@@ -39,33 +39,40 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
 
         public override int Execute()
         {
-            try
+            if (_sdkCheckConfig != null && !string.IsNullOrEmpty(_sdkCheckConfig.CommandOutputReplacementString))
             {
-                var productCollection = _productCollectionProvider.GetProductCollection(
-                    _sdkCheckConfig?.ReleasesUri == null ? null : new Uri(_sdkCheckConfig.ReleasesUri),
-                    _sdkCheckConfig?.ReleasesFilePath == null ? null : _sdkCheckConfig.ReleasesFilePath);
-                var environmentInfo = _netBundleProvider.GetDotnetEnvironmentInfo(_dotnetPath);
-                var sdkFormatter = new SdkOutputWriter(environmentInfo.SdkInfo, productCollection, _productCollectionProvider, _reporter);
-                var runtimeFormatter = new RuntimeOutputWriter(environmentInfo.RuntimeInfo, productCollection, _productCollectionProvider, _reporter);
-
-                sdkFormatter.PrintSdkInfo();
                 _reporter.WriteLine();
-                runtimeFormatter.PrintRuntimeInfo();
-                _reporter.WriteLine();
-                _reporter.WriteLine(string.Format(LocalizableStrings.CommandFooter,
-                    _sdkCheckConfig?.DownloadUri ?? "https://aka.ms/dotnet-core-download",
-                    _sdkCheckConfig?.LifecyclesUri ?? "https://aka.ms/dotnet-core-support"));
+                _reporter.WriteLine(_sdkCheckConfig.CommandOutputReplacementString);
                 _reporter.WriteLine();
             }
-            catch (HostFxrResolutionException hostfxrResolutionException)
+            else
             {
-                switch (hostfxrResolutionException)
+                try
                 {
-                    case HostFxrRuntimePropertyNotSetException:
-                        throw new GracefulException(new[] { LocalizableStrings.RuntimePropertyNotFound }, new string[] { }, isUserError: false);
+                    var productCollection = _productCollectionProvider.GetProductCollection(
+                        _sdkCheckConfig?.ReleasesUri == null ? null : new Uri(_sdkCheckConfig.ReleasesUri),
+                        _sdkCheckConfig?.ReleasesFilePath == null ? null : _sdkCheckConfig.ReleasesFilePath);
+                    var environmentInfo = _netBundleProvider.GetDotnetEnvironmentInfo(_dotnetPath);
+                    var sdkFormatter = new SdkOutputWriter(environmentInfo.SdkInfo, productCollection, _productCollectionProvider, _reporter);
+                    var runtimeFormatter = new RuntimeOutputWriter(environmentInfo.RuntimeInfo, productCollection, _productCollectionProvider, _reporter);
 
-                    case HostFxrNotFoundException hostFxrNotFoundException:
-                        throw new GracefulException(new[] { LocalizableStrings.HostFxrCouldNotBeLoaded }, new string[] { hostFxrNotFoundException.Message }, isUserError: false);
+                    sdkFormatter.PrintSdkInfo();
+                    _reporter.WriteLine();
+                    runtimeFormatter.PrintRuntimeInfo();
+                    _reporter.WriteLine();
+                    _reporter.WriteLine(LocalizableStrings.CommandFooter);
+                    _reporter.WriteLine();
+                }
+                catch (HostFxrResolutionException hostfxrResolutionException)
+                {
+                    switch (hostfxrResolutionException)
+                    {
+                        case HostFxrRuntimePropertyNotSetException:
+                            throw new GracefulException(new[] { LocalizableStrings.RuntimePropertyNotFound }, new string[] { }, isUserError: false);
+
+                        case HostFxrNotFoundException hostFxrNotFoundException:
+                            throw new GracefulException(new[] { LocalizableStrings.HostFxrCouldNotBeLoaded }, new string[] { hostFxrNotFoundException.Message }, isUserError: false);
+                    }
                 }
             }
 
@@ -84,7 +91,6 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
     {
         public string ReleasesUri { get; set; }
         public string ReleasesFilePath { get; set; }
-        public string DownloadUri { get; set; }
-        public string LifecyclesUri { get; set; }
+        public string CommandOutputReplacementString { get; set; }
     }
 }

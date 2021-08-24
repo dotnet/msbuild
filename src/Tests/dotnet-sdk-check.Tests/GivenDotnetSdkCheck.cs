@@ -202,36 +202,16 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "sdk", "check" });
             var dotnetRoot = _testAssetsManager.CreateTestDirectory().Path;
             var bundles = GetFakeEnvironmentInfo(new[] { "1.0.10", "2.1.809", "3.1.100", "5.0.100" }, new[] { "1.1.4", "2.1.8", "3.1.0", "3.1.3", "5.0.0" });
-            var mockDownloadUri = "MockDownloadUri";
-            var mockLifecycleUri = "MockLifecycleUri";
-            var configFileContent = JsonSerializer.Serialize(new SdkCheckConfig() { ReleasesFilePath = Path.Combine(fakeReleasesPath, "releases-index.json"),
-                DownloadUri = mockDownloadUri, LifecyclesUri = mockLifecycleUri });
+            var replacementString = "Mock command output";
+            var configFileContent = JsonSerializer.Serialize(new SdkCheckConfig() { CommandOutputReplacementString = replacementString });
             var configFilePath = Path.Combine(dotnetRoot, "sdk", "6.0.100", "sdk-check-config.json");
             Directory.CreateDirectory(Path.GetDirectoryName(configFilePath));
             File.WriteAllText(configFilePath, configFileContent);
 
             new SdkCheckCommand(parseResult, new MockNETBundleProvider(bundles), dotnetRoot: dotnetRoot, dotnetVersion: "6.0.100", reporter: _reporter).Execute();
 
-            var lines = string.Join(" ", _reporter.Lines);
-            lines.Should().Contain(mockDownloadUri);
-            lines.Should().Contain(mockLifecycleUri);
-
-            foreach (var version in bundles.SdkInfo.Select(b => b.Version.ToString()))
-            {
-                string.Join(' ', _reporter.Lines)
-                    .Should()
-                    .Contain(version);
-            }
-
-            foreach (var bundle in bundles.RuntimeInfo)
-            {
-                string.Join(' ', _reporter.Lines)
-                    .Should()
-                    .Contain(bundle.Version.ToString());
-                string.Join(' ', _reporter.Lines)
-                    .Should()
-                    .Contain(bundle.Name.ToString());
-            }
+            _reporter.Lines.Count().Should().Be(3);
+            _reporter.Lines.Should().Contain(replacementString);
         }
 
         private NetEnvironmentInfo GetFakeEnvironmentInfo(IEnumerable<string> sdkVersions, IEnumerable<string> runtimeVersions)
