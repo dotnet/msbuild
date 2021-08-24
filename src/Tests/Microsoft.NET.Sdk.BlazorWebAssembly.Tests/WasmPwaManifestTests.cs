@@ -41,9 +41,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm.dll")).Should().Exist();
 
-            //var staticWebAssets = Path.Combine(buildOutputDirectory, "blazorwasm.StaticWebAssets.xml");
-            //new FileInfo(staticWebAssets).Should().Contain(Path.Combine(DefaultTfm, "wwwroot"));
-
             var serviceWorkerAssetsManifest = Path.Combine(buildOutputDirectory, "wwwroot", "service-worker-assets.js");
             // Trim prefix 'self.assetsManifest = ' and suffix ';'
             var manifestContents = File.ReadAllText(serviceWorkerAssetsManifest).TrimEnd()[22..^1];
@@ -75,9 +72,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 .Should().Pass();
 
             var buildOutputDirectory = Path.Combine(testInstance.TestRoot, "blazorwasm", "bin", "Debug", DefaultTfm);
-
-            //var staticWebAssets = Path.Combine(buildOutputDirectory, "blazorwasm.StaticWebAssets.xml");
-            //new FileInfo(staticWebAssets).Should().Contain(Path.Combine(DefaultTfm, "wwwroot"));
 
             var serviceWorkerAssetsManifest = Path.Combine(buildOutputDirectory, "wwwroot", "custom-service-worker-assets.js");
             // Trim prefix 'self.assetsManifest = ' and suffix ';'

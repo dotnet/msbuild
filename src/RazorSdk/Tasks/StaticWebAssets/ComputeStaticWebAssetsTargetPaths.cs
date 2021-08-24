@@ -17,6 +17,8 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
         public bool UseAlternatePathDirectorySeparator { get; set; }
 
+        public bool AdjustPathsForPack { get; set; } = false;
+
         [Output]
         public ITaskItem[] AssetsWithTargetPath { get; set; }
 
@@ -34,6 +36,11 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     var targetPath = staticWebAsset.ComputeTargetPath(
                         PathPrefix,
                         UseAlternatePathDirectorySeparator ? Path.AltDirectorySeparatorChar : Path.DirectorySeparatorChar);
+
+                    if (AdjustPathsForPack && string.IsNullOrEmpty(Path.GetExtension(targetPath)))
+                    {
+                        targetPath = Path.GetDirectoryName(targetPath);
+                    }
 
                     result.SetMetadata("TargetPath", targetPath);
                     

@@ -1,25 +1,23 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.IO;
+using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.NET.TestFramework;
+using FluentAssertions;
+using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.Utilities;
-using Microsoft.NET.Sdk.BlazorWebAssembly;
-using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.AspNetCore.Razor.Tasks;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
     public class WasmBuildIntegrationTest : BlazorWasmBaselineTests
     {
-        public WasmBuildIntegrationTest(ITestOutputHelper log) : base(log, GenerateBaselines) {}
+        public WasmBuildIntegrationTest(ITestOutputHelper log) : base(log, GenerateBaselines) { }
 
         [Fact]
         public void BuildMinimal_Works()
@@ -43,11 +41,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.timezones.blat")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm.gz")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm-minimal.dll")).Should().Exist();
-
-            //var staticWebAssets = new FileInfo(Path.Combine(buildOutputDirectory, "blazorwasm-minimal.StaticWebAssets.xml"));
-            //staticWebAssets.Should().Exist();
-            //staticWebAssets.Should().Contain(Path.Combine(DefaultTfm, "wwwroot"));
-            //staticWebAssets.Should().Contain(Path.Combine(DefaultTfm, "scopedcss"));
         }
 
         [Fact]
@@ -72,15 +65,61 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.Text.Json.dll.gz")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.dll")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.dll.gz")).Should().Exist();
-            
+
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm.pdb")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "RazorClassLibrary.pdb")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "RazorClassLibrary.dll")).Should().Exist();
+        }
 
-            //var staticWebAssets = new FileInfo(Path.Combine(buildOutputDirectory, "blazorwasm.StaticWebAssets.xml"));
-            //staticWebAssets.Should().Exist();
-            //staticWebAssets.Should().Contain(Path.Combine(DefaultTfm, "wwwroot"));
-            //staticWebAssets.Should().Contain(Path.Combine(testInstance.TestRoot, "razorclasslibrary", "wwwroot"));
+        [Fact]
+        public void Build_Works_WithLibraryUsingHintPath()
+        {
+            // Arrange
+            var testAppName = "BlazorWasmWithLibrary";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+
+            testInstance.WithProjectChanges((project, document) =>
+            {
+                if (Path.GetFileNameWithoutExtension(project) == "blazorwasm")
+                {
+                    var reference = document
+                        .Descendants()
+                        .Single(e => 
+                            e.Name == "ProjectReference" && 
+                            e.Attribute("Include").Value == @"..\razorclasslibrary\RazorClassLibrary.csproj");
+
+                    reference.Name = "Reference";
+                    reference.Add(new XElement(
+                        "HintPath",
+                        Path.Combine("..", "razorclasslibrary", "bin", "Debug", "net6.0", "RazorClassLibrary.dll")));
+                }
+            });
+
+            var buildLibraryCommand = new BuildCommand(testInstance, "razorclasslibrary");
+            buildLibraryCommand.WithWorkingDirectory(testInstance.TestRoot);
+            buildLibraryCommand.Execute("/bl")
+                .Should().Pass();
+
+            var buildCommand = new BuildCommand(testInstance, "blazorwasm");
+            buildCommand.WithWorkingDirectory(testInstance.TestRoot);
+            buildCommand.Execute("/bl")
+                .Should().Pass();
+
+            var buildOutputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
+
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.webassembly.js")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm.gz")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm.dll")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.Text.Json.dll")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.Text.Json.dll.gz")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.dll")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.dll.gz")).Should().Exist();
+
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm.pdb")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "RazorClassLibrary.pdb")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "RazorClassLibrary.dll")).Should().Exist();
         }
 
         [Fact]
@@ -105,15 +144,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.Text.Json.dll.gz")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.dll")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "System.dll.gz")).Should().Exist();
-            
+
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm.pdb")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "RazorClassLibrary.pdb")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "RazorClassLibrary.dll")).Should().Exist();
-
-            //var staticWebAssets = new FileInfo(Path.Combine(buildOutputDirectory, "blazorwasm.StaticWebAssets.xml"));
-            //staticWebAssets.Should().Exist();
-            //staticWebAssets.Should().Contain(Path.Combine(DefaultTfm, "wwwroot"));
-            //staticWebAssets.Should().Contain(Path.Combine(testInstance.TestRoot, "razorclasslibrary", "wwwroot"));
         }
 
         [Fact]
@@ -308,7 +342,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Arrange
             var testAppName = "BlazorHosted";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
-            
+
             var buildCommand = new BuildCommand(testInstance, "blazorhosted");
             buildCommand.WithWorkingDirectory(testInstance.TestRoot);
             buildCommand.Execute("/bl").Should().Pass();
@@ -316,12 +350,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var buildOutputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
 
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "_bin", "blazorwasm.dll")).Should().NotExist();
-
-            //var staticWebAssets = new FileInfo(Path.Combine(buildOutputDirectory, "blazorhosted.StaticWebAssets.xml"));
-            //staticWebAssets.Should().Exist();
-            //staticWebAssets.Should().Contain(Path.Combine(DefaultTfm, "wwwroot"));
-            //staticWebAssets.Should().Contain(Path.Combine("razorclasslibrary", "wwwroot"));
-            //staticWebAssets.Should().Contain(Path.Combine("blazorwasm", "wwwroot"));
         }
 
         [Fact]
@@ -333,7 +361,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             ProjectDirectory.WithProjectChanges((path, project) =>
             {
-                if (path.Contains("blazorwasm")) {
+                if (path.Contains("blazorwasm"))
+                {
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = new XElement(ns + "PropertyGroup");
                     propertyGroup.Add(new XElement("DefineConstants", @"$(DefineConstants);REFERENCE_classlibrarywithsatelliteassemblies"));
@@ -388,7 +417,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             testInstance.WithProjectChanges((path, project) =>
             {
-                if (path.Contains("blazorwasm")) {
+                if (path.Contains("blazorwasm"))
+                {
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = new XElement(ns + "PropertyGroup");
                     propertyGroup.Add(new XElement("BaseOutputPath", @"$(MSBuildThisFileDirectory)build\bin\"));

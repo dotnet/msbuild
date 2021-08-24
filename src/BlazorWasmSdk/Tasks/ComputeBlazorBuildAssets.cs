@@ -200,6 +200,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
                         candidate.SetMetadata("AssetTraitValue", "runtime");
                     }
+                    if (string.Equals(candidate.GetMetadata("ResolvedFrom"), "{HintPathFromItem}", StringComparison.Ordinal))
+                    {
+                        candidate.RemoveMetadata("OriginalItemSpec");
+                    }
                     break;
                 case ".wasm":
                 case ".blat":
@@ -227,17 +231,25 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             var extension = candidate.GetMetadata("Extension");
             var fileName = candidate.GetMetadata("FileName");
             var assetType = candidate.GetMetadata("AssetType");
+            var fromMonoPackage = string.Equals(
+                candidate.GetMetadata("NuGetPackageId"),
+                "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
+                StringComparison.Ordinal);
+
             reason = extension switch
             {
-                ".a" => "extension is .a is not supported.",
-                ".c" => "extension is .c is not supported.",
-                ".h" => "extension is .h is not supported.",
+                ".a" when fromMonoPackage => "extension is .a is not supported.",
+                ".c" when fromMonoPackage => "extension is .c is not supported.",
+                ".h" when fromMonoPackage => "extension is .h is not supported.",
+                // It is safe to filter out all XML files since we are not interested in any XML file from the list
+                // of ResolvedFilesToPublish to become a static web asset. Things like this include XML doc files and
+                // so on.
                 ".xml" => "it is a documentation file",
-                ".rsp" => "extension is .rsp is not supported.",
-                ".props" => "extension is .props is not supported.",
+                ".rsp" when fromMonoPackage => "extension is .rsp is not supported.",
+                ".props" when fromMonoPackage => "extension is .props is not supported.",
                 ".blat" when !timezoneSupport => "timezone support is not enabled.",
                 ".dat" when invariantGlobalization && fileName.StartsWith("icudt") => "invariant globalization is enabled",
-                ".json" when fileName == "emcc-props" => $"{fileName}{extension} is not used by Blazor",
+                ".json" when fromMonoPackage && fileName == "emcc-props" => $"{fileName}{extension} is not used by Blazor",
                 ".js" when fileName == "dotnet" => "dotnet.js is already processed by Blazor",
                 ".js" when assetType == "native" => $"{fileName}{extension} is not used by Blazor",
                 ".pdb" when !copySymbols => "copying symbols is disabled",

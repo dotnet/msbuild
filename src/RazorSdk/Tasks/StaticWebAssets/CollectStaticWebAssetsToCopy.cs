@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             var normalizedOutputPath = StaticWebAsset.NormalizeContentRootPath(Path.GetFullPath(OutputPath));
             try
             {
-                foreach (var asset in Assets.Select(a => StaticWebAsset.FromTaskItem(a)))
+                foreach (var asset in Assets.Select(StaticWebAsset.FromTaskItem))
                 {
                     string fileOutputPath = null;                    
                     if (!(asset.IsDiscovered() || asset.IsComputed()))

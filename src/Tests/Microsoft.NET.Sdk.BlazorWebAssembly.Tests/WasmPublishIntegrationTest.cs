@@ -104,6 +104,54 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
+        public void Publish_Works_WithLibraryUsingHintPath()
+        {
+            // Arrange
+            var testAppName = "BlazorWasmWithLibrary";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+
+            testInstance.WithProjectChanges((project, document) =>
+            {
+                if (Path.GetFileNameWithoutExtension(project) == "blazorwasm")
+                {
+                    var reference = document
+                        .Descendants()
+                        .Single(e =>
+                            e.Name == "ProjectReference" &&
+                            e.Attribute("Include").Value == @"..\razorclasslibrary\RazorClassLibrary.csproj");
+
+                    reference.Name = "Reference";
+                    reference.Add(new XElement(
+                        "HintPath",
+                        Path.Combine("..", "razorclasslibrary", "bin", "Debug", "net6.0", "RazorClassLibrary.dll")));
+                }
+            });
+
+            var buildLibraryCommand = new BuildCommand(testInstance, "razorclasslibrary");
+            buildLibraryCommand.WithWorkingDirectory(testInstance.TestRoot);
+            buildLibraryCommand.Execute("/bl")
+                .Should().Pass();
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/bl").Should().Pass();
+
+            var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
+
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazor.boot.json")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazor.webassembly.js")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.wasm.gz")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazorwasm.dll")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.Text.Json.dll")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.Text.Json.dll.gz")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.dll")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.dll.gz")).Should().Exist();
+
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "RazorClassLibrary.dll")).Should().Exist();
+        }
+
+        [Fact]
         public void Publish_WithScopedCss_Works()
         {
             // Arrange

@@ -34,6 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.BrotliCompress" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.GzipCompress" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.CreateBlazorTrimmerRootDescriptorFile" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.ComputeBlazorFilesToCompress" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.ComputeBlazorBuildAssets" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.ComputeBlazorPublishAssets" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
 
@@ -260,14 +261,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       that change from build to build. Runtime assets contribute to the bulk of the download size. Compressing it
       has the most benefit while avoiding any ongoing costs to the dev inner loop.
     -->
-    <ItemGroup>
-      <_GzipFileToCompressForBuild Include="@(_BlazorStaticWebAsset->'%(OriginalItemSpec)')" >
-        <RelatedAsset>%(Identity)</RelatedAsset>
-        <AssetRole>Alternative</AssetRole>
-        <AssetTraitName>Content-Encoding</AssetTraitName>
-        <AssetTraitValue>gzip</AssetTraitValue>
-      </_GzipFileToCompressForBuild>
-    </ItemGroup>
+
+    <ComputeBlazorFilesToCompress Assets="@(_BlazorStaticWebAsset)">
+      <Output TaskParameter="AssetsToCompress" ItemName="_GzipFileToCompressForBuild" />
+    </ComputeBlazorFilesToCompress>
 
     <GZipCompress
       FilesToCompress="@(_GzipFileToCompressForBuild)"
