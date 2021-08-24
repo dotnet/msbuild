@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Cli.Utils;
@@ -318,11 +319,17 @@ namespace MyNamespace
         {
             var assetInfo = GetSimpleTestAsset();
             AssemblySymbolLoader loader = new(resolveAssemblyReferences: true);
+            // AddReferenceSearchDirectories should be able to handle directories as well as full path to assemblies.
             loader.AddReferenceSearchDirectories(Path.GetDirectoryName(typeof(string).Assembly.Location));
+            loader.AddReferenceSearchDirectories(Path.GetFullPath(typeof(string).Assembly.Location));
             loader.LoadAssembly(Path.Combine(assetInfo.OutputDirectory, assetInfo.TestAsset.TestProject.Name + ".dll"));
 
             Assert.False(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
             Assert.Empty(warnings);
+
+            // Ensure we loaded more than one assembly since resolveReferences was set to true.
+            Dictionary<string, MetadataReference> loadedAssemblies = (Dictionary<string, MetadataReference>)typeof(AssemblySymbolLoader)?.GetField("_loadedAssemblies", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(loader);
+            Assert.True(loadedAssemblies != null && loadedAssemblies.Count > 1);
         }
 
         [Fact]

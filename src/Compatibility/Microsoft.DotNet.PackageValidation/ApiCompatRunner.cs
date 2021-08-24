@@ -64,7 +64,6 @@ namespace Microsoft.DotNet.PackageValidation
                     rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightSymbols, rightTuple.rightAssembly));
                 }
 
-                _differ.RunningWithReferences = runWithReferences;
                 IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                     _differ.GetDifferences(leftContainer, rightContainerList);
 
@@ -115,7 +114,7 @@ namespace Microsoft.DotNet.PackageValidation
                 resolvedReferences = true;
                 loader.AddReferenceSearchDirectories(referencePathForTFM);
             }
-            else if (!_isBaselineSuppression && _referencePaths != null)
+            else if (!_isBaselineSuppression && _referencePaths != null && ShouldLogDiagnosticId(ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm))
             {
                 _log.LogWarning(
                     new Suppression()
@@ -135,16 +134,19 @@ namespace Microsoft.DotNet.PackageValidation
                 resolvedReferences = false;
                 foreach (AssemblyLoadWarning warning in warnings)
                 {
-                    _log.LogWarning(
-                        new Suppression()
-                        {
-                            DiagnosticId = warning.DiagnosticId,
-                            Target = warning.ReferenceId
-                        },
-                        warning.DiagnosticId,
-                        Resources.AssemblyLoadWarning,
-                        assemblyInformation.DisplayString,
-                        warning.Message);
+                    if (ShouldLogDiagnosticId(warning.DiagnosticId))
+                    {
+                        _log.LogWarning(
+                            new Suppression()
+                            {
+                                DiagnosticId = warning.DiagnosticId,
+                                Target = warning.ReferenceId
+                            },
+                            warning.DiagnosticId,
+                            Resources.AssemblyLoadWarning,
+                            assemblyInformation.DisplayString,
+                            warning.Message);
+                    }
                 }
             }
 
@@ -197,6 +199,22 @@ namespace Microsoft.DotNet.PackageValidation
                 ms.Seek(0, SeekOrigin.Begin);
             }
             return ms;
+        }
+
+        private bool ShouldLogDiagnosticId(string diagnosticId)
+        {
+            if (!string.IsNullOrEmpty(_differ.NoWarn))
+            {
+                foreach (var noWarn in _differ.NoWarn.Split(';'))
+                {
+                    if (StringComparer.InvariantCultureIgnoreCase.Equals(noWarn, diagnosticId))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

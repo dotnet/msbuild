@@ -38,11 +38,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         public bool StrictMode { get; set; }
 
         /// <summary>
-        /// Flag indicating whether the ApiComparison will be performed using references or not.
-        /// </summary>
-        public bool RunningWithReferences { get; set; }
-
-        /// <summary>
         /// Callback function to get the <see cref="ComparingSettings"/> to be used when creating the settings to get the differences.
         /// The callback takes a string leftName and string[] rightNames parameters to indicate API Compat via the settings what the 
         /// name for the left and right the user specified.
