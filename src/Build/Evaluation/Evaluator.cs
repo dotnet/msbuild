@@ -1791,6 +1791,8 @@ namespace Microsoft.Build.Evaluation
                 }
                 catch (SdkResolverException e)
                 {
+                    // We throw using e.Message because e.Message already contains the stack trace
+                    // https://github.com/dotnet/msbuild/pull/6763
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e.Message);
                 }
 
