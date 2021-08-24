@@ -124,12 +124,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     // than give them a generic error, we want to give a more specific message.  This exception cannot be caught by
                     // the resolver itself because it is usually thrown before the class is loaded
                     // The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}
-                    throw new SdkResolverException("CouldNotRunNuGetSdkResolver", sdkResolver, sdk, e, MSBuildConstants.NuGetAssemblyPathEnvironmentVariableName, e.Message);
+                    throw new SdkResolverException("CouldNotRunNuGetSdkResolver", sdkResolver, sdk, e, MSBuildConstants.NuGetAssemblyPathEnvironmentVariableName, e.ToString());
                 }
                 catch (Exception e)
                 {
                     // The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}": {2}
-                    throw new SdkResolverException("SDKResolverFailed", sdkResolver, sdk, e, sdkResolver.Name, sdk.ToString(), e.Message);
+                    throw new SdkResolverException("SDKResolverFailed", sdkResolver, sdk, e, sdkResolver.Name, sdk.ToString(), e.ToString());
                 }
 
                 SetResolverState(submissionId, sdkResolver, context.State);
