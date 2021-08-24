@@ -28,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (jObject.GetValue(nameof(UsageExamples), StringComparison.OrdinalIgnoreCase) is JArray usagesArray)
             {
-                UsageExamples = new List<string>(usagesArray.Values<string>());
+                UsageExamples = new List<string>(usagesArray.Values<string>().Where(v => v != null).OfType<string>());
             }
 
             if (jObject.GetValue(nameof(SymbolInfo), StringComparison.OrdinalIgnoreCase) is JObject symbols)
@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                     foreach (var symbolProperty in symbol.Properties())
                     {
-                        symbolProperties[symbolProperty.Name] = symbolProperty.Value.Value<string>();
+                        symbolProperties[symbolProperty.Name] = symbolProperty.Value.Value<string>() ?? "";
                     }
 
                     symbolsInfo[symbolInfo.Name] = symbolProperties;
@@ -161,10 +161,14 @@ namespace Microsoft.TemplateEngine.Cli
 
         private class HostSpecificTemplateDataJsonConverter : JsonConverter<HostSpecificTemplateData>
         {
-            public override HostSpecificTemplateData ReadJson(JsonReader reader, Type objectType, HostSpecificTemplateData existingValue, bool hasExistingValue, JsonSerializer serializer) => throw new NotImplementedException();
+            public override HostSpecificTemplateData ReadJson(JsonReader reader, Type objectType, HostSpecificTemplateData? existingValue, bool hasExistingValue, JsonSerializer serializer) => throw new NotImplementedException();
 
-            public override void WriteJson(JsonWriter writer, HostSpecificTemplateData value, JsonSerializer serializer)
+            public override void WriteJson(JsonWriter writer, HostSpecificTemplateData? value, JsonSerializer serializer)
             {
+                if (value == null)
+                {
+                    return;
+                }
                 writer.WriteStartObject();
                 if (value.IsHidden)
                 {

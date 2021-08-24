@@ -160,7 +160,7 @@ namespace Microsoft.TemplateEngine.Cli.Alias
         {
             Dictionary<string, IReadOnlyList<string>> result = new Dictionary<string, IReadOnlyList<string>>(comparer ?? StringComparer.Ordinal);
             JObject? jObj = token as JObject;
-            if (jObj == null || !jObj.TryGetValue(propertyName, StringComparison.OrdinalIgnoreCase, out JToken element))
+            if (jObj == null || propertyName == null || !jObj.TryGetValue(propertyName, StringComparison.OrdinalIgnoreCase, out JToken? element))
             {
                 return result;
             }

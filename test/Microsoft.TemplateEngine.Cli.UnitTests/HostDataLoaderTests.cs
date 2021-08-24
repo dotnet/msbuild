@@ -210,10 +210,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var symbolInfoArray = serialized.Properties().Single().Value as JObject;
             Assert.NotNull(symbolInfoArray);
             //empty values should stay when deserializing symbol info
-            Assert.Equal(3, ((JObject)symbolInfoArray!["param1"]).Properties().Count());
-            Assert.Equal("", symbolInfoArray!["param2"]["longName"]);
-            Assert.Equal(3, ((JObject)symbolInfoArray!["param2"]).Properties().Count());
-            Assert.Equal(1, ((JObject)symbolInfoArray!["param3"]).Properties().Count());
+            Assert.Equal(3, ((JObject)symbolInfoArray!["param1"]!).Properties().Count());
+            Assert.Equal("", symbolInfoArray!["param2"]!["longName"]);
+            Assert.Equal(3, ((JObject)symbolInfoArray!["param2"]!).Properties().Count());
+            Assert.Equal(1, ((JObject)symbolInfoArray!["param3"]!).Properties().Count());
 
             Assert.DoesNotContain(serialized.Properties(), p => p.Name == "IsHidden");
             Assert.DoesNotContain(serialized.Properties(), p => p.Name == "UsageExamples");

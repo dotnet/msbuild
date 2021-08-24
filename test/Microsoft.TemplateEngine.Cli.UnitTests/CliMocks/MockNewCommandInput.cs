@@ -220,8 +220,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         public void Deserialize(IXunitSerializationInfo info)
         {
             TemplateName = info.GetValue<string>("command_templateName");
-            _commandOptions = JsonConvert.DeserializeObject<Dictionary<string, string?>>(info.GetValue<string>("command_options"));
-            _templateOptions = JsonConvert.DeserializeObject<Dictionary<string, string?>>(info.GetValue<string>("command_templateOptions"));
+            _commandOptions = JsonConvert.DeserializeObject<Dictionary<string, string?>>(info.GetValue<string>("command_options")) ?? new Dictionary<string, string?>();
+            _templateOptions = JsonConvert.DeserializeObject<Dictionary<string, string?>>(info.GetValue<string>("command_templateOptions")) ?? new Dictionary<string, string?>();
         }
 
         public void Serialize(IXunitSerializationInfo info)
