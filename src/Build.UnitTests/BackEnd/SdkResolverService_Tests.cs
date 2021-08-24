@@ -93,8 +93,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // When an SDK resolver throws, the expander will catch it and stop the build.
             SdkResolverException e = Should.Throw<SdkResolverException>(() => SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false));
-            e.Message.ShouldContain("MockSdkResolverThrows");
-            e.Message.ShouldContain("EXMESSAGE");
+            e.Resolver.Name.ShouldBe("MockSdkResolverThrows");
+            e.Sdk.Name.ShouldBe("1sdkName");
         }
 
         [Fact]
