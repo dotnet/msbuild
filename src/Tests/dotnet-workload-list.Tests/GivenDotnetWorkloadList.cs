@@ -14,6 +14,7 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using ManifestReaderTests;
 using System.IO;
 using System.Linq;
+using System;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             command.Execute();
 
             // Expected number of lines for table headers
-            _reporter.Lines.Count.Should().Be(8);
+            _reporter.Lines.Count.Should().Be(OperatingSystem.IsWindows() ? 8 : 6);
         }
 
         [Fact]
