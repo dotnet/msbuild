@@ -11,4 +11,14 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="GetSdkCategorizedIntermediateNupkgContents"
+          BeforeTargets="GetCategorizedIntermediateNupkgContents">
+    <ItemGroup>
+      <!--
+        Add the internal toolset zip required by dotnet/installer.
+      -->
+      <IntermediateNupkgArtifactFile Include="$(CurrentRepoSourceBuildArtifactsPackagesDir)NonShipping\dotnet-toolset-internal-*.zip" />
+    </ItemGroup>
+  </Target>
+
 </Project>
