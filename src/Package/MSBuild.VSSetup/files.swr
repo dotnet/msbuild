@@ -310,8 +310,6 @@ folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
   file source=$(SourceDir)Package\MSBuild.VSSetup\MSBuild.clientenabledpkg
   file source=$(SourceDir)Framework\Microsoft.Build.Framework.pkgdef
   file source=$(SourceDir)Build\Microsoft.Build.pkgdef
-  file source=$(SourceDir)Build\System.Text.Encodings.Web.pkgdef
-  file source=$(SourceDir)Build\System.Text.Json.pkgdef
   file source=$(SourceDir)StringTools\StringTools.pkgdef
   file source=$(SourceDir)Tasks\Microsoft.Build.Tasks.Core.pkgdef
   file source=$(SourceDir)Tasks\System.Resources.Extensions.pkgdef
