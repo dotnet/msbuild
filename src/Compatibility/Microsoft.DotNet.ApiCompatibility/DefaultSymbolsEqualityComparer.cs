@@ -16,6 +16,19 @@ namespace Microsoft.DotNet.ApiCompatibility
         public int GetHashCode(ISymbol obj) =>
             GetKey(obj).GetHashCode();
 
-        private static string GetKey(ISymbol symbol) => symbol.ToComparisonDisplayString();
+        private static string GetKey(ISymbol symbol)
+        {
+            if (symbol is IMethodSymbol method)
+            {
+                // The display string for event add and remove varies
+                // depending if we have references or not.
+                // As these can't have different overrides we don't care
+                // about the full display string.
+                if (method.IsEventAdderOrRemover())
+                    return method.Name;
+            }
+
+            return symbol.ToComparisonDisplayString();
+        }
     }
 }

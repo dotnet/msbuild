@@ -17,5 +17,10 @@ namespace Microsoft.DotNet.ApiCompatibility
         public const string CannotRemoveBaseType = "CP0007";
         public const string CannotRemoveBaseInterface = "CP0008";
         public const string CannotSealType = "CP0009";
+
+        // Assembly loading ids
+        public const string AssemblyNotFound = "CP1001";
+        public const string AssemblyReferenceNotFound = "CP1002";
+        public const string SearchDirectoriesNotFoundForTfm = "CP1003";
     }
 }

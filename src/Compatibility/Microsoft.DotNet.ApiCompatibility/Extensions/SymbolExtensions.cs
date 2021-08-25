@@ -18,7 +18,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
 
             // Remove ? annotations from reference types as we want to map the APIs without nullable annotations
             // and have a special rule to catch those differences.
+            // Also don't use keyword names for special types. This makes the comparison more accurate when no
+            // references are running or if one side has references and the other doesn't.
             format = format.WithMiscellaneousOptions(format.MiscellaneousOptions &
+                ~SymbolDisplayMiscellaneousOptions.UseSpecialTypes &
                 ~SymbolDisplayMiscellaneousOptions.UseErrorTypeSymbolName &
                 ~SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
 
@@ -83,5 +86,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
             symbol.DeclaredAccessibility == Accessibility.Protected ||
             symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal ||
             (includeInternals && symbol.DeclaredAccessibility != Accessibility.Private);
+
+        internal static bool IsEventAdderOrRemover(this IMethodSymbol method) =>
+            method.MethodKind == MethodKind.EventAdd ||
+            method.MethodKind == MethodKind.EventRemove ||
+            method.Name.StartsWith("add_", StringComparison.Ordinal) ||
+            method.Name.StartsWith("remove_", StringComparison.Ordinal);
     }
 }

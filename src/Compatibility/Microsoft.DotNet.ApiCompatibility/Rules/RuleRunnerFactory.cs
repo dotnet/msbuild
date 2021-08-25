@@ -15,11 +15,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         private readonly string[] _rightNames;
         private readonly IEqualityComparer<ISymbol> _equalityComparer;
         private readonly bool _includeInternalSymbols;
+        private readonly bool _withReferences;
         private RuleRunner _runner;
 
-        public RuleRunnerFactory(string leftName, string[] rightNames, IEqualityComparer<ISymbol> equalityComparer, bool includeInternalSymbols, bool strictMode)
+        public RuleRunnerFactory(string leftName, string[] rightNames, IEqualityComparer<ISymbol> equalityComparer, bool includeInternalSymbols, bool strictMode, bool withReferences)
         {
             _strictMode = strictMode;
+            _withReferences = withReferences;
             _equalityComparer = equalityComparer;
             _includeInternalSymbols = includeInternalSymbols;
             _leftName = string.IsNullOrEmpty(leftName) ? RuleRunner.DEFAULT_LEFT_NAME : leftName;
@@ -46,7 +48,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         public virtual IRuleRunner GetRuleRunner()
         {
             if (_runner == null)
-                _runner = new RuleRunner(_leftName, _rightNames, _strictMode, _equalityComparer, _includeInternalSymbols);
+                _runner = new RuleRunner(_leftName, _rightNames, _strictMode, _equalityComparer, _includeInternalSymbols, _withReferences);
 
             return _runner;
         }
