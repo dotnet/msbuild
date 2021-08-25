@@ -31,13 +31,21 @@ namespace Microsoft.DotNet.Cli.Utils
             Data.Add(ExceptionExtensions.CLI_User_Displayed_Exception, true);
         }
 
+        public GracefulException(string message, bool isUserError = true)
+            : base(message)
+        {
+            IsUserError = isUserError;
+            Data.Add(ExceptionExtensions.CLI_User_Displayed_Exception, isUserError);
+        }
+
         public GracefulException(string format, params string[] args) : this(string.Format(format, args))
         {
         }
 
-        public GracefulException(string message, Exception innerException) : base(message, innerException)
+        public GracefulException(string message, Exception innerException, bool isUserError = true) : base(message, innerException)
         {
-            Data.Add(ExceptionExtensions.CLI_User_Displayed_Exception, true);
+            IsUserError = isUserError;
+            Data.Add(ExceptionExtensions.CLI_User_Displayed_Exception, isUserError);
         }
     }
 }

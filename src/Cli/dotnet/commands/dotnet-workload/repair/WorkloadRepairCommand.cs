@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
             catch (Exception e)
             {
                 // Don't show entire stack trace
-                throw new GracefulException(string.Format(LocalizableStrings.WorkloadRepairFailed, e.Message), e);
+                throw new GracefulException(string.Format(LocalizableStrings.WorkloadRepairFailed, e.Message), e, isUserError: false);
             }
             finally
             {

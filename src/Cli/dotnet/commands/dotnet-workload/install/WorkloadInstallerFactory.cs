@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             if (elevationRequired && !CanWriteToDotnetRoot(dotnetDir))
             {
-                throw new GracefulException(LocalizableStrings.InadequatePermissions);
+                throw new GracefulException(LocalizableStrings.InadequatePermissions, isUserError: false);
             }
 
             return new NetSdkManagedInstaller(reporter,

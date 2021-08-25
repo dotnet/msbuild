@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption).GetManifests();
                 if (!manifests.Any())
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption));
+                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption), isUserError: false);
                 }
                 try
                 {
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 catch
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.IncompatibleManifests, versionOption));
+                    throw new GracefulException(string.Format(LocalizableStrings.IncompatibleManifests, versionOption), isUserError: false);
                 }
 
                 return new ReleaseVersion(versionOption);

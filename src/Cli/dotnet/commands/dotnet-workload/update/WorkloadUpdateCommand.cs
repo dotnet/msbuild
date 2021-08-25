@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 }
                 catch (Exception e)
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e);
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e, isUserError: false);
                 }
             }
             else if (_printDownloadLinkOnly)
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 catch (Exception e)
                 {
                     // Don't show entire stack trace
-                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadUpdateFailed, e.Message), e);
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadUpdateFailed, e.Message), e, isUserError: false);
                 }
             }
 
