@@ -23,10 +23,12 @@ namespace Microsoft.DotNet.PackageValidation
         /// <returns>The package object.</returns>
         public static Package CreatePackage(string packagePath, RuntimeGraph runtimeGraph)
         {
-            PackageArchiveReader packageReader = new PackageArchiveReader(packagePath);
-            Package package = CreatePackage(packageReader, runtimeGraph);
-            package.PackagePath = packagePath;
-            return package;
+            using (PackageArchiveReader packageReader = new PackageArchiveReader(packagePath))
+            {
+                Package package = CreatePackage(packageReader, runtimeGraph);
+                package.PackagePath = packagePath;
+                return package;
+            }
         }
 
         private static Package CreatePackage(PackageArchiveReader packageReader, RuntimeGraph runtimeGraph)
