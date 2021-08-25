@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
                 nugetPackageDownloader: nugetDownloader, version: sdkFeatureVersion, dotnetDir: dotnetRoot);
             repairCommand.Execute();
 
-            _reporter.Lines.Should().Contain(string.Format(LocalizableStrings.RepairSucceeded, string.Empty));
+            _reporter.Lines.Should().Contain(LocalizableStrings.NoWorkloadsToRepair);
         }
 
         [Fact]

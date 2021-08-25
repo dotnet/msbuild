@@ -7,6 +7,11 @@
         <target state="needs-review-translation">Installa lo strumento globale o locale. Gli strumenti locali vengono aggiunti al manifesto e ripristinati.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoWorkloadsToRepair">
+        <source>No workloads are installed, nothing to repair. Run `dotnet workload search` to find workloads to install.</source>
+        <target state="new">No workloads are installed, nothing to repair. Run `dotnet workload search` to find workloads to install.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RepairSucceeded">
         <source>Successfully repaired workloads: {0}</source>
         <target state="new">Successfully repaired workloads: {0}</target>
