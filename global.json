@@ -1,9 +1,9 @@
 {
   "tools": {
-    "dotnet": "6.0.100-rc.1.21417.19",
+    "dotnet": "6.0.100-rc.2.21424.16",
     "runtimes": {
       "dotnet": [
-        "$(VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion)"
+        "$(VSRedistCommonNetCoreSharedFrameworkx6470PackageVersion)"
       ]
     },
     "vs-opt": {
