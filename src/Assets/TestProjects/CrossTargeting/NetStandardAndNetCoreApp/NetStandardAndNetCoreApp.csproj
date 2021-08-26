@@ -2,12 +2,12 @@
   <PropertyGroup>
     <TargetFrameworks>$(CurrentTargetFramework);netstandard1.5</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(CurrentTargetFramework)'">
+  <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard1.5'">
     <OutputType>exe</OutputType>
     <DefineConstants>NETCOREAPP;$(DefineConstants)</DefineConstants>
     <AssetTargetFallback>dnxcore50</AssetTargetFallback>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '$(CurrentTargetFramework)'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.5'">
     <PackageReference Include="Newtonsoft.Json" Version="7.0.1" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">

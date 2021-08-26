@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                          .And.HaveStdOutContaining("Hello World!");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19487#issuecomment-898765210")]
         public void ItCanRunAMSBuildProjectWhenSpecifyingAFramework()
         {
             var testAppName = "MSBuildTestApp";
@@ -136,14 +136,9 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             var testProjectDirectory = testInstance.Path;
 
-            new DotnetCommand(Log, "build")
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--restore","--framework", "netcoreapp3.1")
-                .Should().Pass();
-
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--no-restore","--framework", "netcoreapp3.1")
+                .Execute("--framework", "netcoreapp3.1")
                 .Should().Pass()
                          .And.HaveStdOut("Hello World!");
         }
