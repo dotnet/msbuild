@@ -410,27 +410,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             }
         }
 
-        [Fact]
-        public async Task CanReadSearchMetadata_FromBlob()
-        {
-            using EnvironmentSettingsHelper environmentSettingsHelper = new EnvironmentSettingsHelper();
-            var environmentSettings = environmentSettingsHelper.CreateEnvironment(virtualize: true);
-            var sourceFileProvider = new NuGetMetadataSearchProvider(
-                A.Fake<ITemplateSearchProviderFactory>(),
-                environmentSettings,
-                new Dictionary<string, Func<object, object>>());
-            await sourceFileProvider.GetSearchFileAsync(default).ConfigureAwait(false);
-            string content = environmentSettings.Host.FileSystem.ReadAllText(Path.Combine(environmentSettings.Paths.HostVersionSettingsDir, "nugetTemplateSearchInfo.json"));
-            var jObj = JObject.Parse(content);
-#pragma warning disable CS0618 // Type or member is obsolete
-            Assert.True(LegacySearchCacheReader.TryReadDiscoveryMetadata(
-#pragma warning restore CS0618 // Type or member is obsolete
-                jObj,
-                environmentSettings.Host.Logger,
-                null,
-                out _));
-        }
-
 #pragma warning disable CS0618 // Type or member is obsolete
         private static string SetupDiscoveryMetadata(string fileLocation, bool includehostData = false)
 
