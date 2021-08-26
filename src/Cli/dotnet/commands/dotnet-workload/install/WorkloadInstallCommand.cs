@@ -110,11 +110,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     if (_workloadResolver.IsPlatformIncompatibleWorkload(new WorkloadId(workloadId)))
                     {
-                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotSupportedOnPlatform, workloadId));
+                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotSupportedOnPlatform, workloadId), isUserError: false);
                     }
                     else
                     {
-                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotRecognized, workloadId));
+                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotRecognized, workloadId), isUserError: false);
                     }
                 }
             }
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 catch (Exception e)
                 {
                     _workloadInstaller.Shutdown();
-                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e);
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e, isUserError: false);
                 }
             }
             else
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     _workloadInstaller.Shutdown();
                     // Don't show entire stack trace
-                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e);
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e, isUserError: false);
                 }
             }
 
