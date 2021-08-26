@@ -20,29 +20,19 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public GracefulException(IEnumerable<string> messages, IEnumerable<string> verboseMessages = null,
             bool isUserError = true)
-            : base(string.Join(Environment.NewLine, messages))
+            : this(string.Join(Environment.NewLine, messages), isUserError: isUserError)
         {
-            IsUserError = isUserError;
             if (verboseMessages != null)
             {
                 VerboseMessage = string.Join(Environment.NewLine, verboseMessages);
             }
-
-            Data.Add(ExceptionExtensions.CLI_User_Displayed_Exception, true);
-        }
-
-        public GracefulException(string message, bool isUserError = true)
-            : base(message)
-        {
-            IsUserError = isUserError;
-            Data.Add(ExceptionExtensions.CLI_User_Displayed_Exception, isUserError);
         }
 
         public GracefulException(string format, params string[] args) : this(string.Format(format, args))
         {
         }
 
-        public GracefulException(string message, Exception innerException, bool isUserError = true) : base(message, innerException)
+        public GracefulException(string message, Exception innerException = null, bool isUserError = true) : base(message, innerException)
         {
             IsUserError = isUserError;
             Data.Add(ExceptionExtensions.CLI_User_Displayed_Exception, isUserError);
