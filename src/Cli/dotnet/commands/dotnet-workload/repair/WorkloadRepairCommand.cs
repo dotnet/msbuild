@@ -75,6 +75,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
 
                 var workloadIds = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(new SdkFeatureBand(_sdkVersion));
 
+                if (!workloadIds.Any())
+                {
+                    _reporter.WriteLine(LocalizableStrings.NoWorkloadsToRepair);
+                    return 0;
+                }
+
                 _reporter.WriteLine(string.Format(LocalizableStrings.RepairingWorkloads, string.Join(" ", workloadIds)));
 
                 ReinstallWorkloadsBasedOnCurrentManifests(workloadIds, new SdkFeatureBand(_sdkVersion));
