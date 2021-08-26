@@ -3,6 +3,8 @@
 <Project>
   <PropertyGroup>
     <PublishingVersion>3</PublishingVersion>
+    <!-- This repo does its own symbol package generation to avoid generating symbols for a bunch of unrelated test packages. -->
+    <AutoGenerateSymbolPackages>false</AutoGenerateSymbolPackages>
   </PropertyGroup>
 
   <PropertyGroup>
