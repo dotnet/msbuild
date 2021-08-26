@@ -119,6 +119,11 @@ namespace Microsoft.Build.Execution
         private Exception _shutdownException;
 
         /// <summary>
+        /// Flag indicating if we should debug communications or not.
+        /// </summary>
+        private readonly bool _debugCommunications;
+
+        /// <summary>
         /// Data for the use of LegacyThreading semantics.
         /// </summary>
         private readonly LegacyThreadingData _legacyThreadingData;
@@ -134,6 +139,8 @@ namespace Microsoft.Build.Execution
         public OutOfProcNode()
         {
             s_isOutOfProcNode = true;
+
+            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);

@@ -19,10 +19,6 @@ using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 using System.Xml.Schema;
 using System.Runtime.Serialization;
-#if !CLR2COMPATIBILITY
-using Microsoft.Build.Shared.Debugging;
-#endif
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Shared
 #endif
@@ -45,16 +41,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         private static string GetDebugDumpPath()
         {
-            string debugPath =
-// Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
-#if CLR2COMPATIBILITY || MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                        Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
-#else
-                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                    ? DebugUtils.DebugPath
-                    : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
-#endif
-
+            string debugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
             return !string.IsNullOrEmpty(debugPath)
                     ? debugPath
                     : Path.GetTempPath();

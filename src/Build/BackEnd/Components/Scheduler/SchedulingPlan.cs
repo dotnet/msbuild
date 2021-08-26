@@ -10,7 +10,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -317,7 +316,7 @@ namespace Microsoft.Build.BackEnd
         private void AnalyzeData()
         {
             DoRecursiveAnalysis();
-            if (Traits.Instance.DebugScheduler)
+            if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER")))
             {
                 DetermineExpensiveConfigs();
                 DetermineConfigsByNumberOfOccurrences();

@@ -1476,21 +1476,12 @@ $@"
             var graph = Helpers.CreateProjectGraph(
                 _env,
                 edges,
-                globalProperties: new Dictionary<string, string> {{"a", "b"}},
-                createProjectFile: (env, projectId, references, _, _, _) => Helpers.CreateProjectFile(
-                    env,
-                    projectId,
-                    references,
-                    projectReferenceTargets: new Dictionary<string, string[]>
-                    {
-                        {"Build", new[] {$"TargetFrom{projectId}", "Build"}}
-                    }));
+                new Dictionary<string, string> {{"a", "b"}});
 
-            var targetsPerNode = graph.GetTargetLists(new []{ "Build" });
 
             Func<ProjectGraphNode, string> nodeIdProvider = GetProjectFileName;
 
-            var dot = graph.ToDot(nodeIdProvider, targetsPerNode);
+            var dot = graph.ToDot(nodeIdProvider);
 
             var edgeCount = 0;
 
@@ -1498,12 +1489,9 @@ $@"
             {
                 var nodeId = nodeIdProvider(node);
 
-                var targets = string.Join(".*", targetsPerNode[node]);
-                targets.ShouldNotBeNullOrEmpty();
-
                 foreach (var globalProperty in node.ProjectInstance.GlobalProperties)
                 {
-                    dot.ShouldMatch($@"{nodeId}\s*\[.*{targets}.*{globalProperty.Key}.*{globalProperty.Value}.*\]");
+                    dot.ShouldMatch($@"{nodeId}\s*\[.*{globalProperty.Key}.*{globalProperty.Value}.*\]");
                 }
 
                 foreach (var reference in node.ProjectReferences)
