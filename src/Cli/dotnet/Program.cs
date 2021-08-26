@@ -34,6 +34,13 @@ namespace Microsoft.DotNet.Cli
             TimeSpan startupTime = mainTimeStamp - Process.GetCurrentProcess().StartTime;
 
             bool perfLogEnabled = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_PERF_LOG", false);
+
+            // Avoid create temp directory with root permission and later prevent access in non sudo
+            if (SudoEnvironmentDirectoryOverride.IsRunningUnderSudo())
+            {
+                perfLogEnabled = false;
+            }
+
             PerformanceLogStartupInformation startupInfo = null;
             if (perfLogEnabled)
             {
@@ -111,6 +118,12 @@ namespace Microsoft.DotNet.Cli
             PerformanceLogEventSource.Log.BuiltInCommandParserStart();
             Stopwatch parseStartTime = Stopwatch.StartNew();
             var parseResult = Parser.Instance.Parse(args);
+
+            // Avoid create temp directory with root permission and later prevent access in non sudo
+            // This method need to be run very early before temp folder get created
+            // https://github.com/dotnet/sdk/issues/20195
+            SudoEnvironmentDirectoryOverride.OverrideEnvironmentVariableToTmp(parseResult);
+
             performanceData.Add("Parse Time", parseStartTime.Elapsed.TotalMilliseconds);
             PerformanceLogEventSource.Log.BuiltInCommandParserStop();
 
