@@ -18,6 +18,7 @@ using Microsoft.DotNet.ShellShim;
 using System.IO;
 using Microsoft.NET.TestFramework.Utilities;
 using System.CommandLine.Parsing;
+using System.Runtime.InteropServices;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
@@ -284,6 +285,52 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 .Be(LowerPackageVersion);
         }
 
+        [Fact]
+        public void GivenPackagedShimIsProvidedWhenRunWithPackageIdItCreatesShimUsingPackagedShim()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
+            var prepackagedShimPath = Path.Combine(Path.GetTempPath(), "SimulatorCommand" + extension);
+            var tokenToIdentifyPackagedShim = "packagedShim";
+            _fileSystem.File.WriteAllText(prepackagedShimPath, tokenToIdentifyPackagedShim);
+
+            var packagedShimsMap = new Dictionary<PackageId, IReadOnlyList<FilePath>>
+            {
+                [_packageId] = new[] {new FilePath(prepackagedShimPath)}
+            };
+
+            string options = $"-g {_packageId}";
+            ParseResult result = Parser.Instance.Parse("dotnet tool update " + options);
+            var command = new ToolUpdateGlobalOrToolPathCommand(
+                result,
+                (_, _) => (_store, _store, new ToolPackageInstallerMock(
+                        _fileSystem,
+                        _store,
+                        new ProjectRestorerMock(
+                            _fileSystem,
+                            _reporter,
+                            _mockFeeds
+                        ),
+                        packagedShimsMap: packagedShimsMap),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
+                (_, _) => GetMockedShellShimRepository(),
+                _reporter);
+
+            command.Execute();
+
+            _fileSystem.File.ReadAllText(ExpectedCommandPath()).Should().Be(tokenToIdentifyPackagedShim);
+
+            string ExpectedCommandPath()
+            {
+                var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
+                return Path.Combine(
+                    _shimsDirectory,
+                    "SimulatorCommand" + extension);
+            }
+        }
+
         private ToolInstallGlobalOrToolPathCommand CreateInstallCommand(string options)
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool install " + options);
@@ -328,7 +375,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                     new DirectoryPath(_shimsDirectory),
                     string.Empty,
                     fileSystem: _fileSystem,
-                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem));
+                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem),
+                    filePermissionSetter: new ToolInstallGlobalOrToolPathCommandTests.NoOpFilePermissionSetter());
         }
     }
 }
