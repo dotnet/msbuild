@@ -15,9 +15,9 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> VersionOption = WorkloadUpdateCommandParser.VersionOption;
 
-        public static readonly Option<string> TempDirOption = WorkloadUpdateCommandParser.TempDirOption;
+        public static readonly Option<string> TempDirOption = WorkloadUpdateCommandParser.TempDirOption.MakeHidden();
         
-        public static readonly Option<bool> IncludePreviewsOption = WorkloadUpdateCommandParser.IncludePreviewsOption;
+        public static readonly Option<bool> IncludePreviewsOption = WorkloadUpdateCommandParser.IncludePreviewsOption.MakeHidden();
 
         public static Command GetCommand()
         {
@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VersionOption);
             command.AddOption(TempDirOption);
             command.AddOption(IncludePreviewsOption);
-            command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
+            command.AddWorkloadCommandNuGetRestoreActionConfigOptions(true);
             return command;
         }
     }

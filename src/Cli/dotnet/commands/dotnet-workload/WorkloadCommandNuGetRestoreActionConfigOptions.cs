@@ -36,12 +36,12 @@ namespace Microsoft.DotNet.Cli
                 Interactive: parseResult.ValueForOption<bool>(InteractiveRestoreOption));
         }
 
-        public static void AddWorkloadCommandNuGetRestoreActionConfigOptions(this Command command)
+        public static void AddWorkloadCommandNuGetRestoreActionConfigOptions(this Command command, bool makeHidden = false)
         {
-            command.AddOption(DisableParallelOption);
-            command.AddOption(IgnoreFailedSourcesOption);
-            command.AddOption(NoCacheOption);
-            command.AddOption(InteractiveRestoreOption);
+            command.AddOption(makeHidden ? DisableParallelOption.MakeHidden() : DisableParallelOption);
+            command.AddOption(makeHidden ? IgnoreFailedSourcesOption.MakeHidden() : IgnoreFailedSourcesOption);
+            command.AddOption(makeHidden ? NoCacheOption.MakeHidden() : NoCacheOption);
+            command.AddOption(makeHidden ? InteractiveRestoreOption.MakeHidden() : InteractiveRestoreOption);
         }
     }
 }
