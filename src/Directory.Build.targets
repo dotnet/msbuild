@@ -104,6 +104,16 @@
              Visible="false" Pack="false"/>
   </ItemGroup>
 
+  <Target Name="SetResourceProperties" BeforeTargets="_GetEmbeddedResourcesWithSourceGeneration">
+    <ItemGroup>
+      <EmbeddedResource Update="@(EmbeddedResource)" Condition="'%(EmbeddedResource.NuGetPackageId)' == 'Microsoft.CodeAnalysis.Collections' AND '%(FileName)' == 'Strings'">
+        <GenerateSource>true</GenerateSource>
+        <Generator>MSBuild:_GenerateResxSource</Generator>
+        <ClassName>Microsoft.CodeAnalysis.Collections.SR</ClassName>
+      </EmbeddedResource>
+    </ItemGroup>
+  </Target>
+
   <!-- Override in-box GenerateSatelliteAssemblies, as we are using CoreGenerateSatelliteAssemblies instead.
        With https://github.com/Microsoft/msbuild/pull/2726 this is no longer necessary, but that change is not
        in VS 15.5 (which is what we use for Jenkins right now). -->

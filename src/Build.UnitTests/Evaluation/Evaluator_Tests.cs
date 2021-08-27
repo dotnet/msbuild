@@ -4769,6 +4769,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 });
         }
 
+        [Fact]
+        public void VerifyGetTypeEvaluationBlocked()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"
+                             <Project>
+                               <PropertyGroup>
+                                 <TestProp>$(MSBuildRuntimeType.GetType())</TestProp>
+                               </PropertyGroup>
+                             </Project>");
+
+            ProjectCollection fakeProjectCollection =
+                GetProjectCollectionWithFakeToolset(null /* no global properties */);
+
+            Should.Throw<InvalidProjectFileException>(() =>
+                new Project(XmlReader.Create(new StringReader(projectContents)), null, "Fake", fakeProjectCollection));
+        }
+
         private void VerifyPropertyTrackingLoggingScenario(string envVarValue, Action<MockLogger> loggerEvaluatorAction)
         {
             // The default is that only reassignments are logged.

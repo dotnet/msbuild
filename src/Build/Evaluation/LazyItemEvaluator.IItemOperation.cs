@@ -9,7 +9,7 @@ namespace Microsoft.Build.Evaluation
     {
         internal interface IItemOperation
         {
-            void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);
+            void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);
         }
     }
 }
