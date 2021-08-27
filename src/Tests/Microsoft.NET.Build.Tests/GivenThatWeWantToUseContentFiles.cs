@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_handles_content_files_correctly()
         {
-            const string targetFramework = "netcoreapp2.0";
+            const string targetFramework = "netcoreapp3.0";
 
             var project = new TestProject
             {
