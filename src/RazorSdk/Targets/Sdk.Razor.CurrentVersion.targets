@@ -50,8 +50,6 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_TargetingNET50OrLater>true</_TargetingNET50OrLater>
         <_TargetingNET60OrLater>true</_TargetingNET60OrLater>
         <UseRazorSourceGenerator Condition="'$(UseRazorSourceGenerator)' == '' ">true</UseRazorSourceGenerator>
-        <!-- Required to support incremental source generator -->
-        <LangVersion Condition="'$(UseRazorSourceGenerator)' != '' ">preview</LangVersion>
         <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">6.0</RazorLangVersion>
       </PropertyGroup>
     </When>
@@ -101,7 +99,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <StaticWebAssetsEnabled Condition="'$(StaticWebAssetsEnabled)' == ''">$(_Targeting30OrNewerRazorLangVersion)</StaticWebAssetsEnabled>
 
     <UseStaticWebAssetsV2>$(_TargetingNET60OrLater)</UseStaticWebAssetsV2>
-     
+
     <!-- Controls whether or not the scoped css feature is enabled. By default is enabled for net6.0 applications and RazorLangVersion 5 or above -->
     <ScopedCssEnabled Condition="'$(ScopedCssEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_Targeting30OrNewerRazorLangVersion)</ScopedCssEnabled>
 
