@@ -41,6 +41,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             ITypeSymbol leftBaseType = left.BaseType;
             ITypeSymbol rightBaseType = right.BaseType;
 
+            if (leftBaseType == null)
+                return;
+
             while (rightBaseType != null)
             {
                 // If we found the immediate left base type on right we can assume

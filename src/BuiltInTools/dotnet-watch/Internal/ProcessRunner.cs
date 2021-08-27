@@ -1,6 +1,8 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +16,8 @@ namespace Microsoft.DotNet.Watcher.Internal
 {
     public class ProcessRunner
     {
+        private static readonly Func<string, string?> _getEnvironmentVariable = static key => Environment.GetEnvironmentVariable(key);
+
         private readonly IReporter _reporter;
 
         public ProcessRunner(IReporter reporter)
@@ -120,20 +124,24 @@ namespace Microsoft.DotNet.Watcher.Internal
                 process.StartInfo.Environment.Add(env.Key, env.Value);
             }
 
-            SetEnvironmentVariable(process.StartInfo, "DOTNET_STARTUP_HOOKS", processSpec.EnvironmentVariables.DotNetStartupHooks, Path.PathSeparator);
-            SetEnvironmentVariable(process.StartInfo, "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", processSpec.EnvironmentVariables.AspNetCoreHostingStartupAssemblies, ';');
+            SetEnvironmentVariable(process.StartInfo, "DOTNET_STARTUP_HOOKS", processSpec.EnvironmentVariables.DotNetStartupHooks, Path.PathSeparator, _getEnvironmentVariable);
+            SetEnvironmentVariable(process.StartInfo, "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", processSpec.EnvironmentVariables.AspNetCoreHostingStartupAssemblies, ';', _getEnvironmentVariable);
 
             return process;
         }
 
-        private void SetEnvironmentVariable(ProcessStartInfo processStartInfo, string envVarName, List<string> envVarValues, char separator)
+        internal static void SetEnvironmentVariable(ProcessStartInfo processStartInfo, string envVarName, List<string> envVarValues, char separator, Func<string, string?> getEnvironmentVariable)
         {
             if (envVarValues is { Count: 0 })
             {
                 return;
             }
 
-            var existing = Environment.GetEnvironmentVariable(envVarName);
+            var existing = getEnvironmentVariable(envVarName);
+            if (processStartInfo.Environment.TryGetValue(envVarName, out var value))
+            {
+                existing = CombineEnvironmentVariable(existing, value, separator);
+            }
 
             string result;
             if (!string.IsNullOrEmpty(existing))
@@ -146,13 +154,23 @@ namespace Microsoft.DotNet.Watcher.Internal
             }
 
             processStartInfo.EnvironmentVariables[envVarName] = result;
+
+            static string? CombineEnvironmentVariable(string? a, string? b, char separator)
+            {
+                if (!string.IsNullOrEmpty(a))
+                {
+                    return !string.IsNullOrEmpty(b) ? (a + separator + b) : a;
+                }
+
+                return b;
+            }
         }
 
         private class ProcessState : IDisposable
         {
             private readonly IReporter _reporter;
             private readonly Process _process;
-            private readonly TaskCompletionSource<object> _tcs = new TaskCompletionSource<object>();
+            private readonly TaskCompletionSource _tcs = new TaskCompletionSource();
             private volatile bool _disposed;
 
             public ProcessState(Process process, IReporter reporter)
@@ -209,8 +227,8 @@ namespace Microsoft.DotNet.Watcher.Internal
                 }
             }
 
-            private void OnExited(object sender, EventArgs args)
-                => _tcs.TrySetResult(null);
+            private void OnExited(object? sender, EventArgs args)
+                => _tcs.TrySetResult();
 
             public void Dispose()
             {

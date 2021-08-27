@@ -60,5 +60,14 @@ namespace Microsoft.DotNet.Installer.Windows
             get;
             set;
         }
+
+        /// <summary>
+        /// The upgrade code (GUID) of the workload pack MSI.
+        /// </summary>
+        public string UpgradeCode
+        {
+            get;
+            set;
+        }
     }
 }

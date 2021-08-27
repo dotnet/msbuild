@@ -60,6 +60,11 @@ namespace Microsoft.Win32.Msi
         public const string INSTALLSOURCE = "InstallSource";
 
         /// <summary>
+        /// Installed language of the product.
+        /// </summary>
+        public const string LANGUAGE = "Language";
+
+        /// <summary>
         /// The local cached package.
         /// </summary>
         public const string LOCALPACKAGE = "LocalPackage";

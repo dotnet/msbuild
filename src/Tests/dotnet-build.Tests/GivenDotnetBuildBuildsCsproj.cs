@@ -212,6 +212,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
             var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
                 .WithSource()
+                .WithTargetFramework("netcoreapp3.1")
                 .Restore(Log);
 
             new DotnetBuildCommand(Log)

@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.HotReload;
@@ -13,6 +15,8 @@ internal sealed class StartupHook
 
     public static void Initialize()
     {
+        ClearHotReloadEnvironmentVariables(Environment.GetEnvironmentVariable, Environment.SetEnvironmentVariable);
+
         Task.Run(async () =>
         {
             using var hotReloadAgent = new HotReloadAgent(Log);
@@ -25,6 +29,33 @@ internal sealed class StartupHook
                 Log(ex.Message);
             }
         });
+    }
+
+    internal static void ClearHotReloadEnvironmentVariables(
+        Func<string, string?> getEnvironmentVariable,
+        Action<string, string?> setEnvironmentVariable)
+    {
+        // Workaround for https://github.com/dotnet/runtime/issues/58000
+        // Clear any hot-reload specific environment variables. This should prevent child processes from being
+        // affected by the current app's hot reload settings.
+        setEnvironmentVariable("DOTNET_MODIFIABLE_ASSEMBLIES", null);
+        const string StartupHooksEnvironment = "DOTNET_STARTUP_HOOKS";
+        var environment = getEnvironmentVariable(StartupHooksEnvironment);
+        setEnvironmentVariable(StartupHooksEnvironment, RemoveCurrentAssembly(environment));
+
+        static string? RemoveCurrentAssembly(string? environment)
+        {
+            if (string.IsNullOrEmpty(environment))
+            {
+                return environment;
+            }
+
+            var assemblyLocation = typeof(StartupHook).Assembly.Location;
+            var updatedValues = environment.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+                .Where(e => !string.Equals(e, assemblyLocation, StringComparison.OrdinalIgnoreCase));
+
+            return string.Join(Path.PathSeparator, updatedValues);
+        }
     }
 
     public static async Task ReceiveDeltas(HotReloadAgent hotReloadAgent)

@@ -17,6 +17,9 @@ namespace Microsoft.NET.TestFramework
 {
     public class ToolsetInfo
     {
+        public const string CurrentTargetFramework = "net6.0";
+        public const string CurrentTargetFrameworkVersion = "6.0";
+
         public string DotNetRoot { get; }
         public string DotNetHostPath { get; }
 

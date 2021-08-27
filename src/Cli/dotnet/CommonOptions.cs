@@ -149,8 +149,9 @@ namespace Microsoft.DotNet.Cli
                 // ResolveOsOptionToRuntimeIdentifier handles resolving the RID when both arch and os are specified
                 return Array.Empty<string>();
             }
-
-            return ResolveRidShorthandOptions(null, arg);
+            
+            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption().Aliases.First()) || parseResult.HasOption(NoSelfContainedOption().Aliases.First());
+            return ResolveRidShorthandOptions(null, arg, selfContainedSpecified);
         }
 
         internal static IEnumerable<string> ResolveOsOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
@@ -160,17 +161,22 @@ namespace Microsoft.DotNet.Cli
                 throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndOsOptions);
             }
 
+            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption().Aliases.First()) || parseResult.HasOption(NoSelfContainedOption().Aliases.First());
             if (parseResult.BothArchAndOsOptionsSpecified())
             {
-                return ResolveRidShorthandOptions(arg, parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()));
+                return ResolveRidShorthandOptions(arg, parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()), selfContainedSpecified);
             }
 
-            return ResolveRidShorthandOptions(arg, null);
+            return ResolveRidShorthandOptions(arg, null, selfContainedSpecified);
         }
 
-        private static IEnumerable<string> ResolveRidShorthandOptions(string os, string arch)
+        private static IEnumerable<string> ResolveRidShorthandOptions(string os, string arch, bool userSpecifiedSelfContainedOption)
         {
             var properties = new string[] { $"-property:RuntimeIdentifier={ResolveRidShorthandOptionsToRuntimeIdentifier(os, arch)}" };
+            if (!userSpecifiedSelfContainedOption)
+            {
+                properties = properties.Append("-property:SelfContained=false").ToArray();
+            }
             return properties;
         }
 

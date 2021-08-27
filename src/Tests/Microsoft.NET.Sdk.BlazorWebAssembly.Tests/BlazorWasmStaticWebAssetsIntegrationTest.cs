@@ -2,6 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.NET.TestFramework.Assertions;
@@ -126,6 +130,37 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publish = new PublishCommand(ProjectDirectory, "blazorhosted");
             publish.WithWorkingDirectory(ProjectDirectory.TestRoot);
             var publishResult = publish.Execute("/bl");
+            publishResult.Should().Pass();
+
+            var publishPath = publish.GetOutputDirectory(DefaultTfm).ToString();
+            var intermediateOutputPath = publish.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
+
+            // GenerateStaticWebAssetsManifest should generate the manifest file.
+            var path = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
+            new FileInfo(path).Should().Exist();
+            var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path));
+            AssertManifest(manifest, LoadPublishManifest());
+
+            AssertPublishAssets(
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                publishPath,
+                intermediateOutputPath);
+        }
+
+        [Fact]
+        public void StaticWebAssets_Publish_DoesNotIncludeXmlDocumentationFiles_AsAssets()
+        {
+            // Arrange
+            var testAppName = "BlazorHosted";
+            ProjectDirectory = CreateAspNetSdkTestAsset(testAppName);
+
+            // Check that static web assets is correctly configured by setting up a css file to triger css isolation.
+            // The list of publish files should not include bundle.scp.css and should include blazorwasm.styles.css
+            File.WriteAllText(Path.Combine(ProjectDirectory.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
+
+            var publish = new PublishCommand(ProjectDirectory, "blazorhosted");
+            publish.WithWorkingDirectory(ProjectDirectory.TestRoot);
+            var publishResult = publish.Execute("/p:GenerateDocumentationFile=true", "/bl");
             publishResult.Should().Pass();
 
             var publishPath = publish.GetOutputDirectory(DefaultTfm).ToString();

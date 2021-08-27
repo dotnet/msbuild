@@ -127,6 +127,21 @@
         <target state="new">No manifest with ID {0} exists.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MsiProgressInstall">
+        <source>Installing {0} </source>
+        <target state="new">Installing {0} </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressRepair">
+        <source>Repairing {0} </source>
+        <target state="new">Repairing {0} </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsiProgressUninstall">
+        <source>Removing {0} </source>
+        <target state="new">Removing {0} </target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoManifestsExistForFeatureBand">
         <source>No manifests exist for SDK version {0}.</source>
         <target state="new">No manifests exist for SDK version {0}.</target>
@@ -140,6 +155,11 @@
       <trans-unit id="OSDoesNotSupportMsi">
         <source>MSI installations are only supported on Windows.</source>
         <target state="new">MSI installations are only supported on Windows.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PendingReboot">
+        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
+        <target state="new">The machine has a pending reboot. Installation will continue, but you may need to restart.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
@@ -195,6 +215,11 @@
       <trans-unit id="TempDirOptionDescription">
         <source>Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</source>
         <target state="new">Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownInstallType">
+        <source>Unknown installation type: {0}.</source>
+        <target state="new">Unknown installation type: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPackError">

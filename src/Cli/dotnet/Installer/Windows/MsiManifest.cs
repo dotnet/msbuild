@@ -22,6 +22,15 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
+        /// The product language of the MSI.
+        /// </summary>
+        public int Language
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The name of the MSI package.
         /// </summary>
         public string Payload
@@ -52,6 +61,16 @@ namespace Microsoft.DotNet.Installer.Windows
         /// The name of the dependency provider key used to track installation reference counts.
         /// </summary>
         public string ProviderKeyName
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Upgrade information associated with the MSI. The array may be null if an MSI
+        /// does not define an Upgrade table.
+        /// </summary>
+        public RelatedProduct[] RelatedProducts
         {
             get;
             set;

@@ -56,8 +56,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             ReleaseVersion currentSdkReleaseVersion = new(currentSdkVersion ?? Product.Version);
             _currentSdkFeatureBand = new SdkFeatureBand(currentSdkReleaseVersion);
-            _workloadRecordRepo = workloadRecordRepo ??
-                                  new NetSdkManagedInstallationRecordRepository(_dotnetPath);
+            
             _includePreviews = result.ValueForOption<bool>(WorkloadListCommandParser.IncludePreviewsOption);
             _tempDirPath = tempDirPath ??
                            (string.IsNullOrWhiteSpace(
@@ -80,6 +79,10 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                           verboseLogger: nullLogger,
                                           restoreActionConfig: _parseResult.ToRestoreActionConfig());
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString());
+
+            _workloadRecordRepo = workloadRecordRepo ??
+                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity).GetWorkloadInstallationRecordRepository();
+
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
                 workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, _workloadRecordRepo);
         }

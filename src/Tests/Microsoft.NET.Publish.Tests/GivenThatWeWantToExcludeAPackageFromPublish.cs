@@ -181,7 +181,7 @@ namespace Microsoft.NET.Publish.Tests
                 TargetFrameworks = "netcoreapp3.0"
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "all"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1", privateAssets: "all"));
 
             testProject.ReferencedProjects.Add(testLibraryProject);
 

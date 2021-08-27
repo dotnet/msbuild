@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
 
                 return NetSdkMsiInstallerClient.Create(sdkFeatureBand, workloadResolver,
-                    nugetPackageDownloader, verbosity, packageSourceLocation, reporter);
+                    nugetPackageDownloader, verbosity, packageSourceLocation, reporter, tempDirPath);
             }
 
             if (elevationRequired && !CanWriteToDotnetRoot(dotnetDir))

@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.0")]
         [InlineData(".NETCoreApp")]
         [InlineData(".NETStandard")]
         public void TheMaximumVersionsAreSupported(string targetFrameworkIdentifier)

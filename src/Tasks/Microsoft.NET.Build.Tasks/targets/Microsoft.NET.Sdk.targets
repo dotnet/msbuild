@@ -11,6 +11,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="Microsoft.NET.Sdk.Common.targets" />
 
+  <PropertyGroup>
+    <EnableDynamicLoading Condition="'$(EnableDynamicLoading)' == '' and '$(EnableComHosting)' == 'true'">true</EnableDynamicLoading>
+  </PropertyGroup>
+  
   <ImportGroup>
     <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets') and ('$(Language)' != 'C++' or '$(_EnablePackageReferencesInVCProjects)' == 'true')" />
     <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolutionStubs.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolutionStubs.targets') and ('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true')" />
@@ -30,7 +34,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <EnableDynamicLoading Condition="'$(EnableDynamicLoading)' == '' and '$(EnableComHosting)' == 'true'">true</EnableDynamicLoading>
     <GenerateRuntimeConfigurationFiles Condition=" '$(GenerateRuntimeConfigurationFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and ('$(HasRuntimeOutput)' == 'true' or '$(EnableComHosting)' == 'true' or '$(EnableDynamicLoading)' == 'true') ">true</GenerateRuntimeConfigurationFiles>
     <AlwaysIncludeCoreFrameworkInRuntimeConfig Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '6.0'))">false</AlwaysIncludeCoreFrameworkInRuntimeConfig>
     <AlwaysIncludeCoreFrameworkInRuntimeConfig Condition="'$(AlwaysIncludeCoreFrameworkInRuntimeConfig)' == ''">true</AlwaysIncludeCoreFrameworkInRuntimeConfig>

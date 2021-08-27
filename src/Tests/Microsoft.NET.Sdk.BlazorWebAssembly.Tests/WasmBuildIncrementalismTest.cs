@@ -2,15 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.IO;
-using System.Text.Json;
-using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.NET.Sdk.BlazorWebAssembly;
+using System.Text.Json;
+using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Utilities;
-using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -60,7 +58,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "blazorwasm");
-            build.Execute()
+            build.WithWorkingDirectory(projectDirectory.TestRoot);
+            build.Execute("/bl")
                 .Should()
                 .Pass();
 
@@ -74,7 +73,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             for (var i = 0; i < 3; i++)
             {
                 build = new BuildCommand(projectDirectory, "blazorwasm");
-                build.Execute()
+                build.WithWorkingDirectory(projectDirectory.TestRoot);
+                build.Execute($"/bl:msbuild{i}.binlog")
                     .Should()
                     .Pass();
 

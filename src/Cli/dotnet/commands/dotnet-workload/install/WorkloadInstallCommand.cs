@@ -181,20 +181,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             InstallWorkloadsWithInstallRecord(workloadIds, _sdkFeatureBand, manifestsToUpdate, offlineCache);
 
-            TryRunGarbageCollection(_workloadInstaller, _reporter, _verbosity);
+            TryRunGarbageCollection(_workloadInstaller, _reporter, _verbosity, offlineCache);
 
             _reporter.WriteLine();
             _reporter.WriteLine(string.Format(LocalizableStrings.InstallationSucceeded, string.Join(" ", workloadIds)));
             _reporter.WriteLine();
         }
 
-        internal static void TryRunGarbageCollection(IInstaller workloadInstaller, IReporter reporter, VerbosityOptions verbosity)
+        internal static void TryRunGarbageCollection(IInstaller workloadInstaller, IReporter reporter, VerbosityOptions verbosity, DirectoryPath? offlineCache = null)
         {
             try
             {
                 if (workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
                 {
-                    workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
+                    workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks(offlineCache);
                 }
             }
             catch (Exception e)
@@ -249,7 +249,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                             foreach (var manifest in manifestsToUpdate)
                             {
-                                _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand);
+                                _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand, offlineCache: null, isRollback: true);
                             }
 
                             foreach (var packId in workloadPackToInstall)

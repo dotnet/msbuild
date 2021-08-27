@@ -121,7 +121,11 @@ namespace Microsoft.DotNet.Watcher.Tools
             await _terminateWebSocket.Task;
         }
 
-        public Task WaitForClientConnectionAsync(CancellationToken cancellationToken) => _clientConnected.Task.WaitAsync(cancellationToken);
+        public async Task WaitForClientConnectionAsync(CancellationToken cancellationToken)
+        {
+            _reporter.Verbose("Waiting for a browser to connect");
+            await _clientConnected.Task.WaitAsync(cancellationToken);
+        }
 
         public ValueTask SendJsonSerlialized<TValue>(TValue value, CancellationToken cancellationToken = default)
         {

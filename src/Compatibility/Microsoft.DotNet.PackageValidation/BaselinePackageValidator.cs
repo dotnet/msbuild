@@ -22,14 +22,14 @@ namespace Microsoft.DotNet.PackageValidation
         private readonly bool _runApiCompat;
         private readonly DiagnosticBag<IDiagnostic> _diagnosticBag;
         private readonly ApiCompatRunner _apiCompatRunner;
-        private readonly IPackageLogger _log;
+        private readonly ICompatibilityLogger _log;
 
-        public BaselinePackageValidator(Package baselinePackage, string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, IPackageLogger log)
+        public BaselinePackageValidator(Package baselinePackage, string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, ICompatibilityLogger log, Dictionary<string, HashSet<string>> apiCompatReferences)
         {
             _baselinePackage = baselinePackage;
             _runApiCompat = runApiCompat;
             _log = log;
-            _apiCompatRunner = new(noWarn, ignoredDifferences, false, _log);
+            _apiCompatRunner = new(noWarn, ignoredDifferences, false, _log, apiCompatReferences);
             _diagnosticBag = new(noWarn?.Split(';')?.Where(t => s_diagList.Contains(t)), ignoredDifferences);
         }
 

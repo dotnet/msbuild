@@ -19,6 +19,8 @@ namespace Microsoft.DotNet.Build.Tasks
     /// If there is a change depended on the latest runtime. Without override the runtime version in BundledNETCoreAppPackageVersion
     /// we would need to somehow get this change in without the test, and then insertion dotnet/installer
     /// and then update the stage 0 back.
+    ///
+    /// Override NETCoreSdkVersion to stage 0 sdk version like 6.0.100-dev
     /// 
     /// Use a task to override since it was generated as a string literal replace anyway.
     /// And using C# can have better error when anything goes wrong.
@@ -33,20 +35,24 @@ namespace Microsoft.DotNet.Build.Tasks
         [Required] public string Stage0MicrosoftNETCoreAppRefPackageVersionPath { get; set; }
 
         [Required] public string MicrosoftNETCoreAppRefPackageVersion { get; set; }
+        [Required] public string NewSDKVersion { get; set; }
 
         [Required] public string OutputPath { get; set; }
 
         public override bool Execute()
         {
             File.WriteAllText(OutputPath,
-                ExecuteInternal(File.ReadAllText(Stage0MicrosoftNETCoreAppRefPackageVersionPath),
-                    MicrosoftNETCoreAppRefPackageVersion));
+                ExecuteInternal(
+                    File.ReadAllText(Stage0MicrosoftNETCoreAppRefPackageVersionPath),
+                    MicrosoftNETCoreAppRefPackageVersion,
+                    NewSDKVersion));
             return true;
         }
 
         public static string ExecuteInternal(
             string stage0MicrosoftNETCoreAppRefPackageVersionContent,
-            string microsoftNETCoreAppRefPackageVersion)
+            string microsoftNETCoreAppRefPackageVersion,
+            string newSDKVersion)
         {
             var projectXml = XDocument.Parse(stage0MicrosoftNETCoreAppRefPackageVersionContent);
 
@@ -56,8 +62,10 @@ namespace Microsoft.DotNet.Build.Tasks
 
             var isSDKServicing = IsSDKServicing(propertyGroup.Element(ns + "NETCoreSdkVersion").Value);
 
+            propertyGroup.Element(ns + "NETCoreSdkVersion").Value = newSDKVersion;
+
             var originalBundledNETCoreAppPackageVersion =
-            propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value;
+                propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value;
             propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value = microsoftNETCoreAppRefPackageVersion;
 
             void CheckAndReplaceElement(XElement element)

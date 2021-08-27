@@ -144,6 +144,7 @@
   </Target>
 
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.PackageInstall.Tests\Microsoft.DotNet.PackageInstall.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
     <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
@@ -156,5 +157,7 @@
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <!-- This package comes from dotnet/runtime-assets -->
+    <PackageReference Include="Microsoft.DotNet.Installer.Windows.Security.TestData" Version="$(MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>
 </Project>

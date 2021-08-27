@@ -164,7 +164,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
             UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
 
-            WorkloadInstallCommand.TryRunGarbageCollection(_workloadInstaller, _reporter, _verbosity);
+            WorkloadInstallCommand.TryRunGarbageCollection(_workloadInstaller, _reporter, _verbosity, offlineCache);
 
             _workloadManifestUpdater.DeleteUpdatableWorkloadsFile();
 
@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
                             foreach (var manifest in manifestsToUpdate)
                             {
-                                _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand);
+                                _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand, offlineCache: null, isRollback: true);
                             }
 
                             foreach (var packId in workloadPackToUpdate)

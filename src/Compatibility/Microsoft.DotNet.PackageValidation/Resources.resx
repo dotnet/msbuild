@@ -147,13 +147,13 @@
   <data name="NonExistentPackagePath" xml:space="preserve">
     <value>Package '{0}' not found. Please provide a valid package path.</value>
   </data>
-  <data name="WroteSuppressions" xml:space="preserve">
-    <value>Successfully wrote compatibility suppressions to '{0}'.</value>
-  </data>
   <data name="Baseline" xml:space="preserve">
     <value>[Baseline]</value>
   </data>
-  <data name="UpdateSdkVersion" xml:space="preserve">
-    <value> The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</value>
+  <data name="AssemblyLoadWarning" xml:space="preserve">
+    <value>When loading: '{0}': {1}</value>
+  </data>
+  <data name="MissingSearchDirectory" xml:space="preserve">
+    <value>Could not find a reference directory in the provided directories for TargetFramework '{0}' when loading '{1}'. For more information see: https://aka.ms/dotnetpackagevalidation</value>
   </data>
 </root>

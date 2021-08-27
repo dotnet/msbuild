@@ -8,17 +8,17 @@ using Microsoft.DotNet.Compatibility.ErrorSuppression;
 
 namespace Microsoft.DotNet.PackageValidation.Tests
 {
-    public class TestLogger : IPackageLogger
+    public class TestLogger : ICompatibilityLogger
     {
         public List<string> errors = new();
+        public List<string> warnings = new();
 
-        public void LogError(Suppression suppression, string code, string format, params string[] args)
-        {
+        public void LogError(Suppression suppression, string code, string format, params string[] args) =>
             errors.Add(code + " " + string.Format(format, args));
-        }
-
-        public void LogErrorHeader(string message) { }
 
         public void LogMessage(MessageImportance importance, string format, params string[] args) { }
+
+        public void LogWarning(Suppression suppression, string code, string format, params string[] args) =>
+            errors.Add(code + " " + string.Format(format, args));
     }
 }

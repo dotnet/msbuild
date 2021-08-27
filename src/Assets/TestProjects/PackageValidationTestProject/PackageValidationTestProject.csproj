@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildProjectDirectory)\..\..\..\..\src\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
+    <ProjectReference Include="$(MSBuildProjectDirectory)\..\..\..\..\src\Compatibility\Microsoft.DotNet.Compatibility\Microsoft.DotNet.Compatibility.csproj" />
     <PackageReference Include="NuGet.Frameworks" Version="6.0.0-preview.1.66" />
     <PackageReference Include="NuGet.Packaging" Version="6.0.0-preview.1.66" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
@@ -19,8 +19,8 @@
   <Import Project="$(MSBuildProjectDirectory)\..\..\..\..\src\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.Compatibility.targets" />
 
   <PropertyGroup>
-    <DotNetPackageValidationAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\netstandard2.0\Microsoft.DotNet.PackageValidation.dll</DotNetPackageValidationAssembly>
-    <DotNetPackageValidationAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\net6.0\Microsoft.DotNet.PackageValidation.dll</DotNetPackageValidationAssembly>
+    <DotNetCompatibilityAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\netstandard2.0\Microsoft.DotNet.Compatibility.dll</DotNetCompatibilityAssembly>
+    <DotNetCompatibilityAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\net6.0\Microsoft.DotNet.Compatibility.dll</DotNetCompatibilityAssembly>
   </PropertyGroup>
 
 </Project>

@@ -30,6 +30,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var sourceItems = sourceItemsWithDiagnostics
                 .ReportDiagnostics(context);
 
+            var hasRazorFiles = sourceItems.Collect()
+                .Select(static (sourceItems, _) => sourceItems.Any());
+
             var importFiles = sourceItems.Where(static file =>
             {
                 var path = file.FilePath;
@@ -47,7 +50,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 return false;
             });
 
-            var generatedCode = razorSourceGeneratorOptions
+            var generatedDeclarationCode = razorSourceGeneratorOptions
                 .Combine(sourceItems.Collect())
                 .Select(static (pair, _) =>
                 {
@@ -55,6 +58,12 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
                     if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
                     {
+                        return ImmutableArray<string>.Empty;
+                    }
+
+                    if (sourceItems.IsEmpty)
+                    {
+                        // If there's no razor code in this app, don't do anything.
                         return ImmutableArray<string>.Empty;
                     }
 
@@ -72,24 +81,28 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 .WithLambdaComparer(static (a, b) => a.SequenceEqual(b, StringComparer.Ordinal), static a => a.Length);
 
             var tagHelpersFromCompilation = context.CompilationProvider
-                .Combine(generatedCode)
+                .Combine(generatedDeclarationCode)
                 .Combine(context.ParseOptionsProvider)
                 .Combine(razorSourceGeneratorOptions)
                 .Select(static (pair, _) =>
                 {
-                    var (((compilation, generatedCode), parseOptions), razorSourceGeneratorOptions) = pair;
-                    
+                    var (((compilation, generatedDeclarationCode), parseOptions), razorSourceGeneratorOptions) = pair;
+
                     if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
                     {
                         return ImmutableArray<TagHelperDescriptor>.Empty;
                     }
 
-                    var syntaxTree = generatedCode.Select(c => CSharpSyntaxTree.ParseText(c, (CSharpParseOptions)parseOptions));
+                    if (generatedDeclarationCode.IsEmpty)
+                    {
+                        // If there's no razor code in this app, don't do anything.
+                        return ImmutableArray<TagHelperDescriptor>.Empty;
+                    }
 
                     var tagHelperFeature = new StaticCompilationTagHelperFeature();
                     var discoveryProjectEngine = GetDiscoveryProjectEngine(compilation.References.ToImmutableArray(), tagHelperFeature);
 
-                    var syntaxTrees = generatedCode.Select(c => CSharpSyntaxTree.ParseText(c, (CSharpParseOptions)parseOptions));
+                    var syntaxTrees = generatedDeclarationCode.Select(c => CSharpSyntaxTree.ParseText(c, (CSharpParseOptions)parseOptions));
 
                     var compilationWithDeclarations = compilation.AddSyntaxTrees(syntaxTrees);
 
@@ -101,13 +114,42 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             var tagHelpersFromReferences = context.CompilationProvider
                 .Combine(razorSourceGeneratorOptions)
-                .WithLambdaComparer(static (a, b) => a.Left.References.SequenceEqual(b.Left.References), static a => a.Left.References.GetHashCode())
+                .Combine(hasRazorFiles)
+                .WithLambdaComparer(static (a, b) =>
+                {
+                    var ((compilationA, razorSourceGeneratorOptionsA), hasRazorFilesA) = a;
+                    var ((compilationB, razorSourceGeneratorOptionsB), hasRazorFilesB) = b;
+
+                    if (!compilationA.References.SequenceEqual(compilationB.References))
+                    {
+                        return false;
+                    }
+
+                    if (razorSourceGeneratorOptionsA != razorSourceGeneratorOptionsB)
+                    {
+                        return false;
+                    }
+
+                    return hasRazorFilesA == hasRazorFilesB;
+                },
+                static item =>
+                {
+                    // we'll use the number of references as a hashcode.
+                    var ((compilationA, razorSourceGeneratorOptionsA), hasRazorFilesA) = item;
+                    return compilationA.References.GetHashCode();
+                })
                 .Select(static (pair, _) =>
                 {
-                    var (compilation, razorSourceGeneratorOptions) = pair;
+                    var ((compilation, razorSourceGeneratorOptions), hasRazorFiles) = pair;
 
                     if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
                     {
+                        return ImmutableArray<TagHelperDescriptor>.Empty;
+                    }
+
+                    if (!hasRazorFiles)
+                    {
+                        // If there's no razor code in this app, don't do anything.
                         return ImmutableArray<TagHelperDescriptor>.Empty;
                     }
 
@@ -132,7 +174,13 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 .Select(static (pair, _) =>
                 {
                     var (tagHelpersFromCompilation, tagHelpersFromReferences) = pair;
-                    var allTagHelpers = new TagHelperDescriptor[tagHelpersFromCompilation.Count + tagHelpersFromReferences.Count];
+                    var count = tagHelpersFromCompilation.Count + tagHelpersFromReferences.Count;
+                    if (count == 0)
+                    {
+                        return Array.Empty<TagHelperDescriptor>();
+                    }
+
+                    var allTagHelpers = new TagHelperDescriptor[count];
                     tagHelpersFromCompilation.CopyTo(allTagHelpers, 0);
                     tagHelpersFromReferences.CopyTo(allTagHelpers, tagHelpersFromCompilation.Count);
 

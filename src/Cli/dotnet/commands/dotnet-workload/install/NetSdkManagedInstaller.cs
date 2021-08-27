@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         try
                         {
                             _reporter.WriteLine(string.Format(LocalizableStrings.RollingBackPackInstall, packInfo.Id));
-                            RollBackWorkloadPackInstall(packInfo, sdkFeatureBand);
+                            RollBackWorkloadPackInstall(packInfo, sdkFeatureBand, offlineCache);
                         }
                         catch (Exception e)
                         {
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             InstallWorkloadPack(packInfo, sdkFeatureBand, offlineCache);
         }
 
-        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
+        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             DeletePackInstallationRecord(packInfo, sdkFeatureBand);
             if (!PackHasInstallRecords(packInfo))
@@ -185,7 +185,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null, bool isRollback = false)
         {
             string packagePath = null;
             string tempExtractionDir = null;
@@ -285,7 +285,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 downloadFolder: cachePath).GetAwaiter().GetResult();
         }
 
-        public void GarbageCollectInstalledWorkloadPacks()
+        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
         {
             var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1");
             var installedSdkFeatureBands = _installationRecordRepository.GetFeatureBandsWithInstallationRecords();

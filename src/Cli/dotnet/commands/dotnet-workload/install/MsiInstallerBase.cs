@@ -21,6 +21,11 @@ namespace Microsoft.DotNet.Installer.Windows
     internal abstract class MsiInstallerBase : InstallerBase
     {
         /// <summary>
+        /// Track messages that should never be reported more than once.
+        /// </summary>
+        private HashSet<string> _reportedMessages = new HashSet<string>();
+
+        /// <summary>
         /// Default reinstall mode (equivalent to VOMUS).
         /// </summary>
         public const ReinstallMode DefaultReinstallMode = ReinstallMode.FILEOLDERVERSION | ReinstallMode.FILEVERIFY |
@@ -111,31 +116,35 @@ namespace Microsoft.DotNet.Installer.Windows
             Dictionary<string, List<WorkloadPackRecord>> workloadPackRecords = new Dictionary<string, List<WorkloadPackRecord>>();
             using RegistryKey installedPacksKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\dotnet\InstalledPacks");
 
-            foreach (string packId in installedPacksKey.GetSubKeyNames())
+            if (installedPacksKey != null)
             {
-                if (!workloadPackRecords.ContainsKey(packId))
+                foreach (string packId in installedPacksKey.GetSubKeyNames())
                 {
-                    workloadPackRecords[packId] = new List<WorkloadPackRecord>();
-                }
-
-                using RegistryKey packKey = installedPacksKey.OpenSubKey(packId);
-
-                foreach (string packVersion in packKey.GetSubKeyNames())
-                {
-                    using RegistryKey packVersionKey = packKey.OpenSubKey(packVersion);
-
-                    WorkloadPackRecord record = new WorkloadPackRecord
+                    if (!workloadPackRecords.ContainsKey(packId))
                     {
-                        ProviderKeyName = (string)packVersionKey.GetValue("DependencyProviderKey"),
-                        PackId = new NET.Sdk.WorkloadManifestReader.WorkloadPackId(packId),
-                        PackVersion = new NuGetVersion(packVersion),
-                        ProductCode = (string)packVersionKey.GetValue("ProductCode"),
-                        ProductVersion = new Version((string)packVersionKey.GetValue("ProductVersion"))
-                    };
+                        workloadPackRecords[packId] = new List<WorkloadPackRecord>();
+                    }
 
-                    Log?.LogMessage($"Found workload pack record, Id: {record.PackId}, version: {record.PackVersion}, ProductCode: {record.ProductCode}, provider key: {record.ProviderKeyName}");
+                    using RegistryKey packKey = installedPacksKey.OpenSubKey(packId);
 
-                    workloadPackRecords[packId].Add(record);
+                    foreach (string packVersion in packKey.GetSubKeyNames())
+                    {
+                        using RegistryKey packVersionKey = packKey.OpenSubKey(packVersion);
+
+                        WorkloadPackRecord record = new WorkloadPackRecord
+                        {
+                            ProviderKeyName = (string)packVersionKey.GetValue("DependencyProviderKey"),
+                            PackId = new NET.Sdk.WorkloadManifestReader.WorkloadPackId(packId),
+                            PackVersion = new NuGetVersion(packVersion),
+                            ProductCode = (string)packVersionKey.GetValue("ProductCode"),
+                            ProductVersion = new Version((string)packVersionKey.GetValue("ProductVersion")),
+                            UpgradeCode = (string)packVersionKey.GetValue("UpgradeCode"),
+                        };
+
+                        Log?.LogMessage($"Found workload pack record, Id: {record.PackId}, version: {record.PackVersion}, ProductCode: {record.ProductCode}, provider key: {record.ProviderKeyName}");
+
+                        workloadPackRecords[packId].Add(record);
+                    }
                 }
             }
 
@@ -266,7 +275,7 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
-        /// Creates the log filename to use when executing an MSI. The name is based on the primar log, workload pack and <see cref="InstallAction"/>.
+        /// Creates the log filename to use when executing an MSI. The name is based on the primary log, workload pack and <see cref="InstallAction"/>.
         /// </summary>
         /// <param name="packInfo">The workload pack to use when generating the log name.</param>
         /// <param name="action">The install action that will be performed.</param>
@@ -278,7 +287,31 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
-        /// Creates the log filename to use when executing an MSI. The name is based on the primar log, workload pack and <see cref="InstallAction"/>.
+        /// Creates the log filename to use when executing an MSI. The name is based on the primary log, payload name and <see cref="InstallAction"/>.
+        /// </summary>
+        /// <param name="packInfo">The workload pack to use when generating the log name.</param>
+        /// <param name="action">The install action that will be performed.</param>
+        /// <returns>The full path of the log file.</returns>
+        protected string GetMsiLogName(MsiPayload msi, InstallAction action)
+        {
+            return Path.Combine(Path.GetDirectoryName(Log.LogPath),
+                Path.GetFileNameWithoutExtension(Log.LogPath) + $"_{msi.Manifest.Payload}_{action}.log");
+        }
+
+        /// <summary>
+        /// Creates the log filename to use when executing an MSI. The name is based on the primary log, ProductCode and <see cref="InstallAction"/>.
+        /// </summary>
+        /// <param name="packInfo">The workload pack to use when generating the log name.</param>
+        /// <param name="action">The install action that will be performed.</param>
+        /// <returns>The full path of the log file.</returns>
+        protected string GetMsiLogName(string productCode, InstallAction action)
+        {
+            return Path.Combine(Path.GetDirectoryName(Log.LogPath),
+                Path.GetFileNameWithoutExtension(Log.LogPath) + $"_{productCode}_{action}.log");
+        }
+
+        /// <summary>
+        /// Creates the log filename to use when executing an MSI. The name is based on the primary log, workload pack record and <see cref="InstallAction"/>.
         /// </summary>
         /// <param name="record">The workload record to use when generating the log name.</param>
         /// <param name="action">The install action that will be performed.</param>
@@ -306,7 +339,20 @@ namespace Microsoft.DotNet.Installer.Windows
             using RegistryKey installedSdkVersionsKey = hklm32.OpenSubKey(@$"SOFTWARE\dotnet\Setup\InstalledVersions\{HostArchitecture}\sdk");
 
             // Call ToList() since the registry key handle will be disposed when exiting and deferred execution will fail.
-            return installedSdkVersionsKey?.GetValueNames().ToList() ?? Enumerable.Empty<string>();
+            return installedSdkVersionsKey?.GetValueNames().Where(name => !string.IsNullOrWhiteSpace(name)).ToList() ?? Enumerable.Empty<string>();
+        }
+
+        /// <summary>
+        /// Writes a messages to the underlying <see cref="IReporter"/> if the message has not previously been reported.
+        /// </summary>
+        /// <param name="message">The message to report.</param>
+        protected void ReportOnce(string message)
+        {
+            if (!_reportedMessages.Contains(message))
+            {
+                Reporter.WriteLine(message);
+                _reportedMessages.Add(message);
+            }
         }
 
         /// <summary>
@@ -324,7 +370,7 @@ namespace Microsoft.DotNet.Installer.Windows
                 Log?.LogMessage($"Dependent already exists, {providerKeyName} won't be modified.");
                 return;
             }
-                
+
             if (!provider.Dependents.Contains(dependent) && requestType == InstallRequestType.RemoveDependent)
             {
                 Log?.LogMessage($"Dependent doesn't exist, {providerKeyName} won't be modified.");
@@ -338,6 +384,8 @@ namespace Microsoft.DotNet.Installer.Windows
                 if (requestType == InstallRequestType.RemoveDependent)
                 {
                     Log?.LogMessage($"Removing dependent '{dependent}' from provider '{providerKeyName}'");
+                    // NB: Do not remove the provider key. The dependency provider custom action in the MSI will fail
+                    // if it cannot find the key.
                     provider.RemoveDependent(dependent, removeProvider: false);
                 }
                 else if (requestType == InstallRequestType.AddDependent)
@@ -348,7 +396,8 @@ namespace Microsoft.DotNet.Installer.Windows
             }
             else if (IsClient)
             {
-                var response = Dispatcher.SendDependentRequest(requestType, providerKeyName, dependent);
+                InstallResponseMessage response = Dispatcher.SendDependentRequest(requestType, providerKeyName, dependent);
+                ExitOnFailure(response, $"Failed to update dependent, providerKey: {providerKeyName}, dependent: {dependent}.");
             }
         }
     }

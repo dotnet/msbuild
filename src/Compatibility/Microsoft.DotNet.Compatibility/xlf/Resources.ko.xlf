@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../Resources.resx">
+    <body>
+      <trans-unit id="UpdateSdkVersion">
+        <source> The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</source>
+        <target state="new"> The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -30,16 +30,22 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEqualityComparer<ISymbol> EqualityComparer { get; }
 
         /// <summary>
+        /// Indicates if we are running with a full set of references for left and right.
+        /// </summary>
+        public bool RunningWithReferences { get; }
+
+        /// <summary>
         /// Instantiate an object with the desired settings.
         /// </summary>
         /// <param name="ruleRunnerFactory">The factory to create a <see cref="IRuleRunner"/></param>
         /// <param name="filter">The symbol filter.</param>
         /// <param name="equalityComparer">The comparer to map metadata.</param>
-        public ComparingSettings(RuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null, bool includeInternalSymbols = false, bool strictMode = false, string leftName = null, string[] rightNames = null)
+        public ComparingSettings(RuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null, bool includeInternalSymbols = false, bool strictMode = false, bool withReferences = false, string leftName = null, string[] rightNames = null)
         {
             Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols: includeInternalSymbols);
             EqualityComparer = equalityComparer ?? new DefaultSymbolsEqualityComparer();
-            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(leftName, rightNames, EqualityComparer, includeInternalSymbols, strictMode);
+            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(leftName, rightNames, EqualityComparer, includeInternalSymbols, strictMode, withReferences);
+            RunningWithReferences = withReferences;
         }
     }
 }

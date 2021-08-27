@@ -75,6 +75,11 @@ namespace Microsoft.DotNet.Cli.Utils
         public readonly string ProviderKeyName;
 
         /// <summary>
+        /// The product code of the MSI associated with the dependency provider.
+        /// </summary>
+        public string ProductCode => GetProductCode();
+
+        /// <summary>
         /// The path of the provider key, relative to the <see cref="BaseKey"/>.
         /// </summary>
         public readonly string ProviderKeyPath;
@@ -162,6 +167,18 @@ namespace Microsoft.DotNet.Cli.Utils
             using RegistryKey dependentsKey = BaseKey.OpenSubKey(DependentsKeyPath);
 
             return dependentsKey?.GetSubKeyNames() ?? Enumerable.Empty<string>();
+        }
+
+        /// <summary>
+        /// Gets the ProductCode associated with this dependency provider. The ProductCode is stored in the default
+        /// value.
+        /// </summary>
+        /// <returns>The ProductCode associated with this dependency provider or <see langword="null"/> if it does not exist.</returns>
+        private string GetProductCode()
+        {
+            using RegistryKey providerKey = BaseKey.OpenSubKey(ProviderKeyPath);
+
+            return providerKey.GetValue(null) as string;
         }
     }
 }
