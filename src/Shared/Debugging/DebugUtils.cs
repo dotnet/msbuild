@@ -26,13 +26,17 @@ namespace Microsoft.Build.Shared.Debugging
             if (Traits.Instance.DebugEngine)
             {
                 debugDirectory ??= Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
-                FileUtilities.EnsureDirectoryExists(debugDirectory);
 
                 // Out of proc nodes do not know the startup directory so set the environment variable for them.
                 if (string.IsNullOrWhiteSpace(environmentDebugPath))
                 {
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugDirectory);
                 }
+            }
+
+            if (debugDirectory is not null)
+            {
+                FileUtilities.EnsureDirectoryExists(debugDirectory);
             }
 
             DebugPath = debugDirectory;
