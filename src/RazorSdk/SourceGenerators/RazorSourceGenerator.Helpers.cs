@@ -34,13 +34,15 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         }
 
         private static RazorProjectEngine GetDeclarationProjectEngine(
-            IEnumerable<SourceGeneratorProjectItem> items,
+            SourceGeneratorProjectItem item,
+            IEnumerable<SourceGeneratorProjectItem> imports,
             RazorSourceGenerationOptions razorSourceGeneratorOptions)
         {
             var fileSystem = new VirtualRazorProjectFileSystem();
-            foreach (var item in items)
+            fileSystem.Add(item);
+            foreach (var import in imports)
             {
-                fileSystem.Add(item);
+                fileSystem.Add(import);
             }
 
             var discoveryProjectEngine = RazorProjectEngine.Create(razorSourceGeneratorOptions.Configuration, fileSystem, b =>
