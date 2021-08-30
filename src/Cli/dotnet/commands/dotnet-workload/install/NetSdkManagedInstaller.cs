@@ -197,7 +197,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string tempExtractionDir = null;
             string tempBackupDir = null;
             string rootInstallDir = WorkloadInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString()) ? _userProfileDir : _dotnetDir;
-            // TODO: do we need to use something from _dotnetDir sdk-manifests for user local install?
             var manifestPath = Path.Combine(rootInstallDir, "sdk-manifests", sdkFeatureBand.ToString(), manifestId.ToString());
 
             _reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloadManifest, manifestId, manifestVersion));
