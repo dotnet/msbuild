@@ -15,9 +15,9 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> VersionOption = WorkloadUpdateCommandParser.VersionOption;
 
-        public static readonly Option<string> TempDirOption = WorkloadUpdateCommandParser.TempDirOption.MakeHidden();
+        public static readonly Option<string> TempDirOption = WorkloadUpdateCommandParser.TempDirOption.Hide();
         
-        public static readonly Option<bool> IncludePreviewsOption = WorkloadUpdateCommandParser.IncludePreviewsOption.MakeHidden();
+        public static readonly Option<bool> IncludePreviewsOption = WorkloadUpdateCommandParser.IncludePreviewsOption.Hide();
 
         public static Command GetCommand()
         {

@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli
             return option;
         }
 
-        public static Option<T> MakeHidden<T>(this Option<T> option)
+        public static Option<T> Hide<T>(this Option<T> option)
         {
             option.IsHidden = true;
             return option;
