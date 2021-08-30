@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                       new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null,
                                           new FirstPartyNuGetPackageSigningVerifier(_tempPackagesDir), logger,
                                           restoreActionConfig: _restoreActionConfig);
-            _dotnetWorkloadMetadataDir = Path.Combine(dotnetDir, "metadata", "workloads");
+            _dotnetWorkloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
             _userWorkloadMetadataDir = Path.Combine(_userProfileDir, "metadata", "workloads");
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;
