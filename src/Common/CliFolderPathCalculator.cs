@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Configurer
             }
         }
 
-        private static bool IsWindows => Path.DirectorySeparatorChar == '\\';
+        private static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     }
 
     static class ToolPackageFolderPathCalculator
