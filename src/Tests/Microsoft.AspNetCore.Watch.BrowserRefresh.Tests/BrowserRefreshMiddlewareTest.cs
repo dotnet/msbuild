@@ -144,7 +144,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
 
             // Assert
             var responseContent = Encoding.UTF8.GetString(stream.ToArray());
-            Assert.Equal("<html><body><h1>Hello world</h1><script src=\"_framework/aspnetcore-browser-refresh.js\"></script></body></html>", responseContent);
+            Assert.Equal("<html><body><h1>Hello world</h1><script src=\"/_framework/aspnetcore-browser-refresh.js\"></script></body></html>", responseContent);
         }
     }
 }
