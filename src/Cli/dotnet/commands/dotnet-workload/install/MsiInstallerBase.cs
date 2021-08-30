@@ -116,9 +116,9 @@ namespace Microsoft.DotNet.Installer.Windows
         /// </summary>
         private IReadOnlyDictionary<string, List<WorkloadPackRecord>> GetWorkloadPackRecords()
         {
-            Log?.LogMessage("Detecting installed workload packs.");
+            Log?.LogMessage($"Detecting installed workload packs for {HostArchitecture}.");
             Dictionary<string, List<WorkloadPackRecord>> workloadPackRecords = new Dictionary<string, List<WorkloadPackRecord>>();
-            using RegistryKey installedPacksKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\dotnet\InstalledPacks");
+            using RegistryKey installedPacksKey = Registry.LocalMachine.OpenSubKey(@$"SOFTWARE\Microsoft\dotnet\InstalledPacks\{HostArchitecture}");
 
             if (installedPacksKey != null)
             {
