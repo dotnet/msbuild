@@ -12,6 +12,9 @@
     <PackageId>Microsoft.DotNet.Cli</PackageId>
     <UseAppHost>false</UseAppHost>
     <IsPackable>true</IsPackable>
+
+    <!-- Suppress warning about using ambiguity between compiled Common types and not the imported ones. -->
+    <NoWarn>$(NoWarn);0436</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
@@ -19,6 +22,8 @@
     <Compile Include="..\..\Resolvers\Microsoft.DotNet.MSBuildSdkResolver\FXVersion.cs" />
     <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common" />
     <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculator.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Common\ExceptionExtensions.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Common\ConfigurationException.cs" LinkBase="Common" />
     <Compile Include="$(RepoRoot)src\Common\WorkloadInstall.cs" LinkBase="Common" />
     <EmbeddedResource Include="commands\dotnet-new\*.zip" />
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />

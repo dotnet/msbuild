@@ -9,11 +9,17 @@
     <RepositoryType>git</RepositoryType>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
     <IsPackable>true</IsPackable>
+
+    <!-- Suppress warning about using ambiguity between compiled Common types and not the imported ones. -->
+    <NoWarn>$(NoWarn);0436</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+    <EmbeddedResource Include="..\..\Cli\dotnet\CommonLocalizableStrings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.DotNet.Tools" />
     <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculator.cs" LinkBase="Common"/>
+    <Compile Include="$(RepoRoot)src\Common\ExceptionExtensions.cs" LinkBase="Common"/>
+    <Compile Include="$(RepoRoot)src\Common\ConfigurationException.cs" LinkBase="Common"/>
   </ItemGroup>
 
   <ItemGroup>

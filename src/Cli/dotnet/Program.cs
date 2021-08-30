@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli
                     Reporter.Output.WriteLine(e.Message);
                     return 0;
                 }
-                catch (Exception e) when (e.ShouldBeDisplayedAsError())
+                catch (Exception e) when (ExceptionExtensions.ShouldBeDisplayedAsError(e))
                 {
                     Reporter.Error.WriteLine(CommandContext.IsVerbose()
                         ? e.ToString().Red().Bold()
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Cli
 
                     return 1;
                 }
-                catch (Exception e) when (!e.ShouldBeDisplayedAsError())
+                catch (Exception e) when (!ExceptionExtensions.ShouldBeDisplayedAsError(e))
                 {
                     // If telemetry object has not been initialized yet. It cannot be collected
                     TelemetryEventEntry.SendFiltered(e);

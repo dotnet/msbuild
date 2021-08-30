@@ -19,6 +19,9 @@
 
     <!--https://github.com/NuGet/Home/issues/3891#issuecomment-377319939-->
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+
+    <!-- Suppress warning about using ambiguity between compiled Common types and not the imported ones. -->
+    <NoWarn>$(NoWarn);0436</NoWarn>
   </PropertyGroup>
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -51,6 +54,7 @@
   
   <ItemGroup>
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+    <EmbeddedResource Include="..\..\Cli\dotnet\CommonLocalizableStrings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.DotNet.Tools" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,6 +75,8 @@
 
     <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common"/>
     <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculator.cs" LinkBase="Common"/>
+    <Compile Include="$(RepoRoot)src\Common\ExceptionExtensions.cs" LinkBase="Common"/>
+    <Compile Include="$(RepoRoot)src\Common\ConfigurationException.cs" LinkBase="Common"/>
     <Compile Include="$(RepoRoot)src\Common\WorkloadInstall.cs" LinkBase="Common"/>
   </ItemGroup>
 

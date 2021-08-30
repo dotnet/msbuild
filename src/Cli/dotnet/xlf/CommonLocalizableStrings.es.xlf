@@ -95,6 +95,11 @@ export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="translated">No se puede determinar el directorio raíz del usuario. Establezca la variable de entorno “{0}” para especificar el directorio que debe usarse.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FrameworkDependentOptionDescription">
         <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
         <target state="new">Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</target>

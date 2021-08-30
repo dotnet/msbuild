@@ -699,4 +699,7 @@ The default is 'true' if a runtime identifier is specified.</value>
   <data name="SelfContainAndNoSelfContainedConflict" xml:space="preserve">
     <value>The '--self-contained' and '--no-self-contained' options cannot be used together.</value>
   </data>
+  <data name="FailedToDetermineUserHomeDirectory" xml:space="preserve">
+    <value>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</value>
+  </data>
 </root>

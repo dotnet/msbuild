@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-// using Microsoft.DotNet.Cli.Utils;
-// using NuGet.Common;
+using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Configurer
 {
@@ -53,12 +53,10 @@ namespace Microsoft.DotNet.Configurer
                     home = Environment.GetEnvironmentVariable(PlatformHomeVariableName);
                     if (string.IsNullOrEmpty(home))
                     {
-                        throw new Exception(); // TODO
-                        // throw new ConfigurationException(
-                        //         string.Format(
-                        //             LocalizableStrings.FailedToDetermineUserHomeDirectory,
-                        //             DotnetHomeVariableName))
-                        //     .DisplayAsError();
+                        throw ExceptionExtensions.DisplayAsError(new ConfigurationException(
+                                string.Format(
+                                    CommonLocalizableStrings.FailedToDetermineUserHomeDirectory,
+                                    DotnetHomeVariableName)));
                     }
                 }
 
