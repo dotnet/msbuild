@@ -298,61 +298,56 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var installedSdkFeatureBands = _installationRecordRepository.GetFeatureBandsWithInstallationRecords();
             _reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectingSdkFeatureBandsMessage, string.Join(" ", installedSdkFeatureBands)));
             var currentBandInstallRecords = GetExpectedPackInstallRecords(_sdkFeatureBand);
+            string installedPacksDir = Path.Combine(GetWorkloadMetadataDir(_sdkFeatureBand), InstalledPacksDir, "v1");
 
-            foreach (var installedPacksDir in new[] {
-                Path.Combine(_dotnetWorkloadMetadataDir, InstalledPacksDir, "v1"),
-                Path.Combine(_userWorkloadMetadataDir, InstalledPacksDir, "v1")
-            })
+            if (!Directory.Exists(installedPacksDir))
             {
-                if (!Directory.Exists(installedPacksDir))
+                return;
+            }
+
+            foreach (var packIdDir in Directory.GetDirectories(installedPacksDir))
+            {
+                foreach (var packVersionDir in Directory.GetDirectories(packIdDir))
                 {
-                    continue;
+                    var bandRecords = Directory.GetFileSystemEntries(packVersionDir);
+
+                    var unneededBandRecords = bandRecords
+                        .Where(recordPath => !installedSdkFeatureBands.Contains(new SdkFeatureBand(Path.GetFileName(recordPath))));
+
+                    var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
+                    if (bandRecords.Contains(currentBandRecordPath) && !currentBandInstallRecords.Contains(currentBandRecordPath))
+                    {
+                        unneededBandRecords = unneededBandRecords.Append(currentBandRecordPath);
+                    }
+
+                    if (!unneededBandRecords.Any())
+                    {
+                        continue;
+                    }
+
+                    // Save the pack info in case we need to delete the pack
+                    var jsonPackInfo = File.ReadAllText(unneededBandRecords.First());
+                    foreach (var unneededRecord in unneededBandRecords)
+                    {
+                        File.Delete(unneededRecord);
+                    }
+
+                    if (!bandRecords.Except(unneededBandRecords).Any())
+                    {
+                        Directory.Delete(packVersionDir);
+                        var deletablePack = GetPackInfo(packVersionDir);
+                        if (deletablePack == null)
+                        {
+                            // Pack no longer exists in manifests, get pack info from installation record
+                            deletablePack = JsonSerializer.Deserialize(jsonPackInfo, typeof(PackInfo)) as PackInfo;
+                        }
+                        DeletePack(deletablePack);
+                    }
                 }
 
-                foreach (var packIdDir in Directory.GetDirectories(installedPacksDir))
+                if (!Directory.GetFileSystemEntries(packIdDir).Any())
                 {
-                    foreach (var packVersionDir in Directory.GetDirectories(packIdDir))
-                    {
-                        var bandRecords = Directory.GetFileSystemEntries(packVersionDir);
-
-                        var unneededBandRecords = bandRecords
-                            .Where(recordPath => !installedSdkFeatureBands.Contains(new SdkFeatureBand(Path.GetFileName(recordPath))));
-
-                        var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
-                        if (bandRecords.Contains(currentBandRecordPath) && !currentBandInstallRecords.Contains(currentBandRecordPath))
-                        {
-                            unneededBandRecords = unneededBandRecords.Append(currentBandRecordPath);
-                        }
-
-                        if (!unneededBandRecords.Any())
-                        {
-                            continue;
-                        }
-
-                        // Save the pack info in case we need to delete the pack
-                        var jsonPackInfo = File.ReadAllText(unneededBandRecords.First());
-                        foreach (var unneededRecord in unneededBandRecords)
-                        {
-                            File.Delete(unneededRecord);
-                        }
-
-                        if (!bandRecords.Except(unneededBandRecords).Any())
-                        {
-                            Directory.Delete(packVersionDir);
-                            var deletablePack = GetPackInfo(packVersionDir);
-                            if (deletablePack == null)
-                            {
-                                // Pack no longer exists in manifests, get pack info from installation record
-                                deletablePack = JsonSerializer.Deserialize(jsonPackInfo, typeof(PackInfo)) as PackInfo;
-                            }
-                            DeletePack(deletablePack);
-                        }
-                    }
-
-                    if (!Directory.GetFileSystemEntries(packIdDir).Any())
-                    {
-                        Directory.Delete(packIdDir);
-                    }
+                    Directory.Delete(packIdDir);
                 }
             }
         }
