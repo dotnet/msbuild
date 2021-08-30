@@ -635,6 +635,15 @@ namespace Microsoft.NET.Build.Tasks
         {
             IEnumerable<string> GetPackFolders()
             {
+                var packRootEnvironmentVariable = Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_PACK_ROOTS);
+                if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
+                {
+                    foreach (var packRoot in packRootEnvironmentVariable.Split(Path.PathSeparator))
+                    {
+                        yield return Path.Combine(packRoot, "packs");
+                    }
+                }
+
                 if (!string.IsNullOrEmpty(NetCoreRoot) && !string.IsNullOrEmpty(NETCoreSdkVersion))
                 {
                     if (WorkloadInstall.IsUserLocal(NetCoreRoot, NETCoreSdkVersion))
@@ -647,14 +656,6 @@ namespace Microsoft.NET.Build.Tasks
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
                 {
                     yield return TargetingPackRoot;
-                }
-                var packRootEnvironmentVariable = Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_PACK_ROOTS);
-                if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
-                {
-                    foreach (var packRoot in packRootEnvironmentVariable.Split(Path.PathSeparator))
-                    {
-                        yield return Path.Combine(packRoot, "packs");
-                    }
                 }
             }
 

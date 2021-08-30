@@ -61,7 +61,17 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 _knownManifestIds = File.ReadAllLines(knownManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)).ToHashSet();
             }
 
-            var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
+            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            string userManifestsDir = Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand);
+            string dotnetManifestDir = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
+            if (WorkloadInstall.IsUserLocal(_sdkRootPath, sdkVersion) && Directory.Exists(userManifestsDir))
+            {
+                _manifestDirectories = new[] { userManifestsDir, dotnetManifestDir };
+            }
+            else
+            {
+                _manifestDirectories = new[] { dotnetManifestDir };
+            }
 
             var manifestDirectoryEnvironmentVariable = getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS);
             if (manifestDirectoryEnvironmentVariable != null)
@@ -70,21 +80,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 //  environment variable settings to be shared by multiple SDKs.
                 _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator)
                     .Select(p => Path.Combine(p, _sdkVersionBand))
-                    .Append(manifestDirectory).ToArray();
-            }
-            else
-            {
-                _manifestDirectories = new[] { manifestDirectory };
-            }
-
-            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            if (WorkloadInstall.IsUserLocal(_sdkRootPath, sdkVersion) && Directory.Exists(userProfileDir))
-            {
-                string userManifestsDir = Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand);
-                if (Directory.Exists(userManifestsDir))
-                {
-                    _manifestDirectories = new[] { userManifestsDir }.Concat(_manifestDirectories).ToArray();
-                }
+                    .Concat(_manifestDirectories).ToArray();
             }
         }
 

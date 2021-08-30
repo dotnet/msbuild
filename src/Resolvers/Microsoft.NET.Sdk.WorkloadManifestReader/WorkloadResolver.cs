@@ -35,25 +35,24 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 File.ReadAllLines(runtimeIdentifierChainPath).Where(l => !string.IsNullOrEmpty(l)).ToArray() :
                 new string[] { };
 
-            var packRootEnvironmentVariable = Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_PACK_ROOTS);
-
-            string[] dotnetRootPaths;
-            if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
+            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            string[] workloadRootPaths;
+            if (WorkloadInstall.IsUserLocal(dotnetRootPath, sdkVersion) && Directory.Exists(userProfileDir))
             {
-                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.PathSeparator).Append(dotnetRootPath).ToArray();
+                workloadRootPaths = new[] { userProfileDir, dotnetRootPath };
             }
             else
             {
-                dotnetRootPaths = new[] { dotnetRootPath };
+                workloadRootPaths = new[] { dotnetRootPath };
             }
 
-            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            if (WorkloadInstall.IsUserLocal(dotnetRootPath, sdkVersion) && Directory.Exists(userProfileDir))
+            var packRootEnvironmentVariable = Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_PACK_ROOTS);
+            if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
             {
-                dotnetRootPaths = new[] { userProfileDir }.Concat(dotnetRootPaths).ToArray();
+                workloadRootPaths = packRootEnvironmentVariable.Split(Path.PathSeparator).Concat(workloadRootPaths).ToArray();
             }
 
-            return new WorkloadResolver(manifestProvider, dotnetRootPaths, currentRuntimeIdentifiers);
+            return new WorkloadResolver(manifestProvider, workloadRootPaths, currentRuntimeIdentifiers);
         }
 
         public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, string[] dotNetRootPaths, string[]? currentRuntimeIdentifiers = null)
