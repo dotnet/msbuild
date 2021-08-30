@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return InstallType.FileBased;
         }
 
-        private static bool CanWriteToDotnetRoot(string dotnetDir = null) // TODO
+        private static bool CanWriteToDotnetRoot(string dotnetDir = null)
         {
             dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             try
