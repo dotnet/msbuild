@@ -12,6 +12,7 @@ namespace Microsoft.DotNet.Cli.Utils
     /// </summary>
     public static class ProcessExtensions
     {
+#pragma warning disable CA1416
         /// <summary>
         /// Returns the parent process of this process by querying the Win32_Process class.
         /// </summary>
@@ -51,5 +52,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return enumerator.MoveNext() ? Convert.ToString(enumerator.Current.GetPropertyValue("CommandLine")) : null;
         }
+#pragma warning restore CA1416
     }
 }
