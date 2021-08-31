@@ -32,6 +32,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private IWorkloadResolver _workloadResolver;
 
+        private bool _shutdown;
+
         private readonly PackageSourceLocation _packageSourceLocation;
 
         private readonly string _dependent;
@@ -451,6 +453,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             Log?.LogMessage("Shutdown completed.");
             Log?.LogMessage($"Restart required: {Restart}");
+            _shutdown = true;
         }
 
         private void LogPackInfo(PackInfo packInfo)
@@ -865,7 +868,19 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private void OnProcessExit(object sender, EventArgs e)
         {
-            Shutdown();
+            if (!_shutdown)
+            {
+                try
+                {
+                    Shutdown();
+                }
+                catch (Exception ex)
+                {
+                    // Don't rethrow. We'll call ShutDown during abnormal termination when control is passing back to the host
+                    // so there's nothing in the CLI that will catch the exception.
+                    Log?.LogMessage($"OnProcessExit: Shutdown failed, {ex.Message}");
+                }
+            }
         }
     }
 }
