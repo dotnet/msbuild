@@ -268,7 +268,8 @@ namespace Microsoft.NET.StringTools
 
                 // The invariant that Length is the sum of span lengths is critical in this unsafe method.
                 // Violating it may lead to memory corruption and, since this code tends to run under a lock,
-                // to hangs caused by the lock getting orphaned.
+                // to hangs caused by the lock getting orphaned. Attempt to detect that and throw now, 
+                // before the corruption causes further problems.
                 if (destPtr != resultPtr + Length)
                 {
                     throw new InvalidOperationException("Length property does not match sum of span lengths");
