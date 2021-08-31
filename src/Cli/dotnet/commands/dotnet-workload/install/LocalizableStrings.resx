@@ -315,4 +315,10 @@
   <data name="GarbageCollectionFailed" xml:space="preserve">
     <value>Warning: Workload garbage collection failed with error: {0}.</value>
   </data>
+  <data name="FromCacheOptionArgumentName" xml:space="preserve">
+    <value>DIRECTORY</value>
+  </data>
+  <data name="DownloadToCacheOptionArgumentName" xml:space="preserve">
+    <value>DIRECTORY</value>
+  </data>
 </root>

@@ -36,15 +36,22 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> VersionOption =
             new Option<string>("--sdk-version", LocalizableStrings.VersionOptionDescription)
             {
-                ArgumentHelpName = LocalizableStrings.VersionOptionName
+                ArgumentHelpName = LocalizableStrings.VersionOptionName,
+                IsHidden = true
             };
 
         public static readonly Option<bool> IncludePreviewOption =
             new Option<bool>("--include-previews", LocalizableStrings.IncludePreviewOptionDescription);
 
-        public static readonly Option<string> FromCacheOption = new Option<string>("--from-cache", LocalizableStrings.FromCacheOptionDescription);
+        public static readonly Option<string> FromCacheOption = new Option<string>("--from-cache", LocalizableStrings.FromCacheOptionDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.FromCacheOptionArgumentName
+        };
 
-        public static readonly Option<string> DownloadToCacheOption = new Option<string>("--download-to-cache", LocalizableStrings.DownloadToCacheOptionDescription);
+        public static readonly Option<string> DownloadToCacheOption = new Option<string>("--download-to-cache", LocalizableStrings.DownloadToCacheOptionDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.DownloadToCacheOptionArgumentName
+        };
 
         public static readonly Option<bool> SkipManifestUpdateOption = new Option<bool>("--skip-manifest-update", LocalizableStrings.SkipManifestUpdateOptionDescription);
 
