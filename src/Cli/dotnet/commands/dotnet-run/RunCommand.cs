@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.DotNet.Cli.Utils;
@@ -25,6 +26,7 @@ namespace Microsoft.DotNet.Tools.Run
         public bool Interactive { get; private set; }
         public IEnumerable<string> RestoreArgs { get; private set; }
 
+        private Version Version6_0 = new Version(6, 0);
         private bool ShouldBuild => !NoBuild;
         private bool HasQuietVerbosity =>
             RestoreArgs.All(arg => !arg.StartsWith("-verbosity:", StringComparison.Ordinal) ||
@@ -254,10 +256,21 @@ namespace Microsoft.DotNet.Tools.Run
             var command = CommandFactoryUsingResolver.Create(commandSpec)
                 .WorkingDirectory(runWorkingDirectory);
 
-            var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
-            if (Environment.GetEnvironmentVariable(rootVariableName) == null)
+            if (((TryGetTargetArchitecture(project.GetPropertyValue("RuntimeIdentifier"), out var targetArchitecture) ||
+                TryGetTargetArchitecture(project.GetPropertyValue("DefaultAppHostRuntimeIdentifier"), out targetArchitecture)) &&
+                targetArchitecture == RuntimeInformation.ProcessArchitecture) || targetArchitecture == null)
             {
-                command.EnvironmentVariable(rootVariableName, Path.GetDirectoryName(new Muxer().MuxerPath));
+                var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
+                string targetFrameworkVersion = project.GetPropertyValue("TargetFrameworkVersion");
+                if (!string.IsNullOrEmpty(targetFrameworkVersion) && Version.Parse(targetFrameworkVersion.AsSpan(1)) >= Version6_0)
+                {
+                    rootVariableName = $"DOTNET_ROOT_{RuntimeInformation.ProcessArchitecture.ToString().ToUpperInvariant()}";
+                }
+
+                if (Environment.GetEnvironmentVariable(rootVariableName) == null)
+                {
+                    command.EnvironmentVariable(rootVariableName, Path.GetDirectoryName(new Muxer().MuxerPath));
+                }
             }
 
             return command;
@@ -310,6 +323,27 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             return projectFiles[0];
+        }
+
+        private static bool TryGetTargetArchitecture(string runtimeIdentifier, out Architecture? targetArchitecture)
+        {
+            targetArchitecture = null;
+            int separator = runtimeIdentifier.LastIndexOf("-");
+            if (separator < 0)
+            {
+                return false;
+            }
+
+            targetArchitecture = runtimeIdentifier.Substring(separator + 1).ToLowerInvariant() switch
+            {
+                "arm" => Architecture.Arm,
+                "arm64" => Architecture.Arm64,
+                "x64" => Architecture.X64,
+                "x86" => Architecture.X86,
+                _ => null
+            };
+
+            return targetArchitecture != null;
         }
     }
 }
