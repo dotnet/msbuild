@@ -15,6 +15,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
     [Generator]
     public partial class RazorSourceGenerator : IIncrementalGenerator
     {
+        private static RazorSourceGeneratorEventSource Log => RazorSourceGeneratorEventSource.Log;
+
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var razorSourceGeneratorOptionsWithDiagnostics = context.AnalyzerConfigOptionsProvider
@@ -23,22 +25,25 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var razorSourceGeneratorOptions = razorSourceGeneratorOptionsWithDiagnostics.ReportDiagnostics(context);
 
             var sourceItemsWithDiagnostics = context.AdditionalTextsProvider
-                .Where(static (file) => file.Path.EndsWith(".razor", StringComparison.Ordinal) || file.Path.EndsWith(".cshtml", StringComparison.Ordinal))
+                .Where(static (file) => file.Path.EndsWith(".razor", StringComparison.OrdinalIgnoreCase) || file.Path.EndsWith(".cshtml", StringComparison.OrdinalIgnoreCase))
                 .Combine(context.AnalyzerConfigOptionsProvider)
                 .Select(ComputeProjectItems);
 
             var sourceItems = sourceItemsWithDiagnostics
                 .ReportDiagnostics(context);
 
+            var hasRazorFiles = sourceItems.Collect()
+                .Select(static (sourceItems, _) => sourceItems.Any());
+
             var importFiles = sourceItems.Where(static file =>
             {
                 var path = file.FilePath;
-                if (path.EndsWith(".razor", StringComparison.Ordinal))
+                if (path.EndsWith(".razor", StringComparison.OrdinalIgnoreCase))
                 {
                     var fileName = Path.GetFileNameWithoutExtension(path);
                     return string.Equals(fileName, "_Imports", StringComparison.OrdinalIgnoreCase);
                 }
-                else if (path.EndsWith(".cshtml", StringComparison.Ordinal))
+                else if (path.EndsWith(".cshtml", StringComparison.OrdinalIgnoreCase))
                 {
                     var fileName = Path.GetFileNameWithoutExtension(path);
                     return string.Equals(fileName, "_ViewImports", StringComparison.OrdinalIgnoreCase);
@@ -47,67 +52,134 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 return false;
             });
 
-            var generatedCode = razorSourceGeneratorOptions
-                .Combine(sourceItems.Collect())
-                .Select(static (pair, _) =>
-                {
-                    var (razorSourceGeneratorOptions, sourceItems) = pair;
+            var componentFiles = sourceItems.Where(static file => file.FilePath.EndsWith(".razor", StringComparison.OrdinalIgnoreCase));
 
-                    if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
-                    {
-                        return ImmutableArray<string>.Empty;
-                    }
-
-                    var projectEngine = GetDeclarationProjectEngine(sourceItems, razorSourceGeneratorOptions);
-
-                    var generatedCode = ImmutableArray.CreateBuilder<string>(sourceItems.Length);
-                    foreach (var file in sourceItems)
-                    {
-                        var codeGen = projectEngine.Process(file);
-                        generatedCode.Add(codeGen.GetCSharpDocument().GeneratedCode);
-                    }
-
-                    return generatedCode.ToImmutable();
-                })
-                .WithLambdaComparer(static (a, b) => a.SequenceEqual(b, StringComparer.Ordinal), static a => a.Length);
-
-            var tagHelpersFromCompilation = context.CompilationProvider
-                .Combine(generatedCode)
-                .Combine(context.ParseOptionsProvider)
+            var generatedDeclarationCode = componentFiles
+                .Combine(importFiles.Collect())
                 .Combine(razorSourceGeneratorOptions)
                 .Select(static (pair, _) =>
                 {
-                    var (((compilation, generatedCode), parseOptions), razorSourceGeneratorOptions) = pair;
-                    
+
+                    var ((sourceItem, importFiles), razorSourceGeneratorOptions) = pair;
+                    RazorSourceGeneratorEventSource.Log.GenerateDeclarationCodeStart(sourceItem.FilePath);
+
                     if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
                     {
-                        return ImmutableArray<TagHelperDescriptor>.Empty;
+                        RazorSourceGeneratorEventSource.Log.GenerateDeclarationCodeStop(sourceItem.FilePath);
+                        return null;
                     }
 
-                    var syntaxTree = generatedCode.Select(c => CSharpSyntaxTree.ParseText(c, (CSharpParseOptions)parseOptions));
+                    var projectEngine = GetDeclarationProjectEngine(sourceItem, importFiles, razorSourceGeneratorOptions);
+
+                    var codeGen = projectEngine.Process(sourceItem);
+
+                    var result = codeGen.GetCSharpDocument().GeneratedCode;
+
+                    RazorSourceGeneratorEventSource.Log.GenerateDeclarationCodeStop(sourceItem.FilePath);
+
+                    return result;
+                });
+
+            var generatedDeclarationSyntaxTrees = generatedDeclarationCode
+                .Combine(context.ParseOptionsProvider)
+                .Select(static (pair, _) =>
+                {
+                    var (generatedDeclarationCode, parseOptions) = pair;
+                    if (generatedDeclarationCode is null)
+                    {
+                        return null;
+                    }
+
+                    return CSharpSyntaxTree.ParseText(generatedDeclarationCode, (CSharpParseOptions)parseOptions);
+                });
+
+            var tagHelpersFromCompilation = context.CompilationProvider
+                .Combine(generatedDeclarationSyntaxTrees.Collect())
+                .Combine(razorSourceGeneratorOptions)
+                .Select(static (pair, _) =>
+                {
+                    RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromCompilationStart();
+
+                    var ((compilation, generatedDeclarationSyntaxTrees), razorSourceGeneratorOptions) = pair;
+
+                    if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
+                    {
+                        RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromCompilationStop();
+                        return ImmutableArray<TagHelperDescriptor>.Empty;
+                    }
 
                     var tagHelperFeature = new StaticCompilationTagHelperFeature();
                     var discoveryProjectEngine = GetDiscoveryProjectEngine(compilation.References.ToImmutableArray(), tagHelperFeature);
 
-                    var syntaxTrees = generatedCode.Select(c => CSharpSyntaxTree.ParseText(c, (CSharpParseOptions)parseOptions));
-
-                    var compilationWithDeclarations = compilation.AddSyntaxTrees(syntaxTrees);
+                    var compilationWithDeclarations = compilation.AddSyntaxTrees(generatedDeclarationSyntaxTrees);
 
                     tagHelperFeature.Compilation = compilationWithDeclarations;
                     tagHelperFeature.TargetAssembly = compilationWithDeclarations.Assembly;
 
-                    return (IList<TagHelperDescriptor>)tagHelperFeature.GetDescriptors();
-                });
+                    var result = (IList<TagHelperDescriptor>)tagHelperFeature.GetDescriptors();
+                    RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromCompilationStop();
+                    return result;
+                })
+                .WithLambdaComparer(static (a, b) =>
+                {
+                    if (a.Count != b.Count)
+                    {
+                        return false;
+                    }
+
+                    for (var i = 0; i < a.Count; i++)
+                    {
+                        if (!a[i].Equals(b[i]))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }, getHashCode: static a => a.Count);
 
             var tagHelpersFromReferences = context.CompilationProvider
                 .Combine(razorSourceGeneratorOptions)
-                .WithLambdaComparer(static (a, b) => a.Left.References.SequenceEqual(b.Left.References), static a => a.Left.References.GetHashCode())
+                .Combine(hasRazorFiles)
+                .WithLambdaComparer(static (a, b) =>
+                {
+                    var ((compilationA, razorSourceGeneratorOptionsA), hasRazorFilesA) = a;
+                    var ((compilationB, razorSourceGeneratorOptionsB), hasRazorFilesB) = b;
+
+                    if (!compilationA.References.SequenceEqual(compilationB.References))
+                    {
+                        return false;
+                    }
+
+                    if (razorSourceGeneratorOptionsA != razorSourceGeneratorOptionsB)
+                    {
+                        return false;
+                    }
+
+                    return hasRazorFilesA == hasRazorFilesB;
+                },
+                static item =>
+                {
+                    // we'll use the number of references as a hashcode.
+                    var ((compilationA, razorSourceGeneratorOptionsA), hasRazorFilesA) = item;
+                    return compilationA.References.GetHashCode();
+                })
                 .Select(static (pair, _) =>
                 {
-                    var (compilation, razorSourceGeneratorOptions) = pair;
+                    RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromReferencesStart();
+
+                    var ((compilation, razorSourceGeneratorOptions), hasRazorFiles) = pair;
 
                     if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
                     {
+                        RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromReferencesStop();
+                        return ImmutableArray<TagHelperDescriptor>.Empty;
+                    }
+
+                    if (!hasRazorFiles)
+                    {
+                        // If there's no razor code in this app, don't do anything.
+                        RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromReferencesStop();
                         return ImmutableArray<TagHelperDescriptor>.Empty;
                     }
 
@@ -124,6 +196,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                             descriptors.AddRange(tagHelperFeature.GetDescriptors());
                         }
                     }
+
+                    RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromReferencesStop();
                     return (ICollection<TagHelperDescriptor>)descriptors;
                 });
 
@@ -132,7 +206,13 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 .Select(static (pair, _) =>
                 {
                     var (tagHelpersFromCompilation, tagHelpersFromReferences) = pair;
-                    var allTagHelpers = new TagHelperDescriptor[tagHelpersFromCompilation.Count + tagHelpersFromReferences.Count];
+                    var count = tagHelpersFromCompilation.Count + tagHelpersFromReferences.Count;
+                    if (count == 0)
+                    {
+                        return Array.Empty<TagHelperDescriptor>();
+                    }
+
+                    var allTagHelpers = new TagHelperDescriptor[count];
                     tagHelpersFromCompilation.CopyTo(allTagHelpers, 0);
                     tagHelpersFromReferences.CopyTo(allTagHelpers, tagHelpersFromCompilation.Count);
 
@@ -147,8 +227,12 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 .Select(static (pair, _) =>
                 {
                     var ((((sourceItem, imports), allTagHelpers), razorSourceGeneratorOptions), parserOptions) = pair;
+
+                    RazorSourceGeneratorEventSource.Log.RazorCodeGenerateStart(sourceItem.FilePath);
+
                     if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
                     {
+                        RazorSourceGeneratorEventSource.Log.RazorCodeGenerateStop(sourceItem.FilePath);
                         return default;
                     }
 
@@ -160,12 +244,24 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     var codeDocument = projectEngine.Process(sourceItem);
                     var csharpDocument = codeDocument.GetCSharpDocument();
 
+                    RazorSourceGeneratorEventSource.Log.RazorCodeGenerateStop(sourceItem.FilePath);
                     return (hintName, csharpDocument);
-                });
+                })
+                .WithLambdaComparer(static (a, b) =>
+                {
+                    if (a.csharpDocument.Diagnostics.Count > 0 || b.csharpDocument.Diagnostics.Count > 0)
+                    {
+                        // if there are any diagnostics, treat the documents as unequal and force RegisterSourceOutput to be called uncached.
+                        return false;
+                    }
+
+                    return string.Equals(a.csharpDocument.GeneratedCode, b.csharpDocument.GeneratedCode, StringComparison.Ordinal);
+                }, static a => StringComparer.Ordinal.GetHashCode(a.csharpDocument));
 
             context.RegisterSourceOutput(generatedOutput, static (context, pair) =>
             {
                 var (hintName, csharpDocument) = pair;
+                RazorSourceGeneratorEventSource.Log.AddSyntaxTrees(hintName);
                 if (hintName is null)
                 {
                     // Source generator is suppressed.

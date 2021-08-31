@@ -44,7 +44,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
 
             if (!string.IsNullOrEmpty(_workloadIdStub))
             {
-                availableWorkloads = availableWorkloads.Where(workload => workload.Id.ToString().Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase));
+                availableWorkloads = availableWorkloads
+                    .Where(workload => workload.Id.ToString().Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase) || (workload.Description?.Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase) ?? false));
             }
 
             var table = new PrintableTable<WorkloadResolver.WorkloadInfo>();

@@ -11,11 +11,17 @@ using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.NET.Build.Tasks
 {
     public class ShowMissingWorkloads : TaskBase
     {
+        private static readonly string MauiTopLevelVSWorkload = "Microsoft.VisualStudio.Workload.NetCrossPlat";
+        private static readonly HashSet<string> MauiWorkloadIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "android", "android-aot", "ios", "maccatalyst", "macos", "maui", "maui-android",
+            "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-windows", "tvos" };
+
         public ITaskItem[] MissingWorkloadPacks { get; set; }
 
         public string NetCoreRoot { get; set; }
@@ -58,8 +64,10 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     SuggestedWorkloads = suggestedWorkloads.Select(suggestedWorkload =>
                     {
+                        var suggestedWorkloadsList = GetSuggestedWorkloadsList(suggestedWorkload);
                         var taskItem = new TaskItem(suggestedWorkload.Id);
                         taskItem.SetMetadata("VisualStudioComponentId", ToSafeId(suggestedWorkload.Id));
+                        taskItem.SetMetadata("VisualStudioComponentIds", string.Join(";", suggestedWorkloadsList));
                         return taskItem;
                     }).ToArray();
                 }
@@ -69,6 +77,13 @@ namespace Microsoft.NET.Build.Tasks
         internal static string ToSafeId(string id)
         {
             return id.Replace("-", ".").Replace(" ", ".").Replace("_", ".");
+        }
+
+        private static IEnumerable<string> GetSuggestedWorkloadsList(WorkloadInfo workloadInfo)
+        {
+            return MauiWorkloadIds.Contains(workloadInfo.Id.ToString()) ?
+                new string[] { ToSafeId(workloadInfo.Id), MauiTopLevelVSWorkload } :
+                new string[] { ToSafeId(workloadInfo.Id)  };
         }
     }
 }

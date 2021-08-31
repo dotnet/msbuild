@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             {
                 _workloadInstaller.Shutdown();
                 // Don't show entire stack trace
-                throw new GracefulException(string.Format(LocalizableStrings.WorkloadUninstallFailed, e.Message), e);
+                throw new GracefulException(string.Format(LocalizableStrings.WorkloadUninstallFailed, e.Message), e, isUserError: false);
             }
 
             return _workloadInstaller.ExitCode;

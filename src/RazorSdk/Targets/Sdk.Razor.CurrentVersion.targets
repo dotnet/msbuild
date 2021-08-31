@@ -49,7 +49,9 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
         <_TargetingNET50OrLater>true</_TargetingNET50OrLater>
         <_TargetingNET60OrLater>true</_TargetingNET60OrLater>
-        <UseRazorSourceGenerator Condition="'$(UseRazorSourceGenerator)' == '' ">true</UseRazorSourceGenerator>
+        <UseRazorSourceGenerator Condition="'$(Language)' == 'C#' AND '$(UseRazorSourceGenerator)' == '' ">true</UseRazorSourceGenerator>
+        <!-- Required to support incremental source generator -->
+        <LangVersion Condition="'$(UseRazorSourceGenerator)' != '' ">preview</LangVersion>
         <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">6.0</RazorLangVersion>
       </PropertyGroup>
     </When>
@@ -382,7 +384,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- When targeting 3.x and later projects, we have to infer configuration by inspecting the project. -->
   <Import Project="Microsoft.NET.Sdk.Razor.Configuration.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true'" />
 
-  <Import Project="Microsoft.NET.Sdk.Razor.CodeGeneration.targets" Condition="'$(UseRazorSourceGenerator)' != 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.CodeGeneration.targets" />
 
   <Import Project="Microsoft.NET.Sdk.Razor.Component.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(UseRazorSourceGenerator)' != 'true'" />
 

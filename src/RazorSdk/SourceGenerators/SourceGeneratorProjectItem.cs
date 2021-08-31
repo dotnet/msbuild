@@ -2,14 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Text;
 using System.IO;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
-    internal class SourceGeneratorProjectItem : RazorProjectItem
+    internal class SourceGeneratorProjectItem : RazorProjectItem, IEquatable<SourceGeneratorProjectItem>
     {
         private readonly string _fileKind;
 
@@ -47,5 +46,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         public override Stream Read() 
             => throw new NotSupportedException("This API should not be invoked. We should instead be relying on " +
                 "the RazorSourceDocument associated with this item instead.");
+
+        public bool Equals(SourceGeneratorProjectItem other) => AdditionalText == other.AdditionalText;
+
+        public override int GetHashCode() => AdditionalText.GetHashCode();
+
+        public override bool Equals(object obj) => obj is SourceGeneratorProjectItem projectItem && Equals(projectItem);
     }
 }

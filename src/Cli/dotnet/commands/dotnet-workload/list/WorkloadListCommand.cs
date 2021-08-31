@@ -81,7 +81,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString());
 
             _workloadRecordRepo = workloadRecordRepo ??
-                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity).GetWorkloadInstallationRecordRepository();
+                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity,
+                elevationRequired: false).GetWorkloadInstallationRecordRepository();
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
                 workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, _workloadRecordRepo);
@@ -113,8 +114,11 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             }
             else
             {
-                _reporter.WriteLine();
-                _reporter.WriteLine(LocalizableStrings.WorkloadListHeader);
+                if (OperatingSystem.IsWindows())
+                {
+                    _reporter.WriteLine();
+                    _reporter.WriteLine(LocalizableStrings.WorkloadListHeader);
+                }
                 _reporter.WriteLine();
 
                 PrintableTable<WorkloadId> table = new();

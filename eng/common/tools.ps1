@@ -166,6 +166,9 @@ function InitializeDotNetCli([bool]$install, [bool]$createSdkLocationFile) {
   # Disable telemetry on CI.
   if ($ci) {
     $env:DOTNET_CLI_TELEMETRY_OPTOUT=1
+ 
+    # In case of network error, try to log the current IP for reference
+    Try-LogClientIpAddress
   }
 
   # Source Build uses DotNetCoreSdkDir variable
