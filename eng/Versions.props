@@ -127,6 +127,7 @@
     <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0-4.21430.4</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>4.0.0-4.21430.4</MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>
     <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>4.0.0-4.21430.4</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.0.0-4.21430.4</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->

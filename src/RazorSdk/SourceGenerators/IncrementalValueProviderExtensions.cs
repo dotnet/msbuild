@@ -16,6 +16,12 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             return source.WithComparer(comparer);
         }
 
+        internal static IncrementalValuesProvider<T> WithLambdaComparer<T>(this IncrementalValuesProvider<T> source, Func<T, T, bool> equal, Func<T, int> getHashCode)
+        {
+            var comparer = new LambdaComparer<T>(equal, getHashCode);
+            return source.WithComparer(comparer);
+        }
+
         internal static IncrementalValuesProvider<TSource> ReportDiagnostics<TSource>(this IncrementalValuesProvider<(TSource?, Diagnostic?)> source, IncrementalGeneratorInitializationContext context)
         {
             context.RegisterSourceOutput(source, (spc, source) =>

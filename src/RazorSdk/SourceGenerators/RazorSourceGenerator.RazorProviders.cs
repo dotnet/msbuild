@@ -16,6 +16,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
     {
         private static (RazorSourceGenerationOptions?, Diagnostic?) ComputeRazorSourceGeneratorOptions((AnalyzerConfigOptionsProvider, ParseOptions) pair, CancellationToken ct)
         {
+            Log.ComputeRazorSourceGeneratorOptions();
+
             var (options, parseOptions) = pair;
             var globalOptions = options.GlobalOptions;
 
