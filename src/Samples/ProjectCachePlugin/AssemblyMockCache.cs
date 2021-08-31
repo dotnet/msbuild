@@ -2,11 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
+using Shouldly;
 
 namespace MockCacheFromAssembly
 {
@@ -21,6 +24,15 @@ namespace MockCacheFromAssembly
         {
             logger.LogMessage($"{nameof(AssemblyMockCache)}: BeginBuildAsync", MessageImportance.High);
 
+            foreach (var ep in context.GraphEntryPoints ?? Enumerable.Empty<ProjectGraphEntryPoint>())
+            {
+                var globalPropertyString = ep.GlobalProperties is not null
+                    ? string.Join("\n\t", ep.GlobalProperties.Select(gp => $"{gp.Key}:{gp.Value}"))
+                    : string.Empty;
+
+                logger.LogMessage($"EntryPoint: {ep.ProjectFile} \n(\n\t{globalPropertyString}\n)");
+            }
+
             ErrorFrom(nameof(BeginBuildAsync), logger);
 
             return Task.CompletedTask;
@@ -32,6 +44,8 @@ namespace MockCacheFromAssembly
             CancellationToken cancellationToken)
         {
             logger.LogMessage($"{nameof(AssemblyMockCache)}: GetCacheResultAsync for {buildRequest.ProjectFullPath}", MessageImportance.High);
+
+            buildRequest.ProjectInstance.ShouldNotBeNull("The cache plugin expects evaluated projects.");
 
             ErrorFrom(nameof(GetCacheResultAsync), logger);
 

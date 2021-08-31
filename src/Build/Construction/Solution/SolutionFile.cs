@@ -1384,7 +1384,6 @@ namespace Microsoft.Build.Construction
         internal void ParseSolutionConfigurations()
         {
             var nameValueSeparators = '=';
-            var configPlatformSeparators = new[] { SolutionConfigurationInSolution.ConfigurationPlatformSeparator };
 
             do
             {
@@ -1419,13 +1418,24 @@ namespace Microsoft.Build.Construction
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(fullConfigurationName == configurationNames[1].Trim(), "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseInvalidSolutionConfigurationEntry", str);
 
-                string[] configurationPlatformParts = fullConfigurationName.Split(configPlatformSeparators);
+                var (configuration, platform) = ParseConfigurationName(fullConfigurationName, FullPath, _currentLineNumber, str);
 
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(configurationPlatformParts.Length == 2, "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseInvalidSolutionConfigurationEntry", str);
-
-                _solutionConfigurations.Add(new SolutionConfigurationInSolution(configurationPlatformParts[0], configurationPlatformParts[1]));
+                _solutionConfigurations.Add(new SolutionConfigurationInSolution(configuration, platform));
             } while (true);
+        }
+
+        internal static (string Configuration, string Platform) ParseConfigurationName(string fullConfigurationName, string projectPath, int lineNumber, string containingString)
+        {
+            string[] configurationPlatformParts = fullConfigurationName.Split(SolutionConfigurationInSolution.ConfigurationPlatformSeparatorArray);
+
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                configurationPlatformParts.Length == 2,
+                "SubCategoryForSolutionParsingErrors",
+                new BuildEventFileInfo(projectPath, lineNumber, 0),
+                "SolutionParseInvalidSolutionConfigurationEntry",
+                containingString);
+
+            return (configurationPlatformParts[0], configurationPlatformParts[1]);
         }
 
         /// <summary>

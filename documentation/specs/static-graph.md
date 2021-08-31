@@ -1,36 +1,5 @@
 # Static Graph
 
-- [Static Graph](#static-graph)
-  - [What is static graph for?](#what-is-static-graph-for)
-    - [Weakness of the old model: project-level scheduling](#weakness-of-the-old-model-project-level-scheduling)
-    - [Weakness of the old model: incrementality](#weakness-of-the-old-model-incrementality)
-    - [Weakness of the old model: caching and distributability](#weakness-of-the-old-model-caching-and-distributability)
-  - [What is static graph?](#what-is-static-graph)
-  - [Design documentation](#design-documentation)
-    - [Design goals](#design-goals)
-  - [Project Graph](#project-graph)
-    - [Constructing the project graph](#constructing-the-project-graph)
-    - [Build dimensions](#build-dimensions)
-      - [Multitargeting](#multitargeting)
-    - [Executing targets on a graph](#executing-targets-on-a-graph)
-      - [Command line](#command-line)
-      - [APIs](#apis)
-    - [Inferring which targets to run for a project within the graph](#inferring-which-targets-to-run-for-a-project-within-the-graph)
-      - [Multitargeting details](#multitargeting-details)
-    - [Underspecified graphs](#underspecified-graphs)
-    - [Public API](#public-api)
-  - [Isolated builds](#isolated-builds)
-    - [Isolated graph builds](#isolated-graph-builds)
-    - [Single project isolated builds](#single-project-isolated-builds)
-      - [APIs](#apis-1)
-      - [Command line](#command-line-1)
-      - [Exempting references from isolation constraints](#exempting-references-from-isolation-constraints)
-  - [I/O Tracking](#io-tracking)
-    - [Detours](#detours)
-    - [Isolation requirement](#isolation-requirement)
-    - [Tool servers](#tool-servers)
-  - [Examples](#examples)
-
 ## What is static graph for?
 
 As a repo gets bigger and more complex, weaknesses in MSBuild's scheduling and incrementality models become more apparent. MSBuild's static graph features are intended to ameliorate these weaknesses while remaining as compatible as possible with existing projects and SDKs.

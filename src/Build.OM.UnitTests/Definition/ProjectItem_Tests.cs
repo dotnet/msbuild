@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// <summary>
     /// Tests for ProjectItem
     /// </summary>
-    public class ProjectItem_Tests
+    public class ProjectItem_Tests : IDisposable
     {
         internal const string ItemWithIncludeAndExclude = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
@@ -42,6 +42,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>
                 ";
+
+        protected TestEnvironment _env;
+
+        public ProjectItem_Tests()
+        {
+            _env = TestEnvironment.Create();
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
+        }
 
         /// <summary>
         /// Project getter
@@ -2095,6 +2107,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void RemoveAllMatchingItems()
+        {
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
+                "<i Include='a;b' />" +
+                "<i Include='a;b' />" +
+                "<i Remove='b;c' />"
+                );
+
+            Assert.Equal(2, items.Count);
+            Assert.Equal(@"a;a", string.Join(";", items.Select(i => i.EvaluatedInclude)));
+        }
+
+        [Fact]
         public void RemoveGlob()
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
@@ -3527,6 +3552,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var itemB = projectInstance.Items.Single(i => i.ItemType == "B").EvaluatedInclude;
                 itemB.ShouldBe("D_test.ext");
             }
+        }
+    }
+
+    public class ProjectItemWithOptimizations_Tests : ProjectItem_Tests
+    {
+        public ProjectItemWithOptimizations_Tests()
+        {
+            // Make sure we always use the dictionary-based Remove logic.
+            _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
         }
     }
 }

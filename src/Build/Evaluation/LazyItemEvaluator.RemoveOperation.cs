@@ -3,6 +3,8 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -35,48 +37,57 @@ namespace Microsoft.Build.Evaluation
             /// Apply the Remove operation.
             /// </summary>
             /// <remarks>
-            /// This operation is mostly implemented in terms of the default <see cref="LazyItemOperation.ApplyImpl(ImmutableList{ItemData}.Builder, ImmutableHashSet{string})"/>.
-            /// This override exists to apply the removing-everything short-circuit.
+            /// This override exists to apply the removing-everything short-circuit and to avoid creating a redundant list of items to remove.
             /// </remarks>
-            protected override void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
-            {
-                if (_matchOnMetadata.IsEmpty && ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType) && _conditionResult)
-                {
-                    // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
-                    // then all items are removed and matching is not necessary
-                    listBuilder.Clear();
-                    return;
-                }
-
-                base.ApplyImpl(listBuilder, globsToIgnore);
-            }
-
-            // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
-            protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
-            {
-                var items = ImmutableHashSet.CreateBuilder<I>();
-                foreach (ItemData item in listBuilder)
-                {
-                    if (_matchOnMetadata.IsEmpty ? _itemSpec.MatchesItem(item.Item) : MatchesItemOnMetadata(item.Item))
-                        items.Add(item.Item);
-                }
-
-                return items.ToImmutableList();
-            }
-
-            private bool MatchesItemOnMetadata(I item)
-            {
-                return _metadataSet.Contains(_matchOnMetadata.Select(m => item.GetMetadataValue(m)));
-            }
-
-            protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)
+            protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 if (!_conditionResult)
                 {
                     return;
                 }
 
-                listBuilder.RemoveAll(itemData => items.Contains(itemData.Item));
+                bool matchingOnMetadata = !_matchOnMetadata.IsEmpty;
+                if (!matchingOnMetadata)
+                {
+                    if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
+                    {
+                        // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
+                        // then all items are removed and matching is not necessary
+                        listBuilder.Clear();
+                        return;
+                    }
+
+                    if (listBuilder.Count >= Traits.Instance.DictionaryBasedItemRemoveThreshold)
+                    {
+                        // Perf optimization: If the number of items in the running list is large, construct a dictionary,
+                        // enumerate all items referenced by the item spec, and perform dictionary look-ups to find items
+                        // to remove.
+                        IList<string> matches = _itemSpec.IntersectsWith(listBuilder.Dictionary);
+                        listBuilder.RemoveAll(matches);
+                        return;
+                    }
+                }
+
+                // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
+                HashSet<I> items = null;
+                foreach (ItemData item in listBuilder)
+                {
+                    bool isMatch = matchingOnMetadata ? MatchesItemOnMetadata(item.Item) : _itemSpec.MatchesItem(item.Item);
+                    if (isMatch)
+                    {
+                        items ??= new HashSet<I>();
+                        items.Add(item.Item);
+                    }
+                }
+                if (items is not null)
+                {
+                    listBuilder.RemoveAll(items);
+                }
+            }
+
+            private bool MatchesItemOnMetadata(I item)
+            {
+                return _metadataSet.Contains(_matchOnMetadata.Select(m => item.GetMetadataValue(m)));
             }
 
             public ImmutableHashSet<string>.Builder GetRemovedGlobs()

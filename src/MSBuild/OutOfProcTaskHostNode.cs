@@ -33,7 +33,7 @@ namespace Microsoft.Build.CommandLine
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine9
+        IBuildEngine10
 #endif
     {
         /// <summary>
@@ -492,6 +492,22 @@ namespace Microsoft.Build.CommandLine
         }
 
         #endregion
+
+        #region IBuildEngine10 Members
+
+        [Serializable]
+        private sealed class EngineServicesImpl : EngineServices
+        {
+            /// <summary>
+            /// No logging verbosity optimization in OOP nodes.
+            /// </summary>
+            public override bool LogsMessagesOfImportance(MessageImportance importance) => true;
+        }
+
+        public EngineServices EngineServices { get; } = new EngineServicesImpl();
+
+        #endregion
+
 #endif
 
         #region INodePacketFactory Members

@@ -89,6 +89,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
 
+        /// <summary>
+        /// When evaluating items, this is the minimum number of items on the running list to use a dictionary-based remove optimization.
+        /// </summary>
+        public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
+
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;

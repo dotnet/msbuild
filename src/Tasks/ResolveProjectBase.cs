@@ -121,6 +121,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void CacheProjectElementsFromXml(string xmlString)
         {
+            // TODO: fix code clone for parsing CurrentSolutionConfiguration xml: https://github.com/dotnet/msbuild/issues/6751
             XmlDocument doc = null;
 
             if (!string.IsNullOrEmpty(xmlString))
