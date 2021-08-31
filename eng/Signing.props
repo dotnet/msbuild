@@ -53,6 +53,11 @@
     <FileSignInfo Include="xunit.performance.metrics.dll" CertificateName="3PartySHA2" />
   </ItemGroup>
 
+  <!-- Filter out any test packages from ItemsToSign -->
+  <ItemGroup>
+    <ItemsToSignPostBuild Remove="*tests*.nupkg" />
+  </ItemGroup>
+
   <PropertyGroup>
     <UseDotNetCertificate>true</UseDotNetCertificate>
   </PropertyGroup>
