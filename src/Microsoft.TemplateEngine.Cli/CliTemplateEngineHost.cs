@@ -16,12 +16,14 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly ITemplateEngineHost _baseHost;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
-        private INewCommandInput _commandInput;
+        private string? _outputPath;
 
-        internal CliTemplateEngineHost(ITemplateEngineHost baseHost, INewCommandInput commandInput)
+        internal CliTemplateEngineHost(ITemplateEngineHost baseHost, INewCommandInput commandInput) : this(baseHost, commandInput.OutputPath) { }
+
+        internal CliTemplateEngineHost(ITemplateEngineHost baseHost, string? outputPath)
         {
             _baseHost = baseHost;
-            _commandInput = commandInput;
+            _outputPath = outputPath;
 
             bool enableVerboseLogging = bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE"), out bool value) && value;
             _loggerFactory =
@@ -56,8 +58,11 @@ namespace Microsoft.TemplateEngine.Cli
             get
             {
                 const string fileName = "global.json";
-
-                string? workingPath = Path.Combine(FileSystem.GetCurrentDirectory(), _commandInput.OutputPath);
+                string? workingPath = FileSystem.GetCurrentDirectory();
+                if (!string.IsNullOrWhiteSpace(_outputPath))
+                {
+                    workingPath = Path.Combine(workingPath, _outputPath);
+                }
                 bool found = false;
 
                 do
@@ -99,7 +104,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal void ResetCommand(INewCommandInput commandInput)
         {
-            _commandInput = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+            _outputPath = commandInput.OutputPath;
         }
 
         #region Obsolete

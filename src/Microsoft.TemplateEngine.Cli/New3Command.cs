@@ -3,12 +3,14 @@
 
 #nullable enable
 
+using System.CommandLine;
 using System.Reflection;
 using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Cli.Alias;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TemplateSearch;
 using Microsoft.TemplateEngine.Edge;
@@ -75,32 +77,17 @@ namespace Microsoft.TemplateEngine.Cli
             _ = callbacks ?? throw new ArgumentNullException(nameof(callbacks));
             _ = args ?? throw new ArgumentNullException(nameof(args));
 
-            if (!args.Any(x => string.Equals(x, "--debug:ephemeral-hive")))
-            {
-                EnsureEntryMutex(hivePath, host);
+            Command rootCommand = new RootCommand(LocalizableStrings.CommandDescription);
+            rootCommand.Name = commandName;
 
-                if (!_entryMutex!.WaitOne())
-                {
-                    return -1;
-                }
+            foreach (var commandCreator in CommandFactory.GetSubcommands())
+            {
+                rootCommand.AddCommand(commandCreator(host, telemetryLogger, callbacks).CreateCommand());
             }
 
-            try
-            {
-                if (Console.IsOutputRedirected)
-                {
-                    Console.OutputEncoding = Encoding.UTF8;
-                }
-
-                return ActualRun(commandName, host, telemetryLogger, callbacks, args, hivePath);
-            }
-            finally
-            {
-                if (_entryMutex != null)
-                {
-                    _entryMutex.ReleaseMutex();
-                }
-            }
+            rootCommand.TreatUnmatchedTokensAsErrors = true;
+            CommandFactory.SetupGlobalOptions(rootCommand);
+            return rootCommand.Invoke(args);
         }
 
         private static Mutex EnsureEntryMutex(string? hivePath, ITemplateEngineHost host)
