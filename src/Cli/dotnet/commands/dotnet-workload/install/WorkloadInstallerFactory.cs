@@ -8,6 +8,7 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Configurer;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -21,6 +22,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null, 
             string tempDirPath = null,
+            string userProfileDir = null,
             PackageSourceLocation packageSourceLocation = null,
             RestoreActionConfig restoreActionConfig = null, 
             bool elevationRequired = true)
@@ -45,12 +47,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 throw new GracefulException(LocalizableStrings.InadequatePermissions, isUserError: false);
             }
 
+            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
+
             return new NetSdkManagedInstaller(reporter,
                 sdkFeatureBand,
                 workloadResolver,
                 nugetPackageDownloader,
                 dotnetDir: dotnetDir,
                 tempDirPath: tempDirPath,
+                userProfileDir: userProfileDir,
                 verbosity: verbosity,
                 packageSourceLocation: packageSourceLocation,
                 restoreActionConfig: restoreActionConfig);

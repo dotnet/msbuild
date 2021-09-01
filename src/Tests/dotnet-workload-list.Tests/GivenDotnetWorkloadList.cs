@@ -96,12 +96,12 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { testDirectory });
 
             // Lay out fake advertising manifests with pack version update for pack A (in workloads 1 and 3)
-            var userHome = Path.Combine(testDirectory, "userHome");
-            var manifestPath = Path.Combine(userHome, ".dotnet", "sdk-advertising", "6.0.100", "SampleManifest", "WorkloadManifest.json");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            var manifestPath = Path.Combine(userProfileDir, "sdk-advertising", "6.0.100", "SampleManifest", "WorkloadManifest.json");
             Directory.CreateDirectory(Path.GetDirectoryName(manifestPath));
             File.Copy(Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockListSampleUpdated.json"), manifestPath);
 
-            var command = new WorkloadListCommand(_parseResult, _reporter, workloadInstaller, "6.0.100", workloadResolver: workloadResolver, userHome: userHome);
+            var command = new WorkloadListCommand(_parseResult, _reporter, workloadInstaller, "6.0.100", workloadResolver: workloadResolver, userProfileDir: userProfileDir);
             command.Execute();
 
             // Workloads 1 and 3 should have updates

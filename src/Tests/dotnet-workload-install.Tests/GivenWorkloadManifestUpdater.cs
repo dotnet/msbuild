@@ -51,22 +51,22 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenAdvertisingManifestUpdateItUpdatesWhenNoSentinalExists()
         {
-            (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater();
+            (var manifestUpdater, var nugetDownloader, var userProfileDir) = GetTestUpdater();
 
             manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
             var expectedDownloadedPackages = _installedManifests
                 .Select(id => ((PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation))(new PackageId($"{id}.manifest-6.0.100"), null, null, null));
             nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(expectedDownloadedPackages);
-            File.Exists(Path.Combine(testDir, ".dotnet", _manifestSentinalFileName)).Should().BeTrue();
+            File.Exists(Path.Combine(userProfileDir, _manifestSentinalFileName)).Should().BeTrue();
         }
 
         [Fact]
         public void GivenAdvertisingManifestUpdateItUpdatesWhenDue()
         {
             Func<string, string> getEnvironmentVariable = (envVar) => envVar.Equals(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS) ? "0" : string.Empty;
-            (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater(getEnvironmentVariable: getEnvironmentVariable);
+            (var manifestUpdater, var nugetDownloader, var userProfileDir) = GetTestUpdater(getEnvironmentVariable: getEnvironmentVariable);
 
-            var sentinalPath = Path.Combine(testDir, ".dotnet", _manifestSentinalFileName);
+            var sentinalPath = Path.Combine(userProfileDir, _manifestSentinalFileName);
             File.WriteAllText(sentinalPath, string.Empty);
             var createTime = DateTime.Now;
 
@@ -82,9 +82,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenAdvertisingManifestUpdateItDoesNotUpdateWhenNotDue()
         {
-            (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater();
+            (var manifestUpdater, var nugetDownloader, var userProfileDir) = GetTestUpdater();
 
-            var sentinalPath = Path.Combine(testDir, ".dotnet", _manifestSentinalFileName);
+            var sentinalPath = Path.Combine(userProfileDir, _manifestSentinalFileName);
             File.Create(sentinalPath);
             var createTime = DateTime.Now;
 
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, new string[] { dotnetRoot });
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, userProfileDir: Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
 
             var manifestUpdates = manifestUpdater.CalculateManifestUpdates().Select( m => (m.manifestId, m.existingVersion,m .newVersion));
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);

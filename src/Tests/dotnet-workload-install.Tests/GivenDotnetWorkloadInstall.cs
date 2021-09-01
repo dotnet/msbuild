@@ -25,13 +25,15 @@ using System.Text.Json;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
-    public class GivenDotnetWorkloadInstall : SdkTest
+    public abstract class GivenDotnetWorkloadInstallBase : SdkTest
     {
         private readonly BufferedReporter _reporter;
         private readonly string _manifestPath;
+        private readonly bool _userLocal;
 
-        public GivenDotnetWorkloadInstall(ITestOutputHelper log) : base(log)
+        protected GivenDotnetWorkloadInstallBase(ITestOutputHelper log, bool userLocal) : base(log)
         {
+            _userLocal = userLocal;
             _reporter = new BufferedReporter();
             _manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
         }
@@ -241,7 +243,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", mockWorkloadId });
 
             var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer,
-                nugetPackageDownloader: nugetDownloader, workloadManifestUpdater: manifestUpdater, userHome: testDirectory, dotnetDir: dotnetRoot, version: "6.0.100"));
+                nugetPackageDownloader: nugetDownloader, workloadManifestUpdater: manifestUpdater, userProfileDir: testDirectory, dotnetDir: dotnetRoot, version: "6.0.100"));
             exceptionThrown.Message.Should().Be(String.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotSupportedOnPlatform, mockWorkloadId));
         }
 
@@ -250,35 +252,42 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            var tmpDir = Path.Combine(testDirectory, "tmp");
             var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), new string[] { dotnetRoot });
-            var nugetDownloader = new FailingNuGetPackageDownloader(dotnetRoot);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), _userLocal ? new string[] { userProfileDir, dotnetRoot } : new string[] { dotnetRoot });
+            var nugetDownloader = new FailingNuGetPackageDownloader(tmpDir);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var sdkFeatureVersion = "6.0.100";
             var existingWorkload = "mock-1";
             var installingWorkload = "mock-2";
+            if (_userLocal)
+            {
+                SetUserLocal(dotnetRoot, sdkFeatureVersion);
+            }
 
             // Successfully install a workload
             var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", existingWorkload });
-            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(dotnetRoot),
-                workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             installCommand.Execute();
 
             // Install a workload with a mocked nuget failure
             installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
             installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
-                workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             var exceptionThrown = Assert.Throws<GracefulException>(() => installCommand.Execute());
             exceptionThrown.Message.Should().Contain("Test Failure");
 
             // Existing installation is still present
-            var installRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads");
+            string installRoot = _userLocal ? userProfileDir : dotnetRoot;
+            var installRecordPath = Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads");
             Directory.GetFiles(installRecordPath).Count().Should().Be(1);
             File.Exists(Path.Combine(installRecordPath, existingWorkload))
                 .Should().BeTrue();
-            var packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            var packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
             packRecordDirs.Count().Should().Be(3);
-            var installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            var installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
             installPacks.Count().Should().Be(3);
         }
 
@@ -296,6 +305,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates, tempDirManifestPath);
+            string sdkVersion = "6.0.100";
+            if (_userLocal)
+            {
+                SetUserLocal(dotnetRoot, sdkVersion);
+            }
             var installManager = new WorkloadInstallCommand(
                 parseResult,
                 reporter: _reporter,
@@ -303,11 +317,33 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 workloadInstaller: installer,
                 nugetPackageDownloader: nugetDownloader,
                 workloadManifestUpdater: manifestUpdater,
-                userHome: testDirectory,
+                userProfileDir: testDirectory,
                 dotnetDir: dotnetRoot,
                 version: "6.0.100");
 
             return (testDirectory, installManager, installer, workloadResolver, manifestUpdater, nugetDownloader);
         }
+
+        private void SetUserLocal(string dotnetDir, string sdkFeatureBand)
+        {
+            // Add the userlocal marker file.
+            string workloadMetadataDir = Path.Combine(dotnetDir, "metadata", "workloads", sdkFeatureBand);
+            Directory.CreateDirectory(workloadMetadataDir);
+            File.WriteAllText(Path.Combine(workloadMetadataDir, "userlocal"), "");
+
+            Assert.True(WorkloadInstall.IsUserLocal(dotnetDir, sdkFeatureBand));
+        }
+    }
+
+    public class UserLocalGivenDotnetWorkloadInstall : GivenDotnetWorkloadInstallBase
+    {
+        public UserLocalGivenDotnetWorkloadInstall(ITestOutputHelper log) : base(log, userLocal: true)
+        { }
+    }
+
+    public class DotnetWorkloadInstall : GivenDotnetWorkloadInstallBase
+    {
+        public DotnetWorkloadInstall(ITestOutputHelper log) : base(log, userLocal: false)
+        { }
     }
 }

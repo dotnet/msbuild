@@ -7,6 +7,7 @@ using System.CommandLine.Parsing;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.IO;
 using System.Linq;
@@ -36,6 +37,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null,
             string tempDirPath = null,
+            string userProfileDir = null,
             string version = null)
             : base(parseResult)
         {
@@ -61,9 +63,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
                 tempPackagesDir,
                 filePermissionSetter: null,
                 new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger), nullLogger, restoreActionConfig: _parseResult.ToRestoreActionConfig());
+            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
             _workloadInstaller = workloadInstaller ??
                                  WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand,
-                                     _workloadResolver, _verbosity, nugetPackageDownloader, dotnetDir, tempDirPath,
+                                     _workloadResolver, _verbosity, nugetPackageDownloader, dotnetDir, tempDirPath, userProfileDir,
                                      _packageSourceLocation, _parseResult.ToRestoreActionConfig());
         }
 

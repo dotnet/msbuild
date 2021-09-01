@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly IReporter _reporter;
         private readonly string _targetSdkVersion;
         private readonly string _tempDirPath;
-        private readonly string _userHome;
+        private readonly string _userProfileDir;
         private readonly VerbosityOptions _verbosity;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             IWorkloadInstallationRecordRepository workloadRecordRepo = null,
             string currentSdkVersion = null,
             string dotnetDir = null,
-            string userHome = null,
+            string userProfileDir = null,
             string tempDirPath = null,
             INuGetPackageDownloader nugetPackageDownloader = null,
             IWorkloadManifestUpdater workloadManifestUpdater = null,
@@ -69,9 +69,9 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                     string.IsNullOrWhiteSpace(_targetSdkVersion)
                         ? currentSdkReleaseVersion.ToString()
                         : _targetSdkVersion);
-            _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
+            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             DirectoryPath tempPackagesDir =
-                new(Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp"));
+                new(Path.Combine(_userProfileDir, "sdk-advertising-temp"));
             NullLogger nullLogger = new NullLogger();
             _nugetPackageDownloader = nugetPackageDownloader ??
                                       new NuGetPackageDownloader(tempPackagesDir, null,
@@ -81,11 +81,11 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString());
 
             _workloadRecordRepo = workloadRecordRepo ??
-                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity,
+                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity, userProfileDir: _userProfileDir,
                 elevationRequired: false).GetWorkloadInstallationRecordRepository();
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
-                workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, _workloadRecordRepo);
+                workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath, _workloadRecordRepo);
         }
 
         public override int Execute()

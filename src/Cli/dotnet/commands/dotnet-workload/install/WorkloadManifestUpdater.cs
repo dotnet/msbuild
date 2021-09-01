@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly IWorkloadResolver _workloadResolver;
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly SdkFeatureBand _sdkFeatureBand;
-        private readonly string _userHome;
+        private readonly string _userProfileDir;
         private readonly string _tempDirPath;
         private readonly PackageSourceLocation _packageSourceLocation;
         Func<string, string> _getEnvironmentVariable;
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public WorkloadManifestUpdater(IReporter reporter,
             IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader,
-            string userHome,
+            string userProfileDir,
             string tempDirPath,
             IWorkloadInstallationRecordRepository workloadRecordRepo,
             PackageSourceLocation packageSourceLocation = null,
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             _reporter = reporter;
             _workloadResolver = workloadResolver;
-            _userHome = userHome;
+            _userProfileDir = userProfileDir;
             _tempDirPath = tempDirPath;
             _nugetPackageDownloader = nugetPackageDownloader;
             _sdkFeatureBand = new SdkFeatureBand(_workloadResolver.GetSdkFeatureBand());
@@ -66,11 +66,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
                                           new NullLogger(),
                                           reporter);
-            var userHome = CliFolderPathCalculator.DotnetHomePath;
+            var userProfileDir = CliFolderPathCalculator.DotnetUserProfileFolderPath;
             var workloadRecordRepo = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion), workloadResolver, Cli.VerbosityOptions.normal)
                 .GetWorkloadInstallationRecordRepository();
 
-            return new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userHome, tempPackagesDir.Value, workloadRecordRepo);
+            return new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userProfileDir, tempPackagesDir.Value, workloadRecordRepo);
         }
 
         public async Task UpdateAdvertisingManifestsAsync(bool includePreviews, DirectoryPath? offlineCache = null)
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             try
             {
                 var backgroundUpdatesDisabled = bool.TryParse(Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE), out var disableEnvVar) && disableEnvVar;
-                var adUpdatesFile = GetAdvertisingWorkloadsFilePath(CliFolderPathCalculator.DotnetHomePath);
+                var adUpdatesFile = GetAdvertisingWorkloadsFilePath(CliFolderPathCalculator.DotnetUserProfileFolderPath);
                 if (!backgroundUpdatesDisabled && File.Exists(adUpdatesFile))
                 {
                     var updatableWorkloads = JsonSerializer.Deserialize<string[]>(File.ReadAllText(adUpdatesFile));
@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             try
             {
-                var overlayProvider = new TempDirectoryWorkloadManifestProvider(Path.Combine(_userHome, ".dotnet", "sdk-advertising", _sdkFeatureBand.ToString()), _sdkFeatureBand.ToString());
+                var overlayProvider = new TempDirectoryWorkloadManifestProvider(Path.Combine(_userProfileDir, "sdk-advertising", _sdkFeatureBand.ToString()), _sdkFeatureBand.ToString());
                 var advertisingManifestResolver = _workloadResolver.CreateOverlayResolver(overlayProvider);
                 return _workloadResolver.GetUpdatedWorkloads(advertisingManifestResolver, installedWorkloads);
             }
@@ -441,14 +441,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private bool BackgroundUpdatesAreDisabled() =>
             bool.TryParse(_getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE), out var disableEnvVar) && disableEnvVar;
 
-        private string GetAdvertisingManifestSentinalPath() => Path.Combine(_userHome, ".dotnet", ".workloadAdvertisingManifestSentinal");
+        private string GetAdvertisingManifestSentinalPath() => Path.Combine(_userProfileDir, ".workloadAdvertisingManifestSentinal");
 
-        private string GetAdvertisingWorkloadsFilePath() => GetAdvertisingWorkloadsFilePath(_userHome);
+        private string GetAdvertisingWorkloadsFilePath() => GetAdvertisingWorkloadsFilePath(_userProfileDir);
 
-        private static string GetAdvertisingWorkloadsFilePath(string userHome) => Path.Combine(userHome, ".dotnet", ".workloadAdvertisingUpdates");
+        private static string GetAdvertisingWorkloadsFilePath(string userProfileDir) => Path.Combine(userProfileDir, ".workloadAdvertisingUpdates");
 
         private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
-            Path.Combine(_userHome, ".dotnet", "sdk-advertising", featureBand.ToString(), manifestId.ToString());
+            Path.Combine(_userProfileDir, "sdk-advertising", featureBand.ToString(), manifestId.ToString());
 
         internal static PackageId GetManifestPackageId(SdkFeatureBand featureBand, ManifestId manifestId) =>
             GetManifestPackageId(featureBand, manifestId, InstallType.FileBased);

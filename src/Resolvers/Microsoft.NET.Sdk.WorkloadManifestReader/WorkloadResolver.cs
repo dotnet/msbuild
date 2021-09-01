@@ -289,10 +289,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             string GetPackPath(WorkloadPackId resolvedPackageId, string packageVersion, WorkloadPackKind kind, out bool isInstalled)
             {
                 isInstalled = false;
-                string packPath = "";
-                bool isFile;
+                string? firstPackPath = null;
+                string? installedPackPath = null;
                 foreach (var rootPath in _dotnetRootPaths)
                 {
+                    string packPath;
+                    bool isFile;
                     switch (kind)
                     {
                         case WorkloadPackKind.Framework:
@@ -316,6 +318,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
                     }
 
+                    firstPackPath ??= packPath;
+
                     //can we do a more robust check than directory.exists?
                     isInstalled = isFile ?
                         _fileExistOverride?.Invoke(packPath) ?? File.Exists(packPath) :
@@ -323,10 +327,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                     if (isInstalled)
                     {
+                        installedPackPath = packPath;
                         break;
                     }
                 }
-                return packPath;
+                return installedPackPath ?? firstPackPath ?? "";
             }
         }
 

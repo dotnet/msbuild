@@ -124,6 +124,9 @@ namespace Microsoft.NET.TestFramework
                 directoryName = directoryName.Append(testProjectName);
             }
 
+            // avoid collisions between derived test classes using same base method concurrently
+            directoryName = directoryName.Append(Guid.NewGuid().ToString("N").Substring(0, 8));
+
             // We need to ensure the directory name isn't over 24 characters in length
             if (directoryName.Length > 24)
             {
