@@ -29,7 +29,7 @@ namespace Microsoft.Build.Framework
         /// An explicit version of this class. Must be incremented whenever new members are added. Derived classes should override
         /// the property to return the version actually being implemented.
         /// </summary>
-        public virtual int Version => Version1;
+        public virtual int Version => Version2;
 
         /// <summary>
         /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.
