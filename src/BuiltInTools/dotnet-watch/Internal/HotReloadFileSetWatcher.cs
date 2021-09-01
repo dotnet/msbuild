@@ -98,12 +98,12 @@ namespace Microsoft.DotNet.Watcher.Internal
             }
         }
 
-        public Task<FileItem[]?> GetChangedFileAsync(CancellationToken cancellationToken)
+        public Task<FileItem[]?> GetChangedFileAsync(CancellationToken cancellationToken, bool forceWaitForNewUpdate = false)
         {
             EnsureInitialized();
 
             var tcs = _tcs;
-            if (tcs is not null)
+            if (!forceWaitForNewUpdate && tcs is not null)
             {
                 return tcs.Task;
             }
