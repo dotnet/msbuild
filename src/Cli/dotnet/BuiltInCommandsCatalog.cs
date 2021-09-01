@@ -24,6 +24,7 @@ using Microsoft.DotNet.Tools.VSTest;
 using System.Collections.Generic;
 using Microsoft.DotNet.Tools.Tool;
 using Microsoft.DotNet.Workloads.Workload;
+using Microsoft.DotNet.Tools.Format;
 
 namespace Microsoft.DotNet.Cli
 {
