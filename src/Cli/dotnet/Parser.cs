@@ -9,9 +9,9 @@ using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.Reflection;
 
-using Microsoft.DotNet.Cli.Format;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Format;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
