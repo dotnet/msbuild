@@ -85,10 +85,10 @@ namespace Microsoft.Build.FileSystem
             FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Combine(path, fileName.ToString());
 
             IEnumerable<string> directories = includeDirectories
-                ? _directoryCache.EnumerateDirectories(path, predicate, transform)
+                ? _directoryCache.EnumerateDirectories(path, searchPattern, predicate, transform)
                 : Enumerable.Empty<string>();
             IEnumerable<string> files = includeFiles
-                ? _directoryCache.EnumerateFiles(path, predicate, transform)
+                ? _directoryCache.EnumerateFiles(path, searchPattern, predicate, transform)
                 : Enumerable.Empty<string>();
 
             return Enumerable.Concat(directories, files);

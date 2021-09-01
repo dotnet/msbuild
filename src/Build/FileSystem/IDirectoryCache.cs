@@ -59,17 +59,31 @@ namespace Microsoft.Build.FileSystem
         /// </summary>
         /// <typeparam name="TResult">The desired return type.</typeparam>
         /// <param name="path">The directory to enumerate.</param>
+        /// <param name="pattern">A search pattern supported by the platform which is guaranteed to return a superset of relevant files.</param>
         /// <param name="predicate">A predicate to test whether a file should be included.</param>
         /// <param name="transform">A transform from <code>ReadOnlySpan&lt;char&gt;</code> to <typeparamref name="TResult"/>.</param>
-        IEnumerable<TResult> EnumerateFiles<TResult>(string path, FindPredicate predicate, FindTransform<TResult> transform);
+        /// <remarks>
+        /// The <paramref name="pattern"/> parameter may match more files than what the caller is interested in. In other words,
+        /// <paramref name="predicate"/> can return <code>false</code> even if the implementation enumerates only files whose names
+        /// match the pattern. The implementation is free to ignore the pattern and call the predicate for all files on the given
+        /// <paramref name="path"/>.
+        /// </remarks>
+        IEnumerable<TResult> EnumerateFiles<TResult>(string path, string pattern, FindPredicate predicate, FindTransform<TResult> transform);
 
         /// <summary>
         /// Enumerates subdirectories in the given directory only (non-recursively).
         /// </summary>
         /// <typeparam name="TResult">The desired return type.</typeparam>
         /// <param name="path">The directory to enumerate.</param>
+        /// <param name="pattern">A search pattern supported by the platform which is guaranteed to return a superset of relevant directories.</param>
         /// <param name="predicate">A predicate to test whether a directory should be included.</param>
         /// <param name="transform">A transform from <code>ReadOnlySpan&lt;char&gt;</code> to <typeparamref name="TResult"/>.</param>
-        IEnumerable<TResult> EnumerateDirectories<TResult>(string path, FindPredicate predicate, FindTransform<TResult> transform);
+        /// <remarks>
+        /// The <paramref name="pattern"/> parameter may match more direcories than what the caller is interested in. In other words,
+        /// <paramref name="predicate"/> can return <code>false</code> even if the implementation enumerates only directories whose names
+        /// match the pattern. The implementation is free to ignore the pattern and call the predicate for all directories on the given
+        /// <paramref name="path"/>.
+        /// </remarks>
+        IEnumerable<TResult> EnumerateDirectories<TResult>(string path, string pattern, FindPredicate predicate, FindTransform<TResult> transform);
     }
 }

@@ -1510,8 +1510,8 @@ namespace Microsoft.Build.FileSystem
     public partial interface IDirectoryCache
     {
         bool DirectoryExists(string path);
-        System.Collections.Generic.IEnumerable<TResult> EnumerateDirectories<TResult>(string path, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
-        System.Collections.Generic.IEnumerable<TResult> EnumerateFiles<TResult>(string path, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
+        System.Collections.Generic.IEnumerable<TResult> EnumerateDirectories<TResult>(string path, string pattern, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
+        System.Collections.Generic.IEnumerable<TResult> EnumerateFiles<TResult>(string path, string pattern, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
         bool FileExists(string path);
     }
     public partial interface IDirectoryCacheFactory
