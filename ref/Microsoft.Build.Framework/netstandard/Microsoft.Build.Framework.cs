@@ -155,7 +155,9 @@ namespace Microsoft.Build.Framework
     public abstract partial class EngineServices
     {
         public const int Version1 = 1;
+        public const int Version2 = 2;
         protected EngineServices() { }
+        public virtual bool IsTaskInputLoggingEnabled { get { throw null; } }
         public virtual int Version { get { throw null; } }
         public virtual bool LogsMessagesOfImportance(Microsoft.Build.Framework.MessageImportance importance) { throw null; }
     }

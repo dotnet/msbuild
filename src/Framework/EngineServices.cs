@@ -21,6 +21,11 @@ namespace Microsoft.Build.Framework
         public const int Version1 = 1;
 
         /// <summary>
+        /// This version added the IsTaskInputLoggingEnabled property.
+        /// </summary>
+        public const int Version2 = 2;
+
+        /// <summary>
         /// An explicit version of this class. Must be incremented whenever new members are added. Derived classes should override
         /// the property to return the version actually being implemented.
         /// </summary>
@@ -37,5 +42,13 @@ namespace Microsoft.Build.Framework
         /// for <see cref="MessageImportance.Low"/>.
         /// </remarks>
         public virtual bool LogsMessagesOfImportance(MessageImportance importance) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the build is configured to log all task inputs.
+        /// </summary>
+        /// <remarks>
+        /// This is a performance optimization allowing tasks to skip expensive double-logging.
+        /// </remarks>
+        public virtual bool IsTaskInputLoggingEnabled => throw new NotImplementedException();
     }
 }

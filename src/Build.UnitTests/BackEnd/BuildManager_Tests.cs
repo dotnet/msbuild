@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Xml;
 
@@ -21,6 +22,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -4341,6 +4343,51 @@ $@"<Project InitialTargets=`Sleep`>
             logger.BuildFinishedEvents.ShouldHaveSingleItem();
             logger.FullLog.ShouldContain("Static graph loaded in");
             logger.FullLog.ShouldContain("3 nodes, 2 edges");
+        }
+
+        /// <summary>
+        /// Helper task used by <see cref="TaskInputLoggingIsExposedToTasks"/> to verify <see cref="TaskLoggingHelper.IsTaskInputLoggingEnabled"/>.
+        /// </summary>
+        public class LogTaskInputsCheckingTask : Task
+        {
+            public bool ExpectedTaskInputLoggingEnabled { get; set; }
+
+            public override bool Execute()
+            {
+                return Log.IsTaskInputLoggingEnabled == ExpectedTaskInputLoggingEnabled;
+            }
+        }
+
+        [Theory]
+        [InlineData("", false)] // regular task host, input logging disabled
+        [InlineData("", true)] // regular task host, input logging enabled
+        [InlineData("TaskHostFactory", false)] // OOP task host, input logging disabled
+        [InlineData("TaskHostFactory", true)] // OOP task host, input logging enabled
+        public void TaskInputLoggingIsExposedToTasks(string taskFactory, bool taskInputLoggingEnabled)
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
+
+  <UsingTask
+    TaskName=""" + typeof(LogTaskInputsCheckingTask).FullName + @"""
+    AssemblyFile=""" + Assembly.GetExecutingAssembly().Location + @"""
+    TaskFactory=""" + taskFactory + @"""
+  />
+
+  <Target Name=""target1"">
+    <LogTaskInputsCheckingTask ExpectedTaskInputLoggingEnabled=""" + taskInputLoggingEnabled + @""" />
+  </Target>
+
+</Project>");
+
+            _parameters.LogTaskInputs = taskInputLoggingEnabled;
+
+            Project project = CreateProject(projectContents, MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(new BuildRequestData(instance, new[] { "target1" }));
+            _buildManager.EndBuild();
+
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
         }
     }
 }
