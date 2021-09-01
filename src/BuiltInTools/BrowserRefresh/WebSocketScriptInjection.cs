@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
 
         private static readonly byte[] _bodyBytes = Encoding.UTF8.GetBytes(BodyMarker);
 
-        internal static string InjectedScript { get; } = $"<script src=\"{ApplicationPaths.BrowserRefreshJS.Value.Substring(1)}\"></script>";
+        internal static string InjectedScript { get; } = $"<script src=\"{ApplicationPaths.BrowserRefreshJS}\"></script>";
 
         private static readonly byte[] _injectedScriptBytes = Encoding.UTF8.GetBytes(InjectedScript);
 

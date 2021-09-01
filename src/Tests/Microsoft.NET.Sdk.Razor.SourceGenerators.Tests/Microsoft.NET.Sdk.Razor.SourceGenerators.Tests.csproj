@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
@@ -6,11 +6,9 @@
 
   <PropertyGroup>
     <TargetFramework>$(SdkTargetFramework)</TargetFramework>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <OutputType>Exe</OutputType>
     <PackageId>testSdkRSG</PackageId>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +20,9 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion)" />
+
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
