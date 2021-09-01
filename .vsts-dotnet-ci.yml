@@ -7,7 +7,8 @@ jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
   displayName: "Windows Full"
   pool:
-    vmImage: 'windows-2019'
+    name: NetCore1ESPool-Svc-Public
+    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019
   steps:
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
@@ -53,7 +54,8 @@ jobs:
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
   pool:
-    vmImage: 'windows-2019'
+    name: NetCore1ESPool-Svc-Public
+    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019
   steps:
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
@@ -100,7 +102,8 @@ jobs:
 - job: FullReleaseOnWindows
   displayName: "Windows Full Release (no bootstrap)"
   pool:
-    vmImage: 'windows-2019'
+    name: NetCore1ESPool-Svc-Public
+    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019
   steps:
   - task: BatchScript@1
     displayName: cibuild.cmd
@@ -147,7 +150,8 @@ jobs:
 - job: RichCodeNavIndex
   displayName: "Windows Code Indexing"
   pool:
-    vmImage: 'windows-latest'
+    name: NetCore1ESPool-Svc-Public
+    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019
   steps:
   - task: BatchScript@1
     displayName: build.cmd
@@ -163,7 +167,8 @@ jobs:
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   pool:
-    vmImage: 'ubuntu-latest'
+    name: NetCore1ESPool-Svc-Public
+    demands: ImageOverride -equals Ubuntu.2004.Amd64.Open.svc
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
@@ -197,7 +202,8 @@ jobs:
 - job: CoreOnMac
   displayName: "macOS Core"
   pool:
-    vmImage: 'macOS-10.14'
+    name: NetCore1ESPool-Svc-Public
+    demands: ImageOverride -equals OSX.1015.Amd64
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
