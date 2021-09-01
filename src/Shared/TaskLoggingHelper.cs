@@ -243,7 +243,7 @@ namespace Microsoft.Build.Utilities
         /// Returns <see langword="true"/> if the build is configured to log all task inputs.
         /// </summary>
         public bool IsTaskInputLoggingEnabled =>
-            BuildEngine is not IBuildEngine10 buildEngine10 || buildEngine10.EngineServices.IsTaskInputLoggingEnabled;
+            BuildEngine is IBuildEngine10 buildEngine10 && buildEngine10.EngineServices.IsTaskInputLoggingEnabled;
 
         /// <summary>
         /// Returns true if a message of given importance should be logged because it is possible that a logger consuming it exists.
