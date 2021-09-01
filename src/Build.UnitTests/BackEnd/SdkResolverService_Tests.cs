@@ -85,16 +85,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void AssertErrorLoggedWhenResolverThrows()
+        public void AssertResolverThrows()
         {
             SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeErrorResolver: true));
 
             SdkReference sdk = new SdkReference("1sdkName", "version1", "minimumVersion");
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
-
-            result.Path.ShouldBe("resolverpath1");
-            _logger.Warnings.Select(i => i.Message).ShouldBe(new [] { "The SDK resolver \"MockSdkResolverThrows\" failed to run. EXMESSAGE" });
+            // When an SDK resolver throws, the expander will catch it and stop the build.
+            SdkResolverException e = Should.Throw<SdkResolverException>(() => SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false));
+            e.Resolver.Name.ShouldBe("MockSdkResolverThrows");
+            e.Sdk.Name.ShouldBe("1sdkName");
         }
 
         [Fact]
