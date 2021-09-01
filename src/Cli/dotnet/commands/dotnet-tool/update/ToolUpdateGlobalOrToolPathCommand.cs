@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
                     foreach (RestoredCommand command in newInstalledPackage.Commands)
                     {
-                        shellShimRepository.CreateShim(command.Executable, command.Name);
+                        shellShimRepository.CreateShim(command.Executable, command.Name, newInstalledPackage.PackagedShims);
                     }
 
                     PrintSuccessMessage(oldPackageNullable, newInstalledPackage);

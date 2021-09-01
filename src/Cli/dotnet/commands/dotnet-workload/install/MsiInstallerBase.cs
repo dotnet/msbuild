@@ -26,6 +26,11 @@ namespace Microsoft.DotNet.Installer.Windows
         private HashSet<string> _reportedMessages = new HashSet<string>();
 
         /// <summary>
+        /// Backing field for the install location of .NET
+        /// </summary>
+        private string _dotNetHome;
+
+        /// <summary>
         /// Default reinstall mode (equivalent to VOMUS).
         /// </summary>
         public const ReinstallMode DefaultReinstallMode = ReinstallMode.FILEOLDERVERSION | ReinstallMode.FILEVERIFY |
@@ -35,24 +40,6 @@ namespace Microsoft.DotNet.Installer.Windows
         /// The prefix used when registering a dependent against a provider key.
         /// </summary>
         protected const string DependentPrefix = "Microsoft.NET.Sdk";
-
-        // Set MSIFASTINSTALL=7 and be explicit about what this means.
-        private const int _msiFastInstall = (int)(MsiFastInstall.NoSystemRestore | MsiFastInstall.OnlyFileCosting | MsiFastInstall.ReducedProgressFrequency);
-
-        /// <summary>
-        /// Set of default properties to use when installing.
-        /// </summary>
-        private static readonly string s_installProperties = $"MSIFASTINSTALL={_msiFastInstall} ARPSYSTEMCOMPONENT=1 REBOOT=ReallySuppress";
-
-        /// <summary>
-        /// Set of default properties to use when repairing.
-        /// </summary>
-        private static readonly string s_repairProperties = $"MSIFASTINSTALL={_msiFastInstall} ARPSYSTEMCOMPONENT=1 REBOOT=ReallySuppress REINSTALLMODE=vomus REINSTALL=ALL";
-
-        /// <summary>
-        /// Set of default properties to use when uninstalling.
-        /// </summary>
-        private static readonly string s_uninstallProperties = $"{s_installProperties} REMOVE=ALL";
 
         /// <summary>
         /// Supported installer architectures used to map workload packs to architecture
@@ -72,6 +59,23 @@ namespace Microsoft.DotNet.Installer.Windows
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// The install location of the .NET based on the host and OS architecture as stored in the registry. If
+        /// no registry entry exists, the default location is returned.
+        /// </summary>
+        protected string DotNetHome
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_dotNetHome))
+                {
+                    _dotNetHome = GetDotNetHome();
+                }
+
+                return _dotNetHome;
+            }
         }
 
         protected readonly IReporter Reporter;
@@ -112,9 +116,9 @@ namespace Microsoft.DotNet.Installer.Windows
         /// </summary>
         private IReadOnlyDictionary<string, List<WorkloadPackRecord>> GetWorkloadPackRecords()
         {
-            Log?.LogMessage("Detecting installed workload packs.");
+            Log?.LogMessage($"Detecting installed workload packs for {HostArchitecture}.");
             Dictionary<string, List<WorkloadPackRecord>> workloadPackRecords = new Dictionary<string, List<WorkloadPackRecord>>();
-            using RegistryKey installedPacksKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\dotnet\InstalledPacks");
+            using RegistryKey installedPacksKey = Registry.LocalMachine.OpenSubKey(@$"SOFTWARE\Microsoft\dotnet\InstalledPacks\{HostArchitecture}");
 
             if (installedPacksKey != null)
             {
@@ -149,6 +153,39 @@ namespace Microsoft.DotNet.Installer.Windows
             }
 
             return new ReadOnlyDictionary<string, List<WorkloadPackRecord>>(workloadPackRecords);
+        }
+
+        /// <summary>
+        /// Determines the per-machine install location for .NET. This is similar to the logic in the standalone installers.
+        /// </summary>
+        /// <returns>The path where .NET is installed based on the host architecture and operating system bitness.</returns>
+        private string GetDotNetHome()
+        {
+            // Configure the default location, e.g., if the registry key is absent. Technically that would be suggesting
+            // that the install is corrupt or we're being asked to run as an admin install in a non-admin deployment.
+            Environment.SpecialFolder programFiles = string.Equals(HostArchitecture, "x86") && Environment.Is64BitOperatingSystem
+                ? Environment.SpecialFolder.ProgramFilesX86
+                : Environment.SpecialFolder.ProgramFiles;
+            string dotNetHome = Path.Combine(Environment.GetFolderPath(programFiles), "dotnet");
+
+            using RegistryKey hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
+
+            if (hklm != null)
+            {
+                using RegistryKey hostKey = hklm.OpenSubKey($@"SOFTWARE\dotnet\Setup\InstalledVersions\{HostArchitecture}");
+
+                if (hostKey != null)
+                {
+                    string installLocation = (string)hostKey.GetValue("InstallLocation");
+
+                    if (!string.IsNullOrWhiteSpace(installLocation))
+                    {
+                        return installLocation;
+                    }
+                }
+            }
+
+            return dotNetHome;
         }
 
         /// <summary>
@@ -218,7 +255,10 @@ namespace Microsoft.DotNet.Installer.Windows
             if (IsElevated)
             {
                 ConfigureInstall(logFile);
-                return WindowsInstaller.InstallProduct(packagePath, s_installProperties);
+                string installProperties = InstallProperties.Create(InstallProperties.SystemComponent,
+                    InstallProperties.FastInstall, InstallProperties.SuppressReboot,
+                    $@"DOTNETHOME=""{DotNetHome}""");
+                return WindowsInstaller.InstallProduct(packagePath, installProperties);
             }
             else if (IsClient)
             {
@@ -245,8 +285,11 @@ namespace Microsoft.DotNet.Installer.Windows
             if (IsElevated)
             {
                 ConfigureInstall(logFile);
+                string installProperties = InstallProperties.Create(InstallProperties.SystemComponent,
+                    InstallProperties.FastInstall, InstallProperties.SuppressReboot,
+                    InstallProperties.RemoveAll);
                 return WindowsInstaller.ConfigureProduct(productCode, WindowsInstaller.INSTALLLEVEL_DEFAULT, InstallState.ABSENT,
-                    s_uninstallProperties);
+                    installProperties);
             }
             else if (IsClient)
             {

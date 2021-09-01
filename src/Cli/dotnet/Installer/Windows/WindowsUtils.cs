@@ -1,6 +1,5 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
 
 using System;
 using System.Runtime.Versioning;
@@ -25,7 +24,10 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <returns>A string containing the pipe name.</returns>
         public static string CreatePipeName(int processId, params string[] values)
         {
-            return Uuid.Create($"{processId};{Environment.ProcessPath};{Sha256Hasher.Hash(MacAddressGetter.GetMacAddress())};{string.Join(";", values)}")
+            // Reinvoking the host can cause differences between the original path, e.g.,
+            // "C:\Program Files" and "c:\Program Files". This will generate different UUID values and cause
+            // deadlock when the client and server are trying to connect, so always use the lower invariant of the process.
+            return Uuid.Create($"{processId};{Environment.ProcessPath.ToLowerInvariant()};{Sha256Hasher.Hash(MacAddressGetter.GetMacAddress())};{string.Join(";", values)}")
                 .ToString("B");
         }
 

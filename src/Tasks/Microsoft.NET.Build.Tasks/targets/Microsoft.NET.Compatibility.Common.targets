@@ -2,7 +2,13 @@
 <Project>
   <UsingTask TaskName="Microsoft.DotNet.Compatibility.ValidatePackage" AssemblyFile="$(DotNetCompatibilityAssembly)" />
 
+  <PropertyGroup>
+    <!--Add any custom targets that need to run before package validation to the following property-->
+    <RunPackageValidationDependsOn>_GetReferencePathFromInnerProjects;$(RunPackageValidationDependsOn)</RunPackageValidationDependsOn>
+  </PropertyGroup>
+
   <Target Name="RunPackageValidation"
+          DependsOnTargets="$(RunPackageValidationDependsOn)"
           AfterTargets="Pack"
           Condition="'$(IsPackable)' == 'true' and '$(EnablePackageValidation)' == 'true'">
 
@@ -34,6 +40,36 @@
       CompatibilitySuppressionFilePath="$(CompatibilitySuppressionFilePath)"
       BaselinePackageTargetPath="$(PackageValidationBaselinePath)"
       DisablePackageBaselineValidation="$(DisablePackageBaselineValidation)"
-      RoslynAssembliesPath="$(RoslynAssembliesPath)" />
+      RoslynAssembliesPath="$(RoslynAssembliesPath)"
+      ReferencePaths="@(PackageValidationReferencePath)" />
+  </Target>
+
+  <PropertyGroup>
+    <_GetReferencePathFromInnerProjectsDependsOn Condition="'$(IsCrossTargetingBuild)' != 'true'">_GetReferencePathForPackageValidation</_GetReferencePathFromInnerProjectsDependsOn>
+    <_GetReferencePathFromInnerProjectsDependsOn Condition="'$(IsCrossTargetingBuild)' == 'true'">_ComputeTargetFrameworkItems</_GetReferencePathFromInnerProjectsDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_GetReferencePathForPackageValidation"
+          DependsOnTargets="ResolveReferences"
+          Returns="@(_ReferencePathWithTargetFramework)">
+    <ItemGroup>
+      <_ReferencePathWithTargetFramework Include="@(ReferencePath)"  TargetFramework="$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GetReferencePathFromInnerProjects"
+          DependsOnTargets="$(_GetReferencePathFromInnerProjectsDependsOn)"
+          Condition="'$(RunPackageValidationWithoutReferences)' != 'true'">
+
+    <MSBuild Projects="@(_InnerBuildProjects)"
+             Condition="'$(IsCrossTargetingBuild)' == 'true'"
+             Targets="_GetReferencePathForPackageValidation"
+             Properties="BuildProjectReferences=false">
+      <Output ItemName="PackageValidationReferencePath" TaskParameter="TargetOutputs" />
+    </MSBuild>
+
+    <ItemGroup Condition="'$(IsCrossTargetingBuild)' != 'true'">
+      <PackageValidationReferencePath Include="@(_ReferencePathWithTargetFramework)" />
+    </ItemGroup>
   </Target>
 </Project>

@@ -177,8 +177,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private string GetProductCode()
         {
             using RegistryKey providerKey = BaseKey.OpenSubKey(ProviderKeyPath);
-
-            return providerKey.GetValue(null) as string;
+            return providerKey?.GetValue(null) as string ?? null;
         }
     }
 }

@@ -21,17 +21,18 @@ namespace Microsoft.DotNet.PackageValidation
         internal Dictionary<MetadataInformation, List<(MetadataInformation rightAssembly, string header)>> _dict = new();
         private readonly ApiComparer _differ = new();
         private readonly ICompatibilityLogger _log;
-
+        private readonly Dictionary<string, HashSet<string>> _referencePaths;
         private bool _isBaselineSuppression = false;
         private string _leftPackagePath;
         private string _rightPackagePath;
 
-        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, ICompatibilityLogger log)
+        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, ICompatibilityLogger log, Dictionary<string, HashSet<string>> referencePaths)
         {
             _differ.NoWarn = noWarn;
             _differ.IgnoredDifferences = ignoredDifferences;
             _differ.StrictMode = enableStrictMode;
             _log = log;
+            _referencePaths = referencePaths ?? new();
         }
 
         /// <summary>
@@ -42,10 +43,12 @@ namespace Microsoft.DotNet.PackageValidation
             foreach (MetadataInformation left in _dict.Keys)
             {
                 IAssemblySymbol leftSymbols;
+                bool runWithReferences = false;
                 using(Stream leftAssemblyStream = GetFileStreamFromPackage(_leftPackagePath, left.AssemblyId))
                 {
-                    leftSymbols = new AssemblySymbolLoader().LoadAssembly(left.AssemblyName, leftAssemblyStream);
+                    leftSymbols = GetAssemblySymbolFromStream(leftAssemblyStream, left, out runWithReferences);
                 }
+
                 ElementContainer<IAssemblySymbol> leftContainer = new(leftSymbols, left);
 
                 List<ElementContainer<IAssemblySymbol>> rightContainerList = new();
@@ -54,8 +57,10 @@ namespace Microsoft.DotNet.PackageValidation
                     IAssemblySymbol rightSymbols;
                     using (Stream rightAssemblyStream = GetFileStreamFromPackage(_rightPackagePath, rightTuple.rightAssembly.AssemblyId))
                     {
-                        rightSymbols = new AssemblySymbolLoader().LoadAssembly(rightTuple.rightAssembly.AssemblyName, rightAssemblyStream);
+                        rightSymbols = GetAssemblySymbolFromStream(rightAssemblyStream, rightTuple.rightAssembly, out bool resolvedReferences);
+                        runWithReferences &= resolvedReferences;
                     }
+
                     rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightSymbols, rightTuple.rightAssembly));
                 }
 
@@ -66,10 +71,16 @@ namespace Microsoft.DotNet.PackageValidation
                 foreach ((MetadataInformation, MetadataInformation, IEnumerable<CompatDifference> differences) diff in differences)
                 {
                     (MetadataInformation rightAssembly, string header) rightTuple = _dict[left][counter++];
-                    _log.LogMessage(MessageImportance.Low, rightTuple.header);
 
+                    bool logHeaderMessage = true;
                     foreach (CompatDifference difference in diff.differences)
                     {
+                        if (logHeaderMessage)
+                        {
+                            _log.LogMessage(MessageImportance.Low, rightTuple.header);
+                            logHeaderMessage = false;
+                        }
+
                         _log.LogError(
                             new Suppression
                             {
@@ -85,6 +96,61 @@ namespace Microsoft.DotNet.PackageValidation
                 }
             }
             _dict.Clear();
+        }
+
+        private IAssemblySymbol GetAssemblySymbolFromStream(Stream assemblyStream, MetadataInformation assemblyInformation, out bool resolvedReferences)
+        {
+            resolvedReferences = false;
+            HashSet<string> referencePathForTFM = null;
+
+            // In order to enable reference support for baseline suppression we need a better way
+            // to resolve references for the baseline package. Let's not enable it for now.
+            bool shouldResolveReferences = !_isBaselineSuppression && _referencePaths != null &&
+                _referencePaths.TryGetValue(assemblyInformation.TargetFramework, out referencePathForTFM);
+
+            AssemblySymbolLoader loader = new(resolveAssemblyReferences: shouldResolveReferences);
+            if (shouldResolveReferences)
+            {
+                resolvedReferences = true;
+                loader.AddReferenceSearchDirectories(referencePathForTFM);
+            }
+            else if (!_isBaselineSuppression && _referencePaths != null && ShouldLogDiagnosticId(ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm))
+            {
+                _log.LogWarning(
+                    new Suppression()
+                    {
+                        DiagnosticId = ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm,
+                        Target = assemblyInformation.DisplayString
+                    },
+                    ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm,
+                    Resources.MissingSearchDirectory,
+                    assemblyInformation.TargetFramework, assemblyInformation.DisplayString);
+            }
+
+            IAssemblySymbol symbol = loader.LoadAssembly(assemblyInformation.AssemblyName, assemblyStream);
+
+            if (loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings))
+            {
+                resolvedReferences = false;
+                foreach (AssemblyLoadWarning warning in warnings)
+                {
+                    if (ShouldLogDiagnosticId(warning.DiagnosticId))
+                    {
+                        _log.LogWarning(
+                            new Suppression()
+                            {
+                                DiagnosticId = warning.DiagnosticId,
+                                Target = warning.ReferenceId
+                            },
+                            warning.DiagnosticId,
+                            Resources.AssemblyLoadWarning,
+                            assemblyInformation.DisplayString,
+                            warning.Message);
+                    }
+                }
+            }
+
+            return symbol;
         }
 
         /// <summary>
@@ -133,6 +199,22 @@ namespace Microsoft.DotNet.PackageValidation
                 ms.Seek(0, SeekOrigin.Begin);
             }
             return ms;
+        }
+
+        private bool ShouldLogDiagnosticId(string diagnosticId)
+        {
+            if (!string.IsNullOrEmpty(_differ.NoWarn))
+            {
+                foreach (var noWarn in _differ.NoWarn.Split(';'))
+                {
+                    if (StringComparer.InvariantCultureIgnoreCase.Equals(noWarn, diagnosticId))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

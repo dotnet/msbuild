@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -156,7 +158,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 
                     foreach (ISymbol member in symbol.GetMembers())
                     {
-                        if (Settings.Filter.Include(member) && member is not ITypeSymbol)
+                        // when running without references Roslyn doesn't filter out the special value__ field emitted
+                        // for enums. The reason why we should filter it out, is because we could have a case
+                        // where one side was loaded with references and one that was loaded without, if that is the case
+                        // we would compare __value vs null and emit some warnings.
+                        if (Settings.Filter.Include(member) && member is not ITypeSymbol && !IsSpecialEnumField(member))
                         {
                             if (!_members.TryGetValue(member, out MemberMapper mapper))
                             {
@@ -171,5 +177,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 
             return _members.Values;
         }
+
+        private bool IsSpecialEnumField(ISymbol member) =>
+            !Settings.RunningWithReferences &&
+            member is IFieldSymbol &&
+            member.Name == "value__" &&
+            // When running without references, Roslyn doesn't set the type kind as enum. Compare by name instead.
+            member.ContainingType.BaseType?.ToComparisonDisplayString() == "System.Enum";
     }
 }

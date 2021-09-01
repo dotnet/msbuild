@@ -12,6 +12,11 @@
         <target state="new">API compatibility errors between '{0}' (left) and '{1}' (right):</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssemblyLoadWarning">
+        <source>When loading: '{0}': {1}</source>
+        <target state="new">When loading: '{0}': {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Baseline">
         <source>[Baseline]</source>
         <target state="new">[Baseline]</target>
@@ -25,6 +30,11 @@
       <trans-unit id="InvalidPackagePath">
         <source>Package path '{0}' is invalid.</source>
         <target state="new">Package path '{0}' is invalid.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingSearchDirectory">
+        <source>Could not find a reference directory in the provided directories for TargetFramework '{0}' when loading '{1}'. For more information see: https://aka.ms/dotnetpackagevalidation</source>
+        <target state="new">Could not find a reference directory in the provided directories for TargetFramework '{0}' when loading '{1}'. For more information see: https://aka.ms/dotnetpackagevalidation</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTargetFramework">

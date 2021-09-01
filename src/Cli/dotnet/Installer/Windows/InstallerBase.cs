@@ -199,7 +199,8 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <param name="exception">The exception to log.</param>
         protected void LogException(Exception exception)
         {
-            Log?.LogMessage($"{exception.Message} HResult: 0x{exception.HResult:x8}.");
+            Log?.LogMessage($"Exception: {exception.Message}, HResult: 0x{exception.HResult:x8}.");
+            Log?.LogMessage($"{exception.StackTrace}");
         }
 
         static InstallerBase()

@@ -14,14 +14,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         private readonly RuleSettings _settings;
         private readonly string _leftName;
         private readonly string[] _rightNames;
-
         internal const string DEFAULT_LEFT_NAME = "left";
         internal const string DEFAULT_RIGHT_NAME = "right";
 
-        internal RuleRunner(string leftName, string[] rightNames, bool strictMode, IEqualityComparer<ISymbol> symbolComparer, bool includeInternalSymbols)
+        internal RuleRunner(string leftName, string[] rightNames, bool strictMode, IEqualityComparer<ISymbol> symbolComparer, bool includeInternalSymbols, bool withReferences)
         {
             _context = new RuleRunnerContext();
-            _settings = new RuleSettings(strictMode, symbolComparer, includeInternalSymbols);
+            _settings = new RuleSettings(strictMode, symbolComparer, includeInternalSymbols, withReferences);
             _leftName = leftName;
             _rightNames = rightNames;
             InitializeRules();
