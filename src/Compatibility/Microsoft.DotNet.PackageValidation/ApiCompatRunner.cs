@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility;
@@ -64,6 +65,7 @@ namespace Microsoft.DotNet.PackageValidation
                     rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightSymbols, rightTuple.rightAssembly));
                 }
 
+                _differ.RunningWithReferences = runWithReferences;
                 IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                     _differ.GetDifferences(leftContainer, rightContainerList);
 
@@ -128,27 +130,6 @@ namespace Microsoft.DotNet.PackageValidation
             }
 
             IAssemblySymbol symbol = loader.LoadAssembly(assemblyInformation.AssemblyName, assemblyStream);
-
-            if (loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings))
-            {
-                resolvedReferences = false;
-                foreach (AssemblyLoadWarning warning in warnings)
-                {
-                    if (ShouldLogDiagnosticId(warning.DiagnosticId))
-                    {
-                        _log.LogWarning(
-                            new Suppression()
-                            {
-                                DiagnosticId = warning.DiagnosticId,
-                                Target = warning.ReferenceId
-                            },
-                            warning.DiagnosticId,
-                            Resources.AssemblyLoadWarning,
-                            assemblyInformation.DisplayString,
-                            warning.Message);
-                    }
-                }
-            }
 
             return symbol;
         }

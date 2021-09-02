@@ -132,55 +132,19 @@ namespace Microsoft.DotNet.PackageValidation.Tests
         {
             TestLogger log = new TestLogger();
 
-            string subDependencyName = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
-            TestProject testSubDependency = new()
-            {
-                Name = subDependencyName,
-                TargetFrameworks = "netstandard2.0"
-            };
-            string subDependencySourceCode = @"
-namespace PackageValidationTests
-{
-    public interface IBaseInterface { }
-}
-";
-            testSubDependency.SourceFiles.Add("IBaseInterface.cs", subDependencySourceCode);
-
-            string dependencyName = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
-            TestProject testDependency = new()
-            {
-                Name = dependencyName,
-                TargetFrameworks = "netstandard2.0;net5.0"
-            };
-            string dependencySourceCode = @"
-namespace PackageValidationTests
-{
-    public class ItermediateBaseClass
+            string testDependencySource = @"namespace PackageValidationTests { public class ItermediateBaseClass
 #if NETSTANDARD2_0
-: IBaseInterface
+: IBaseInterface 
 #endif
-    { }
-}
-";
-            testDependency.ReferencedProjects.Add(testSubDependency);
-            testDependency.SourceFiles.Add("ItermediateBaseClass.cs", dependencySourceCode);
+{ } }";
 
+            TestProject testSubDependency = CreateTestProject(@"namespace PackageValidationTests { public interface IBaseInterface { } }", "netstandard2.0");
+            TestProject testDependency = CreateTestProject(
+                                            testDependencySource,
+                                            "netstandard2.0;net5.0",
+                                            new[] { testSubDependency });
+            TestProject testProject = CreateTestProject(@"namespace PackageValidationTests { public class First : ItermediateBaseClass { } }", "netstandard2.0;net5.0", new[] { testDependency });
 
-            string name = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
-            TestProject testProject = new()
-            {
-                Name = name,
-                TargetFrameworks = "netstandard2.0;net5.0",
-            };
-
-            string sourceCode = @"
-namespace PackageValidationTests
-{
-    public class First : ItermediateBaseClass { }
-}";
-
-            testProject.ReferencedProjects.Add(testDependency);
-            testProject.SourceFiles.Add("Hello.cs", sourceCode);
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
@@ -204,6 +168,113 @@ namespace PackageValidationTests
             Assert.NotEmpty(log.errors);
 
             Assert.Contains($"CP0008 Type 'PackageValidationTests.First' does not implement interface 'PackageValidationTests.IBaseInterface' on lib/net5.0/{asset.TestProject.Name}.dll but it does on lib/netstandard2.0/{asset.TestProject.Name}.dll" ,log.errors);
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(false, true, false)]
+        [InlineData(false, false, false)]
+        [InlineData(true, false, false)]
+        [InlineData(true, true, true)]
+        public void ValidateOnlyErrorWhenAReferenceIsRequired(bool createDependencyToDummy, bool useReferences, bool shouldLogError)
+        {
+            TestLogger log = new TestLogger();
+
+            string testDependencyCode = createDependencyToDummy ?
+                                        @"namespace PackageValidationTests{public class SomeBaseClass : IDummyInterface { }public class SomeDummyClass : IDummyInterface { }}" :
+                                        @"namespace PackageValidationTests{public class SomeBaseClass { }public class SomeDummyClass : IDummyInterface { }}";
+
+            TestProject testDummyDependency = CreateTestProject(@"namespace PackageValidationTests { public interface IDummyInterface { } }", "netstandard2.0");
+            TestProject testDependency = CreateTestProject( testDependencyCode, "netstandard2.0", new[] { testDummyDependency });
+            TestProject testProject = CreateTestProject(@"namespace PackageValidationTests { public class First : SomeBaseClass { } }", "netstandard2.0;net5.0", new[] { testDependency });
+
+            TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            var result = packCommand.Execute();
+            Assert.Equal(string.Empty, result.StdErr);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+
+            Dictionary<string, HashSet<string>> references = new()
+            {
+                { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
+                { "net5.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0") } }
+            };
+
+            File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0", $"{testDummyDependency.Name}.dll"));
+
+            // First we run without references. Without references, ApiCompat should not be able to see that class First
+            // removed an interface due to it's base class removing that implementation. We validate that APICompat doesn't
+            // log errors when not using references.
+            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, log, useReferences ? references : null).Validate(package);
+            if (shouldLogError)
+                Assert.Contains($"CP1002 Could not find matching assembly: '{testDummyDependency.Name}.dll' in any of the search directories.", log.errors);
+            else
+                Assert.DoesNotContain($"CP1002 Could not find matching assembly: '{testDummyDependency.Name}.dll' in any of the search directories." ,log.errors);
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(false, true, false, false)]
+        [InlineData(true, false, false, false)]
+        [InlineData(true, true, true, true)]
+        public void ValidateErrorWhenTypeForwardingReferences(bool useReferences, bool expectCP0001, bool deleteFile, bool expectCP1002)
+        {
+            TestLogger log = new TestLogger();
+
+            string dependencySourceCode = @"namespace PackageValidationTests { public interface ISomeInterface { }
+#if !NETSTANDARD2_0
+public class MyForwardedType : ISomeInterface { }
+#endif
+}";
+            string testSourceCode = @"
+#if NETSTANDARD2_0
+namespace PackageValidationTests { public class MyForwardedType : ISomeInterface { } }
+#else
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(PackageValidationTests.MyForwardedType))]
+#endif";
+            TestProject dependency = CreateTestProject(dependencySourceCode, "netstandard2.0;net5.0");
+            TestProject testProject = CreateTestProject(testSourceCode, "netstandard2.0;net5.0", new[] { dependency });
+
+            TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            var result = packCommand.Execute();
+            Assert.Equal(string.Empty, result.StdErr);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+
+            Dictionary<string, HashSet<string>> references = new()
+            {
+                { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
+                { "net5.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0") } }
+            };
+
+            if (deleteFile)
+                File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0", $"{dependency.Name}.dll"));
+
+            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, log, useReferences ? references : null).Validate(package);
+
+            if (expectCP0001)
+                Assert.Contains($"CP0001 Type 'PackageValidationTests.MyForwardedType' exists on lib/netstandard2.0/{testProject.Name}.dll but not on lib/net5.0/{testProject.Name}.dll", log.errors);
+
+            if (expectCP1002)
+                Assert.Contains($"CP1002 Could not find matching assembly: '{dependency.Name}.dll' in any of the search directories.", log.errors);
+        }
+
+        private TestProject CreateTestProject(string sourceCode, string tfms, IEnumerable<TestProject> referenceProjects = null)
+        {
+            string name = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
+            TestProject testProject = new()
+            {
+                Name = name,
+                TargetFrameworks = tfms,
+            };
+
+            testProject.SourceFiles.Add($"{name}.cs", sourceCode);
+
+            if (referenceProjects != null)
+            {
+                foreach (var project in referenceProjects)
+                    testProject.ReferencedProjects.Add(project);
+            }
+
+            return testProject;
         }
     }
 }
