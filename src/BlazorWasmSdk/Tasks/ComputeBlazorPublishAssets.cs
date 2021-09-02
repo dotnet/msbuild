@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -191,8 +192,21 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     ITaskItem newDotNetJs = null;
                     if (aotDotNetJs != null)
                     {
+                        var hash = aotDotNetJs.GetMetadata("FileHash");
+                        if (string.IsNullOrEmpty(hash))
+                        {
+                            // Some files that are part of the service worker manifest may not have their hashes previously
+                            // calculated. Calculate them at this time.
+                            using var sha = SHA256.Create();
+                            using var file = File.OpenRead(aotDotNetJs.ItemSpec);
+                            var bytes = sha.ComputeHash(file);
+
+                            hash = Convert.ToBase64String(bytes);
+                        }
+
                         newDotNetJs = new TaskItem(Path.GetFullPath(aotDotNetJs.ItemSpec), asset.CloneCustomMetadata());
                         newDotNetJs.SetMetadata("OriginalItemSpec", aotDotNetJs.ItemSpec);
+                        newDotNetJs.SetMetadata("RelativePath", $"dotnet.{hash}.js");
                         updateMap.Add(asset.ItemSpec, newDotNetJs);
                         Log.LogMessage("Replacing asset '{0}' with linked version '{1}'", asset.ItemSpec, newDotNetJs.ItemSpec);
                     }
