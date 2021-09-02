@@ -202,8 +202,7 @@ jobs:
 - job: CoreOnMac
   displayName: "macOS Core"
   pool:
-    name: NetCore1ESPool-Svc-Public
-    demands: ImageOverride -equals OSX.1015.Amd64.Open
+    vmImage: 'macOS-10.14'
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
