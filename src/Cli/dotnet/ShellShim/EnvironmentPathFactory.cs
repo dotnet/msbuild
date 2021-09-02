@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Xsl;
@@ -44,7 +43,7 @@ namespace Microsoft.DotNet.ShellShim
             else if (OperatingSystem.IsLinux() && isDotnetBeingInvokedFromNativeInstaller)
             {
                 environmentPath = new LinuxEnvironmentPath(
-                    ToolsShimPathInUnix,
+                    CliFolderPathCalculator.ToolsShimPathInUnix,
                     Reporter.Output,
                     environmentProvider,
                     new FileWrapper());
@@ -52,7 +51,7 @@ namespace Microsoft.DotNet.ShellShim
             else if (OperatingSystem.IsMacOS() && isDotnetBeingInvokedFromNativeInstaller)
             {
                 environmentPath = new OsxBashEnvironmentPath(
-                    executablePath: ToolsShimPathInUnix,
+                    executablePath: CliFolderPathCalculator.ToolsShimPathInUnix,
                     reporter: Reporter.Output,
                     environmentProvider: environmentProvider,
                     fileSystem: new FileWrapper());
@@ -72,7 +71,7 @@ namespace Microsoft.DotNet.ShellShim
             if (OperatingSystem.IsMacOS() && ZshDetector.IsZshTheUsersShell(environmentProvider))
             {
                 return new OsxZshEnvironmentPathInstruction(
-                    executablePath: ToolsShimPathInUnix,
+                    executablePath: CliFolderPathCalculator.ToolsShimPathInUnix,
                     reporter: Reporter.Output,
                     environmentProvider: environmentProvider);
             }
@@ -89,10 +88,5 @@ namespace Microsoft.DotNet.ShellShim
 
             return CreateEnvironmentPath(true, environmentProvider);
         }
-
-        private static BashPathUnderHomeDirectory ToolsShimPathInUnix =>
-            new BashPathUnderHomeDirectory(
-                CliFolderPathCalculator.DotnetHomePath,
-                Path.Combine(CliFolderPathCalculator.DotnetProfileDirectoryName, CliFolderPathCalculator.ToolsShimFolderName));
     }
 }

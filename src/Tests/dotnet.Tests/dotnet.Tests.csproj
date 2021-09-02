@@ -14,9 +14,6 @@
          on a valid layout. -->
     <OutputPath>$(ArtifactsBinDir)redist\$(Configuration)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-
-    <!-- Suppress warning about using ambiguity between compiled Common types and not the imported ones. -->
-    <NoWarn>$(NoWarn);0436</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -54,9 +51,6 @@
     <Compile Include="..\Microsoft.DotNet.CommandFactory.Tests\**\*.cs" LinkBase="CommandFactory" />
     <Compile Include="..\Microsoft.DotNet.Configurer.UnitTests\**\*.cs" LinkBase="Configurer" />
     <Compile Include="..\Microsoft.DotNet.ShellShim.Tests\**\*.cs" LinkBase="ShellShim" />
-    <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculator.cs" LinkBase="Common"/>
-    <Compile Include="$(RepoRoot)src\Common\ExceptionExtensions.cs" LinkBase="Common"/>
-    <Compile Include="$(RepoRoot)src\Common\ConfigurationException.cs" LinkBase="Common"/>
 
     <None Include="..\Microsoft.DotNet.ShellShim.Tests\WpfBinaryTestAsssets\testwpf.dll" LinkBase="WpfBinaryTestAsssets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -164,9 +158,5 @@
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <!-- This package comes from dotnet/runtime-assets -->
     <PackageReference Include="Microsoft.DotNet.Installer.Windows.Security.TestData" Version="$(MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion)" GeneratePathProperty="true" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="..\..\Cli\dotnet\CommonLocalizableStrings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.DotNet.Tools" />
   </ItemGroup>
 </Project>

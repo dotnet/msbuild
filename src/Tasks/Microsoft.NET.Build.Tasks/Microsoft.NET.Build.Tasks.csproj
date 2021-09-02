@@ -80,16 +80,13 @@
     <Compile Include="..\..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\**\*.cs" LinkBase="WorkloadManifestReader" />
     <Compile Include="..\..\Resolvers\Microsoft.DotNet.MSBuildSdkResolver\FXVersion.cs" LinkBase="WorkloadManifestReader"/>
     <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common"/>
-    <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculator.cs" LinkBase="Common"/>
-    <Compile Include="$(RepoRoot)src\Common\ExceptionExtensions.cs" LinkBase="Common"/>
-    <Compile Include="$(RepoRoot)src\Common\ConfigurationException.cs" LinkBase="Common"/>
+    <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculatorCore.cs" LinkBase="Common"/>
     <Compile Include="$(RepoRoot)src\Common\WorkloadInstall.cs" LinkBase="Common"/>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\Common\Resources\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Build.Tasks" />
     <EmbeddedResource Include="..\..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\Strings.resx" LinkBase="Resources\WorkloadManifestReoder" GenerateSource="True" Namespace="Microsoft.NET.Sdk.Localization"/>
-    <EmbeddedResource Include="..\..\Cli\dotnet\CommonLocalizableStrings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.DotNet.Tools" />
   </ItemGroup>
 
   <ItemGroup>

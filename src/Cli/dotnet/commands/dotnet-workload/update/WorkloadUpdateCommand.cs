@@ -69,7 +69,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath);
+            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
@@ -81,14 +82,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  sourceOption);
 
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), _userProfileDir);
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             var restoreActionConfig = _parseResult.ToRestoreActionConfig();
-            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter,
-                sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader,
-                dotnetDir, _tempDirPath, _userProfileDir, packageSourceLocation: _packageSourceLocation, restoreActionConfig,
+                sdkFeatureBand, _workloadResolver, _verbosity, _userProfileDir, nugetPackageDownloader,
+                dotnetDir, _tempDirPath, packageSourceLocation: _packageSourceLocation, restoreActionConfig,
                 elevationRequired: !_printDownloadLinkOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir,
@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             {
                 await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, new DirectoryPath(tempManifestDir));
                 var overlayManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
-                _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString());
+                _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
 
                 if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
                 {
@@ -306,7 +306,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreview, tempPath);
             await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, tempPath);
             var overlayManifestProvider = new TempDirectoryWorkloadManifestProvider(tempPath.Value, _sdkVersion.ToString());
-            _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
         }
 
         private IEnumerable<WorkloadId> GetUpdatableWorkloads()

@@ -95,11 +95,6 @@ EOF
 </target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToDetermineUserHomeDirectory">
-        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
-        <target state="translated">无法确定用户的主目录。设置“{0}”环境变量以指定要使用的目录。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FrameworkDependentOptionDescription">
         <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
         <target state="new">Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</target>

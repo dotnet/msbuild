@@ -40,15 +40,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public NetSdkManagedInstaller(IReporter reporter,
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver,
+            string userProfileDir,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null,
-            string userProfileDir = null,
             string tempDirPath = null,
             VerbosityOptions verbosity = VerbosityOptions.normal,
             PackageSourceLocation packageSourceLocation = null,
             RestoreActionConfig restoreActionConfig = null)
         {
-            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            _userProfileDir = userProfileDir;
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _tempPackagesDir = new DirectoryPath(tempDirPath ?? Path.GetTempPath());
             ILogger logger = verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();

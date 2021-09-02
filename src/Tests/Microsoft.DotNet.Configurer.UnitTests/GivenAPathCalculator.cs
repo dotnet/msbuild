@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -18,7 +17,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         {
             // shim name will conflict with the folder that is PackageId, if commandName and packageId are the same.
             CliFolderPathCalculator.ToolsPackagePath.Should().NotBe(CliFolderPathCalculator.ToolsShimPath);
-            CliFolderPathCalculator.ToolsPackagePath.Should().NotBe($"{CliFolderPathCalculator.DotnetHomePath}/{Path.Combine(CliFolderPathCalculator.DotnetProfileDirectoryName, CliFolderPathCalculator.ToolsShimFolderName)}");
+            CliFolderPathCalculator.ToolsPackagePath.Should().NotBe(CliFolderPathCalculator.ToolsShimPathInUnix.Path);
         }
     }
 }

@@ -64,12 +64,13 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                ? Path.GetTempPath()
                                : result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption));
             _targetSdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
+            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             var workloadManifestProvider =
                 new SdkDirectoryWorkloadManifestProvider(_dotnetPath,
                     string.IsNullOrWhiteSpace(_targetSdkVersion)
                         ? currentSdkReleaseVersion.ToString()
-                        : _targetSdkVersion);
-            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
+                        : _targetSdkVersion,
+                    _userProfileDir);
             DirectoryPath tempPackagesDir =
                 new(Path.Combine(_userProfileDir, "sdk-advertising-temp"));
             NullLogger nullLogger = new NullLogger();
@@ -78,10 +79,10 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger),
                                           verboseLogger: nullLogger,
                                           restoreActionConfig: _parseResult.ToRestoreActionConfig());
-            workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString());
+            workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
 
             _workloadRecordRepo = workloadRecordRepo ??
-                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity, userProfileDir: _userProfileDir,
+                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity, _userProfileDir,
                 elevationRequired: false).GetWorkloadInstallationRecordRepository();
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,

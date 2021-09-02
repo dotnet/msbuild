@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Configurer;
 using Microsoft.NET.Sdk.Localization;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
@@ -20,13 +19,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos" };
         private readonly HashSet<string>? _knownManifestIds;
 
-        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
-            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable)
+        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir)
+            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir)
         {
 
         }
 
-        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable, string userProfileDir = null!)
+        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable, string? userProfileDir)
         {
             if (string.IsNullOrWhiteSpace(sdkVersion))
             {
@@ -61,10 +60,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 _knownManifestIds = File.ReadAllLines(knownManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)).ToHashSet();
             }
 
-            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            string userManifestsDir = Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand);
+            string? userManifestsDir = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand);
             string dotnetManifestDir = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
-            if (WorkloadInstall.IsUserLocal(_sdkRootPath, sdkVersion) && Directory.Exists(userManifestsDir))
+            if (userManifestsDir != null && WorkloadInstall.IsUserLocal(_sdkRootPath, sdkVersion) && Directory.Exists(userManifestsDir))
             {
                 _manifestDirectories = new[] { userManifestsDir, dotnetManifestDir };
             }

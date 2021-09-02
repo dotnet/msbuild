@@ -51,7 +51,7 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(_manifestDirectory, "iOS", "WorkloadManifest.json"), iosManifestFileContent);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100");
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -68,7 +68,7 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), androidManifestFileContent);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.105");
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -81,7 +81,7 @@ namespace ManifestReaderTests
             Initialize();
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.105");
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
             sdkDirectoryWorkloadManifestProvider.GetManifests().Should().BeEmpty();
         }
 
@@ -93,7 +93,7 @@ namespace ManifestReaderTests
             Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.105");
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
 
             Action a = () => sdkDirectoryWorkloadManifestProvider.GetManifests().Select(m => {
                 using (m.openManifestStream()) { }
@@ -126,7 +126,7 @@ namespace ManifestReaderTests
 
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -155,7 +155,7 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "OverriddenAndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -198,7 +198,7 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test", "WorkloadManifest.json"), "TestContent2");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -221,7 +221,7 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "AndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -240,7 +240,7 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(_manifestDirectory, "Microsoft.NET.Workload.Android", "WorkloadManifest.json"), "iOSContent");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100");
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -286,7 +286,7 @@ namespace ManifestReaderTests
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: fakeDotnetRootDirectory, sdkVersion: "6.0.100");
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: fakeDotnetRootDirectory, sdkVersion: "6.0.100", userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()

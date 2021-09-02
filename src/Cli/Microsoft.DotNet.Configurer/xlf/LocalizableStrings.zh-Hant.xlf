@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="translated">無法判定該使用者的主目錄。請設定 '{0}' 環境變數，指定要使用的目錄。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FirstTimeMessageMoreInformation">
         <source>----------------
 Installed an ASP.NET Core HTTPS development certificate.

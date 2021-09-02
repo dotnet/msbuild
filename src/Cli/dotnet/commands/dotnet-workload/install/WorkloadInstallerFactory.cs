@@ -19,10 +19,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver, 
             VerbosityOptions verbosity,
+            string userProfileDir,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null, 
             string tempDirPath = null,
-            string userProfileDir = null,
             PackageSourceLocation packageSourceLocation = null,
             RestoreActionConfig restoreActionConfig = null, 
             bool elevationRequired = true)
@@ -52,10 +52,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return new NetSdkManagedInstaller(reporter,
                 sdkFeatureBand,
                 workloadResolver,
+                userProfileDir,
                 nugetPackageDownloader,
                 dotnetDir: dotnetDir,
                 tempDirPath: tempDirPath,
-                userProfileDir: userProfileDir,
                 verbosity: verbosity,
                 packageSourceLocation: packageSourceLocation,
                 restoreActionConfig: restoreActionConfig);

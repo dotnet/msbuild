@@ -53,21 +53,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _workloadRecordRepo = workloadRecordRepo;
         }
 
-        private static WorkloadManifestUpdater GetInstance()
+        private static WorkloadManifestUpdater GetInstance(string userProfileDir)
         {
             var reporter = new NullReporter();
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
             var sdkVersion = Product.Version;
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion);
-            var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion, userProfileDir);
+            var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion, userProfileDir);
             var tempPackagesDir = new DirectoryPath(Path.Combine(Path.GetTempPath(), "dotnet-sdk-advertising-temp"));
             var nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
                                           filePermissionSetter: null,
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
                                           new NullLogger(),
                                           reporter);
-            var userProfileDir = CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            var workloadRecordRepo = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion), workloadResolver, Cli.VerbosityOptions.normal)
+            var workloadRecordRepo = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion), workloadResolver, Cli.VerbosityOptions.normal, userProfileDir)
                 .GetWorkloadInstallationRecordRepository();
 
             return new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userProfileDir, tempPackagesDir.Value, workloadRecordRepo);
@@ -81,11 +80,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             WriteUpdatableWorkloadsFile();
         }
 
-        public async static Task BackgroundUpdateAdvertisingManifestsAsync()
+        public async static Task BackgroundUpdateAdvertisingManifestsAsync(string userProfileDir)
         {
             try
             {
-                var manifestUpdater = WorkloadManifestUpdater.GetInstance();
+                var manifestUpdater = WorkloadManifestUpdater.GetInstance(userProfileDir);
                 await manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync();
             }
             catch (Exception)

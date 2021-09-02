@@ -26,10 +26,6 @@
   </Target>
 
   <ItemGroup>
-    <Compile Include="$(RepoRoot)src\Common\ExceptionExtensions.cs" LinkBase="Common"/>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime"
         ExcludeAssets="all"
         Version="$(MicrosoftBuildRuntimePackageVersion)"

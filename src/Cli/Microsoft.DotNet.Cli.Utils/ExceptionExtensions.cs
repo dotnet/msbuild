@@ -14,6 +14,11 @@ namespace Microsoft.DotNet.Cli.Utils
              return exception;
         }
 
+        public static void ReportAsWarning(this Exception e)
+        {
+            Reporter.Verbose.WriteLine($"Warning: Ignoring exception: {e.ToString().Yellow()}");
+        }
+
         public static bool ShouldBeDisplayedAsError(this Exception e) =>
             e.Data.Contains(CLI_User_Displayed_Exception);
 

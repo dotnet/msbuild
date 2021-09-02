@@ -646,10 +646,10 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (!string.IsNullOrEmpty(NetCoreRoot) && !string.IsNullOrEmpty(NETCoreSdkVersion))
                 {
-                    if (WorkloadInstall.IsUserLocal(NetCoreRoot, NETCoreSdkVersion))
+                    if (WorkloadInstall.IsUserLocal(NetCoreRoot, NETCoreSdkVersion) &&
+                        CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath() is { } userProfileDir)
                     {
-                        // TODO: should DotnetUserProfileFolderPath come from a property?
-                        yield return Path.Combine(CliFolderPathCalculator.DotnetUserProfileFolderPath, "packs");
+                        yield return Path.Combine(userProfileDir, "packs");
                     }
                 }
 
@@ -683,8 +683,9 @@ namespace Microsoft.NET.Build.Tasks
 
             if (_workloadManifestProvider == null)
             {
-                _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion);
-                _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion);
+                string userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
+                _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion, userProfileDir);
+                _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion, userProfileDir);
             }
 
             var packInfo = _workloadResolver.TryGetPackInfo(new WorkloadPackId(packID));

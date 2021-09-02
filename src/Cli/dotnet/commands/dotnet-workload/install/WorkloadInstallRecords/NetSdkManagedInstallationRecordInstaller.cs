@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using Microsoft.DotNet.Configurer;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
