@@ -64,7 +64,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 is already installed and will be replaced with version")
                 .And.HaveStdOutMatching($"^Success: Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+ installed the following templates:\\s*$", System.Text.RegularExpressions.RegexOptions.Multiline)
                 .And.HaveStdOutContaining("console")
-                .And.HaveStdOutContaining("Console Application");
+                .And.HaveStdOutContaining("Console App");
         }
 
         [Fact]

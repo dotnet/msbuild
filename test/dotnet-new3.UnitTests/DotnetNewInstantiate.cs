@@ -34,7 +34,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
+                .And.HaveStdOutContaining("The template \"Console App\" was created successfully.");
         }
 
         [Fact]
@@ -154,16 +154,16 @@ namespace Dotnet_new3.IntegrationTests
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log, "Console Application")
+            new DotnetNewCommand(_log, "Console App")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Fail()
                 .And.NotHaveStdOut()
-                .And.NotHaveStdOutContaining("The template \"Console Application\" was created successfully.")
-                .And.HaveStdErrContaining("No templates found matching: 'Console Application'.")
+                .And.NotHaveStdOutContaining("The template \"Console App\" was created successfully.")
+                .And.HaveStdErrContaining("No templates found matching: 'Console App'.")
                 .And.HaveStdErrContaining($"To list installed templates, run:{Environment.NewLine}   dotnet new3 --list")
-                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 'Console Application' --search");
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 'Console App' --search");
         }
 
         [Fact]
@@ -278,7 +278,7 @@ namespace Dotnet_new3.IntegrationTests
              .Should()
              .ExitWith(0)
              .And.NotHaveStdErr()
-             .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
+             .And.HaveStdOutContaining("The template \"Console App\" was created successfully.");
 
             new DotnetNewCommand(_log, "csharpconsole", "-n", "MyConsole", "-o", "alias")
                .WithCustomHive(home)
@@ -287,7 +287,7 @@ namespace Dotnet_new3.IntegrationTests
                .Should()
                .ExitWith(0)
                .And.NotHaveStdErr()
-               .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.")
+               .And.HaveStdOutContaining("The template \"Console App\" was created successfully.")
                .And.HaveStdOutContaining("After expanding aliases, the command is:")
                .And.HaveStdOutContaining("dotnet new3 console -n MyConsole -o alias");
 
@@ -310,7 +310,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
+                .And.HaveStdOutContaining("The template \"Console App\" was created successfully.");
 
             new DotnetNewCommand(_log, "console")
                 .WithCustomHive(home)
@@ -337,7 +337,7 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
+                .And.HaveStdOutContaining("The template \"Console App\" was created successfully.");
 
             var forceCommandResult = new DotnetNewCommand(_log, "console", "--no-restore", "--force")
                 .WithCustomHive(home)
@@ -347,7 +347,7 @@ namespace Dotnet_new3.IntegrationTests
             forceCommandResult.Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
+                .And.HaveStdOutContaining("The template \"Console App\" was created successfully.");
 
             Assert.Equal(commandResult.StdOut, forceCommandResult.StdOut);
         }

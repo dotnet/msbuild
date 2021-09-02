@@ -36,10 +36,10 @@ namespace Dotnet_new3.IntegrationTests
 @"The 'dotnet new3' command creates a .NET project based on a template.
 
 Common templates are:
-Template Name        Short Name  Language    Tags          
--------------------  ----------  ----------  --------------
-Class Library        classlib    [C#],F#,VB  Common/Library
-Console Application  console     [C#],F#,VB  Common/Console
+Template Name  Short Name  Language    Tags          
+-------------  ----------  ----------  --------------
+Class Library  classlib    [C#],F#,VB  Common/Library
+Console App    console     [C#],F#,VB  Common/Console
 
 An example would be:
    dotnet new3 console
@@ -69,7 +69,7 @@ Display templates available on NuGet.org with:
                 .Should()
                 .ExitWith(0).And.NotHaveStdErr()
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
                 .And.NotHaveStdOutContaining("webapi").And.NotHaveStdOutContaining("winformslib");

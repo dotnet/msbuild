@@ -5,7 +5,7 @@
     "Common",
     "Console"
   ],
-  "name": "Console Application",
+  "name": "Console App",
   "generatorVersions": "[1.0.0.0-*)",
   "description": "A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS",
   "groupIdentity": "Microsoft.Common.Console",

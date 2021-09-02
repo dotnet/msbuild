@@ -32,7 +32,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
 
@@ -44,7 +44,7 @@ namespace Dotnet_new3.IntegrationTests
              .And.NotHaveStdErr()
              .And.HaveStdOutContaining("These templates matched your input: 'c'")
              .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-             .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+             .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
              .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
              .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
         }
@@ -59,7 +59,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And.NotHaveStdErr()
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Type\\s+Author\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+project\\s+Microsoft\\s+Common/Console");
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+project\\s+Microsoft\\s+Common/Console");
         }
 
         [Fact]
@@ -73,19 +73,19 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: tag='Common'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
 
-            new DotnetNewCommand(_log, "application", "--list", "--tag", "Common")
+            new DotnetNewCommand(_log, "app", "--list", "--tag", "Common")
                  .WithCustomHive(_sharedHome.HomeDirectory)
                  .Execute()
                  .Should()
                  .ExitWith(0)
                  .And.NotHaveStdErr()
-                 .And.HaveStdOutContaining("These templates matched your input: 'application', tag='Common'")
+                 .And.HaveStdOutContaining("These templates matched your input: 'app', tag='Common'")
                  .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                 .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                 .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                  .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
                  .And.NotHaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
         }
@@ -104,7 +104,7 @@ ASP.NET Core Web App (Model-View-Controller)  mvc            [C#],F#     Web/MVC
 Blazor Server App                             blazorserver   [C#]        Web/Blazor            
 Blazor WebAssembly App                        blazorwasm     [C#]        Web/Blazor/WebAssembly
 Class Library                                 classlib       [C#],F#,VB  Common/Library        
-Console Application                           console        [C#],F#,VB  Common/Console        
+Console App                                   console        [C#],F#,VB  Common/Console        
 dotnet gitignore file                         gitignore                  Config                
 Dotnet local tool manifest file               tool-manifest              Config                
 EditorConfig file                             editorconfig               Config                
@@ -188,7 +188,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -200,7 +200,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -212,7 +212,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: 'c', --framework")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -224,7 +224,7 @@ Worker Service                                worker         [C#],F#     Common/
               .And.NotHaveStdErr()
               .And.HaveStdOutContaining("These templates matched your input: 'c', -f")
               .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-              .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+              .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
               .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
               .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
               .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
@@ -237,7 +237,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: --framework")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -249,7 +249,7 @@ Worker Service                                worker         [C#],F#     Common/
               .And.NotHaveStdErr()
               .And.HaveStdOutContaining("These templates matched your input: -f")
               .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-              .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+              .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
               .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
               .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
               .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
@@ -266,7 +266,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -278,7 +278,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -290,7 +290,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: 'c', --langVersion")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -302,7 +302,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: --langVersion")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
         }
@@ -318,7 +318,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -330,7 +330,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -342,7 +342,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: 'c', --no-restore")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -354,7 +354,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: --no-restore")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
         }
@@ -370,7 +370,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -382,7 +382,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -394,7 +394,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: 'c', --framework='net5.0'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -406,7 +406,7 @@ Worker Service                                worker         [C#],F#     Common/
               .And.NotHaveStdErr()
               .And.HaveStdOutContaining("These templates matched your input: 'c', -f")
               .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-              .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+              .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
               .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
               .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -418,7 +418,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: --framework")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -430,7 +430,7 @@ Worker Service                                worker         [C#],F#     Common/
               .And.NotHaveStdErr()
               .And.HaveStdOutContaining("These templates matched your input: -f")
               .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-              .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+              .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
               .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
               .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
         }
@@ -446,7 +446,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -486,7 +486,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 
@@ -518,7 +518,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
                 .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
 

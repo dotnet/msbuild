@@ -42,7 +42,7 @@ Options:
   --no-update-check              Disables checking for the template package updates when instantiating a template.";
 
         private const string ConsoleHelp =
-@"Console Application (C#)
+@"Console App (C#)
 Author: Microsoft
 Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
 Options:                                                                             
@@ -192,18 +192,18 @@ To search for the templates on NuGet.org, run:
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log, "Console Application", "-h")
+            new DotnetNewCommand(_log, "Console App", "-h")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Fail()
                 .And.HaveStdErr(
-@"No templates found matching: 'Console Application'.
+@"No templates found matching: 'Console App'.
 
 To list installed templates, run:
    dotnet new3 --list
 To search for the templates on NuGet.org, run:
-   dotnet new3 'Console Application' --search");
+   dotnet new3 'Console App' --search");
         }
 
         [Fact]
@@ -230,7 +230,7 @@ To search for the templates on NuGet.org, run:
         public void CanShowHelpForTemplate_MatchOnChoice()
         {
             const string ConsoleHelp =
-@"Console Application (C#)
+@"Console App (C#)
 Author: Microsoft
 Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
 Options:                                                                            
@@ -316,7 +316,7 @@ For more information, run:
         public void CanShowHelpForTemplate_MatchOnNonChoiceParam()
         {
             const string ConsoleHelp =
-@"Console Application (C#)
+@"Console App (C#)
 Author: Microsoft
 Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
 Options:                                                                             
@@ -361,7 +361,7 @@ To see help for other template languages (F#, VB), use --language option:
         public void CanShowHelpForTemplate_MatchOnLanguage()
         {
             const string ConsoleHelp =
-@"Console Application (F#)
+@"Console App (F#)
 Author: Microsoft
 Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
 Options:                                                                             
