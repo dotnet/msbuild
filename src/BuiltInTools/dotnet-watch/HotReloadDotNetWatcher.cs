@@ -48,14 +48,14 @@ namespace Microsoft.DotNet.Watcher
             var processSpec = context.ProcessSpec;
 
             _reporter.Output("Hot reload enabled. For a list of supported edits, see https://aka.ms/dotnet/hot-reload. " +
-                "Press \"Ctrl + Shift + R\" to restart.");
+                "Press \"Ctrl + R\" to restart.");
 
             var forceReload = new CancellationTokenSource();
 
             _console.KeyPressed += (key) =>
             {
-                var controlShift = ConsoleModifiers.Control | ConsoleModifiers.Shift;
-                if ((key.Modifiers & controlShift) == controlShift && key.Key == ConsoleKey.R)
+                var modifiers = ConsoleModifiers.Control;
+                if ((key.Modifiers & modifiers) == modifiers && key.Key == ConsoleKey.R)
                 {
                     var cancellationTokenSource = Interlocked.Exchange(ref forceReload, new CancellationTokenSource());
                     cancellationTokenSource.Cancel();
@@ -140,6 +140,13 @@ namespace Microsoft.DotNet.Watcher
                                 continue;
                             }
 
+                            if (fileItems.Length > 1)
+                            {
+                                // Filter out newly added files from the list to make the reporting cleaner.
+                                // Any action we needed to take on significant newly added files is handled by MayRequiredRecompilation.
+                                fileItems = fileItems.Where(f => !f.IsNewFile).ToArray();
+                            }
+
                             if (fileItems.Length == 1)
                             {
                                 _reporter.Output($"File changed: {fileItems[0].FilePath}.");
@@ -156,7 +163,6 @@ namespace Microsoft.DotNet.Watcher
                             }
                             else
                             {
-                                _reporter.Output($"Unable to handle changes using hot reload.");
                                 await _rudeEditDialog.EvaluateAsync(combinedCancellationSource.Token);
 
                                 break;

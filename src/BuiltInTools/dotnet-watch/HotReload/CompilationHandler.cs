@@ -154,7 +154,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             if (!rudeEdits.IsDefaultOrEmpty)
             {
                 // Rude edit.
-                _reporter.Output("Unable to apply hot reload because of a rude edit. Rebuilding the app...");
+                _reporter.Output("Unable to apply hot reload because of a rude edit.");
                 foreach (var diagnostic in hotReloadDiagnostics)
                 {
                     _reporter.Verbose(CSharpDiagnosticFormatter.Instance.Format(diagnostic));
