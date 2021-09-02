@@ -36,6 +36,8 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         [Required]
         public ITaskItem[] StaticWebAssets { get; set; }
 
+        public string PackagePathPrefix { get; set; } = "staticwebassets";
+
         public override bool Execute()
         {
             if (!ValidateArguments())
@@ -58,12 +60,12 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 .ThenBy(e => e.GetMetadata(RelativePath), StringComparer.OrdinalIgnoreCase);
             foreach(var element in orderedAssets)
             {
-                var fullPathExpression = @$"$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\{Normalize(element.GetMetadata(RelativePath))}))";
+                var fullPathExpression = @$"$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\{Normalize(PackagePathPrefix)}\{Normalize(element.GetMetadata(RelativePath))}))";
                 itemGroup.Add(new XElement("StaticWebAsset",
                     new XAttribute("Include", fullPathExpression),
                     new XElement(SourceType, "Package"),
                     new XElement(SourceId, element.GetMetadata(SourceId)),
-                    new XElement(ContentRoot, @"$(MSBuildThisFileDirectory)..\staticwebassets\"),
+                    new XElement(ContentRoot, @$"$(MSBuildThisFileDirectory)..\{Normalize(PackagePathPrefix)}\"),
                     new XElement(BasePath, element.GetMetadata(BasePath)),
                     new XElement(RelativePath, element.GetMetadata(RelativePath)),
                     new XElement(AssetKind, element.GetMetadata(AssetKind)),
