@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools
             string userProfileDir = null)
             : base(GetCommandArguments(msbuildArgs, noRestore), msbuildPath)
         {
-            userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            userProfileDir = CliFolderPathCalculator.DotnetUserProfileFolderPath;
             Task.Run(() => WorkloadManifestUpdater.BackgroundUpdateAdvertisingManifestsAsync(userProfileDir));
             SeparateRestoreCommand = GetSeparateRestoreCommand(msbuildArgs, noRestore, msbuildPath);
         }

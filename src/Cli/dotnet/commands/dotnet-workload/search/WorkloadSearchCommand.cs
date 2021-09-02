@@ -27,8 +27,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             ParseResult result,
             IReporter reporter = null,
             IWorkloadResolver workloadResolver = null,
-            string userProfileDir = null,
-            string version = null) : base(result)
+            string version = null,
+            string userProfileDir = null) : base(result)
         {
             _reporter = reporter ?? Reporter.Output;
             _verbosity = result.ValueForOption<VerbosityOptions>(WorkloadSearchCommandParser.VerbosityOption);

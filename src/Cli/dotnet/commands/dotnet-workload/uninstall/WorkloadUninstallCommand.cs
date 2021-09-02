@@ -33,8 +33,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             IWorkloadResolver workloadResolver = null,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null,
-            string userProfileDir = null,
-            string version = null)
+            string version = null,
+            string userProfileDir = null)
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;

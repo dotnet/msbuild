@@ -42,11 +42,11 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             IWorkloadInstallationRecordRepository workloadRecordRepo = null,
             string currentSdkVersion = null,
             string dotnetDir = null,
-            string userProfileDir = null,
             string tempDirPath = null,
             INuGetPackageDownloader nugetPackageDownloader = null,
             IWorkloadManifestUpdater workloadManifestUpdater = null,
-            IWorkloadResolver workloadResolver = null
+            IWorkloadResolver workloadResolver = null,
+            string userProfileDir = null
         ) : base(result)
         {
             _reporter = reporter ?? Reporter.Output;
