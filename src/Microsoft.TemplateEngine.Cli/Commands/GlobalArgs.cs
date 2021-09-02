@@ -3,10 +3,20 @@
 
 #nullable enable
 
+using System.CommandLine;
+using System.CommandLine.Invocation;
+
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class GlobalArgs
     {
+        private static Option<bool> quietOption = new("--quiet", "sshhhhhhhhhhhh");
+
+        public GlobalArgs(InvocationContext invocationContext)
+        {
+            Quiet = invocationContext.ParseResult.ValueForOption(quietOption);
+        }
+
         internal bool Quiet { get; private set; }
 
         internal bool DebugAttach { get; private set; }
@@ -20,5 +30,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal bool DebugShowConfig { get; private set; }
 
         internal string? DebugSettingsLocation { get; private set; }
+
+        internal static void AddGlobalsToCommand(Command command)
+        {
+            command.AddOption(quietOption);
+        }
     }
 }

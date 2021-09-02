@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -12,12 +13,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal ShowAliasCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
 
-        public override Command CreateCommand() => throw new NotImplementedException();
+        protected override Command CreateCommandAbstract() => throw new NotImplementedException();
 
-        protected override Task<int> ExecuteAsync(ShowAliasCommandArgs args, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        protected override Task<int> ExecuteAsync(ShowAliasCommandArgs args, CancellationToken cancellationToken) => throw new NotImplementedException();
+
+        protected override ShowAliasCommandArgs ParseContext(InvocationContext context) => throw new NotImplementedException();
     }
 
     internal class ShowAliasCommandArgs : GlobalArgs
     {
+        public ShowAliasCommandArgs(InvocationContext invocationContext) : base(invocationContext)
+        {
+        }
     }
 }

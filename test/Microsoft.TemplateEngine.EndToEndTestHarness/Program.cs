@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.CommandLine;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -58,7 +59,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             host.VirtualizeDirectory(hivePath);
             host.VirtualizeDirectory(outputPath);
 
-            int result = New3Command.Run(CommandName, host, new TelemetryLogger(null), new New3Callbacks(), passthroughArgs, hivePath);
+            int result = New3Command.CreateCommand(CommandName, host, new TelemetryLogger(null), new New3Callbacks()).Invoke(passthroughArgs);
             bool verificationsPassed = false;
 
             for (int i = 0; i < batteryCount; ++i)

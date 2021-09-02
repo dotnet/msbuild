@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -12,12 +13,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal ListCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
 
-        public override Command CreateCommand() => throw new NotImplementedException();
+        protected override Command CreateCommandAbstract() => throw new NotImplementedException();
 
-        protected override Task<int> ExecuteAsync(ListCommandArgs args, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        protected override Task<int> ExecuteAsync(ListCommandArgs args, CancellationToken cancellationToken) => throw new NotImplementedException();
+
+        protected override ListCommandArgs ParseContext(InvocationContext context) => throw new NotImplementedException();
     }
 
     internal class ListCommandArgs : GlobalArgs
     {
+        public ListCommandArgs(InvocationContext invocationContext) : base(invocationContext)
+        {
+        }
     }
 }

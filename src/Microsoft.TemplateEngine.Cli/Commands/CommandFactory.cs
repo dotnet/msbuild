@@ -10,12 +10,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal static class CommandFactory
     {
-        internal static IEnumerable<Func<ITemplateEngineHost, ITelemetryLogger, New3Callbacks, BaseCommand>> GetSubcommands()
+        internal static IEnumerable<Func<ITemplateEngineHost, ITelemetryLogger, New3Callbacks, IBaseCommand>> GetSubcommands()
         {
             yield return (host, telemetryLogger, callbacks) => new InstantiateCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new SearchCommand(host, telemetryLogger, callbacks);
-            //yield return (host, telemetryLogger, callbacks) => new InstallCommand(host, telemetryLogger, callbacks);
+            yield return (host, telemetryLogger, callbacks) => new InstallCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new UninstallCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new UpdateCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new AddAliasCommand(host, telemetryLogger, callbacks);
