@@ -272,7 +272,7 @@ namespace Microsoft.NET.StringTools
                 // before the corruption causes further problems.
                 if (destPtr != resultPtr + Length)
                 {
-                    throw new InvalidOperationException("Length property does not match sum of span lengths");
+                    throw new InvalidOperationException($"Length of {Length} does not match the sum of span lengths of {destPtr - resultPtr}.");
                 }
             }
             return result;
