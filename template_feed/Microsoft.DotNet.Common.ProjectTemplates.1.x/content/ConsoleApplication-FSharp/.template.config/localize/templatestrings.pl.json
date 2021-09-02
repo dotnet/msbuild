@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Aplikacja konsoli",
+  "name": "Console App",
   "description": "Projekt służący do tworzenia aplikacji wiersza polecenia, którą można uruchomić na platformie .NET Core w systemach Windows, Linux i macOS.",
   "symbols/TargetFrameworkOverride/description": "Zastępuje platformę docelową",
   "symbols/TargetFrameworkOverride/displayName": "Odrzucenie platformy docelowej",

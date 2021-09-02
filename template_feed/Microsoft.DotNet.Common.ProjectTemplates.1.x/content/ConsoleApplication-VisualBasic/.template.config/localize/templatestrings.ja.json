@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "コンソール アプリケーション",
+  "name": "Console App",
   "description": "Windows、Linux、macOS 上の .NET Core で実行できるコマンド ライン アプリケーションを作成するためのプロジェクト。",
   "symbols/TargetFrameworkOverride/description": "ターゲット フレームワークをオーバーライドする",
   "symbols/TargetFrameworkOverride/displayName": "ターゲット フレームワークのオーバーライド",

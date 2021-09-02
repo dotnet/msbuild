@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "콘솔 응용 프로그램",
+  "name": "Console App",
   "description": "Windows, Linux 및 macOS의 .NET Core에서 실행할 수 있는 명령줄 애플리케이션을 만드는 프로젝트",
   "symbols/TargetFrameworkOverride/description": "대상 프레임워크를 재정의합니다",
   "symbols/TargetFrameworkOverride/displayName": "대상 프레임워크 재정의",

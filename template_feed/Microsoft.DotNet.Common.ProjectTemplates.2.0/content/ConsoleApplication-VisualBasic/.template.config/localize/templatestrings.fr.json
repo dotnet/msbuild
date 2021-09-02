@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Application console",
+  "name": "Console App",
   "description": "Projet de création d'une application en ligne de commande pouvant s'exécuter sur .NET Core sur Windows, Linux et macOS",
   "symbols/TargetFrameworkOverride/description": "Remplace l’infrastructure cible",
   "symbols/TargetFrameworkOverride/displayName": "Remplacement de l’infrastructure cible",

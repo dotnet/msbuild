@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Aplicación de consola",
+  "name": "Console App",
   "description": "Proyecto para crear una aplicación de línea de comandos que se puede ejecutar en .NET Core en Windows, Linux y macOS.",
   "symbols/TargetFrameworkOverride/description": "Invalida la plataforma de destino",
   "symbols/TargetFrameworkOverride/displayName": "Invalidación de la plataforma de destino",

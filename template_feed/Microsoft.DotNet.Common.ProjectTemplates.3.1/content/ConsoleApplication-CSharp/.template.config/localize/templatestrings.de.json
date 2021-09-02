@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Konsolenanwendung",
+  "name": "Console App",
   "description": "Ein Projekt zum Erstellen einer Befehlszeilenanwendung, die mit .NET Core unter Windows, Linux und macOS ausgeführt werden kann",
   "symbols/TargetFrameworkOverride/description": "Überschreibt das Zielframework",
   "symbols/TargetFrameworkOverride/displayName": "Zielframeworküberschreibung",

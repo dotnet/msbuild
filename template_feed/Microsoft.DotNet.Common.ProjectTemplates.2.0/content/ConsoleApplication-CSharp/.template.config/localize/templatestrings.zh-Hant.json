@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "主控台應用程式",
+  "name": "Console App",
   "description": "專案，用於建立可在 Windows、Linux 及 macOS 於 .NET Core 執行的命令列應用程式",
   "symbols/TargetFrameworkOverride/description": "覆寫目標 Framework",
   "symbols/TargetFrameworkOverride/displayName": "目標 Framework 覆寫",

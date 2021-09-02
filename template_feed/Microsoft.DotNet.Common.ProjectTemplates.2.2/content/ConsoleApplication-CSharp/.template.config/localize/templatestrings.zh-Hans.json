@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "控制台应用程序",
+  "name": "Console App",
   "description": "一个用于创建可在 Windows、Linux 和 macOS 上的 .NET Core 上运行的命令行应用程序的项目",
   "symbols/TargetFrameworkOverride/description": "替代目标框架",
   "symbols/TargetFrameworkOverride/displayName": "目标框架替代",

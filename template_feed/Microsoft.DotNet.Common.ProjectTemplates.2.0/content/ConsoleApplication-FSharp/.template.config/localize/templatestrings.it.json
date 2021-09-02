@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Applicazione console",
+  "name": "Console App",
   "description": "Progetto per la creazione di un'applicazione da riga di comando eseguibile in .NET Core in Windows, Linux e macOS",
   "symbols/TargetFrameworkOverride/description": "Ignora il framework di destinazione",
   "symbols/TargetFrameworkOverride/displayName": "Override del framework di destinazione",
