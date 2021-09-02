@@ -10,25 +10,6 @@ namespace Microsoft.Extensions.DotNetDeltaApplier
     public class StartupHookTests
     {
         [Fact]
-        public void ClearHotReloadEnvironmentVariables_ClearsDotnetModifiableAssemblies()
-        {
-            // Arrange
-            var environmentVariables = new Dictionary<string, string?>
-            {
-                ["DOTNET_MODIFIABLE_ASSEMBLIES"] = "debug",
-                ["DOTNET_STARTUP_HOOKS"] = null
-            };
-
-            // Act
-            StartupHook.ClearHotReloadEnvironmentVariables(
-                (name) => environmentVariables[name],
-                (name, value) => environmentVariables[name] = value);
-
-            // Assert
-            Assert.Null(environmentVariables["DOTNET_MODIFIABLE_ASSEMBLIES"]);
-        }
-
-        [Fact]
         public void ClearHotReloadEnvironmentVariables_ClearsStartupHook()
         {
             // Arrange
