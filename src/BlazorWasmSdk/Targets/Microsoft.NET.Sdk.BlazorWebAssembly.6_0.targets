@@ -105,32 +105,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="Microsoft.NET.Sdk.BlazorWebAssembly.ServiceWorkerAssetsManifest.targets" Condition="'$(ServiceWorkerAssetsManifest)' != ''" />
 
-  <Target Name="_PreProcessScrambleDotnetJsFileName" AfterTargets="ResolveRuntimePackAssets">
-
-    <ItemGroup>
-      <_IntermediateItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.DestinationSubPath)' == 'dotnet.js' AND '%(ReferenceCopyLocalPaths.AssetType)' == 'native'" />
-    </ItemGroup>
-    
-    <GetFileHash Files="@(_IntermediateItem)" Algorithm="SHA256" HashEncoding="base64">
-      <Output TaskParameter="Items" ItemName="_DotNetJSHash" />
-    </GetFileHash>
-
-  </Target>
-
-  <Target Name="_ScrambleDotnetJsFileName" AfterTargets="_PreProcessScrambleDotnetJsFileName">
+  <Target Name="_ScrambleDotnetJsFileName" AfterTargets="ResolveRuntimePackAssets">
     <!--
       We want the dotnet.js file output to have a version to better work with caching. We'll append the runtime version to the file name as soon as file has been discovered.
     -->
-    <!-- <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+    <PropertyGroup>
       <_DotNetJsVersion>$(BundledNETCoreAppPackageVersion)</_DotNetJsVersion>
       <_DotNetJsVersion Condition="'$(RuntimeFrameworkVersion)' != ''">$(RuntimeFrameworkVersion)</_DotNetJsVersion>
       <_BlazorDotnetJsFileName>dotnet.$(_DotNetJsVersion).js</_BlazorDotnetJsFileName>
-    </PropertyGroup> -->
-
-    <PropertyGroup>
-      <_BlazorDotnetJsFileName>dotnet_%(_DotNetJSHash.FileHash).js</_BlazorDotnetJsFileName>
     </PropertyGroup>
-    
+
     <ItemGroup>
       <_DotNetJsItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.DestinationSubPath)' == 'dotnet.js' AND '%(ReferenceCopyLocalPaths.AssetType)' == 'native'">
         <RelativePath>_framework/$(_BlazorDotnetJsFileName)</RelativePath>
