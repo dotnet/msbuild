@@ -60,34 +60,29 @@ namespace Microsoft.TemplateEngine.Cli
         internal EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
         /// <summary>
-        /// Runs the command using <paramref name="host"/> and <paramref name="args"/>.
+        ///
         /// </summary>
         /// <param name="commandName">Command name that is being executed.</param>
         /// <param name="host">The <see cref="ITemplateEngineHost"/> that executes the command.</param>
         /// <param name="telemetryLogger"><see cref="ITelemetryLogger"/> to use to track events.</param>
         /// <param name="callbacks">set of callbacks to be used, <see cref="New3Callbacks"/> for more details.</param>
-        /// <param name="args">arguments to be run using template engine.</param>
-        /// <param name="hivePath">(optional) the path to template engine settings to use.</param>
-        /// <returns>exit code: 0 on success, other on error.</returns>
-        /// <exception cref="CommandParserException">when <paramref name="args"/> cannot be parsed.</exception>
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath = null)
+        public static Command CreateCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks)
         {
             _ = host ?? throw new ArgumentNullException(nameof(host));
             _ = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _ = callbacks ?? throw new ArgumentNullException(nameof(callbacks));
-            _ = args ?? throw new ArgumentNullException(nameof(args));
 
-            Command rootCommand = new RootCommand(LocalizableStrings.CommandDescription);
+            Command rootCommand = new Command(commandName, LocalizableStrings.CommandDescription);
             rootCommand.Name = commandName;
 
             foreach (var commandCreator in CommandFactory.GetSubcommands())
             {
-                rootCommand.AddCommand(commandCreator(host, telemetryLogger, callbacks).CreateCommand());
+                rootCommand.Add(commandCreator(host, telemetryLogger, callbacks).CreateCommand());
             }
 
             rootCommand.TreatUnmatchedTokensAsErrors = true;
             CommandFactory.SetupGlobalOptions(rootCommand);
-            return rootCommand.Invoke(args);
+            return rootCommand;
         }
 
         private static Mutex EnsureEntryMutex(string? hivePath, ITemplateEngineHost host)

@@ -10,12 +10,14 @@ using Microsoft.TemplateEngine.Edge;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal abstract class BaseCommand
+    internal abstract class BaseCommand : ICommandHandler
     {
         public abstract Command CreateCommand();
+
+        public abstract Task<int> InvokeAsync(InvocationContext context);
     }
 
-    internal abstract class BaseCommand<TArgs> : BaseCommand, ICommandHandler where TArgs : GlobalArgs
+    internal abstract class BaseCommand<TArgs> : BaseCommand where TArgs : GlobalArgs
     {
         //private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
         private readonly ITemplateEngineHost _host;
@@ -31,12 +33,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected New3Callbacks Callbacks { get; }
 
-        public Task<int> InvokeAsync(InvocationContext context)
+        public override Task<int> InvokeAsync(InvocationContext context)
         {
-            return CommandHandler.Create<TArgs, CancellationToken>(ExecuteInternalAsync).InvokeAsync(context);
+            return ExecuteInternal(context);
         }
 
         protected abstract Task<int> ExecuteAsync(TArgs args, CancellationToken cancellationToken);
+
+        //protected abstract TArgs ParseContext(InvocationContext context);
 
         protected IEngineEnvironmentSettings GetEnvironmentSettings(GlobalArgs globalArgs, string? outputPath)
         {
@@ -63,8 +67,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         //    return new Mutex(false, entryMutexIdentity);
         //}
 
-        private async Task<int> ExecuteInternalAsync(TArgs args, CancellationToken cancellationToken)
+        private Task<int> ExecuteInternal(InvocationContext context)
         {
+            return Task.FromResult(0);
+            //var args = ParseContext(context);
             //TODO: do it better - await is not supported in critical section
             //Mutex? entryMutex = null;
             //if (!args.DebugVirtualSettings)
@@ -72,17 +78,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //    entryMutex = GetEntryMutex(args.DebugSettingsLocation, _host);
             //    entryMutex.WaitOne();
             //}
-            try
-            {
-                return await ExecuteAsync(args, cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                //if (entryMutex != null)
-                //{
-                //    entryMutex.Release(1);
-                //}
-            }
+           // try
+            //{
+            //  //  return await ExecuteAsync(new string[] { }).ConfigureAwait(false);
+            //}
+            //finally
+            //{
+            //    //if (entryMutex != null)
+            //    //{
+            //    //    entryMutex.Release(1);
+            //    //}
+            //}
         }
     }
 }

@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System.CommandLine;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -30,7 +31,8 @@ namespace Dotnet_new3
             DefaultTemplateEngineHost host = CreateHost(disableSdkTemplates);
 
             var callbacks = new New3Callbacks();
-            return New3Command.Run(CommandName, host, new TelemetryLogger(null, debugTelemetry), callbacks, args);
+            var command = New3Command.CreateCommand(CommandName, host, new TelemetryLogger(null, debugTelemetry), callbacks);
+            return command.Invoke(args);
         }
 
         private static DefaultTemplateEngineHost CreateHost(bool disableSdkTemplates)

@@ -12,7 +12,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal InstantiateCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
 
-        public override Command CreateCommand() => throw new NotImplementedException();
+        public override Command CreateCommand()
+        {
+            return new Command("console")
+            {
+                Handler = this
+            };
+        }
 
         protected override Task<int> ExecuteAsync(InstantiateCommandArgs args, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     }
