@@ -22,7 +22,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -4361,8 +4360,10 @@ $@"<Project InitialTargets=`Sleep`>
         [Theory]
         [InlineData("", false)] // regular task host, input logging disabled
         [InlineData("", true)] // regular task host, input logging enabled
+#if NETFRAMEWORK // https://github.com/microsoft/msbuild/issues/5158
         [InlineData("TaskHostFactory", false)] // OOP task host, input logging disabled
         [InlineData("TaskHostFactory", true)] // OOP task host, input logging enabled
+#endif
         public void TaskInputLoggingIsExposedToTasks(string taskFactory, bool taskInputLoggingEnabled)
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
