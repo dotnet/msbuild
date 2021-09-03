@@ -151,7 +151,7 @@ For example, here is a trimmed down `Microsoft.Net.Sdk` multitargeting project:
 </Project>
 ```
 
-To summarize, there are two main patterns for specifying build dimensions which are handled:
+To summarize, there are two main patterns for specifying build dimensions:
 1. Multitargeting based. A multitargeting project self describes supported build dimensions. In this case the SDK needs to specify the multitargeting build dimensions. The graph then extracts innerbuilds from a given outer build. For example, the `TargetFramework` build dimension gets specified this way.
 2. Global Property based: A top level set of global properties get applied to the graph entrypoints and get propagated downward through the graph. For example, the `Configuration` and `Platform` build dimensions get specified this way.
 
