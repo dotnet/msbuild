@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             _reporter.Clear();
             var expectedWorkloads = new List<WorkloadId>() { new WorkloadId("mock-workload-1"), new WorkloadId("mock-workload-2"), new WorkloadId("mock-workload-3") };
             var workloadInstaller = new MockWorkloadRecordRepo(expectedWorkloads);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { Directory.GetCurrentDirectory() });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), Directory.GetCurrentDirectory());
             var command = new WorkloadListCommand(_parseResult, _reporter, workloadInstaller, "6.0.100", workloadResolver: workloadResolver);
             command.Execute();
 
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var expectedWorkloads = new List<WorkloadId>() { new WorkloadId("mock-workload-1"), new WorkloadId("mock-workload-2"), new WorkloadId("mock-workload-3") };
             var workloadInstaller = new MockWorkloadRecordRepo(expectedWorkloads);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { testDirectory });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), testDirectory);
 
             // Lay out fake advertising manifests with pack version update for pack A (in workloads 1 and 3)
             var userProfileDir = Path.Combine(testDirectory, "user-profile");

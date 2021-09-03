@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var installer = new MockPackWorkloadInstaller(failingWorkload: "xamarin-android-build", failingRollback: true);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "xamarin-android-build", "--skip-manifest-update" });
             var installManager = new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer, version: "6.0.100");
 
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var installer = new MockPackWorkloadInstaller(failingGarbageCollection: true);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "xamarin-android-build", "--skip-manifest-update" });
             var installManager = new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer, version: "6.0.100");
 
@@ -237,7 +237,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var installer = new MockPackWorkloadInstaller();
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), dotnetRoot);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", mockWorkloadId });
@@ -255,7 +255,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var userProfileDir = Path.Combine(testDirectory, "user-profile");
             var tmpDir = Path.Combine(testDirectory, "tmp");
             var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), _userLocal ? new string[] { userProfileDir, dotnetRoot } : new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(
+                new MockManifestProvider(new[] { manifestPath }), _userLocal ? new [] { (userProfileDir, true), (dotnetRoot, true) } :
+                                                                               new [] { (dotnetRoot, true) });
             var nugetDownloader = new FailingNuGetPackageDownloader(tmpDir);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var sdkFeatureVersion = "6.0.100";
@@ -302,7 +304,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName).Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var installer = new MockPackWorkloadInstaller(failingWorkload);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates, tempDirManifestPath);
             string sdkVersion = "6.0.100";

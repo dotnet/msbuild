@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
         private void InstallWorkload(string installingWorkload, string testDirectory, string sdkFeatureVersion)
         {
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
         private void UninstallWorkload(string uninstallingWorkload, string testDirectory, string sdkFeatureVersion)
         {
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var uninstallParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "uninstall", uninstallingWorkload });
             var uninstallCommand = new WorkloadUninstallCommand(uninstallParseResult, reporter: _reporter, workloadResolver, nugetDownloader,

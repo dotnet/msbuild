@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var sdkFeatureVersion = "6.0.100";
 
             var repairCommand = new WorkloadRepairCommand(_parseResult, reporter: _reporter, workloadResolver: workloadResolver,
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var sdkFeatureVersion = "6.0.100";
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var sdkFeatureVersion = "6.0.100";
