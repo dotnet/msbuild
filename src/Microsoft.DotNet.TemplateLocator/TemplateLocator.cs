@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.TemplateLocator
         public IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> GetDotnetSdkTemplatePackages(
             string sdkVersion,
             string dotnetRootPath,
-            string userProfileDir)
+            string? userProfileDir)
         {
             if (string.IsNullOrWhiteSpace(sdkVersion))
             {

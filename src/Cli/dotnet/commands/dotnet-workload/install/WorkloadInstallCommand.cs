@@ -54,10 +54,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             INuGetPackageDownloader nugetPackageDownloader = null,
             IWorkloadManifestUpdater workloadManifestUpdater = null,
             string dotnetDir = null,
+            string userProfileDir = null,
             string tempDirPath = null,
             string version = null,
-            IReadOnlyCollection<string> workloadIds = null,
-            string userProfileDir = null)
+            IReadOnlyCollection<string> workloadIds = null)
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;

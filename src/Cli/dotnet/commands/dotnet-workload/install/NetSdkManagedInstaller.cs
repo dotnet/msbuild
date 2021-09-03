@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             DeletePackInstallationRecord(packInfo, sdkFeatureBand);
-            if (!PackHasInstallRecords(packInfo, sdkFeatureBand))
+            if (!PackHasInstallRecords(packInfo))
             {
                 DeletePack(packInfo);
             }
@@ -469,7 +469,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        private bool PackHasInstallRecords(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
+        private bool PackHasInstallRecords(PackInfo packInfo)
         {
             var packInstallRecordDir = Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1", packInfo.Id, packInfo.Version);
             return Directory.Exists(packInstallRecordDir) && Directory.GetFiles(packInstallRecordDir).Any();

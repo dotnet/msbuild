@@ -68,7 +68,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// <returns>The <see cref="InstallType"/> associated with the SDK.</returns>
         public static InstallType GetWorkloadInstallType(SdkFeatureBand sdkFeatureBand, string dotnetDir)
         {
-            // TODO: does this file come with the SDK under dotnetDir? Or can it be under the userProfileDir for local installs?
             string installerTypePath = Path.Combine(dotnetDir, "metadata",
                 "workloads", $"{sdkFeatureBand}", "installertype");
 
