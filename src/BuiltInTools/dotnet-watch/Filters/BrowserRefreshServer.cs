@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.WebSockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -29,8 +27,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly byte[] ReloadMessage = Encoding.UTF8.GetBytes("Reload");
         private readonly byte[] WaitMessage = Encoding.UTF8.GetBytes("Wait");
         private readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web);
-        private readonly List<(WebSocket clientSocket, string sharedSecret)> _clientSockets = new();
-        private readonly RSA _rsa;
+        private readonly List<WebSocket> _clientSockets = new();
         private readonly IReporter _reporter;
         private readonly TaskCompletionSource _terminateWebSocket;
         private readonly TaskCompletionSource _clientConnected;
@@ -38,13 +35,10 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public BrowserRefreshServer(IReporter reporter)
         {
-            _rsa = RSA.Create(2048);
             _reporter = reporter;
             _terminateWebSocket = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             _clientConnected = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         }
-
-        public string ServerKey => Convert.ToBase64String(_rsa.ExportSubjectPublicKeyInfo());
 
         public async ValueTask<IEnumerable<string>> StartAsync(CancellationToken cancellationToken)
         {
@@ -106,17 +100,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var subProtocol = (string)null;
-            string sharedSecret = null;
-            if (context.WebSockets.WebSocketRequestedProtocols.Count == 1)
-            {
-                subProtocol = context.WebSockets.WebSocketRequestedProtocols[0];
-                var subProtocolBytes = Convert.FromBase64String(WebUtility.UrlDecode(subProtocol));
-                sharedSecret = Convert.ToBase64String(_rsa.Decrypt(subProtocolBytes, RSAEncryptionPadding.OaepSHA256));
-            }
-
-            var clientSocket = await context.WebSockets.AcceptWebSocketAsync(subProtocol);
-            _clientSockets.Add((clientSocket, sharedSecret));
+            _clientSockets.Add(await context.WebSockets.AcceptWebSocketAsync());
             _clientConnected.TrySetResult();
             await _terminateWebSocket.Task;
         }
@@ -133,41 +117,13 @@ namespace Microsoft.DotNet.Watcher.Tools
             return SendMessage(jsonSerialized, cancellationToken);
         }
 
-        public async ValueTask SendJsonWithSecret<TValue>(Func<string, TValue> valueFactory, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                for (var i = 0; i < _clientSockets.Count; i++)
-                {
-                    var (clientSocket, secret) = _clientSockets[i];
-                    if (clientSocket.State is not WebSocketState.Open)
-                    {
-                        continue;
-                    }
-
-                    var value = valueFactory(secret);
-                    var messageBytes = JsonSerializer.SerializeToUtf8Bytes(value, _jsonSerializerOptions);
-
-                    await clientSocket.SendAsync(messageBytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken);
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                _reporter.Verbose("WebSocket connection has been terminated.");
-            }
-            catch (Exception ex)
-            {
-                _reporter.Verbose($"Refresh server error: {ex}");
-            }
-        }
-
         public async ValueTask SendMessage(ReadOnlyMemory<byte> messageBytes, CancellationToken cancellationToken = default)
         {
             try
             {
                 for (var i = 0; i < _clientSockets.Count; i++)
                 {
-                    var (clientSocket, _) = _clientSockets[i];
+                    var clientSocket = _clientSockets[i];
                     if (clientSocket.State is not WebSocketState.Open)
                     {
                         continue;
@@ -187,11 +143,9 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async ValueTask DisposeAsync()
         {
-            _rsa.Dispose();
-
             for (var i = 0; i < _clientSockets.Count; i++)
             {
-                var (clientSocket, _) = _clientSockets[i];
+                var clientSocket = _clientSockets[i];
                 await clientSocket.CloseOutputAsync(WebSocketCloseStatus.Empty, null, default);
                 clientSocket.Dispose();
             }
@@ -208,7 +162,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             for (int i = 0; i < _clientSockets.Count; i++)
             {
-                var (clientSocket, _) = _clientSockets[i];
+                var clientSocket = _clientSockets[i];
 
                 if (clientSocket.State is not WebSocketState.Open)
                 {
@@ -217,8 +171,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
                 try
                 {
-                    var result = await clientSocket.ReceiveAsync(buffer, cancellationToken);
-                    return result;
+                    return await clientSocket.ReceiveAsync(buffer, cancellationToken);
                 }
                 catch (Exception ex)
                 {

@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             var context = new DefaultHttpContext();
             var stream = new MemoryStream();
             context.Response.Body = stream;
-            var middleware = new BrowserScriptMiddleware(_next, BrowserScriptMiddleware.GetWebSocketClientJavaScript("some-host", "test-key"));
+            var middleware = new BrowserScriptMiddleware(_next, BrowserScriptMiddleware.GetWebSocketClientJavaScript("some-host"));
 
             // Act
             await middleware.InvokeAsync(context);
@@ -31,7 +31,6 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             var script = Encoding.UTF8.GetString(stream.ToArray());
             Assert.Contains("// dotnet-watch browser reload script", script);
             Assert.Contains("'some-host'", script);
-            Assert.Contains("'test-key'", script);
         }
 
         [Fact]
@@ -40,7 +39,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             // Arrange
             var context = new DefaultHttpContext();
             context.Response.Body = new MemoryStream();
-            var middleware = new BrowserScriptMiddleware(_next, BrowserScriptMiddleware.GetWebSocketClientJavaScript("some-host", "test-key"));
+            var middleware = new BrowserScriptMiddleware(_next, BrowserScriptMiddleware.GetWebSocketClientJavaScript("some-host"));
 
             // Act
             await middleware.InvokeAsync(context);

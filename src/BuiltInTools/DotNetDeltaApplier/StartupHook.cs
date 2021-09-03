@@ -38,7 +38,6 @@ internal sealed class StartupHook
         // Workaround for https://github.com/dotnet/runtime/issues/58000
         // Clear any hot-reload specific environment variables. This should prevent child processes from being
         // affected by the current app's hot reload settings.
-        setEnvironmentVariable("DOTNET_MODIFIABLE_ASSEMBLIES", null);
         const string StartupHooksEnvironment = "DOTNET_STARTUP_HOOKS";
         var environment = getEnvironmentVariable(StartupHooksEnvironment);
         setEnvironmentVariable(StartupHooksEnvironment, RemoveCurrentAssembly(environment));
