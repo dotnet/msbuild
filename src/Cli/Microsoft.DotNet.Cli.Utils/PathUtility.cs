@@ -222,6 +222,7 @@ namespace Microsoft.DotNet.Tools.Common
             return path;
         }
 
+        [Obsolete("Use System.IO.Path.GetFullPath(string, string) instead, or PathUtility.GetFullPath(string) if the base path is the current working directory.")]
         public static string GetAbsolutePath(string basePath, string relativePath)
         {
             if (basePath == null)
