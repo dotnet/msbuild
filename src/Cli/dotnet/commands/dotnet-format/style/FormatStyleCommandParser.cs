@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.Tools.Format
         {
             var command = new Command("style", LocalizableStrings.Run_code_style_analyzers_and_apply_fixes)
             {
+                DiagnosticsOption,
                 SeverityOption,
             };
             command.AddCommonOptions();

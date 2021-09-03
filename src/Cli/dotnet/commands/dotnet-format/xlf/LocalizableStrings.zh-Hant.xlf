@@ -72,6 +72,11 @@
         <target state="new">Verify no formatting changes would be performed. Terminates with a non-zero exit code if any files would have been formatted.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Whether_to_treat_the_workspace_argument_as_a_simple_folder_of_files">
+        <source>Whether to treat the workspace argument as a simple folder of files.</source>
+        <target state="new">Whether to treat the workspace argument as a simple folder of files.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="all_files_in_the_solution_or_project">
         <source>all files in the solution or project</source>
         <target state="new">all files in the solution or project</target>
