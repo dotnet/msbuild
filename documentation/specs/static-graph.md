@@ -358,7 +358,7 @@ namespace Microsoft.Build.Experimental.Graph
 ```
 
 ## Isolated builds
-Building a project in isolation means that any build results for project references must be pre-computed and provided as input.
+Building a project in isolation means enforcing the constraint that whenever a graph node is built, all the target calls that it does on its references **do not execute** because their results are already available. This means that any BuildResult objects for project references must be pre-computed and somehow provided as inputs to the referencing project.
 
 If a project uses the MSBuild task, the build result must be in MSBuild's build result cache instead of just-in-time executing targets on that referenced project. If it is not in the build result cache, an error will be logged and the build will fail. If the project is calling into itself either via `CallTarget` or the MSBuild task with a different set of global properties, this will be allowed to support multitargeting and other build dimensions implemented in a similar way.
 
