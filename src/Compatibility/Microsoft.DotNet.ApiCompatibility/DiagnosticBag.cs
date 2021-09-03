@@ -73,7 +73,8 @@ namespace Microsoft.DotNet.ApiCompatibility
         {
             if (!Filter(difference.DiagnosticId, difference.ReferenceId))
             {
-                _differences.Add(difference);
+                if (!_differences.Contains(difference))
+                    _differences.Add(difference);
             }
         }
 

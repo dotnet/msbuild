@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                                     DiagnosticIds.AssemblyReferenceNotFound,
                                     string.Format(Resources.MatchingAssemblyNotFound, $"{type.ContainingAssembly.Name}.dll"),
                                     DifferenceType.Changed,
-                                    type));
+                                    string.Empty));
         }
     }
 }

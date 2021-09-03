@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     /// <summary>
     /// Class representing a difference of compatibility, containing detailed information about it.
     /// </summary>
-    public class CompatDifference : IDiagnostic
+    public class CompatDifference : IDiagnostic, IEquatable<CompatDifference>
     {
         /// <summary>
         /// The Diagnostic ID for this difference.
@@ -65,5 +65,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// </summary>
         /// <returns><see cref="string"/> describing the difference.</returns>
         public override string ToString() => $"{DiagnosticId} : {Message}";
+
+        public bool Equals(CompatDifference other) => DiagnosticId.Equals(other.DiagnosticId, StringComparison.InvariantCultureIgnoreCase) &
+                                                      Message.Equals(other.Message, StringComparison.InvariantCultureIgnoreCase) &
+                                                      Type.Equals(other.Type) &
+                                                      ReferenceId.Equals(other.ReferenceId, StringComparison.InvariantCultureIgnoreCase);
     }
 }

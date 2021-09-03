@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
@@ -255,6 +256,47 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
 
             if (expectCP1002)
                 Assert.Contains($"CP1002 Could not find matching assembly: '{dependency.Name}.dll' in any of the search directories.", log.errors);
+        }
+
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        public void EnsureOnlyOneAssemblyLoadErrorIsLoggedPerMissingAssembly()
+        {
+            TestLogger log = new TestLogger();
+
+            string dependencySourceCode = @"namespace PackageValidationTests { public interface ISomeInterface { }
+#if !NETSTANDARD2_0
+public class MyForwardedType : ISomeInterface { }
+public class MySecondForwardedType : ISomeInterface { }
+#endif
+}";
+            string testSourceCode = @"
+#if NETSTANDARD2_0
+namespace PackageValidationTests { public class MyForwardedType : ISomeInterface { } public class MySecondForwardedType : ISomeInterface { } }
+#else
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(PackageValidationTests.MyForwardedType))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(PackageValidationTests.MySecondForwardedType))]
+#endif";
+
+            TestProject dependency = CreateTestProject(dependencySourceCode, "netstandard2.0;net5.0");
+            TestProject testProject = CreateTestProject(testSourceCode, "netstandard2.0;net5.0", new[] { dependency });
+
+            TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            var result = packCommand.Execute();
+            Assert.Equal(string.Empty, result.StdErr);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+
+            Dictionary<string, HashSet<string>> references = new()
+            {
+                { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
+                { "net5.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0") } }
+            };
+
+            File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0", $"{dependency.Name}.dll"));
+
+            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, log, references).Validate(package);
+
+            Assert.Single(log.errors.Where(e => e.Contains("CP1002")));
         }
 
         private TestProject CreateTestProject(string sourceCode, string tfms, IEnumerable<TestProject> referenceProjects = null)

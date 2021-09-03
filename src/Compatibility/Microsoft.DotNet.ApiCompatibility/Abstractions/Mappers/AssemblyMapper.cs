@@ -123,11 +123,15 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         }
                         else
                         {
-                            _assemblyLoadErrors[index].Add(new CompatDifference(
-                                    DiagnosticIds.AssemblyReferenceNotFound,
-                                    string.Format(Resources.MatchingAssemblyNotFound, $"{symbol.ContainingAssembly.Name}.dll"),
-                                    DifferenceType.Changed,
-                                    symbol));
+                            // If we should warn on missing references and we are unable to resolve the type forward, then we should log a diagnostic
+                            if (Settings.WarnOnMissingReferences)
+                            {
+                                _assemblyLoadErrors[index].Add(new CompatDifference(
+                                        DiagnosticIds.AssemblyReferenceNotFound,
+                                        string.Format(Resources.MatchingAssemblyNotFound, $"{symbol.ContainingAssembly.Name}.dll"),
+                                        DifferenceType.Changed,
+                                        string.Empty));
+                            }
                         }
                     }
 

@@ -179,7 +179,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         }
 
         private bool IsSpecialEnumField(ISymbol member) =>
-            !Settings.RunningWithReferences &&
+            !Settings.WarnOnMissingReferences &&
             member is IFieldSymbol &&
             member.Name == "value__" &&
             // When running without references, Roslyn doesn't set the type kind as enum. Compare by name instead.

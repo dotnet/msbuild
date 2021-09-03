@@ -38,9 +38,9 @@ namespace Microsoft.DotNet.ApiCompatibility
         public bool StrictMode { get; set; }
 
         /// <summary>
-        /// Flag indicating whether the ApiComparison will be performed using references or not.
+        /// Flag indicating whether the ApiComparison will warn if there are missing references
         /// </summary>
-        public bool RunningWithReferences { get; set; }
+        public bool WarnOnMissingReferences { get; set; }
 
         /// <summary>
         /// Callback function to get the <see cref="ComparingSettings"/> to be used when creating the settings to get the differences.
@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             if (GetComparingSettings != null)
                 return GetComparingSettings(leftName, rightNames);
 
-            return new ComparingSettings(includeInternalSymbols: IncludeInternalSymbols, strictMode: StrictMode, leftName: leftName, rightNames: rightNames, withReferences: RunningWithReferences);
+            return new ComparingSettings(includeInternalSymbols: IncludeInternalSymbols, strictMode: StrictMode, leftName: leftName, rightNames: rightNames, warnOnMissingReferences: WarnOnMissingReferences);
         }
     }
 }

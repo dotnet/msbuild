@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.PackageValidation
                     rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightSymbols, rightTuple.rightAssembly));
                 }
 
-                _differ.RunningWithReferences = runWithReferences;
+                _differ.WarnOnMissingReferences = runWithReferences;
                 IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                     _differ.GetDifferences(leftContainer, rightContainerList);
 
