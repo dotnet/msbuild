@@ -115,9 +115,10 @@ $@"The template ""{expectedTemplateName}"" was created successfully\.
 Processing post-creation actions\.\.\.
 Running 'dotnet restore' on ({finalProjectName})\.\.\.
   Determining projects to restore\.\.\.
-  Restored ({finalProjectName}) \(in \d{{1,3}} ms|\d(\.\d{{1,3}}){{0,1}} sec\)\.
+(.*$\n)*  Restored ({finalProjectName}) \(in \d{{1,5}}(\.\d{{1,5}}){{0,1}} \w*\)\.
 
-Restore succeeded\.");
+Restore succeeded\.",
+                RegexOptions.Multiline);
 
             new DotnetCommand(_log, "restore")
                 .WithWorkingDirectory(workingDir)
