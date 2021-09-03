@@ -304,13 +304,12 @@ namespace Microsoft.NET.StringTools
         /// <returns>A stable hashcode of the string represented by this instance.</returns>
         public override unsafe int GetHashCode()
         {
-            int hashCode = 5381;
+            uint hash = (5381 << 16) + 5381;
+            bool hashedOddNumberOfCharacters = false;
+
             fixed (char* charPtr = _inlineSpan)
             {
-                for (int i = 0; i < _inlineSpan.Length; i++)
-                {
-                    hashCode = unchecked(hashCode * 33 ^ charPtr[i]);
-                }
+                GetHashCodeHelper(charPtr, _inlineSpan.Length, ref hash, ref hashedOddNumberOfCharacters);
             }
             if (_spans != null)
             {
@@ -318,14 +317,46 @@ namespace Microsoft.NET.StringTools
                 {
                     fixed (char* charPtr = span.Span)
                     {
-                        for (int i = 0; i < span.Length; i++)
-                        {
-                            hashCode = unchecked(hashCode * 33 ^ charPtr[i]);
-                        }
+                        GetHashCodeHelper(charPtr, span.Length, ref hash, ref hashedOddNumberOfCharacters);
                     }
                 }
             }
-            return hashCode;
+            return (int)(hash);
+        }
+
+        /// <summary>
+        /// Hashes a memory block specified by a pointer and length.
+        /// </summary>
+        /// <param name="charPtr">Pointer to the first character.</param>
+        /// <param name="length">Number of characters at <paramref name="charPtr"/>.</param>
+        /// <param name="hash">The running hash code.</param>
+        /// <param name="hashedOddNumberOfCharacters">True if the incoming <paramref name="hash"/> was calculated from an odd number of characters.</param>
+        private static unsafe void GetHashCodeHelper(char* charPtr, int length, ref uint hash, ref bool hashedOddNumberOfCharacters)
+        {
+            if (hashedOddNumberOfCharacters && length > 0)
+            {
+                // If the number of characters hashed so far is odd, the first character of the current block completes
+                // the calculation done with the last character of the previous block.
+                hash ^= BitConverter.IsLittleEndian ? ((uint)*charPtr << 16) : *charPtr;
+                length--;
+                charPtr++;
+                hashedOddNumberOfCharacters = false;
+            }
+
+            // The loop hashes two characters at a time.
+            uint* ptr = (uint*)charPtr;
+            while (length >= 2)
+            {
+                length -= 2;
+                hash = ((hash << 5) + hash) ^ *ptr;
+                ptr += 1;
+            }
+
+            if (length > 0)
+            {
+                hash = ((hash << 5) + hash) ^ (BitConverter.IsLittleEndian ? *((char*)ptr) : ((uint)*((char*)ptr) << 16));
+                hashedOddNumberOfCharacters = true;
+            }
         }
     }
 }
