@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Configurer;
 using Microsoft.NET.Sdk.Razor.Tool.CommandLineUtils;
 
 namespace Microsoft.NET.Sdk.Razor.Tool
@@ -172,9 +173,8 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             var path = getEnvironmentVariable("DOTNET_BUILD_PIDFILE_DIRECTORY");
             if (string.IsNullOrEmpty(path))
             {
-                var homeEnvVariable = PlatformInformation.IsWindows ? "USERPROFILE" : "HOME";
-                var homePath = getEnvironmentVariable(homeEnvVariable);
-                if (string.IsNullOrEmpty(homePath))
+                var homePath = CliFolderPathCalculatorCore.GetDotnetHomePath();
+                if (homePath is null)
                 {
                     // Couldn't locate the user profile directory. Bail.
                     return null;

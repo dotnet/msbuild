@@ -36,6 +36,10 @@
       SkipGetTargetFrameworkProperties="true"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculatorCore.cs" LinkBase="Common"/>
+  </ItemGroup>
+
   <!-- This makes it so that the runtimeconfig.json is included as part of the build output of the project that references this project. -->
   <Target Name="PreserveRuntimeConfig" BeforeTargets="GetCopyToOutputDirectoryItems">
     <ItemGroup>
