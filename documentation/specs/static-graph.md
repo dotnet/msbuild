@@ -151,9 +151,13 @@ For example, here is a trimmed down `Microsoft.Net.Sdk` multitargeting project:
 </Project>
 ```
 
-To summarize, there are two main patterns for build dimensions which are handled:
-1. The project multitargets, in which case the SDK needs to specify the multitargeting build dimensions.
-2. A different set of global properties are used to choose the dimension like with Configuration or Platform. The project graph supports this via multiple entry points.
+To summarize, there are two main patterns for specifying build dimensions which are handled:
+1. Multitargeting based. A multitargeting project self describes supported build dimensions. In this case the SDK needs to specify the multitargeting build dimensions. The graph then extracts innerbuilds from a given outer build. For example, the `TargetFramework` build dimension gets specified this way.
+2. Global Property based: A top level set of global properties get applied to the graph entrypoints and get propagated downward through the graph. For example, the `Configuration` and `Platform` build dimensions get specified this way.
+
+Why does an outerbuild need to generate speculative edges to all of its innerbuilds? Why can't it use nuget to prune the speculative edges down to the compatible set?
+- One big design constraint we imposed on static graph was to keep it agnostic of SDK implementation details. So the graph must not know about particular details of one language's SDK. We wanted a generic design that all language SDKs can leverage. We considered that calling nuget to get the compatible TargetFramework values breaks this rule, as both the concept of "nuget" and the concept of "TargetFramework" are implementation details of the .net SDK. If someone were to write a Java SDK, would "calling nuget to get the compatible TargetFramework" still be relevant? A solution to this is to allow SDKs to configure the graph with an extension point on "how to collapse multiple speculative innerbuild edges one a smaller set", but we didn't have the time to design it yet.
+- There is a conflicting need between build everything or just building a "TF slice" through the graph. Outer loop builds (CI builds) that publish binaries need to build all the packages for all the supported TFs, so they need the graph to express all possible combinations. Inner loop builds (dev-at-work) can be sliced down to only the TF that the dev is working on in order to reduce build times. Again, we didn't have time to design how to express these two things so we went with "express everything" because that allows both scenarios to work.
 
 ### Executing targets on a graph
 When building a graph, project references should be built before the projects that reference them, as opposed to the existing msbuild scheduler which builds projects just in time.
