@@ -451,7 +451,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework, runtimeIdentifier: RuntimeInformation.RuntimeIdentifier);
             var mainProjectDll = Path.Combine(intermediateDirectory.FullName, $"{TestProjectName}.dll");
-            var niPdbFile = GivenThatWeWantToPublishReadyToRun.GetPDBFileName(mainProjectDll, framework);
+            var niPdbFile = GivenThatWeWantToPublishReadyToRun.GetPDBFileName(mainProjectDll, framework, RuntimeInformation.RuntimeIdentifier);
 
             string[] expectedFiles = { SingleFile, PdbFile, niPdbFile };
             GetPublishDirectory(publishCommand)
