@@ -28,12 +28,14 @@ namespace Microsoft.DotNet.Configurer
             return Path.Combine(homePath, DotnetProfileDirectoryName);
         }
 
-        public static string? GetDotnetHomePath()
+        public static string? GetDotnetHomePath(Func<string, string?>? getEnvironmentVariable = null)
         {
-            var home = Environment.GetEnvironmentVariable(DotnetHomeVariableName);
+            getEnvironmentVariable ??= key => Environment.GetEnvironmentVariable(key);
+
+            var home = getEnvironmentVariable(DotnetHomeVariableName);
             if (string.IsNullOrEmpty(home))
             {
-                home = Environment.GetEnvironmentVariable(PlatformHomeVariableName);
+                home = getEnvironmentVariable(PlatformHomeVariableName);
                 if (string.IsNullOrEmpty(home))
                 {
                     return null;

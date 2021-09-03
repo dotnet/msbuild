@@ -173,7 +173,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             var path = getEnvironmentVariable("DOTNET_BUILD_PIDFILE_DIRECTORY");
             if (string.IsNullOrEmpty(path))
             {
-                var homePath = CliFolderPathCalculatorCore.GetDotnetHomePath();
+                var homePath = CliFolderPathCalculatorCore.GetDotnetHomePath(getEnvironmentVariable);
                 if (homePath is null)
                 {
                     // Couldn't locate the user profile directory. Bail.
