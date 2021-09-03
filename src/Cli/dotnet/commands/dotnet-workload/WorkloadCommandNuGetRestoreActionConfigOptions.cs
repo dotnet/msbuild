@@ -28,20 +28,37 @@ namespace Microsoft.DotNet.Cli
             "--interactive",
             CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
+        public static Option<bool> HiddenDisableParallelOption = new ForwardedOption<bool>(
+            "--disable-parallel",
+            LocalizableStrings.CmdDisableParallelOptionDescription).Hide();
+
+        public static Option<bool> HiddenNoCacheOption = new ForwardedOption<bool>(
+            "--no-cache",
+            LocalizableStrings.CmdNoCacheOptionDescription).Hide();
+
+        public static Option<bool> HiddenIgnoreFailedSourcesOption = new ForwardedOption<bool>(
+            "--ignore-failed-sources",
+            LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription).Hide();
+
+        public static Option<bool> HiddenInteractiveRestoreOption = new ForwardedOption<bool>(
+            "--interactive",
+            CommonLocalizableStrings.CommandInteractiveOptionDescription).Hide();
+
         public static RestoreActionConfig ToRestoreActionConfig(this ParseResult parseResult)
         {
-            return new RestoreActionConfig(DisableParallel: parseResult.ValueForOption<bool>(DisableParallelOption),
-                NoCache: parseResult.ValueForOption<bool>(NoCacheOption),
-                IgnoreFailedSources: parseResult.ValueForOption<bool>(IgnoreFailedSourcesOption),
-                Interactive: parseResult.ValueForOption<bool>(InteractiveRestoreOption));
+            return new RestoreActionConfig(
+                DisableParallel: parseResult.HasOption(DisableParallelOption) ? parseResult.ValueForOption<bool>(DisableParallelOption) : parseResult.ValueForOption<bool>(HiddenDisableParallelOption),
+                NoCache: parseResult.HasOption(NoCacheOption) ? parseResult.ValueForOption<bool>(NoCacheOption) : parseResult.ValueForOption<bool>(HiddenNoCacheOption),
+                IgnoreFailedSources: parseResult.HasOption(IgnoreFailedSourcesOption) ? parseResult.ValueForOption<bool>(IgnoreFailedSourcesOption) : parseResult.ValueForOption<bool>(HiddenIgnoreFailedSourcesOption),
+                Interactive: parseResult.HasOption(InteractiveRestoreOption) ? parseResult.ValueForOption<bool>(InteractiveRestoreOption) : parseResult.ValueForOption<bool>(HiddenInteractiveRestoreOption));
         }
 
         public static void AddWorkloadCommandNuGetRestoreActionConfigOptions(this Command command, bool Hide = false)
         {
-            command.AddOption(Hide ? DisableParallelOption.Hide() : DisableParallelOption);
-            command.AddOption(Hide ? IgnoreFailedSourcesOption.Hide() : IgnoreFailedSourcesOption);
-            command.AddOption(Hide ? NoCacheOption.Hide() : NoCacheOption);
-            command.AddOption(Hide ? InteractiveRestoreOption.Hide() : InteractiveRestoreOption);
+            command.AddOption(Hide ? HiddenDisableParallelOption : DisableParallelOption);
+            command.AddOption(Hide ? HiddenIgnoreFailedSourcesOption : IgnoreFailedSourcesOption);
+            command.AddOption(Hide ? HiddenNoCacheOption : NoCacheOption);
+            command.AddOption(Hide ? HiddenInteractiveRestoreOption : InteractiveRestoreOption);
         }
     }
 }

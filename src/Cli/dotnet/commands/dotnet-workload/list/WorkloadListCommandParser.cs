@@ -15,9 +15,11 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> VersionOption = WorkloadUpdateCommandParser.VersionOption;
 
-        public static readonly Option<string> TempDirOption = WorkloadUpdateCommandParser.TempDirOption.Hide();
+        public static readonly Option<string> TempDirOption = 
+            new Option<string>("--temp-dir", Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings.TempDirOptionDescription).Hide();
         
-        public static readonly Option<bool> IncludePreviewsOption = WorkloadUpdateCommandParser.IncludePreviewsOption.Hide();
+        public static readonly Option<bool> IncludePreviewsOption = 
+            new Option<bool>("--include-previews", Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings.IncludePreviewOptionDescription).Hide();
 
         public static Command GetCommand()
         {
