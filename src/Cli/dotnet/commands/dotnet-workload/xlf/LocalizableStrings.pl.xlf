@@ -7,9 +7,19 @@
         <target state="new">Install or work with workloads that extend the .NET experience.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EmscriptenDescription">
+        <source>Emscripten SDK compiler tooling</source>
+        <target state="new">Emscripten SDK compiler tooling</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
         <source>.NET Install Command</source>
         <target state="new">.NET Install Command</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WasmToolsDescription">
+        <source>.NET WebAssembly build tools</source>
+        <target state="new">.NET WebAssembly build tools</target>
         <note />
       </trans-unit>
     </body>
