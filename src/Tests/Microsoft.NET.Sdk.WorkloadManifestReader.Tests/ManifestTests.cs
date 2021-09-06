@@ -77,7 +77,7 @@ namespace ManifestReaderTests
         }
 
         [Fact]
-        public void GivenMultiplePackRoots_ItUsesTheLastOneIfThePackDoesntExist()
+        public void GivenMultiplePackRoots_ItUsesTheFirstInstallableIfThePackDoesntExist()
         {
             TestMultiplePackRoots(false, false);
         }
