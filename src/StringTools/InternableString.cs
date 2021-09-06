@@ -331,6 +331,7 @@ namespace Microsoft.NET.StringTools
         /// <param name="length">Number of characters at <paramref name="charPtr"/>.</param>
         /// <param name="hash">The running hash code.</param>
         /// <param name="hashedOddNumberOfCharacters">True if the incoming <paramref name="hash"/> was calculated from an odd number of characters.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void GetHashCodeHelper(char* charPtr, int length, ref uint hash, ref bool hashedOddNumberOfCharacters)
         {
             if (hashedOddNumberOfCharacters && length > 0)
