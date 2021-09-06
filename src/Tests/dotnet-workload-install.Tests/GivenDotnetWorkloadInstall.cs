@@ -272,17 +272,16 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var userProfileDir = Path.Combine(testDirectory, "user-profile");
             var tmpDir = Path.Combine(testDirectory, "tmp");
             var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
-            var workloadResolver = WorkloadResolver.CreateForTests(
-                new MockManifestProvider(new[] { manifestPath }), userLocal ? new [] { (userProfileDir, true), (dotnetRoot, true) } :
-                                                                               new [] { (dotnetRoot, true) });
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), dotnetRoot, userLocal, userProfileDir);
             var nugetDownloader = new FailingNuGetPackageDownloader(tmpDir);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var sdkFeatureVersion = "6.0.100";
             var existingWorkload = "mock-1";
             var installingWorkload = "mock-2";
+
             if (userLocal)
             {
-                SetUserLocal(dotnetRoot, sdkFeatureVersion);
+                WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkFeatureVersion);
             }
 
             // Successfully install a workload
@@ -328,7 +327,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             string sdkVersion = "6.0.100";
             if (userLocal)
             {
-                SetUserLocal(dotnetRoot, sdkVersion);
+                WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkVersion);
             }
             var installManager = new WorkloadInstallCommand(
                 parseResult,
@@ -342,16 +341,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 version: "6.0.100");
 
             return (testDirectory, installManager, installer, workloadResolver, manifestUpdater, nugetDownloader);
-        }
-
-        private void SetUserLocal(string dotnetDir, string sdkFeatureBand)
-        {
-            // Add the userlocal marker file.
-            string workloadMetadataDir = Path.Combine(dotnetDir, "metadata", "workloads", sdkFeatureBand);
-            Directory.CreateDirectory(workloadMetadataDir);
-            File.WriteAllText(Path.Combine(workloadMetadataDir, "userlocal"), "");
-
-            Assert.True(WorkloadFileBasedInstall.IsUserLocal(dotnetDir, sdkFeatureBand));
         }
 
         private string AppendForUserLocal(string identifier, bool userLocal)

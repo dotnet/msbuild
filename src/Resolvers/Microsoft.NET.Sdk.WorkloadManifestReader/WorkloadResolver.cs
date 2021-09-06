@@ -54,8 +54,17 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return new WorkloadResolver(manifestProvider, workloadRootPaths, currentRuntimeIdentifiers);
         }
 
-        public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, string dotNetRoot, string[]? currentRuntimeIdentifiers = null)
-            => CreateForTests(manifestProvider, new (string, bool)[] { (dotNetRoot, true) }, currentRuntimeIdentifiers);
+        public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, string dotNetRoot, bool userLocal = false, string? userProfileDir = null, string[]? currentRuntimeIdentifiers = null)
+        {
+            if (userLocal && userProfileDir is null)
+            {
+                throw new ArgumentNullException(nameof(userProfileDir));
+            }
+            (string path, bool installable)[] dotNetRootPaths = userLocal
+                                                                ? new[] { (userProfileDir!, true), (dotNetRoot, true) }
+                                                                : new[] { (dotNetRoot, true) };
+            return CreateForTests(manifestProvider, dotNetRootPaths, currentRuntimeIdentifiers);
+        }
 
         public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, (string path, bool installable)[] dotNetRootPaths, string[]? currentRuntimeIdentifiers = null)
         {

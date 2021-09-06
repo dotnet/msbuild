@@ -8,10 +8,17 @@ namespace Microsoft.DotNet.Workloads.Workload
     static class WorkloadFileBasedInstall
     {
         public static bool IsUserLocal(string dotnetDir, string sdkFeatureBand)
-        {
-            string userlocalPath = Path.Combine(dotnetDir, "metadata", "workloads", sdkFeatureBand, "userlocal");
+            => File.Exists(GetUserInstallFilePath(dotnetDir, sdkFeatureBand));
 
-            return File.Exists(userlocalPath);
+        internal static void SetUserLocal(string dotnetDir, string sdkFeatureBand)
+        {
+            string filePath = GetUserInstallFilePath(dotnetDir, sdkFeatureBand);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            File.WriteAllText(filePath, "");
         }
+
+        private static string GetUserInstallFilePath(string dotnetDir, string sdkFeatureBand)
+            => Path.Combine(dotnetDir, "metadata", "workloads", sdkFeatureBand, "userlocal");
     }
 }
