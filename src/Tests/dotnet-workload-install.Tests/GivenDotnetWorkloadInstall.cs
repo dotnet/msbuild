@@ -320,6 +320,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             _reporter.Clear();
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName, identifier: userLocal ? "userlocal" : "default").Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
             var installer = new MockPackWorkloadInstaller(failingWorkload);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
@@ -336,7 +337,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 workloadInstaller: installer,
                 nugetPackageDownloader: nugetDownloader,
                 workloadManifestUpdater: manifestUpdater,
-                userProfileDir: testDirectory,
+                userProfileDir: userProfileDir,
                 dotnetDir: dotnetRoot,
                 version: "6.0.100");
 

@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
             }
 
             var repairCommand = new WorkloadRepairCommand(_parseResult, reporter: _reporter, workloadResolver: workloadResolver,
-                nugetPackageDownloader: nugetDownloader, version: sdkFeatureVersion, dotnetDir: dotnetRoot);
+                nugetPackageDownloader: nugetDownloader, version: sdkFeatureVersion, dotnetDir: dotnetRoot, userProfileDir: userProfileDir);
             repairCommand.Execute();
 
             _reporter.Lines.Should().Contain(LocalizableStrings.NoWorkloadsToRepair);
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
             var extraPackPath = Path.Combine(installRoot, "packs", "Test.Pack.A", "1.0.0");
             Directory.CreateDirectory(extraPackPath);
 
-            var repairCommand = new WorkloadRepairCommand(_parseResult, reporter: _reporter, workloadResolver: workloadResolver,
+            var repairCommand = new WorkloadRepairCommand(_parseResult, reporter: _reporter, workloadResolver: workloadResolver, userProfileDir: userProfileDir,
                 nugetPackageDownloader: nugetDownloader, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             repairCommand.Execute();
 
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
             var deletedPackPath = Path.Combine(installRoot, "packs", "Xamarin.Android.Sdk");
             Directory.Delete(deletedPackPath, true);
 
-            var repairCommand = new WorkloadRepairCommand(_parseResult, reporter: _reporter, workloadResolver: workloadResolver,
+            var repairCommand = new WorkloadRepairCommand(_parseResult, reporter: _reporter, workloadResolver: workloadResolver, userProfileDir: userProfileDir,
                 nugetPackageDownloader: nugetDownloader, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             repairCommand.Execute();
 
