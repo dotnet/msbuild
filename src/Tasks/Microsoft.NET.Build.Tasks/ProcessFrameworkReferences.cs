@@ -11,6 +11,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Newtonsoft.Json;
 using NuGet.Frameworks;
@@ -646,7 +647,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (!string.IsNullOrEmpty(NetCoreRoot) && !string.IsNullOrEmpty(NETCoreSdkVersion))
                 {
-                    if (WorkloadInstall.IsUserLocal(NetCoreRoot, NETCoreSdkVersion) &&
+                    if (WorkloadFileBasedInstall.IsUserLocal(NetCoreRoot, NETCoreSdkVersion) &&
                         CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath() is { } userProfileDir)
                     {
                         yield return Path.Combine(userProfileDir, "packs");

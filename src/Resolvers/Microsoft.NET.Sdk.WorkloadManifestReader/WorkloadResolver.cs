@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.NET.Sdk.Localization;
 using FXVersion = Microsoft.DotNet.MSBuildSdkResolver.FXVersion;
 
@@ -35,7 +36,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 new string[] { };
 
             (string path, bool installable)[] workloadRootPaths;
-            if (userProfileDir != null && WorkloadInstall.IsUserLocal(dotnetRootPath, sdkVersion) && Directory.Exists(userProfileDir))
+            if (userProfileDir != null && WorkloadFileBasedInstall.IsUserLocal(dotnetRootPath, sdkVersion) && Directory.Exists(userProfileDir))
             {
                 workloadRootPaths = new[] { (userProfileDir, true), (dotnetRootPath, true) };
             }

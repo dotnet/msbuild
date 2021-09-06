@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                       new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null,
                                           new FirstPartyNuGetPackageSigningVerifier(_tempPackagesDir), logger,
                                           restoreActionConfig: _restoreActionConfig);
-            bool userLocal = WorkloadInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString());
+            bool userLocal = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString());
             _workloadMetadataDir = Path.Combine(userLocal ? _userProfileDir : _dotnetDir, "metadata", "workloads");
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;
@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string packagePath = null;
             string tempExtractionDir = null;
             string tempBackupDir = null;
-            string rootInstallDir = WorkloadInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString()) ? _userProfileDir : _dotnetDir;
+            string rootInstallDir = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString()) ? _userProfileDir : _dotnetDir;
             var manifestPath = Path.Combine(rootInstallDir, "sdk-manifests", sdkFeatureBand.ToString(), manifestId.ToString());
 
             _reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloadManifest, manifestId, manifestVersion));

@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using FluentAssertions;
 using ManifestReaderTests;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
@@ -333,7 +334,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.CreateDirectory(workloadMetadataDir);
             File.WriteAllText(Path.Combine(workloadMetadataDir, "userlocal"), "");
 
-            Assert.True(WorkloadInstall.IsUserLocal(dotnetDir, sdkFeatureBand));
+            Assert.True(WorkloadFileBasedInstall.IsUserLocal(dotnetDir, sdkFeatureBand));
         }
     }
 

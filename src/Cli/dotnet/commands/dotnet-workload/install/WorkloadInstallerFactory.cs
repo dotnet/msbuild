@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     nugetPackageDownloader, verbosity, packageSourceLocation, reporter, tempDirPath);
             }
 
-            if (elevationRequired && !WorkloadInstall.IsUserLocal(dotnetDir, sdkFeatureBand.ToString()) && !CanWriteToDotnetRoot(dotnetDir))
+            if (elevationRequired && !WorkloadFileBasedInstall.IsUserLocal(dotnetDir, sdkFeatureBand.ToString()) && !CanWriteToDotnetRoot(dotnetDir))
             {
                 throw new GracefulException(LocalizableStrings.InadequatePermissions, isUserError: false);
             }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.NET.Sdk.Localization;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
@@ -62,7 +63,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             string? userManifestsDir = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand);
             string dotnetManifestDir = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
-            if (userManifestsDir != null && WorkloadInstall.IsUserLocal(_sdkRootPath, sdkVersion) && Directory.Exists(userManifestsDir))
+            if (userManifestsDir != null && WorkloadFileBasedInstall.IsUserLocal(_sdkRootPath, sdkVersion) && Directory.Exists(userManifestsDir))
             {
                 _manifestDirectories = new[] { userManifestsDir, dotnetManifestDir };
             }
