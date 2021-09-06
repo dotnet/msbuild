@@ -90,7 +90,7 @@ namespace Microsoft.NET.TestFramework
 
         public TestDirectory CreateTestDirectory([CallerMemberName] string testName = null, string identifier = null)
         {
-            string dir = GetTestDestinationDirectoryPath(testName, testName, identifier ?? string.Empty, unique: true);
+            string dir = GetTestDestinationDirectoryPath(testName, testName, identifier ?? string.Empty);
             return new TestDirectory(dir, TestContext.Current.SdkVersion);
         }
 
@@ -114,8 +114,7 @@ namespace Microsoft.NET.TestFramework
             string testProjectName,
             string callingMethodAndFileName,
             string identifier,
-            bool allowCopyIfPresent = false,
-            bool unique = false)
+            bool allowCopyIfPresent = false)
         {
             string baseDirectory = TestContext.Current.TestExecutionDirectory;
             var directoryName = new StringBuilder(callingMethodAndFileName).Append(identifier);
@@ -123,12 +122,6 @@ namespace Microsoft.NET.TestFramework
             if (testProjectName != callingMethodAndFileName)
             {
                 directoryName = directoryName.Append(testProjectName);
-            }
-
-            if (unique)
-            {
-                // avoid collisions between derived test classes using same base method concurrently
-                directoryName = directoryName.Append(Guid.NewGuid().ToString("N").Substring(0, 8));
             }
 
             // We need to ensure the directory name isn't over 24 characters in length
