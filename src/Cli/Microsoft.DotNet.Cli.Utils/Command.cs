@@ -200,13 +200,13 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private void EnsureStdOut()
         {
-            _stdOut = _stdOut ?? new StreamForwarder();
+            _stdOut ??= new StreamForwarder();
             _process.StartInfo.RedirectStandardOutput = true;
         }
 
         private void EnsureStdErr()
         {
-            _stdErr = _stdErr ?? new StreamForwarder();
+            _stdErr ??= new StreamForwarder();
             _process.StartInfo.RedirectStandardError = true;
         }
 
