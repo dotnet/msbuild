@@ -67,7 +67,7 @@ namespace ManifestReaderTests
         public void UnresolvedAliasedPackPath()
         {
             var manifestProvider = new FakeManifestProvider(ManifestPath);
-            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath, new[] { "fake-platform" });
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath, currentRuntimeIdentifiers: new[] { "fake-platform" });
 
             resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
 
