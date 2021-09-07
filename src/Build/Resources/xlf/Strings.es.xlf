@@ -1791,7 +1791,7 @@
       </trans-unit>
       <trans-unit id="AffinityConflict">
         <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: La afinidad de solicitud {0} especificada está en conflicto con una afinidad {1} anterior especificada para este proyecto.</target>
+        <target state="new">MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -2381,12 +2381,12 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="CouldNotRunSdkResolver">
         <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: La resolución del SDK "{0}" no se pudo ejecutar. {1}</target>
+        <target state="new">MSB4242: The SDK resolver "{0}" failed to run. {1}</target>
         <note>{StrBegin="MSB4242: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: La resolución del SDK basado en NuGet no se pudo ejecutar porque no se encontraron los ensamblados de NuGet. Compruebe su instalación de MSBuild o configure la variable del entorno "{0}" en la carpeta que contiene los ensamblados de NuGet requeridos. {1}</target>
+        <target state="new">MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">

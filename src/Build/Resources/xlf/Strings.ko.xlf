@@ -1791,7 +1791,7 @@
       </trans-unit>
       <trans-unit id="AffinityConflict">
         <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: 지정한 요청 선호도 {0}이(가) 이 프로젝트에 대해 이전에 지정한 선호도 {1}과(와) 충돌합니다.</target>
+        <target state="new">MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -2381,12 +2381,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="CouldNotRunSdkResolver">
         <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: SDK 확인자 "{0}"을(를) 실행하지 못했습니다. {1}</target>
+        <target state="new">MSB4242: The SDK resolver "{0}" failed to run. {1}</target>
         <note>{StrBegin="MSB4242: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: NuGet 어셈블리를 찾을 수 없어 NuGet 기반 SDK 확인자를 실행하지 못했습니다. MSBuild 설치를 확인하거나 환경 변수 "{0}"을(를) 필요한 NuGet 어셈블리가 포함된 폴더로 설정하세요. {1}</target>
+        <target state="new">MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">

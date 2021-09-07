@@ -1791,7 +1791,7 @@
       </trans-unit>
       <trans-unit id="AffinityConflict">
         <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: 指定的请求关联 {0} 与先前为此项目指定的关联 {1} 冲突。</target>
+        <target state="new">MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -2381,12 +2381,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="CouldNotRunSdkResolver">
         <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: SDK 解析程序“{0}”运行失败。{1}</target>
+        <target state="new">MSB4242: The SDK resolver "{0}" failed to run. {1}</target>
         <note>{StrBegin="MSB4242: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: 基于 NuGet 的 SDK 解析程序运行失败，因为无法找到 NuGet 程序集。请检查你安装的 MSBuild 或将环境变量“{0}”设置为包含所需 NuGet 程序集的文件夹。{1}</target>
+        <target state="new">MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
