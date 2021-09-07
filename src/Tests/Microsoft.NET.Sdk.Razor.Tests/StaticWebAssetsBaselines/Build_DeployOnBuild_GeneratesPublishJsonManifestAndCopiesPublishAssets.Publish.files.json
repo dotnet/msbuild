@@ -1,0 +1,5 @@
+[
+  "${OutputPath}\\wwwroot\\ComponentApp.styles.css",
+  "${ProjectPath}\\obj\\Debug\\net6.0\\scopedcss\\bundle\\ComponentApp.styles.css",
+  "${ProjectPath}\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css"
+]
