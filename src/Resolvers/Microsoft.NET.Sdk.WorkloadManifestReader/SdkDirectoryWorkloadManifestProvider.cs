@@ -63,7 +63,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             string? userManifestsDir = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand);
             string dotnetManifestDir = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
-            if (userManifestsDir != null && WorkloadFileBasedInstall.IsUserLocal(_sdkRootPath, sdkVersion) && Directory.Exists(userManifestsDir))
+            if (userManifestsDir != null && WorkloadFileBasedInstall.IsUserLocal(_sdkRootPath, _sdkVersionBand) && Directory.Exists(userManifestsDir))
             {
                 _manifestDirectories = new[] { userManifestsDir, dotnetManifestDir };
             }
