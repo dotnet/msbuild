@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                                                       Type.Equals(other.Type) &
                                                       ReferenceId.Equals(other.ReferenceId, StringComparison.InvariantCultureIgnoreCase)));
 
-        public override bool Equals(object obj) => Equals(other as CompatDifference);
+        public override bool Equals(object obj) => Equals(obj as CompatDifference);
 
         public override int GetHashCode()
         {
