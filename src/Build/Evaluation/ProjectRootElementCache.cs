@@ -21,37 +21,37 @@ namespace Microsoft.Build.Evaluation
     /// Maintains a cache of all loaded ProjectRootElement's for design time purposes.
     /// Weak references are held to add added ProjectRootElement's.
     /// Strong references are held to a limited number of added ProjectRootElement's.
-    /// 
+    ///
     /// 1. Loads of a ProjectRootElement will share any existing loaded ProjectRootElement, rather
     /// than loading and parsing a new one. This is the case whether the ProjectRootElement
     /// is loaded directly or imported.
-    /// 
+    ///
     /// 2. For design time, only a weak reference needs to be held, because all users have a strong reference.
-    /// 
+    ///
     /// 3. Because all loads of a ProjectRootElement consult this cache, they can be assured that any
     /// entries in this cache are up to date. For example, if a ProjectRootElement is modified and saved,
     /// the cached ProjectRootElement will be the loaded one that was saved, so it will be up to date.
-    /// 
+    ///
     /// 4. If, after a project has been loaded, an external app changes the project file content on disk, it is
     /// important that a subsequent load of that project does not return stale ProjectRootElement. To avoid this, the
     /// timestamp of the file on disk is compared to the timestamp of the file at the time that the ProjectRootElement loaded it.
-    /// 
+    ///
     /// 5. For build time, some strong references need to be held, as otherwise the ProjectRootElement's for reuseable
     /// imports will be collected, and time will be wasted reparsing them. However we do not want to hold strong references
     /// to all ProjectRootElement's, consuming memory without end. So a simple priority queue is used. All Adds and Gets boost their
     /// entry to the top. As the queue gets too big, low priority entries are dropped.
-    /// 
+    ///
     /// No guesses are made at which files are more interesting to cache, beyond the most-recently-used list. For example, ".targets" files
     /// or imported files are not treated specially, as this is a potentially unreliable heuristic. Besides, caching a project file itself could
     /// be useful, if for example you want to build it twice with different sets of properties.
-    /// 
+    ///
     /// Because of the strongly typed list, some ProjectRootElement's will be held onto indefinitely. This is an acceptable price to pay for
     /// being able to provide a commonly used ProjectRootElement immediately it's needed. It is mitigated by the list being finite and small, and
     /// because we allow ProjectCollection.UnloadAllProjects to hint to us to clear the list.
-    /// 
+    ///
     /// Implicit references are those which were loaded as a result of a build, and not explicitly loaded through, for instance, the project
     /// collection.
-    /// 
+    ///
     /// </summary>
     internal class ProjectRootElementCache : ProjectRootElementCacheBase
     {
@@ -59,16 +59,17 @@ namespace Microsoft.Build.Evaluation
         /// The maximum number of entries to keep strong references to.
         /// This has to be strong enough to make sure that key .targets files aren't pushed
         /// off by transient loads of non-reusable files like .user files.
-        /// 
-        /// Made this as large as 50 because VC has a large number of
-        /// regularly used property sheets and other imports.
-        /// If you change this, update the unit tests.
         /// </summary>
         /// <remarks>
+        /// Made this as large as 200 because ASP.NET Core (6.0) projects have
+        /// something like 80-90 imports. This was observed to give a noticeable
+        /// performance improvement compared to a mid-17.0 MSBuild with the old
+        /// value of 50.
+        ///
         /// If this number is increased much higher, the datastructure may
         /// need to be changed from a linked list, since it's currently O(n).
         /// </remarks>
-        private static readonly int s_maximumStrongCacheSize = 50;
+        private static readonly int s_maximumStrongCacheSize = 200;
 
         /// <summary>
         /// Whether the cache should log activity to the Debug.Out stream
@@ -368,7 +369,7 @@ namespace Microsoft.Build.Evaluation
                     RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
                 }
 
-                // A scavenge of the weak cache is probably not worth it as 
+                // A scavenge of the weak cache is probably not worth it as
                 // the GC would have had to run immediately after the line above.
             }
         }
@@ -399,7 +400,7 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                // Make a new Weak cache only with items that have been explicitly loaded, this will be a small number, there will most likely 
+                // Make a new Weak cache only with items that have been explicitly loaded, this will be a small number, there will most likely
                 // be many items which were not explicitly loaded (ie p2p references).
                 WeakValueDictionary<string, ProjectRootElement> oldWeakCache = _weakCache;
                 _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
@@ -480,7 +481,7 @@ namespace Microsoft.Build.Evaluation
             // (and thus gone from the client's point of view) that merely remains
             // in the cache because we still have a reference to it from our strong cache.
             // Another possibility is that there are two, unrelated, un-saved, in-memory projects that were given the same path.
-            // Replacing the cache entry does not in itself cause a problem -- if there are any actual users of the old 
+            // Replacing the cache entry does not in itself cause a problem -- if there are any actual users of the old
             // entry they will not be affected. There would then exist more than one ProjectRootElement with the same path,
             // but clients ought not get themselves into such a state - and unless they save them to disk,
             // it may not be a problem. Replacing also doesn't cause a problem for the strong cache,
