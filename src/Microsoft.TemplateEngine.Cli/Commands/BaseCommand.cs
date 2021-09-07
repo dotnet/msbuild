@@ -7,6 +7,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -19,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal abstract class BaseCommand<TArgs> : IBaseCommand, ICommandHandler where TArgs : GlobalArgs
     {
-        //private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
+        private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
         private readonly ITemplateEngineHost _host;
 
         internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
@@ -41,69 +42,43 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return command;
         }
 
-        public Task<int> InvokeAsync(InvocationContext context)
+        public async Task<int> InvokeAsync(InvocationContext context)
         {
-            return ExecuteInternal(context);
-        }
+            TArgs args = ParseContext(context);
 
-        protected abstract Command CreateCommandAbstract();
+            string? outputPath = (args as InstantiateCommandArgs)?.OutputPath;
 
-        protected abstract Task<int> ExecuteAsync(TArgs args, CancellationToken cancellationToken);
-
-        protected abstract TArgs ParseContext(InvocationContext context);
-
-        protected IEngineEnvironmentSettings GetEnvironmentSettings(GlobalArgs globalArgs, string? outputPath)
-        {
-            return new EngineEnvironmentSettings(
+            IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
                 new CliTemplateEngineHost(_host, outputPath),
-                settingsLocation: globalArgs.DebugSettingsLocation,
-                virtualizeSettings: globalArgs.DebugVirtualSettings,
+                settingsLocation: args.DebugSettingsLocation,
+                virtualizeSettings: args.DebugVirtualSettings,
                 environment: new CliEnvironment());
-        }
-
-        //private static Mutex GetEntryMutex(string? hivePath, ITemplateEngineHost host)
-        //{
-        //    string entryMutexIdentity;
-        //    // this effectively mimics EngineEnvironmentSettings.BaseDir, which is not initialized when this is needed.
-        //    if (!string.IsNullOrEmpty(hivePath))
-        //    {
-        //        entryMutexIdentity = $"{_entryMutexGuid}-{hivePath}".Replace("\\", "_").Replace("/", "_");
-        //    }
-        //    else
-        //    {
-        //        entryMutexIdentity = $"{_entryMutexGuid}-{host.HostIdentifier}-{host.Version}".Replace("\\", "_").Replace("/", "_");
-        //    }
-
-        //    return new Mutex(false, entryMutexIdentity);
-        //}
-
-        private Task<int> ExecuteInternal(InvocationContext context)
-        {
-            var args = ParseContext(context);
 
             var cancellationTokenSource = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
             {
                 cancellationTokenSource.Cancel();
             };
-            //TODO: do it better - await is not supported in critical section
-            //Mutex? entryMutex = null;
-            if (!args.DebugVirtualSettings)
+
+            using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, cancellationTokenSource.Token).ConfigureAwait(false);
+            return await ExecuteAsync(args, environmentSettings, cancellationTokenSource.Token).ConfigureAwait(false);
+        }
+
+        protected abstract Command CreateCommandAbstract();
+
+        protected abstract Task<int> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken);
+
+        protected abstract TArgs ParseContext(InvocationContext context);
+
+        private static async Task<AsyncMutex?> EnsureEntryMutex(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken token)
+        {
+            // we don't need to acquire mutex in case of virtual settings
+            if (args.DebugVirtualSettings)
             {
-                //entryMutex = GetEntryMutex(args.DebugSettingsLocation, _host);
-                //entryMutex.WaitOne();
+                return null;
             }
-            try
-            {
-                return ExecuteAsync(args, cancellationTokenSource.Token);
-            }
-            finally
-            {
-                //if (entryMutex != null)
-                //{
-                //    entryMutex.Release(1);
-                //}
-            }
+            string entryMutexIdentity = $"Global\\{_entryMutexGuid}_{environmentSettings.Paths.HostVersionSettingsDir.Replace("\\", "_").Replace("/", "_")}";
+            return await AsyncMutex.WaitAsync(entryMutexIdentity, token).ConfigureAwait(false);
         }
     }
 }

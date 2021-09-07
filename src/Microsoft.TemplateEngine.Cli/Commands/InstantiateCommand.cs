@@ -13,9 +13,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal InstantiateCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
 
-        protected override Command CreateCommandAbstract() => throw new NotImplementedException();
+        protected override Command CreateCommandAbstract()
+        {
+            var command = new Command("create");
+            InstantiateCommandArgs.AddToCommand(command);
+            return command;
+        }
 
-        protected override Task<int> ExecuteAsync(InstantiateCommandArgs args, CancellationToken cancellationToken) => throw new NotImplementedException();
+        protected override Task<int> ExecuteAsync(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken) => throw new NotImplementedException();
 
         protected override InstantiateCommandArgs ParseContext(InvocationContext context) => throw new NotImplementedException();
     }
@@ -24,6 +29,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public InstantiateCommandArgs(InvocationContext invocationContext) : base(invocationContext)
         {
+            OutputPath = invocationContext.ParseResult.ValueForOption(OutputPathOption);
         }
+
+        public string? OutputPath { get; }
+
+        private static Option<string> OutputPathOption { get; } = new(new[] { "-o", "--output" })
+        {
+            Description = "Location to place the generated output. The default is the current directory."
+        };
+
+        internal static void AddToCommand(Command command)
+        {
+            command.AddOption(OutputPathOption);
+        }
+
     }
 }

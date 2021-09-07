@@ -20,9 +20,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return command;
         }
 
-        protected override Task<int> ExecuteAsync(InstallCommandArgs args, CancellationToken cancellationToken = default)
+        protected override Task<int> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
         {
-            IEngineEnvironmentSettings environmentSettings = GetEnvironmentSettings(args, outputPath: null);
             throw new NotImplementedException();
         }
 
@@ -34,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public InstallCommandArgs(InvocationContext invocationContext)
             : base(invocationContext)
         {
-            Name = invocationContext.ParseResult.ValueForArgument(NameArgumnet) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
+            Name = invocationContext.ParseResult.ValueForArgument(NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
             Interactive = invocationContext.ParseResult.ValueForOption(InteractiveOption);
             AddSource = invocationContext.ParseResult.ValueForOption(AddSourceOption);
         }
@@ -45,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public string? AddSource { get; }
 
-        private static Argument<string[]> NameArgumnet { get; } = new("name")
+        private static Argument<string[]> NameArgument { get; } = new("name")
         {
             Description = "Name of NuGet package or folder.",
             Arity = new ArgumentArity(1, 99)
@@ -56,15 +55,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Description = "When downloading enable NuGet interactive."
         };
 
-        private static Option<string> AddSourceOption { get; } = new("--add-source")
+        private static Option<string> AddSourceOption { get; } = new(new[] { "--add-source", "--nuget-source" })
         {
             Description = "Add NuGet source when looking for package.",
-            AllowMultipleArgumentsPerToken = true
+            AllowMultipleArgumentsPerToken = true,
         };
 
         internal static void AddToCommand(Command command)
         {
-            command.AddArgument(NameArgumnet);
+            command.AddArgument(NameArgument);
             command.AddOption(InteractiveOption);
             command.AddOption(AddSourceOption);
         }
