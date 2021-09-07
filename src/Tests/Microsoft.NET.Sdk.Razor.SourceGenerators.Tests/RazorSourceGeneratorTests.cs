@@ -912,13 +912,45 @@ public class HeaderTagHelper : TagHelper
             Assert.Equal(2, result.GeneratedSources.Length);
         }
 
+        [Fact]
+        public async Task SourceGenerator_DoesNotAddAnyGeneratedSources_WhenSourceGeneratorIsSuppressed()
+        {
+            // Regression test for https://github.com/dotnet/aspnetcore/issues/36227
+            // Arrange
+            var project = CreateTestProject(new()
+            {
+                ["Pages/Index.razor"] = "<h1>Hello world</h1>",
+                ["Pages/Counter.razor"] = "<h1>Counter</h1>",
+            });
+
+            var compilation = await project.GetCompilationAsync();
+            var (driver, additionalTexts) = await GetDriverWithAdditionalTextAsync(project, optionsProvider =>
+            {
+                optionsProvider.TestGlobalOptions["build_property.SuppressRazorSourceGenerator"] = "true";
+            });
+
+            var result = RunGenerator(compilation!, ref driver);
+            Assert.Empty(result.Diagnostics);
+            Assert.Empty(result.GeneratedSources);
+
+            var updatedText = new TestAdditionalText("Pages/Index.razor", SourceText.From(@"<h1>Hello world 1</h1>", Encoding.UTF8));
+            driver = driver.ReplaceAdditionalText(additionalTexts.First(f => f.Path == updatedText.Path), updatedText);
+
+            // Now run the source generator again with updated text that should result in a cache miss
+            // and exercise comparers
+            result = RunGenerator(compilation!, ref driver);
+
+            Assert.Empty(result.Diagnostics);
+            Assert.Empty(result.GeneratedSources);
+        }
+
         private static async ValueTask<GeneratorDriver> GetDriverAsync(Project project)
         {
             var (driver, _) = await GetDriverWithAdditionalTextAsync(project);
             return driver;
         }
 
-        private static async ValueTask<(GeneratorDriver, ImmutableArray<AdditionalText>)> GetDriverWithAdditionalTextAsync(Project project)
+        private static async ValueTask<(GeneratorDriver, ImmutableArray<AdditionalText>)> GetDriverWithAdditionalTextAsync(Project project, Action<TestAnalyzerConfigOptionsProvider>? configureGlobalOptions = null)
         {
             var razorSourceGenerator = new RazorSourceGenerator().AsSourceGenerator();
             var driver = (GeneratorDriver)CSharpGeneratorDriver.Create(new[] { razorSourceGenerator }, parseOptions: (CSharpParseOptions)project.ParseOptions!);
@@ -927,6 +959,8 @@ public class HeaderTagHelper : TagHelper
             optionsProvider.TestGlobalOptions["build_property.RazorConfiguration"] = "Default";
             optionsProvider.TestGlobalOptions["build_property.RootNamespace"] = "MyApp";
             optionsProvider.TestGlobalOptions["build_property.RazorLangVersion"] = "Latest";
+
+            configureGlobalOptions?.Invoke(optionsProvider);
 
             var additionalTexts = ImmutableArray<AdditionalText>.Empty;
 
