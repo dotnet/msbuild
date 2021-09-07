@@ -45,12 +45,14 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> FromCacheOption = new Option<string>("--from-cache", LocalizableStrings.FromCacheOptionDescription)
         {
-            ArgumentHelpName = LocalizableStrings.FromCacheOptionArgumentName
+            ArgumentHelpName = LocalizableStrings.FromCacheOptionArgumentName,
+            IsHidden = true
         };
 
         public static readonly Option<string> DownloadToCacheOption = new Option<string>("--download-to-cache", LocalizableStrings.DownloadToCacheOptionDescription)
         {
-            ArgumentHelpName = LocalizableStrings.DownloadToCacheOptionArgumentName
+            ArgumentHelpName = LocalizableStrings.DownloadToCacheOptionArgumentName,
+            IsHidden = true
         };
 
         public static readonly Option<bool> SkipManifestUpdateOption = new Option<bool>("--skip-manifest-update", LocalizableStrings.SkipManifestUpdateOptionDescription);
