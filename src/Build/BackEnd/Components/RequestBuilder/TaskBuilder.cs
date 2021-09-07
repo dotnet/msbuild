@@ -847,7 +847,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else if (type == typeof(ThreadAbortException))
                     {
-#if !NET6_0_OR_GREATER
+#if !NET6_0_OR_GREATER && !NET6_0 // This is redundant but works around https://github.com/dotnet/sdk/issues/20700
                         Thread.ResetAbort();
 #endif
                         _continueOnError = ContinueOnError.ErrorAndStop;
