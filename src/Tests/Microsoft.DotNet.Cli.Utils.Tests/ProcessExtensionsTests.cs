@@ -3,11 +3,15 @@
 //
 
 using System.Diagnostics;
+using System.Runtime.Versioning;
 using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public class ProcessExtensionsTests
     {
         [WindowsOnlyFact]

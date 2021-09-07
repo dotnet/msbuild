@@ -2,14 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Management;
+using System.Linq;
+using System.Runtime.Versioning;
+using Microsoft.Management.Infrastructure;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     /// <summary>
     /// Extensions methods for <see cref="Process"/> components.
     /// </summary>
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static class ProcessExtensions
     {
 #pragma warning disable CA1416
@@ -32,11 +38,11 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns>The process ID of the parent process, or -1 if the parent process could not be found.</returns>
         public static int GetParentProcessId(this Process process)
         {
-            ManagementObjectSearcher searcher = new($"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId='{process.Id}'");
-            using ManagementObjectCollection result = searcher.Get();
-            ManagementObjectCollection.ManagementObjectEnumerator enumerator = result.GetEnumerator();
+            CimSession cimSession = CimSession.Create(null);
+            IEnumerable<CimInstance> results = cimSession.QueryInstances(@"root\cimv2", "WQL",
+                $"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId='{process.Id}'");
 
-            return enumerator.MoveNext() ? Convert.ToInt32(enumerator.Current.GetPropertyValue("ParentProcessId")) : -1;
+            return results.Any() ? Convert.ToInt32(results.First().CimInstanceProperties["ParentProcessId"].Value) : -1;
         }
 
         /// <summary>
@@ -46,11 +52,11 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns>The command line of the process or <see langword="null"/> if it could not be retrieved.</returns>
         public static string GetCommandLine(this Process process)
         {
-            ManagementObjectSearcher searcher = new($"SELECT CommandLine FROM Win32_Process WHERE ProcessId='{process.Id}'");
-            using ManagementObjectCollection result = searcher.Get();
-            ManagementObjectCollection.ManagementObjectEnumerator enumerator = result.GetEnumerator();
+            CimSession cimSession = CimSession.Create(null);
+            IEnumerable<CimInstance> results = cimSession.QueryInstances(@"root\cimv2", "WQL",
+                $"SELECT CommandLine FROM Win32_Process WHERE ProcessId='{process.Id}'");
 
-            return enumerator.MoveNext() ? Convert.ToString(enumerator.Current.GetPropertyValue("CommandLine")) : null;
+            return results.Any() ? Convert.ToString(results.First().CimInstanceProperties["CommandLine"].Value) : null;
         }
 #pragma warning restore CA1416
     }
