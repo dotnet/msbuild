@@ -55,14 +55,16 @@ namespace Microsoft.Build.Tasks
         /// A typical input: "propname1=propvalue1", "propname2=propvalue2", "propname3=propvalue3".
         /// </summary>
         /// <remarks>
-        /// The fact that this is a string[] makes the following illegal:
-        ///     <MSBuild
-        ///         Properties="TargetPath=@(OutputPathItem)" />
-        /// The engine fails on this because it doesn't like item lists being concatenated with string
-        /// constants when the data is being passed into an array parameter.  So the workaround is to 
-        /// write this in the project file:
-        ///     <MSBuild
-        ///         Properties="@(OutputPathItem->'TargetPath=%(Identity)')" />
+        ///   <format type="text/markdown"><![CDATA[
+        ///     ## Remarks
+        ///     The fact that this is a `string[]` makes the following illegal:
+        ///         `<MSBuild Properties="TargetPath=@(OutputPathItem)" />`
+        ///     The engine fails on this because it doesn't like item lists being concatenated with string
+        ///     constants when the data is being passed into an array parameter.  So the workaround is to 
+        ///     write this in the project file:
+        ///         `<MSBuild Properties="@(OutputPathItem-&gt;'TargetPath=%(Identity)')" />`
+        ///     ]]>
+        ///   </format>
         /// </remarks>
         public string[] Properties { get; set; }
 
