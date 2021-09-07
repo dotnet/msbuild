@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ApiCompatibility
     {
         private readonly Dictionary<string, HashSet<string>> _ignore;
         private readonly HashSet<string> _noWarn;
-        private readonly List<T> _differences = new();
+        private readonly HashSet<T> _differences = new();
 
         /// <summary>
         /// Instantiate an diagnostic bag with the provided settings to ignore diagnostics.

@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -66,9 +67,21 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <returns><see cref="string"/> describing the difference.</returns>
         public override string ToString() => $"{DiagnosticId} : {Message}";
 
-        public bool Equals(CompatDifference other) => DiagnosticId.Equals(other.DiagnosticId, StringComparison.InvariantCultureIgnoreCase) &
+        public bool Equals(CompatDifference other) => other != null &&
+                                                      (object.ReferenceEquals(this, other) ||
+                                                      (DiagnosticId.Equals(other.DiagnosticId, StringComparison.InvariantCultureIgnoreCase) &
                                                       Message.Equals(other.Message, StringComparison.InvariantCultureIgnoreCase) &
                                                       Type.Equals(other.Type) &
-                                                      ReferenceId.Equals(other.ReferenceId, StringComparison.InvariantCultureIgnoreCase);
+                                                      ReferenceId.Equals(other.ReferenceId, StringComparison.InvariantCultureIgnoreCase)));
+
+        public override int GetHashCode()
+        {
+            int hashCode = 1447485498;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(DiagnosticId?.ToLowerInvariant() ?? string.Empty);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Message?.ToLowerInvariant() ?? string.Empty);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Type.ToString().ToLowerInvariant() ?? string.Empty);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ReferenceId?.ToLowerInvariant() ?? string.Empty);
+            return hashCode;
+        }
     }
 }
