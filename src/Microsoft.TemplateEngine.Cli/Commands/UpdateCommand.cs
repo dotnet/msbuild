@@ -15,7 +15,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected override Command CreateCommandAbstract() => throw new NotImplementedException();
 
-        protected override Task<int> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken) => throw new NotImplementedException();
+        protected override Task<New3CommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken) => throw new NotImplementedException();
 
         protected override UpdateCommandArgs ParseContext(InvocationContext context) => throw new NotImplementedException();
     }

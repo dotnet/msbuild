@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System.CommandLine;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -20,12 +19,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //yield return (host, telemetryLogger, callbacks) => new UpdateCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new AddAliasCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new ShowAliasCommand(host, telemetryLogger, callbacks);
-        }
-
-        //setup global and root command options
-        //setup root command handler for compatibility
-        internal static void SetupGlobalOptions(Command rootCommand)
-        {
         }
     }
 }

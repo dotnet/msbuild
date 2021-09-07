@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return command;
         }
 
-        protected override Task<int> ExecuteAsync(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken) => throw new NotImplementedException();
+        protected override Task<New3CommandStatus> ExecuteAsync(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken) => throw new NotImplementedException();
 
         protected override InstantiateCommandArgs ParseContext(InvocationContext context) => throw new NotImplementedException();
     }

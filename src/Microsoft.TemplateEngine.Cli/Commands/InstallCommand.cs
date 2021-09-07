@@ -6,6 +6,11 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.Extensions;
+using Microsoft.TemplateEngine.Cli.HelpAndUsage;
+using Microsoft.TemplateEngine.Edge.Settings;
+using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -20,9 +25,25 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return command;
         }
 
-        protected override Task<int> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        protected override Task<New3CommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
+            TemplateInformationCoordinator templateInformationCoordinator = new TemplateInformationCoordinator(
+                environmentSettings,
+                templatePackageManager,
+                new TemplateCreator(environmentSettings),
+                new HostSpecificDataLoader(environmentSettings),
+                TelemetryLogger,
+                environmentSettings.GetDefaultLanguage());
+
+            TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
+                TelemetryLogger,
+                environmentSettings,
+                templatePackageManager,
+                templateInformationCoordinator,
+                environmentSettings.GetDefaultLanguage());
+
+            return templatePackageCoordinator.EnterInstallFlowAsync(args, cancellationToken);
         }
 
         protected override InstallCommandArgs ParseContext(InvocationContext context) => new(context);
@@ -33,18 +54,26 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public InstallCommandArgs(InvocationContext invocationContext)
             : base(invocationContext)
         {
-            Name = invocationContext.ParseResult.ValueForArgument(NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
+            TemplatePackages = invocationContext.ParseResult.ValueForArgument(NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
             Interactive = invocationContext.ParseResult.ValueForOption(InteractiveOption);
-            AddSource = invocationContext.ParseResult.ValueForOption(AddSourceOption);
+            AdditionalSources = invocationContext.ParseResult.ValueForOption(AddSourceOption);
         }
 
-        public string[] Name { get; }
+        [Obsolete]
+        internal InstallCommandArgs(INewCommandInput legacyArgs) : base(legacyArgs)
+        {
+            TemplatePackages = legacyArgs.ToInstallList ?? throw new ArgumentNullException(nameof(legacyArgs.ToInstallList));
+            AdditionalSources = legacyArgs.InstallNuGetSourceList;
+            Interactive = legacyArgs.IsInteractiveFlagSpecified;
+        }
+
+        public IReadOnlyList<string> TemplatePackages { get; }
 
         public bool Interactive { get; }
 
-        public string? AddSource { get; }
+        public IReadOnlyList<string>? AdditionalSources { get; }
 
-        private static Argument<string[]> NameArgument { get; } = new("name")
+        private static Argument<IReadOnlyList<string>> NameArgument { get; } = new("name")
         {
             Description = "Name of NuGet package or folder.",
             Arity = new ArgumentArity(1, 99)
@@ -55,7 +84,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Description = "When downloading enable NuGet interactive."
         };
 
-        private static Option<string> AddSourceOption { get; } = new(new[] { "--add-source", "--nuget-source" })
+        private static Option<IReadOnlyList<string>> AddSourceOption { get; } = new(new[] { "--add-source", "--nuget-source" })
         {
             Description = "Add NuGet source when looking for package.",
             AllowMultipleArgumentsPerToken = true,

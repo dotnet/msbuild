@@ -7,6 +7,7 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.NuGet;
 using Microsoft.TemplateEngine.Cli.TableOutput;
@@ -76,6 +77,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <param name="commandInput">the command input with instructions to process.</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
+        [Obsolete]
         internal Task<New3CommandStatus> ProcessAsync(INewCommandInput commandInput, CancellationToken cancellationToken = default)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
@@ -180,28 +182,36 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
+        [Obsolete]
+        private Task<New3CommandStatus> EnterInstallFlowAsync(INewCommandInput args, CancellationToken cancellationToken)
+        {
+            return EnterInstallFlowAsync(new InstallCommandArgs(args), cancellationToken);
+        }
+
         /// <summary>
         /// Install the template package(s) flow (--install, -i).
         /// </summary>
-        private async Task<New3CommandStatus> EnterInstallFlowAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
+#pragma warning disable SA1202 // Elements should be ordered by access
+        internal async Task<New3CommandStatus> EnterInstallFlowAsync(InstallCommandArgs args, CancellationToken cancellationToken)
+#pragma warning restore SA1202 // Elements should be ordered by access
         {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
-            _ = commandInput.ToInstallList ?? throw new ArgumentNullException(nameof(commandInput.ToInstallList));
-            if (!commandInput.ToInstallList.Any())
+            _ = args ?? throw new ArgumentNullException(nameof(args));
+            _ = args.TemplatePackages ?? throw new ArgumentNullException(nameof(args.TemplatePackages));
+            if (!args.TemplatePackages.Any())
             {
-                throw new ArgumentException($"{nameof(commandInput.ToInstallList)} should have at least one item to continue.", nameof(commandInput.ToInstallList));
+                throw new ArgumentException($"{nameof(args.TemplatePackages)} should have at least one item to continue.", nameof(args.TemplatePackages));
             }
             cancellationToken.ThrowIfCancellationRequested();
 
             New3CommandStatus resultStatus = New3CommandStatus.Success;
-            _telemetryLogger.TrackEvent(commandInput.CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, commandInput.ToInstallList.Count.ToString() } });
+            _telemetryLogger.TrackEvent(args.CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, args.TemplatePackages.Count.ToString() } });
 
             var details = new Dictionary<string, string>();
-            if (commandInput.InstallNuGetSourceList?.Count > 0)
+            if (args.AdditionalSources?.Count > 0)
             {
-                details[InstallerConstants.NuGetSourcesKey] = string.Join(InstallerConstants.NuGetSourcesSeparator.ToString(), commandInput.InstallNuGetSourceList);
+                details[InstallerConstants.NuGetSourcesKey] = string.Join(InstallerConstants.NuGetSourcesSeparator.ToString(), args.AdditionalSources);
             }
-            if (commandInput.IsInteractiveFlagSpecified)
+            if (args.Interactive)
             {
                 details[InstallerConstants.InteractiveModeKey] = "true";
             }
@@ -210,7 +220,7 @@ namespace Microsoft.TemplateEngine.Cli
             var managedSourceProvider = _templatePackageManager.GetBuiltInManagedProvider(InstallationScope.Global);
             List<InstallRequest> installRequests = new List<InstallRequest>();
 
-            foreach (string installArg in commandInput.ToInstallList)
+            foreach (string installArg in args.TemplatePackages)
             {
                 string[] splitByColons = installArg.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
                 string identifier = splitByColons[0];
@@ -254,7 +264,8 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<InstallResult> installResults = await managedSourceProvider.InstallAsync(installRequests, cancellationToken).ConfigureAwait(false);
             foreach (InstallResult result in installResults)
             {
-                await DisplayInstallResultAsync(commandInput, result.InstallRequest.DisplayName, result, cancellationToken).ConfigureAwait(false);
+                //TODO: convert to using args
+                //await DisplayInstallResultAsync(commandInput, result.InstallRequest.DisplayName, result, cancellationToken).ConfigureAwait(false);
                 if (!result.Success)
                 {
                     resultStatus = New3CommandStatus.CreateFailed;

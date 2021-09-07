@@ -72,16 +72,11 @@ namespace Microsoft.TemplateEngine.Cli
             _ = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _ = callbacks ?? throw new ArgumentNullException(nameof(callbacks));
 
-            Command rootCommand = new Command(commandName, LocalizableStrings.CommandDescription);
-            rootCommand.Name = commandName;
-
+            Command rootCommand = new NewCommand(commandName, host, telemetryLogger, callbacks).CreateCommand();
             foreach (var commandCreator in CommandFactory.GetSubcommands())
             {
                 rootCommand.Add(commandCreator(host, telemetryLogger, callbacks).CreateCommand());
             }
-
-            rootCommand.TreatUnmatchedTokensAsErrors = true;
-            CommandFactory.SetupGlobalOptions(rootCommand);
             return rootCommand;
         }
 
@@ -107,6 +102,7 @@ namespace Microsoft.TemplateEngine.Cli
             return _entryMutex;
         }
 
+        [Obsolete]
         private static int ActualRun(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath)
         {
             if (args.Any(x => string.Equals(x, "--debug:attach", StringComparison.Ordinal)))
@@ -232,6 +228,7 @@ namespace Microsoft.TemplateEngine.Cli
             return await invocationCoordinator.CoordinateInvocationAsync(commandInput, default).ConfigureAwait(false);
         }
 
+        [Obsolete]
         private async Task<New3CommandStatus> ExecuteAsync(INewCommandInput commandInput)
         {
             if (commandInput is null)

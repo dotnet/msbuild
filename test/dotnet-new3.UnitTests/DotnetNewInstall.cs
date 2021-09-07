@@ -43,6 +43,24 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
+        public void CanInstallRemoteNuGetPackage_V2()
+        {
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+                .WithCustomHive()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr()
+                .And.NotHaveStdOutContaining("Determining projects to restore...")
+                .And.HaveStdOutContaining("The following template packages will be installed:")
+                .And.HaveStdOutMatching($"Success: Microsoft\\.DotNet\\.Web\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+ installed the following templates:")
+                .And.HaveStdOutContaining("web")
+                .And.HaveStdOutContaining("blazorwasm");
+        }
+
+        [Fact]
         public void CanInstallRemoteNuGetPackage_LatestVariations()
         {
             var command1 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")

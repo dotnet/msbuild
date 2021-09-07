@@ -5,6 +5,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using Microsoft.TemplateEngine.Cli.CommandParsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -12,10 +13,24 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         private static Option<bool> quietOption = new("--quiet", "sshhhhhhhhhhhh");
 
+        private static Option<string?> customHiveOption = new("--debug:custom-hive", "Sets custom settings location");
+
         public GlobalArgs(InvocationContext invocationContext)
         {
             Quiet = invocationContext.ParseResult.ValueForOption(quietOption);
+            DebugSettingsLocation = invocationContext.ParseResult.ValueForOption(customHiveOption);
+            //TODO: check if it gets the command name correctly.
+            CommandName = invocationContext.ParseResult.CommandResult.Command.Name;
         }
+
+        [Obsolete]
+        internal GlobalArgs(INewCommandInput legacyArgs)
+        {
+            Quiet = legacyArgs.IsQuietFlagSpecified;
+            CommandName = legacyArgs.CommandName;
+        }
+
+        internal string CommandName { get; private set; }
 
         internal bool Quiet { get; private set; }
 
@@ -34,6 +49,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal static void AddGlobalsToCommand(Command command)
         {
             command.AddOption(quietOption);
+            command.AddOption(customHiveOption);
         }
     }
 }

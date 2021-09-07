@@ -26,11 +26,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
         {
             _host = host;
-            Logger = logger;
+            TelemetryLogger = logger;
             Callbacks = callbacks;
         }
 
-        protected ITelemetryLogger Logger { get; }
+        protected ITelemetryLogger TelemetryLogger { get; }
 
         protected New3Callbacks Callbacks { get; }
 
@@ -61,12 +61,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             };
 
             using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, cancellationTokenSource.Token).ConfigureAwait(false);
-            return await ExecuteAsync(args, environmentSettings, cancellationTokenSource.Token).ConfigureAwait(false);
+            return (int)await ExecuteAsync(args, environmentSettings, cancellationTokenSource.Token).ConfigureAwait(false);
         }
 
         protected abstract Command CreateCommandAbstract();
 
-        protected abstract Task<int> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken);
+        protected abstract Task<New3CommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken);
 
         protected abstract TArgs ParseContext(InvocationContext context);
 
