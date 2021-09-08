@@ -29,5 +29,9 @@
     <!-- <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments> -->
   </PropertyGroup>
 
+  <PropertyGroup>
+    <AssemblyInformationCachePaths Condition="Exists('$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SdkPrecomputedAssemblyReferences.cache')">$(AssemblyInformationCachePaths);$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SDKPrecomputedAssemblyReferences.cache</AssemblyInformationCachePaths>
+  </PropertyGroup>
+
   <Import Project="build/GenerateResxSource.targets" />
 </Project>

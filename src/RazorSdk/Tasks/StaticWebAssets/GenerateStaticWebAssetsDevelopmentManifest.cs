@@ -39,6 +39,12 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         {
             try
             {
+                if (Assets.Length == 0 && DiscoveryPatterns.Length == 0)
+                {
+                    Log.LogMessage("Skipping manifest generation because no assets nor discovery patterns were found.");
+                    return true;
+                }
+
                 var manifest = ComputeDevelopmentManifest(
                     Assets.Select(a => StaticWebAsset.FromTaskItem(a)),
                     DiscoveryPatterns.Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem));

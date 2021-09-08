@@ -12,11 +12,6 @@
         <target state="new">API compatibility errors between '{0}' (left) and '{1}' (right):</target>
         <note />
       </trans-unit>
-      <trans-unit id="AssemblyLoadWarning">
-        <source>When loading: '{0}': {1}</source>
-        <target state="new">When loading: '{0}': {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Baseline">
         <source>[Baseline]</source>
         <target state="new">[Baseline]</target>
