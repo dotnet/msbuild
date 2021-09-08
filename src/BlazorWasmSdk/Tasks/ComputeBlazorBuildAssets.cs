@@ -108,7 +108,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         candidate.SetMetadata("RelativePath", $"_framework/{cacheBustedDotnetJSFileName}.js");
                         candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
                         candidate.SetMetadata("AssetTraitValue", "native");
-                        candidate.SetMetadata("CHANGEDTHIS", "howdy");
                     }
                     else if (string.IsNullOrEmpty(destinationSubPath))
                     {
