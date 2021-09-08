@@ -54,7 +54,7 @@ namespace CompatTests
 #endif
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -91,7 +91,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.ForwardedTestType")
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -192,7 +192,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.Fourth")
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -232,7 +232,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.First.FirstNested"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -262,7 +262,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.RightType"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]

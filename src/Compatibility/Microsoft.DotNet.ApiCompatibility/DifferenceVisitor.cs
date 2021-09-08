@@ -48,6 +48,9 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             AddDifferences(assembly);
             base.Visit(assembly);
+            // After visiting the assembly, the assembly mapper will contain any assembly load errors that happened
+            // when trying to resolve typeforwarded types. If there were any, we add them to the diagnostic bag next.
+            AddAssemblyLoadErrors(assembly);
         }
 
         /// <summary>
@@ -93,14 +96,26 @@ namespace Microsoft.DotNet.ApiCompatibility
         {
             IReadOnlyList<IEnumerable<CompatDifference>> differences = mapper.GetDifferences();
 
-            if (_diagnosticBags.Length != differences.Count)
+            AddToDiagnosticBags(differences);
+        }
+
+        private void AddAssemblyLoadErrors<T>(ElementMapper<T> mapper)
+        {
+            IReadOnlyList<IEnumerable<CompatDifference>> assemblyLoadErrors = mapper.GetAssemblyLoadErrors();
+
+            AddToDiagnosticBags(assemblyLoadErrors);
+        }
+
+        private void AddToDiagnosticBags(IReadOnlyList<IEnumerable<CompatDifference>> diagnosticsToAdd)
+        {
+            if (_diagnosticBags.Length != diagnosticsToAdd.Count)
             {
                 throw new InvalidOperationException(Resources.VisitorRightCountShouldMatchMappersSetSize);
             }
 
-            for (int i = 0; i < differences.Count; i++)
+            for (int i = 0; i < diagnosticsToAdd.Count; i++)
             {
-                _diagnosticBags[i].AddRange(differences[i]);
+                _diagnosticBags[i].AddRange(diagnosticsToAdd[i]);
             }
         }
     }
