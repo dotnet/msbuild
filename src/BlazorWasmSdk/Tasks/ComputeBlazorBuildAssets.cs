@@ -43,6 +43,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         [Required]
         public bool CopySymbols { get; set; }
 
+        [Required]
+        public string MicrosoftNETCoreAppRefPackageVersion { get; set; }
+
         [Output]
         public ITaskItem[] AssetCandidates { get; set; }
 
@@ -73,7 +76,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     var candidate = Candidates[i];
                     if (ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
                     {
-                        Log.LogMessage("Skipping asset '{0}' becasue '{1}'", candidate.ItemSpec, reason);
+                        Log.LogMessage("Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                         filesToRemove.Add(candidate);
                         continue;
                     }
@@ -97,7 +100,17 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     }
 
                     var destinationSubPath = candidate.GetMetadata("DestinationSubPath");
-                    if (string.IsNullOrEmpty(destinationSubPath))
+                    if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
+                    {
+                        var dotNetVersion = MicrosoftNETCoreAppRefPackageVersion;
+                        var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
+                        var cacheBustedDotnetJSFileName = $"dotnet.{dotNetVersion}.{itemHash}";
+                        candidate.SetMetadata("RelativePath", $"_framework/{cacheBustedDotnetJSFileName}.js");
+                        candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                        candidate.SetMetadata("AssetTraitValue", "native");
+                        candidate.SetMetadata("CHANGEDTHIS", "howdy");
+                    }
+                    else if (string.IsNullOrEmpty(destinationSubPath))
                     {
                         var relativePath = candidate.GetMetadata("FileName") + candidate.GetMetadata("Extension");
                         candidate.SetMetadata("RelativePath", $"_framework/{relativePath}");
@@ -250,8 +263,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 ".blat" when !timezoneSupport => "timezone support is not enabled.",
                 ".dat" when invariantGlobalization && fileName.StartsWith("icudt") => "invariant globalization is enabled",
                 ".json" when fromMonoPackage && fileName == "emcc-props" => $"{fileName}{extension} is not used by Blazor",
-                ".js" when fileName == "dotnet" => "dotnet.js is already processed by Blazor",
-                ".js" when assetType == "native" => $"{fileName}{extension} is not used by Blazor",
+                ".js" when assetType == "native" && fileName != "dotnet" => $"{fileName}{extension} is not used by Blazor",
                 ".pdb" when !copySymbols => "copying symbols is disabled",
                 _ => null
             };
