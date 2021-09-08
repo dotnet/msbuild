@@ -192,21 +192,24 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     ITaskItem newDotNetJs = null;
                     if (aotDotNetJs != null)
                     {
-                        var hash = aotDotNetJs.GetMetadata("FileHash");
-                        if (string.IsNullOrEmpty(hash))
-                        {
-                            // Some files that are part of the service worker manifest may not have their hashes previously
-                            // calculated. Calculate them at this time.
-                            using var sha = SHA256.Create();
-                            using var file = File.OpenRead(aotDotNetJs.ItemSpec);
-                            var bytes = sha.ComputeHash(file);
-
-                            hash = Convert.ToBase64String(bytes);
-                        }
-
                         newDotNetJs = new TaskItem(Path.GetFullPath(aotDotNetJs.ItemSpec), asset.CloneCustomMetadata());
                         newDotNetJs.SetMetadata("OriginalItemSpec", aotDotNetJs.ItemSpec);
-                        newDotNetJs.SetMetadata("RelativePath", $"dotnet.{hash}.js");
+
+                        var existingRelativePath = newDotNetJs.GetMetadata("RelativePath");
+                        var existingRelativePathWithoutExtension = Path.Combine(Path.GetDirectoryName(existingRelativePath), Path.GetFileNameWithoutExtension(existingRelativePath));
+
+                        // A Base64 encoded hash can contain `/`, `=` and `+` which may be problematic for URLs/file names.
+                        // As we're only using the hash for the purposes of cache busting, we can opt to simply remove those chars 
+                        // from the hash (at the cost of a tiny bit of entropy).
+                        //
+                        // URL encoding is not an option as encoded file names are decoded at another layer and not
+                        // reflected in the final published asset file name (ie. final asset would still contain symbols).
+                        //
+                        // https://en.wikipedia.org/wiki/Base64#Base64_table
+                        var itemHash = GetItemHash(aotDotNetJs).Replace("/", string.Empty).Replace("=", string.Empty).Replace("+", string.Empty);
+                        var newRelativePath = $"{existingRelativePathWithoutExtension}.{itemHash}.js";
+                        newDotNetJs.SetMetadata("RelativePath", newRelativePath);
+
                         updateMap.Add(asset.ItemSpec, newDotNetJs);
                         Log.LogMessage("Replacing asset '{0}' with linked version '{1}'", asset.ItemSpec, newDotNetJs.ItemSpec);
                     }
@@ -263,6 +266,23 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             static bool IsDotNetJs(string key) => string.Equals("dotnet.js", Path.GetFileName(key), StringComparison.Ordinal);
 
             static bool IsDotNetWasm(string key) => string.Equals("dotnet.wasm", Path.GetFileName(key), StringComparison.Ordinal);
+        }
+
+        private string GetItemHash(ITaskItem item)
+        {
+            var hash = item.GetMetadata("FileHash");
+            if (string.IsNullOrEmpty(hash))
+            {
+                // Some files that are part of the service worker manifest may not have their hashes previously
+                // calculated. Calculate them at this time.
+                using var sha = SHA256.Create();
+                using var file = File.OpenRead(item.ItemSpec);
+                var bytes = sha.ComputeHash(file);
+
+                hash = Convert.ToBase64String(bytes);
+            }
+
+            return hash;
         }
 
         private List<ITaskItem> ProcessSymbolAssets(
