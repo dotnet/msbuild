@@ -100,8 +100,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <UseStaticWebAssetsV2>$(_TargetingNET60OrLater)</UseStaticWebAssetsV2>
 
-    <!-- Controls whether or not the scoped css feature is enabled. By default is enabled for net6.0 applications and RazorLangVersion 5 or above -->
-    <ScopedCssEnabled Condition="'$(ScopedCssEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_Targeting30OrNewerRazorLangVersion)</ScopedCssEnabled>
+    <!-- Controls whether or not the scoped css feature is enabled. By default is enabled for net5.0 applications and RazorLangVersion 5 or above -->
+    <ScopedCssEnabled Condition="'$(ScopedCssEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_TargetingNET50OrLater)</ScopedCssEnabled>
 
     <JSModulesEnabled Condition="'$(JSModulesEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_TargetingNET60OrLater)</JSModulesEnabled>
   </PropertyGroup>

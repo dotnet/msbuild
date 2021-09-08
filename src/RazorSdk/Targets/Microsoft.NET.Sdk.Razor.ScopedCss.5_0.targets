@@ -294,6 +294,12 @@ Integration with static web assets:
 
 </Target>
 
+<Target Name="_RemoveApplicationBundleForPack" BeforeTargets="_CreateStaticWebAssetsCustomPropsCacheFile" Condition="'$(DisableScopedCssBundling)' != 'true'">
+  <ItemGroup>
+    <StaticWebAsset Remove="@(_AppBundleStaticWebAsset)" />
+  </ItemGroup>
+</Target>
+
 <!-- This target runs as part of ResolveStaticWebAssetInputs and collects all the generated scoped css files. When bundling is enabled
      these files are removed from the list of static web assets by '_AddScopedCssBundles' -->
 
