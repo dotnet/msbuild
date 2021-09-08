@@ -22,6 +22,7 @@ using Xunit.Abstractions;
 using System.Security.Cryptography.X509Certificates;
 using System.Linq;
 using System.Threading;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {

@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
             using FileStream destinationStream = File.Create(nupkgPath);
-            bool success = await RetryOnFailure(() => resource.CopyNupkgToStreamAsync(
+            bool success = await ExponentialRetry.ExecuteWithRetryOnFailure(() => resource.CopyNupkgToStreamAsync(
                 packageId.ToString(),
                 resolvedPackageVersion,
                 destinationStream,
@@ -579,40 +579,6 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 includePreview, cancellationToken).ConfigureAwait(false);
 
             return packageMetadata.Identity.Version;
-        }
-
-        private static async Task<T> RetryOnFailure<T>(
-            Func<T> func,
-            int maxRetries = 3,
-            TimeSpan sleepDuration = default(TimeSpan))
-        {
-            var attemptsLeft = maxRetries;
-
-            if (sleepDuration == default(TimeSpan))
-            {
-                sleepDuration = TimeSpan.FromMilliseconds(10);
-            }
-
-            while (true)
-            {
-                try
-                {
-                    return func();
-                }
-                catch
-                {
-                    if (attemptsLeft < 1)
-                    {
-                        throw;
-                    }
-                    else
-                    {
-                        await Task.Delay(sleepDuration);
-                    }
-                }
-
-                attemptsLeft--;
-            }
         }
     }
 }

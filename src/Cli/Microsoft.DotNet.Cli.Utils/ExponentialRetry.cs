@@ -6,9 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Xunit.Abstractions;
 
-namespace Microsoft.NET.TestFramework
+namespace Microsoft.DotNet.Cli.Utils
 {
     public static class ExponentialRetry
     {
@@ -30,8 +29,7 @@ namespace Microsoft.NET.TestFramework
             Func<T, bool> shouldStopRetry,
             int maxRetryCount,
             Func<IEnumerable<Task>> timer,
-            string taskDescription = "",
-            ITestOutputHelper log = null)
+            string taskDescription = "")
         {
             var count = 0;
             foreach (var t in timer())
@@ -43,12 +41,36 @@ namespace Microsoft.NET.TestFramework
                     return result;
                 }
 
-                log?.WriteLine($"Operation failed. Retry count: {count}");
                 count++;
                 if (count == maxRetryCount)
                 {
-                    throw new RetryFailedException(
+                    throw new Exception(
                         $"Retry failed for {taskDescription} after {count} times with result: {result}");
+                }
+            }
+            throw new Exception("Timer should not be exhausted");
+        }
+        
+        public static async Task<T> ExecuteWithRetryOnFailure<T>(Func<T> action,
+            int maxRetryCount = 3,
+            Func<IEnumerable<Task>> timer = null)
+        {
+            timer = timer == null ? () => ExponentialRetry.Timer(ExponentialRetry.Intervals): timer;
+            var count = 0;
+            foreach (var t in timer())
+            {
+                await t;
+                count++;
+                try
+                {
+                    return action();
+                }
+                catch
+                {
+                    if (count == maxRetryCount)
+                    {
+                        throw;
+                    }
                 }
             }
             throw new Exception("Timer should not be exhausted");
