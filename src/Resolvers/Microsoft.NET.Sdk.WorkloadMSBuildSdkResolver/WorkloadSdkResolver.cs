@@ -1,13 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.NativeWrapper;
 using System.Collections.Immutable;
 
@@ -66,7 +66,8 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                 resolverContext.State = cachedState;
             }
 
-            var result = cachedState.WorkloadResolver.Resolve(sdkReference.Name, cachedState.DotnetRootPath, cachedState.SdkVersion);
+            string userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
+            var result = cachedState.WorkloadResolver.Resolve(sdkReference.Name, cachedState.DotnetRootPath, cachedState.SdkVersion, userProfileDir);
 
 
             return result.ToSdkResult(sdkReference, factory);

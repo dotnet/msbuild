@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
@@ -23,8 +24,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         private readonly IReporter _reporter;
         private readonly string _workloadMetadataDir;
-        private readonly string _installedPacksDir = "InstalledPacks";
+        private const string InstalledPacksDir = "InstalledPacks";
         protected readonly string _dotnetDir;
+        protected readonly string _userProfileDir;
         protected readonly DirectoryPath _tempPackagesDir;
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly IWorkloadResolver _workloadResolver;
@@ -38,6 +40,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public NetSdkManagedInstaller(IReporter reporter,
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver,
+            string userProfileDir,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null,
             string tempDirPath = null,
@@ -45,6 +48,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             PackageSourceLocation packageSourceLocation = null,
             RestoreActionConfig restoreActionConfig = null)
         {
+            _userProfileDir = userProfileDir;
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _tempPackagesDir = new DirectoryPath(tempDirPath ?? Path.GetTempPath());
             ILogger logger = verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
@@ -53,11 +57,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                       new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null,
                                           new FirstPartyNuGetPackageSigningVerifier(_tempPackagesDir), logger,
                                           restoreActionConfig: _restoreActionConfig);
-            _workloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
+            bool userLocal = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString());
+            _workloadMetadataDir = Path.Combine(userLocal ? _userProfileDir : _dotnetDir, "metadata", "workloads");
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;
             _workloadResolver = workloadResolver;
-            _installationRecordRepository = new NetSdkManagedInstallationRecordRepository(_dotnetDir);
+            _installationRecordRepository = new NetSdkManagedInstallationRecordRepository(_workloadMetadataDir);
             _packageSourceLocation = packageSourceLocation;
         }
 
@@ -190,7 +195,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string packagePath = null;
             string tempExtractionDir = null;
             string tempBackupDir = null;
-            var manifestPath = Path.Combine(_dotnetDir, "sdk-manifests", sdkFeatureBand.ToString(), manifestId.ToString());
+            string rootInstallDir = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString()) ? _userProfileDir : _dotnetDir;
+            var manifestPath = Path.Combine(rootInstallDir, "sdk-manifests", sdkFeatureBand.ToString(), manifestId.ToString());
 
             _reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloadManifest, manifestId, manifestVersion));
 
@@ -287,10 +293,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
         {
-            var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1");
             var installedSdkFeatureBands = _installationRecordRepository.GetFeatureBandsWithInstallationRecords();
             _reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectingSdkFeatureBandsMessage, string.Join(" ", installedSdkFeatureBands)));
             var currentBandInstallRecords = GetExpectedPackInstallRecords(_sdkFeatureBand);
+            string installedPacksDir = Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1");
 
             if (!Directory.Exists(installedPacksDir))
             {
@@ -346,7 +352,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
-            var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1");
+            var installedPacksDir = Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1");
             if (!Directory.Exists(installedPacksDir))
             {
                 return Enumerable.Empty<(WorkloadPackId, string)>();
@@ -429,7 +435,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         private string GetPackInstallRecordPath(PackInfo packInfo, SdkFeatureBand featureBand) =>
-            Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1", packInfo.Id, packInfo.Version, featureBand.ToString());
+            Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1", packInfo.Id, packInfo.Version, featureBand.ToString());
 
         private void WritePackInstallationRecord(PackInfo packInfo, SdkFeatureBand featureBand)
         {
@@ -465,7 +471,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private bool PackHasInstallRecords(PackInfo packInfo)
         {
-            var packInstallRecordDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1", packInfo.Id, packInfo.Version);
+            var packInstallRecordDir = Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1", packInfo.Id, packInfo.Version);
             return Directory.Exists(packInstallRecordDir) && Directory.GetFiles(packInstallRecordDir).Any();
         }
 

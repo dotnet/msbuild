@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.DotNet.Configurer;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
@@ -37,8 +38,9 @@ namespace Microsoft.NET.Build.Tasks
         {
             if (MissingWorkloadPacks.Any())
             {
-                var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion);
-                var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion);
+                string? userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
+                var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion, userProfileDir);
+                var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion, userProfileDir);
 
                 var suggestedWorkloads = workloadResolver.GetWorkloadSuggestionForMissingPacks(
                     MissingWorkloadPacks.Select(item => new WorkloadPackId (item.ItemSpec)).ToList(),

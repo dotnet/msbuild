@@ -1,4 +1,5 @@
 ﻿using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Configurer;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using System;
@@ -35,8 +36,9 @@ namespace Microsoft.DotNet.Tools.New
             var sdkDirectory = Path.GetDirectoryName(typeof(DotnetFiles).Assembly.Location);
             var sdkVersion = Path.GetFileName(sdkDirectory);
             var dotnetRootPath = Path.GetDirectoryName(Path.GetDirectoryName(sdkDirectory));
+            string userProfileDir = CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
-            var packages = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion, dotnetRootPath);
+            var packages = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion, dotnetRootPath, userProfileDir);
             var fileSystem = _environmentSettings.Host.FileSystem;
             foreach (var packageInfo in packages)
             {

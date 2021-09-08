@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
             string templateNupkgPath = Path.Combine(templatePacksDirectory, "xamarin.android.templates.1.0.3.nupkg");
             File.WriteAllText(templateNupkgPath, "");
 
-            var result = _resolver.GetDotnetSdkTemplatePackages("5.0.102", _fakeDotnetRootDirectory);
+            var result = _resolver.GetDotnetSdkTemplatePackages("5.0.102", _fakeDotnetRootDirectory, userProfileDir: null);
 
             result.First().Path.Should().Be(templateNupkgPath);
             result.First().TemplatePackageId.Should().Be("Xamarin.Android.Templates");
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
             File.Copy(Path.Combine("Manifests", "AndroidWorkloadManifest.json"),
                 Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"));
 
-            var result = _resolver.GetDotnetSdkTemplatePackages("5.1.100", _fakeDotnetRootDirectory);
+            var result = _resolver.GetDotnetSdkTemplatePackages("5.1.100", _fakeDotnetRootDirectory, userProfileDir: null);
             result.Should().BeEmpty();
         }
 
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
         {
             var fakeDotnetRootDirectory =
                 Path.Combine(TestContext.Current.TestExecutionDirectory, Path.GetRandomFileName());
-            var result = _resolver.GetDotnetSdkTemplatePackages("5.0.102", fakeDotnetRootDirectory);
+            var result = _resolver.GetDotnetSdkTemplatePackages("5.0.102", fakeDotnetRootDirectory, userProfileDir: null);
             result.Should().BeEmpty();
         }
     }

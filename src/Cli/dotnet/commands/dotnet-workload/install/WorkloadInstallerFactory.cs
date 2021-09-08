@@ -8,6 +8,7 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Configurer;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -18,6 +19,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver, 
             VerbosityOptions verbosity,
+            string userProfileDir,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null, 
             string tempDirPath = null,
@@ -40,14 +42,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     nugetPackageDownloader, verbosity, packageSourceLocation, reporter, tempDirPath);
             }
 
-            if (elevationRequired && !CanWriteToDotnetRoot(dotnetDir))
+            if (elevationRequired && !WorkloadFileBasedInstall.IsUserLocal(dotnetDir, sdkFeatureBand.ToString()) && !CanWriteToDotnetRoot(dotnetDir))
             {
                 throw new GracefulException(LocalizableStrings.InadequatePermissions, isUserError: false);
             }
 
+            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
+
             return new NetSdkManagedInstaller(reporter,
                 sdkFeatureBand,
                 workloadResolver,
+                userProfileDir,
                 nugetPackageDownloader,
                 dotnetDir: dotnetDir,
                 tempDirPath: tempDirPath,

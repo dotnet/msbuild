@@ -7,6 +7,7 @@ using System.Linq;
 using FluentAssertions;
 using ManifestReaderTests;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
@@ -39,92 +40,120 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
             exceptionThrown.Message.Should().Contain("mock-1");
         }
 
-        [Fact]
-        public void GivenWorkloadUninstallItCanUninstallWorkload()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GivenWorkloadUninstallItCanUninstallWorkload(bool userLocal)
         {
-            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? "userlocal" : "default").Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
             var sdkFeatureVersion = "6.0.100";
             var installingWorkload = "mock-1";
+
+            string installRoot = userLocal ? userProfileDir : dotnetRoot;
+            if (userLocal)
+            {
+                WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkFeatureVersion);
+            }
 
             InstallWorkload(installingWorkload, testDirectory, sdkFeatureVersion);
 
             // Assert install was successful
-            var installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            var installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
             installPacks.Count().Should().Be(2);
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload))
                 .Should().BeTrue();
-            var packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            var packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
             packRecordDirs.Count().Should().Be(3);
 
             UninstallWorkload(installingWorkload, testDirectory, sdkFeatureVersion);
 
             // Assert uninstall was successful
-            installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
             installPacks.Count().Should().Be(0);
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload))
                 .Should().BeFalse();
-            packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
             packRecordDirs.Count().Should().Be(0);
         }
 
-        [Fact]
-        public void GivenWorkloadUninstallItCanUninstallOnlySpecifiedWorkload()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GivenWorkloadUninstallItCanUninstallOnlySpecifiedWorkload(bool userLocal)
         {
-            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? "userlocal" : "default").Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
             var sdkFeatureVersion = "6.0.100";
             var installedWorkload = "mock-1";
             var uninstallingWorkload = "mock-2";
+
+            string installRoot = userLocal ? userProfileDir : dotnetRoot;
+            if (userLocal)
+            {
+                WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkFeatureVersion);
+            }
 
             InstallWorkload(installedWorkload, testDirectory, sdkFeatureVersion);
             InstallWorkload(uninstallingWorkload, testDirectory, sdkFeatureVersion);
 
             // Assert installs were successful
-            var installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            var installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
             installPacks.Count().Should().Be(3);
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installedWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installedWorkload))
                 .Should().BeTrue();
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
                 .Should().BeTrue();
-            var packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            var packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
             packRecordDirs.Count().Should().Be(4);
 
             UninstallWorkload(uninstallingWorkload, testDirectory, sdkFeatureVersion);
 
             // Assert uninstall was successful, other workload is still installed
-            installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
             installPacks.Count().Should().Be(2);
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
                 .Should().BeFalse();
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installedWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installedWorkload))
                 .Should().BeTrue();
-            packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
             packRecordDirs.Count().Should().Be(3);
         }
 
-        [Fact]
-        public void GivenWorkloadUninstallItCanUninstallOnlySpecifiedFeatureBand()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GivenWorkloadUninstallItCanUninstallOnlySpecifiedFeatureBand(bool userLocal)
         {
-            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? "userlocal" : "default").Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
             var prevSdkFeatureVersion = "5.0.100";
             var sdkFeatureVersion = "6.0.100";
             var uninstallingWorkload = "mock-1";
+
+            string installRoot = userLocal ? userProfileDir : dotnetRoot;
+            if (userLocal)
+            {
+                WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkFeatureVersion);
+                WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, prevSdkFeatureVersion);
+            }
 
             InstallWorkload(uninstallingWorkload, testDirectory, prevSdkFeatureVersion);
             InstallWorkload(uninstallingWorkload, testDirectory, sdkFeatureVersion);
 
             // Assert installs were successful
-            var installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            var installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
             installPacks.Count().Should().Be(2);
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", prevSdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", prevSdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
                 .Should().BeTrue();
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
                 .Should().BeTrue();
-            var packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            var packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
             packRecordDirs.Count().Should().Be(3);
-            var featureBandMarkerFiles = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"))
+            var featureBandMarkerFiles = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"))
                 .SelectMany(packIdDirs => Directory.GetDirectories(packIdDirs))
                 .SelectMany(packVersionDirs => Directory.GetFiles(packVersionDirs));
             featureBandMarkerFiles.Count().Should().Be(6); // 3 packs x 2 feature bands
@@ -132,36 +161,40 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
             UninstallWorkload(uninstallingWorkload, testDirectory, sdkFeatureVersion);
 
             // Assert uninstall was successful, other workload is still installed
-            installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
             installPacks.Count().Should().Be(2);
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
                 .Should().BeFalse();
-            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", prevSdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", prevSdkFeatureVersion, "InstalledWorkloads", uninstallingWorkload))
                 .Should().BeTrue();
-            packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
             packRecordDirs.Count().Should().Be(3);
         }
 
         private void InstallWorkload(string installingWorkload, string testDirectory, string sdkFeatureVersion)
         {
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            bool userLocal = WorkloadFileBasedInstall.IsUserLocal(dotnetRoot, sdkFeatureVersion);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
-                workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             installCommand.Execute();
         }
 
         private void UninstallWorkload(string uninstallingWorkload, string testDirectory, string sdkFeatureVersion)
         {
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            bool userLocal = WorkloadFileBasedInstall.IsUserLocal(dotnetRoot, sdkFeatureVersion);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var uninstallParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "uninstall", uninstallingWorkload });
             var uninstallCommand = new WorkloadUninstallCommand(uninstallParseResult, reporter: _reporter, workloadResolver, nugetDownloader,
-                dotnetDir: dotnetRoot, version: sdkFeatureVersion);
+                dotnetDir: dotnetRoot, version: sdkFeatureVersion, userProfileDir: userProfileDir);
             uninstallCommand.Execute();
         }
     }

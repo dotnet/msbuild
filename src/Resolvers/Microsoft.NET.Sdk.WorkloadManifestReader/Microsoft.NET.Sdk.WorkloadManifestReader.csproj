@@ -19,6 +19,7 @@
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" Namespace="Microsoft.NET.Sdk.Localization" />
     <Compile Include="..\Microsoft.DotNet.MSBuildSdkResolver\FXVersion.cs" />
     <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common"/>
+    <Compile Include="$(RepoRoot)src\Common\WorkloadFileBasedInstall.cs" LinkBase="Common"/>
   </ItemGroup>
 
   <ItemGroup>

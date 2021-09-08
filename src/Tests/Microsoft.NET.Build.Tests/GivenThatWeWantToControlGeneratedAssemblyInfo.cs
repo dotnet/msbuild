@@ -386,7 +386,7 @@ namespace Microsoft.NET.Build.Tests
                         .WithWorkingDirectory(path)
                         .Execute("new", "console");
 
-                    string projectFile = Path.Combine(path, "LatestTargetFramework.csproj");
+                    string projectFile = Path.Combine(path, $"{Path.GetFileName(path)}.csproj");
                     XDocument projectXml = XDocument.Load(projectFile);
                     XNamespace ns = projectXml.Root.Name.Namespace;
                     _cachedLatestTargetFramework = projectXml.Root.Element(ns + "PropertyGroup").Element(ns + "TargetFramework").Value;

@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 _reporter,
                 nugetPackageDownloader: _nugetDownloader,
                 workloadManifestUpdater: new MockWorkloadManifestUpdater(_mockManifestUpdates),
-                userHome: _testDirectory,
+                userProfileDir: _testDirectory,
                 currentSdkVersion: CurrentSdkVersion,
                 dotnetDir: _dotnetRoot,
                 workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 _reporter,
                 nugetPackageDownloader: _nugetDownloader,
                 workloadManifestUpdater: new MockWorkloadManifestUpdater(_mockManifestUpdates),
-                userHome: _testDirectory,
+                userProfileDir: _testDirectory,
                 currentSdkVersion: CurrentSdkVersion,
                 dotnetDir: _dotnetRoot,
                 workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 _reporter,
                 nugetPackageDownloader: _nugetDownloader,
                 workloadManifestUpdater: new MockWorkloadManifestUpdater(_mockManifestUpdates),
-                userHome: _testDirectory,
+                userProfileDir: _testDirectory,
                 currentSdkVersion: "6.0.101",
                 dotnetDir: _dotnetRoot,
                 workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
