@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ApiCompatibility
     {
         private readonly Dictionary<string, HashSet<string>> _ignore;
         private readonly HashSet<string> _noWarn;
-        private readonly List<T> _differences = new();
+        private readonly HashSet<T> _differences = new();
 
         /// <summary>
         /// Instantiate an diagnostic bag with the provided settings to ignore diagnostics.
@@ -73,7 +73,8 @@ namespace Microsoft.DotNet.ApiCompatibility
         {
             if (!Filter(difference.DiagnosticId, difference.ReferenceId))
             {
-                _differences.Add(difference);
+                if (!_differences.Contains(difference))
+                    _differences.Add(difference);
             }
         }
 

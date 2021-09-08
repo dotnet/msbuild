@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
                 Assert.Equal(expectedRight, a.right);
 
                 CompatDifference[] expectedDiff = expectedDifferences[i++];
-                Assert.Equal(expectedDiff, a.differences, CompatDifferenceComparer.Default);
+                Assert.Equal(expectedDiff, a.differences);
             }
         }
 

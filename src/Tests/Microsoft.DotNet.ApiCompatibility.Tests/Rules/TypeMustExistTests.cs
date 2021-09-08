@@ -55,7 +55,7 @@ namespace CompatTests
 #endif
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace B.B
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:A.B.C"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -115,7 +115,7 @@ public class A
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:A.B"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.ForwardedTestType")
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -248,7 +248,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Fourth")
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Theory]
@@ -289,7 +289,7 @@ namespace CompatTests
                     new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.InternalType")
                 };
 
-                Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+                Assert.Equal(expected, differences);
             }
         }
 
@@ -344,7 +344,7 @@ namespace CompatTests
                 );
             }
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
