@@ -450,13 +450,11 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 {
                     if (Path.GetFileName(project) == "AnotherClassLib.csproj")
                     {
-                        document.Descendants("TargetFramework").Single().ReplaceNodes("netcoreapp3.1");
-                        document.Descendants("PropertyGroup").First().Add(new XElement("RazorLangVersion", "3.0"));
+                        document.Descendants("TargetFramework").Single().ReplaceNodes("net5.0");
                     }
                     if (Path.GetFileName(project) == "ClassLibrary.csproj")
                     {
-                        document.Descendants("TargetFramework").Single().ReplaceNodes("netcoreapp3.0");
-                        document.Descendants("PropertyGroup").First().Add(new XElement("RazorLangVersion", "3.0"));
+                        document.Descendants("TargetFramework").Single().ReplaceNodes("net5.0");
                     }
                 });
 
@@ -495,13 +493,11 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 {
                     if (Path.GetFileName(project) == "AnotherClassLib.csproj")
                     {
-                        document.Descendants("TargetFramework").Single().ReplaceNodes("netcoreapp3.1");
-                        document.Descendants("PropertyGroup").First().Add(new XElement("RazorLangVersion", "3.0"));
+                        document.Descendants("TargetFramework").Single().ReplaceNodes("net5.0");
                     }
                     if (Path.GetFileName(project) == "ClassLibrary.csproj")
                     {
-                        document.Descendants("TargetFramework").Single().ReplaceNodes("netcoreapp3.0");
-                        document.Descendants("PropertyGroup").First().Add(new XElement("RazorLangVersion", "3.0"));
+                        document.Descendants("TargetFramework").Single().ReplaceNodes("net5.0");
                     }
                 });
 

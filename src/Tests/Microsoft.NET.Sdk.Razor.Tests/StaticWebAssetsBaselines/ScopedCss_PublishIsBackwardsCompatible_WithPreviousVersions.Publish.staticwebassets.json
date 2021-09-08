@@ -98,10 +98,10 @@
       "OriginalItemSpec": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
     },
     {
-      "Identity": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\netcoreapp3.0\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css",
+      "Identity": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net5.0\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css",
       "SourceId": "ClassLibrary",
       "SourceType": "Project",
-      "ContentRoot": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\netcoreapp3.0\\scopedcss\\projectbundle\\",
+      "ContentRoot": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net5.0\\scopedcss\\projectbundle\\",
       "BasePath": "_content/ClassLibrary",
       "RelativePath": "ClassLibrary.bundle.scp.css",
       "AssetKind": "All",
@@ -112,7 +112,7 @@
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\netcoreapp3.0\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css"
+      "OriginalItemSpec": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net5.0\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css"
     },
     {
       "Identity": "${ProjectRoot}\\ClassLibrary\\wwwroot\\js\\project-transitive-dep.js",

@@ -425,9 +425,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       ManifestPath="$(StaticWebAssetDevelopmentManifestPath)">
     </GenerateStaticWebAssetsDevelopmentManifest>
 
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel" Lines="2.0" WriteOnlyWhenDifferent="true" />
+
     <ItemGroup>
       <FileWrites Include="$(StaticWebAssetBuildManifestPath)" />
       <FileWrites Include="$(StaticWebAssetDevelopmentManifestPath)" />
+      <FileWrites Include="$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel" />
     </ItemGroup>
     
   </Target>
@@ -858,6 +861,12 @@ Copyright (c) .NET Foundation. All rights reserved.
         Condition="'%(StaticWebAsset.SourceType)' == ''"
         Remove="@(StaticWebAsset->'wwwroot\%(RelativePath)')"  />
     </ItemGroup>
+  </Target>
+
+  <Target Name="_DeleteSentinelFile" BeforeTargets="_GetTargetFrameworksOutput">
+    <!-- We use this to detect when we are packing in a multitarget scenario, the first pack task to run creates the sentinel and
+    the other ones no-op when they see it. -->
+    <Delete Files="$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel" Condition="Exists('$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel')" />
   </Target>
 
   <!-- This target makes sure that all static web assets for the current project get included
