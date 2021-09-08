@@ -132,16 +132,16 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>6.0.0-rc.2.21458.8</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>6.0.0-rc.2.21458.8</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>6.0.0-rc.2.21458.8</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>6.0.0-rc.2.21458.8</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>6.0.0-rc.2.21458.8</MicrosoftAspNetCoreAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreTestHostPackageVersion>6.0.0-rc.2.21458.8</MicrosoftAspNetCoreTestHostPackageVersion>
-    <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>6.0.0-rc.2.21458.8</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
-    <MicrosoftAspNetCoreRazorLanguageVersion>6.0.0-rc.2.21458.8</MicrosoftAspNetCoreRazorLanguageVersion>
-    <MicrosoftCodeAnalysisRazorVersion>6.0.0-rc.2.21458.8</MicrosoftCodeAnalysisRazorVersion>
-    <MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>6.0.0-rc.2.21458.8</MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>6.0.0-rc.2.21458.13</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>6.0.0-rc.2.21458.13</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>6.0.0-rc.2.21458.13</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>6.0.0-rc.2.21458.13</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>6.0.0-rc.2.21458.13</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreTestHostPackageVersion>6.0.0-rc.2.21458.13</MicrosoftAspNetCoreTestHostPackageVersion>
+    <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>6.0.0-rc.2.21458.13</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
+    <MicrosoftAspNetCoreRazorLanguageVersion>6.0.0-rc.2.21458.13</MicrosoftAspNetCoreRazorLanguageVersion>
+    <MicrosoftCodeAnalysisRazorVersion>6.0.0-rc.2.21458.13</MicrosoftCodeAnalysisRazorVersion>
+    <MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>6.0.0-rc.2.21458.13</MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/wpf -->
