@@ -393,7 +393,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="AddStaticWebAssetsManifest" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
     <ItemGroup>
-      <ContentWithTargetPath Condition="@(StaticWebAsset) != ''"
+      <ContentWithTargetPath Condition="Exists('$(StaticWebAssetDevelopmentManifestPath)')"
         Include="$(StaticWebAssetDevelopmentManifestPath)"
         TargetPath="$(TargetName).staticwebassets.runtime.json"
         CopyToOutputDirectory="PreserveNewest"
