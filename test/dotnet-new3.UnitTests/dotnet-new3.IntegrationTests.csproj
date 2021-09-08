@@ -12,6 +12,37 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.3.1" Version="3.1.2" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.5.0" Version="5.0" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GeneratedText>
+      <![CDATA[
+namespace Dotnet_new3.IntegrationTests
+{
+  class TemplatePackagesPaths
+  {
+      public const string MicrosoftDotNetCommonProjectTemplates31Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_3_1)"%3B
+      public const string MicrosoftDotNetCommonProjectTemplates50Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_5_0)"%3B
+  }
+}
+      ]]>
+    </GeneratedText>
+  </PropertyGroup>
+
+  <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)GeneratedFile.cs">
+    <PropertyGroup>
+      <GeneratedFilePath>$(IntermediateOutputPath)TemplatePackagesPaths.cs</GeneratedFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Include="$(GeneratedFilePath)" />
+      <FileWrites Include="$(GeneratedFilePath)" />
+    </ItemGroup>
+    <WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+  </Target>
+  
+  <ItemGroup>
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
