@@ -109,14 +109,21 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 // All project references should define MSBuildSourceProjectFile but in the ASP.NET Core some special (malformed) references do not.
                 // We can be more lenient here and fallback to the project reference ItemSpec if not present.
                 referenceMetadata = !string.IsNullOrEmpty(referenceMetadata) ? referenceMetadata : projectReference.ItemSpec;
+                var configurationFullPath = configuration.GetMetadata("FullPath");
+                var projectReferenceFullPath = Path.GetFullPath(referenceMetadata);
                 var matchPath = string.Equals(
-                    configuration.GetMetadata("FullPath"),
-                    Path.GetFullPath(referenceMetadata),
-                    StringComparison.Ordinal);
+                    configurationFullPath,
+                    projectReferenceFullPath,
+                    OSPath.PathComparison);
 
                 if (matchPath)
                 {
+                    Log.LogMessage("Found project reference '{0}' for configuration item '{1}'.", configurationFullPath, projectReferenceFullPath);
                     return projectReference;
+                }
+                else
+                {
+                    Log.LogMessage("Rejected project reference '{0}' for configuration item '{1}' becasue paths don't match.", configurationFullPath, projectReferenceFullPath);
                 }
             }
 
