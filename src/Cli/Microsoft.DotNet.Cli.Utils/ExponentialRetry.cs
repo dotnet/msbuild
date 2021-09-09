@@ -35,17 +35,28 @@ namespace Microsoft.DotNet.Cli.Utils
             foreach (var t in timer())
             {
                 await t;
-                var result = action();
+                T result = default;
+                count++;
+                try
+                {
+                    result = action();
+                }
+                catch
+                {
+                    if (count == maxRetryCount)
+                    {
+                        throw;
+                    }
+                }
+
                 if (shouldStopRetry(result))
                 {
                     return result;
                 }
 
-                count++;
                 if (count == maxRetryCount)
                 {
-                    throw new Exception(
-                        $"Retry failed for {taskDescription} after {count} times with result: {result}");
+                    return result;
                 }
             }
             throw new Exception("Timer should not be exhausted");
@@ -56,24 +67,7 @@ namespace Microsoft.DotNet.Cli.Utils
             Func<IEnumerable<Task>> timer = null)
         {
             timer = timer == null ? () => ExponentialRetry.Timer(ExponentialRetry.Intervals): timer;
-            var count = 0;
-            foreach (var t in timer())
-            {
-                await t;
-                count++;
-                try
-                {
-                    return action();
-                }
-                catch
-                {
-                    if (count == maxRetryCount)
-                    {
-                        throw;
-                    }
-                }
-            }
-            throw new Exception("Timer should not be exhausted");
+            return await ExecuteWithRetry(action, _ => false, maxRetryCount, timer);
         }
 
         public static IEnumerable<Task> Timer(IEnumerable<TimeSpan> interval)
