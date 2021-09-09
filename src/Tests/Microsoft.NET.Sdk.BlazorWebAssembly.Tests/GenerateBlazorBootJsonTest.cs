@@ -1,13 +1,11 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Json;
-using Microsoft.Build.Framework;
-using Microsoft.NET.Sdk.BlazorWebAssembly;
 using FluentAssertions;
+using Microsoft.Build.Framework;
 using Moq;
 using Xunit;
 
@@ -166,7 +164,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Arrange
             var taskInstance = new GenerateBlazorWebAssemblyBootJson { DebugBuild = flagValue };
             taskInstance.BuildEngine = Mock.Of<IBuildEngine>();
-            
+
             using var stream = new MemoryStream();
 
             // Act

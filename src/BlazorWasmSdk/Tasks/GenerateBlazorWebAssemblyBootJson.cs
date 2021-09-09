@@ -1,8 +1,10 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -155,7 +157,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         Log.LogMessage("Candidate '{0}' is defined as a library initializer resource.", resource.ItemSpec);
                         resourceData.libraryInitializers ??= new();
                         resourceList = resourceData.libraryInitializers;
-                        AddResourceToList(resource, resourceList, resource.GetMetadata("TargetPath"));
+                        var targetPath = resource.GetMetadata("TargetPath");
+                        Debug.Assert(!string.IsNullOrEmpty(targetPath), "Target path for '{0}' must exist.", resource.ItemSpec);
+                        AddResourceToList(resource, resourceList, targetPath);
                         continue;
                     }
                     else if (string.Equals("BlazorWebAssemblyResource", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
@@ -169,7 +173,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                             resourceList = new();
                             resourceData.extensions[extensionName] = resourceList;
                         }
-                        AddResourceToList(resource, resourceList, resource.GetMetadata("TargetPath"));
+                        var targetPath = resource.GetMetadata("TargetPath");
+                        Debug.Assert(!string.IsNullOrEmpty(targetPath), "Target path for '{0}' must exist.", resource.ItemSpec);
+                        AddResourceToList(resource, resourceList, targetPath);
                         continue;
                     }
                     else

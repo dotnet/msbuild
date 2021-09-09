@@ -529,6 +529,9 @@ Copyright (c) .NET Foundation. All rights reserved.
         Include="@(StaticWebAsset)"
         Condition="'%(StaticWebAsset.AssetTraitName)' == 'JSModule' and '%(StaticWebAsset.AssetTraitValue)' == 'JSLibraryModule' and '%(AssetKind)' != 'Build'" />
 
+      <!-- We remove the extensions since they are added to the list of static web assets but we need to compute the target path for them -->
+      <_BlazorPublishAsset Remove="@(_BlazorExtensionsCandidatesForPublish)" />
+
     </ItemGroup>
 
     <ComputeStaticWebAssetsTargetPaths
