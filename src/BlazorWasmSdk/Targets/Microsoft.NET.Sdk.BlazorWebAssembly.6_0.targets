@@ -151,11 +151,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="_ResolveBlazorWasmOutputs" DependsOnTargets="ResolveReferences;PrepareResourceNames;ComputeIntermediateSatelliteAssemblies" BeforeTargets="_RazorPrepareForRun">
-    <!--
-      Calculates the outputs and the paths for Blazor WASM. This target is invoked frequently and should perform minimal work.
-    -->
-
+  <Target Name="_ResolveBlazorWasmConfiguration">
     <PropertyGroup>
       <_BlazorEnableTimeZoneSupport>$(BlazorEnableTimeZoneSupport)</_BlazorEnableTimeZoneSupport>
       <_BlazorEnableTimeZoneSupport Condition="'$(_BlazorEnableTimeZoneSupport)' == ''">true</_BlazorEnableTimeZoneSupport>
@@ -163,16 +159,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_BlazorInvariantGlobalization Condition="'$(_BlazorInvariantGlobalization)' == ''">true</_BlazorInvariantGlobalization>
       <_BlazorCopyOutputSymbolsToOutputDirectory>$(CopyOutputSymbolsToOutputDirectory)</_BlazorCopyOutputSymbolsToOutputDirectory>
       <_BlazorCopyOutputSymbolsToOutputDirectory Condition="'$(_BlazorCopyOutputSymbolsToOutputDirectory)'==''">true</_BlazorCopyOutputSymbolsToOutputDirectory>
-    </PropertyGroup>
-
-    <PropertyGroup>
-      <!-- Workaround for https://github.com/dotnet/sdk/issues/12114-->
-      <PublishDir Condition="'$(AppendRuntimeIdentifierToOutputPath)' != 'true' AND '$(PublishDir)' == '$(OutputPath)$(RuntimeIdentifier)\$(PublishDirName)\'">$(OutputPath)$(PublishDirName)\</PublishDir>
-
       <_BlazorWebAssemblyLoadAllGlobalizationData>$(BlazorWebAssemblyLoadAllGlobalizationData)</_BlazorWebAssemblyLoadAllGlobalizationData>
       <_BlazorWebAssemblyLoadAllGlobalizationData Condition="'$(_BlazorWebAssemblyLoadAllGlobalizationData)' == ''">false</_BlazorWebAssemblyLoadAllGlobalizationData>
-    </PropertyGroup>
 
+      <!-- Workaround for https://github.com/dotnet/sdk/issues/12114-->
+      <PublishDir Condition="'$(AppendRuntimeIdentifierToOutputPath)' != 'true' AND '$(PublishDir)' == '$(OutputPath)$(RuntimeIdentifier)\$(PublishDirName)\'">$(OutputPath)$(PublishDirName)\</PublishDir>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_ResolveBlazorWasmOutputs" DependsOnTargets="ResolveReferences;PrepareResourceNames;ComputeIntermediateSatelliteAssemblies;_ResolveBlazorWasmConfiguration" BeforeTargets="_RazorPrepareForRun">
     <ItemGroup>
       <_BlazorJSFile Include="$(BlazorWebAssemblyJSPath)" />
       <_BlazorJSFile Include="$(BlazorWebAssemblyJSMapPath)" Condition="Exists('$(BlazorWebAssemblyJSMapPath)')" />
@@ -411,16 +406,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="ProcessPublishFilesForBlazor" DependsOnTargets="LoadStaticWebAssetsBuildManifest" AfterTargets="ILLink">
-
+  <Target Name="ProcessPublishFilesForBlazor" DependsOnTargets="_ResolveBlazorWasmConfiguration;LoadStaticWebAssetsBuildManifest" AfterTargets="ILLink">
     <PropertyGroup>
-      <!-- Workaround for https://github.com/dotnet/sdk/issues/12114-->
-      <PublishDir Condition="'$(AppendRuntimeIdentifierToOutputPath)' != 'true' AND '$(PublishDir)' == '$(OutputPath)$(RuntimeIdentifier)\$(PublishDirName)\'">$(OutputPath)$(PublishDirName)\</PublishDir>
-
-      <_BlazorEnableTimeZoneSupport>$(BlazorEnableTimeZoneSupport)</_BlazorEnableTimeZoneSupport>
-      <_BlazorEnableTimeZoneSupport Condition="'$(_BlazorEnableTimeZoneSupport)' == ''">true</_BlazorEnableTimeZoneSupport>
-      <_BlazorInvariantGlobalization>$(InvariantGlobalization)</_BlazorInvariantGlobalization>
-      <_BlazorInvariantGlobalization Condition="'$(_BlazorInvariantGlobalization)' == ''">true</_BlazorInvariantGlobalization>
       <_BlazorAotEnabled>$(UsingBrowserRuntimeWorkload)</_BlazorAotEnabled>
       <_BlazorAotEnabled Condition="'$(_BlazorAotEnabled)' == ''">false</_BlazorAotEnabled>
       <_BlazorLinkerEnabled>$(PublishTrimmed)</_BlazorLinkerEnabled>

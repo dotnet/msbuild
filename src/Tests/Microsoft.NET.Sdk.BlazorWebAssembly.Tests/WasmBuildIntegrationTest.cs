@@ -298,6 +298,46 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
+        public void Publish_WithInvariantGlobalizationEnabled_DoesNotCopyGlobalizationData()
+        {
+            // Arrange
+            var testAppName = "BlazorHosted";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+
+            testInstance.WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var itemGroup = new XElement(ns + "PropertyGroup");
+                itemGroup.Add(new XElement("InvariantGlobalization", true));
+                project.Root.Add(itemGroup);
+            });
+
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/bl")
+                .Should().Pass();
+
+            var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
+
+            var bootJsonPath = Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
+            var bootJsonData = ReadBootJsonData(bootJsonPath);
+
+            bootJsonData.icuDataMode.Should().Be(ICUDataMode.Invariant);
+            var runtime = bootJsonData.resources.runtime;
+            runtime.Should().ContainKey("dotnet.wasm");
+            runtime.Should().ContainKey("dotnet.timezones.blat");
+
+            runtime.Should().NotContainKey("icudt.dat");
+            runtime.Should().NotContainKey("icudt_EFIGS.dat");
+
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt.dat")).Should().NotExist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().NotExist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().NotExist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_no_CJK.dat")).Should().NotExist();
+        }
+
+        [Fact]
         public void Build_WithBlazorWebAssemblyLoadAllGlobalizationData_SetsICUDataMode()
         {
             // Arrange
@@ -334,6 +374,46 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_no_CJK.dat")).Should().Exist();
+        }
+
+        [Fact]
+        public void Publish_WithBlazorWebAssemblyLoadAllGlobalizationData_SetsICUDataMode()
+        {
+            // Arrange
+            var testAppName = "BlazorHosted";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+
+            testInstance.WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var itemGroup = new XElement(ns + "PropertyGroup");
+                itemGroup.Add(new XElement("BlazorWebAssemblyLoadAllGlobalizationData", true));
+                project.Root.Add(itemGroup);
+            });
+
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/bl")
+                .Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
+
+            var bootJsonPath = Path.Combine(publishDirectory, "wwwroot", "_framework", "blazor.boot.json");
+            var bootJsonData = ReadBootJsonData(bootJsonPath);
+
+            bootJsonData.icuDataMode.Should().Be(ICUDataMode.All);
+            var runtime = bootJsonData.resources.runtime;
+
+            runtime.Should().ContainKey("dotnet.wasm");
+            runtime.Should().ContainKey("dotnet.timezones.blat");
+            runtime.Should().ContainKey("icudt.dat");
+            runtime.Should().ContainKey("icudt_EFIGS.dat");
+
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt.dat")).Should().Exist();
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().Exist();
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().Exist();
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt_no_CJK.dat")).Should().Exist();
         }
 
         [Fact]
