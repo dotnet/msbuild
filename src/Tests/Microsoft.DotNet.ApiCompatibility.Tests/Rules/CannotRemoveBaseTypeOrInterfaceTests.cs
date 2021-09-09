@@ -85,7 +85,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.CannotRemoveBaseInterface, string.Empty, DifferenceType.Changed, "T:CompatTests.First"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
 
             differences[0].Message.Contains("CompatTests.FirstBase");
             differences[1].Message.Contains("CompatTests.IFirstInterface");
@@ -128,7 +128,7 @@ namespace CompatTests
                     new CompatDifference(DiagnosticIds.CannotRemoveBaseInterface, string.Empty, DifferenceType.Changed, "T:CompatTests.First")
                 };
 
-                Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+                Assert.Equal(expected, differences);
             }
             else
             {
@@ -171,7 +171,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.CannotRemoveBaseInterface, string.Empty, DifferenceType.Changed, "T:CompatTests.First"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
 
             string firstMessage = differences[0].Message;
             string secondMessage = differences[1].Message;
