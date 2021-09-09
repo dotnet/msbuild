@@ -148,7 +148,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       TimeZoneSupport="$(_BlazorEnableTimeZoneSupport)"
       InvariantGlobalization="$(_BlazorInvariantGlobalization)"
       CopySymbols="$(_BlazorCopyOutputSymbolsToOutputDirectory)"
-      MicrosoftNETCoreAppRefPackageVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
+      BundledNETCoreAppPackageVersion="$(BundledNETCoreAppPackageVersion)"
       OutputPath="$(OutputPath)"
     >
       <Output TaskParameter="AssetCandidates" ItemName="_BuildAssetsCandidates" />
@@ -390,7 +390,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       InvariantGlobalization="$(_BlazorInvariantGlobalization)"
       CopySymbols="$(CopyOutputSymbolsToPublishDirectory)"
       ExistingAssets="@(_BlazorPublishPrefilteredAssets)"
-      MicrosoftNETCoreAppRefPackageVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
+      BundledNETCoreAppPackageVersion="$(BundledNETCoreAppPackageVersion)"
     >
       <Output TaskParameter="NewCandidates" ItemName="_NewBlazorPublishStaticWebAssets" />
       <Output TaskParameter="FilesToRemove" ItemName="_PublishResolvedFilesToRemove" />

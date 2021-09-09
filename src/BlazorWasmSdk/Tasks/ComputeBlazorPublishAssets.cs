@@ -52,7 +52,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         public string PublishPath { get; set; }
 
         [Required]
-        public string MicrosoftNETCoreAppRefPackageVersion { get; set; }
+        public string BundledNETCoreAppPackageVersion { get; set; }
 
         [Output]
         public ITaskItem[] NewCandidates { get; set; }
@@ -199,7 +199,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         newDotNetJs.SetMetadata("OriginalItemSpec", aotDotNetJs.ItemSpec);
 
                         var itemHash = FileHasher.GetFileHash(aotDotNetJs.ItemSpec);
-                        var newRelativePath = $"dotnet.{MicrosoftNETCoreAppRefPackageVersion}.{itemHash}.js";
+                        var newRelativePath = $"dotnet.{BundledNETCoreAppPackageVersion}.{itemHash}.js";
                         newDotNetJs.SetMetadata("RelativePath", newRelativePath);
 
                         updateMap.Add(asset.ItemSpec, newDotNetJs);
