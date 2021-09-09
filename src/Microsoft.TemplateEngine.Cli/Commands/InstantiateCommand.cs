@@ -9,7 +9,7 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class InstantiateCommand : BaseCommand<InstantiateCommandArgs>
+    internal class InstantiateCommand : BaseCommandHandler<InstantiateCommandArgs>
     {
         internal InstantiateCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
 

@@ -9,7 +9,7 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class ShowAliasCommand : BaseCommand<ShowAliasCommandArgs>
+    internal class ShowAliasCommand : BaseCommandHandler<ShowAliasCommandArgs>
     {
         internal ShowAliasCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
 

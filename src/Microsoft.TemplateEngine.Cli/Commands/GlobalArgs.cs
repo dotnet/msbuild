@@ -5,7 +5,6 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -21,14 +20,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             DebugSettingsLocation = invocationContext.ParseResult.ValueForOption(customHiveOption);
             //TODO: check if it gets the command name correctly.
             CommandName = invocationContext.ParseResult.CommandResult.Command.Name;
+            InvocationContext = invocationContext;
         }
 
-        [Obsolete]
-        internal GlobalArgs(INewCommandInput legacyArgs)
-        {
-            Quiet = legacyArgs.IsQuietFlagSpecified;
-            CommandName = legacyArgs.CommandName;
-        }
+        public InvocationContext InvocationContext { get; }
 
         internal string CommandName { get; private set; }
 

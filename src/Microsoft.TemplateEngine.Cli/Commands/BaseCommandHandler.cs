@@ -18,12 +18,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public Task<int> InvokeAsync(InvocationContext context);
     }
 
-    internal abstract class BaseCommand<TArgs> : IBaseCommand, ICommandHandler where TArgs : GlobalArgs
+    internal abstract class BaseCommandHandler<TArgs> : IBaseCommand, ICommandHandler where TArgs : GlobalArgs
     {
         private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
         private readonly ITemplateEngineHost _host;
 
-        internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
+        internal BaseCommandHandler(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
         {
             _host = host;
             TelemetryLogger = logger;

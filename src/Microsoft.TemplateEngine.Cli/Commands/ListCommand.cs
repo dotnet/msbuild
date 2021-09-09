@@ -9,7 +9,7 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class ListCommand : BaseCommand<ListCommandArgs>
+    internal class ListCommand : BaseCommandHandler<ListCommandArgs>
     {
         internal ListCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
 

@@ -4,16 +4,15 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Help;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.Extensions;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class NewCommand : BaseCommand<NewCommandArgs>
+    internal class NewCommand : BaseCommandHandler<NewCommandArgs>
     {
         private readonly string _commandName;
 
@@ -24,80 +23,123 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected override Command CreateCommandAbstract()
         {
-            Command command = new Command(_commandName, LocalizableStrings.CommandDescription);
+            Command command = new NewCommandWithSuggestions(_commandName, LocalizableStrings.CommandDescription);
             NewCommandArgs.AddToCommand(command);
             command.TreatUnmatchedTokensAsErrors = true;
             return command;
         }
 
-        protected override Task<New3CommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        protected override async Task<New3CommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
         {
-            if (TemplatePackageCoordinator.IsTemplatePackageManipulationFlow(args))
+            if (string.IsNullOrWhiteSpace(args.ShortName))
             {
-                TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-                TemplateInformationCoordinator templateInformationCoordinator = new TemplateInformationCoordinator(
-                    environmentSettings,
-                    templatePackageManager,
-                    new TemplateCreator(environmentSettings),
-                    new HostSpecificDataLoader(environmentSettings),
-                    TelemetryLogger,
-                    environmentSettings.GetDefaultLanguage());
-
-                TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
-                    TelemetryLogger,
-                    environmentSettings,
-                    templatePackageManager,
-                    templateInformationCoordinator,
-                    environmentSettings.GetDefaultLanguage());
-
-#pragma warning disable CS0612 // Type or member is obsolete
-                return templatePackageCoordinator.ProcessAsync(args, cancellationToken);
-#pragma warning restore CS0612 // Type or member is obsolete
+                if (args.HelpRequested)
+                {
+                    HelpResult helpResult = new HelpResult();
+                    helpResult.Apply(args.InvocationContext);
+                    return New3CommandStatus.Success;
+                }
+                //show curated list
+                return New3CommandStatus.Success;
             }
 
-            throw new NotImplementedException();
+            TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
+
+            var templates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            var template = templates.FirstOrDefault(template => template.ShortNameList.Contains(args.ShortName));
+
+            if (template == null)
+            {
+                Reporter.Error.WriteLine($"Template {args.ShortName} doesn't exist.");
+                return New3CommandStatus.NotFound;
+            }
+
+            var dotnet = new Command("dotnet");
+            var newC = new Command("new");
+            var command = new Command(args.ShortName);
+            command.Description = template.Name + Environment.NewLine + template.Description;
+            command.AddOption(new Option<string>("-o"));
+            foreach (var p in template.Parameters)
+            {
+                command.AddOption(new Option<string>($"--{p.Name}")
+                {
+                    Description = p.Description
+                });
+            }
+
+            command.Handler = CommandHandler.Create<InvocationContext>((c) => Reporter.Output.WriteLine("Template is created!"));
+
+            dotnet.AddCommand(newC);
+            newC.AddCommand(command);
+
+            string[] newArgs = new[] { "dotnet", "new", args.ShortName };
+            newArgs = newArgs.Concat(args.Arguments?.ToArray() ?? Array.Empty<string>()).ToArray();
+
+            return (New3CommandStatus)dotnet.Invoke(newArgs);
         }
 
         protected override NewCommandArgs ParseContext(InvocationContext context) => new(context);
+
+        /// <summary>
+        /// Implements suggestions for "new" command.
+        /// </summary>
+        internal class NewCommandWithSuggestions : Command
+        {
+            public NewCommandWithSuggestions(string name, string? description = null) : base(name, description) { }
+
+            public override IEnumerable<string> GetSuggestions(ParseResult? parseResult = null, string? textToMatch = null)
+            {
+                return base.GetSuggestions(parseResult, textToMatch);
+            }
+        }
     }
 
     internal partial class NewCommandArgs : GlobalArgs
     {
         public NewCommandArgs(InvocationContext invocationContext) : base(invocationContext)
         {
-            InstallItems = invocationContext.ParseResult.ValueForOption(InstallOption);
-            Interactive = invocationContext.ParseResult.ValueForOption(InteractiveOption);
-            AdditionalNuGetSources = invocationContext.ParseResult.ValueForOption(AddSourceOption);
+            Arguments = invocationContext.ParseResult.ValueForArgument(RemainingArguments);
+            ShortName = invocationContext.ParseResult.ValueForArgument(ShortNameArgument);
+            HelpRequested = invocationContext.ParseResult.ValueForOption(HelpOption);
         }
 
-        public IReadOnlyList<string>? InstallItems { get; }
+        internal string? ShortName { get; }
 
-        public bool Interactive { get; }
+        internal IReadOnlyList<string>? Arguments { get; }
 
-        public IReadOnlyList<string>? AdditionalNuGetSources { get; }
+        internal bool HelpRequested { get; }
 
-        private static Option<IReadOnlyList<string>> InstallOption { get; } = new(new[] { "-i", "--install" })
+        private static Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
         {
-            Description = LocalizableStrings.InstallHelp,
-            AllowMultipleArgumentsPerToken = true,
+            Arity = new ArgumentArity(0, 1)
         };
 
-        private static Option<bool> InteractiveOption { get; } = new("--interactive")
+        private static Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
         {
-            Description = "When downloading enable NuGet interactive."
+            Arity = new ArgumentArity(0, 999)
         };
 
-        private static Option<IReadOnlyList<string>> AddSourceOption { get; } = new(new[] { "--add-source", "--nuget-source" })
-        {
-            Description = "Add NuGet source when looking for package.",
-            AllowMultipleArgumentsPerToken = true,
-        };
+        private static Option<bool> HelpOption { get; } = new Option<bool>(new string[] { "-h", "--help", "-?" });
 
         internal static void AddToCommand(Command command)
         {
-            command.AddOption(InstallOption);
-            command.AddOption(InteractiveOption);
-            command.AddOption(AddSourceOption);
+            ShortNameArgument.AddSuggestions((parseResult, textToMatch) =>
+            {
+                // get list of all short names
+                return Array.Empty<string>();
+            });
+
+            RemainingArguments.AddSuggestions((parseResult, textToMatch) =>
+            {
+                //decide if we do it here or in child class
+                var shortName = parseResult?.ValueForArgument(ShortNameArgument);
+                return Array.Empty<string>();
+            });
+
+            command.AddArgument(ShortNameArgument);
+            command.AddArgument(RemainingArguments);
+            LegacyInstallCommandArgs.AddOptionsToCommand(command);
+            command.AddOption(HelpOption);
         }
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class SearchCommand : BaseCommand<SearchCommandArgs>
+    internal class SearchCommand : BaseCommandHandler<SearchCommandArgs>
     {
         internal SearchCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
 

@@ -185,7 +185,9 @@ namespace Microsoft.TemplateEngine.Cli
         [Obsolete]
         private Task<New3CommandStatus> EnterInstallFlowAsync(INewCommandInput args, CancellationToken cancellationToken)
         {
-            return EnterInstallFlowAsync(new InstallCommandArgs(args), cancellationToken);
+            return Task.FromResult(New3CommandStatus.Cancelled);
+
+            //return EnterInstallFlowAsync(new InstallCommandArgs(args), cancellationToken);
         }
 
         /// <summary>
