@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli
 
             var result = Parser.Instance.Parse(input);
 
-            return result.GetSuggestions()
+            return result.GetSuggestions(position)
                 .Distinct()
                 .ToArray();
         }
