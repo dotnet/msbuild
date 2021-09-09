@@ -1,7 +1,6 @@
 setTimeout(async function () {
   // dotnet-watch browser reload script
   const webSocketUrls = '{{hostString}}'.split(',');
-  const sharedSecret = await getSecret('{{ServerKey}}');
   let connection;
   for (const url of webSocketUrls) {
     try {
@@ -36,7 +35,7 @@ setTimeout(async function () {
       const payload = JSON.parse(message.data);
       const action = {
         'UpdateStaticFile': () => updateStaticFile(payload.path),
-        'BlazorHotReloadDeltav1': () => applyBlazorDeltas(payload.sharedSecret, payload.deltas),
+        'BlazorHotReloadDeltav1': () => applyBlazorDeltas(payload.deltas),
         'HotReloadDiagnosticsv1': () => displayDiagnostics(payload.diagnostics),
         'BlazorRequestApplyUpdateCapabilities': getBlazorWasmApplyUpdateCapabilities,
         'AspNetCoreHotReloadApplied': () => aspnetCoreHotReloadApplied()
