@@ -705,12 +705,6 @@ Build
                 flags |= BuildEventArgsFieldFlags.SenderName;
             }
 
-            // ThreadId never seems to be used or useful for anything.
-            //if (e.ThreadId > 0)
-            //{
-            //    flags |= BuildEventArgsFieldFlags.ThreadId;
-            //}
-
             if (e.Timestamp != default(DateTime))
             {
                 flags |= BuildEventArgsFieldFlags.Timestamp;
