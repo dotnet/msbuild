@@ -223,7 +223,7 @@ setTimeout(async function () {
   function getWebSocket(url) {
     return new Promise((resolve, reject) => {
       const encryptedSecret = sharedSecret && sharedSecret.encryptedSharedSecret;
-      const protocol = encryptedSecret ? encodeURIComponent(encryptedSecret) : null;
+      const protocol = encryptedSecret ? encodeURIComponent(encryptedSecret) : [];
       const webSocket = new WebSocket(url, protocol);
       let opened = false;
 
