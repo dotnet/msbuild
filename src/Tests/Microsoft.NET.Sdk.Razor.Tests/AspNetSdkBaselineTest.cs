@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.NET.TestFramework;
@@ -20,6 +21,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
     public class AspNetSdkBaselineTest : AspNetSdkTest
     {
         private static readonly JsonSerializerOptions BaselineSerializationOptions = new() { WriteIndented = true };
+        protected static readonly string DotNetJSHashRegexPattern = "\\.[a-z0-9]{10}\\.js";
 
         private string _baselinesFolder;
 
@@ -291,7 +293,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         {
             foreach (var f in files)
             {
-                var updated = f.Replace(restorePath, "${RestorePath}")
+                var updated = Regex.Replace(f, DotNetJSHashRegexPattern, ".[[hash]].js");
+                updated = updated.Replace(restorePath, "${RestorePath}")
                     .Replace(RuntimeVersion, "${RuntimeVersion}")
                     .Replace(DefaultPackageVersion, "${PackageVersion}")
                     .Replace(buildOrPublishFolder, "${OutputPath}")
@@ -464,6 +467,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 asset.Identity = TemplatizeRestorePath(restorePath, asset.Identity);
                 asset.Identity = PathTemplatizer(asset, asset.Identity, null) ?? asset.Identity;
 
+                asset.RelativePath = Regex.Replace(asset.RelativePath, DotNetJSHashRegexPattern, ".[[hash]].js");
                 asset.RelativePath = asset.RelativePath.Replace(RuntimeVersion, "${RuntimeVersion}");
 
                 asset.ContentRoot = asset.ContentRoot.Replace(projectRoot, "${ProjectRoot}");
@@ -484,6 +488,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 for (var i = 0; i < segments.Length; i++)
                 {
                     ref var segment = ref segments[i];
+                    segment = Regex.Replace(segment, DotNetJSHashRegexPattern, ".[[hash]].js");
                     if (segment.Contains(RuntimeVersion))
                     {
                         segment = segment.Replace(RuntimeVersion, "${RuntimeVersion}");
