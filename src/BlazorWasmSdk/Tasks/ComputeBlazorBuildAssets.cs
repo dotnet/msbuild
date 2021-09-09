@@ -46,6 +46,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         [Required]
         public string BundledNETCoreAppPackageVersion { get; set; }
 
+        [Required]
+        public string IntermediateOutputPath { get; set; }        
+
         [Output]
         public ITaskItem[] AssetCandidates { get; set; }
 
@@ -108,6 +111,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         candidate.SetMetadata("RelativePath", $"_framework/{cacheBustedDotnetJSFileName}.js");
                         candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
                         candidate.SetMetadata("AssetTraitValue", "native");
+                        candidate.SetMetadata("ContentRoot", Path.Combine(IntermediateOutputPath, "blazor"));
                     }
                     else if (string.IsNullOrEmpty(destinationSubPath))
                     {
