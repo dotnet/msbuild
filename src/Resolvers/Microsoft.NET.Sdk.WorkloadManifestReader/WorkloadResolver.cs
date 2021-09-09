@@ -9,6 +9,9 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.NET.Sdk.Localization;
 using FXVersion = Microsoft.DotNet.MSBuildSdkResolver.FXVersion;
+#if USE_SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#endif
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -610,6 +613,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             /// <summary>
             /// The workload pack ID. The NuGet package ID <see cref="ResolvedPackageId"/> may differ from this.
             /// </summary>
+#if USE_SYSTEM_TEXT_JSON
+            [JsonConverter(typeof(PackIdJsonConverter))]
+#endif
             public WorkloadPackId Id { get; }
 
             public string Version { get; }
