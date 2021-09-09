@@ -42,6 +42,13 @@ namespace Microsoft.Build.Evaluation
         private static readonly char[] s_separatorForExtensionsPathSearchPaths = MSBuildConstants.SemicolonChar;
 
         /// <summary>
+        /// Caching MSBuild exe configuration.
+        /// Used only by ReadApplicationConfiguration factory function (default) as oppose to unit tests config factory functions
+        /// which must not cache configs.
+        /// </summary>
+        private static readonly Lazy<Configuration> s_configurationCache = new Lazy<Configuration>(ReadOpenMappedExeConfiguration);
+
+        /// <summary>
         /// Cached values of tools version -> project import search paths table
         /// </summary>
         private readonly Dictionary<string, Dictionary<string, ProjectImportPathMatch>> _projectImportSearchPathsCache;
@@ -250,6 +257,18 @@ namespace Microsoft.Build.Evaluation
         /// Unit tests wish to avoid reading (nunit.exe) application configuration file.
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
+        {
+            if (Environment.GetEnvironmentVariable("MSBUILDCACHETOOLSETCONFIGURATION") != "0")
+            {
+                return s_configurationCache.Value;
+            }
+            else
+            {
+                return ReadOpenMappedExeConfiguration();
+            }
+        }
+
+        private static Configuration ReadOpenMappedExeConfiguration()
         {
             // When running from the command-line or from VS, use the msbuild.exe.config file.
             if (BuildEnvironmentHelper.Instance.Mode != BuildEnvironmentMode.None &&
