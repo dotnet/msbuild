@@ -34,6 +34,23 @@
       "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\[[CustomPackageVersion]]\\build\\net5.0\\blazor.webassembly.js"
     },
     {
+      "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
+      "SourceId": "blazorwasm-minimal",
+      "SourceType": "Computed",
+      "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "_framework/dotnet.${RuntimeVersion}.[[hash]].js",
+      "AssetKind": "Publish",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitValue": "native",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js"
+    },
+    {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.timezones.blat",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
@@ -153,23 +170,6 @@
       "OriginalItemSpec": "obj\\Debug\\net6.0\\blazor.publish.boot.json"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js",
-      "SourceId": "blazorwasm-minimal",
-      "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
-      "BasePath": "/",
-      "RelativePath": "_framework/dotnet.${RuntimeVersion}.js",
-      "AssetKind": "Publish",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
-      "AssetTraitValue": "native",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js"
-    },
-    {
       "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/blazor.webassembly.js.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
@@ -202,23 +202,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework\\[[_framework/blazorwasm-minimal.pdb.gz]]"
-    },
-    {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.${RuntimeVersion}.js.gz]]",
-      "SourceId": "blazorwasm-minimal",
-      "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
-      "BasePath": "/",
-      "RelativePath": "_framework/dotnet.${RuntimeVersion}.js.gz",
-      "AssetKind": "Publish",
-      "AssetMode": "All",
-      "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js",
-      "AssetTraitName": "Content-Encoding",
-      "AssetTraitValue": "gzip",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework\\[[_framework/dotnet.${RuntimeVersion}.js.gz]]"
     },
     {
       "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.wasm.gz]]",
@@ -2465,21 +2448,38 @@
       "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\linked\\blazorwasm-minimal.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.${RuntimeVersion}.js.br]]",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.${RuntimeVersion}.[[hash]].js.br]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
       "BasePath": "/",
-      "RelativePath": "_framework/dotnet.${RuntimeVersion}.js.br",
+      "RelativePath": "_framework/dotnet.${RuntimeVersion}.[[hash]].js.br",
       "AssetKind": "Publish",
       "AssetMode": "All",
       "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js",
+      "RelatedAsset": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "br",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js"
+      "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js"
+    },
+    {
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz]]",
+      "SourceId": "blazorwasm-minimal",
+      "SourceType": "Computed",
+      "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz",
+      "AssetKind": "Publish",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "RelatedAsset": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js"
     },
     {
       "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.timezones.blat.br]]",

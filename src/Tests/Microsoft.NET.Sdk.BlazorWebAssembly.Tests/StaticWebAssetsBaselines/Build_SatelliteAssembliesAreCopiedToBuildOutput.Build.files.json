@@ -402,7 +402,6 @@
   "${OutputPath}\\wwwroot\\_framework\\de\\Microsoft.CodeAnalysis.resources.dll.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js.gz",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.js",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.wasm",

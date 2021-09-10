@@ -102,11 +102,25 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     var destinationSubPath = candidate.GetMetadata("DestinationSubPath");
                     if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
                     {
-                        var dotNetVersion = BundledNETCoreAppPackageVersion;
                         var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
-                        candidate.SetMetadata("RelativePath", $"_framework/dotnet.{dotNetVersion}.{itemHash}.js");
-                        candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
-                        candidate.SetMetadata("AssetTraitValue", "native");
+                        var cacheBustedDotNetJSFileName = $"dotnet.{BundledNETCoreAppPackageVersion}.{itemHash}.js";
+
+                        var originalFileFullPath = Path.GetFullPath(candidate.ItemSpec);
+                        var originalFileDirectory = Path.GetDirectoryName(originalFileFullPath);
+
+                        var cacheBustedDotNetJSFullPath = Path.Combine(originalFileDirectory, cacheBustedDotNetJSFileName);
+
+                        var newDotNetJs = new TaskItem(cacheBustedDotNetJSFullPath, candidate.CloneCustomMetadata());
+                        newDotNetJs.SetMetadata("OriginalItemSpec", candidate.ItemSpec);
+
+                        var newRelativePath = $"_framework/{cacheBustedDotNetJSFileName}";
+                        newDotNetJs.SetMetadata("RelativePath", newRelativePath);
+
+                        newDotNetJs.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                        newDotNetJs.SetMetadata("AssetTraitValue", "native");
+
+                        assetCandidates.Add(newDotNetJs);
+                        continue;
                     }
                     else if (string.IsNullOrEmpty(destinationSubPath))
                     {

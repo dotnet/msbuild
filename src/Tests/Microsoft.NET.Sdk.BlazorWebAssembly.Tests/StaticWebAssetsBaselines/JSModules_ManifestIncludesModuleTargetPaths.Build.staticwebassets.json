@@ -3345,7 +3345,7 @@
       "OriginalItemSpec": "obj\\Debug\\net6.0\\blazorwasm.pdb"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.js",
+      "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6771,12 +6771,12 @@
       "AssetKind": "Build",
       "AssetMode": "All",
       "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.js",
+      "RelatedAsset": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.js"
+      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js"
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.timezones.blat.gz]]",

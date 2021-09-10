@@ -195,11 +195,18 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     ITaskItem newDotNetJs = null;
                     if (aotDotNetJs != null)
                     {
-                        newDotNetJs = new TaskItem(Path.GetFullPath(aotDotNetJs.ItemSpec), asset.CloneCustomMetadata());
+                        var itemHash = FileHasher.GetFileHash(aotDotNetJs.ItemSpec);
+                        var cacheBustedDotNetJSFileName = $"dotnet.{BundledNETCoreAppPackageVersion}.{itemHash}.js";
+
+                        var originalFileFullPath = Path.GetFullPath(aotDotNetJs.ItemSpec);
+                        var originalFileDirectory = Path.GetDirectoryName(originalFileFullPath);
+
+                        var cacheBustedDotNetJSFullPath = Path.Combine(originalFileDirectory, cacheBustedDotNetJSFileName);
+
+                        newDotNetJs = new TaskItem(cacheBustedDotNetJSFullPath, asset.CloneCustomMetadata());
                         newDotNetJs.SetMetadata("OriginalItemSpec", aotDotNetJs.ItemSpec);
 
-                        var itemHash = FileHasher.GetFileHash(aotDotNetJs.ItemSpec);
-                        var newRelativePath = $"dotnet.{BundledNETCoreAppPackageVersion}.{itemHash}.js";
+                        var newRelativePath = $"_framework/{cacheBustedDotNetJSFileName}";
                         newDotNetJs.SetMetadata("RelativePath", newRelativePath);
 
                         updateMap.Add(asset.ItemSpec, newDotNetJs);
