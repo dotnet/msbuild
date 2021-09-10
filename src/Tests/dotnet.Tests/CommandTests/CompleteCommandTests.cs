@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
@@ -306,6 +307,45 @@ namespace Microsoft.DotNet.Tests.Commands
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget sign " }, reporter).Should().Be(0);
             reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        [Fact]
+        public void GivenDotnetAddPackWithPosition()
+        {
+            var expected = new[] {
+                "package"
+            };
+
+            var reporter = new BufferedReporter();
+            CompleteCommand.RunWithReporter(GetArguments("dotnet add pack$ abc"), reporter).Should().Be(0);
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        [Fact]
+        public void GivenDotnetToolInWithPosition()
+        {
+            var expected = new[] {
+                "install",
+                "uninstall",
+                "--info"
+            };
+
+            var reporter = new BufferedReporter();
+            CompleteCommand.RunWithReporter(GetArguments("dotnet tool in$ abc"), reporter).Should().Be(0);
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        /// <summary>
+        /// Converts command annotated with dollar sign($) into string array with "--position" option pointing at dollar sign location.
+        /// </summary>
+        private string[] GetArguments(string command)
+        {
+            var indexOfDollar = command.IndexOf("$");
+            if (indexOfDollar == -1)
+            {
+                throw new ArgumentException("Does not contain $", nameof(command));
+            }
+            return new[] { command.Replace("$", ""), "--position", indexOfDollar.ToString() };
         }
     }
 }
