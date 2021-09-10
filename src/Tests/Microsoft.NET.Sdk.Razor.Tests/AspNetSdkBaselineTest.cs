@@ -186,6 +186,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
                 var existingFiles = wwwRootFiles.Concat(computedFiles.Select(a => PathTemplatizer(a, a.Identity, null) ?? a.Identity)).Concat(copyToOutputDirectoryFiles)
                     .Distinct()
+                    .Select(f => Regex.Replace(f, DotNetJSHashRegexPattern, DotNetJSHashTemplate))
                     .OrderBy(f => f, StringComparer.Ordinal)
                     .ToArray();
 
