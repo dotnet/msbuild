@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.NET.TestFramework;
@@ -20,6 +21,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
     public class AspNetSdkBaselineTest : AspNetSdkTest
     {
         private static readonly JsonSerializerOptions BaselineSerializationOptions = new() { WriteIndented = true };
+        protected static readonly string DotNetJSHashRegexPattern = "\\.[a-z0-9]{10}\\.js";
+        protected static readonly string DotNetJSHashTemplate = ".[[hash]].js";
 
         private string _baselinesFolder;
 
@@ -101,12 +104,21 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             for (int i = 0; i < assets.Length; i++)
             {
                 var asset = assets[i];
+                RemoveHashFromAsset(asset);
                 var relatedAsset = string.IsNullOrEmpty(asset.RelatedAsset) || !assetsById.TryGetValue(asset.RelatedAsset, out var related) ?
                     null : related;
                 asset.Identity = PathTemplatizer(asset, asset.Identity, null) ?? asset.Identity;
                 asset.RelatedAsset = PathTemplatizer(asset, asset.RelatedAsset, relatedAsset) ?? asset.RelatedAsset;
                 asset.OriginalItemSpec = PathTemplatizer(asset, asset.OriginalItemSpec, null) ?? asset.OriginalItemSpec;
             }
+        }
+
+        private void RemoveHashFromAsset(StaticWebAsset asset)
+        {
+            asset.RelativePath = Regex.Replace(asset.RelativePath, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
+            asset.Identity = Regex.Replace(asset.Identity, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
+            asset.OriginalItemSpec = Regex.Replace(asset.OriginalItemSpec, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
+            asset.RelatedAsset = Regex.Replace(asset.RelatedAsset, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
         }
 
         private void UpdateCustomPackageVersions(string restorePath, StaticWebAssetsManifest manifest)
@@ -174,6 +186,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
                 var existingFiles = wwwRootFiles.Concat(computedFiles.Select(a => PathTemplatizer(a, a.Identity, null) ?? a.Identity)).Concat(copyToOutputDirectoryFiles)
                     .Distinct()
+                    .Select(f => Regex.Replace(f, DotNetJSHashRegexPattern, DotNetJSHashTemplate))
                     .OrderBy(f => f, StringComparer.Ordinal)
                     .ToArray();
 
@@ -234,6 +247,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             if (!_generateBaselines)
             {
+                existingFiles = existingFiles.Select(f => Regex.Replace(f, DotNetJSHashRegexPattern, DotNetJSHashTemplate)).ToArray();
+
                 var expected = LoadExpectedFilesBaseline(manifest.ManifestType, publishFolder, intermediateOutputPath, suffix, name);
                 existingFiles.ShouldBeEquivalentTo(expected);
             }
@@ -291,7 +306,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         {
             foreach (var f in files)
             {
-                var updated = f.Replace(restorePath, "${RestorePath}")
+                var updated = Regex.Replace(f, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
+                updated = updated.Replace(restorePath, "${RestorePath}")
                     .Replace(RuntimeVersion, "${RuntimeVersion}")
                     .Replace(DefaultPackageVersion, "${PackageVersion}")
                     .Replace(buildOrPublishFolder, "${OutputPath}")
@@ -464,6 +480,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 asset.Identity = TemplatizeRestorePath(restorePath, asset.Identity);
                 asset.Identity = PathTemplatizer(asset, asset.Identity, null) ?? asset.Identity;
 
+                asset.RelativePath = Regex.Replace(asset.RelativePath, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
                 asset.RelativePath = asset.RelativePath.Replace(RuntimeVersion, "${RuntimeVersion}");
 
                 asset.ContentRoot = asset.ContentRoot.Replace(projectRoot, "${ProjectRoot}");
@@ -484,6 +501,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 for (var i = 0; i < segments.Length; i++)
                 {
                     ref var segment = ref segments[i];
+                    segment = Regex.Replace(segment, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
                     if (segment.Contains(RuntimeVersion))
                     {
                         segment = segment.Replace(RuntimeVersion, "${RuntimeVersion}");

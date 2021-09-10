@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -49,6 +50,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         [Required]
         public string PublishPath { get; set; }
+
+        [Required]
+        public string BundledNETCoreAppPackageVersion { get; set; }
 
         [Output]
         public ITaskItem[] NewCandidates { get; set; }
@@ -191,8 +195,20 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     ITaskItem newDotNetJs = null;
                     if (aotDotNetJs != null)
                     {
-                        newDotNetJs = new TaskItem(Path.GetFullPath(aotDotNetJs.ItemSpec), asset.CloneCustomMetadata());
+                        var itemHash = FileHasher.GetFileHash(aotDotNetJs.ItemSpec);
+                        var cacheBustedDotNetJSFileName = $"dotnet.{BundledNETCoreAppPackageVersion}.{itemHash}.js";
+
+                        var originalFileFullPath = Path.GetFullPath(aotDotNetJs.ItemSpec);
+                        var originalFileDirectory = Path.GetDirectoryName(originalFileFullPath);
+
+                        var cacheBustedDotNetJSFullPath = Path.Combine(originalFileDirectory, cacheBustedDotNetJSFileName);
+
+                        newDotNetJs = new TaskItem(cacheBustedDotNetJSFullPath, asset.CloneCustomMetadata());
                         newDotNetJs.SetMetadata("OriginalItemSpec", aotDotNetJs.ItemSpec);
+
+                        var newRelativePath = $"_framework/{cacheBustedDotNetJSFileName}";
+                        newDotNetJs.SetMetadata("RelativePath", newRelativePath);
+
                         updateMap.Add(asset.ItemSpec, newDotNetJs);
                         Log.LogMessage("Replacing asset '{0}' with linked version '{1}'", asset.ItemSpec, newDotNetJs.ItemSpec);
                     }

@@ -39,3 +39,6 @@ cmake/
 
 # Helix payload
 .dotnet.payload
+
+# MSBuild Logs
+**/MSBuild_Logs/MSBuild_pid-*.failure.txt
