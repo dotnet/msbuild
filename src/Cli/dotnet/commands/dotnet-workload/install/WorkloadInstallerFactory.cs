@@ -27,9 +27,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             RestoreActionConfig restoreActionConfig = null, 
             bool elevationRequired = true)
         {
-            var installType = GetWorkloadInstallType(sdkFeatureBand, string.IsNullOrWhiteSpace(dotnetDir) 
-                ? Path.GetDirectoryName(Environment.ProcessPath)
-                : dotnetDir);
+            dotnetDir = string.IsNullOrWhiteSpace(dotnetDir) ? Path.GetDirectoryName(Environment.ProcessPath) : dotnetDir;
+            var installType = GetWorkloadInstallType(sdkFeatureBand, dotnetDir);
 
             if (installType == InstallType.Msi)
             {
