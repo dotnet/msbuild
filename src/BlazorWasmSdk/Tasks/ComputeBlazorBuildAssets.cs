@@ -104,8 +104,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     {
                         var dotNetVersion = BundledNETCoreAppPackageVersion;
                         var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
-                        var cacheBustedDotnetJSFileName = $"dotnet.{dotNetVersion}.{itemHash}";
-                        candidate.SetMetadata("RelativePath", $"_framework/{cacheBustedDotnetJSFileName}.js");
+                        candidate.SetMetadata("RelativePath", $"_framework/dotnet.{dotNetVersion}.{itemHash}.js");
                         candidate.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
                         candidate.SetMetadata("AssetTraitValue", "native");
                     }
