@@ -1,12 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.Versioning;
-using Microsoft.Management.Infrastructure;
+using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -36,27 +33,18 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         /// <param name="process">The process component.</param>
         /// <returns>The process ID of the parent process, or -1 if the parent process could not be found.</returns>
-        public static int GetParentProcessId(this Process process)
+        public unsafe static int GetParentProcessId(this Process process)
         {
-            CimSession cimSession = CimSession.Create(null);
-            IEnumerable<CimInstance> results = cimSession.QueryInstances(@"root\cimv2", "WQL",
-                $"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId='{process.Id}'");
+            SafeProcessHandle handle = process.SafeHandle;
+            NativeMethods.Windows.PROCESS_BASIC_INFORMATION info;
 
-            return results.Any() ? Convert.ToInt32(results.First().CimInstanceProperties["ParentProcessId"].Value) : -1;
-        }
+            if (NativeMethods.Windows.NtQueryInformationProcess(handle, NativeMethods.Windows.ProcessBasicInformation,
+                &info, (uint)sizeof(NativeMethods.Windows.PROCESS_BASIC_INFORMATION), out _) != 0)
+            {
+                return -1;
+            }
 
-        /// <summary>
-        /// Returns the command line of this process by querying the Win32_Process class.
-        /// </summary>
-        /// <param name="process">The process component.</param>
-        /// <returns>The command line of the process or <see langword="null"/> if it could not be retrieved.</returns>
-        public static string GetCommandLine(this Process process)
-        {
-            CimSession cimSession = CimSession.Create(null);
-            IEnumerable<CimInstance> results = cimSession.QueryInstances(@"root\cimv2", "WQL",
-                $"SELECT CommandLine FROM Win32_Process WHERE ProcessId='{process.Id}'");
-
-            return results.Any() ? Convert.ToString(results.First().CimInstanceProperties["CommandLine"].Value) : null;
+            return (int)info.InheritedFromUniqueProcessId;
         }
 #pragma warning restore CA1416
     }

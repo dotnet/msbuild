@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
@@ -12,6 +13,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     public class ElementMapper<T>
     {
         private IReadOnlyList<IEnumerable<CompatDifference>> _differences;
+        protected IList<CompatDifference>[] _assemblyLoadErrors;
 
         /// <summary>
         /// Property representing the Left hand side of the mapping.
@@ -40,6 +42,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));
             Right = new T[rightSetSize];
+            _assemblyLoadErrors = new IList<CompatDifference>[rightSetSize];
+            for (int i = 0; i < rightSetSize; i++)
+                _assemblyLoadErrors[i] = new List<CompatDifference>();
         }
 
         /// <summary>
@@ -80,6 +85,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         {
             return _differences ??= Settings.RuleRunnerFactory.GetRuleRunner().Run(this);
         }
+
+        /// <summary>
+        /// Gets the assembly load errors that happened when trying to follow type forwards.
+        /// </summary>
+        /// <returns>A list containing the assembly load errors that ocurred when following type forwards.</returns>
+        public IList<CompatDifference>[] GetAssemblyLoadErrors() => _assemblyLoadErrors;
 
         internal T GetElement(ElementSide side, int setIndex)
         {

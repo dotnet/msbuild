@@ -55,6 +55,19 @@ namespace Microsoft.DotNet.Cli.Utils
                 public UIntPtr PeakJobMemoryUsed;
             }
 
+            internal const int ProcessBasicInformation = 0;
+
+            [StructLayout(LayoutKind.Sequential)]
+            internal struct PROCESS_BASIC_INFORMATION
+            {
+                public uint ExitStatus;
+                public IntPtr PebBaseAddress;
+                public UIntPtr AffinityMask;
+                public int BasePriority;
+                public UIntPtr UniqueProcessId;
+                public UIntPtr InheritedFromUniqueProcessId;
+            }
+
             [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
             internal static extern SafeWaitHandle CreateJobObjectW(IntPtr lpJobAttributes, string lpName);
 
@@ -63,6 +76,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
             [DllImport("kernel32.dll", SetLastError = true)]
             internal static extern bool AssignProcessToJobObject(IntPtr hJob, IntPtr hProcess);
+
+            [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+            [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+            internal static extern IntPtr GetCommandLine();
+
+            [DllImport("ntdll.dll", SetLastError = true)]
+            [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+            internal static extern unsafe uint NtQueryInformationProcess(SafeProcessHandle ProcessHandle, int ProcessInformationClass, void* ProcessInformation, uint ProcessInformationLength, out uint ReturnLength);
         }
 
         internal static class Posix

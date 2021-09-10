@@ -38,6 +38,11 @@ namespace Microsoft.DotNet.ApiCompatibility
         public bool StrictMode { get; set; }
 
         /// <summary>
+        /// Flag indicating whether the ApiComparison will warn if there are missing references
+        /// </summary>
+        public bool WarnOnMissingReferences { get; set; }
+
+        /// <summary>
         /// Callback function to get the <see cref="ComparingSettings"/> to be used when creating the settings to get the differences.
         /// The callback takes a string leftName and string[] rightNames parameters to indicate API Compat via the settings what the 
         /// name for the left and right the user specified.
@@ -160,7 +165,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             if (GetComparingSettings != null)
                 return GetComparingSettings(leftName, rightNames);
 
-            return new ComparingSettings(includeInternalSymbols: IncludeInternalSymbols, strictMode: StrictMode, leftName: leftName, rightNames: rightNames);
+            return new ComparingSettings(includeInternalSymbols: IncludeInternalSymbols, strictMode: StrictMode, leftName: leftName, rightNames: rightNames, warnOnMissingReferences: WarnOnMissingReferences);
         }
     }
 }
