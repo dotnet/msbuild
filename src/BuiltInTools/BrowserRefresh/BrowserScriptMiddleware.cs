@@ -2,106 +2,65 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Watch.BrowserRefresh
 {
-    public class BrowserRefreshMiddleware
+    /// <summary>
+    /// Responds with the contents of WebSocketScriptInjection.js with the stub WebSocket url replaced by the
+    /// one specified by the launching app.
+    /// </summary>
+    public sealed class BrowserScriptMiddleware
     {
-        private static readonly MediaTypeHeaderValue _textHtmlMediaType = new MediaTypeHeaderValue("text/html");
-        private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
+        private readonly byte[] _scriptBytes;
+        private readonly string _contentLength;
 
-        public BrowserRefreshMiddleware(RequestDelegate next, ILogger<BrowserRefreshMiddleware> logger) =>
-            (_next, _logger) = (next, logger);
+        public BrowserScriptMiddleware(RequestDelegate next, byte[] scriptBytes)
+        {
+            _scriptBytes = scriptBytes;
+            _contentLength = _scriptBytes.Length.ToString(CultureInfo.InvariantCulture);
+        }
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // We only need to support this for requests that could be initiated by a browser.
-            if (IsBrowserRequest(context))
-            {
-                // Use a custom StreamWrapper to rewrite output on Write/WriteAsync
-                using var responseStreamWrapper = new ResponseStreamWrapper(context, _logger);
-                var originalBodyFeature = context.Features.Get<IHttpResponseBodyFeature>();
-                context.Features.Set<IHttpResponseBodyFeature>(new StreamResponseBodyFeature(responseStreamWrapper));
+            context.Response.Headers["Cache-Control"] = "no-store";
+            context.Response.Headers["Content-Length"] = _contentLength;
+            context.Response.Headers["Content-Type"] = "application/javascript; charset=utf-8";
 
-                try
-                {
-                    await _next(context);
-                }
-                finally
-                {
-                    context.Features.Set(originalBodyFeature);
-                }
-
-                if (responseStreamWrapper.IsHtmlResponse && _logger.IsEnabled(LogLevel.Debug))
-                {
-                    if (responseStreamWrapper.ScriptInjectionPerformed)
-                    {
-                        Log.BrowserConfiguredForRefreshes(_logger);
-                    }
-                    else
-                    {
-                        Log.FailedToConfiguredForRefreshes(_logger);
-                    }
-                }
-            }
-            else
-            {
-                await _next(context);
-            }
+            await context.Response.Body.WriteAsync(_scriptBytes.AsMemory(), context.RequestAborted);
         }
 
-        internal static bool IsBrowserRequest(HttpContext context)
+        internal static byte[] GetBlazorHotReloadJS()
         {
-            var request = context.Request;
-            if (!HttpMethods.IsGet(request.Method) && !HttpMethods.IsPost(request.Method))
-            {
-                return false;
-            }
+            var jsFileName = "Microsoft.AspNetCore.Watch.BrowserRefresh.BlazorHotReload.js";
+            using var stream = new MemoryStream();
+            var manifestStream = typeof(WebSocketScriptInjection).Assembly.GetManifestResourceStream(jsFileName)!;
+            manifestStream.CopyTo(stream);
 
-            var typedHeaders = request.GetTypedHeaders();
-            if (!(typedHeaders.Accept is IList<MediaTypeHeaderValue> acceptHeaders))
-            {
-                return false;
-            }
-
-            for (var i = 0; i < acceptHeaders.Count; i++)
-            {
-                if (acceptHeaders[i].IsSubsetOf(_textHtmlMediaType))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return stream.ToArray();
         }
 
-        internal static class Log
+        internal static byte[] GetBrowserRefreshJS()
         {
-            private static readonly Action<ILogger, Exception?> _setupResponseForBrowserRefresh = LoggerMessage.Define(
-               LogLevel.Debug,
-                new EventId(1, "SetUpResponseForBrowserRefresh"),
-               "Response markup is scheduled to include browser refresh script injection.");
+            var endpoint = Environment.GetEnvironmentVariable("ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT")!;
+            var serverKey = Environment.GetEnvironmentVariable("ASPNETCORE_AUTO_RELOAD_WS_KEY") ?? string.Empty;
 
-            private static readonly Action<ILogger, Exception?> _browserConfiguredForRefreshes = LoggerMessage.Define(
-               LogLevel.Debug,
-                new EventId(2, "BrowserConfiguredForRefreshes"),
-               "Response markup was updated to include browser refresh script injection.");
+            return GetWebSocketClientJavaScript(endpoint, serverKey);
+        }
 
-            private static readonly Action<ILogger, Exception?> _failedToConfigureForRefreshes = LoggerMessage.Define(
-               LogLevel.Debug,
-                new EventId(3, "FailedToConfiguredForRefreshes"),
-               "Unable to configure browser refresh script injection on the response.");
+        internal static byte[] GetWebSocketClientJavaScript(string hostString, string serverKey)
+        {
+            var jsFileName = "Microsoft.AspNetCore.Watch.BrowserRefresh.WebSocketScriptInjection.js";
+            using var reader = new StreamReader(typeof(WebSocketScriptInjection).Assembly.GetManifestResourceStream(jsFileName)!);
+            var script = reader.ReadToEnd()
+                .Replace("{{hostString}}", hostString)
+                .Replace("{{ServerKey}}", serverKey);
 
-            public static void SetupResponseForBrowserRefresh(ILogger logger) => _setupResponseForBrowserRefresh(logger, null);
-            public static void BrowserConfiguredForRefreshes(ILogger logger) => _browserConfiguredForRefreshes(logger, null);
-            public static void FailedToConfiguredForRefreshes(ILogger logger) => _failedToConfigureForRefreshes(logger, null);
+            return Encoding.UTF8.GetBytes(script);
         }
     }
 }
