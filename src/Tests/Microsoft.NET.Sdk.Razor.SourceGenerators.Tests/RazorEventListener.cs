@@ -11,7 +11,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
     {
         protected override void OnEventSourceCreated(EventSource source)
         {
-            if (source.Name.Equals("Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator"))
+            if (source.Name == "Microsoft-DotNet-SDK-Razor-SourceGenerator")
             {
                 EnableEvents(source, EventLevel.Informational);
             }

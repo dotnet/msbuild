@@ -353,7 +353,7 @@ public class Person
 @code
 {
     private int count;
-    
+
     public void Click() => count++;
 }
 
@@ -435,7 +435,7 @@ public class Person
 @code
 {
     private int count;
-    
+
     public void Click() => count++;
 
     [Parameter] public int IncrementAmount { get; set; }
@@ -521,9 +521,9 @@ public class Person
             Assert.Equal(2, result.GeneratedSources.Length);
 
             eventListener.Events.Clear();
-            
-            var surveryPromptAssembly = GetSurveyPromptMetadataReference(compilation!);
-            compilation = compilation!.AddReferences(surveryPromptAssembly);
+
+            var surveyPromptAssembly = GetSurveyPromptMetadataReference(compilation!);
+            compilation = compilation!.AddReferences(surveyPromptAssembly);
 
             result = RunGenerator(compilation, ref driver);
 
