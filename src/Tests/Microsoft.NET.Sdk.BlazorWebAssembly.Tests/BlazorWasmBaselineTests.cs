@@ -41,7 +41,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             if (GenerateBaselines)
             {
-                result = Regex.Replace(result, DotNetJSHashRegexPattern, ".[[hash]].js");
+                result = Regex.Replace(result, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
                 return result.Replace(RuntimeVersion, "${RuntimeVersion}").Replace(DefaultPackageVersion, "${PackageVersion}");
             }
             else
