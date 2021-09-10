@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 #nullable enable
@@ -54,6 +54,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 var serverUrls = string.Join(',', await _refreshServer.StartAsync(cancellationToken));
                 context.Reporter.Verbose($"Refresh server running at {serverUrls}.");
                 context.ProcessSpec.EnvironmentVariables["ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT"] = serverUrls;
+                context.ProcessSpec.EnvironmentVariables["ASPNETCORE_AUTO_RELOAD_WS_KEY"] = _refreshServer.ServerKey;
 
                 var pathToMiddleware = Path.Combine(AppContext.BaseDirectory, "middleware", "Microsoft.AspNetCore.Watch.BrowserRefresh.dll");
                 context.ProcessSpec.EnvironmentVariables.DotNetStartupHooks.Add(pathToMiddleware);
