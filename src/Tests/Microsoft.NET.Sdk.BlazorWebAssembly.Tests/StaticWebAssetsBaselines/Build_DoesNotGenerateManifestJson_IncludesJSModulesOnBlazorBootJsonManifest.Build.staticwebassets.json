@@ -3264,6 +3264,23 @@
       "OriginalItemSpec": "obj\\Debug\\net6.0\\blazorwasm-minimal.pdb"
     },
     {
+      "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.js",
+      "SourceId": "blazorwasm-minimal",
+      "SourceType": "Computed",
+      "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "_framework/dotnet.${RuntimeVersion}.[[hash]].js",
+      "AssetKind": "Build",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitValue": "native",
+      "CopyToOutputDirectory": "PreserveNewest",
+      "CopyToPublishDirectory": "Never",
+      "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\native\\dotnet.js"
+    },
+    {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.timezones.blat",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
@@ -3398,23 +3415,6 @@
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\lib\\net6.0\\netstandard.dll"
-    },
-    {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js",
-      "SourceId": "blazorwasm-minimal",
-      "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\",
-      "BasePath": "/",
-      "RelativePath": "_framework/dotnet.${RuntimeVersion}.js",
-      "AssetKind": "Build",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
-      "AssetTraitValue": "native",
-      "CopyToOutputDirectory": "PreserveNewest",
-      "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\native\\dotnet.js"
     },
     {
       "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.AspNetCore.Authorization.dll.gz]]",
@@ -6647,21 +6647,21 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazorwasm-minimal.pdb"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.${RuntimeVersion}.js.gz]]",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\",
+      "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
       "BasePath": "/",
-      "RelativePath": "_framework/dotnet.${RuntimeVersion}.js.gz",
+      "RelativePath": "_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz",
       "AssetKind": "Build",
       "AssetMode": "All",
       "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js",
+      "RelatedAsset": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.js",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js"
+      "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.js"
     },
     {
       "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.timezones.blat.gz]]",
