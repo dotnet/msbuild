@@ -69,6 +69,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- We disable the manifest generation because we are going to inline the modules in the blazor.boot.json manifest -->
     <GenerateJSModuleManifest>false</GenerateJSModuleManifest>
 
+    <DisableAutoWasmBuildApp>true</DisableAutoWasmBuildApp>
+    <DisableAutoWasmPublishApp>true</DisableAutoWasmPublishApp>
+    <EnableDefaultWasmAssembliesToBundle>false</EnableDefaultWasmAssembliesToBundle>
+    <WasmNestedPublishAppDependsOn>ComputeFilesToPublish;_GatherWasmFilesToPublish;$(WasmNestedPublishAppDependsOn)</WasmNestedPublishAppDependsOn>
+    <_ScrambleDotnetJsFileNameAfterThisTarget Condition="'$(UsingBrowserRuntimeWorkload)' != 'true'">ResolveRuntimePackAssets</_ScrambleDotnetJsFileNameAfterThisTarget>
+    <_ScrambleDotnetJsFileNameAfterThisTarget Condition="'$(UsingBrowserRuntimeWorkload)' == 'true'">WasmBuildApp</_ScrambleDotnetJsFileNameAfterThisTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -105,7 +111,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="Microsoft.NET.Sdk.BlazorWebAssembly.ServiceWorkerAssetsManifest.targets" Condition="'$(ServiceWorkerAssetsManifest)' != ''" />
 
-  <Target Name="_ScrambleDotnetJsFileName" AfterTargets="ResolveRuntimePackAssets">
+  <Target Name="_ScrambleDotnetJsFileNameForPublish">
     <!--
       We want the dotnet.js file output to have a version to better work with caching. We'll append the runtime version to the file name as soon as file has been discovered.
     -->
@@ -115,9 +121,72 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_BlazorDotnetJsFileName>dotnet.$(_DotNetJsVersion).js</_BlazorDotnetJsFileName>
     </PropertyGroup>
 
+    <ItemGroup Condition="@(WasmNativeAsset->Count()) != 0">
+      <_DotNetJsItem Remove="@(_DotNetJsItem)" />
+      <_DotNetJsItem Include="@(WasmNativeAsset)" Condition="'%(WasmNativeAsset.FileName)%(WasmNativeAsset.Extension)' == 'dotnet.js'">
+        <RelativePath>_framework/$(_BlazorDotnetJsFileName)</RelativePath>
+        <AssetType>native</AssetType>
+        <CopyLocal>true</CopyLocal>
+      </_DotNetJsItem>
+    </ItemGroup>
+
     <ItemGroup>
+      <_DotnetJsStaticWebAssetCandidate Remove="@(_DotnetJsStaticWebAssetCandidate)" />
+      <_DotnetJsCopyCandidates Remove="@(_DotnetJsCopyCandidates)" />
+    </ItemGroup>
+
+    <DefineStaticWebAssets Condition="'@(_DotNetJsItem->Count())' != '0'"
+      CandidateAssets="@(_DotNetJsItem)"
+      SourceId="$(PackageId)"
+      SourceType="Computed"
+      AssetKind="Build"
+      AssetRole="Primary"
+      AssetTraitName="BlazorWebAssemblyResource"
+      AssetTraitValue="native"
+      CopyToOutputDirectory="PreserveNewest"
+      CopyToPublishDirectory="Never"
+      ContentRoot="$(IntermediateOutputPath)\blazor"
+      BasePath="$(StaticWebAssetBasePath)"
+    >
+      <Output TaskParameter="Assets" ItemName="_DotnetJsStaticWebAssetCandidate" />
+      <Output TaskParameter="CopyCandidates" ItemName="_DotnetJsCopyCandidates" />
+    </DefineStaticWebAssets>
+
+    <Copy
+      SourceFiles="@(_DotnetJsCopyCandidates)"
+      DestinationFiles="@(_DotnetJsCopyCandidates->'%(TargetPath)')"
+      SkipUnchangedFiles="true"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)" />
+
+    <ItemGroup Condition="'@(_DotNetJsItem->Count())' != '0'">
+      <ReferenceCopyLocalPaths Remove="@(_DotNetJsItem)" />
+      <_DotnetJsStaticWebAsset Include="@(_DotnetJsStaticWebAssetCandidate->'%(ContentRoot)_framework\dotnet.js')" />
+      <_BlazorStaticWebAsset Include="@(_DotnetJsStaticWebAsset)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_ScrambleDotnetJsFileName" AfterTargets="$(_ScrambleDotnetJsFileNameAfterThisTarget)">
+    <!--
+      We want the dotnet.js file output to have a version to better work with caching. We'll append the runtime version to the file name as soon as file has been discovered.
+    -->
+    <PropertyGroup>
+      <_DotNetJsVersion>$(BundledNETCoreAppPackageVersion)</_DotNetJsVersion>
+      <_DotNetJsVersion Condition="'$(RuntimeFrameworkVersion)' != ''">$(RuntimeFrameworkVersion)</_DotNetJsVersion>
+      <_BlazorDotnetJsFileName>dotnet.$(_DotNetJsVersion).js</_BlazorDotnetJsFileName>
+    </PropertyGroup>
+
+    <ItemGroup Condition="@(WasmNativeAsset->Count()) == 0">
       <_DotNetJsItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.DestinationSubPath)' == 'dotnet.js' AND '%(ReferenceCopyLocalPaths.AssetType)' == 'native'">
         <RelativePath>_framework/$(_BlazorDotnetJsFileName)</RelativePath>
+      </_DotNetJsItem>
+    </ItemGroup>
+
+    <ItemGroup Condition="@(WasmNativeAsset->Count()) != 0">
+      <_DotNetJsItem Remove="@(_DotNetJsItem)" />
+      <_DotNetJsItem Include="@(WasmNativeAsset)" Condition="'%(WasmNativeAsset.FileName)%(WasmNativeAsset.Extension)' == 'dotnet.js'">
+        <RelativePath>_framework/$(_BlazorDotnetJsFileName)</RelativePath>
+        <AssetType>native</AssetType>
+        <CopyLocal>true</CopyLocal>
       </_DotNetJsItem>
     </ItemGroup>
 
@@ -151,6 +220,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <Target Name="_BlazorWasmNativeForBuild" DependsOnTargets="_GatherWasmFilesToBuild;WasmBuildApp" Condition="'$(UsingBrowserRuntimeWorkload)' == 'true'" />
+
+  <Target Name="_GatherWasmFilesToBuild">
+    <ItemGroup>
+      <WasmAssembliesToBundle Remove="@(WasmAssembliesToBundle)" />
+      <WasmAssembliesToBundle Include="@(ReferenceCopyLocalPaths);@(MainAssembly)" Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.dll'" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="_ResolveBlazorWasmConfiguration">
     <PropertyGroup>
       <_BlazorEnableTimeZoneSupport>$(BlazorEnableTimeZoneSupport)</_BlazorEnableTimeZoneSupport>
@@ -167,7 +245,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
   </Target>
 
-  <Target Name="_ResolveBlazorWasmOutputs" DependsOnTargets="ResolveReferences;PrepareResourceNames;ComputeIntermediateSatelliteAssemblies;_ResolveBlazorWasmConfiguration" BeforeTargets="_RazorPrepareForRun">
+  <Target Name="_ResolveBlazorWasmOutputs" DependsOnTargets="ResolveReferences;PrepareResourceNames;ComputeIntermediateSatelliteAssemblies;_ResolveBlazorWasmConfiguration;_BlazorWasmNativeForBuild" BeforeTargets="_RazorPrepareForRun">
     <ItemGroup>
       <_BlazorJSFile Include="$(BlazorWebAssemblyJSPath)" />
       <_BlazorJSFile Include="$(BlazorWebAssemblyJSMapPath)" Condition="Exists('$(BlazorWebAssemblyJSMapPath)')" />
@@ -183,10 +261,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <_BlazorConfigFileCandidates Include="@(StaticWebAsset)" Condition="'%(SourceType)' == 'Discovered'" />
 
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
+                               Condition="@(WasmNativeAsset->Count()) > 0 and '%(FileName)' == 'dotnet' and ('%(Extension)' == '.wasm' or '%(Extension)' == '.js')" />
     </ItemGroup>
 
     <ComputeBlazorBuildAssets
-      Candidates="@(ReferenceCopyLocalPaths)"
+      Candidates="@(ReferenceCopyLocalPaths);@(WasmNativeAsset->WithMetadataValue('Extension', '.wasm'))"
       ProjectAssembly="@(IntermediateAssembly)"
       ProjectDebugSymbols="@(_DebugSymbolsIntermediatePath)"
       SatelliteAssemblies="@(ReferenceSatellitePaths)"
@@ -406,7 +486,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="ProcessPublishFilesForBlazor" DependsOnTargets="_ResolveBlazorWasmConfiguration;LoadStaticWebAssetsBuildManifest" AfterTargets="ILLink">
+  <Target Name="ProcessPublishFilesForBlazor" DependsOnTargets="_ResolveBlazorWasmConfiguration;LoadStaticWebAssetsBuildManifest" AfterTargets="ILLink" Condition="'$(WasmBuildingForPublish)' != 'true'">
     <PropertyGroup>
       <_BlazorAotEnabled>$(UsingBrowserRuntimeWorkload)</_BlazorAotEnabled>
       <_BlazorAotEnabled Condition="'$(_BlazorAotEnabled)' == ''">false</_BlazorAotEnabled>
@@ -565,7 +645,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="_BlazorWasmNative"
-      DependsOnTargets="_EnsureWasmRuntimeWorkload;_GatherWasmFilesToBuild;WasmBuildApp"
+      DependsOnTargets="_EnsureWasmRuntimeWorkload;WasmTriggerPublishApp;_ScrambleDotnetJsFileNameForPublish"
       BeforeTargets="ProcessPublishFilesForBlazor"
       Condition="'$(UsingBrowserRuntimeWorkload)' == 'true'" />
 
@@ -575,9 +655,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       Code="BLAZORSDK1002" />
   </Target>
 
-  <Target Name="_GatherWasmFilesToBuild">
+  <Target Name="_GatherWasmFilesToPublish">
     <ItemGroup>
-      <WasmAssembliesToBundle Include="%(ResolvedFileToPublish.FullPath)" Exclude="@(_Exclude)" Condition="%(Extension) == '.dll' AND %(FileName) != 'Microsoft.JSInterop.WebAssembly'" />
+      <WasmAssembliesToBundle Remove="@(WasmAssembliesToBundle)" />
+      <WasmAssembliesToBundle Include="%(ResolvedFileToPublish.FullPath)" Exclude="@(_Exclude)" Condition="%(Extension) == '.dll'" />
+      <WasmAssembliesToBundle Condition="'%(WasmAssembliesToBundle.FileName)' == 'Microsoft.JSInterop.WebAssembly'" AOT_InternalForceInterpreter="true" />
     </ItemGroup>
   </Target>
 
