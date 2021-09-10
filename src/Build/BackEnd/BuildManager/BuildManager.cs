@@ -832,10 +832,11 @@ namespace Microsoft.Build.Execution
                 ShutdownConnectedNodes(false /* normal termination */);
                 _noNodesActiveEvent.WaitOne();
 
-                // Wait for all of the actions in the work queue to drain.  Wait() could throw here if there was an unhandled exception
+                // Wait for all of the actions in the work queue to drain.  _workQueue.Completion.Wait() could throw here if there was an unhandled exception
                 // in the work queue, but the top level exception handler there should catch everything and have forwarded it to the
                 // OnThreadException method in this class already.
                 _workQueue.Complete();
+                Task.WaitAny(_workQueue.Completion);
 
                 // Stop the graph scheduling thread(s)
                 _graphSchedulingCancellationSource?.Cancel();
@@ -2804,55 +2805,58 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnThreadException(Exception e)
         {
-            lock (_syncLock)
+            _workQueue.Post(() =>
             {
-                if (_threadException == null)
+                lock (_syncLock)
                 {
-                    if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
+                    if (_threadException == null)
                     {
-                        e = ae.InnerExceptions.First();
-                    }
-
-                    _threadException = ExceptionDispatchInfo.Capture(e);
-                    var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
-                    foreach (BuildSubmission submission in submissions)
-                    {
-                        // Submission has not started
-                        if (submission.BuildRequest == null)
+                        if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
                         {
-                            continue;
+                            e = ae.InnerExceptions.First();
                         }
 
-                        // Attach the exception to this submission if it does not already have an exception associated with it
-                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
+                        _threadException = ExceptionDispatchInfo.Capture(e);
+                        var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
+                        foreach (BuildSubmission submission in submissions)
                         {
-                            submission.BuildResult.Exception = e;
+                            // Submission has not started
+                            if (submission.BuildRequest == null)
+                            {
+                                continue;
+                            }
+
+                            // Attach the exception to this submission if it does not already have an exception associated with it
+                            if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
+                            {
+                                submission.BuildResult.Exception = e;
+                            }
+                            submission.CompleteLogging();
+                            submission.CompleteResults(new BuildResult(submission.BuildRequest, e));
+
+                            CheckSubmissionCompletenessAndRemove(submission);
                         }
-                        submission.CompleteLogging();
-                        submission.CompleteResults(new BuildResult(submission.BuildRequest, e));
 
-                        CheckSubmissionCompletenessAndRemove(submission);
-                    }
-
-                    var graphSubmissions = new List<GraphBuildSubmission>(_graphBuildSubmissions.Values);
-                    foreach (GraphBuildSubmission submission in graphSubmissions)
-                    {
-                        if (!submission.IsStarted)
+                        var graphSubmissions = new List<GraphBuildSubmission>(_graphBuildSubmissions.Values);
+                        foreach (GraphBuildSubmission submission in graphSubmissions)
                         {
-                            continue;
-                        }
+                            if (!submission.IsStarted)
+                            {
+                                continue;
+                            }
 
-                        // Attach the exception to this submission if it does not already have an exception associated with it
-                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
-                        {
-                            submission.BuildResult.Exception = e;
-                        }
-                        submission.CompleteResults(submission.BuildResult ?? new GraphBuildResult(submission.SubmissionId, e));
+                            // Attach the exception to this submission if it does not already have an exception associated with it
+                            if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
+                            {
+                                submission.BuildResult.Exception = e;
+                            }
+                            submission.CompleteResults(submission.BuildResult ?? new GraphBuildResult(submission.SubmissionId, e));
 
-                        CheckSubmissionCompletenessAndRemove(submission);
+                            CheckSubmissionCompletenessAndRemove(submission);
+                        }
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -2860,21 +2864,24 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
-            lock (_syncLock)
+            _workQueue.Post(() =>
             {
-                if (_projectStartedEvents.TryGetValue(e.BuildEventContext.SubmissionId, out var originalArgs))
+                lock (_syncLock)
                 {
-                    if (originalArgs.BuildEventContext.Equals(e.BuildEventContext))
+                    if (_projectStartedEvents.TryGetValue(e.BuildEventContext.SubmissionId, out var originalArgs))
                     {
-                        _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
-                        if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
+                        if (originalArgs.BuildEventContext.Equals(e.BuildEventContext))
                         {
-                            submission.CompleteLogging();
-                            CheckSubmissionCompletenessAndRemove(submission);
+                            _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
+                            if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
+                            {
+                                submission.CompleteLogging();
+                                CheckSubmissionCompletenessAndRemove(submission);
+                            }
                         }
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -2882,13 +2889,16 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            lock (_syncLock)
+            _workQueue.Post(() =>
             {
-                if (!_projectStartedEvents.ContainsKey(e.BuildEventContext.SubmissionId))
+                lock (_syncLock)
                 {
-                    _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
+                    if (!_projectStartedEvents.ContainsKey(e.BuildEventContext.SubmissionId))
+                    {
+                        _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
+                    }
                 }
-            }
+            });
         }
 
         /// <summary>
