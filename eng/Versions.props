@@ -39,7 +39,6 @@
     <DeploymentReleasesVersion>1.0.0-preview1.1.21112.1</DeploymentReleasesVersion>
     <SystemManagementPackageVersion>4.6.0</SystemManagementPackageVersion>
     <SystemCommandLineVersion>2.0.0-beta1.21417.2</SystemCommandLineVersion>
-    <MicrosoftManagementInfrastructurePackageVersion>2.0.0</MicrosoftManagementInfrastructurePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->

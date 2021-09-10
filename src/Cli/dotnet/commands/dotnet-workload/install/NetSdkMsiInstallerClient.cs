@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
 
-            Log?.LogMessage($"Executing: {CurrentProcess.GetCommandLine()}, PID: {CurrentProcess.Id}, PPID: {ParentProcess.Id}");
+            Log?.LogMessage($"Executing: {Windows.GetProcessCommandLine()}, PID: {CurrentProcess.Id}, PPID: {ParentProcess.Id}");
             Log?.LogMessage($"{nameof(IsElevated)}: {IsElevated}");
             Log?.LogMessage($"{nameof(Is64BitProcess)}: {Is64BitProcess}");
             Log?.LogMessage($"{nameof(RebootPending)}: {RebootPending}");
