@@ -149,7 +149,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       InvariantGlobalization="$(_BlazorInvariantGlobalization)"
       CopySymbols="$(_BlazorCopyOutputSymbolsToOutputDirectory)"
       BundledNETCoreAppPackageVersion="$(BundledNETCoreAppPackageVersion)"
-      IntermediateOutputPath="$(IntermediateOutputPath)"
       OutputPath="$(OutputPath)"
     >
       <Output TaskParameter="AssetCandidates" ItemName="_BuildAssetsCandidates" />
