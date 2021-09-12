@@ -51,7 +51,6 @@ namespace Microsoft.DotNet.Watcher.Tools
             var processStartInfo = _spec.GetProcessStartInfo();
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
-            processStartInfo.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "true";
 
             _process = new Process
             {
