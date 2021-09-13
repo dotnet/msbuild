@@ -299,9 +299,15 @@ namespace Microsoft.NET.StringTools
         }
 
         /// <summary>
-        /// Implements the simple yet very decently performing djb2 hash function (xor version).
+        /// Implements the simple yet very decently performing djb2-like hash function (xor version) as inspired by
+        /// https://github.com/dotnet/runtime/blob/6262ae8e6a33abac569ab6086cdccc470c810ea4/src/libraries/System.Private.CoreLib/src/System/String.Comparison.cs#L810-L840
         /// </summary>
         /// <returns>A stable hashcode of the string represented by this instance.</returns>
+        /// <remarks>
+        /// Unlike the BCL method, this implementation works only on two characters at a time to cut on the complexity with
+        /// characters that feed into the same operation but straddle multiple spans. Note that it must return the same value for
+        /// a given string regardless of how it's split into spans (e.g. { "AB" } and { "A", "B" } have the same hash code).
+        /// </remarks>
         public override unsafe int GetHashCode()
         {
             uint hash = (5381 << 16) + 5381;
