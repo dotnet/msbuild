@@ -84,6 +84,37 @@ namespace Microsoft.Build.Evaluation
             return Version.TryParse(GetExpandedValue(state), out _);
         }
 
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
+        {
+            return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state), out result);
+        }
+
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
+        {
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
+            {
+                result = ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
+                return true;
+            }
+            else
+            {
+                return ConversionUtilities.TryConvertDecimalOrHexToDouble(GetExpandedValue(state), out result);
+            }
+        }
+
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        {
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
+            {
+                result = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
+                return true;
+            }
+            else
+            {
+                return Version.TryParse(GetExpandedValue(state), out result);
+            }
+        }
+
         /// <summary>
         /// Returns true if this node evaluates to an empty string,
         /// otherwise false.
