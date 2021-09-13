@@ -147,6 +147,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", packInfo.Id, packInfo.Version, version);
             File.Exists(installationRecordPath).Should().BeTrue();
+            var content = File.ReadAllText(installationRecordPath);
+            content.Should().Contain(packInfo.Id.ToString());
+            content.Should().Contain(packInfo.Version.ToString());
 
             File.Exists(packInfo.Path).Should().BeTrue();
         }
