@@ -84,7 +84,7 @@ namespace Microsoft.NET.StringTools.Tests
 
             for (int i = 0; i < numberOfStrings; i++)
             {
-                string strPart2 = string.Concat(Enumerable.Repeat("108066709210", i + 2));
+                string strPart2 = string.Concat(Enumerable.Repeat("100570862200", i + 2));
                 hashCodes[i] = AddString(string.Empty, strPart2, (string cachedString) =>
                 {
                     _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
