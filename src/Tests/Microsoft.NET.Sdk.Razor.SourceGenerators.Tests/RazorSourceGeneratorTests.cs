@@ -957,7 +957,7 @@ public class HeaderTagHelper : TagHelper
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
 <h1>Counter</h1>
-<button @onclick=""IncrementCount"">Click me</button>",
+<button @onclick=""@(() => {})"">Click me</button>",
             });
 
             var compilation = await project.GetCompilationAsync();
@@ -971,8 +971,6 @@ public class HeaderTagHelper : TagHelper
             var result = RunGenerator(compilation!, ref driver);
             Assert.Empty(result.Diagnostics);
             Assert.Empty(result.GeneratedSources);
-
-
             var updatedOptionsProvider = new TestAnalyzerConfigOptionsProvider();
             foreach (var option in testOptionsProvider!.AdditionalTextOptions)
             {
