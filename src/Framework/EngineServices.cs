@@ -16,20 +16,15 @@ namespace Microsoft.Build.Framework
     public abstract class EngineServices
     {
         /// <summary>
-        /// Initial version with LogsMessagesOfImportance() as the only exposed member.
+        /// Initial version with LogsMessagesOfImportance() and IsTaskInputLoggingEnabled as the only exposed members.
         /// </summary>
         public const int Version1 = 1;
-
-        /// <summary>
-        /// This version added the IsTaskInputLoggingEnabled property.
-        /// </summary>
-        public const int Version2 = 2;
 
         /// <summary>
         /// An explicit version of this class. Must be incremented whenever new members are added. Derived classes should override
         /// the property to return the version actually being implemented.
         /// </summary>
-        public virtual int Version => Version2;
+        public virtual int Version => Version1; // Not updated since we have not shipped 17.0 yet
 
         /// <summary>
         /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.
