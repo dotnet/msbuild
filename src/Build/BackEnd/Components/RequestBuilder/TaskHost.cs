@@ -880,7 +880,7 @@ namespace Microsoft.Build.BackEnd
         [Serializable]
         private sealed class EngineServicesImpl : EngineServices
         {
-            private TaskHost _taskHost;
+            private readonly TaskHost _taskHost;
 
             internal EngineServicesImpl(TaskHost taskHost)
             {
@@ -902,9 +902,12 @@ namespace Microsoft.Build.BackEnd
                 return importance <= minimumImportance;
 
             }
+
+            /// <inheritdoc/>
+            public override bool IsTaskInputLoggingEnabled => _taskHost._host.BuildParameters.LogTaskInputs;
         }
 
-        public EngineServices EngineServices{ get; }
+        public EngineServices EngineServices { get; }
 
         #endregion
 

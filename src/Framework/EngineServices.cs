@@ -16,7 +16,7 @@ namespace Microsoft.Build.Framework
     public abstract class EngineServices
     {
         /// <summary>
-        /// Initial version with LogsMessagesOfImportance() as the only exposed member.
+        /// Initial version with LogsMessagesOfImportance() and IsTaskInputLoggingEnabled as the only exposed members.
         /// </summary>
         public const int Version1 = 1;
 
@@ -24,7 +24,7 @@ namespace Microsoft.Build.Framework
         /// An explicit version of this class. Must be incremented whenever new members are added. Derived classes should override
         /// the property to return the version actually being implemented.
         /// </summary>
-        public virtual int Version => Version1;
+        public virtual int Version => Version1; // Not updated since we have not shipped 17.0 yet
 
         /// <summary>
         /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.
@@ -37,5 +37,13 @@ namespace Microsoft.Build.Framework
         /// for <see cref="MessageImportance.Low"/>.
         /// </remarks>
         public virtual bool LogsMessagesOfImportance(MessageImportance importance) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the build is configured to log all task inputs.
+        /// </summary>
+        /// <remarks>
+        /// This is a performance optimization allowing tasks to skip expensive double-logging.
+        /// </remarks>
+        public virtual bool IsTaskInputLoggingEnabled => throw new NotImplementedException();
     }
 }
