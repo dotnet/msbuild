@@ -7,6 +7,7 @@ using System.Configuration;
 using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -28,7 +29,7 @@ namespace Microsoft.Build.Evaluation
 
         internal static ToolsetConfigurationSection ReadToolsetConfigurationSection(Configuration configuration)
         {
-            if (Environment.GetEnvironmentVariable("MSBUILDCACHETOOLSETCONFIGURATION") != "0")
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
             {
                 if (configuration == null)
                 {
