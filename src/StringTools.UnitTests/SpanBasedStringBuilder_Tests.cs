@@ -99,11 +99,11 @@ namespace Microsoft.NET.StringTools.Tests
         [Theory]
         [InlineData("012345678")] // odd number of characters
         [InlineData("0123456789")] // even number of characters
-        public void GetHashCodeIsStableRegadlessOfSpanLengths(string testString)
+        public void GetHashCodeIsStableRegardlessOfSpanLength(string testString)
         {
             int hashCode = new InternableString(testString).GetHashCode();
 
-            // Chop up the string to 2-3 parts and verify that the hash code is unchanged.
+            // Chop the string into 2-3 parts and verify that the hash code is unchanged.
             for (int i = 0; i < testString.Length - 1; i++)
             {
                 for (int j = i + 1; j < testString.Length; j++)
