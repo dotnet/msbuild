@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.PackageValidation
                 resolvedReferences = true;
                 loader.AddReferenceSearchDirectories(referencePathForTFM);
             }
-            else if (!_isBaselineSuppression && _referencePaths != null && ShouldLogDiagnosticId(ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm))
+            else if (!_isBaselineSuppression && _referencePaths.Count != 0 && ShouldLogDiagnosticId(ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm))
             {
                 _log.LogWarning(
                     new Suppression()
