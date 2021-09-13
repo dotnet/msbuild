@@ -349,15 +349,33 @@ namespace Microsoft.NET.StringTools
             while (length >= 2)
             {
                 length -= 2;
-                hash = ((hash << 5) + hash) ^ *ptr;
+                hash = (RotateLeft(hash, 5) + hash) ^ *ptr;
                 ptr += 1;
             }
 
             if (length > 0)
             {
-                hash = ((hash << 5) + hash) ^ (BitConverter.IsLittleEndian ? *((char*)ptr) : ((uint)*((char*)ptr) << 16));
+                hash = (RotateLeft(hash, 5) + hash) ^ (BitConverter.IsLittleEndian ? *((char*)ptr) : ((uint)*((char*)ptr) << 16));
                 hashedOddNumberOfCharacters = true;
             }
+        }
+
+        /// <summary>
+        /// Rotates an integer by the specified number of bits.
+        /// </summary>
+        /// <param name="value">The value to rotate.</param>
+        /// <param name="offset">The number of bits.</param>
+        /// <returns>The rotated value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static uint RotateLeft(uint value, int offset)
+        {
+#if NETCOREAPP
+            return System.Numerics.BitOperations.RotateLeft(value, offset);
+#else
+            // Copied from System\Numerics\BitOperations.cs in dotnet/runtime as the routine is not available on .NET Framework.
+            // The JIT recognized the pattern and generates efficient code, e.g. the rol instruction on x86/x64.
+            return (value << offset) | (value >> (32 - offset));
+#endif
         }
     }
 }
