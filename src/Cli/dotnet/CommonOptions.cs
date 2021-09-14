@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli
             VerbosityOption(o => $"-verbosity:{o}");
 
         public static Option<VerbosityOptions> HiddenVerbosityOption() =>
-            VerbosityOption(o => $"-verbosity:{o}").Hide();
+            VerbosityOption().Hide();
 
         public static Option<VerbosityOptions> VerbosityOption(Func<VerbosityOptions, string> format) =>
             new ForwardedOption<VerbosityOptions>(
