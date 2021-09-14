@@ -7,6 +7,7 @@ using System.Configuration;
 using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -15,7 +16,49 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal static class ToolsetConfigurationReaderHelpers
     {
+        /// <summary>
+        /// Lock for process wide ToolsetConfigurationSection section cache
+        /// </summary>
+        private static readonly object s_syncLock = new();
+
+        /// <summary>
+        /// Process wide ToolsetConfigurationSection section cache
+        /// </summary>
+        private static ToolsetConfigurationSection s_toolsetConfigurationSectionCache;
+        private static Configuration s_configurationOfCachedSection;
+
         internal static ToolsetConfigurationSection ReadToolsetConfigurationSection(Configuration configuration)
+        {
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            {
+                if (configuration == null)
+                {
+                    return null;
+                }
+
+                lock (s_syncLock)
+                {
+                    // Cache 1st requested configuration section. In unit tests, different Configuration is provided for particular test cases.
+                    // During runtime, however, only MSBuild exe configuration file is provided to read toolset configuration from,
+                    //   and modifying MSBuild exe configuration during lifetime of msbuild nodes is neither expected nor supported.
+                    if (s_toolsetConfigurationSectionCache == null)
+                    {
+                        s_toolsetConfigurationSectionCache = GetToolsetConfigurationSection(configuration);
+                        s_configurationOfCachedSection = configuration;
+                    }
+
+                    return s_configurationOfCachedSection == configuration ?
+                        s_toolsetConfigurationSectionCache :
+                        GetToolsetConfigurationSection(configuration);
+                }
+            }
+            else
+            {
+                return GetToolsetConfigurationSection(configuration);
+            }
+        }
+
+        private static ToolsetConfigurationSection GetToolsetConfigurationSection(Configuration configuration)
         {
             ToolsetConfigurationSection configurationSection = null;
 
