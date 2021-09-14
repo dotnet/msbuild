@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli
                 Description = LocalizableStrings.WorkloadIdStubArgumentDescription
             };
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.HiddenVerbosityOption();
 
         public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
 
