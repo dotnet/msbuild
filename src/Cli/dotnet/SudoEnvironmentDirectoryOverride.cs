@@ -6,6 +6,7 @@ using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Common;
 using NuGet.Common;
 using NuGet.Configuration;
 
@@ -36,6 +37,18 @@ namespace Microsoft.DotNet.Cli
         {
             if (!OperatingSystem.IsWindows() && IsRunningUnderSudo() && IsRunningWorkloadCommand(parseResult))
             {
+                if (!TempHomeIsOnlyRootWritable(SudoHomeDirectory))
+                {
+                    try
+                    {
+                        Directory.Delete(SudoHomeDirectory, recursive: true);
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+                        // Avoid read after write race condition
+                    }
+                }
+
                 Directory.CreateDirectory(SudoHomeDirectory);
 
                 var homeBeforeOverride = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
@@ -93,5 +106,31 @@ namespace Microsoft.DotNet.Cli
 
         private static bool IsRunningWorkloadCommand(ParseResult parseResult) =>
             parseResult.RootSubCommandResult() == (WorkloadCommandParser.GetCommand().Name);
+
+        private static bool TempHomeIsOnlyRootWritable(string path)
+        {
+            if (StatInterop.LStat(path, out StatInterop.FileStatus fileStat) != 0)
+            {
+                return false;
+            }
+
+            return IsOwnedByRoot(fileStat) && IsGroupWritable(fileStat) &&
+                   IsOtherUserWritable(fileStat);
+        }
+
+        private static bool IsOtherUserWritable(StatInterop.FileStatus fileStat)
+        {
+            return (fileStat.Mode & (int) StatInterop.Permissions.S_IWOTH) == 0;
+        }
+
+        private static bool IsGroupWritable(StatInterop.FileStatus fileStat)
+        {
+            return (fileStat.Mode & (int) StatInterop.Permissions.S_IWGRP) == 0;
+        }
+
+        private static bool IsOwnedByRoot(StatInterop.FileStatus fileStat)
+        {
+            return fileStat.Uid == 0;
+        }
     }
 }
