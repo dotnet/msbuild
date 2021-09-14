@@ -299,6 +299,33 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             Assert.Single(log.errors.Where(e => e.Contains("CP1002")));
         }
 
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ValidateMissingReferencesIsOnlyLoggedWhenRunningWithReferences(bool useReferences)
+        {
+            TestLogger log = new TestLogger();
+
+            TestProject testProject = CreateTestProject("public class MyType { }", "netstandard2.0;net5.0");
+            TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            var result = packCommand.Execute();
+            Assert.Equal(string.Empty, result.StdErr);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+
+            Dictionary<string, HashSet<string>> references = new()
+            {
+                { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } }
+            };
+
+            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, log, useReferences ? references : null).Validate(package);
+
+            if (!useReferences)
+                Assert.Empty(log.errors.Where(e => e.Contains("CP1003")));
+            else
+                Assert.NotEmpty(log.errors.Where(e => e.Contains("CP1003")));
+        }
+
         private TestProject CreateTestProject(string sourceCode, string tfms, IEnumerable<TestProject> referenceProjects = null)
         {
             string name = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
