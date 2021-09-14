@@ -52,7 +52,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                     return new MatchInfo(MatchInfo.BuiltIn.Name, name, MatchKind.Partial);
                 }
 
-                int nameIndex = templateGroup.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase);
+                int nameIndex = templateGroup.Name.IndexOf(name, StringComparison.CurrentCultureIgnoreCase);
 
                 if (nameIndex == 0 && templateGroup.Name.Length == name.Length)
                 {
