@@ -288,7 +288,7 @@ namespace Microsoft.Build.Execution
 
             _projectStartedEventHandler = OnProjectStarted;
             _projectFinishedEventHandler = OnProjectFinished;
-            _loggingThreadExceptionEventHandler = OnThreadException;
+            _loggingThreadExceptionEventHandler = OnLoggingThreadException;
             _legacyThreadingData = new LegacyThreadingData();
             _instantiationTimeUtc = DateTime.UtcNow;
         }
@@ -2799,64 +2799,76 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Handler for thread exceptions (logging thread, communications thread).  This handler will only get called if the exception did not previously
+        /// Handler for thread exceptions. This handler will only get called if the exception did not previously
         /// get handled by a node exception handlers (for instance because the build is complete for the node.)  In this case we
         /// get the exception and will put it into the OverallBuildResult so that the host can see what happened.
         /// </summary>
         private void OnThreadException(Exception e)
         {
-            _workQueue.Post(() =>
+            lock (_syncLock)
             {
-                lock (_syncLock)
+                if (_threadException == null)
                 {
-                    if (_threadException == null)
+                    if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
                     {
-                        if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
+                        e = ae.InnerExceptions.First();
+                    }
+
+                    _threadException = ExceptionDispatchInfo.Capture(e);
+                    var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
+                    foreach (BuildSubmission submission in submissions)
+                    {
+                        // Submission has not started
+                        if (submission.BuildRequest == null)
                         {
-                            e = ae.InnerExceptions.First();
+                            continue;
                         }
 
-                        _threadException = ExceptionDispatchInfo.Capture(e);
-                        var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
-                        foreach (BuildSubmission submission in submissions)
+                        // Attach the exception to this submission if it does not already have an exception associated with it
+                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
                         {
-                            // Submission has not started
-                            if (submission.BuildRequest == null)
-                            {
-                                continue;
-                            }
+                            submission.BuildResult.Exception = e;
+                        }
+                        submission.CompleteLogging();
+                        submission.CompleteResults(new BuildResult(submission.BuildRequest, e));
 
-                            // Attach the exception to this submission if it does not already have an exception associated with it
-                            if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
-                            {
-                                submission.BuildResult.Exception = e;
-                            }
-                            submission.CompleteLogging();
-                            submission.CompleteResults(new BuildResult(submission.BuildRequest, e));
+                        CheckSubmissionCompletenessAndRemove(submission);
+                    }
 
-                            CheckSubmissionCompletenessAndRemove(submission);
+                    var graphSubmissions = new List<GraphBuildSubmission>(_graphBuildSubmissions.Values);
+                    foreach (GraphBuildSubmission submission in graphSubmissions)
+                    {
+                        if (!submission.IsStarted)
+                        {
+                            continue;
                         }
 
-                        var graphSubmissions = new List<GraphBuildSubmission>(_graphBuildSubmissions.Values);
-                        foreach (GraphBuildSubmission submission in graphSubmissions)
+                        // Attach the exception to this submission if it does not already have an exception associated with it
+                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
                         {
-                            if (!submission.IsStarted)
-                            {
-                                continue;
-                            }
-
-                            // Attach the exception to this submission if it does not already have an exception associated with it
-                            if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
-                            {
-                                submission.BuildResult.Exception = e;
-                            }
-                            submission.CompleteResults(submission.BuildResult ?? new GraphBuildResult(submission.SubmissionId, e));
-
-                            CheckSubmissionCompletenessAndRemove(submission);
+                            submission.BuildResult.Exception = e;
                         }
+                        submission.CompleteResults(submission.BuildResult ?? new GraphBuildResult(submission.SubmissionId, e));
+
+                        CheckSubmissionCompletenessAndRemove(submission);
                     }
                 }
-            });
+            }
+        }
+
+        /// <summary>
+        /// Handler for LoggingService thread exceptions.
+        /// </summary>
+        private void OnLoggingThreadException(Exception e)
+        {
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            {
+                _workQueue.Post(() => OnThreadException(e));
+            }
+            else
+            {
+                OnThreadException(e);
+            }
         }
 
         /// <summary>
@@ -2864,7 +2876,16 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
-            _workQueue.Post(() =>
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            {
+                _workQueue.Post(() => OnProjectFinishedBody(e));
+            }
+            else
+            {
+                OnProjectFinishedBody(e);
+            }
+
+            void OnProjectFinishedBody(ProjectFinishedEventArgs e)
             {
                 lock (_syncLock)
                 {
@@ -2881,7 +2902,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
                 }
-            });
+            }
         }
 
         /// <summary>
@@ -2889,7 +2910,16 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            _workQueue.Post(() =>
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            {
+                _workQueue.Post(() => OnProjectStartedBody(e));
+            }
+            else
+            {
+                OnProjectStartedBody(e);
+            }
+
+            void OnProjectStartedBody(ProjectStartedEventArgs e)
             {
                 lock (_syncLock)
                 {
@@ -2898,7 +2928,7 @@ namespace Microsoft.Build.Execution
                         _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
                     }
                 }
-            });
+            }
         }
 
         /// <summary>
