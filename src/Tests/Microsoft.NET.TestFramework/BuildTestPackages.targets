@@ -147,6 +147,22 @@
         <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Assets/TestPackages/Library.ContainsAnalyzer">
+        <Name>Library.ContainsAnalyzer</Name>
+        <ProjectName>Library.ContainsAnalyzer.csproj</ProjectName>
+        <NuPkgName>Library.ContainsAnalyzer</NuPkgName>
+        <IsApplicable>True</IsApplicable>
+        <Version>1.0.0</Version>
+        <Clean>True</Clean>
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Assets/TestPackages/Library.ContainsAnalyzer2">
+        <Name>Library.ContainsAnalyzer2</Name>
+        <ProjectName>Library.ContainsAnalyzer2.csproj</ProjectName>
+        <NuPkgName>Library.ContainsAnalyzer2</NuPkgName>
+        <IsApplicable>True</IsApplicable>
+        <Version>1.0.0</Version>
+        <Clean>True</Clean>
+      </BaseTestPackageProject>
 
       <BaseTestPackageProject>
         <NuPkgName Condition=" '%(NuPkgName)' == '' ">%(Name)</NuPkgName>

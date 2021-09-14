@@ -353,8 +353,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
                 VerifyPackage(msi);
                 DetectState state = DetectPackage(msi, out Version installedVersion);
-                PlanPackage(msi, state, InstallAction.Repair, installedVersion, out _);
-                ExecutePackage(msi, InstallAction.Repair);
+                InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Repair, installedVersion, out _);
+                ExecutePackage(msi, plannedAction);
 
                 // Update the reference count against the MSI.
                 UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
