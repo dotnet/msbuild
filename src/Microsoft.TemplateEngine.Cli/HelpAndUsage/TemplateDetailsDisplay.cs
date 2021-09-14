@@ -68,7 +68,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             if (languages != null && languages.Any())
             {
-                Reporter.Output.WriteLine($"{preferredTemplate.Name} ({string.Join(", ", languages)})");
+                Reporter.Output.WriteLine($"{preferredTemplate.Name} ({string.Join(", ", languages.OrderBy(t => t, StringComparer.OrdinalIgnoreCase))})");
             }
             else
             {

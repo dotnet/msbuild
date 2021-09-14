@@ -179,7 +179,8 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
                         templates
                             .Select(template => template.GetTemplateType())
                             .Where(type => !string.IsNullOrWhiteSpace(type))
-                            .Distinct(StringComparer.OrdinalIgnoreCase)));
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .OrderBy(type => type, StringComparer.OrdinalIgnoreCase)));
             }
             return string.Join(environment.NewLine, typesGroups);
         }

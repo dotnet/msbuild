@@ -351,7 +351,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             string? preferredLanguage =
                 resolutionResult.UnambiguousTemplateGroupMatchInfo
-                    .TemplatesWithMatchingParametersForPreferredLanguage.First().GetLanguage();
+                    .TemplatesWithMatchingParametersForPreferredLanguage
+                    .OrderBy(t => t.GetLanguage(), StringComparer.OrdinalIgnoreCase)
+                    .First().GetLanguage();
 
             List<string> supportedLanguages = new List<string>();
             foreach (string? language in resolutionResult.UnambiguousTemplateGroup.Languages)
@@ -367,7 +369,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
             if (supportedLanguages.Any())
             {
-                string supportedLanguagesStr = string.Join(", ", supportedLanguages.OrderBy(s => s, StringComparer.OrdinalIgnoreCase));
+                supportedLanguages.Sort(StringComparer.OrdinalIgnoreCase);
+                string supportedLanguagesStr = string.Join(", ", supportedLanguages);
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint, supportedLanguagesStr));
                 Reporter.Output.WriteCommand(
                     commandInput.HelpCommandExample(resolutionResult.UnambiguousTemplateGroup.ShortNames[0], supportedLanguages.First()));
