@@ -837,6 +837,11 @@ namespace Microsoft.Build.Execution
                 // but the top level exception handler there should catch everything and have forwarded it to the
                 // OnThreadException method in this class already.
                 _workQueue.Complete();
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+                {
+                    _workQueue.Completion.Wait();
+                }
+
                 _workQueue.Completion.Wait();
 
                 // Stop the graph scheduling thread(s)
