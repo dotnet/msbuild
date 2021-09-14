@@ -446,7 +446,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     .DefineColumn(t => t.TemplatePrecedence.ToString(), out object prcedenceColumn, LocalizableStrings.ColumnNamePrecedence, showAlways: true)
                     .DefineColumn(t => t.TemplateAuthor, LocalizableStrings.ColumnNameAuthor, showAlways: true, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(t => t.TemplatePackage != null ? t.TemplatePackage.Identifier : string.Empty, LocalizableStrings.ColumnNamePackage, showAlways: true)
-                    .OrderBy(identityColumn, StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(identityColumn, StringComparer.CurrentCultureIgnoreCase)
                     .OrderByDescending(prcedenceColumn, new NullOrEmptyIsLastStringComparer());
             Reporter.Error.WriteLine(formatter.Layout().Bold().Red());
 
@@ -484,7 +484,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, BaseCommandInput.TypeColumnFilter, defaultColumn: false)
                     .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, BaseCommandInput.AuthorColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.ColumnNameTags, BaseCommandInput.TagsColumnFilter, defaultColumn: true)
-                    .OrderBy(nameColumn, StringComparer.OrdinalIgnoreCase);
+                    .OrderBy(nameColumn, StringComparer.CurrentCultureIgnoreCase);
 
             Reporter reporter = useErrorOutput ? Reporter.Error : Reporter.Output;
             reporter.WriteLine(formatter.Layout());
