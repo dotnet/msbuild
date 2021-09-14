@@ -18,6 +18,8 @@ using NuGet.Common;
 using System.Text.Json;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
+using System.Net;
+using System.Net.Http;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -428,11 +430,22 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private IEnumerable<(ManifestId, ManifestVersion)> ParseRollbackDefinitionFile(string rollbackDefinitionFilePath)
         {
-            if (!File.Exists(rollbackDefinitionFilePath))
+            string fileContent;
+            if (File.Exists(rollbackDefinitionFilePath))
             {
-                throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
+                fileContent = File.ReadAllText(rollbackDefinitionFilePath);
             }
-            var fileContent = File.ReadAllText(rollbackDefinitionFilePath);
+            else
+            {
+                try
+                {
+                    fileContent = (new HttpClient()).GetStringAsync(rollbackDefinitionFilePath).Result;
+                }
+                catch (InvalidOperationException)
+                {
+                    throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
+                }
+            }
             return JsonSerializer.Deserialize<IDictionary<string, string>>(fileContent)
                 .Select(manifest => (new ManifestId(manifest.Key), new ManifestVersion(manifest.Value)));
         }
