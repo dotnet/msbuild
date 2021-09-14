@@ -832,11 +832,12 @@ namespace Microsoft.Build.Execution
                 ShutdownConnectedNodes(false /* normal termination */);
                 _noNodesActiveEvent.WaitOne();
 
-                // Wait for all of the actions in the work queue to drain.  _workQueue.Completion.Wait() could throw here if there was an unhandled exception
-                // in the work queue, but the top level exception handler there should catch everything and have forwarded it to the
+                // Wait for all of the actions in the work queue to drain.
+                // _workQueue.Completion.Wait() could throw here if there was an unhandled exception in the work queue,
+                // but the top level exception handler there should catch everything and have forwarded it to the
                 // OnThreadException method in this class already.
                 _workQueue.Complete();
-                Task.WaitAny(_workQueue.Completion);
+                _workQueue.Completion.Wait();
 
                 // Stop the graph scheduling thread(s)
                 _graphSchedulingCancellationSource?.Cancel();
