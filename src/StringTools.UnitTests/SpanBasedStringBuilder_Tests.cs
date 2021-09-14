@@ -97,6 +97,28 @@ namespace Microsoft.NET.StringTools.Tests
         }
 
         [Theory]
+        [InlineData("012345678")] // odd number of characters
+        [InlineData("0123456789")] // even number of characters
+        public void GetHashCodeIsStableRegardlessOfSpanLength(string testString)
+        {
+            int hashCode = new InternableString(testString).GetHashCode();
+
+            // Chop the string into 2-3 parts and verify that the hash code is unchanged.
+            for (int i = 0; i < testString.Length - 1; i++)
+            {
+                for (int j = i + 1; j < testString.Length; j++)
+                {
+                    SpanBasedStringBuilder stringBuilder = new SpanBasedStringBuilder();
+                    stringBuilder.Append(testString.Substring(0, i));
+                    stringBuilder.Append(testString.Substring(i, j - i));
+                    stringBuilder.Append(testString.Substring(j));
+                    InternableString internableString = new InternableString(stringBuilder);
+                    internableString.GetHashCode().ShouldBe(hashCode);
+                }
+            }
+        }
+
+        [Theory]
         [MemberData(nameof(TestData))]
         public void AppendAppendsString(InterningTestData.TestDatum datum)
         {
