@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
         // arguments are a list of workload to be detected
         public static readonly Option<bool> MachineReadableOption = new Option<bool>("--machine-readable") {IsHidden = true};
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.HiddenVerbosityOption();
 
         public static readonly Option<string> VersionOption = WorkloadUpdateCommandParser.VersionOption;
 
