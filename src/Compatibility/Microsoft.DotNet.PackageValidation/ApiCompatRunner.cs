@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.PackageValidation
 
             // In order to enable reference support for baseline suppression we need a better way
             // to resolve references for the baseline package. Let's not enable it for now.
-            bool shouldResolveReferences = !_isBaselineSuppression && _referencePaths != null &&
+            bool shouldResolveReferences = !_isBaselineSuppression &&
                 _referencePaths.TryGetValue(assemblyInformation.TargetFramework, out referencePathForTFM);
 
             AssemblySymbolLoader loader = new(resolveAssemblyReferences: shouldResolveReferences);
@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.PackageValidation
                 resolvedReferences = true;
                 loader.AddReferenceSearchDirectories(referencePathForTFM);
             }
-            else if (!_isBaselineSuppression && _referencePaths != null && ShouldLogDiagnosticId(ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm))
+            else if (!_isBaselineSuppression && _referencePaths.Count != 0 && ShouldLogDiagnosticId(ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm))
             {
                 _log.LogWarning(
                     new Suppression()
