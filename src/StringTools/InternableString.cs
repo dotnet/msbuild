@@ -324,7 +324,7 @@ namespace Microsoft.NET.StringTools
 
             fixed (char* charPtr = _inlineSpan)
             {
-                GetHashCodeHelper(charPtr, _inlineSpan.Length, ref hash, ref hashedOddNumberOfCharacters);
+                hash = GetHashCodeHelper(charPtr, _inlineSpan.Length, hash, ref hashedOddNumberOfCharacters);
             }
             if (_spans != null)
             {
@@ -332,7 +332,7 @@ namespace Microsoft.NET.StringTools
                 {
                     fixed (char* charPtr = span.Span)
                     {
-                        GetHashCodeHelper(charPtr, span.Length, ref hash, ref hashedOddNumberOfCharacters);
+                        hash = GetHashCodeHelper(charPtr, span.Length, hash, ref hashedOddNumberOfCharacters);
                     }
                 }
             }
@@ -346,8 +346,9 @@ namespace Microsoft.NET.StringTools
         /// <param name="length">Number of characters at <paramref name="charPtr"/>.</param>
         /// <param name="hash">The running hash code.</param>
         /// <param name="hashedOddNumberOfCharacters">True if the incoming <paramref name="hash"/> was calculated from an odd number of characters.</param>
+        /// <returns>The updated running hash code (not passed as a ref parameter to play nicely with JIT optimizations).</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe void GetHashCodeHelper(char* charPtr, int length, ref uint hash, ref bool hashedOddNumberOfCharacters)
+        private static unsafe uint GetHashCodeHelper(char* charPtr, int length, uint hash, ref bool hashedOddNumberOfCharacters)
         {
             if (hashedOddNumberOfCharacters && length > 0)
             {
@@ -373,6 +374,8 @@ namespace Microsoft.NET.StringTools
                 hash = (RotateLeft(hash, 5) + hash) ^ (BitConverter.IsLittleEndian ? *((char*)ptr) : ((uint)*((char*)ptr) << 16));
                 hashedOddNumberOfCharacters = true;
             }
+
+            return hash;
         }
 
         /// <summary>
