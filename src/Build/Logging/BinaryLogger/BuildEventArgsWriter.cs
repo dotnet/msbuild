@@ -708,9 +708,8 @@ Build
 
                 // We're only going to write the arguments for messages,
                 // warnings and errors. Only set the flag for these.
-                if (e is LazyFormattedBuildEventArgs lazyFormattedBuildEventArgs &&
-                    lazyFormattedBuildEventArgs.RawArguments is { Length: > 0 } &&
-                    (e is BuildMessageEventArgs or BuildWarningEventArgs or BuildErrorEventArgs))
+                if (e is LazyFormattedBuildEventArgs { RawArguments: { Length: > 0 } } and
+                    (BuildMessageEventArgs or BuildWarningEventArgs or BuildErrorEventArgs))
                 {
                     flags |= BuildEventArgsFieldFlags.Arguments;
                 }
