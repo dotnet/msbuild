@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.PackageValidation
 
             // In order to enable reference support for baseline suppression we need a better way
             // to resolve references for the baseline package. Let's not enable it for now.
-            bool shouldResolveReferences = !_isBaselineSuppression && _referencePaths != null &&
+            bool shouldResolveReferences = !_isBaselineSuppression &&
                 _referencePaths.TryGetValue(assemblyInformation.TargetFramework, out referencePathForTFM);
 
             AssemblySymbolLoader loader = new(resolveAssemblyReferences: shouldResolveReferences);
