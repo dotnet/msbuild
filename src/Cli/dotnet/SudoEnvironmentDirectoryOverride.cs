@@ -114,16 +114,16 @@ namespace Microsoft.DotNet.Cli
                 return false;
             }
 
-            return IsOwnedByRoot(fileStat) && IsGroupWritable(fileStat) &&
-                   IsOtherUserWritable(fileStat);
+            return IsOwnedByRoot(fileStat) && GroupCannotWrite(fileStat) &&
+                   OtherUserCannotWrite(fileStat);
         }
 
-        private static bool IsOtherUserWritable(StatInterop.FileStatus fileStat)
+        private static bool OtherUserCannotWrite(StatInterop.FileStatus fileStat)
         {
             return (fileStat.Mode & (int) StatInterop.Permissions.S_IWOTH) == 0;
         }
 
-        private static bool IsGroupWritable(StatInterop.FileStatus fileStat)
+        private static bool GroupCannotWrite(StatInterop.FileStatus fileStat)
         {
             return (fileStat.Mode & (int) StatInterop.Permissions.S_IWGRP) == 0;
         }
