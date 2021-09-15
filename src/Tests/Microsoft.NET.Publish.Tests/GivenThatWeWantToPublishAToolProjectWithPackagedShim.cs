@@ -50,7 +50,7 @@ namespace Microsoft.NET.Publish.Tests
 
             publishCommand.Execute();
 
-            publishCommand.GetOutputDirectory(targetFramework: "netcoreapp2.1")
+            publishCommand.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework)
                 .Sub("shims")
                 .Sub("win-x64")
                 .EnumerateFiles().Should().Contain(f => f.Name == _customToolCommandName + ".exe");
@@ -67,7 +67,7 @@ namespace Microsoft.NET.Publish.Tests
 
             publishCommand.Execute("/p:NoBuild=true");
 
-            publishCommand.GetOutputDirectory(targetFramework: "netcoreapp2.1")
+            publishCommand.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework)
                 .Sub("shims")
                 .Sub("win-x64")
                 .EnumerateFiles().Should().Contain(f => f.Name == _customToolCommandName + ".exe");
