@@ -4,11 +4,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -273,7 +270,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
             foreach (var kvp in symbolAssets)
             {
-                var key = kvp.Key;
                 var asset = kvp.Value;
                 if (resolvedSymbolAssetToPublish.TryGetValue(Path.GetFileName(asset.GetMetadata("OriginalItemSpec")), out var existing))
                 {
@@ -530,7 +526,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 if (ComputeBlazorBuildAssets.ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
                 {
                     Log.LogMessage("Skipping asset '{0}' becasue '{1}'", candidate.ItemSpec, reason);
-                    resolvedFilesToPublishToRemove.Add(candidate.ItemSpec, candidate);
+                    if (!resolvedFilesToPublishToRemove.ContainsKey(candidate.ItemSpec))
+                    {
+                        resolvedFilesToPublishToRemove.Add(candidate.ItemSpec, candidate);
+                    }
+                    else
+                    {
+                        Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                    }
                     continue;
                 }
 
@@ -543,16 +546,42 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     {
                         var finalCulture = !string.IsNullOrEmpty(culture) ? culture : inferredCulture;
                         var assemblyName = Path.GetFileName(candidate.GetMetadata("RelativePath").Replace("\\", "/"));
-                        satelliteAssemblyToPublish.Add((finalCulture, assemblyName), candidate);
+                        if (!satelliteAssemblyToPublish.ContainsKey((finalCulture, assemblyName)))
+                        {
+                            satelliteAssemblyToPublish.Add((finalCulture, assemblyName), candidate);
+                        }
+                        else
+                        {
+                            Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                        }
                         continue;
                     }
 
-                    resolvedAssemblyToPublish.Add(Path.GetFileName(candidate.GetMetadata("RelativePath")), candidate);
+                    var candidateName = Path.GetFileName(candidate.GetMetadata("RelativePath"));
+                    if (!resolvedAssemblyToPublish.ContainsKey(candidateName))
+                    {
+                        resolvedAssemblyToPublish.Add(candidateName, candidate);
+                    }
+                    else
+                    {
+                        Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                    }
+
                     continue;
                 }
-                if (string.Equals(extension, " .pdb", StringComparison.Ordinal))
+
+                if (string.Equals(extension, ".pdb", StringComparison.Ordinal))
                 {
-                    resolvedSymbolsToPublish.Add(Path.GetFileName(candidate.GetMetadata("RelativePath")), candidate);
+                    var candidateName = Path.GetFileName(candidate.GetMetadata("RelativePath"));
+                    if (!resolvedSymbolsToPublish.ContainsKey(candidateName))
+                    {
+                        resolvedSymbolsToPublish.Add(candidateName, candidate);
+                    }
+                    else
+                    {
+                        Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                    }
+
                     continue;
                 }
 
@@ -560,7 +589,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 // upgraded
                 if (string.Equals(candidate.GetMetadata("AssetType"), "native", StringComparison.Ordinal))
                 {
-                    resolvedNativeAssetToPublish.Add($"{candidate.GetMetadata("FileName")}{extension}", candidate);
+                    var candidateName = $"{candidate.GetMetadata("FileName")}{extension}";
+                    if (!resolvedNativeAssetToPublish.ContainsKey(candidateName))
+                    {
+                        resolvedNativeAssetToPublish.Add(candidateName, candidate);
+                    }
+                    else
+                    {
+                        Log.LogMessage("Duplicate candidate '{0}' found in ResolvedFilesToPublish", candidate.ItemSpec);
+                    }
                     continue;
                 }
             }
