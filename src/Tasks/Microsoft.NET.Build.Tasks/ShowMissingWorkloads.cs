@@ -18,10 +18,14 @@ namespace Microsoft.NET.Build.Tasks
 {
     public class ShowMissingWorkloads : TaskBase
     {
-        private static readonly string MauiTopLevelVSWorkload = "Microsoft.VisualStudio.Workload.NetCrossPlat";
+        private static readonly HashSet<string> MauiTopLevelVSWorkloads = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "Microsoft.VisualStudio.Workload.NetCrossPlat", "Microsoft.VisualStudio.ComponentGroup.Maui.All" };
+        private static readonly string WasmTopLevelVSWorkload = "Microsoft.VisualStudio.Workload.NetWeb";
         private static readonly HashSet<string> MauiWorkloadIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             { "android", "android-aot", "ios", "maccatalyst", "macos", "maui", "maui-android",
             "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-windows", "tvos" };
+        private static readonly HashSet<string> WasmWorkloadIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "wasm-tools" };
 
         public ITaskItem[] MissingWorkloadPacks { get; set; }
 
@@ -84,8 +88,10 @@ namespace Microsoft.NET.Build.Tasks
         private static IEnumerable<string> GetSuggestedWorkloadsList(WorkloadInfo workloadInfo)
         {
             return MauiWorkloadIds.Contains(workloadInfo.Id.ToString()) ?
-                new string[] { ToSafeId(workloadInfo.Id), MauiTopLevelVSWorkload } :
-                new string[] { ToSafeId(workloadInfo.Id)  };
+                MauiTopLevelVSWorkloads.Append(ToSafeId(workloadInfo.Id)) :
+                WasmWorkloadIds.Contains(workloadInfo.Id.ToString()) ?
+                new string[] { ToSafeId(workloadInfo.Id), WasmTopLevelVSWorkload } :
+                new string[] { ToSafeId(workloadInfo.Id) };
         }
     }
 }
