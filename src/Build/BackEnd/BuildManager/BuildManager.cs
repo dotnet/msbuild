@@ -842,8 +842,6 @@ namespace Microsoft.Build.Execution
                     _workQueue.Completion.Wait();
                 }
 
-                _workQueue.Completion.Wait();
-
                 // Stop the graph scheduling thread(s)
                 _graphSchedulingCancellationSource?.Cancel();
 
