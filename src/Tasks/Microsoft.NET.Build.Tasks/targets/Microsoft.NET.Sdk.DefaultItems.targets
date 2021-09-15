@@ -130,7 +130,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_WarnWhenUsingNET6AndVSPriorTo17"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-        Condition="$([MSBuild]::VersionLessThan($(VisualStudioVersion), '17.0'))">
+        Condition="$([MSBuild]::VersionLessThan($(VisualStudioVersion), '17.0')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
     <NetSdkWarning ResourceName="Net6NotCompatibleWithDev16"/>
   </Target>
 
