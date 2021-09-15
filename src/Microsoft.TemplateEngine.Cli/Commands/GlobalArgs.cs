@@ -4,7 +4,7 @@
 #nullable enable
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -14,16 +14,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private static Option<string?> customHiveOption = new("--debug:custom-hive", "Sets custom settings location");
 
-        public GlobalArgs(InvocationContext invocationContext)
+        public GlobalArgs(ParseResult parseResult)
         {
-            Quiet = invocationContext.ParseResult.ValueForOption(quietOption);
-            DebugSettingsLocation = invocationContext.ParseResult.ValueForOption(customHiveOption);
+            Quiet = parseResult.ValueForOption(quietOption);
+            DebugSettingsLocation = parseResult.ValueForOption(customHiveOption);
             //TODO: check if it gets the command name correctly.
-            CommandName = invocationContext.ParseResult.CommandResult.Command.Name;
-            InvocationContext = invocationContext;
+            CommandName = parseResult.CommandResult.Command.Name;
         }
-
-        public InvocationContext InvocationContext { get; }
 
         internal string CommandName { get; private set; }
 

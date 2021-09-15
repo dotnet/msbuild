@@ -29,14 +29,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return command;
         }
 
-        protected override async Task<New3CommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        protected override async Task<New3CommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             if (string.IsNullOrWhiteSpace(args.ShortName))
             {
                 if (args.HelpRequested)
                 {
                     HelpResult helpResult = new HelpResult();
-                    helpResult.Apply(args.InvocationContext);
+                    helpResult.Apply(context);
                     return New3CommandStatus.Success;
                 }
                 //show curated list
@@ -45,7 +45,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
 
-            var templates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            var templates = await templatePackageManager.GetTemplatesAsync(context.GetCancellationToken()).ConfigureAwait(false);
             var template = templates.FirstOrDefault(template => template.ShortNameList.Contains(args.ShortName));
 
             if (template == null)
@@ -78,7 +78,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return (New3CommandStatus)dotnet.Invoke(newArgs);
         }
 
-        protected override NewCommandArgs ParseContext(InvocationContext context) => new(context);
+        protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(parseResult);
 
         /// <summary>
         /// Implements suggestions for "new" command.
@@ -96,11 +96,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal partial class NewCommandArgs : GlobalArgs
     {
-        public NewCommandArgs(InvocationContext invocationContext) : base(invocationContext)
+        public NewCommandArgs(ParseResult parseResult) : base(parseResult)
         {
-            Arguments = invocationContext.ParseResult.ValueForArgument(RemainingArguments);
-            ShortName = invocationContext.ParseResult.ValueForArgument(ShortNameArgument);
-            HelpRequested = invocationContext.ParseResult.ValueForOption(HelpOption);
+            Arguments = parseResult.ValueForArgument(RemainingArguments);
+            ShortName = parseResult.ValueForArgument(ShortNameArgument);
+            HelpRequested = parseResult.ValueForOption(HelpOption);
         }
 
         internal string? ShortName { get; }
@@ -133,6 +133,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 //decide if we do it here or in child class
                 var shortName = parseResult?.ValueForArgument(ShortNameArgument);
+
                 return Array.Empty<string>();
             });
 

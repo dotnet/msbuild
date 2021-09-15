@@ -5,6 +5,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
@@ -44,8 +45,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
-            TArgs args = ParseContext(context);
-
+            TArgs args = ParseContext(context.ParseResult);
             string? outputPath = (args as InstantiateCommandArgs)?.OutputPath;
 
             IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
@@ -54,21 +54,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 virtualizeSettings: args.DebugVirtualSettings,
                 environment: new CliEnvironment());
 
-            var cancellationTokenSource = new CancellationTokenSource();
-            Console.CancelKeyPress += (s, e) =>
-            {
-                cancellationTokenSource.Cancel();
-            };
-
-            using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, cancellationTokenSource.Token).ConfigureAwait(false);
-            return (int)await ExecuteAsync(args, environmentSettings, cancellationTokenSource.Token).ConfigureAwait(false);
+            using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, context.GetCancellationToken()).ConfigureAwait(false);
+            return (int)await ExecuteAsync(args, environmentSettings, context).ConfigureAwait(false);
         }
 
         protected abstract Command CreateCommandAbstract();
 
-        protected abstract Task<New3CommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken);
+        protected abstract Task<New3CommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
 
-        protected abstract TArgs ParseContext(InvocationContext context);
+        protected abstract TArgs ParseContext(ParseResult parseResult);
 
         private static async Task<AsyncMutex?> EnsureEntryMutex(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken token)
         {

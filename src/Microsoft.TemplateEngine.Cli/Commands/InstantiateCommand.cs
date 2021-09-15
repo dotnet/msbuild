@@ -5,6 +5,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -20,16 +21,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return command;
         }
 
-        protected override Task<New3CommandStatus> ExecuteAsync(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken) => throw new NotImplementedException();
+        protected override Task<New3CommandStatus> ExecuteAsync(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 
-        protected override InstantiateCommandArgs ParseContext(InvocationContext context) => throw new NotImplementedException();
+        protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => throw new NotImplementedException();
     }
 
     internal class InstantiateCommandArgs : GlobalArgs
     {
-        public InstantiateCommandArgs(InvocationContext invocationContext) : base(invocationContext)
+        public InstantiateCommandArgs(ParseResult parseResult) : base(parseResult)
         {
-            OutputPath = invocationContext.ParseResult.ValueForOption(OutputPathOption);
+            OutputPath = parseResult.ValueForOption(OutputPathOption);
         }
 
         public string? OutputPath { get; }

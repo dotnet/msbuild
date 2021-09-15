@@ -5,6 +5,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -15,14 +16,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected override Command CreateCommandAbstract() => throw new NotImplementedException();
 
-        protected override Task<New3CommandStatus> ExecuteAsync(AddAliasCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken) => throw new NotImplementedException();
+        protected override Task<New3CommandStatus> ExecuteAsync(AddAliasCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 
-        protected override AddAliasCommandArgs ParseContext(InvocationContext context) => throw new NotImplementedException();
+        protected override AddAliasCommandArgs ParseContext(ParseResult parseResult) => new(parseResult);
     }
 
     internal class AddAliasCommandArgs : GlobalArgs
     {
-        public AddAliasCommandArgs(InvocationContext invocationContext) : base(invocationContext)
+        public AddAliasCommandArgs(ParseResult parseResult) : base(parseResult)
         {
         }
     }

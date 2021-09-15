@@ -5,6 +5,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
@@ -39,7 +40,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return command;
         }
 
-        protected override Task<New3CommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        protected override Task<New3CommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplateInformationCoordinator templateInformationCoordinator = new TemplateInformationCoordinator(
@@ -57,20 +58,19 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 templateInformationCoordinator,
                 environmentSettings.GetDefaultLanguage());
 
-            return templatePackageCoordinator.EnterInstallFlowAsync(args, cancellationToken);
+            return templatePackageCoordinator.EnterInstallFlowAsync(args, context.GetCancellationToken());
         }
 
-        protected override InstallCommandArgs ParseContext(InvocationContext context) => new(context);
+        protected override InstallCommandArgs ParseContext(ParseResult parseResult) => new(parseResult);
     }
 
     internal class LegacyInstallCommandArgs : GlobalArgs
     {
-        public LegacyInstallCommandArgs(InvocationContext invocationContext)
-            : base(invocationContext)
+        public LegacyInstallCommandArgs(ParseResult parseResult) : base(parseResult)
         {
-            TemplatePackages = invocationContext.ParseResult.ValueForArgument(NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
-            Interactive = invocationContext.ParseResult.ValueForOption(InteractiveOption);
-            AdditionalSources = invocationContext.ParseResult.ValueForOption(AddSourceOption);
+            TemplatePackages = parseResult.ValueForArgument(NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
+            Interactive = parseResult.ValueForOption(InteractiveOption);
+            AdditionalSources = parseResult.ValueForOption(AddSourceOption);
         }
 
         public IReadOnlyList<string> TemplatePackages { get; }
@@ -115,12 +115,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class InstallCommandArgs : GlobalArgs
     {
-        public InstallCommandArgs(InvocationContext invocationContext)
-            : base(invocationContext)
+        public InstallCommandArgs(ParseResult parseResult) : base(parseResult)
         {
-            TemplatePackages = invocationContext.ParseResult.ValueForArgument(NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
-            Interactive = invocationContext.ParseResult.ValueForOption(InteractiveOption);
-            AdditionalSources = invocationContext.ParseResult.ValueForOption(AddSourceOption);
+            TemplatePackages = parseResult.ValueForArgument(NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
+            Interactive = parseResult.ValueForOption(InteractiveOption);
+            AdditionalSources = parseResult.ValueForOption(AddSourceOption);
         }
 
         public IReadOnlyList<string> TemplatePackages { get; }
