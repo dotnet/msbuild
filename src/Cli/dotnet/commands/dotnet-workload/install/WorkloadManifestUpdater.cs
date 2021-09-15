@@ -431,20 +431,21 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private IEnumerable<(ManifestId, ManifestVersion)> ParseRollbackDefinitionFile(string rollbackDefinitionFilePath)
         {
             string fileContent;
-            if (File.Exists(rollbackDefinitionFilePath))
+
+            if (Uri.TryCreate(rollbackDefinitionFilePath, UriKind.Absolute, out var rollbackUri) && !rollbackUri.IsFile)
             {
-                fileContent = File.ReadAllText(rollbackDefinitionFilePath);
+                fileContent = (new HttpClient()).GetStringAsync(rollbackDefinitionFilePath).Result;
             }
             else
             {
-                try
+                if (File.Exists(rollbackDefinitionFilePath))
                 {
-                    fileContent = (new HttpClient()).GetStringAsync(rollbackDefinitionFilePath).Result;
+                    fileContent = File.ReadAllText(rollbackDefinitionFilePath);
                 }
-                catch (InvalidOperationException)
+                else
                 {
                     throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
-                }
+                }           
             }
             return JsonSerializer.Deserialize<IDictionary<string, string>>(fileContent)
                 .Select(manifest => (new ManifestId(manifest.Key), new ManifestVersion(manifest.Value)));
