@@ -72,10 +72,10 @@ namespace Microsoft.TemplateEngine.Cli
             _ = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _ = callbacks ?? throw new ArgumentNullException(nameof(callbacks));
 
-            Command rootCommand = new NewCommand(commandName, host, telemetryLogger, callbacks).CreateCommand();
+            Command rootCommand = new NewCommand(commandName, host, telemetryLogger, callbacks);
             foreach (var commandCreator in CommandFactory.GetSubcommands())
             {
-                rootCommand.Add(commandCreator(host, telemetryLogger, callbacks).CreateCommand());
+                rootCommand.Add(commandCreator(host, telemetryLogger, callbacks));
             }
             return rootCommand;
         }

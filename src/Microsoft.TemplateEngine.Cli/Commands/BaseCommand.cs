@@ -12,40 +12,52 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal interface IBaseCommand
-    {
-        public Command CreateCommand();
-
-        public Task<int> InvokeAsync(InvocationContext context);
-    }
-
-    internal abstract class BaseCommandHandler<TArgs> : IBaseCommand, ICommandHandler where TArgs : GlobalArgs
+    internal abstract class BaseCommand<TArgs> : Command, ICommandHandler where TArgs : GlobalArgs
     {
         private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
         private readonly ITemplateEngineHost _host;
 
-        internal BaseCommandHandler(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
+        internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks, string name, string? description = null)
+            : base(name, description)
         {
             _host = host;
             TelemetryLogger = logger;
             Callbacks = callbacks;
+            this.Handler = this;
+            GlobalArgs.AddGlobalsToCommand(this);
         }
 
-        protected ITelemetryLogger TelemetryLogger { get; }
+        internal ITelemetryLogger TelemetryLogger { get; }
 
-        protected New3Callbacks Callbacks { get; }
-
-        public Command CreateCommand()
-        {
-            var command = CreateCommandAbstract();
-            GlobalArgs.AddGlobalsToCommand(command);
-            command.Handler = this;
-            return command;
-        }
+        internal New3Callbacks Callbacks { get; }
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
             TArgs args = ParseContext(context.ParseResult);
+            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args);
+
+            using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, context.GetCancellationToken()).ConfigureAwait(false);
+            return (int)await ExecuteAsync(args, environmentSettings, context).ConfigureAwait(false);
+        }
+
+        public override IEnumerable<string> GetSuggestions(ParseResult? parseResult = null, string? textToMatch = null)
+        {
+            if (parseResult == null)
+            {
+                return base.GetSuggestions(parseResult, textToMatch);
+            }
+            TArgs args = ParseContext(parseResult);
+            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args);
+            return GetSuggestions(args, environmentSettings, textToMatch);
+        }
+
+        protected virtual IEnumerable<string> GetSuggestions(TArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
+        {
+            return base.GetSuggestions(args.ParseResult, textToMatch);
+        }
+
+        protected IEngineEnvironmentSettings CreateEnvironmentSettings(TArgs args)
+        {
             string? outputPath = (args as InstantiateCommandArgs)?.OutputPath;
 
             IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
@@ -53,12 +65,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 settingsLocation: args.DebugSettingsLocation,
                 virtualizeSettings: args.DebugVirtualSettings,
                 environment: new CliEnvironment());
-
-            using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, context.GetCancellationToken()).ConfigureAwait(false);
-            return (int)await ExecuteAsync(args, environmentSettings, context).ConfigureAwait(false);
+            return environmentSettings;
         }
-
-        protected abstract Command CreateCommandAbstract();
 
         protected abstract Task<New3CommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
 

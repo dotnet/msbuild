@@ -51,27 +51,28 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (templateResolutionResult.ResolutionStatus == TemplateResolutionResult.Status.SingleMatch && templateResolutionResult.TemplateToInvoke != null)
             {
-                TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_telemetryLogger, _environment, _templatePackageManager, _templateInformationCoordinator);
+                throw new NotImplementedException();
+                //TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_telemetryLogger, _environment, _templatePackageManager, _templateInformationCoordinator);
 
-                // start checking for updates
-                var checkForUpdateTask = packageCoordinator.CheckUpdateForTemplate(templateResolutionResult.TemplateToInvoke.Value.Template, commandInput, cancellationToken);
-                // start creation of template
-                var templateCreationTask = _invoker.InvokeTemplate(
-                    templateResolutionResult.TemplateToInvoke.Value.Template,
-                    templateResolutionResult.TemplateToInvoke.Value.Parameters,
-                    commandInput);
+                //// start checking for updates
+                //var checkForUpdateTask = packageCoordinator.CheckUpdateForTemplate(templateResolutionResult.TemplateToInvoke.Value.Template, commandInput, cancellationToken);
+                //// start creation of template
+                //var templateCreationTask = _invoker.InvokeTemplate(
+                //    templateResolutionResult.TemplateToInvoke.Value.Template,
+                //    templateResolutionResult.TemplateToInvoke.Value.Parameters,
+                //    commandInput);
 
-                // await for both tasks to finish
-                await Task.WhenAll(checkForUpdateTask, templateCreationTask).ConfigureAwait(false);
+                //// await for both tasks to finish
+                //await Task.WhenAll(checkForUpdateTask, templateCreationTask).ConfigureAwait(false);
 
-                if (checkForUpdateTask.Result != null)
-                {
-                    // print if there is update for this template
-                    packageCoordinator.DisplayUpdateCheckResult(checkForUpdateTask.Result, commandInput);
-                }
+                //if (checkForUpdateTask.Result != null)
+                //{
+                //    // print if there is update for this template
+                //    packageCoordinator.DisplayUpdateCheckResult(checkForUpdateTask.Result, commandInput);
+                //}
 
-                // return creation result
-                return templateCreationTask.Result;
+                //// return creation result
+                //return templateCreationTask.Result;
             }
             else
             {

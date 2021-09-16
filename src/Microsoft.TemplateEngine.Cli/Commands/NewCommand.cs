@@ -12,21 +12,37 @@ using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class NewCommand : BaseCommandHandler<NewCommandArgs>
+    internal class NewCommand : BaseCommand<NewCommandArgs>
     {
         private readonly string _commandName;
 
-        internal NewCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks)
+        internal NewCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
+            : base(host, logger, callbacks, commandName)
         {
             _commandName = commandName;
+            NewCommandArgs.AddToCommand(this);
+            this.TreatUnmatchedTokensAsErrors = true;
+            this.Description = LocalizableStrings.CommandDescription;
         }
 
-        protected override Command CreateCommandAbstract()
+        protected override IEnumerable<string> GetSuggestions(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
         {
-            Command command = new NewCommandWithSuggestions(_commandName, LocalizableStrings.CommandDescription);
-            NewCommandArgs.AddToCommand(command);
-            command.TreatUnmatchedTokensAsErrors = true;
-            return command;
+            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
+            var templates = templatePackageManager.GetTemplatesAsync(CancellationToken.None).Result;
+
+            if (!string.IsNullOrEmpty(args.ShortName))
+            {
+                var template = templates.FirstOrDefault(template => template.ShortNameList.Contains(args.ShortName));
+
+                if (template != null)
+                {
+                    var templateGroupCommand = new TemplateGroupCommand(this, environmentSettings, template);
+                    var parsed = templateGroupCommand.Parse(args.Arguments ?? Array.Empty<string>());
+                    return templateGroupCommand.GetSuggestions(parsed, textToMatch);
+                }
+            }
+
+            return base.GetSuggestions(args, environmentSettings, textToMatch);
         }
 
         protected override async Task<New3CommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
@@ -43,8 +59,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return New3CommandStatus.Success;
             }
 
-            TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-
+            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             var templates = await templatePackageManager.GetTemplatesAsync(context.GetCancellationToken()).ConfigureAwait(false);
             var template = templates.FirstOrDefault(template => template.ShortNameList.Contains(args.ShortName));
 
@@ -54,44 +69,21 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return New3CommandStatus.NotFound;
             }
 
-            var dotnet = new Command("dotnet");
-            var newC = new Command("new");
-            var command = new Command(args.ShortName);
-            command.Description = template.Name + Environment.NewLine + template.Description;
-            command.AddOption(new Option<string>("-o"));
-            foreach (var p in template.Parameters)
+            //var dotnet = new Command("dotnet")
+            //{
+            //    TreatUnmatchedTokensAsErrors = false
+            //};
+            var newC = new Command(_commandName)
             {
-                command.AddOption(new Option<string>($"--{p.Name}")
-                {
-                    Description = p.Description
-                });
-            }
+                TreatUnmatchedTokensAsErrors = false
+            };
+            //dotnet.AddCommand(newC);
+            newC.AddCommand(new TemplateGroupCommand(this, environmentSettings, template));
 
-            command.Handler = CommandHandler.Create<InvocationContext>((c) => Reporter.Output.WriteLine("Template is created!"));
-
-            dotnet.AddCommand(newC);
-            newC.AddCommand(command);
-
-            string[] newArgs = new[] { "dotnet", "new", args.ShortName };
-            newArgs = newArgs.Concat(args.Arguments?.ToArray() ?? Array.Empty<string>()).ToArray();
-
-            return (New3CommandStatus)dotnet.Invoke(newArgs);
+            return (New3CommandStatus)newC.Invoke(context.ParseResult.Tokens.Select(s => s.Value).ToArray());
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(parseResult);
-
-        /// <summary>
-        /// Implements suggestions for "new" command.
-        /// </summary>
-        internal class NewCommandWithSuggestions : Command
-        {
-            public NewCommandWithSuggestions(string name, string? description = null) : base(name, description) { }
-
-            public override IEnumerable<string> GetSuggestions(ParseResult? parseResult = null, string? textToMatch = null)
-            {
-                return base.GetSuggestions(parseResult, textToMatch);
-            }
-        }
     }
 
     internal partial class NewCommandArgs : GlobalArgs
@@ -105,7 +97,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal string? ShortName { get; }
 
-        internal IReadOnlyList<string>? Arguments { get; }
+        internal string[]? Arguments { get; }
 
         internal bool HelpRequested { get; }
 
@@ -123,20 +115,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static void AddToCommand(Command command)
         {
-            ShortNameArgument.AddSuggestions((parseResult, textToMatch) =>
-            {
-                // get list of all short names
-                return Array.Empty<string>();
-            });
-
-            RemainingArguments.AddSuggestions((parseResult, textToMatch) =>
-            {
-                //decide if we do it here or in child class
-                var shortName = parseResult?.ValueForArgument(ShortNameArgument);
-
-                return Array.Empty<string>();
-            });
-
             command.AddArgument(ShortNameArgument);
             command.AddArgument(RemainingArguments);
             LegacyInstallCommandArgs.AddOptionsToCommand(command);

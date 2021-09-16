@@ -3,18 +3,15 @@
 
 #nullable enable
 
-using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class ListCommand : BaseCommandHandler<ListCommandArgs>
+    internal class ListCommand : BaseCommand<ListCommandArgs>
     {
-        internal ListCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
-
-        protected override Command CreateCommandAbstract() => throw new NotImplementedException();
+        internal ListCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks, "list") { }
 
         protected override Task<New3CommandStatus> ExecuteAsync(ListCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 

@@ -3,13 +3,14 @@
 
 #nullable enable
 
+using System.CommandLine;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal static class CommandFactory
     {
-        internal static IEnumerable<Func<ITemplateEngineHost, ITelemetryLogger, New3Callbacks, IBaseCommand>> GetSubcommands()
+        internal static IEnumerable<Func<ITemplateEngineHost, ITelemetryLogger, New3Callbacks, Command>> GetSubcommands()
         {
             yield return (host, telemetryLogger, callbacks) => new InstantiateCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);

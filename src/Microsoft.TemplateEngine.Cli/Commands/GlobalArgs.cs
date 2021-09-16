@@ -20,7 +20,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             DebugSettingsLocation = parseResult.ValueForOption(customHiveOption);
             //TODO: check if it gets the command name correctly.
             CommandName = parseResult.CommandResult.Command.Name;
+            ParseResult = parseResult;
         }
+
+        internal ParseResult ParseResult { get; }
 
         internal string CommandName { get; private set; }
 

@@ -16,28 +16,26 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class LegacyInstallCommand : InstallCommand
     {
-        internal LegacyInstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
-
-        protected override Command CreateCommandAbstract()
+        internal LegacyInstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
+            : base(host, logger, callbacks, "--install")
         {
-            var command = new Command("--install");
-            command.IsHidden = true;
-            command.AddAlias("-i");
-            InstallCommandArgs.AddToCommand(command);
-            return command;
-
+            this.IsHidden = true;
+            this.AddAlias("-i");
+            InstallCommandArgs.AddToCommand(this);
         }
     }
 
-    internal class InstallCommand : BaseCommandHandler<InstallCommandArgs>
+    internal class InstallCommand : BaseCommand<InstallCommandArgs>
     {
-        internal InstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
-
-        protected override Command CreateCommandAbstract()
+        internal InstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks, string commandName)
+            : base(host, logger, callbacks, commandName)
         {
-            var command = new Command("install");
-            InstallCommandArgs.AddToCommand(command);
-            return command;
+        }
+
+        internal InstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
+            : base(host, logger, callbacks, "install")
+        {
+            InstallCommandArgs.AddToCommand(this);
         }
 
         protected override Task<New3CommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)

@@ -5,8 +5,7 @@
 
 using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Utils;
 using CreationResultStatus = Microsoft.TemplateEngine.Edge.Template.CreationResultStatus;
 using ITemplateCreationResult = Microsoft.TemplateEngine.Edge.Template.ITemplateCreationResult;
@@ -42,8 +41,9 @@ namespace Microsoft.TemplateEngine.Cli
             _postActionDispatcher = new PostActionDispatcher(_environment, _callbacks, _inputGetter);
         }
 
-        internal async Task<New3CommandStatus> InvokeTemplate(ITemplateInfo templateToInvoke, IReadOnlyDictionary<string, string?> parameters, INewCommandInput commandInput)
+        internal async Task<New3CommandStatus> InvokeTemplate(TemplateGroupArgs templateGroupArgs)
         {
+            var templateToInvoke = templateGroupArgs.Template;
             string? templateLanguage = templateToInvoke.GetLanguage();
             bool isMicrosoftAuthored = string.Equals(templateToInvoke.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
             string? framework = null;
@@ -52,10 +52,10 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (isMicrosoftAuthored)
             {
-                parameters.TryGetValue("Framework", out string? inputFrameworkValue);
+                templateGroupArgs.TemplateSpecificOptions.TryGetValue("Framework", out string? inputFrameworkValue);
                 framework = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke, "Framework", inputFrameworkValue));
 
-                parameters.TryGetValue("auth", out string? inputAuthValue);
+                templateGroupArgs.TemplateSpecificOptions.TryGetValue("auth", out string? inputAuthValue);
                 auth = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke, "auth", inputAuthValue));
             }
 
@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                return await CreateTemplateAsync(templateToInvoke, parameters, commandInput).ConfigureAwait(false);
+                return await CreateTemplateAsync(templateToInvoke, templateGroupArgs).ConfigureAwait(false);
             }
             catch (ContentGenerationException cx)
             {
@@ -83,7 +83,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             finally
             {
-                _telemetryLogger.TrackEvent(commandInput.CommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
+                _telemetryLogger.TrackEvent(templateGroupArgs.CommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
                     {
                         { TelemetryConstants.Language, templateLanguage },
                         { TelemetryConstants.ArgError, "False" },
@@ -115,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli
         // Warning: The _commandInput cannot be assumed to be in a state that is parsed for the template being invoked.
         //      So be sure to only get template-agnostic information from it. Anything specific to the template must be gotten from the ITemplateMatchInfo
         //      Or do a reparse if necessary (currently occurs in one error case).
-        private async Task<New3CommandStatus> CreateTemplateAsync(ITemplateInfo template, IReadOnlyDictionary<string, string?> parameters, INewCommandInput commandInput)
+        private async Task<New3CommandStatus> CreateTemplateAsync(ITemplateInfo template, TemplateGroupArgs commandInput)
         {
             char[] invalidChars = Path.GetInvalidFileNameChars();
 
@@ -158,7 +158,7 @@ namespace Microsoft.TemplateEngine.Cli
                     commandInput.Name,
                     fallbackName,
                     commandInput.OutputPath,
-                    parameters,
+                    commandInput.TemplateSpecificOptions,
                     commandInput.IsForceFlagSpecified,
                     commandInput.BaselineName,
                     commandInput.IsDryRun)
@@ -180,7 +180,7 @@ namespace Microsoft.TemplateEngine.Cli
                 return New3CommandStatus.CreateFailed;
             }
 
-            string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? commandInput.TemplateName : instantiateResult.TemplateFullName;
+            string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? commandInput.Template.Name : instantiateResult.TemplateFullName;
 
             switch (instantiateResult.Status)
             {
@@ -210,43 +210,41 @@ namespace Microsoft.TemplateEngine.Cli
                 case CreationResultStatus.CreateFailed:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.ErrorMessage).Bold().Red());
                     return New3CommandStatus.CreateFailed;
-                case CreationResultStatus.MissingMandatoryParam:
-                    if (string.Equals(instantiateResult.ErrorMessage, "--name", StringComparison.Ordinal))
-                    {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.ErrorMessage, resultTemplateName).Bold().Red());
-                    }
-                    else if (!string.IsNullOrWhiteSpace(instantiateResult.ErrorMessage))
-                    {
-                        // TODO: rework to avoid having to reparse.
-                        // The canonical info could be in the ITemplateMatchInfo, but currently isn't.
-                        TemplateCommandInput reparsedCommand = TemplateCommandInput.ParseForTemplate(template, commandInput, _hostDataLoader.ReadHostSpecificTemplateData(template));
-                        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.ErrorMessage.Split(new[] { ',' })
-                            .Select(x => reparsedCommand.VariantsForCanonical(x.Trim())
-                                                        .DefaultIfEmpty(x.Trim()).First())
-                            .ToList();
-                        string fixedMessage = string.Join(", ", missingParamNamesCanonical);
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, fixedMessage, resultTemplateName).Bold().Red());
-                    }
-                    return New3CommandStatus.MissingMandatoryParam;
+                //TODO: needed?
+                //case CreationResultStatus.MissingMandatoryParam:
+                //    if (!string.IsNullOrWhiteSpace(instantiateResult.ErrorMessage))
+                //    {
+                //        // TODO: rework to avoid having to reparse.
+                //        // The canonical info could be in the ITemplateMatchInfo, but currently isn't.
+                //        TemplateCommandInput reparsedCommand = TemplateCommandInput.ParseForTemplate(template, commandInput, _hostDataLoader.ReadHostSpecificTemplateData(template));
+                //        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.ErrorMessage.Split(new[] { ',' })
+                //            .Select(x => reparsedCommand.VariantsForCanonical(x.Trim())
+                //                                        .DefaultIfEmpty(x.Trim()).First())
+                //            .ToList();
+                //        string fixedMessage = string.Join(", ", missingParamNamesCanonical);
+                //        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, fixedMessage, resultTemplateName).Bold().Red());
+                //    }
+                //    return New3CommandStatus.MissingMandatoryParam;
                 case CreationResultStatus.NotFound:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, commandInput).Bold().Red());
                     return New3CommandStatus.NotFound;
-                case CreationResultStatus.InvalidParamValues:
-                    TemplateUsageInformation? usageInformation = await TemplateUsageHelp.GetTemplateUsageInformationAsync(template, _environment, commandInput, _hostDataLoader, _templateCreator, default).ConfigureAwait(false);
+                    //TODO: needed?
+                //case CreationResultStatus.InvalidParamValues:
+                //    TemplateUsageInformation? usageInformation = await TemplateUsageHelp.GetTemplateUsageInformationAsync(template, _environment, commandInput, _hostDataLoader, _templateCreator, default).ConfigureAwait(false);
 
-                    if (usageInformation != null)
-                    {
-                        string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.Value.InvalidParameters);
-                        Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
-                        Reporter.Error.WriteLine(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters);
-                        Reporter.Error.WriteCommand(commandInput.HelpCommandExample());
-                    }
-                    else
-                    {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, commandInput.CommandName).Bold().Red());
-                        return New3CommandStatus.NotFound;
-                    }
-                    return New3CommandStatus.InvalidParamValues;
+                //    if (usageInformation != null)
+                //    {
+                //        string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.Value.InvalidParameters);
+                //        Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
+                //        Reporter.Error.WriteLine(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters);
+                //        Reporter.Error.WriteCommand(commandInput.HelpCommandExample());
+                //    }
+                //    else
+                //    {
+                //        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, commandInput.CommandName).Bold().Red());
+                //        return New3CommandStatus.NotFound;
+                //    }
+                //    return New3CommandStatus.InvalidParamValues;
                 case CreationResultStatus.DestructiveChangesDetected:
                     Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
                     if (instantiateResult.CreationEffects != null)
@@ -269,37 +267,39 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private New3CommandStatus HandlePostActions(ITemplateCreationResult creationResult, INewCommandInput commandInput)
+        private New3CommandStatus HandlePostActions(ITemplateCreationResult creationResult, TemplateGroupArgs commandInput)
         {
-            AllowRunScripts scriptRunSettings;
+            return New3CommandStatus.Success;
+            //TODO: DO
+            //AllowRunScripts scriptRunSettings;
 
-            if (string.IsNullOrEmpty(commandInput.AllowScriptsToRun) || string.Equals(commandInput.AllowScriptsToRun, "prompt", StringComparison.OrdinalIgnoreCase))
-            {
-                scriptRunSettings = AllowRunScripts.Prompt;
-            }
-            else if (string.Equals(commandInput.AllowScriptsToRun, "yes", StringComparison.OrdinalIgnoreCase))
-            {
-                scriptRunSettings = AllowRunScripts.Yes;
-            }
-            else if (string.Equals(commandInput.AllowScriptsToRun, "no", StringComparison.OrdinalIgnoreCase))
-            {
-                scriptRunSettings = AllowRunScripts.No;
-            }
-            else
-            {
-                scriptRunSettings = AllowRunScripts.Prompt;
-            }
+            //if (string.IsNullOrEmpty(commandInput.AllowScriptsToRun) || string.Equals(commandInput.AllowScriptsToRun, "prompt", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    scriptRunSettings = AllowRunScripts.Prompt;
+            //}
+            //else if (string.Equals(commandInput.AllowScriptsToRun, "yes", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    scriptRunSettings = AllowRunScripts.Yes;
+            //}
+            //else if (string.Equals(commandInput.AllowScriptsToRun, "no", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    scriptRunSettings = AllowRunScripts.No;
+            //}
+            //else
+            //{
+            //    scriptRunSettings = AllowRunScripts.Prompt;
+            //}
 
-            PostActionExecutionStatus result = _postActionDispatcher.Process(creationResult, commandInput.IsDryRun, scriptRunSettings);
+            //PostActionExecutionStatus result = _postActionDispatcher.Process(creationResult, commandInput.IsDryRun, scriptRunSettings);
 
-            return result switch
-            {
-                PostActionExecutionStatus.Success => New3CommandStatus.Success,
-                PostActionExecutionStatus.Failure => New3CommandStatus.PostActionFailed,
-                PostActionExecutionStatus.Cancelled => New3CommandStatus.Cancelled,
-                PostActionExecutionStatus.Failure | PostActionExecutionStatus.Cancelled => New3CommandStatus.PostActionFailed,
-                _ => New3CommandStatus.UnexpectedResult
-            };
+            //return result switch
+            //{
+            //    PostActionExecutionStatus.Success => New3CommandStatus.Success,
+            //    PostActionExecutionStatus.Failure => New3CommandStatus.PostActionFailed,
+            //    PostActionExecutionStatus.Cancelled => New3CommandStatus.Cancelled,
+            //    PostActionExecutionStatus.Failure | PostActionExecutionStatus.Cancelled => New3CommandStatus.PostActionFailed,
+            //    _ => New3CommandStatus.UnexpectedResult
+            //};
         }
     }
 }

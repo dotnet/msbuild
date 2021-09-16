@@ -3,18 +3,15 @@
 
 #nullable enable
 
-using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class ShowAliasCommand : BaseCommandHandler<ShowAliasCommandArgs>
+    internal class ShowAliasCommand : BaseCommand<ShowAliasCommandArgs>
     {
-        internal ShowAliasCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
-
-        protected override Command CreateCommandAbstract() => throw new NotImplementedException();
+        internal ShowAliasCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks, "alias-show") { }
 
         protected override Task<New3CommandStatus> ExecuteAsync(ShowAliasCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 

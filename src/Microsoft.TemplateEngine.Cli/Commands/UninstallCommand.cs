@@ -3,18 +3,15 @@
 
 #nullable enable
 
-using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class UninstallCommand : BaseCommandHandler<UninstallCommandArgs>
+    internal class UninstallCommand : BaseCommand<UninstallCommandArgs>
     {
-        internal UninstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
-
-        protected override Command CreateCommandAbstract() => throw new NotImplementedException();
+        internal UninstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks, "uninstall") { }
 
         protected override Task<New3CommandStatus> ExecuteAsync(UninstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 

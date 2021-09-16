@@ -10,15 +10,12 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class InstantiateCommand : BaseCommandHandler<InstantiateCommandArgs>
+    internal class InstantiateCommand : BaseCommand<InstantiateCommandArgs>
     {
-        internal InstantiateCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks) { }
-
-        protected override Command CreateCommandAbstract()
+        internal InstantiateCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks, "create")
         {
-            var command = new Command("create");
-            InstantiateCommandArgs.AddToCommand(command);
-            return command;
+            InstantiateCommandArgs.AddToCommand(this);
+
         }
 
         protected override Task<New3CommandStatus> ExecuteAsync(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
