@@ -1,6 +1,6 @@
 {
   "tools": {
-    "dotnet": "5.0.102",
+    "dotnet": "5.0.401",
     "runtimes": {
       "dotnet/x64": [
         "2.1.7"
