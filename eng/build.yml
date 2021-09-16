@@ -22,6 +22,7 @@ jobs:
       LclSource: lclFilesfromPackage
       LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
       MirrorBranch: release/6.0.1xx
+      MirrorRepo: sdk
 - template: /eng/common/templates/job/job.yml
   parameters:
     name: ${{ parameters.agentOs }}
