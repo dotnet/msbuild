@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Xml;
 using System.Xml.Xsl;
 using System.Xml.XPath;
@@ -335,7 +334,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (XmlMode == XmlModes.XmlFile)
                 {
-                    return XmlReader.Create(new StreamReader(_data[itemPos], new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), detectEncodingFromByteOrderMarks: true));
+                    return XmlReader.Create(new StreamReader(_data[itemPos]));
                 }
                 else // xmlModes.Xml 
                 {
@@ -460,7 +459,7 @@ namespace Microsoft.Build.Tasks
                             _log.LogMessageFromResources(MessageImportance.Low, "XslTransform.UseTrustedSettings", _data);
                         }
 
-                        xslct.Load(new XPathDocument(XmlReader.Create(new StreamReader(_data, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), detectEncodingFromByteOrderMarks: true))), settings, new XmlUrlResolver());
+                        xslct.Load(new XPathDocument(XmlReader.Create(new StreamReader(_data))), settings, new XmlUrlResolver());
                         break;
                     case XslModes.XsltCompiledDll:
 #if FEATURE_COMPILED_XSL
