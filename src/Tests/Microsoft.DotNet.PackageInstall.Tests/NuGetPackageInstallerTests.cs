@@ -43,8 +43,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             _tempDirectory = GetUniqueTempProjectPathEachTest();
             _logger = new NuGetTestLogger();
             _installer =
-                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(),
-                    _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
+                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(), _logger,
+                    restoreActionConfig: new RestoreActionConfig(NoCache: true), timer: () => ExponentialRetry.Timer(ExponentialRetry.TestingIntervals));
         }
 
         [Fact]
