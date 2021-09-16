@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Clean.Tests
                 .WithSource();
 
             new DotnetBuildCommand(Log, testInstance.Path)
-                .Execute("-r", "win7-x64", "/p:ProduceReferenceAssembly=false")
+                .Execute("-r", "win7-x64")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";

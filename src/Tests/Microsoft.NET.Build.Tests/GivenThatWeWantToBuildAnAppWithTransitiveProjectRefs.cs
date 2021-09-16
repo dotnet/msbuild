@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             buildCommand
-                .Execute("/p:ProduceReferenceAssembly=false")
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -80,7 +80,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset, "TestApp");
 
             buildCommand
-                .Execute("/p:ProduceReferenceAssembly=false")
+                .Execute()
                 .Should()
                 .Pass();
 

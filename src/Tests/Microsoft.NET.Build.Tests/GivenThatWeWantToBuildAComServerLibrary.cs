@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
-                .Execute("/p:ProduceReferenceAssembly=false")
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -65,7 +65,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
-                .Execute("/p:ProduceReferenceAssembly=false")
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
-                .Execute("/p:ProduceReferenceAssembly=false")
+                .Execute()
                 .Should()
                 .Pass();
 
