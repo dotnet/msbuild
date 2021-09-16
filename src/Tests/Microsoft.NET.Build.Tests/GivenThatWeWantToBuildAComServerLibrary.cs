@@ -33,15 +33,14 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1");
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
                 "ComServer.pdb",
                 "ComServer.deps.json",
                 "ComServer.comhost.dll",
-                "ComServer.runtimeconfig.json",
-                "ComServer.runtimeconfig.dev.json"
+                "ComServer.runtimeconfig.json"
             });
 
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, "ComServer.runtimeconfig.json");
@@ -70,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1");
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
@@ -78,8 +77,7 @@ namespace Microsoft.NET.Build.Tests
                 "ComServer.deps.json",
                 "ComServer.comhost.dll",
                 "ComServer.X.manifest",
-                "ComServer.runtimeconfig.json",
-                "ComServer.runtimeconfig.dev.json"
+                "ComServer.runtimeconfig.json"
             });
         }
 
@@ -104,15 +102,14 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1", runtimeIdentifier: rid);
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, runtimeIdentifier: rid);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
                 "ComServer.pdb",
                 "ComServer.deps.json",
                 "ComServer.comhost.dll",
-                "ComServer.runtimeconfig.json",
-                "ComServer.runtimeconfig.dev.json"
+                "ComServer.runtimeconfig.json"
             });
         }
 

@@ -180,7 +180,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [WindowsOnlyFact(Skip="https://github.com/dotnet/sdk/issues/3678")]
+        [WindowsOnlyFact]
         public void It_builds_a_vb_wpf_app()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;

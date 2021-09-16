@@ -34,7 +34,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            string intermediateOutputPath = Path.Combine(command.GetBaseIntermediateDirectory().FullName, "Debug", "netcoreapp2.0");
+            string intermediateOutputPath = Path.Combine(command.GetBaseIntermediateDirectory().FullName, "Debug", ToolsetInfo.CurrentTargetFramework);
             string itemsFile = Path.Combine(intermediateOutputPath, "Items.txt");
 
             var items = File.ReadAllLines(itemsFile)
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputPath = buildCommand.GetOutputDirectory("netcoreapp2.0");
+            var outputPath = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputPath.Should().NotHaveFile("TextFile1.txt");
 

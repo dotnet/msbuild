@@ -101,7 +101,8 @@ namespace Microsoft.NET.TestFramework
             p =>
             {
                 var ns = p.Root.Name.Namespace;
-                var currentTargetFramework = p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").SingleOrDefault();
+                var currentTargetFramework = p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").FirstOrDefault();
+                currentTargetFramework ??= p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFrameworks").FirstOrDefault();
                 currentTargetFramework?.SetValue(currentTargetFramework?.Value.Replace("$(CurrentTargetFramework)", 
                                                                                         ToolsetInfo.CurrentTargetFramework));
             },

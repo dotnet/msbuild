@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("C#", "AppWithLibrary")]
         [InlineData("VB", "AppWithLibraryVB")]
-        [InlineData("F#", "AppWithLibraryFS", Skip = "https://github.com/dotnet/coreclr/issues/27275")]
+        [InlineData("F#", "AppWithLibraryFS")]
         public void It_resolves_analyzers_correctly(string language, string testAssetName)
         {
             var asset = _testAssetsManager
@@ -48,7 +48,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(
                 Log,
                 Path.Combine(asset.Path, "TestApp"),
-                "netcoreapp1.1",
+                ToolsetInfo.CurrentTargetFramework,
                 "Analyzer",
                 GetValuesCommand.ValueType.Item);
 
@@ -59,9 +59,9 @@ namespace Microsoft.NET.Build.Tests
             switch (language)
             {
                 case "C#":
-                    analyzers.Select(RelativeNuGetPath).Should().BeEquivalentTo(
-                        "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll",
-                        "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.Analyzers.dll",
+                    analyzers.Select(x => RelativeNuGetPath(x)).Where(x => x != null).Should().BeEquivalentTo(
+                        "Microsoft.NET.Sdk/targets/../analyzers/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+                        "Microsoft.NET.Sdk/targets/../analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll",
                         "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/cs/Microsoft.CodeQuality.Analyzers.dll",
                         "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/cs/Microsoft.CodeQuality.CSharp.Analyzers.dll",
                         "microsoft.dependencyvalidation.analyzers/0.9.0/analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"
@@ -69,9 +69,9 @@ namespace Microsoft.NET.Build.Tests
                     break;
 
                 case "VB":
-                    analyzers.Select(RelativeNuGetPath).Should().BeEquivalentTo(
-                        "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/vb/Microsoft.CodeAnalysis.Analyzers.dll",
-                        "microsoft.codeanalysis.analyzers/1.1.0/analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.Analyzers.dll",
+                    analyzers.Select(x => RelativeNuGetPath(x)).Should().BeEquivalentTo(
+                        "Microsoft.NET.Sdk/targets/../analyzers/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll",
+                        "Microsoft.NET.Sdk/targets/../analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll",
                         "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/vb/Microsoft.CodeQuality.Analyzers.dll",
                         "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/vb/Microsoft.CodeQuality.VisualBasic.Analyzers.dll",
                         "microsoft.dependencyvalidation.analyzers/0.9.0/analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Build.Tests
 
                 getValuesCommand.Execute("-p:TargetFramework=" + targetFramework).Should().Pass();
 
-                return getValuesCommand.GetValues().Select(RelativeNuGetPath).ToList();
+                return getValuesCommand.GetValues().Select(x => RelativeNuGetPath(x,false)).ToList();
             }
             
             GetAnalyzersForTargetFramework("net6.0").Should().BeEquivalentTo("system.text.json/6.0.0-preview.4.21253.7/analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll");
@@ -134,13 +134,18 @@ namespace Microsoft.NET.Build.Tests
         static readonly List<string> nugetRoots = new List<string>()
             {
                 TestContext.Current.NuGetCachePath,
-                Path.Combine(FileConstants.UserProfileFolder, ".dotnet", "NuGetFallbackFolder")
+                Path.Combine(FileConstants.UserProfileFolder, ".dotnet", "NuGetFallbackFolder"),
+                TestContext.Current.ToolsetUnderTest.SdksPath
             };
 
-        static string RelativeNuGetPath(string absoluteNuGetPath)
+        static string RelativeNuGetPath(string absoluteNuGetPath, bool excludeSourceGeneration = true)
         {
             foreach (var nugetRoot in nugetRoots)
             {
+                if (excludeSourceGeneration && absoluteNuGetPath.EndsWith("System.Text.Json.SourceGeneration.dll"))
+                {
+                    return null;
+                }
                 if (absoluteNuGetPath.StartsWith(nugetRoot + Path.DirectorySeparatorChar))
                 {
                     return absoluteNuGetPath.Substring(nugetRoot.Length + 1)

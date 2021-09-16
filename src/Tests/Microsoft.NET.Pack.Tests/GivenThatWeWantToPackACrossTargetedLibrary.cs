@@ -33,11 +33,13 @@ namespace Microsoft.NET.Pack.Tests
             var outputDirectory = new DirectoryInfo(Path.Combine(libraryProjectDirectory, "bin", "Debug"));
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "NetStandardAndNetCoreApp.1.0.0.nupkg",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.dll",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.pdb",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.runtimeconfig.json",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.runtimeconfig.dev.json",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.deps.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.dll",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.pdb",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.runtimeconfig.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.deps.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/Newtonsoft.Json.dll",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp{EnvironmentInfo.ExecutableExtension}",
+                $"{ToolsetInfo.CurrentTargetFramework}/ref/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.pdb",
                 "netstandard1.5/NetStandardAndNetCoreApp.deps.json"
