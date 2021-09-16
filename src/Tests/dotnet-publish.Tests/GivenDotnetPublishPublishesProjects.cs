@@ -227,7 +227,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputProgram = Path.Combine(rootDir, "bin", configuration, "netcoreapp3.1", "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(rootDir, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()
@@ -278,7 +278,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputProgram = Path.Combine(rootPath, "bin", configuration, "netcoreapp3.1", rid, "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(rootPath, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid, "publish", $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()
