@@ -12,12 +12,45 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         private static Option<bool> quietOption = new("--quiet", "sshhhhhhhhhhhh");
 
-        private static Option<string?> customHiveOption = new("--debug:custom-hive", "Sets custom settings location");
+        private static Option<string?> debugCustomSettingsLocationOption = new("--debug:custom-hive", "Sets custom settings location")
+        {
+            IsHidden = true
+        };
+
+        private static Option<bool> debugVirtualizeSettingsOption = new("--debug:ephemeral-hive", "Use virtual settings")
+        {
+            IsHidden = true
+        };
+
+        private static Option<bool> debugAttachOption = new("--debug:attach", "Allows to pause execution in order to attach to the process for debug purposes")
+        {
+            IsHidden = true
+        };
+
+        private static Option<bool> debugReinitOption = new("--debug:reinit", "Resets the settings")
+        {
+            IsHidden = true
+        };
+
+        private static Option<bool> debugRebuildCacheOption = new(new[] { "--debug:rebuild-cache", "--debug:rebuildcache" }, "Resets template cache")
+        {
+            IsHidden = true
+        };
+
+        private static Option<bool> debugShowConfigOption = new(new[] { "--debug:show-config", "--debug:showconfig" }, "Shows the template engine config")
+        {
+            IsHidden = true
+        };
 
         public GlobalArgs(ParseResult parseResult)
         {
             Quiet = parseResult.ValueForOption(quietOption);
-            DebugSettingsLocation = parseResult.ValueForOption(customHiveOption);
+            DebugCustomSettingsLocation = parseResult.ValueForOption(debugCustomSettingsLocationOption);
+            DebugVirtualizeSettings = parseResult.ValueForOption(debugVirtualizeSettingsOption);
+            DebugAttach = parseResult.ValueForOption(debugAttachOption);
+            DebugReinit = parseResult.ValueForOption(debugReinitOption);
+            DebugRebuildCache = parseResult.ValueForOption(debugRebuildCacheOption);
+            DebugShowConfig = parseResult.ValueForOption(debugShowConfigOption);
             //TODO: check if it gets the command name correctly.
             CommandName = parseResult.CommandResult.Command.Name;
             ParseResult = parseResult;
@@ -33,18 +66,23 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal bool DebugRebuildCache { get; private set; }
 
-        internal bool DebugVirtualSettings { get; private set; }
+        internal bool DebugVirtualizeSettings { get; private set; }
 
         internal bool DebugReinit { get; private set; }
 
         internal bool DebugShowConfig { get; private set; }
 
-        internal string? DebugSettingsLocation { get; private set; }
+        internal string? DebugCustomSettingsLocation { get; private set; }
 
         internal static void AddGlobalsToCommand(Command command)
         {
             command.AddOption(quietOption);
-            command.AddOption(customHiveOption);
+            command.AddOption(debugCustomSettingsLocationOption);
+            command.AddOption(debugVirtualizeSettingsOption);
+            command.AddOption(debugAttachOption);
+            command.AddOption(debugReinitOption);
+            command.AddOption(debugRebuildCacheOption);
+            command.AddOption(debugShowConfigOption);
         }
     }
 }

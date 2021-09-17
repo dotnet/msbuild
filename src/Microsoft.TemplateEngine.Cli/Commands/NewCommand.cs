@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable enable
@@ -16,13 +16,22 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         private readonly string _commandName;
 
-        internal NewCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
-            : base(host, logger, callbacks, commandName)
+        internal NewCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks) : base(host, telemetryLogger, callbacks, commandName)
         {
             _commandName = commandName;
             NewCommandArgs.AddToCommand(this);
             this.TreatUnmatchedTokensAsErrors = true;
             this.Description = LocalizableStrings.CommandDescription;
+
+            this.Add(new InstantiateCommand(host, telemetryLogger, callbacks));
+            this.Add(new InstallCommand(host, telemetryLogger, callbacks));
+            this.Add(new LegacyInstallCommand(host, telemetryLogger, callbacks));
+            //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);
+            //yield return (host, telemetryLogger, callbacks) => new SearchCommand(host, telemetryLogger, callbacks);
+            //yield return (host, telemetryLogger, callbacks) => new UninstallCommand(host, telemetryLogger, callbacks);
+            //yield return (host, telemetryLogger, callbacks) => new UpdateCommand(host, telemetryLogger, callbacks);
+            //yield return (host, telemetryLogger, callbacks) => new AddAliasCommand(host, telemetryLogger, callbacks);
+            //yield return (host, telemetryLogger, callbacks) => new ShowAliasCommand(host, telemetryLogger, callbacks);
         }
 
         protected override IEnumerable<string> GetSuggestions(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
@@ -84,41 +93,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(parseResult);
-    }
 
-    internal partial class NewCommandArgs : GlobalArgs
-    {
-        public NewCommandArgs(ParseResult parseResult) : base(parseResult)
-        {
-            Arguments = parseResult.ValueForArgument(RemainingArguments);
-            ShortName = parseResult.ValueForArgument(ShortNameArgument);
-            HelpRequested = parseResult.ValueForOption(HelpOption);
-        }
-
-        internal string? ShortName { get; }
-
-        internal string[]? Arguments { get; }
-
-        internal bool HelpRequested { get; }
-
-        private static Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
-        {
-            Arity = new ArgumentArity(0, 1)
-        };
-
-        private static Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
-        {
-            Arity = new ArgumentArity(0, 999)
-        };
-
-        private static Option<bool> HelpOption { get; } = new Option<bool>(new string[] { "-h", "--help", "-?" });
-
-        internal static void AddToCommand(Command command)
-        {
-            command.AddArgument(ShortNameArgument);
-            command.AddArgument(RemainingArguments);
-            LegacyInstallCommandArgs.AddOptionsToCommand(command);
-            command.AddOption(HelpOption);
-        }
     }
 }

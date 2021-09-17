@@ -6,8 +6,11 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.Reflection;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Edge;
+using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -17,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
         private readonly ITemplateEngineHost _host;
 
-        internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks, string name, string? description = null)
+        internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string name, string? description = null)
             : base(name, description)
         {
             _host = host;
@@ -29,15 +32,61 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal ITelemetryLogger TelemetryLogger { get; }
 
-        internal New3Callbacks Callbacks { get; }
+        internal NewCommandCallbacks Callbacks { get; }
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
             TArgs args = ParseContext(context.ParseResult);
             IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args);
 
-            using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, context.GetCancellationToken()).ConfigureAwait(false);
-            return (int)await ExecuteAsync(args, environmentSettings, context).ConfigureAwait(false);
+            CancellationToken cancellationToken = context.GetCancellationToken();
+
+            using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, cancellationToken).ConfigureAwait(false);
+
+            //TODO: check if this exception handling is needed or it is handled by System.CommandLine
+            try
+            {
+                //TODO:
+                //if (commandInput.IsHelpFlagSpecified)
+                //{
+                //    _telemetryLogger.TrackEvent(commandInput.CommandName + TelemetryConstants.HelpEventSuffix);
+                //}
+
+                using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
+                {
+                    await HandleGlobalOptionsAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
+                    return (int)await ExecuteAsync(args, environmentSettings, context).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                AggregateException? ax = ex as AggregateException;
+
+                while (ax != null && ax.InnerExceptions.Count == 1 && ax.InnerException is not null)
+                {
+                    ex = ax.InnerException;
+                    ax = ex as AggregateException;
+                }
+
+                Reporter.Error.WriteLine(ex.Message.Bold().Red());
+
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    ax = ex as AggregateException;
+
+                    while (ax != null && ax.InnerExceptions.Count == 1 && ax.InnerException is not null)
+                    {
+                        ex = ax.InnerException;
+                        ax = ex as AggregateException;
+                    }
+
+                    Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                }
+
+                Reporter.Error.WriteLine(ex.StackTrace.Bold().Red());
+                return 1;
+            }
         }
 
         public override IEnumerable<string> GetSuggestions(ParseResult? parseResult = null, string? textToMatch = null)
@@ -62,8 +111,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
                 new CliTemplateEngineHost(_host, outputPath),
-                settingsLocation: args.DebugSettingsLocation,
-                virtualizeSettings: args.DebugVirtualSettings,
+                settingsLocation: args.DebugCustomSettingsLocation,
+                virtualizeSettings: args.DebugVirtualizeSettings,
                 environment: new CliEnvironment());
             return environmentSettings;
         }
@@ -75,12 +124,75 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static async Task<AsyncMutex?> EnsureEntryMutex(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken token)
         {
             // we don't need to acquire mutex in case of virtual settings
-            if (args.DebugVirtualSettings)
+            if (args.DebugVirtualizeSettings)
             {
                 return null;
             }
             string entryMutexIdentity = $"Global\\{_entryMutexGuid}_{environmentSettings.Paths.HostVersionSettingsDir.Replace("\\", "_").Replace("/", "_")}";
             return await AsyncMutex.WaitAsync(entryMutexIdentity, token).ConfigureAwait(false);
+        }
+
+        private static async Task HandleGlobalOptionsAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        {
+            HandleDebugAttach(args);
+            HandleDebugReinit(args, environmentSettings);
+            await HandleDebugRebuildCacheAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
+            HandleDebugShowConfig(args, environmentSettings);
+        }
+
+        private static void HandleDebugAttach(TArgs args)
+        {
+            if (!args.DebugAttach)
+            {
+                return;
+            }
+            Reporter.Output.WriteLine("Attach to the process and press any key");
+            Console.ReadLine();
+        }
+
+        private static void HandleDebugReinit(TArgs args, IEngineEnvironmentSettings environmentSettings)
+        {
+            if (!args.DebugReinit)
+            {
+                return;
+            }
+            environmentSettings.Host.FileSystem.DirectoryDelete(environmentSettings.Paths.HostVersionSettingsDir, true);
+            environmentSettings.Host.FileSystem.CreateDirectory(environmentSettings.Paths.HostVersionSettingsDir);
+        }
+
+        private static Task HandleDebugRebuildCacheAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        {
+            if (!args.DebugRebuildCache)
+            {
+                return Task.FromResult(0);
+            }
+            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
+            return templatePackageManager.RebuildTemplateCacheAsync(cancellationToken);
+        }
+
+        private static void HandleDebugShowConfig(TArgs args, IEngineEnvironmentSettings environmentSettings)
+        {
+            if (!args.DebugShowConfig)
+            {
+                return;
+            }
+
+            Reporter.Output.WriteLine(LocalizableStrings.CurrentConfiguration);
+            Reporter.Output.WriteLine(" ");
+
+            TableFormatter.Print(environmentSettings.Components.OfType<IMountPointFactory>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
+            {
+                { LocalizableStrings.MountPointFactories, x => x.Id },
+                { LocalizableStrings.Type, x => x.GetType().FullName ?? string.Empty },
+                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName ?? string.Empty }
+            });
+
+            TableFormatter.Print(environmentSettings.Components.OfType<IGenerator>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IGenerator, object>>
+            {
+                { LocalizableStrings.Generators, x => x.Id },
+                { LocalizableStrings.Type, x => x.GetType().FullName ?? string.Empty },
+                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName ?? string.Empty }
+            });
         }
     }
 }

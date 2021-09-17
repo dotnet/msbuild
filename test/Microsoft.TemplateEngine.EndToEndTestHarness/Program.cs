@@ -59,7 +59,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             host.VirtualizeDirectory(hivePath);
             host.VirtualizeDirectory(outputPath);
 
-            int result = New3Command.CreateCommand(CommandName, host, new TelemetryLogger(null), new New3Callbacks()).Invoke(passthroughArgs);
+            int result = NewCommandFactory.Create(CommandName, host, new TelemetryLogger(null), new NewCommandCallbacks()).Invoke(passthroughArgs);
             bool verificationsPassed = false;
 
             for (int i = 0; i < batteryCount; ++i)
