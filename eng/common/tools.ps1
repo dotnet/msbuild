@@ -157,6 +157,9 @@ function InitializeDotNetCli([bool]$install, [bool]$createSdkLocationFile) {
   # Don't resolve runtime, shared framework, or SDK from other locations to ensure build determinism
   $env:DOTNET_MULTILEVEL_LOOKUP=0
 
+  # Disable first run since we do not need all ASP.NET packages restored.
+  $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
   # Disable telemetry on CI.
   if ($ci) {
     $env:DOTNET_CLI_TELEMETRY_OPTOUT=1
@@ -228,6 +231,7 @@ function InitializeDotNetCli([bool]$install, [bool]$createSdkLocationFile) {
   Write-PipelinePrependPath -Path $dotnetRoot
 
   Write-PipelineSetVariable -Name 'DOTNET_MULTILEVEL_LOOKUP' -Value '0'
+  Write-PipelineSetVariable -Name 'DOTNET_SKIP_FIRST_TIME_EXPERIENCE' -Value '1'
 
   return $global:_DotNetInstallDir = $dotnetRoot
 }

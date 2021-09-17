@@ -111,6 +111,9 @@ function InitializeDotNetCli {
   # Don't resolve runtime, shared framework, or SDK from other locations to ensure build determinism
   export DOTNET_MULTILEVEL_LOOKUP=0
 
+  # Disable first run since we want to control all package sources
+  export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
   # Disable telemetry on CI
   if [[ $ci == true ]]; then
     export DOTNET_CLI_TELEMETRY_OPTOUT=1
@@ -162,6 +165,7 @@ function InitializeDotNetCli {
   Write-PipelinePrependPath -path "$dotnet_root"
 
   Write-PipelineSetVariable -name "DOTNET_MULTILEVEL_LOOKUP" -value "0"
+  Write-PipelineSetVariable -name "DOTNET_SKIP_FIRST_TIME_EXPERIENCE" -value "1"
 
   # return value
   _InitializeDotNetCli="$dotnet_root"
