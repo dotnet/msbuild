@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = "dotnet-portable",
                 Configuration = _configuration,
                 ProjectDirectory = testAsset.Path,
-                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30
+                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.Net60
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tests
 
             var commandFile = Path.GetFileNameWithoutExtension(result.Path);
 
-            commandFile.Should().Be("dotnet");
+            commandFile.Should().Be("testhost");
 
             result.Args.Should().Contain(commandResolverArguments.CommandName);
         }
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = "dotnet-portable",
                 Configuration = _configuration,
                 ProjectDirectory = testAsset.Path,
-                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30
+                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.Net60
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
                 ProjectDirectory = testAsset.Path,
-                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30
+                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.Net60
 
             };
 
@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = "dotnet-portable",
                 Configuration = "Debug",
                 ProjectDirectory = testAsset.Path,
-                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30,
+                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.Net60,
                 OutputPath = outputDir
             };
 
