@@ -17,7 +17,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     internal class SdkResolverLoader
     {
 #if FEATURE_ASSEMBLYLOADCONTEXT
-        private readonly CoreClrAssemblyLoader _loader = new CoreClrAssemblyLoader();
+        private static readonly CoreClrAssemblyLoader s_loader = new CoreClrAssemblyLoader();
 #endif
 
         private readonly string IncludeDefaultResolver = Environment.GetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER");
@@ -35,7 +35,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         internal virtual IList<SdkResolver> LoadResolvers(LoggingContext loggingContext,
             ElementLocation location)
         {
-            var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ? 
+            var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
                 new List<SdkResolver> {new DefaultSdkResolver()}
                 : new List<SdkResolver>();
 
@@ -192,7 +192,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             return Assembly.LoadFrom(resolverPath);
 #else
-            return _loader.LoadFromPath(resolverPath);
+            return s_loader.LoadFromPath(resolverPath);
 #endif
         }
 
