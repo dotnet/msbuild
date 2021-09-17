@@ -41,7 +41,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Prompt);
@@ -73,7 +73,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: true, AllowRunScripts.Prompt);
@@ -100,7 +100,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Prompt);
@@ -132,7 +132,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: true, AllowRunScripts.Prompt);
@@ -163,7 +163,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Prompt);
@@ -190,7 +190,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Yes);
@@ -232,7 +232,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Yes);
@@ -281,7 +281,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Yes);
@@ -318,7 +318,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Yes);
@@ -351,7 +351,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => string.Empty);
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.No);
@@ -383,7 +383,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => "Y");  // the user allows to run post action
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Prompt);
@@ -417,7 +417,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => "N"); // the user forbids to run post action
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Prompt);
@@ -449,7 +449,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => "N"); // the user forbids to run post action
 
             //run script setting doesn't matter for dry run
@@ -496,7 +496,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => "N"); // the user forbids to run post action
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Prompt);
@@ -540,7 +540,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             PostActionDispatcher dispatcher = new PostActionDispatcher(
                 engineEnvironmentSettings,
-                new New3Callbacks(),
+                new NewCommandCallbacks(),
                 () => "N"); // the user forbids to run post action
 
             var result = dispatcher.Process(templateCreationResult, isDryRun: false, AllowRunScripts.Prompt);

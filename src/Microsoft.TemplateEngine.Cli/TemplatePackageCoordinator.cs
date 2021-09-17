@@ -78,7 +78,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [Obsolete]
-        internal Task<New3CommandStatus> ProcessAsync(INewCommandInput commandInput, CancellationToken cancellationToken = default)
+        internal Task<NewCommandStatus> ProcessAsync(INewCommandInput commandInput, CancellationToken cancellationToken = default)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
@@ -183,9 +183,9 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         [Obsolete]
-        private Task<New3CommandStatus> EnterInstallFlowAsync(INewCommandInput args, CancellationToken cancellationToken)
+        private Task<NewCommandStatus> EnterInstallFlowAsync(INewCommandInput args, CancellationToken cancellationToken)
         {
-            return Task.FromResult(New3CommandStatus.Cancelled);
+            return Task.FromResult(NewCommandStatus.Cancelled);
 
             //return EnterInstallFlowAsync(new InstallCommandArgs(args), cancellationToken);
         }
@@ -194,7 +194,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// Install the template package(s) flow (--install, -i).
         /// </summary>
 #pragma warning disable SA1202 // Elements should be ordered by access
-        internal async Task<New3CommandStatus> EnterInstallFlowAsync(InstallCommandArgs args, CancellationToken cancellationToken)
+        internal async Task<NewCommandStatus> EnterInstallFlowAsync(InstallCommandArgs args, CancellationToken cancellationToken)
 #pragma warning restore SA1202 // Elements should be ordered by access
         {
             _ = args ?? throw new ArgumentNullException(nameof(args));
@@ -205,7 +205,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             cancellationToken.ThrowIfCancellationRequested();
 
-            New3CommandStatus resultStatus = New3CommandStatus.Success;
+            NewCommandStatus resultStatus = NewCommandStatus.Success;
             _telemetryLogger.TrackEvent(args.CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, args.TemplatePackages.Count.ToString() } });
 
             var details = new Dictionary<string, string>();
@@ -241,7 +241,7 @@ namespace Microsoft.TemplateEngine.Cli
             if (!installRequests.Any())
             {
                 Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall);
-                return New3CommandStatus.NotFound;
+                return NewCommandStatus.NotFound;
             }
 
             //validate if installation requests have unique identifier
@@ -253,7 +253,7 @@ namespace Microsoft.TemplateEngine.Cli
                     continue;
                 }
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Install_Error_SameInstallRequests, installRequest.PackageIdentifier));
-                return New3CommandStatus.Cancelled;
+                return NewCommandStatus.Cancelled;
             }
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled);
@@ -270,7 +270,7 @@ namespace Microsoft.TemplateEngine.Cli
                 //await DisplayInstallResultAsync(commandInput, result.InstallRequest.DisplayName, result, cancellationToken).ConfigureAwait(false);
                 if (!result.Success)
                 {
-                    resultStatus = New3CommandStatus.CreateFailed;
+                    resultStatus = NewCommandStatus.CreateFailed;
                 }
             }
             return resultStatus;
@@ -279,14 +279,14 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Update the template package(s) flow (--update-check and --update-apply).
         /// </summary>
-        private async Task<New3CommandStatus> EnterUpdateFlowAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
+        private async Task<NewCommandStatus> EnterUpdateFlowAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
 
             bool applyUpdates = commandInput.ApplyUpdates;
             bool allTemplatesUpToDate = true;
-            New3CommandStatus success = New3CommandStatus.Success;
+            NewCommandStatus success = NewCommandStatus.Success;
             var managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
 
             foreach (var packagesGrouping in managedTemplatePackages.GroupBy(package => package.ManagedProvider))
@@ -296,7 +296,7 @@ namespace Microsoft.TemplateEngine.Cli
                 DisplayUpdateCheckResults(checkUpdateResults, commandInput, showUpdates: !applyUpdates);
                 if (checkUpdateResults.Any(result => !result.Success))
                 {
-                    success = New3CommandStatus.CreateFailed;
+                    success = NewCommandStatus.CreateFailed;
                 }
                 allTemplatesUpToDate = checkUpdateResults.All(result => result.Success && result.IsLatestVersion);
 
@@ -320,7 +320,7 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         if (!updateResult.Success)
                         {
-                            success = New3CommandStatus.CreateFailed;
+                            success = NewCommandStatus.CreateFailed;
                         }
                         await DisplayInstallResultAsync(commandInput, updateResult.UpdateRequest.TemplatePackage.DisplayName, updateResult, cancellationToken).ConfigureAwait(false);
                     }
@@ -338,12 +338,12 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Uninstall the template package(s) flow (--uninstall, -u).
         /// </summary>
-        private async Task<New3CommandStatus> EnterUninstallFlowAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
+        private async Task<NewCommandStatus> EnterUninstallFlowAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
 
-            New3CommandStatus result = New3CommandStatus.Success;
+            NewCommandStatus result = NewCommandStatus.Success;
             if (commandInput.ToUninstallList == null || commandInput.ToUninstallList.Count <= 0 || commandInput.ToUninstallList[0] == null)
             {
                 //display all installed template packages
@@ -369,20 +369,20 @@ namespace Microsoft.TemplateEngine.Cli
                     else
                     {
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_GenericError, uninstallResult.TemplatePackage.DisplayName, uninstallResult.ErrorMessage));
-                        result = New3CommandStatus.CreateFailed;
+                        result = NewCommandStatus.CreateFailed;
                     }
                 }
             }
             return result;
         }
 
-        private async Task<(New3CommandStatus, Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>)> DetermineSourcesToUninstall(INewCommandInput commandInput, CancellationToken cancellationToken)
+        private async Task<(NewCommandStatus, Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>)> DetermineSourcesToUninstall(INewCommandInput commandInput, CancellationToken cancellationToken)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             _ = commandInput.ToUninstallList ?? throw new ArgumentNullException(nameof(commandInput.ToUninstallList));
             cancellationToken.ThrowIfCancellationRequested();
 
-            New3CommandStatus result = New3CommandStatus.Success;
+            NewCommandStatus result = NewCommandStatus.Success;
             IReadOnlyList<IManagedTemplatePackage> templatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
 
             List<string> parsedIdentifiers = new List<string>();
@@ -417,7 +417,7 @@ namespace Microsoft.TemplateEngine.Cli
                     continue;
                 }
 
-                result = New3CommandStatus.NotFound;
+                result = NewCommandStatus.NotFound;
                 Reporter.Error.WriteLine(
                     string.Format(
                         LocalizableStrings.TemplatePackageCoordinator_Error_PackageNotFound,

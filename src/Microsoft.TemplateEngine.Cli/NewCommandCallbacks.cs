@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli
     /// These callbacks provide a mechanism for the template engine to invoke these operations without
     /// requiring a built-time dependency on the actual implementation.
     /// </summary>
-    public sealed class New3Callbacks
+    public sealed class NewCommandCallbacks
     {
         /// <summary>
         /// Callback to be executed on first run of the template engine.

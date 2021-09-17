@@ -12,13 +12,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class InstantiateCommand : BaseCommand<InstantiateCommandArgs>
     {
-        internal InstantiateCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks, "create")
+        internal InstantiateCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "create")
         {
             InstantiateCommandArgs.AddToCommand(this);
 
         }
 
-        protected override Task<New3CommandStatus> ExecuteAsync(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
+        protected override Task<NewCommandStatus> ExecuteAsync(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 
         protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => throw new NotImplementedException();
     }

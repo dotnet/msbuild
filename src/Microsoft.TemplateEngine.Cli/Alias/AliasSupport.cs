@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Alias
         // TODO: make this test more robust.
         private static readonly Regex ValidFirstTokenRegex = new Regex("^[a-z0-9]", RegexOptions.IgnoreCase);
 
-        internal static (New3CommandStatus, INewCommandInput?) CoordinateAliasExpansion(
+        internal static (NewCommandStatus, INewCommandInput?) CoordinateAliasExpansion(
             INewCommandInput commandInput,
             AliasRegistry aliasRegistry)
         {
@@ -28,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli.Alias
             if (aliasExpansionStatus == AliasExpansionStatus.ExpansionError)
             {
                 Reporter.Output.WriteLine(LocalizableStrings.AliasExpansionError);
-                return (New3CommandStatus.InvalidParamValues, null);
+                return (NewCommandStatus.InvalidParamValues, null);
             }
             else if (aliasExpansionStatus == AliasExpansionStatus.Expanded && expandedCommandInput != null)
             {
@@ -37,12 +37,12 @@ namespace Microsoft.TemplateEngine.Cli.Alias
                 if (!expandedCommandInput.ValidateParseError())
                 {
                     Reporter.Error.WriteLine(LocalizableStrings.AliasExpandedCommandParseError);
-                    return (New3CommandStatus.InvalidParamValues, null);
+                    return (NewCommandStatus.InvalidParamValues, null);
                 }
             }
 
             // this is both for success and for no action.
-            return (New3CommandStatus.Success, expandedCommandInput);
+            return (NewCommandStatus.Success, expandedCommandInput);
         }
 
         internal static (AliasExpansionStatus, INewCommandInput?) TryExpandAliases(INewCommandInput commandInput, AliasRegistry aliasRegistry)
@@ -65,17 +65,17 @@ namespace Microsoft.TemplateEngine.Cli.Alias
             return (AliasExpansionStatus.ExpansionError, null);
         }
 
-        internal static New3CommandStatus ManipulateAliasIfValid(AliasRegistry aliasRegistry, string aliasName, List<string> inputTokens, HashSet<string> reservedAliasNames)
+        internal static NewCommandStatus ManipulateAliasIfValid(AliasRegistry aliasRegistry, string aliasName, List<string> inputTokens, HashSet<string> reservedAliasNames)
         {
             if (reservedAliasNames.Contains(aliasName))
             {
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCannotBeShortName, aliasName));
-                return New3CommandStatus.CreateFailed;
+                return NewCommandStatus.CreateFailed;
             }
             else if (InvalidAliasRegex.IsMatch(aliasName))
             {
                 Reporter.Output.WriteLine(LocalizableStrings.AliasNameContainsInvalidCharacters);
-                return New3CommandStatus.InvalidParamValues;
+                return NewCommandStatus.InvalidParamValues;
             }
 
             inputTokens.RemoveAt(0);    // remove the command name
@@ -85,14 +85,14 @@ namespace Microsoft.TemplateEngine.Cli.Alias
             if (aliasTokens.Count > 0 && !ValidFirstTokenRegex.IsMatch(aliasTokens[0]))
             {
                 Reporter.Output.WriteLine(LocalizableStrings.AliasValueFirstArgError);
-                return New3CommandStatus.InvalidParamValues;
+                return NewCommandStatus.InvalidParamValues;
             }
 
             // create, update, or delete an alias.
             return ManipulateAliasValue(aliasName, aliasTokens, aliasRegistry);
         }
 
-        internal static New3CommandStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry, string commandName)
+        internal static NewCommandStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry, string commandName)
         {
             IReadOnlyDictionary<string, IReadOnlyList<string>> aliasesToShow;
 
@@ -108,7 +108,7 @@ namespace Microsoft.TemplateEngine.Cli.Alias
                 else
                 {
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasShowErrorUnknownAlias, commandInput.ShowAliasesAliasName, commandName));
-                    return New3CommandStatus.InvalidParamValues;
+                    return NewCommandStatus.InvalidParamValues;
                 }
             }
             else
@@ -129,10 +129,10 @@ namespace Microsoft.TemplateEngine.Cli.Alias
                 .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue, showAlways: true);
 
             Reporter.Output.WriteLine(formatter.Layout());
-            return New3CommandStatus.Success;
+            return NewCommandStatus.Success;
         }
 
-        private static New3CommandStatus ManipulateAliasValue(string aliasName, IReadOnlyList<string> aliasTokens, AliasRegistry aliasRegistry)
+        private static NewCommandStatus ManipulateAliasValue(string aliasName, IReadOnlyList<string> aliasTokens, AliasRegistry aliasRegistry)
         {
             AliasManipulationResult result = aliasRegistry.TryCreateOrRemoveAlias(aliasName, aliasTokens);
 
@@ -140,24 +140,24 @@ namespace Microsoft.TemplateEngine.Cli.Alias
             {
                 case AliasManipulationStatus.Created:
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCreated, result.AliasName, string.Join(" ", result.AliasTokens)));
-                    return New3CommandStatus.Success;
+                    return NewCommandStatus.Success;
                 case AliasManipulationStatus.Removed:
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasRemoved, result.AliasName, string.Join(" ", result.AliasTokens)));
-                    return New3CommandStatus.Success;
+                    return NewCommandStatus.Success;
                 case AliasManipulationStatus.RemoveNonExistentFailed:
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasRemoveNonExistentFailed, result.AliasName));
-                    return New3CommandStatus.AliasFailed;
+                    return NewCommandStatus.AliasFailed;
                 case AliasManipulationStatus.Updated:
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasUpdated, result.AliasName, string.Join(" ", result.AliasTokens)));
-                    return New3CommandStatus.Success;
+                    return NewCommandStatus.Success;
                 case AliasManipulationStatus.WouldCreateCycle:
                     Reporter.Output.WriteLine(LocalizableStrings.AliasCycleError);
-                    return New3CommandStatus.AliasFailed;
+                    return NewCommandStatus.AliasFailed;
                 case AliasManipulationStatus.InvalidInput:
                     Reporter.Output.WriteLine(LocalizableStrings.AliasNotCreatedInvalidInput);
-                    return New3CommandStatus.InvalidParamValues;
+                    return NewCommandStatus.InvalidParamValues;
                 default:
-                    return New3CommandStatus.OperationNotSpecified;
+                    return NewCommandStatus.OperationNotSpecified;
             }
         }
 

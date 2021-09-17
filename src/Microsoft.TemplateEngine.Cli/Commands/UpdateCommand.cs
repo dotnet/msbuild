@@ -11,9 +11,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class UpdateCommand : BaseCommand<UpdateCommandArgs>
     {
-        internal UpdateCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks, "update") { }
+        internal UpdateCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "update") { }
 
-        protected override Task<New3CommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
+        protected override Task<NewCommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 
         protected override UpdateCommandArgs ParseContext(ParseResult parseResult) => throw new NotImplementedException();
     }

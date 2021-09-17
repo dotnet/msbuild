@@ -36,15 +36,15 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         /// <param name="templatePackageManager"></param>
         /// <param name="commandInput">new command data.</param>
         /// <param name="defaultLanguage">default language for the host.</param>
-        /// <returns><see cref="New3CommandStatus.Success"/> when the templates were found and displayed;
-        /// <see cref="New3CommandStatus.Cancelled"/> when the command validation fails;
-        /// <see cref="New3CommandStatus.NotFound"/> when no templates found based on the filter criteria.
+        /// <returns><see cref="NewCommandStatus.Success"/> when the templates were found and displayed;
+        /// <see cref="NewCommandStatus.Cancelled"/> when the command validation fails;
+        /// <see cref="NewCommandStatus.NotFound"/> when no templates found based on the filter criteria.
         /// </returns>
-        internal static async Task<New3CommandStatus> SearchForTemplateMatchesAsync(IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, INewCommandInput commandInput, string? defaultLanguage)
+        internal static async Task<NewCommandStatus> SearchForTemplateMatchesAsync(IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, INewCommandInput commandInput, string? defaultLanguage)
         {
             if (!ValidateCommandInput(commandInput))
             {
-                return New3CommandStatus.InvalidParamValues;
+                return NewCommandStatus.InvalidParamValues;
             }
 
             Reporter.Output.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchInProgress);
@@ -62,7 +62,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             if (!searchResults.Any())
             {
                 Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_NoSources.Bold().Red());
-                return New3CommandStatus.NotFound;
+                return NewCommandStatus.NotFound;
             }
 
             foreach (SearchResult result in searchResults)
@@ -98,9 +98,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 Reporter.Output.WriteCommand(commandInput.InstallCommandExample());
                 Reporter.Output.WriteLine(LocalizableStrings.Generic_ExampleHeader);
                 Reporter.Output.WriteCommand(commandInput.InstallCommandExample(packageID: packageIdToShow));
-                return New3CommandStatus.Success;
+                return NewCommandStatus.Success;
             }
-            return New3CommandStatus.NotFound;
+            return NewCommandStatus.NotFound;
         }
 
         private static string EvaluatePackageToShow(IReadOnlyList<SearchResult> searchResults)

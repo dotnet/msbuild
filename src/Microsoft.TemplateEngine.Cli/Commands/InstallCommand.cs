@@ -16,7 +16,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class LegacyInstallCommand : InstallCommand
     {
-        internal LegacyInstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
+        internal LegacyInstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
             : base(host, logger, callbacks, "--install")
         {
             this.IsHidden = true;
@@ -27,20 +27,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class InstallCommand : BaseCommand<InstallCommandArgs>
     {
-        internal InstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks, string commandName)
+        internal InstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName)
             : base(host, logger, callbacks, commandName)
         {
         }
 
-        internal InstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks)
+        internal InstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
             : base(host, logger, callbacks, "install")
         {
             InstallCommandArgs.AddToCommand(this);
         }
 
-        protected override Task<New3CommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
-            TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
+            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplateInformationCoordinator templateInformationCoordinator = new TemplateInformationCoordinator(
                 environmentSettings,
                 templatePackageManager,

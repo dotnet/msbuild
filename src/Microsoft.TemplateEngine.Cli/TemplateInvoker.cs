@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IEngineEnvironmentSettings _environment;
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly Func<string> _inputGetter;
-        private readonly New3Callbacks _callbacks;
+        private readonly NewCommandCallbacks _callbacks;
 
         private readonly TemplateCreator _templateCreator;
         private readonly IHostSpecificDataLoader _hostDataLoader;
@@ -28,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli
             IEngineEnvironmentSettings environment,
             ITelemetryLogger telemetryLogger,
             Func<string> inputGetter,
-            New3Callbacks callbacks,
+            NewCommandCallbacks callbacks,
             IHostSpecificDataLoader hostDataLoader)
         {
             _environment = environment;
@@ -41,7 +41,7 @@ namespace Microsoft.TemplateEngine.Cli
             _postActionDispatcher = new PostActionDispatcher(_environment, _callbacks, _inputGetter);
         }
 
-        internal async Task<New3CommandStatus> InvokeTemplate(TemplateGroupArgs templateGroupArgs)
+        internal async Task<NewCommandStatus> InvokeTemplate(TemplateGroupArgs templateGroupArgs)
         {
             var templateToInvoke = templateGroupArgs.Template;
             string? templateLanguage = templateToInvoke.GetLanguage();
@@ -74,7 +74,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(cx.InnerException.Message.Bold().Red());
                 }
 
-                return New3CommandStatus.CreateFailed;
+                return NewCommandStatus.CreateFailed;
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ namespace Microsoft.TemplateEngine.Cli
                     });
             }
 
-            return New3CommandStatus.CreateFailed;
+            return NewCommandStatus.CreateFailed;
 
         }
 
@@ -115,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli
         // Warning: The _commandInput cannot be assumed to be in a state that is parsed for the template being invoked.
         //      So be sure to only get template-agnostic information from it. Anything specific to the template must be gotten from the ITemplateMatchInfo
         //      Or do a reparse if necessary (currently occurs in one error case).
-        private async Task<New3CommandStatus> CreateTemplateAsync(ITemplateInfo template, TemplateGroupArgs commandInput)
+        private async Task<NewCommandStatus> CreateTemplateAsync(ITemplateInfo template, TemplateGroupArgs commandInput)
         {
             char[] invalidChars = Path.GetInvalidFileNameChars();
 
@@ -124,7 +124,7 @@ namespace Microsoft.TemplateEngine.Cli
                 string printableChars = string.Join(", ", invalidChars.Where(x => !char.IsControl(x)).Select(x => $"'{x}'"));
                 string nonPrintableChars = string.Join(", ", invalidChars.Where(char.IsControl).Select(x => $"char({(int)x})"));
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidNameParameter, printableChars, nonPrintableChars).Bold().Red());
-                return New3CommandStatus.CreateFailed;
+                return NewCommandStatus.CreateFailed;
             }
 
             string? fallbackName = new DirectoryInfo(
@@ -172,12 +172,12 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(cx.InnerException.Message.Bold().Red());
                 }
 
-                return New3CommandStatus.CreateFailed;
+                return NewCommandStatus.CreateFailed;
             }
             catch (TemplateAuthoringException tae)
             {
                 Reporter.Error.WriteLine(tae.Message.Bold().Red());
-                return New3CommandStatus.CreateFailed;
+                return NewCommandStatus.CreateFailed;
             }
 
             string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? commandInput.Template.Name : instantiateResult.TemplateFullName;
@@ -209,7 +209,7 @@ namespace Microsoft.TemplateEngine.Cli
                     return HandlePostActions(instantiateResult, commandInput);
                 case CreationResultStatus.CreateFailed:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.ErrorMessage).Bold().Red());
-                    return New3CommandStatus.CreateFailed;
+                    return NewCommandStatus.CreateFailed;
                 //TODO: needed?
                 //case CreationResultStatus.MissingMandatoryParam:
                 //    if (!string.IsNullOrWhiteSpace(instantiateResult.ErrorMessage))
@@ -227,7 +227,7 @@ namespace Microsoft.TemplateEngine.Cli
                 //    return New3CommandStatus.MissingMandatoryParam;
                 case CreationResultStatus.NotFound:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, commandInput).Bold().Red());
-                    return New3CommandStatus.NotFound;
+                    return NewCommandStatus.NotFound;
                     //TODO: needed?
                 //case CreationResultStatus.InvalidParamValues:
                 //    TemplateUsageInformation? usageInformation = await TemplateUsageHelp.GetTemplateUsageInformationAsync(template, _environment, commandInput, _hostDataLoader, _templateCreator, default).ConfigureAwait(false);
@@ -261,15 +261,15 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Error.WriteLine();
                     }
                     Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
-                    return New3CommandStatus.DestructiveChangesDetected;
+                    return NewCommandStatus.DestructiveChangesDetected;
                 default:
-                    return New3CommandStatus.UnexpectedResult;
+                    return NewCommandStatus.UnexpectedResult;
             }
         }
 
-        private New3CommandStatus HandlePostActions(ITemplateCreationResult creationResult, TemplateGroupArgs commandInput)
+        private NewCommandStatus HandlePostActions(ITemplateCreationResult creationResult, TemplateGroupArgs commandInput)
         {
-            return New3CommandStatus.Success;
+            return NewCommandStatus.Success;
             //TODO: DO
             //AllowRunScripts scriptRunSettings;
 

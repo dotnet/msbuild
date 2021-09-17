@@ -15,16 +15,9 @@ Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.SymbolInfo.get -> System.C
 Microsoft.TemplateEngine.Cli.IHostSpecificDataLoader
 Microsoft.TemplateEngine.Cli.IHostSpecificDataLoader.ReadHostSpecificTemplateData(Microsoft.TemplateEngine.Abstractions.ITemplateInfo! templateInfo) -> Microsoft.TemplateEngine.Cli.HostSpecificTemplateData!
 Microsoft.TemplateEngine.Cli.ITelemetryLogger
-Microsoft.TemplateEngine.Cli.New3Callbacks
-Microsoft.TemplateEngine.Cli.New3Callbacks.New3Callbacks() -> void
-Microsoft.TemplateEngine.Cli.New3Command
 Microsoft.TemplateEngine.Cli.TelemetryLogger
 static Microsoft.TemplateEngine.Cli.Components.AllComponents.get -> System.Collections.Generic.IReadOnlyList<(System.Type! Type, Microsoft.TemplateEngine.Abstractions.IIdentifiedComponent! Instance)>!
 ~Microsoft.TemplateEngine.Cli.ITelemetryLogger.TrackEvent(string eventName, System.Collections.Generic.IDictionary<string, string> properties = null, System.Collections.Generic.IDictionary<string, double> measurements = null) -> void
-~Microsoft.TemplateEngine.Cli.New3Callbacks.OnFirstRun.get -> System.Action<Microsoft.TemplateEngine.Abstractions.IEngineEnvironmentSettings>
-~Microsoft.TemplateEngine.Cli.New3Callbacks.OnFirstRun.set -> void
-~Microsoft.TemplateEngine.Cli.New3Callbacks.RestoreProject.get -> System.Func<string, bool>
-~Microsoft.TemplateEngine.Cli.New3Callbacks.RestoreProject.set -> void
 ~Microsoft.TemplateEngine.Cli.TelemetryLogger.TelemetryLogger(System.Action<string, System.Collections.Generic.IDictionary<string, string>, System.Collections.Generic.IDictionary<string, double>> trackEvent, bool writeToConsole = false) -> void
 ~Microsoft.TemplateEngine.Cli.TelemetryLogger.TrackEvent(string eventName, System.Collections.Generic.IDictionary<string, string> properties = null, System.Collections.Generic.IDictionary<string, double> measurements = null) -> void
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.UsageExamples.get -> System.Collections.Generic.IReadOnlyList<string!>!

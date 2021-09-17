@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly string? _defaultLanguage;
         private readonly Func<string> _inputGetter;
-        private readonly New3Callbacks _callbacks;
+        private readonly NewCommandCallbacks _callbacks;
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly TemplateInformationCoordinator _templateInformationCoordinator;
         private readonly IHostSpecificDataLoader _hostSpecificDataLoader;
@@ -31,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli
             ITelemetryLogger telemetryLogger,
             string? defaultLanguage,
             Func<string> inputGetter,
-            New3Callbacks callbacks)
+            NewCommandCallbacks callbacks)
         {
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
             _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli
             _invoker = new TemplateInvoker(_environment, _telemetryLogger, _inputGetter, _callbacks, _hostSpecificDataLoader);
         }
 
-        internal async Task<New3CommandStatus> CoordinateInvocationAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
+        internal async Task<NewCommandStatus> CoordinateInvocationAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
         {
             InstantiateTemplateResolver resolver = new InstantiateTemplateResolver(_templatePackageManager, _hostSpecificDataLoader);
             TemplateResolutionResult templateResolutionResult = await resolver.ResolveTemplatesAsync(commandInput, _defaultLanguage, default).ConfigureAwait(false);

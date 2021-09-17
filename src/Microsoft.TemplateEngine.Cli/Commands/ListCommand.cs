@@ -11,9 +11,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class ListCommand : BaseCommand<ListCommandArgs>
     {
-        internal ListCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks, "list") { }
+        internal ListCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "list") { }
 
-        protected override Task<New3CommandStatus> ExecuteAsync(ListCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
+        protected override Task<NewCommandStatus> ExecuteAsync(ListCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 
         protected override ListCommandArgs ParseContext(ParseResult parseResult) => throw new NotImplementedException();
     }

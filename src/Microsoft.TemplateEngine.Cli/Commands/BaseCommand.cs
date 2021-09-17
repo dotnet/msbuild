@@ -117,7 +117,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return environmentSettings;
         }
 
-        protected abstract Task<New3CommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
+        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
 
         protected abstract TArgs ParseContext(ParseResult parseResult);
 

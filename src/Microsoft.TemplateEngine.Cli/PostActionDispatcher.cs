@@ -41,7 +41,7 @@ namespace Microsoft.TemplateEngine.Cli
     internal class PostActionDispatcher
     {
         private readonly IEngineEnvironmentSettings _environment;
-        private readonly New3Callbacks _callbacks;
+        private readonly NewCommandCallbacks _callbacks;
         private readonly Func<string> _inputGetter;
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <param name="environment">template engine environment settings.</param>
         /// <param name="callbacks">callbacks that can be used for post actions.</param>
         /// <param name="inputGetter">the predicate to get user input whether to run the post action.</param>
-        internal PostActionDispatcher(IEngineEnvironmentSettings environment, New3Callbacks callbacks, Func<string> inputGetter)
+        internal PostActionDispatcher(IEngineEnvironmentSettings environment, NewCommandCallbacks callbacks, Func<string> inputGetter)
         {
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
             _callbacks = callbacks ?? throw new ArgumentNullException(nameof(callbacks));

@@ -16,7 +16,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class TemplateDetailsDisplay
     {
-        internal static async Task<New3CommandStatus> ShowTemplateGroupHelpAsync(
+        internal static async Task<NewCommandStatus> ShowTemplateGroupHelpAsync(
             TemplateGroupMatchInfo templateGroup,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
@@ -35,19 +35,19 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 {
                     Reporter.Error.WriteLine(groupParameterDetails.Value.AdditionalInfo.Bold().Red());
                     Reporter.Error.WriteLine();
-                    return New3CommandStatus.InvalidParamValues;
+                    return NewCommandStatus.InvalidParamValues;
                 }
                 // get the input params valid for any param in the group
                 IReadOnlyDictionary<string, string?> inputTemplateParams = CoalesceInputParameterValuesFromTemplateGroup(templateGroup);
                 ShowTemplateDetailHeaders(templateInfos);
                 bool showImplicitlyHiddenParams = templateInfos.Count() > 1;
                 ShowParameterHelp(inputTemplateParams, showImplicitlyHiddenParams, groupParameterDetails.Value, environmentSettings, commandInput);
-                return New3CommandStatus.Success;
+                return NewCommandStatus.Success;
             }
             else
             {
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, commandInput.CommandName).Bold().Red());
-                return New3CommandStatus.DisplayHelpFailed;
+                return NewCommandStatus.DisplayHelpFailed;
             }
         }
 

@@ -11,9 +11,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class UninstallCommand : BaseCommand<UninstallCommandArgs>
     {
-        internal UninstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, New3Callbacks callbacks) : base(host, logger, callbacks, "uninstall") { }
+        internal UninstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "uninstall") { }
 
-        protected override Task<New3CommandStatus> ExecuteAsync(UninstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
+        protected override Task<NewCommandStatus> ExecuteAsync(UninstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 
         protected override UninstallCommandArgs ParseContext(ParseResult parseResult) => throw new NotImplementedException();
     }

@@ -54,7 +54,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return base.GetSuggestions(args, environmentSettings, textToMatch);
         }
 
-        protected override async Task<New3CommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected override async Task<NewCommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             if (string.IsNullOrWhiteSpace(args.ShortName))
             {
@@ -62,10 +62,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 {
                     HelpResult helpResult = new HelpResult();
                     helpResult.Apply(context);
-                    return New3CommandStatus.Success;
+                    return NewCommandStatus.Success;
                 }
                 //show curated list
-                return New3CommandStatus.Success;
+                return NewCommandStatus.Success;
             }
 
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
@@ -75,7 +75,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (template == null)
             {
                 Reporter.Error.WriteLine($"Template {args.ShortName} doesn't exist.");
-                return New3CommandStatus.NotFound;
+                return NewCommandStatus.NotFound;
             }
 
             //var dotnet = new Command("dotnet")
@@ -89,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //dotnet.AddCommand(newC);
             newC.AddCommand(new TemplateGroupCommand(this, environmentSettings, template));
 
-            return (New3CommandStatus)newC.Invoke(context.ParseResult.Tokens.Select(s => s.Value).ToArray());
+            return (NewCommandStatus)newC.Invoke(context.ParseResult.Tokens.Select(s => s.Value).ToArray());
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(parseResult);

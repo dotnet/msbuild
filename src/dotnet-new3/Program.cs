@@ -1,9 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -18,21 +17,20 @@ namespace Dotnet_new3
     {
         private const string HostIdentifier = "dotnetcli-preview";
         private const string HostVersion = "v2.0.0";
-        private const string CommandName = "new3";
         private const string LanguageOverrideEnvironmentVar = "DOTNET_CLI_UI_LANGUAGE";
         private const string VsLanguageOverrideEnvironmentVar = "VSLANG";
         private const string CompilerLanguageEnvironmentVar = "PreferredUILang";
 
         public static int Main(string[] args)
         {
-            bool debugTelemetry = args.Any(x => string.Equals(x, "--debug:emit-telemetry", StringComparison.OrdinalIgnoreCase));
-            bool disableSdkTemplates = args.Any(x => string.Equals(x, "--debug:disable-sdk-templates", StringComparison.OrdinalIgnoreCase));
+            Command new3Command = new New3Command();
+            ParseResult preParseResult = new3Command.Parse(args);
 
-            DefaultTemplateEngineHost host = CreateHost(disableSdkTemplates);
+            DefaultTemplateEngineHost host = CreateHost(preParseResult.ValueForOption(New3Command.DebugDisableBuiltInTemplatesOption));
+            ITelemetryLogger telemetryLogger = new TelemetryLogger(null, preParseResult.ValueForOption(New3Command.DebugEmitTelemetryOption));
+            string[] remainingArgs = preParseResult.ValueForArgument(New3Command.RemainingTokensArgument) ?? Array.Empty<string>();
 
-            var callbacks = new New3Callbacks();
-            var command = New3Command.CreateCommand(CommandName, host, new TelemetryLogger(null, debugTelemetry), callbacks);
-            return command.Invoke(args);
+            return NewCommandFactory.Create(new3Command.Name, host, telemetryLogger, new NewCommandCallbacks()).Invoke(remainingArgs);
         }
 
         private static DefaultTemplateEngineHost CreateHost(bool disableSdkTemplates)

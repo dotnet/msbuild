@@ -49,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <param name="commandInput">command input used in CLI.</param>
         /// <param name="cancellationToken">cancellation token.</param>
         /// <returns></returns>
-        internal Task<New3CommandStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
+        internal Task<NewCommandStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
             TemplateResolutionResult resolutionResult,
             INewCommandInput commandInput,
             CancellationToken cancellationToken)
@@ -68,19 +68,19 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
                     Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName));
                     Reporter.Error.WriteLine();
-                    return Task.FromResult(New3CommandStatus.NotFound);
+                    return Task.FromResult(NewCommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousLanguageChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
                     DisplayTemplateList(resolutionResult.TemplateGroups, commandInput, useErrorOutput: true);
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousLanguageHint.Bold().Red());
-                    return Task.FromResult(New3CommandStatus.NotFound);
+                    return Task.FromResult(NewCommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousTemplateGroupChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
                     DisplayTemplateList(resolutionResult.TemplateGroups, commandInput, useErrorOutput: true);
                     //TODO: https://github.com/dotnet/templating/issues/3275
                     //revise error handling: this message is not the best CTA
                     //Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHint.Bold().Red());
-                    return Task.FromResult(New3CommandStatus.NotFound);
+                    return Task.FromResult(NewCommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousTemplateChoice:
                     if (resolutionResult.UnambiguousTemplateGroup == null)
                     {
@@ -105,7 +105,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         resolutionResult.UnambiguousTemplateGroupMatchInfo,
                         commandInput));
             }
-            return Task.FromResult(New3CommandStatus.CreateFailed);
+            return Task.FromResult(NewCommandStatus.CreateFailed);
         }
 
         /// <summary>
@@ -174,8 +174,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// </summary>
         /// <param name="commandInput">user command input.</param>
         /// <param name="cancellationToken">cancellation token.</param>
-        /// <returns><see cref="New3CommandStatus"/> for operation.</returns>
-        internal async Task<New3CommandStatus> DisplayTemplateHelpAsync(
+        /// <returns><see cref="NewCommandStatus"/> for operation.</returns>
+        internal async Task<NewCommandStatus> DisplayTemplateHelpAsync(
             INewCommandInput commandInput,
             CancellationToken cancellationToken)
         {
@@ -190,7 +190,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 && resolutionResult.UnambiguousTemplateGroupMatchInfo != null
                 && resolutionResult.UnambiguousTemplateGroupMatchInfo.TemplateMatchInfosWithMatchingParametersForPreferredLanguage.Any())
             {
-                New3CommandStatus result = await TemplateDetailsDisplay.ShowTemplateGroupHelpAsync(
+                NewCommandStatus result = await TemplateDetailsDisplay.ShowTemplateGroupHelpAsync(
                     resolutionResult.UnambiguousTemplateGroupMatchInfo,
                     _engineEnvironmentSettings,
                     commandInput,
@@ -198,7 +198,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     _templateCreator,
                     cancellationToken).ConfigureAwait(false);
 
-                if (result == New3CommandStatus.Success)
+                if (result == NewCommandStatus.Success)
                 {
                     DisplayHintForOtherLanguages(commandInput, resolutionResult);
                 }
@@ -216,7 +216,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <param name="commandInput">user command input.</param>
         /// <param name="cancellationToken">cancellation token.</param>
         /// <returns></returns>
-        internal async Task<New3CommandStatus> DisplayTemplateGroupListAsync(
+        internal async Task<NewCommandStatus> DisplayTemplateGroupListAsync(
             INewCommandInput commandInput,
             CancellationToken cancellationToken)
         {
@@ -234,7 +234,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         GetInputParametersString(resolutionResult.Resolver.Filters, commandInput, appliedParameterMatches)));
                 Reporter.Output.WriteLine();
                 DisplayTemplateList(resolutionResult.TemplateGroupsWithMatchingTemplateInfoAndParameters, commandInput);
-                return New3CommandStatus.Success;
+                return NewCommandStatus.Success;
             }
             else
             {
@@ -268,7 +268,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName));
                 }
                 Reporter.Error.WriteLine();
-                return New3CommandStatus.NotFound;
+                return NewCommandStatus.NotFound;
             }
         }
 
@@ -278,7 +278,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <param name="commandInput">user command input.</param>
         /// <param name="cancellationToken">cancellation token.</param>
         /// <returns></returns>
-        internal async Task<New3CommandStatus> DisplayCommandDescriptionAsync(
+        internal async Task<NewCommandStatus> DisplayCommandDescriptionAsync(
             INewCommandInput commandInput,
             CancellationToken cancellationToken)
         {
@@ -309,7 +309,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             Reporter.Output.WriteLine();
 
-            return New3CommandStatus.Success;
+            return NewCommandStatus.Success;
         }
 
         /// <summary>
@@ -317,8 +317,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// </summary>
         /// <param name="templateGroupMatchInfo">the template group to use based on the command input.</param>
         /// <param name="commandInput">the command input.</param>
-        /// <returns><see cref="New3CommandStatus.InvalidParamValues"/>.</returns>
-        private static New3CommandStatus DisplayInvalidParameterError(TemplateGroupMatchInfo templateGroupMatchInfo, INewCommandInput commandInput)
+        /// <returns><see cref="NewCommandStatus.InvalidParamValues"/>.</returns>
+        private static NewCommandStatus DisplayInvalidParameterError(TemplateGroupMatchInfo templateGroupMatchInfo, INewCommandInput commandInput)
         {
             _ = templateGroupMatchInfo ?? throw new ArgumentNullException(paramName: nameof(templateGroupMatchInfo));
             _ = commandInput ?? throw new ArgumentNullException(paramName: nameof(commandInput));
@@ -334,7 +334,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 Reporter.Error.WriteLine(LocalizableStrings.InvalidParameterTemplateHint);
                 Reporter.Error.WriteCommand(commandInput.HelpCommandExample(templateGroupMatchInfo.GroupInfo.ShortNames[0]));
             }
-            return New3CommandStatus.InvalidParamValues;
+            return NewCommandStatus.InvalidParamValues;
         }
 
         private static void DisplayHintForOtherLanguages(INewCommandInput commandInput, TemplateResolutionResult resolutionResult)
@@ -406,7 +406,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">when <paramref name="templateGroupMatchInfo"/> is <see langword="null" />.</exception>
         /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/> is <see langword="null" />.</exception>
-        private async Task<New3CommandStatus> DisplayAmbiguousPrecedenceErrorAsync(
+        private async Task<NewCommandStatus> DisplayAmbiguousPrecedenceErrorAsync(
             TemplateGroupMatchInfo templateGroupMatchInfo,
             INewCommandInput commandInput,
             CancellationToken cancellationToken)
@@ -461,7 +461,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 }
             }
             Reporter.Error.WriteLine(hintMessage.Bold().Red());
-            return New3CommandStatus.NotFound;
+            return NewCommandStatus.NotFound;
         }
 
         private void DisplayTemplateList(

@@ -3,7 +3,7 @@
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    internal enum New3CommandStatus
+    internal enum NewCommandStatus
     {
         /// <summary>
         /// The template was instantiated successfully.
