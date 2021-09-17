@@ -128,6 +128,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(SdkResolverGlobalJsonPath)" />
   </Target>
 
+  <Target Name="_WarnWhenUsingNET6AndVSPriorTo17"
+        BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+        Condition="$([MSBuild]::VersionLessThan($(VisualStudioVersion), '17.0')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
+    <NetSdkWarning ResourceName="Net6NotCompatibleWithDev16"/>
+  </Target>
+
   <Target Name="_CheckForInvalidWindowsDesktopTargetingConfiguration"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
         Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and ('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">
