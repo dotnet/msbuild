@@ -42,9 +42,24 @@ namespace Microsoft.Build.Shared.FileSystem
         public virtual IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
         {
 #if FEATURE_MSIOREDIST
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                    ? Microsoft.IO.Directory.EnumerateFiles(path, searchPattern, (Microsoft.IO.SearchOption)searchOption)
-                    : Directory.EnumerateFiles(path, searchPattern, searchOption);
+            try
+            {
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+                        ? Microsoft.IO.Directory.EnumerateFiles(path, searchPattern, (Microsoft.IO.SearchOption)searchOption)
+                        : Directory.EnumerateFiles(path, searchPattern, searchOption);
+            }
+            // Microsoft.IO.Redist has a dependency on System.Buffers and if it is not found these lines throw an exception.
+            // However, FileMatcher class that calls it do not allow to fail on IO exceptions.
+            // We rethrow it to make it fail with a proper error message and call stack.
+            catch (FileLoadException ex)
+            {
+                throw new InvalidOperationException("Could not load file or assembly.", ex);
+            }
+            // Sometimes FileNotFoundException is thrown when there is an assembly load failure. In this case it has FusionLog.
+            catch (FileNotFoundException ex) when (ex.FusionLog != null)
+            {
+                throw new InvalidOperationException("Could not load file or assembly.", ex);
+            }
 #else
             return Directory.EnumerateFiles(path, searchPattern, searchOption);
 #endif
@@ -53,9 +68,24 @@ namespace Microsoft.Build.Shared.FileSystem
         public virtual IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
         {
 #if FEATURE_MSIOREDIST
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+            try
+            {
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
                     ? Microsoft.IO.Directory.EnumerateDirectories(path, searchPattern, (Microsoft.IO.SearchOption)searchOption)
                     : Directory.EnumerateDirectories(path, searchPattern, searchOption);
+            }
+            // Microsoft.IO.Redist has a dependency on System.Buffers and if it is not found these lines throw an exception.
+            // However, FileMatcher class that calls it do not allow to fail on IO exceptions.
+            // We rethrow it to make it fail with a proper error message and call stack.
+            catch (FileLoadException ex)
+            {
+                throw new InvalidOperationException("Could not load file or assembly.", ex);
+            }
+            // Sometimes FileNotFoundException is thrown when there is an assembly load failure. In this case it has FusionLog.
+            catch (FileNotFoundException ex) when (ex.FusionLog != null)
+            {
+                throw new InvalidOperationException("Could not load file or assembly.", ex);
+            }
 #else
             return Directory.EnumerateDirectories(path, searchPattern, searchOption);
 #endif
@@ -64,9 +94,24 @@ namespace Microsoft.Build.Shared.FileSystem
         public virtual IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
         {
 #if FEATURE_MSIOREDIST
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+            try
+            {
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
                     ? Microsoft.IO.Directory.EnumerateFileSystemEntries(path, searchPattern, (Microsoft.IO.SearchOption)searchOption)
                     : Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+            }
+            // Microsoft.IO.Redist has a dependency on System.Buffers and if it is not found these lines throw an exception.
+            // However, FileMatcher class that calls it do not allow to fail on IO exceptions.
+            // We rethrow it to make it fail with a proper error message and call stack.
+            catch (FileLoadException ex)
+            {
+                throw new InvalidOperationException("Could not load file or assembly.", ex);
+            }
+            // Sometimes FileNotFoundException is thrown when there is an assembly load failure. In this case it has FusionLog.
+            catch (FileNotFoundException ex) when (ex.FusionLog != null)
+            {
+                throw new InvalidOperationException("Could not load file or assembly.", ex);
+            }
 #else
             return Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);
 #endif
