@@ -34,12 +34,12 @@
       </trans-unit>
       <trans-unit id="OnlyOneProjectAllowed">
         <source>Only one project can be specified at a time using the `-p` option.</source>
-        <target state="new">Only one project can be specified at a time using the `-p` option.</target>
+        <target state="translated">使用 `-p` 選項時，一次只能指定一個專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyOptionDescription">
         <source>Properties to be passed to MSBuild.</source>
-        <target state="new">Properties to be passed to MSBuild.</target>
+        <target state="translated">要傳送至 MSBuild 的屬性。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandBuilding">
@@ -119,7 +119,7 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="RunCommandProjectAbbreviationDeprecated">
         <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
-        <target state="new">Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</target>
+        <target state="translated">警告 NETSDK1174: --project 已取代縮寫 -p。請使用 --project。</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">

@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Restore workloads required for a project.</source>
-        <target state="needs-review-translation">Hiermit stellen Sie die im lokalen Workloadmanifest definierten Workloads wieder her.</target>
+        <target state="translated">Stellen Sie Workloads wieder her, die für ein Projekt erforderlich sind.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAProject">
         <source>Couldn't find a project. Ensure that a project exists in {0}, or pass the path to the project using {1}.</source>
-        <target state="new">Couldn't find a project. Ensure that a project exists in {0}, or pass the path to the project using {1}.</target>
+        <target state="translated">Es konnte kein Projekt gefunden werden. Vergewissern Sie sich, dass unter {0} ein Projekt vorhanden ist, oder übergeben Sie den Pfad zum Projekt mithilfe von {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRunTarget">
         <source>Failed to restore workload for project {0}: Failed to run MSBuild Target _GetRequiredWorkloads.</source>
-        <target state="new">Failed to restore workload for project {0}: Failed to run MSBuild Target _GetRequiredWorkloads.</target>
+        <target state="translated">Fehler beim Wiederherstellen der Workload für das Projekt {0}: Fehler beim Ausführen von MSBuild mit Ziel _GetRequiredWorkloads.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloads">
         <source>Installing workloads: {0}</source>
-        <target state="new">Installing workloads: {0}</target>
+        <target state="translated">Workloads werden installiert: {0}</target>
         <note />
       </trans-unit>
     </body>

@@ -4,37 +4,37 @@
     <body>
       <trans-unit id="DownloadVersionFailed">
         <source>Downloading {0} version {1} failed.</source>
-        <target state="new">Downloading {0} version {1} failed.</target>
+        <target state="translated">Не удалось скачать версию {0} {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToLoadNuGetSource">
         <source>Failed to load NuGet source {0}</source>
-        <target state="new">Failed to load NuGet source {0}</target>
+        <target state="translated">Не удалось загрузить источник NuGet {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToLoadNuGetSourceSourceIsNotValid">
         <source>Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</source>
-        <target state="new">Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</target>
+        <target state="translated">Не удалось загрузить источник NuGet {0}: недопустимый источник. Он будет пропущен при дальнейшей обработке.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToValidatePackageSigning">
         <source>Failed to validate package signing.</source>
-        <target state="new">Failed to validate package signing.</target>
+        <target state="translated">Не удалось проверить подпись пакета.</target>
         <note />
       </trans-unit>
       <trans-unit id="IsNotFoundInNuGetFeeds">
         <source>{0} is not found in NuGet feeds {1}".</source>
-        <target state="new">{0} is not found in NuGet feeds {1}".</target>
+        <target state="translated">{0} не найдено в веб-каналах NuGet {1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
         <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
-        <target state="new">Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</target>
+        <target state="translated">Пропустить проверку подписи пакета NuGet. Текущий пакет SDK .NET не подписан первой стороной.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">
         <source>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</source>
-        <target state="new">Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</target>
+        <target state="translated">Пропустить проверку подписи пакета NuGet. Проверка подписи NuGet недоступна в Linux или macOS https://aka.ms/workloadskippackagevalidation.</target>
         <note />
       </trans-unit>
     </body>

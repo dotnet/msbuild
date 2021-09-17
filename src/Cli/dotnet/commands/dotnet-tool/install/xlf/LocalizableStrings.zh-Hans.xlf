@@ -16,7 +16,7 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="InvalidRuntimeIdentifier">
         <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
-        <target state="new">The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</target>
+        <target state="translated">运行时标识符 {0} 无效。有效的运行时标识符为: {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -75,7 +75,7 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       </trans-unit>
       <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
         <source>The --prerelease and --version options are not supported in the same command</source>
-        <target state="new">The --prerelease and --version options are not supported in the same command</target>
+        <target state="translated">不支持在同一命令中同时使用 --prerelease 和 --version 选项</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">

@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AppFullName">
         <source>.NET SDK Command</source>
-        <target state="needs-review-translation">Polecenie clean platformy .NET</target>
+        <target state="translated">Polecenie zestawu .NET SDK</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Manage .NET SDK installation.</source>
-        <target state="needs-review-translation">Polecenie służące do czyszczenia wcześniej wygenerowanych danych wyjściowych kompilacji.</target>
+        <target state="translated">Zarządzaj instalacją zestawu .NET SDK.</target>
         <note />
       </trans-unit>
     </body>

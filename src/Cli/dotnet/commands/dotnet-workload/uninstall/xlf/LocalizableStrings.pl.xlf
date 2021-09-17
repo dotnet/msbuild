@@ -4,47 +4,42 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The workload ID(s) to uninstall.</source>
-        <target state="needs-review-translation">Identyfikator pakietu NuGet narzędzia do odinstalowania.</target>
+        <target state="translated">Identyfikatory obciążenia do odinstalowania.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall one or more workloads.</source>
-        <target state="needs-review-translation">Odinstaluj narzędzie globalne lub lokalne.</target>
+        <target state="translated">Odinstaluj co najmniej jedno obciążenie.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>WORKLOAD_ID</source>
-        <target state="needs-review-translation">PACKAGE_ID</target>
+        <target state="translated">WORKLOAD_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
         <source>Removing workload installation record for {0}...</source>
-        <target state="new">Removing workload installation record for {0}...</target>
+        <target state="translated">Trwa usuwanie rekordu instalacji pakietu roboczego dla {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one workload ID to uninstall.</source>
-        <target state="needs-review-translation">Określ jeden identyfikator pakietu narzędzia do odinstalowania.</target>
+        <target state="translated">Określ jeden identyfikator obciążenia do odinstalowania.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Successfully uninstalled workload(s): {0}</source>
-        <target state="new">Successfully uninstalled workload(s): {0}</target>
+        <target state="translated">Pomyślnie odinstalowane pakiety robocze: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>Couldn't find workload ID(s): {0}</source>
-        <target state="needs-review-translation">Nie można odnaleźć narzędzia o identyfikatorze pakietu „{0}”. 
-
-Narzędzia są odinstalowywane przy użyciu ich identyfikatora pakietu, który może być inny 
-niż nazwa narzędzia używana podczas wywoływania narzędzia. Nazwy narzędzi 
-i odpowiednie identyfikatory pakietów zainstalowanych narzędzi można znaleźć przy użyciu polecenia
-„dotnet workload list”.</target>
+        <target state="translated">Nie można znaleźć identyfikatorów obciążenia: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUninstallFailed">
         <source>Workload uninstallation failed: {0}</source>
-        <target state="new">Workload uninstallation failed: {0}</target>
+        <target state="translated">Niepowodzenie odinstalowania pakietów roboczych: {0}</target>
         <note />
       </trans-unit>
     </body>

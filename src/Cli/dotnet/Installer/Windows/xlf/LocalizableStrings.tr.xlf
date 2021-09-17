@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AuthentiCodeNoTrustedOrg">
         <source>AuthentiCode signature for {0} does not belong to a trusted organization.</source>
-        <target state="new">AuthentiCode signature for {0} does not belong to a trusted organization.</target>
+        <target state="translated">{0} için AuthentiCode imzası güvenilir bir kuruluşa ait değil.</target>
         <note />
       </trans-unit>
     </body>

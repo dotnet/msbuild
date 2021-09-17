@@ -4,47 +4,42 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The workload ID(s) to uninstall.</source>
-        <target state="needs-review-translation">Kaldırılacak aracın NuGet Paket Kimliği.</target>
+        <target state="translated">Kaldırılacak iş yükü kimlikleri.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall one or more workloads.</source>
-        <target state="needs-review-translation">Genel veya yerel bir aracı kaldırın.</target>
+        <target state="translated">Bir veya daha fazla iş yükünü kaldırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>WORKLOAD_ID</source>
-        <target state="needs-review-translation">PACKAGE_ID</target>
+        <target state="translated">WORKLOAD_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
         <source>Removing workload installation record for {0}...</source>
-        <target state="new">Removing workload installation record for {0}...</target>
+        <target state="translated">{0} için iş yükü yükleme kaydı kaldırılıyor...</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one workload ID to uninstall.</source>
-        <target state="needs-review-translation">Kaldırılacak tek bir aracın Paket Kimliğini belirtin.</target>
+        <target state="translated">Kaldırılacak tek bir iş yükünün kimliğini belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Successfully uninstalled workload(s): {0}</source>
-        <target state="new">Successfully uninstalled workload(s): {0}</target>
+        <target state="translated">İş yükleri başarıyla kaldırıldı: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>Couldn't find workload ID(s): {0}</source>
-        <target state="needs-review-translation">'{0}' paket kimliğine sahip araç bulunamadı. 
-
-Araçlar, aracı çağırırken kullandığınız araç adından farklı olabilen 
-paket kimlikleri kullanılarak kaldırılır. Yüklü araçların araç adlarını ve 
-karşılık gelen paket kimliklerini bulmak için 
-'dotnet workload list' komutunu kullanabilirsiniz.</target>
+        <target state="translated">İş yükü kimlikleri bulunamadı: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUninstallFailed">
         <source>Workload uninstallation failed: {0}</source>
-        <target state="new">Workload uninstallation failed: {0}</target>
+        <target state="translated">İş yükü kaldırma başarısız: {0}</target>
         <note />
       </trans-unit>
     </body>

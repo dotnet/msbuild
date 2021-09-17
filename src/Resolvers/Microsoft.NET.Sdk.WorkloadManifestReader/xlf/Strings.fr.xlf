@@ -9,17 +9,17 @@
       </trans-unit>
       <trans-unit id="ConflictingWorkloadDefinition">
         <source>Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
-        <target state="new">Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</target>
+        <target state="translated">La définition de charge de travail '{0}' dans le manifeste '{1}' [{2}] est en conflit avec le manifeste '{3}' [{4}].</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictingWorkloadPack">
         <source>Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
-        <target state="new">Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</target>
+        <target state="translated">Le pack de charge de travail '{0}' dans le manifeste '{1}' [{2}] est en conflit avec le manifeste '{3}' [{4}].</target>
         <note />
       </trans-unit>
       <trans-unit id="CyclicWorkloadRedirect">
         <source>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</source>
-        <target state="new">Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</target>
+        <target state="translated">Réorientation cyclique de la charge de travail '{0}' dans le manifeste '{1}' [{2}]</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateKeyAtOffset">
@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DuplicateManifestID">
         <source>Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</source>
-        <target state="new">Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</target>
+        <target state="translated">Le fournisseur de manifeste {0} a retourné un ID de manifeste' {1} ' [{2}] en conflit qui est en conflit avec le manifeste [{3}] existant</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedBoolAtOffset">
@@ -59,17 +59,17 @@
       </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
-        <target state="new">Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</target>
+        <target state="translated">La dépendance de manifeste de charge de travail « {0} » requise par le manifeste « {1} » [{2}] est introuvable</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestDependencyVersionTooLow">
         <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
-        <target state="new">Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</target>
+        <target state="translated">La version {0}' de la dépendance du manifeste de charge de travail est inférieure à la version '{1}' requise par {2}le manifeste '{3}' [{4}].</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
-        <target state="new">Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</target>
+        <target state="translated">Impossible de trouver la charge de travail '{0}' prolongée par la charge de travail '{1}' dans le manifeste '{2}' [{3}].</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingOrInvalidManifestVersion">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="RedirectWorkloadHasOtherKeys">
         <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
-        <target state="new">Redirect workload '{0}' has keys other than 'redirect-to'</target>
+        <target state="translated">La charge de travail de redirection « {0} » a des clés autres que « redirection vers ».</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
@@ -114,7 +114,7 @@
       </trans-unit>
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
-        <target state="new">Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</target>
+        <target state="translated">Cible non résolue « {0} » pour la redirection de charge de travail « {1} » dans le manifeste « {2} » [{3}]</target>
         <note />
       </trans-unit>
     </body>
