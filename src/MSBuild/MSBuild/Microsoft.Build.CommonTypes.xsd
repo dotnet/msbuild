@@ -1254,7 +1254,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="DebugType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="DebugType" _locComment="" -->none, pdbonly, embedded, portable or full. From C# 6 onwards, pdbonly is the same as full.</xs:documentation>
+            <xs:documentation><!-- _locID_text="DebugType" _locComment="" -->none, pdbonly, embedded, portable, or full. From C# 6 onwards, pdbonly is the same as full.</xs:documentation>
         </xs:annotation>
         <xs:simpleType>
             <xs:restriction base="xs:string">
