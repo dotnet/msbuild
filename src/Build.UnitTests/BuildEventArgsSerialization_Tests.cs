@@ -189,8 +189,10 @@ namespace Microsoft.Build.UnitTests
                 e => e.ThreadId.ToString());
         }
 
-        [Fact]
-        public void RoundtripBuildErrorEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildErrorEventArgs(bool useArguments)
         {
             var args = new BuildErrorEventArgs(
                 "Subcategory",
@@ -200,9 +202,11 @@ namespace Microsoft.Build.UnitTests
                 2,
                 3,
                 4,
-                "Message",
+                "Message with arguments: '{0}'",
                 "Help",
-                "SenderName");
+                "SenderName",
+                DateTime.Parse("9/1/2021 12:02:07 PM"),
+                useArguments ? new object[] { "argument0" } : null);
 
             Roundtrip(args,
                 e => e.Code,
@@ -213,11 +217,14 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.Message,
                 e => e.ProjectFile,
-                e => e.Subcategory);
+                e => e.Subcategory,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
-        [Fact]
-        public void RoundtripBuildWarningEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildWarningEventArgs(bool useArguments)
         {
             var args = new BuildWarningEventArgs(
                 "Subcategory",
@@ -227,9 +234,11 @@ namespace Microsoft.Build.UnitTests
                 2,
                 3,
                 4,
-                "Message",
+                "Message with arguments: '{0}'",
                 "Help",
-                "SenderName");
+                "SenderName",
+                DateTime.Parse("9/1/2021 12:02:07 PM"),
+                useArguments ? new object[] { "argument0" } : null);
 
             Roundtrip(args,
                 e => e.Code,
@@ -240,11 +249,14 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.Message,
                 e => e.ProjectFile,
-                e => e.Subcategory);
+                e => e.Subcategory,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
-        [Fact]
-        public void RoundtripBuildMessageEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildMessageEventArgs(bool useArguments)
         {
             var args = new BuildMessageEventArgs(
                 "Subcategory",
@@ -258,7 +270,8 @@ namespace Microsoft.Build.UnitTests
                 "Help",
                 "SenderName",
                 MessageImportance.High,
-                DateTime.Parse("12/12/2015 06:11:56 PM"));
+                DateTime.Parse("12/12/2015 06:11:56 PM"),
+                useArguments ? new object[] { "argument0" } : null);
 
             Roundtrip(args,
                 e => e.Code,
@@ -270,7 +283,8 @@ namespace Microsoft.Build.UnitTests
                 e => e.Message,
                 e => e.Importance.ToString(),
                 e => e.ProjectFile,
-                e => e.Subcategory);
+                e => e.Subcategory,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
         [Fact]
