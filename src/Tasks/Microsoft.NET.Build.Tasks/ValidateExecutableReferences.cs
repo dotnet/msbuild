@@ -5,8 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
 
@@ -19,6 +17,8 @@ namespace Microsoft.NET.Build.Tasks
         public bool IsExecutable { get; set; }
 
         public ITaskItem[] ReferencedProjects { get; set; } = Array.Empty<ITaskItem>();
+
+        public string MSBuildVersion { get; set; }
 
         protected override void ExecuteCore()
         {
@@ -40,7 +40,10 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 var additionalPropertiesXml = XElement.Parse(project.GetMetadata("AdditionalPropertiesFromProject"));
-                XElement targetFrameworkElement = additionalPropertiesXml.Elements().Where(el => el.HasAttributes && el.FirstAttribute.Value.Equals(nearestTargetFramework)).Single();
+                bool msbuild17OrLater = Version.TryParse(MSBuildVersion, out Version v) && v >= Version.Parse("17.0");
+                XElement targetFrameworkElement = msbuild17OrLater ?
+                    additionalPropertiesXml.Elements().Where(el => el.HasAttributes && el.FirstAttribute.Value.Equals(nearestTargetFramework)).Single() :
+                    additionalPropertiesXml.Element(nearestTargetFramework);
                 Dictionary<string, string> projectAdditionalProperties = new(StringComparer.OrdinalIgnoreCase);
                 foreach (XElement propertyElement in targetFrameworkElement.Elements())
                 {
