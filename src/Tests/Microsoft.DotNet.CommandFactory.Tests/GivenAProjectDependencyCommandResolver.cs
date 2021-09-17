@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tests
 
             var commandFile = Path.GetFileNameWithoutExtension(result.Path);
 
-            commandFile.Should().Be("testhost");
+            commandFile.Should().Be("dotnet");
 
             result.Args.Should().Contain(commandResolverArguments.CommandName);
         }
