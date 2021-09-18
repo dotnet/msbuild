@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = "dotnet-portable",
                 Configuration = _configuration,
                 ProjectDirectory = testAsset.Path,
-                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30
+                Framework = NuGet.Frameworks.NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework)
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = "dotnet-portable",
                 Configuration = _configuration,
                 ProjectDirectory = testAsset.Path,
-                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30
+                Framework = NuGet.Frameworks.NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework)
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -115,8 +115,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
                 ProjectDirectory = testAsset.Path,
-                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30
-
+                Framework = NuGet.Frameworks.NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework)
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -147,7 +146,7 @@ namespace Microsoft.DotNet.Tests
                 CommandName = "dotnet-portable",
                 Configuration = "Debug",
                 ProjectDirectory = testAsset.Path,
-                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30,
+                Framework = NuGet.Frameworks.NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework),
                 OutputPath = outputDir
             };
 
