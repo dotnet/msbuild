@@ -55,6 +55,7 @@ sdk-options:
   test              {LocalizableStrings.TestDefinition}
   tool              {LocalizableStrings.ToolDefinition}
   vstest            {LocalizableStrings.VsTestDefinition}
+  workload          {LocalizableStrings.WorkloadDefinition}
 
 {LocalizableStrings.AdditionalTools}
   dev-certs         {LocalizableStrings.DevCertsDefinition}
