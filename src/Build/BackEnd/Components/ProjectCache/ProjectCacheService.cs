@@ -54,7 +54,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         /// i.e. falling back to FileSystem.Default.
         /// </summary>
         private sealed class DefaultMSBuildFileSystem : MSBuildFileSystemBase { }
-      
+
         // Use NullableBool to make it work with Interlock.CompareExchange (doesn't accept bool?).
         // Assume that if one request is a design time build, all of them are.
         // Volatile because it is read by the BuildManager thread and written by one project cache service thread pool thread.
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 #if !FEATURE_ASSEMBLYLOADCONTEXT
                 return Assembly.LoadFrom(resolverPath);
 #else
-                return _loader.LoadFromPath(resolverPath);
+                return s_loader.LoadFromPath(resolverPath);
 #endif
             }
 
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         }
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
-        private static readonly CoreClrAssemblyLoader _loader = new CoreClrAssemblyLoader();
+        private static readonly CoreClrAssemblyLoader s_loader = new CoreClrAssemblyLoader();
 #endif
 
         public void PostCacheRequest(CacheRequest cacheRequest)
