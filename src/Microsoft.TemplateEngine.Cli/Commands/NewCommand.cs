@@ -62,11 +62,28 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 {
                     var templateGroupCommand = new TemplateGroupCommand(this, environmentSettings, template);
                     var parsed = templateGroupCommand.Parse(args.Arguments ?? Array.Empty<string>());
-                    return templateGroupCommand.GetSuggestions(parsed, textToMatch);
+                    foreach (var suggestion in templateGroupCommand.GetSuggestions(parsed, textToMatch))
+                    {
+                        yield return suggestion;
+                    }
+                    yield break;
+                }
+            }
+            else
+            {
+                foreach (var template in templates)
+                {
+                    foreach (var suggestion in template.ShortNameList)
+                    {
+                        yield return suggestion;
+                    }
                 }
             }
 
-            return base.GetSuggestions(args, environmentSettings, textToMatch);
+            foreach (var suggestion in base.GetSuggestions(args, environmentSettings, textToMatch))
+            {
+                yield return suggestion;
+            }
         }
 
         protected override async Task<NewCommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)

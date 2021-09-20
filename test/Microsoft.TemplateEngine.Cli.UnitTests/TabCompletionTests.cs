@@ -24,5 +24,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             Assert.Contains("--Framework", result);
         }
+
+        [Fact]
+        public void RootCommand()
+        {
+            using EnvironmentSettingsHelper helper = new EnvironmentSettingsHelper();
+            var settings = helper.CreateEnvironment(
+                virtualize: true,
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.Components);
+            var myCommand = NewCommandFactory.Create("new", settings.Host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse("new ");
+            var result = myCommand.GetSuggestions(parseResult).ToArray();
+
+            Assert.Contains("install", result);
+            Assert.DoesNotContain("--install", result);
+            Assert.Contains("console", result);
+        }
     }
 }

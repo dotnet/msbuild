@@ -21,13 +21,18 @@ namespace Microsoft.TemplateEngine.TestHelper
             bool virtualize = false,
             [CallerMemberName] string hostIdentifier = "",
             bool loadDefaultGenerator = true,
-            IEnvironment? environment = null)
+            IEnvironment? environment = null,
+            IReadOnlyList<(Type, IIdentifiedComponent)>? additionalComponents = null)
         {
             if (string.IsNullOrEmpty(locale))
             {
                 locale = "en-US";
             }
             var builtIns = new List<(Type, IIdentifiedComponent)>();
+            if (additionalComponents != null)
+            {
+                builtIns.AddRange(additionalComponents);
+            }
             builtIns.AddRange(Edge.Components.AllComponents);
             if (loadDefaultGenerator)
             {
