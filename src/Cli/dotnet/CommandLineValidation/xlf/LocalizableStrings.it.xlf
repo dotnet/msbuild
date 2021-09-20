@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="ResponseFileNotFound">
         <source>Response file not found '{0}'</source>
-        <target state="translated">Il file di risposta '{0}' non è stato trovato</target>
+        <target state="translated">Il file di risposta non è stato trovato in '{0}'</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">

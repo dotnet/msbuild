@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>List workloads available.</source>
-        <target state="needs-review-translation">Mostrar las herramientas instaladas local o globalmente.</target>
+        <target state="translated">Enumera las cargas de trabajo disponibles.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
         <source>Installed Workload Ids</source>
-        <target state="new">Installed Workload Ids</target>
+        <target state="translated">Los id. de carga de trabajo instalados</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
-        <target state="new">Use `dotnet workload search` to find additional workloads to install.</target>
+        <target state="translated">Use "dotnet workload search" para buscar cargas de trabajo adicionales para instalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadListHeader">
         <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="new">This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</target>
+        <target state="translated">Este comando enumera solo las cargas de trabajo que se instalaron a través de "dotnet workload install" en esta versión del SDK y no las que se instalaron a través de Visual Studio.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="new">Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</target>
+        <target state="translated">Las actualizaciones están disponibles para las siguientes cargas de trabajo: {0}. Ejecute "dotnet workload update" para obtener la versión más reciente.</target>
         <note />
       </trans-unit>
     </body>

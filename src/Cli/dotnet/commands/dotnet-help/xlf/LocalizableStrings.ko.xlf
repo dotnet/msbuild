@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="FormatDefinition">
         <source>Apply style preferences to a project or solution.</source>
-        <target state="new">Apply style preferences to a project or solution.</target>
+        <target state="translated">프로젝트 또는 솔루션에 스타일 기본 설정을 적용합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollForwardDefinition">
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SdkDefinition">
         <source>Manage .NET SDK installation.</source>
-        <target state="new">Manage .NET SDK installation.</target>
+        <target state="translated">.NET SDK 설치를 관리합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">

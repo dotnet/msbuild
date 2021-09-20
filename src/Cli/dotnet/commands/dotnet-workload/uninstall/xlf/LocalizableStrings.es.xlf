@@ -4,47 +4,42 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The workload ID(s) to uninstall.</source>
-        <target state="needs-review-translation">El id. del paquete de NuGet de la herramienta que se desinstalará.</target>
+        <target state="translated">Identificadores de carga de trabajo que se van a desinstalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall one or more workloads.</source>
-        <target state="needs-review-translation">Desinstalar una herramienta global o local.</target>
+        <target state="translated">Desinstale una o varias cargas de trabajo.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>WORKLOAD_ID</source>
-        <target state="needs-review-translation">PACKAGE_ID</target>
+        <target state="translated">WORKLOAD_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
         <source>Removing workload installation record for {0}...</source>
-        <target state="new">Removing workload installation record for {0}...</target>
+        <target state="translated">Quitando el registro de instalación de carga de trabajo para {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one workload ID to uninstall.</source>
-        <target state="needs-review-translation">Especifique un id. de paquete de herramientas para desinstalar.</target>
+        <target state="translated">Especifique un identificador de carga de trabajo para desinstalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Successfully uninstalled workload(s): {0}</source>
-        <target state="new">Successfully uninstalled workload(s): {0}</target>
+        <target state="translated">Carga(s) de trabajo: {0} desinstalada(s) correctamente</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>Couldn't find workload ID(s): {0}</source>
-        <target state="needs-review-translation">No se encontró ninguna herramienta con el identificador de paquete "{0}". 
-
-Para desinstalar las herramientas se usa su identificador de paquete, que puede ser distinto 
-del nombre de herramienta que se usa al llamarla. Para buscar los nombres de herramientas 
-y los identificadores de paquete correspondientes de las herramientas instaladas, use el comando
-"dotnet workload list".</target>
+        <target state="translated">No se encontraron los identificadores de carga de trabajo: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUninstallFailed">
         <source>Workload uninstallation failed: {0}</source>
-        <target state="new">Workload uninstallation failed: {0}</target>
+        <target state="translated">Error de desinstalación de la carga de trabajo: {0}</target>
         <note />
       </trans-unit>
     </body>

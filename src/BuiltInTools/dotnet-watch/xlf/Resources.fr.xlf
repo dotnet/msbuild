@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="Warning_ProjectAbbreviationDeprecated">
         <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
-        <target state="new">Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</target>
+        <target state="translated">AVERTISSEMENT NETSDK1174 : l’abréviation de-p pour--Project est déconseillée. Veuillez utiliser--Project.</target>
         <note />
       </trans-unit>
     </body>

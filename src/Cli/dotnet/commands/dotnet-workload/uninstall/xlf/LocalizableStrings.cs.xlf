@@ -4,47 +4,42 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The workload ID(s) to uninstall.</source>
-        <target state="needs-review-translation">ID balíčku NuGet nástroje, který se má odinstalovat</target>
+        <target state="translated">ID úlohy k odinstalaci.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall one or more workloads.</source>
-        <target state="needs-review-translation">Odinstaluje globální nebo místní nástroj.</target>
+        <target state="translated">Odinstalujte nejméně jednu úlohu.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>WORKLOAD_ID</source>
-        <target state="needs-review-translation">PACKAGE_ID</target>
+        <target state="translated">WORKLOAD_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
         <source>Removing workload installation record for {0}...</source>
-        <target state="new">Removing workload installation record for {0}...</target>
+        <target state="translated">Odebírá se záznam instalace úlohy pro {0}…</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one workload ID to uninstall.</source>
-        <target state="needs-review-translation">Zadejte jedno ID balíčku nástroje, který se má odinstalovat.</target>
+        <target state="translated">Zadejte jedno ID úlohy, která se má odinstalovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Successfully uninstalled workload(s): {0}</source>
-        <target state="new">Successfully uninstalled workload(s): {0}</target>
+        <target state="translated">Úspěšně odinstalované úlohy: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>Couldn't find workload ID(s): {0}</source>
-        <target state="needs-review-translation">Nástroj s ID balíčku {0} se nenašel. 
-
-Nástroje se odinstalují pomocí svého ID balíčku, které se může lišit 
-od názvu nástroje, který používáte při volání nástroje. Názvy nástrojů 
-a odpovídající ID balíčků nainstalovaných nástrojů najdete pomocí
-příkazu 'dotnet workload list'.</target>
+        <target state="translated">Nepovedlo se najít ID úlohy: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUninstallFailed">
         <source>Workload uninstallation failed: {0}</source>
-        <target state="new">Workload uninstallation failed: {0}</target>
+        <target state="translated">Neúspěšná odinstalace úloh: {0}</target>
         <note />
       </trans-unit>
     </body>

@@ -16,7 +16,7 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
       </trans-unit>
       <trans-unit id="InvalidRuntimeIdentifier">
         <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
-        <target state="new">The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</target>
+        <target state="translated">L’identificateur d’exécution {0} n’est pas valide. Les identificateurs d’exécution valides sont : {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -75,7 +75,7 @@ Si vous souhaitez créer un manifeste, utilisez 'dotnet new tool-manifest', gén
       </trans-unit>
       <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
         <source>The --prerelease and --version options are not supported in the same command</source>
-        <target state="new">The --prerelease and --version options are not supported in the same command</target>
+        <target state="translated">Les options --prerelease et --version ne sont pas prises en charge dans la même commande.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
