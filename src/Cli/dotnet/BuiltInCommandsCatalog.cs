@@ -1,13 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Tools.Add;
-using Microsoft.DotNet.Tools.Build;
-using Microsoft.DotNet.Tools.BuildServer;
-using Microsoft.DotNet.Tools.Clean;
 using Microsoft.DotNet.Tools.Sdk;
-using Microsoft.DotNet.Tools.Fsi;
-using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.List;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
@@ -32,36 +26,6 @@ namespace Microsoft.DotNet.Cli
     {
         public static Dictionary<string, BuiltInCommandMetadata> Commands = new Dictionary<string, BuiltInCommandMetadata>
         {
-            ["format"] = new BuiltInCommandMetadata
-            {
-                Command = FormatCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-format
-                DocLink = "https://aka.ms/dotnet-format"
-            },
-            ["fsi"] = new BuiltInCommandMetadata
-            {
-                Command = FsiCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-fsi
-                DocLink = "https://aka.ms/dotnet-fsi"
-            },
-            ["help"] = new BuiltInCommandMetadata
-            {
-                Command = HelpCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-help
-                DocLink = "https://aka.ms/dotnet-help"
-            },
-            ["list"] = new BuiltInCommandMetadata
-            {
-                Command = ListCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-list-reference
-                DocLink = "https://aka.ms/dotnet-list"
-            },
-            ["msbuild"] = new BuiltInCommandMetadata
-            {
-                Command = MSBuildCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-msbuild
-                DocLink = "https://aka.ms/dotnet-msbuild"
-            },
             ["new"] = new BuiltInCommandMetadata
             {
                 Command = NewCommandShim.Run,
@@ -137,10 +101,6 @@ namespace Microsoft.DotNet.Cli
             {
                 Command = ToolCommand.Run,
                 DocLink = "https://aka.ms/dotnet-tool"
-            },
-            ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
-            {
-                Command = InternalReportinstallsuccess.Run
             },
             ["workload"] = new BuiltInCommandMetadata
             {

@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Help
@@ -19,6 +21,8 @@ namespace Microsoft.DotNet.Tools.Help
             var command = new Command("help", LocalizableStrings.AppFullName);
 
             command.AddArgument(Argument);
+
+            command.Handler = CommandHandler.Create<ParseResult>(HelpCommand.Run);
 
             return command;
         }

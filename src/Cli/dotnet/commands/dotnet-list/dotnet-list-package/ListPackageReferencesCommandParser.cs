@@ -3,7 +3,10 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.List.PackageReferences;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.PackageReferences.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -67,6 +70,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ConfigOption);
             command.AddOption(SourceOption);
             command.AddOption(InteractiveOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
 
             return command;
         }
