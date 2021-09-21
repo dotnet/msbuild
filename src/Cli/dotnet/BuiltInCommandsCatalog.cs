@@ -26,40 +26,6 @@ namespace Microsoft.DotNet.Cli
     {
         public static Dictionary<string, BuiltInCommandMetadata> Commands = new Dictionary<string, BuiltInCommandMetadata>
         {
-            ["sln"] = new BuiltInCommandMetadata
-            {
-                Command = SlnCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-sln
-                DocLink = "https://aka.ms/dotnet-sln"
-            },
-            ["store"] = new BuiltInCommandMetadata
-            {
-                Command = StoreCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-store
-                DocLink = "https://aka.ms/dotnet-store"
-            },
-            ["test"] = new BuiltInCommandMetadata
-            {
-                Command = TestCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-test
-                DocLink = "https://aka.ms/dotnet-test"
-            },
-            ["vstest"] = new BuiltInCommandMetadata
-            {
-                Command = VSTestCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-vstest
-                DocLink = "https://aka.ms/dotnet-vstest"
-            },
-            ["tool"] = new BuiltInCommandMetadata
-            {
-                Command = ToolCommand.Run,
-                DocLink = "https://aka.ms/dotnet-tool"
-            },
-            ["workload"] = new BuiltInCommandMetadata
-            {
-                Command = WorkloadCommand.Run,
-                DocLink = "https://aka.ms/dotnet-workload"
-            },
         };
     }
 }

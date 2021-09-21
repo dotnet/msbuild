@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools.Sln.Remove;
 using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -20,6 +23,8 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("remove", LocalizableStrings.RemoveAppFullName);
 
             command.AddArgument(ProjectPathArgument);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new RemoveProjectFromSolutionCommand(parseResult).Execute());
 
             return command;
         }

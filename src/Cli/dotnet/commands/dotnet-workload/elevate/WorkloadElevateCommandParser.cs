@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload.Elevate;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Elevate.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -14,6 +17,8 @@ namespace Microsoft.DotNet.Cli
             {
                 IsHidden = true
             };
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadElevateCommand(parseResult).Execute());
 
             return command;
         }

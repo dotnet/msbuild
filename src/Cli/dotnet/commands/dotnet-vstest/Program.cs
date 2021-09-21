@@ -3,16 +3,17 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Tools.VSTest
 {
     public class VSTestCommand
     {
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            DebugHelper.HandleDebugSwitch(parseResult);
 
-            VSTestForwardingApp vsTestforwardingApp = new VSTestForwardingApp(args);
+            VSTestForwardingApp vsTestforwardingApp = new VSTestForwardingApp(parseResult.GetArguments());
 
             return vsTestforwardingApp.Execute();
         }

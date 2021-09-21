@@ -3,8 +3,11 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Tool.Common;
+using Microsoft.DotNet.Tools.Tool.Install;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -63,6 +66,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption);
             command.AddOption(VerbosityOption);
             command.AddOption(ArchitectureOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolInstallCommand(parseResult).Execute());
 
             return command;
         }

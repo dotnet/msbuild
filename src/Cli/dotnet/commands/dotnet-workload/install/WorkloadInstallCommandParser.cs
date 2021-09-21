@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload.Install;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -72,6 +75,8 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(WorkloadIdArgument);
             AddWorkloadInstallCommandOptions(command);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadInstallCommand(parseResult).Execute());
 
             return command;
         }

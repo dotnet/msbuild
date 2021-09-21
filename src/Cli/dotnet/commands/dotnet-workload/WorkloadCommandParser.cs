@@ -1,7 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -20,6 +22,8 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(WorkloadRepairCommandParser.GetCommand());
             command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
             command.AddCommand(WorkloadElevateCommandParser.GetCommand());
+
+            command.Handler = CommandHandler.Create((Func<int>)(() => throw new Exception("TODO command not found")));
 
             return command;
         }

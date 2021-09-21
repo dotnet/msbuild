@@ -3,8 +3,11 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Test;
 using LocalizableStrings = Microsoft.DotNet.Tools.Test.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -140,6 +143,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption());
             command.AddOption(CommonOptions.ArchitectureOption(false));
             command.AddOption(CommonOptions.OperatingSystemOption());
+
+            command.Handler = CommandHandler.Create<ParseResult>(TestCommand.Run);
 
             return command;
         }

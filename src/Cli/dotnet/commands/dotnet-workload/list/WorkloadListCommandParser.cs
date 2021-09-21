@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload.List;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.List.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -30,6 +33,9 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(TempDirOption);
             command.AddOption(IncludePreviewsOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions(true);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadListCommand(parseResult).Execute());
+
             return command;
         }
     }

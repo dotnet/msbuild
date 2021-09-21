@@ -3,7 +3,10 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Linq;
+using Microsoft.DotNet.Tools.Store;
 using LocalizableStrings = Microsoft.DotNet.Tools.Store.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -77,6 +80,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(CommonOptions.VerbosityOption());
 			command.AddOption(CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription));
+
+            command.Handler = CommandHandler.Create<ParseResult>(StoreCommand.Run);
 
             return command;
         }
