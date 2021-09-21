@@ -3,7 +3,10 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Remove.PackageReference;
 using LocalizableStrings = Microsoft.DotNet.Tools.Remove.PackageReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -25,6 +28,8 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(CmdPackageArgument);
             command.AddOption(InteractiveOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new RemovePackageReferenceCommand(parseResult).Execute());
 
             return command;
         }

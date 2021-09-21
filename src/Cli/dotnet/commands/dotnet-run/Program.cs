@@ -15,7 +15,11 @@ namespace Microsoft.DotNet.Tools.Run
         public static RunCommand FromArgs(string[] args)
         {
             var parseResult = Parser.Instance.ParseFrom("dotnet run", args);
+            return FromParseResult(parseResult);
+        }
 
+        public static RunCommand FromParseResult(ParseResult parseResult)
+        {
             if (parseResult.HasOption("--help"))
             {
                 parseResult.ShowHelp();
@@ -46,11 +50,11 @@ namespace Microsoft.DotNet.Tools.Run
             return command;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            DebugHelper.HandleDebugSwitch(parseResult);
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

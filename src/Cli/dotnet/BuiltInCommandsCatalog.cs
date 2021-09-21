@@ -26,53 +26,6 @@ namespace Microsoft.DotNet.Cli
     {
         public static Dictionary<string, BuiltInCommandMetadata> Commands = new Dictionary<string, BuiltInCommandMetadata>
         {
-            ["new"] = new BuiltInCommandMetadata
-            {
-                Command = NewCommandShim.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-new
-                DocLink = "https://aka.ms/dotnet-new"
-            },
-            ["nuget"] = new BuiltInCommandMetadata
-            {
-                Command = NuGetCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-nuget-locals
-                DocLink = "https://aka.ms/dotnet-nuget"
-            },
-            ["pack"] = new BuiltInCommandMetadata
-            {
-                Command = PackCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-pack
-                DocLink = "https://aka.ms/dotnet-pack"
-            },
-            ["publish"] = new BuiltInCommandMetadata
-            {
-                Command = PublishCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-publish
-                DocLink = "https://aka.ms/dotnet-publish"
-            },
-            ["remove"] = new BuiltInCommandMetadata
-            {
-                Command = RemoveCommand.Run,
-                // aka.ms link: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-remove-reference
-                DocLink = "https://aka.ms/dotnet-remove"
-            },
-            ["restore"] = new BuiltInCommandMetadata
-            {
-                Command = RestoreCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-restore
-                DocLink = "https://aka.ms/dotnet-restore"
-            },
-            ["run"] = new BuiltInCommandMetadata
-            {
-                Command = RunCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-run
-                DocLink = "https://aka.ms/dotnet-run"
-            },
-            ["sdk"] = new BuiltInCommandMetadata
-            {
-                Command = SdkCommand.Run,
-                DocLink = "https://aka.ms/dotnet-sdk"
-            },
             ["sln"] = new BuiltInCommandMetadata
             {
                 Command = SlnCommand.Run,

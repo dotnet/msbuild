@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
@@ -23,13 +22,16 @@ namespace Microsoft.DotNet.Tools.Publish
 
         public static PublishCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            var parser = Parser.Instance;
+            var parseResult = parser.ParseFrom("dotnet publish", args);
+            return FromParseResult(parseResult);
+        }
+
+        public static PublishCommand FromParseResult(ParseResult parseResult, string msbuildPath = null)
+        {
+            DebugHelper.HandleDebugSwitch(parseResult);
 
             var msbuildArgs = new List<string>();
-
-            var parser = Parser.Instance;
-
-            var parseResult = parser.ParseFrom("dotnet publish", args);
 
             parseResult.ShowHelpOrErrorIfAppropriate();
 
@@ -51,11 +53,11 @@ namespace Microsoft.DotNet.Tools.Publish
                 msbuildPath);
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            DebugHelper.HandleDebugSwitch(parseResult);
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

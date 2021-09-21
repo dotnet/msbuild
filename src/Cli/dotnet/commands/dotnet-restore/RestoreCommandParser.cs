@@ -3,8 +3,11 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Restore;
 using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -52,6 +55,8 @@ namespace Microsoft.DotNet.Cli
             {
                 command.AddOption(option);
             }
+
+            command.Handler = CommandHandler.Create<ParseResult>(RestoreCommand.Run);
 
             return command;
         }

@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools.NuGet;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -24,6 +27,8 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(GetVerifyCommand());
             command.AddCommand(GetTrustCommand());
             command.AddCommand(GetSignCommand());
+
+            command.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
 
             return command;
         }
