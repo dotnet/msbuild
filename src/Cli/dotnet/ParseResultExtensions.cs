@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli
         {
             return parseResult.Tokens.Select(t => t.Value)
                 .ToArray()
-                .GetSubArguments(); // TODO test this
+                .GetSubArguments();
         }
 
         public static string[] GetSubArguments(this string[] args)

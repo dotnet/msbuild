@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload.Repair;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Repair.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -25,6 +28,9 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SourceOption);
             command.AddOption(VerbosityOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadRepairCommand(parseResult).Execute());
+
             return command;
         }
     }

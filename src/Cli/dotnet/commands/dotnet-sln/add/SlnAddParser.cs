@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools.Sln.Add;
 using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -26,6 +29,8 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(ProjectPathArgument);
             command.AddOption(InRootOption);
             command.AddOption(SolutionFolderOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new AddProjectToSolutionCommand(parseResult).Execute());
 
             return command;
         }
