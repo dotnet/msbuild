@@ -1,21 +1,18 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.IO;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using System.Linq;
-using FluentAssertions;
-using System.Xml.Linq;
-using System.Collections.Generic;
-using System;
-using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-
 namespace Microsoft.NET.Build.Tests
 {
+    using System.IO;
+    using Microsoft.NET.TestFramework;
+    using Microsoft.NET.TestFramework.Assertions;
+    using Microsoft.NET.TestFramework.Commands;
+    using Xunit;
+    using System.Linq;
+    using FluentAssertions;
+    using System;
+    using Xunit.Abstractions;
+    using Microsoft.NET.TestFramework.ProjectConstruction;
+
     public class GivenThatWeWantToUseContentFiles : SdkTest
     {
         public GivenThatWeWantToUseContentFiles(ITestOutputHelper log) : base(log)
@@ -71,8 +68,8 @@ namespace {project.Name}
                         Path.Combine(outputDir, @"ContentFiles.pdb"),
                         Path.Combine(outputDir, @"ContentFiles.runtimeconfig.dev.json"),
                         Path.Combine(outputDir, @"ContentFiles.runtimeconfig.json"),
-                        Path.Combine(outputDir, @"tools\run.cmd"),
-                        Path.Combine(outputDir, @"tools\run.sh"),
+                        Path.Combine(outputDir, @"tools", "run.cmd"),
+                        Path.Combine(outputDir, @"tools", "run.sh"),
                         contentFileName,
                     };
 
