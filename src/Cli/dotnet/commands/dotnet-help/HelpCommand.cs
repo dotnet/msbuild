@@ -4,6 +4,7 @@
 using System;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -81,12 +82,12 @@ namespace Microsoft.DotNet.Tools.Help
 
         public int Execute()
         {
-            if (BuiltInCommandsCatalog.Commands.TryGetValue(
+            if (TryGetDocsLink(
                 _parseResult.ValueForArgument<string>(HelpCommandParser.Argument),
-                out BuiltInCommandMetadata builtIn) &&
-                !string.IsNullOrEmpty(builtIn.DocLink))
+                out var docsLink) &&
+                !string.IsNullOrEmpty(docsLink))
             {
-                var process = ConfigureProcess(builtIn.DocLink);
+                var process = ConfigureProcess(docsLink);
                 process.Start();
                 process.WaitForExit();
                 return 0;
@@ -100,6 +101,20 @@ namespace Microsoft.DotNet.Tools.Help
                 Reporter.Output.WriteLine(HelpUsageText.UsageText);
                 return 1;
             }
+        }
+
+        private bool TryGetDocsLink(string commandName, out string docsLink)
+        {
+            var command = Cli.Parser.Subcommands
+                .Where(c => c is DocumentedCommand)
+                .FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
+            if (command != null)
+            {
+                docsLink = (command as DocumentedCommand).DocsLink;
+                return true;
+            }
+            docsLink = null;
+            return false;
         }
     }
 }

@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ListCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-list";
+
         public static readonly Argument<string> SlnOrProjectArgument = new Argument<string>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
@@ -19,7 +21,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("list", LocalizableStrings.NetListCommand);
+            var command = new DocumentedCommand("list", DocsLink, LocalizableStrings.NetListCommand);
 
             command.AddArgument(SlnOrProjectArgument);
             command.AddCommand(ListPackageReferencesCommandParser.GetCommand());

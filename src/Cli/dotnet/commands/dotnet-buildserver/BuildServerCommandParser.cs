@@ -10,9 +10,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class BuildServerCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-build-server";
+
         public static Command GetCommand()
         {
-            var command = new Command("build-server", LocalizableStrings.CommandDescription);
+            var command = new DocumentedCommand("build-server", DocsLink, LocalizableStrings.CommandDescription);
 
             command.AddCommand(ServerShutdownCommandParser.GetCommand());
 

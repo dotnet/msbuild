@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class BuildCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-build";
+
         public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
@@ -42,7 +44,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("build", LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("build", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(SlnOrProjectArgument);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: false, includeNoDependenciesOption: false);

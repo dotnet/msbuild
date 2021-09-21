@@ -12,6 +12,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class AddCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-add";
+
         public static readonly Argument<string> ProjectArgument = new Argument<string>(CommonLocalizableStrings.ProjectArgumentName)
         {
             Description = CommonLocalizableStrings.ProjectArgumentDescription
@@ -19,7 +21,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("add", LocalizableStrings.NetAddCommand);
+            var command = new DocumentedCommand("add", DocsLink, LocalizableStrings.NetAddCommand);
 
             command.AddArgument(ProjectArgument);
             command.AddCommand(AddPackageParser.GetCommand());

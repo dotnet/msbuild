@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RemoveCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-remove";
+
         public static readonly Argument<string> ProjectArgument = new Argument<string>(CommonLocalizableStrings.ProjectArgumentName)
         {
             Description = CommonLocalizableStrings.ProjectArgumentDescription
@@ -18,7 +20,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("remove", LocalizableStrings.NetRemoveCommand);
+            var command = new DocumentedCommand("remove", DocsLink, LocalizableStrings.NetRemoveCommand);
 
             command.AddArgument(ProjectArgument);
             command.AddCommand(RemovePackageParser.GetCommand());

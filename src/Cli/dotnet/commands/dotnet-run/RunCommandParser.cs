@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RunCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-run";
+
         public static readonly Option<string> ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
 
         public static readonly Option<string> FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
@@ -42,7 +44,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("run", LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("run", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddOption(ConfigurationOption);
             command.AddOption(FrameworkOption);

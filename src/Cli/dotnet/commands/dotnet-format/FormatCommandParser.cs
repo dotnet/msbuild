@@ -10,9 +10,13 @@ namespace Microsoft.DotNet.Tools.Format
 {
     internal static partial class FormatCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-format";
+
+        private static readonly FormatCommandDefaultHandler s_formatCommandHandler = new();
+
         public static Command GetCommand()
         {
-            var formatCommand = new Command("format", LocalizableStrings.Formats_code_to_match_editorconfig_settings)
+            var formatCommand = new DocumentedCommand("format", DocsLink, LocalizableStrings.Formats_code_to_match_editorconfig_settings)
             {
                 FormatWhitespaceCommandParser.GetCommand(),
                 FormatStyleCommandParser.GetCommand(),

@@ -10,9 +10,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class VSTestCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-vstest";
+
         public static Command GetCommand()
         {
-            var command = new Command("vstest");
+            var command = new DocumentedCommand("vstest", DocsLink);
 
             command.Handler = CommandHandler.Create<ParseResult>(VSTestCommand.Run);
 

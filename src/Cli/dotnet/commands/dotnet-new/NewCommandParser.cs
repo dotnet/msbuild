@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class NewCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-new";
+
         public static readonly Argument Argument = new Argument<IEnumerable<string>>() { Arity = ArgumentArity.ZeroOrMore };
 
         public static readonly Option ListOption = new Option<bool>(new string[] { "-l", "--list" });
@@ -43,7 +45,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("new");
+            var command = new DocumentedCommand("new", DocsLink);
 
             command.AddArgument(Argument);
             command.AddOption(ListOption);

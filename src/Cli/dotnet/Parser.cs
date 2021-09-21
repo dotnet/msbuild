@@ -8,17 +8,13 @@ using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.Reflection;
-
-using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Cli.Format;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Format;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
-
-using Command = System.CommandLine.Command;
-using ICommand = System.CommandLine.ICommand;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -27,7 +23,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly RootCommand RootCommand = new RootCommand();
 
         // Subcommands
-        private static readonly Command[] Subcommands = new Command[]
+        public static readonly Command[] Subcommands = new Command[]
         {
             AddCommandParser.GetCommand(),
             BuildCommandParser.GetCommand(),

@@ -10,6 +10,8 @@ namespace Microsoft.DotNet.Tools.Help
 {
     internal static class HelpCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-help";
+
         public static readonly Argument<string> Argument = new Argument<string>(LocalizableStrings.CommandArgumentName)
         {
             Description = LocalizableStrings.CommandArgumentDescription,
@@ -18,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Help
 
         public static Command GetCommand()
         {
-            var command = new Command("help", LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("help", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(Argument);
 

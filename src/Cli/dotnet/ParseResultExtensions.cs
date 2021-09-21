@@ -48,7 +48,8 @@ namespace Microsoft.DotNet.Cli
 
         public static bool IsDotnetBuiltInCommand(this ParseResult parseResult)
         {
-            return string.IsNullOrEmpty(parseResult.RootSubCommandResult()) || BuiltInCommandsCatalog.Commands.ContainsKey(parseResult.RootSubCommandResult());
+            return string.IsNullOrEmpty(parseResult.RootSubCommandResult()) || 
+                Parser.Subcommands.Any(c => c.Name.Equals(parseResult.RootSubCommandResult(), StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool IsTopLevelDotnetCommand(this ParseResult parseResult)

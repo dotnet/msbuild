@@ -10,9 +10,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-workload";
+
         public static Command GetCommand()
         {
-            var command = new Command("workload", LocalizableStrings.CommandDescription);
+            var command = new DocumentedCommand("workload", DocsLink, LocalizableStrings.CommandDescription);
 
             command.AddCommand(WorkloadInstallCommandParser.GetCommand());
             command.AddCommand(WorkloadUpdateCommandParser.GetCommand());
