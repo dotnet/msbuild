@@ -1,5 +1,5 @@
 # MSBuild Labels
-Here's a brief explanation on the labels most often used by the MSBuild team excluding obvious ones such as `bug`.
+Here's a brief explanation on the labels most often used by the MSBuild team excluding hopefully self-evident ones such as `bug`.
 
 | Label             | Applied When | Notes |
 |-------------------|--------------|-------|
