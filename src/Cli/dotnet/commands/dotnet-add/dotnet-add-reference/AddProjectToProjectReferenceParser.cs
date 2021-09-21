@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.ProjectToProjectReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -30,6 +33,8 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(ProjectPathArgument);
             command.AddOption(FrameworkOption);
             command.AddOption(InteractiveOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new AddProjectToProjectReferenceCommand(parseResult).Execute());
 
             return command;
         }

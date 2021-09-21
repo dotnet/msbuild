@@ -227,31 +227,35 @@ namespace Microsoft.DotNet.Cli
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
             int exitCode;
-            if (parseResult.CommandResult.Command.Name.Equals("dotnet") && string.IsNullOrEmpty(parseResult.ValueForArgument<string>(Parser.DotnetSubCommand)))
-            {
-                exitCode = 0;
-            }
-            else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootSubCommandResult(), out var builtIn))
-            {
-                PerformanceLogEventSource.Log.BuiltInCommandStart();
-                exitCode = builtIn.Command(args.GetSubArguments());
-                PerformanceLogEventSource.Log.BuiltInCommandStop();
-            }
-            else
-            {
-                PerformanceLogEventSource.Log.ExtensibleCommandResolverStart();
-                var resolvedCommand = CommandFactoryUsingResolver.Create(
-                        "dotnet-" + parseResult.ValueForArgument<string>(Parser.DotnetSubCommand),
-                        args.GetSubArguments(),
-                        FrameworkConstants.CommonFrameworks.NetStandardApp15);
-                PerformanceLogEventSource.Log.ExtensibleCommandResolverStop();
 
-                PerformanceLogEventSource.Log.ExtensibleCommandStart();
-                var result = resolvedCommand.Execute();
-                PerformanceLogEventSource.Log.ExtensibleCommandStop();
+            exitCode = parseResult.Invoke();
 
-                exitCode = result.ExitCode;
-            }
+            // TODO
+            //if (parseResult.CommandResult.Command.Name.Equals("dotnet") && string.IsNullOrEmpty(parseResult.ValueForArgument<string>(Parser.DotnetSubCommand)))
+            //{
+            //    exitCode = 0;
+            //}
+            //else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootSubCommandResult(), out var builtIn))
+            //{
+            //    PerformanceLogEventSource.Log.BuiltInCommandStart();
+            //    exitCode = builtIn.Command(args.GetSubArguments());
+            //    PerformanceLogEventSource.Log.BuiltInCommandStop();
+            //}
+            //else
+            //{
+            //    PerformanceLogEventSource.Log.ExtensibleCommandResolverStart();
+            //    var resolvedCommand = CommandFactoryUsingResolver.Create(
+            //            "dotnet-" + parseResult.ValueForArgument<string>(Parser.DotnetSubCommand),
+            //            args.GetSubArguments(),
+            //            FrameworkConstants.CommonFrameworks.NetStandardApp15);
+            //    PerformanceLogEventSource.Log.ExtensibleCommandResolverStop();
+
+            //    PerformanceLogEventSource.Log.ExtensibleCommandStart();
+            //    var result = resolvedCommand.Execute();
+            //    PerformanceLogEventSource.Log.ExtensibleCommandStop();
+
+            //    exitCode = result.ExitCode;
+            //}
 
             PerformanceLogEventSource.Log.TelemetryClientFlushStart();
             telemetryClient.Flush();

@@ -32,24 +32,6 @@ namespace Microsoft.DotNet.Cli
     {
         public static Dictionary<string, BuiltInCommandMetadata> Commands = new Dictionary<string, BuiltInCommandMetadata>
         {
-            ["add"] = new BuiltInCommandMetadata
-            {
-                Command = AddCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-add-reference
-                DocLink = "https://aka.ms/dotnet-add"
-            },
-            ["build"] = new BuiltInCommandMetadata
-            {
-                Command = BuildCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-build
-                DocLink = "https://aka.ms/dotnet-build"
-            },
-            ["clean"] = new BuiltInCommandMetadata 
-            {
-                Command = CleanCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-clean
-                DocLink = "https://aka.ms/dotnet-clean"
-            },
             ["format"] = new BuiltInCommandMetadata
             {
                 Command = FormatCommand.Run,
@@ -151,23 +133,10 @@ namespace Microsoft.DotNet.Cli
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-vstest
                 DocLink = "https://aka.ms/dotnet-vstest"
             },
-            ["complete"] = new BuiltInCommandMetadata
-            {
-                Command = CompleteCommand.Run
-            },
-            ["parse"] = new BuiltInCommandMetadata
-            {
-                Command = ParseCommand.Run
-            },
             ["tool"] = new BuiltInCommandMetadata
             {
                 Command = ToolCommand.Run,
                 DocLink = "https://aka.ms/dotnet-tool"
-            },
-            ["build-server"] = new BuiltInCommandMetadata
-            {
-                Command = BuildServerCommand.Run,
-                DocLink = "https://aka.ms/dotnet-build-server"
             },
             ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
             {
