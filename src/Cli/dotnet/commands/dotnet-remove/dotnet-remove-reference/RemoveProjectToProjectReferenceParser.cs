@@ -3,7 +3,10 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Remove.ProjectToProjectReference;
 using LocalizableStrings = Microsoft.DotNet.Tools.Remove.ProjectToProjectReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -27,6 +30,8 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(ProjectPathArgument);
             command.AddOption(FrameworkOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new RemoveProjectToProjectReferenceCommand(parseResult).Execute());
 
             return command;
         }

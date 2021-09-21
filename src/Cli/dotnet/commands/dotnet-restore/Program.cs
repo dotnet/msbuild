@@ -7,6 +7,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Tools.Restore
 {
@@ -19,11 +20,14 @@ namespace Microsoft.DotNet.Tools.Restore
 
         public static RestoreCommand FromArgs(string[] args, string msbuildPath = null, bool noLogo = true)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-
             var parser = Parser.Instance;
-
             var result = parser.ParseFrom("dotnet restore", args);
+            return FromParseResult(result, msbuildPath, noLogo);
+        }
+
+        public static RestoreCommand FromParseResult(ParseResult result, string msbuildPath = null, bool noLogo = true)
+        {
+            DebugHelper.HandleDebugSwitch(result);
 
             result.ShowHelpOrErrorIfAppropriate();
 
@@ -48,6 +52,13 @@ namespace Microsoft.DotNet.Tools.Restore
             DebugHelper.HandleDebugSwitch(ref args);
 
             return FromArgs(args).Execute();
+        }
+
+        public static int Run(ParseResult parseResult)
+        {
+            DebugHelper.HandleDebugSwitch(parseResult);
+
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

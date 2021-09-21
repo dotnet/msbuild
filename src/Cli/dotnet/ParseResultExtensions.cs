@@ -58,7 +58,9 @@ namespace Microsoft.DotNet.Cli
 
         public static string[] GetArguments(this ParseResult parseResult)
         {
-            return parseResult.Tokens.Select(t => t.Value).ToArray(); // TODO test this
+            return parseResult.Tokens.Select(t => t.Value)
+                .ToArray()
+                .GetSubArguments(); // TODO test this
         }
 
         public static string[] GetSubArguments(this string[] args)

@@ -4,7 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Linq;
+using Microsoft.DotNet.Tools.Run;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -51,6 +54,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.ArchitectureOption());
             command.AddOption(CommonOptions.OperatingSystemOption());
             command.TreatUnmatchedTokensAsErrors = false;
+
+            command.Handler = CommandHandler.Create<ParseResult>(RunCommand.Run);
 
             return command;
         }

@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools.New;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -57,6 +60,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(UpdateCheckOption);
             command.AddOption(UpdateApplyOption);
             command.AddOption(ColumnsOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((ParseResult parseResult) => NewCommandShim.Run(parseResult.GetArguments()));
 
             return command;
         }
