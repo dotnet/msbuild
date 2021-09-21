@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_handles_content_files_correctly()
         {
-            const string targetFramework = "netcoreapp3.0";
+            const string targetFramework = "netcoreapp3.1";
 
             var project = new TestProject
             {
@@ -60,6 +60,10 @@ namespace {project.Name}
 
             string outputDir = cmd.GetOutputDirectory(targetFramework).FullName;
             string intmediateDir = cmd.GetIntermediateDirectory(targetFramework).FullName;
+            var dirEnum = Directory.GetFiles(intmediateDir, "ExampleReader.cs", SearchOption.AllDirectories);
+            string contentFileName = dirEnum.FirstOrDefault();
+            contentFileName.Should().NotBeNullOrEmpty("Unable to locate 'ExampleReader.cs'");
+
             string[] filePaths =
                     {
                         Path.Combine(outputDir, @"ContentFiles.deps.json"),
@@ -69,7 +73,7 @@ namespace {project.Name}
                         Path.Combine(outputDir, @"ContentFiles.runtimeconfig.json"),
                         Path.Combine(outputDir, @"tools\run.cmd"),
                         Path.Combine(outputDir, @"tools\run.sh"),
-                        Path.Combine(intmediateDir, @"NuGet\61139A41364EEBD4B8F4B70445B190E5E43DDAC3\ContentFilesExample\1.0.2\ExampleReader.cs")
+                        contentFileName,
                     };
 
             VerifyFileExists(filePaths, true, out DateTime firstBuild);
