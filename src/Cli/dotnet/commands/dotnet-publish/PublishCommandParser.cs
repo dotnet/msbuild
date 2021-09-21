@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class PublishCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-publish";
+
         public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
@@ -47,7 +49,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("publish", LocalizableStrings.AppDescription);
+            var command = new DocumentedCommand("publish", DocsLink, LocalizableStrings.AppDescription);
 
             command.AddArgument(SlnOrProjectArgument);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: false, includeNoDependenciesOption: true);

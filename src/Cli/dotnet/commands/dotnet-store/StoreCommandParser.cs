@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class StoreCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-store";
+
         public static readonly Argument<IEnumerable<string>> Argument = new Argument<IEnumerable<string>>()
         {
             Arity = ArgumentArity.ZeroOrMore,
@@ -67,7 +69,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("store", LocalizableStrings.AppDescription);
+            var command = new DocumentedCommand("store", DocsLink, LocalizableStrings.AppDescription);
 
             command.AddArgument(Argument);
             command.AddOption(ManifestOption);

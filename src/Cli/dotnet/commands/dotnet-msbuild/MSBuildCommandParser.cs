@@ -4,15 +4,18 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli;
 using LocalizableStrings = Microsoft.DotNet.Tools.Build.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.MSBuild
 {
     internal static class MSBuildCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-msbuild";
+
         public static Command GetCommand()
         {
-            var command = new Command("msbuild", LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("msbuild", DocsLink, LocalizableStrings.AppFullName);
 
             command.Handler = CommandHandler.Create<ParseResult>(MSBuildCommand.Run);
 

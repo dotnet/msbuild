@@ -10,9 +10,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-tool";
+
         public static Command GetCommand()
         {
-            var command = new Command("tool", LocalizableStrings.CommandDescription);
+            var command = new DocumentedCommand("tool", DocsLink, LocalizableStrings.CommandDescription);
 
             command.AddCommand(ToolInstallCommandParser.GetCommand());
             command.AddCommand(ToolUninstallCommandParser.GetCommand());

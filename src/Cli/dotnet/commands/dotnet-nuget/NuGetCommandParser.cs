@@ -13,9 +13,11 @@ namespace Microsoft.DotNet.Cli
     // See https://github.com/NuGet/NuGet.Client for the actual implementation.
     internal static class NuGetCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-nuget";
+
         public static Command GetCommand()
         {
-            var command = new Command("nuget");
+            var command = new DocumentedCommand("nuget", DocsLink);
 
             command.AddOption(new Option<bool>("--version"));
             command.AddOption(new Option<string>(new string[] { "-v", "--verbosity" }));

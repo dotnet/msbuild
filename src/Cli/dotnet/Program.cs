@@ -305,10 +305,5 @@ namespace Microsoft.DotNet.Cli
 
             UILanguageOverride.Setup();
         }
-
-        internal static bool TryGetBuiltInCommand(string commandName, out BuiltInCommandMetadata builtInCommand)
-        {
-            return BuiltInCommandsCatalog.Commands.TryGetValue(commandName, out builtInCommand);
-        }
     }
 }

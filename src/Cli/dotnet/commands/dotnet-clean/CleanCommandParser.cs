@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class CleanCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-clean";
+
         public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
@@ -29,7 +31,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("clean", LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("clean", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(SlnOrProjectArgument);
             command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));

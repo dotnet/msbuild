@@ -10,9 +10,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class FsiCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-fsi";
+
         public static Command GetCommand()
         {
-            var command = new Command("fsi");
+            var command = new DocumentedCommand("fsi", DocsLink);
 
             command.Handler = CommandHandler.Create<ParseResult>(FsiCommand.Run);
 

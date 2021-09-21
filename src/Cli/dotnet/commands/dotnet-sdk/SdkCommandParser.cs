@@ -11,9 +11,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class SdkCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-sdk";
+
         public static Command GetCommand()
         {
-            var command = new Command("sdk", LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("sdk", DocsLink, LocalizableStrings.AppFullName);
             command.AddCommand(SdkCheckCommandParser.GetCommand());
 
             command.Handler = CommandHandler.Create((Func<int>)(() => throw new Exception("TODO command not found")));

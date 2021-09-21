@@ -10,6 +10,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class SlnCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-sln";
+
         public static readonly Argument<string> SlnArgument = new Argument<string>(LocalizableStrings.SolutionArgumentName)
         {
             Description = LocalizableStrings.SolutionArgumentDescription,
@@ -18,7 +20,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("sln", LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("sln", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(SlnArgument);
             command.AddCommand(SlnAddParser.GetCommand());

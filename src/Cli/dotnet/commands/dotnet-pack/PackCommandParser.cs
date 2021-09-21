@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class PackCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-pack";
+
         public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
@@ -43,7 +45,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("pack", LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("pack", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(SlnOrProjectArgument);
             command.AddOption(OutputOption);
