@@ -137,6 +137,10 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>da9d3777afe61bbcfd16ff70ca150433370b4139</Sha>
     </Dependency>
+    <Dependency Name="System.ServiceProcess.ServiceController" Version="6.0.0-rtm.21470.22">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>da9d3777afe61bbcfd16ff70ca150433370b4139</Sha>
+    </Dependency>
     <Dependency Name="System.Text.Encoding.CodePages" Version="6.0.0-rtm.21470.22">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>da9d3777afe61bbcfd16ff70ca150433370b4139</Sha>
