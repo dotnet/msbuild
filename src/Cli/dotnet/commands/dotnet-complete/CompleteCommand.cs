@@ -10,12 +10,19 @@ namespace Microsoft.DotNet.Cli
 {
     public class CompleteCommand
     {
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            return RunWithReporter(args, Reporter.Output);
+            return RunWithReporter(parseResult, Reporter.Output);
         }
 
-        public static int RunWithReporter(string [] args, IReporter reporter)
+        public static int RunWithReporter(string[] args, IReporter reporter)
+        {
+            var parser = Parser.Instance;
+            var result = parser.ParseFrom("dotnet complete", args);
+            return RunWithReporter(result, reporter);
+        }
+
+        public static int RunWithReporter(ParseResult result, IReporter reporter)
         {
             if (reporter == null)
             {
@@ -24,13 +31,7 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                DebugHelper.HandleDebugSwitch(ref args);
-
-                // get the parser for the current subcommand
-                var parser = Parser.Instance;
-
-                // parse the arguments
-                var result = parser.ParseFrom("dotnet complete", args);
+                DebugHelper.HandleDebugSwitch(result);
 
                 var suggestions = Suggestions(result);
 

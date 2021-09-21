@@ -4,11 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Add.PackageReference;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -60,6 +63,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(PackageDirOption);
             command.AddOption(InteractiveOption);
             command.AddOption(PrereleaseOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new AddPackageReferenceCommand(parseResult).Execute());
 
             return command;
         }
