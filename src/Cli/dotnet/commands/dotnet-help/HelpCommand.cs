@@ -4,10 +4,8 @@
 using System;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Help
 {
@@ -20,12 +18,9 @@ namespace Microsoft.DotNet.Tools.Help
             _parseResult = parseResult;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult result)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-
-            var parser = Parser.Instance;
-            var result = parser.ParseFrom("dotnet help", args);
+            DebugHelper.HandleDebugSwitch(result);
 
             result.ShowHelpOrErrorIfAppropriate();
 

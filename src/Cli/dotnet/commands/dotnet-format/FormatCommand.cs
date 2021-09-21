@@ -23,7 +23,5 @@ namespace Microsoft.DotNet.Cli
             dotnetFormatArgs.AddAnalyzerDotnetFormatArgs(parseResult);
             return dotnetFormatArgs;
         }
-
-        public static int Run(string[] args) => new FormatCommand().RunCommand(args);
     }
 }

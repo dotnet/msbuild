@@ -56,6 +56,11 @@ namespace Microsoft.DotNet.Cli
             return parseResult.CommandResult.Command.Equals(RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
         }
 
+        public static string[] GetArguments(this ParseResult parseResult)
+        {
+            return parseResult.Tokens.Select(t => t.Value).ToArray(); // TODO test this
+        }
+
         public static string[] GetSubArguments(this string[] args)
         {
             var subargs = args.ToList();
