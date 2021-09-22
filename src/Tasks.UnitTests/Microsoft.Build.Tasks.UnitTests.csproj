@@ -18,6 +18,7 @@
   <ItemGroup>
     <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="System.Net.Http" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />

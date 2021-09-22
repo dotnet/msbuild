@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
 
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
