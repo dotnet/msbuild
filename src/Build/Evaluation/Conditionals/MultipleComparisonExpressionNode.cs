@@ -73,8 +73,9 @@ namespace Microsoft.Build.Evaluation
 
             if (LeftChild.TryBoolEvaluate(state, out bool leftBoolValue))
             {
-                RightChild.TryBoolEvaluate(state, out bool rightBoolValue);
-                return Compare(leftBoolValue, rightBoolValue);
+                return RightChild.TryBoolEvaluate(state, out bool rightBoolValue) ?
+                    Compare(leftBoolValue, rightBoolValue) :
+                    this is NotEqualExpressionNode; // If the left child is a bool, and the right child is not, then they are not equal. Return true for != and false for ==
             }
 
             string leftExpandedValue = LeftChild.GetExpandedValue(state);
