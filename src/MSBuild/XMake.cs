@@ -1550,8 +1550,7 @@ namespace Microsoft.Build.CommandLine
             {
                 // If we're running on any of the unsupported OS's, fail immediately.  This way,
                 // we don't run into some obscure error down the line, totally confusing the user.
-                InitializationException.Throw($"Platform {Environment.OSVersion.Platform}, version {Environment.OSVersion.Version}", "");
-                //InitializationException.VerifyThrow(false, "UnsupportedOS");
+                InitializationException.VerifyThrow(false, "UnsupportedOS");
             }
 #endif
         }
