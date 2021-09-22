@@ -79,7 +79,16 @@ namespace Microsoft.Build.Tasks
                 {
                     if (state.ResolvingNamespace)
                     {
-                        if (t.InnerText == ".")
+                        // If we see a ';' while resolving a namespace, we assume it's a file-scoped namespace
+                        // namespace foo.bar; <- At this point in code, we're at the semicolon.
+                        // class test { ... }
+                        // https://github.com/dotnet/msbuild/issues/6828
+                        if (t.InnerText == ";")
+                        {
+                            state.PushNamespacePart(state.Namespace);
+                            state.Reset();
+                        }
+                        else if (t.InnerText == ".")
                         {
                             state.Namespace += ".";
                         }
