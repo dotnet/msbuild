@@ -16,7 +16,14 @@ namespace Microsoft.DotNet.Cli
             Description = LocalizableStrings.CommandNameArgumentDescription
         };
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("run", LocalizableStrings.CommandDescription);
 

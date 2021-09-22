@@ -11,7 +11,14 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly Argument<string> Argument = new Argument<string>("internal-reportinstallsuccess-arg");
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("internal-reportinstallsuccess")
             {

@@ -13,7 +13,14 @@ namespace Microsoft.DotNet.Tools.MSBuild
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-msbuild";
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("msbuild", DocsLink, LocalizableStrings.AppFullName);
 

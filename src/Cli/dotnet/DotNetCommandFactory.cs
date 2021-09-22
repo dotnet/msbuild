@@ -40,8 +40,7 @@ namespace Microsoft.DotNet.Cli
 
         private bool TryGetBuiltInCommand(string commandName, out Func<string[], int> commandFunc)
         {
-            var command = Parser.Subcommands
-                .FirstOrDefault(command => command.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
+            var command = Parser.GetBuiltInCommand(commandName);
             if (command != null && command.Handler != null)
             {
                 commandFunc = (args) => command.Handler.InvokeAsync(new InvocationContext(Parser.Instance.Parse(args))).Result;

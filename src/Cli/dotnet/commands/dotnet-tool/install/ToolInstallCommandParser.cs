@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
@@ -41,12 +40,19 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> PrereleaseOption = ToolSearchCommandParser.PrereleaseOption;
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption;
 
         // Don't use the common options version as we don't want this to be a forwarded option
         public static readonly Option<string> ArchitectureOption = new Option<string>(new string[] { "--arch", "-a" }, CommonLocalizableStrings.ArchitectureOptionDescription);
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("install", LocalizableStrings.CommandDescription);
 

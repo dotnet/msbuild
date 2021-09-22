@@ -45,7 +45,14 @@ namespace Microsoft.DotNet.Cli
             IsHidden = true
         };
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             Command command = new("update", LocalizableStrings.CommandDescription);
 

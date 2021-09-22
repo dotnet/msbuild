@@ -17,9 +17,16 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption;
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("repair", LocalizableStrings.CommandDescription);
 

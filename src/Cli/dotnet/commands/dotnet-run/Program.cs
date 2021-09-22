@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(parseResult);
+            parseResult.HandleDebugSwitch();
 
             return FromParseResult(parseResult).Execute();
         }

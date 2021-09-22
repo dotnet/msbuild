@@ -39,15 +39,22 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
-        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption();
+        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
 
-        public static readonly Option<bool> SelfContainedOption = CommonOptions.SelfContainedOption();
+        public static readonly Option<bool> SelfContainedOption = CommonOptions.SelfContainedOption;
 
-        public static readonly Option<bool> NoSelfContainedOption = CommonOptions.NoSelfContainedOption();
+        public static readonly Option<bool> NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
 
         public static readonly Option<string> RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("publish", DocsLink, LocalizableStrings.AppDescription);
 
@@ -62,12 +69,12 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
             command.AddOption(RuntimeOption);
             command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
-            command.AddOption(CommonOptions.VersionSuffixOption());
-            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());
+            command.AddOption(CommonOptions.VersionSuffixOption);
+            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(NoRestoreOption);
-            command.AddOption(CommonOptions.VerbosityOption());
+            command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.ArchitectureOption());
-            command.AddOption(CommonOptions.OperatingSystemOption());
+            command.AddOption(CommonOptions.OperatingSystemOption);
 
             command.Handler = CommandHandler.Create<ParseResult>(PublishCommand.Run);
 

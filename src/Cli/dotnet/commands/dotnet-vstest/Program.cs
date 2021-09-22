@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.VSTest
     {
         public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(parseResult);
+            parseResult.HandleDebugSwitch();
 
             VSTestForwardingApp vsTestforwardingApp = new VSTestForwardingApp(parseResult.GetArguments());
 

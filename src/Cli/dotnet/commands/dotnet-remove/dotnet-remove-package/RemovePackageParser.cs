@@ -22,7 +22,14 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> InteractiveOption = new ForwardedOption<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs("--interactive");
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("package", LocalizableStrings.AppFullName);
 

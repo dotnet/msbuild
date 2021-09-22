@@ -11,7 +11,14 @@ namespace Microsoft.DotNet.Cli
 {
     public static class SlnListParser
     {
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("list", LocalizableStrings.ListAppFullName);
 

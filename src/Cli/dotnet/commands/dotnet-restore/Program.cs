@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tools.Restore
 
         public static RestoreCommand FromParseResult(ParseResult result, string msbuildPath = null, bool noLogo = true)
         {
-            DebugHelper.HandleDebugSwitch(result);
+            result.HandleDebugSwitch();
 
             result.ShowHelpOrErrorIfAppropriate();
 
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Restore
 
         public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(parseResult);
+            parseResult.HandleDebugSwitch();
 
             return FromParseResult(parseResult).Execute();
         }

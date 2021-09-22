@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                DebugHelper.HandleDebugSwitch(result);
+                result.HandleDebugSwitch();
 
                 var suggestions = Suggestions(result);
 

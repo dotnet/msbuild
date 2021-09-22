@@ -11,7 +11,14 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadElevateCommandParser
     {
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             Command command = new Command("elevate", LocalizableStrings.CommandDescription)
             {

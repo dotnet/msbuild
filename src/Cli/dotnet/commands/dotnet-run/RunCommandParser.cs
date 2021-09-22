@@ -34,11 +34,18 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> NoBuildOption = new Option<bool>("--no-build", LocalizableStrings.CommandOptionNoBuildDescription);
 
-        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption();
+        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
 
-        public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveMsBuildForwardOption();
+        public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveMsBuildForwardOption;
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("run", DocsLink, LocalizableStrings.AppFullName);
 
@@ -52,9 +59,9 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoBuildOption);
             command.AddOption(InteractiveOption);
             command.AddOption(NoRestoreOption);
-            command.AddOption(CommonOptions.VerbosityOption());
+            command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.ArchitectureOption());
-            command.AddOption(CommonOptions.OperatingSystemOption());
+            command.AddOption(CommonOptions.OperatingSystemOption);
             command.TreatUnmatchedTokensAsErrors = false;
 
             command.Handler = CommandHandler.Create<ParseResult>(RunCommand.Run);

@@ -16,7 +16,14 @@ namespace Microsoft.DotNet.Cli
     internal static class FormatWhitespaceCommandParser
     {
         private static readonly FormatWhitespaceHandler s_formattingHandler = new();
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("whitespace", LocalizableStrings.Run_whitespace_formatting);
             command.AddCommonOptions();

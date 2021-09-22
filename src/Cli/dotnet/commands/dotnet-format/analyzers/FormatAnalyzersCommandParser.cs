@@ -16,7 +16,14 @@ namespace Microsoft.DotNet.Cli
     {
         private static readonly FormatAnalyzersHandler s_analyzerHandler = new();
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("analyzers", LocalizableStrings.Run_3rd_party_analyzers__and_apply_fixes)
             {

@@ -4,6 +4,7 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using LocalizableStrings = Microsoft.DotNet.Tools.BuildServer.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -12,13 +13,20 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-build-server";
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("build-server", DocsLink, LocalizableStrings.CommandDescription);
 
             command.AddCommand(ServerShutdownCommandParser.GetCommand());
 
-            command.Handler = CommandHandler.Create((Func<int>)(() => throw new Exception("TODO command not found"))); ;
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => parseResult.HandleMissingCommand());
 
             return command;
         }

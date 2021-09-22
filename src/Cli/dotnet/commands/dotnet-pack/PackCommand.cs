@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Pack
 
         public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(parseResult);
+            parseResult.HandleDebugSwitch();
 
             return FromParseResult(parseResult).Execute();
         }

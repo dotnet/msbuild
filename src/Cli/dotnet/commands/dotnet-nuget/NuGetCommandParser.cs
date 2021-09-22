@@ -15,7 +15,14 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-nuget";
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("nuget", DocsLink);
 
@@ -95,7 +102,7 @@ namespace Microsoft.DotNet.Cli
             verifyCommand.AddOption(new ForwardedOption<IEnumerable<string>>(fingerprint)
                 .ForwardAsManyArgumentsEachPrefixedByOption(fingerprint)
                 .AllowSingleArgPerToken());
-            verifyCommand.AddOption(CommonOptions.VerbosityOption());
+            verifyCommand.AddOption(CommonOptions.VerbosityOption);
 
             return verifyCommand;
         }
@@ -111,7 +118,7 @@ namespace Microsoft.DotNet.Cli
             trustCommand.AddOption(new Option<bool>("--allow-untrusted-root"));
             trustCommand.AddOption(new Option<string>("--owners"));
             trustCommand.AddOption(new Option<string>("--configfile"));
-            trustCommand.AddOption(CommonOptions.VerbosityOption());
+            trustCommand.AddOption(CommonOptions.VerbosityOption);
 
             return trustCommand;
         }
@@ -133,7 +140,7 @@ namespace Microsoft.DotNet.Cli
             signCommand.AddOption(new Option<string>("--timestamper"));
             signCommand.AddOption(new Option<string>("--timestamp-hash-algorithm"));
             signCommand.AddOption(new Option<bool>("--overwrite"));
-            signCommand.AddOption(CommonOptions.VerbosityOption());
+            signCommand.AddOption(CommonOptions.VerbosityOption);
 
             return signCommand;
         }

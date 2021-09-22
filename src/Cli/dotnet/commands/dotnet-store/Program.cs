@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Tools.Store
 
         public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(parseResult);
+            parseResult.HandleDebugSwitch();
 
             return FromParseResult(parseResult).Execute();
         }

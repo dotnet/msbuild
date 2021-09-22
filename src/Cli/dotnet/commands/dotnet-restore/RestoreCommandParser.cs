@@ -25,8 +25,8 @@ namespace Microsoft.DotNet.Cli
         private static Option[] FullRestoreOptions() => 
             ImplicitRestoreOptions(true, true, true, true).Concat(
                 new Option[] {
-                    CommonOptions.VerbosityOption(),
-                    CommonOptions.InteractiveMsBuildForwardOption(),
+                    CommonOptions.VerbosityOption,
+                    CommonOptions.InteractiveMsBuildForwardOption,
                     new ForwardedOption<bool>(
                         "--use-lock-file",
                         LocalizableStrings.CmdUseLockFileOptionDescription)
@@ -47,7 +47,14 @@ namespace Microsoft.DotNet.Cli
                             .ForwardAs("-property:RestoreForceEvaluate=true") })
                 .ToArray();
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("restore", DocsLink, LocalizableStrings.AppFullName);
 
@@ -121,7 +128,7 @@ namespace Microsoft.DotNet.Cli
                 {
                     IsHidden = !showHelp
                 }.ForwardAs("-property:RestoreForce=true"),
-                CommonOptions.PropertiesOption()
+                CommonOptions.PropertiesOption
             };
 
             if (includeRuntimeOption)

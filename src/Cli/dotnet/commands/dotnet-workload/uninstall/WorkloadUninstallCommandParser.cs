@@ -18,7 +18,14 @@ namespace Microsoft.DotNet.Cli
         
         public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             Command command = new Command("uninstall", LocalizableStrings.CommandDescription);
             command.AddArgument(WorkloadIdArgument);

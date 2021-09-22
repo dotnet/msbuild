@@ -110,9 +110,16 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-property:VSTestNoLogo=nologo");
 
-        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption();
+        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("test", DocsLink, LocalizableStrings.AppFullName);
 
@@ -141,10 +148,10 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
             command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription, withShortOption: false));
             command.AddOption(NoRestoreOption);
-            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());
-            command.AddOption(CommonOptions.VerbosityOption());
+            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
+            command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.ArchitectureOption(false));
-            command.AddOption(CommonOptions.OperatingSystemOption());
+            command.AddOption(CommonOptions.OperatingSystemOption);
 
             command.Handler = CommandHandler.Create<ParseResult>(TestCommand.Run);
 

@@ -51,7 +51,14 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> PrereleaseOption = new ForwardedOption<bool>("--prerelease", CommonLocalizableStrings.CommandPrereleaseOptionDescription)
             .ForwardAs("--prerelease");
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("package", LocalizableStrings.AppFullName);
 

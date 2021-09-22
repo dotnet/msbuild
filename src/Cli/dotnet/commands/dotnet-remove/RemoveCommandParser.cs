@@ -4,6 +4,7 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Remove.LocalizableStrings;
 
@@ -18,7 +19,14 @@ namespace Microsoft.DotNet.Cli
             Description = CommonLocalizableStrings.ProjectArgumentDescription
         }.DefaultToCurrentDirectory();
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("remove", DocsLink, LocalizableStrings.NetRemoveCommand);
 
@@ -26,7 +34,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(RemovePackageParser.GetCommand());
             command.AddCommand(RemoveProjectToProjectReferenceParser.GetCommand());
 
-            command.Handler = CommandHandler.Create((Func<int>)(() => throw new Exception("TODO command not found")));
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => parseResult.HandleMissingCommand());
 
             return command;
         }

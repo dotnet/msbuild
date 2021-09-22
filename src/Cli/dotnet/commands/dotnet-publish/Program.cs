@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
         public static PublishCommand FromParseResult(ParseResult parseResult, string msbuildPath = null)
         {
-            DebugHelper.HandleDebugSwitch(parseResult);
+            parseResult.HandleDebugSwitch();
 
             var msbuildArgs = new List<string>();
 
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
         public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(parseResult);
+            parseResult.HandleDebugSwitch();
 
             return FromParseResult(parseResult).Execute();
         }
