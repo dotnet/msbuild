@@ -44,7 +44,7 @@ namespace Microsoft.Build.Tasks
             {
                 culture = item.GetMetadata("Culture");
                 // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
-                // https://github.com/dotnet/csharplang/blob/088f20b6f9b714a7b68f6d792d54def0f3b3057e/proposals/csharp-10.0/file-scoped-namespaces.md
+                // https://github.com/dotnet/msbuild/issues/3064
                 treatAsCultureNeutral = item.GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase);
             }
 
