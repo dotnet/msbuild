@@ -68,7 +68,6 @@ namespace {project.Name}
                         Path.Combine(outputDir, @"ContentFiles.deps.json"),
                         Path.Combine(outputDir, @"ContentFiles.dll"),
                         Path.Combine(outputDir, @"ContentFiles.pdb"),
-                        Path.Combine(outputDir, @"ContentFiles.runtimeconfig.dev.json"),
                         Path.Combine(outputDir, @"ContentFiles.runtimeconfig.json"),
                         Path.Combine(outputDir, @"tools", "run.cmd"),
                         Path.Combine(outputDir, @"tools", "run.sh"),
