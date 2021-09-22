@@ -10,8 +10,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class GlobalArgs
     {
-        private static Option<bool> quietOption = new("--quiet", "sshhhhhhhhhhhh");
-
         private static Option<string?> debugCustomSettingsLocationOption = new("--debug:custom-hive", "Sets custom settings location")
         {
             IsHidden = true
@@ -44,7 +42,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public GlobalArgs(ParseResult parseResult)
         {
-            Quiet = parseResult.ValueForOption(quietOption);
             DebugCustomSettingsLocation = parseResult.ValueForOption(debugCustomSettingsLocationOption);
             DebugVirtualizeSettings = parseResult.ValueForOption(debugVirtualizeSettingsOption);
             DebugAttach = parseResult.ValueForOption(debugAttachOption);
@@ -60,8 +57,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal string CommandName { get; private set; }
 
-        internal bool Quiet { get; private set; }
-
         internal bool DebugAttach { get; private set; }
 
         internal bool DebugRebuildCache { get; private set; }
@@ -76,7 +71,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static void AddGlobalsToCommand(Command command)
         {
-            command.AddOption(quietOption);
             command.AddOption(debugCustomSettingsLocationOption);
             command.AddOption(debugVirtualizeSettingsOption);
             command.AddOption(debugAttachOption);
