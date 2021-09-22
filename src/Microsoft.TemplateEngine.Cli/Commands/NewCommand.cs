@@ -16,12 +16,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         private readonly string _commandName;
 
-        internal NewCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks) : base(host, telemetryLogger, callbacks, commandName)
+        internal NewCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks) : base(host, telemetryLogger, callbacks, commandName, LocalizableStrings.CommandDescription)
         {
             _commandName = commandName;
             NewCommandArgs.AddToCommand(this);
             this.TreatUnmatchedTokensAsErrors = true;
-            this.Description = LocalizableStrings.CommandDescription;
 
             this.Add(new InstantiateCommand(host, telemetryLogger, callbacks));
             this.Add(new InstallCommand(host, telemetryLogger, callbacks));
@@ -30,8 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //yield return (host, telemetryLogger, callbacks) => new SearchCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new UninstallCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new UpdateCommand(host, telemetryLogger, callbacks);
-            //yield return (host, telemetryLogger, callbacks) => new AddAliasCommand(host, telemetryLogger, callbacks);
-            //yield return (host, telemetryLogger, callbacks) => new ShowAliasCommand(host, telemetryLogger, callbacks);
+            //yield return (host, telemetryLogger, callbacks) => new AliasCommand(host, telemetryLogger, callbacks);
         }
 
         protected override IEnumerable<string> GetSuggestions(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
