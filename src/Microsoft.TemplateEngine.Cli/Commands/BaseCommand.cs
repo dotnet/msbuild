@@ -43,7 +43,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, cancellationToken).ConfigureAwait(false);
 
-            //TODO: check if this exception handling is needed or it is handled by System.CommandLine
             try
             {
                 //TODO:
@@ -51,7 +50,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 //{
                 //    _telemetryLogger.TrackEvent(commandInput.CommandName + TelemetryConstants.HelpEventSuffix);
                 //}
-
                 using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
                 {
                     await HandleGlobalOptionsAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
