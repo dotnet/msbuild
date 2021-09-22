@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli
     {
         public static void ShowHelp(this ParseResult parseResult)
         {
-            DotnetHelpBuilder.Instance.Value.Write(parseResult.CommandResult.Command);
+            DotnetHelpBuilder.Instance.Value.Write(parseResult.CommandResult.Command, Console.Out);
         }
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)

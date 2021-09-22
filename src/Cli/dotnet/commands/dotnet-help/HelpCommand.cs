@@ -105,9 +105,9 @@ namespace Microsoft.DotNet.Tools.Help
 
         private bool TryGetDocsLink(string commandName, out string docsLink)
         {
-            var command = Cli.Parser.GetBuiltInCommand(commandName)
+            var command = Cli.Parser.GetBuiltInCommand(commandName)?
                 .Where(c => c is DocumentedCommand);
-            if (command != null)
+            if (command != null && command as DocumentedCommand != null)
             {
                 docsLink = (command as DocumentedCommand).DocsLink;
                 return true;

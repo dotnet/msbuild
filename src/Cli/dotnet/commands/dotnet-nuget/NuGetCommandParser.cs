@@ -53,6 +53,8 @@ namespace Microsoft.DotNet.Cli
             deleteCommand.AddOption(new Option<bool>("--no-service-endpoint"));
             deleteCommand.AddOption(new Option<bool>("--interactive"));
 
+            deleteCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+
             return deleteCommand;
         }
 
@@ -66,6 +68,8 @@ namespace Microsoft.DotNet.Cli
             localsCommand.AddOption(new Option<bool>("--force-english-output"));
             localsCommand.AddOption(new Option<bool>(new string[] { "-c", "--clear" }));
             localsCommand.AddOption(new Option<bool>(new string[] { "-l", "--list" }));
+
+            localsCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
 
             return localsCommand;
         }
@@ -88,6 +92,8 @@ namespace Microsoft.DotNet.Cli
             pushCommand.AddOption(new Option<bool>("--interactive"));
             pushCommand.AddOption(new Option<bool>("--skip-duplicate"));
 
+            pushCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+
             return pushCommand;
         }
 
@@ -104,6 +110,8 @@ namespace Microsoft.DotNet.Cli
                 .AllowSingleArgPerToken());
             verifyCommand.AddOption(CommonOptions.VerbosityOption);
 
+            verifyCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+
             return verifyCommand;
         }
 
@@ -119,6 +127,8 @@ namespace Microsoft.DotNet.Cli
             trustCommand.AddOption(new Option<string>("--owners"));
             trustCommand.AddOption(new Option<string>("--configfile"));
             trustCommand.AddOption(CommonOptions.VerbosityOption);
+
+            trustCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
 
             return trustCommand;
         }
@@ -141,6 +151,8 @@ namespace Microsoft.DotNet.Cli
             signCommand.AddOption(new Option<string>("--timestamp-hash-algorithm"));
             signCommand.AddOption(new Option<bool>("--overwrite"));
             signCommand.AddOption(CommonOptions.VerbosityOption);
+
+            signCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
 
             return signCommand;
         }
