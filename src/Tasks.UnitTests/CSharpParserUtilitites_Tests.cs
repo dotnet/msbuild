@@ -18,28 +18,27 @@ namespace Microsoft.Build.UnitTests
         // Simplest case of getting a fully-qualified class name from
         // a c# file.
         [Theory]
-        [InlineData("namespace MyNamespace { class MyClass {} }", "MyNamespace.MyClass")]
-        [InlineData("namespace MyNamespace ; class MyClass {} ", "MyNamespace.MyClass")] // file-scoped namespaces
-        public void Simple(string fileContents, string expected)
+        [InlineData("namespace MyNamespace { class MyClass {} }")]
+        [InlineData("namespace MyNamespace ; class MyClass {} ")] // file-scoped namespaces
+        public void Simple(string fileContents)
         {
-            AssertParse(fileContents, expected);
-            AssertParse("namespace MyNamespace { class MyClass {} }", "MyNamespace.MyClass");
+            AssertParse(fileContents, "MyNamespace.MyClass");
         }
 
         [Theory]
-        [InlineData("namespace /**/ MyNamespace /**/ { /**/ class /**/ MyClass/**/{}} //", "MyNamespace.MyClass")]
-        [InlineData("namespace /**/ MyNamespace /**/ ; /**/ class /**/ MyClass/**/{} //", "MyNamespace.MyClass")] // file-scoped namespaces
-        public void EmbeddedComment(string fileContents, string expected)
+        [InlineData("namespace /**/ MyNamespace /**/ { /**/ class /**/ MyClass/**/{}} //")]
+        [InlineData("namespace /**/ MyNamespace /**/ ; /**/ class /**/ MyClass/**/{} //")] // file-scoped namespaces
+        public void EmbeddedComment(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "MyNamespace.MyClass");
         }
 
         [Theory]
-        [InlineData("namespace MyNamespace{class MyClass{}}", "MyNamespace.MyClass")]
-        [InlineData("namespace MyNamespace;class MyClass{}", "MyNamespace.MyClass")] // file-scoped namespaces
-        public void MinSpace(string fileContents, string expected)
+        [InlineData("namespace MyNamespace{class MyClass{}}")]
+        [InlineData("namespace MyNamespace;class MyClass{}")] // file-scoped namespaces
+        public void MinSpace(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "MyNamespace.MyClass");
         }
 
         [Fact]
@@ -49,19 +48,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("/*namespace MyNamespace { */ class MyClass {} /* } */", "MyClass")]
-        [InlineData("/*namespace MyNamespace ; */ class MyClass {}", "MyClass")] // file-scoped namespaces
-        public void SneakyComment(string fileContents, string expected)
+        [InlineData("/*namespace MyNamespace { */ class MyClass {} /* } */")]
+        [InlineData("/*namespace MyNamespace ; */ class MyClass {}")] // file-scoped namespaces
+        public void SneakyComment(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "MyClass");
         }
 
         [Theory]
-        [InlineData("namespace MyNamespace.Feline { class MyClass {} }", "MyNamespace.Feline.MyClass")]
-        [InlineData("namespace MyNamespace.Feline ; class MyClass {} ", "MyNamespace.Feline.MyClass")] // file-scoped namespaces
-        public void CompoundNamespace(string fileContents, string expected)
+        [InlineData("namespace MyNamespace.Feline { class MyClass {} }")]
+        [InlineData("namespace MyNamespace.Feline ; class MyClass {} ")] // file-scoped namespaces
+        public void CompoundNamespace(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "MyNamespace.Feline.MyClass");
         }
 
         [Fact]
@@ -83,19 +82,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("namespace MyNamespace{class Feline{}class Bovine}", "MyNamespace.Feline")]
-        [InlineData("namespace MyNamespace;class Feline{}class Bovine", "MyNamespace.Feline")] // file-scoped namespaces
-        public void DoubleClass(string fileContents, string expected)
+        [InlineData("namespace MyNamespace{class Feline{}class Bovine}")]
+        [InlineData("namespace MyNamespace;class Feline{}class Bovine")] // file-scoped namespaces
+        public void DoubleClass(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "MyNamespace.Feline");
         }
 
         [Theory]
-        [InlineData("namespace MyNamespace{class @class{}}", "MyNamespace.class")]
-        [InlineData("namespace MyNamespace;class @class{}", "MyNamespace.class")] // file-scoped namespaces
-        public void EscapedKeywordClass(string fileContents, string expected)
+        [InlineData("namespace MyNamespace{class @class{}}")]
+        [InlineData("namespace MyNamespace;class @class{}")] // file-scoped namespaces
+        public void EscapedKeywordClass(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "MyNamespace.class");
         }
 
         [Fact]
@@ -190,11 +189,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("[assembly :MyString(\"namespace\")] namespace i { class a { } }", "i.a")]
-        [InlineData("[assembly :MyString(\"namespace\")] namespace i; class a { }", "i.a")]
-        public void AssemblyAttributeString(string fileContents, string expected)
+        [InlineData("[assembly :MyString(\"namespace\")] namespace i { class a { } }")]
+        [InlineData("[assembly :MyString(\"namespace\")] namespace i; class a { }")]
+        public void AssemblyAttributeString(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "i.a");
         }
 
         [Fact]
@@ -271,11 +270,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("namespace n { public struct s {  enum e {} } class c {} }", "n.c")]
-        [InlineData("namespace n; public struct s {  enum e {} } class c {}", "n.c")] // file-scoped namespace
-        public void NameSpaceStructEnum(string fileContents, string expected)
+        [InlineData("namespace n { public struct s {  enum e {} } class c {} }")]
+        [InlineData("namespace n; public struct s {  enum e {} } class c {}")] // file-scoped namespace
+        public void NameSpaceStructEnum(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "n.c");
         }
 
         [Fact]
@@ -354,7 +353,7 @@ namespace i
     }     
     #endregion
 }
-#endif // MY_CONSTANT ", "i.a")]
+#endif // MY_CONSTANT ")]
         [InlineData(@"
 #if MY_CONSTANT                
 namespace i;
@@ -363,10 +362,10 @@ namespace i;
     {
     }     
     #endregion
-#endif // MY_CONSTANT", "i.a")]
-        public void Preprocessor(string fileContents, string expected)
+#endif // MY_CONSTANT")]
+        public void Preprocessor(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "i.a");
         }
 
         [Fact(Skip = "Preprocessor is not yet implemented.")]
@@ -395,14 +394,14 @@ namespace i
         [InlineData(@"
 namespace n2
 // namespace n1
-{ class c {} }", "n2.c")]
+{ class c {} }")]
         [InlineData(@"
 namespace n2;
 // namespace n1
-class c {}", "n2.c")]
-        public void Regress_Mutation_SingleLineCommentsShouldBeIgnored(string fileContents, string expected)
+class c {}")]
+        public void Regress_Mutation_SingleLineCommentsShouldBeIgnored(string fileContents)
         {
-            AssertParse(fileContents, expected);
+            AssertParse(fileContents, "n2.c");
         }
 
         [Fact]
