@@ -23,8 +23,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.TreatUnmatchedTokensAsErrors = true;
 
             this.Add(new InstantiateCommand(host, telemetryLogger, callbacks));
-            this.Add(new InstallCommand(host, telemetryLogger, callbacks));
-            this.Add(new LegacyInstallCommand(host, telemetryLogger, callbacks));
+            this.Add(InstallCommand.GetCommand(host, telemetryLogger, callbacks));
+            this.Add(InstallCommand.GetLegacyCommand(host, telemetryLogger, callbacks));
             //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new SearchCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new UninstallCommand(host, telemetryLogger, callbacks);
