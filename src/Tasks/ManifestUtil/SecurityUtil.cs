@@ -572,7 +572,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static bool UseSha256Algorithm(X509Certificate2 cert)
         {
             Oid oid = cert.SignatureAlgorithm;
-            return string.Equals(oid.FriendlyName, "sha256RSA", StringComparison.OrdinalIgnoreCase);
+            return string.Equals(oid.FriendlyName, "sha256RSA", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(oid.FriendlyName, "sha384RSA", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(oid.FriendlyName, "sha512RSA", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
