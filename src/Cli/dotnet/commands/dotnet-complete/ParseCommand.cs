@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli
     {
         public static int Run(ParseResult result)
         {
-            DebugHelper.HandleDebugSwitch(result);
+            result.HandleDebugSwitch();
 
             Console.WriteLine(result.Diagram());
 

@@ -14,7 +14,14 @@ namespace Microsoft.DotNet.Tools.Format
 
         private static readonly FormatCommandDefaultHandler s_formatCommandHandler = new();
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var formatCommand = new DocumentedCommand("format", DocsLink, LocalizableStrings.Formats_code_to_match_editorconfig_settings)
             {

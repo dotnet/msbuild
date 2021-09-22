@@ -4,6 +4,7 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.LocalizableStrings;
 
@@ -19,7 +20,14 @@ namespace Microsoft.DotNet.Cli
             Arity = ArgumentArity.ZeroOrOne
         }.DefaultToCurrentDirectory();
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("list", DocsLink, LocalizableStrings.NetListCommand);
 
@@ -27,7 +35,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(ListPackageReferencesCommandParser.GetCommand());
             command.AddCommand(ListProjectToProjectReferencesCommandParser.GetCommand());
 
-            command.Handler = CommandHandler.Create((Func<int>)(() => throw new Exception("TODO command not found"))); ;
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => parseResult.HandleMissingCommand());
 
             return command;
         }

@@ -13,7 +13,14 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly Argument Argument = new Argument<string>("argument") { Arity = ArgumentArity.ZeroOrOne, IsHidden = true };
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("reference", LocalizableStrings.AppFullName);
 

@@ -18,7 +18,14 @@ namespace Microsoft.DotNet.Tools.Help
             Arity = ArgumentArity.ZeroOrOne
         };
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("help", DocsLink, LocalizableStrings.AppFullName);
 

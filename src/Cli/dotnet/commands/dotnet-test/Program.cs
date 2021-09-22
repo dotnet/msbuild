@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(parseResult);
+            parseResult.HandleDebugSwitch();
 
             var args = parseResult.GetArguments();
 

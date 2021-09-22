@@ -9,7 +9,14 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
 {
     internal static class SdkCheckCommandParser
     {
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("check", LocalizableStrings.AppFullName);
 

@@ -4,6 +4,7 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -12,7 +13,14 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-tool";
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("tool", DocsLink, LocalizableStrings.CommandDescription);
 
@@ -24,7 +32,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(ToolSearchCommandParser.GetCommand());
             command.AddCommand(ToolRestoreCommandParser.GetCommand());
 
-            command.Handler = CommandHandler.Create((Func<int>)(() => throw new Exception("TODO command not found")));
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => parseResult.HandleMissingCommand());
 
             return command;
         }

@@ -15,26 +15,23 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class CommonOptions
     {
-        public static Option<string[]> PropertiesOption() =>
+        public static Option<string[]> PropertiesOption =
             new ForwardedOption<string[]>(new string[] { "-property", "/p" })
             {
                 IsHidden = true
             }.ForwardAsProperty()
             .AllowSingleArgPerToken();
-
-        public static Option<VerbosityOptions> VerbosityOption() =>
-            VerbosityOption(o => $"-verbosity:{o}");
-
-        public static Option<VerbosityOptions> HiddenVerbosityOption() =>
+            
+        public static Option<VerbosityOptions> HiddenVerbosityOption =
             VerbosityOption().Hide();
 
-        public static Option<VerbosityOptions> VerbosityOption(Func<VerbosityOptions, string> format) =>
+        public static Option<VerbosityOptions> VerbosityOption =
             new ForwardedOption<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
                 description: CommonLocalizableStrings.VerbosityOptionDescription)
-            {
-                ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
-            }.ForwardAsSingle(format);
+                {
+                    ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
+                }.ForwardAsSingle(o => $"-verbosity:{o}");
 
         public static Option<string> FrameworkOption(string description) =>
             new ForwardedOption<string>(
@@ -68,7 +65,7 @@ namespace Microsoft.DotNet.Cli
             }.ForwardAsSingle(o => $"-property:Configuration={o}")
             .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults());
 
-        public static Option<string> VersionSuffixOption() =>
+        public static Option<string> VersionSuffixOption =
             new ForwardedOption<string>(
                 "--version-suffix",
                 CommonLocalizableStrings.CmdVersionSuffixDescription)
@@ -82,18 +79,18 @@ namespace Microsoft.DotNet.Cli
             return arg;
         }
 
-        public static Option<bool> NoRestoreOption() =>
+        public static Option<bool> NoRestoreOption =
             new Option<bool>(
                 "--no-restore",
                 CommonLocalizableStrings.NoRestoreDescription);
 
-        public static Option<bool> InteractiveMsBuildForwardOption() =>
+        public static Option<bool> InteractiveMsBuildForwardOption =
             new ForwardedOption<bool>(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs("-property:NuGetInteractive=true");
 
-        public static Option<bool> InteractiveOption() =>
+        public static Option<bool> InteractiveOption =
             new Option<bool>(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
@@ -104,21 +101,21 @@ namespace Microsoft.DotNet.Cli
                 CommonLocalizableStrings.ArchitectureOptionDescription)
             .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
 
-        public static Option<string> OperatingSystemOption() =>
+        public static Option<string> OperatingSystemOption =
             new ForwardedOption<string>(
                 "--os",
                 CommonLocalizableStrings.OperatingSystemOptionDescription)
             .SetForwardingFunction(ResolveOsOptionToRuntimeIdentifier);
 
-        public static Option<bool> DebugOption() => new Option<bool>("--debug");
+        public static Option<bool> DebugOption = new Option<bool>("--debug");
 
-        public static Option<bool> SelfContainedOption() =>
+        public static Option<bool> SelfContainedOption =
             new ForwardedOption<bool>(
                 new string[] { "--sc", "--self-contained" },
                 CommonLocalizableStrings.SelfContainedOptionDescription)
             .ForwardAsMany(o => new string[] { $"-property:SelfContained={o}", "-property:_CommandLineDefinedSelfContained=true" });
 
-        public static Option<bool> NoSelfContainedOption() =>
+        public static Option<bool> NoSelfContainedOption =
             new ForwardedOption<bool>(
                 "--no-self-contained",
                 CommonLocalizableStrings.FrameworkDependentOptionDescription)
@@ -153,7 +150,7 @@ namespace Microsoft.DotNet.Cli
                 return Array.Empty<string>();
             }
             
-            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption().Aliases.First()) || parseResult.HasOption(NoSelfContainedOption().Aliases.First());
+            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption.Aliases.First()) || parseResult.HasOption(NoSelfContainedOption.Aliases.First());
             return ResolveRidShorthandOptions(null, arg, selfContainedSpecified);
         }
 
@@ -164,7 +161,7 @@ namespace Microsoft.DotNet.Cli
                 throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndOsOptions);
             }
 
-            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption().Aliases.First()) || parseResult.HasOption(NoSelfContainedOption().Aliases.First());
+            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption.Aliases.First()) || parseResult.HasOption(NoSelfContainedOption.Aliases.First());
             if (parseResult.BothArchAndOsOptionsSpecified())
             {
                 return ResolveRidShorthandOptions(arg, parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()), selfContainedSpecified);

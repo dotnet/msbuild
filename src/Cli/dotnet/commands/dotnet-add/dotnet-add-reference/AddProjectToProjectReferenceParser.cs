@@ -24,9 +24,16 @@ namespace Microsoft.DotNet.Cli
                 
         }.AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
 
-        public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveOption();
+        public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveOption;
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("reference", LocalizableStrings.AppFullName);
 

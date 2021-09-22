@@ -54,11 +54,18 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option InteractiveOption = new ForwardedOption<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs("--interactive");
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("package", LocalizableStrings.AppFullName);
 
-            command.AddOption(CommonOptions.VerbosityOption(o => $"--verbosity:{o}"));
+            command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(OutdatedOption);
             command.AddOption(DepreciatedOption);
             command.AddOption(VulnerableOption);

@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli
         // arguments are a list of workload to be detected
         public static readonly Option<bool> MachineReadableOption = new Option<bool>("--machine-readable") {IsHidden = true};
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.HiddenVerbosityOption();
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.HiddenVerbosityOption;
 
         public static readonly Option<string> VersionOption = WorkloadUpdateCommandParser.VersionOption;
 
@@ -24,7 +24,14 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> IncludePreviewsOption = 
             new Option<bool>("--include-previews", Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings.IncludePreviewOptionDescription).Hide();
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("list", LocalizableStrings.CommandDescription);
             command.AddOption(MachineReadableOption);

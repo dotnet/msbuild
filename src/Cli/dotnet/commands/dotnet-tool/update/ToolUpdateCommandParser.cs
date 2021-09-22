@@ -34,7 +34,14 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<VerbosityOptions> VerbosityOption = ToolInstallCommandParser.VerbosityOption;
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("update", LocalizableStrings.CommandDescription);
 

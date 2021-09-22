@@ -7,6 +7,7 @@ using System.CommandLine.Builder;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Cli.Format;
 using Microsoft.DotNet.Tools;
@@ -98,6 +99,12 @@ namespace Microsoft.DotNet.Cli
         {
             builder.EnablePosixBundling = false;
             return builder;
+        }
+
+        public static Command GetBuiltInCommand(string commandName)
+        {
+            return Subcommands
+                .FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
         }
 
         public static System.CommandLine.Parsing.Parser Instance { get; } = new CommandLineBuilder(ConfigureCommandLine(RootCommand))

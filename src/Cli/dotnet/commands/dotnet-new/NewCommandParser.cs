@@ -43,7 +43,14 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option ColumnsOption = new Option<bool>("--columns");
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("new", DocsLink);
 

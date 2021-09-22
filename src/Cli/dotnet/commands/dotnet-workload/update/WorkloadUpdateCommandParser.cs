@@ -42,7 +42,14 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> FromRollbackFileOption = WorkloadInstallCommandParser.FromRollbackFileOption;
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             Command command = new("update", LocalizableStrings.CommandDescription);
 

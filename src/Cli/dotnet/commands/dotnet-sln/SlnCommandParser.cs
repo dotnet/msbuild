@@ -4,6 +4,7 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -18,7 +19,14 @@ namespace Microsoft.DotNet.Cli
             Arity = ArgumentArity.ExactlyOne
         }.DefaultToCurrentDirectory();
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("sln", DocsLink, LocalizableStrings.AppFullName);
 
@@ -27,7 +35,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(SlnListParser.GetCommand());
             command.AddCommand(SlnRemoveParser.GetCommand());
 
-            command.Handler = CommandHandler.Create((Func<int>)(() => throw new Exception("TODO command not found")));
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => parseResult.HandleMissingCommand());
 
             return command;
         }

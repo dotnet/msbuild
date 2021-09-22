@@ -10,7 +10,16 @@ namespace Microsoft.DotNet.Tools.Format
 {
     internal static class FormatStyleCommandParser
     {
+        private static readonly FormatStyleHandler s_styleHandler = new();
+
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("style", LocalizableStrings.Run_code_style_analyzers_and_apply_fixes)
             {

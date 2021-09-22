@@ -18,11 +18,18 @@ namespace Microsoft.DotNet.Cli
                 Description = LocalizableStrings.WorkloadIdStubArgumentDescription
             };
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.HiddenVerbosityOption();
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.HiddenVerbosityOption;
 
         public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("search", LocalizableStrings.CommandDescription);
             command.AddArgument(WorkloadIdStubArgument);

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using static Microsoft.DotNet.Cli.Parser;
@@ -49,12 +50,19 @@ namespace Microsoft.DotNet.Cli
         public static bool IsDotnetBuiltInCommand(this ParseResult parseResult)
         {
             return string.IsNullOrEmpty(parseResult.RootSubCommandResult()) || 
-                Parser.Subcommands.Any(c => c.Name.Equals(parseResult.RootSubCommandResult(), StringComparison.OrdinalIgnoreCase));
+                Parser.GetBuiltInCommand(parseResult.RootSubCommandResult()) != null;
         }
 
         public static bool IsTopLevelDotnetCommand(this ParseResult parseResult)
         {
             return parseResult.CommandResult.Command.Equals(RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
+        }
+
+        public static int HandleMissingCommand(this ParseResult parseResult)
+        {
+            Reporter.Error.WriteLine(Tools.CommonLocalizableStrings.RequiredCommandNotPassed.Red());
+            parseResult.ShowHelp();
+            return 1;
         }
 
         public static string[] GetArguments(this ParseResult parseResult)
@@ -103,15 +111,15 @@ namespace Microsoft.DotNet.Cli
 
         public static bool BothArchAndOsOptionsSpecified(this ParseResult parseResult) =>
             parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) && 
-            parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First());
+            parseResult.HasOption(CommonOptions.OperatingSystemOption.Aliases.First());
 
         internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
         {
             return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
                 parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption) :
-                parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First()) || parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) ?
+                parseResult.HasOption(CommonOptions.OperatingSystemOption.Aliases.First()) || parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) ?
                 CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
-                    parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption().Aliases.First()),
+                    parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption.Aliases.First()),
                     parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First())) :
                 null;
         }
@@ -154,6 +162,15 @@ namespace Microsoft.DotNet.Cli
             var propertyOptions = options.Where(o => o.Token().Value.Equals(optionString));
             var propertyValues = propertyOptions.SelectMany(o => o.Children.SelectMany(c => c.Tokens.Select(t=> t.Value))).ToArray();
             return propertyValues;
+        }
+
+        [Conditional("DEBUG")]
+        public static void HandleDebugSwitch(this ParseResult parseResult)
+        {
+            if (parseResult.HasOption(CommonOptions.DebugOption))
+            {
+                DebugHelper.WaitForDebugger();
+            }
         }
     }
 }

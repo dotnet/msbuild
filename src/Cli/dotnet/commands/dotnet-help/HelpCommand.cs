@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Help
 
         public static int Run(ParseResult result)
         {
-            DebugHelper.HandleDebugSwitch(result);
+            result.HandleDebugSwitch();
 
             result.ShowHelpOrErrorIfAppropriate();
 
@@ -105,9 +105,8 @@ namespace Microsoft.DotNet.Tools.Help
 
         private bool TryGetDocsLink(string commandName, out string docsLink)
         {
-            var command = Cli.Parser.Subcommands
-                .Where(c => c is DocumentedCommand)
-                .FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
+            var command = Cli.Parser.GetBuiltInCommand(commandName)
+                .Where(c => c is DocumentedCommand);
             if (command != null)
             {
                 docsLink = (command as DocumentedCommand).DocsLink;
