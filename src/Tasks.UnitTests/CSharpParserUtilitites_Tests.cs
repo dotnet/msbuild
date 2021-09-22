@@ -278,7 +278,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-
         public void PreprocessorControllingTwoNamespaces()
         {
             // This works by coincidence since preprocessor directives are currently ignored.
@@ -403,20 +402,6 @@ class c {}")]
         {
             AssertParse(fileContents, "n2.c");
         }
-
-        [Fact]
-        public void FileScoped_Namespace()
-        {
-            AssertParse
-            (
-                @"
-using System;
-namespace test;
-// namespace n1
-var abc;
-private sealed class c {}", "test.c");
-        }
-
 
         /*
         * Method:  AssertParse
