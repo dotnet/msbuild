@@ -1,17 +1,19 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit;
+using System.Linq;
+using FluentAssertions;
+using System;
+using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.ProjectConstruction;
+
 namespace Microsoft.NET.Build.Tests
 {
-    using System.IO;
-    using Microsoft.NET.TestFramework;
-    using Microsoft.NET.TestFramework.Assertions;
-    using Microsoft.NET.TestFramework.Commands;
-    using Xunit;
-    using System.Linq;
-    using FluentAssertions;
-    using System;
-    using Xunit.Abstractions;
-    using Microsoft.NET.TestFramework.ProjectConstruction;
 
     public class GivenThatWeWantToUseContentFiles : SdkTest
     {
@@ -23,7 +25,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_handles_content_files_correctly()
         {
-            const string targetFramework = "netcoreapp3.1";
+            const string targetFramework = "net6.0";
 
             var project = new TestProject
             {
