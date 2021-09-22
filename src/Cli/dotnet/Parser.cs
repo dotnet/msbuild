@@ -7,6 +7,7 @@ using System.CommandLine.Builder;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Cli.Format;
@@ -22,6 +23,8 @@ namespace Microsoft.DotNet.Cli
     public static class Parser
     {
         public static readonly RootCommand RootCommand = new RootCommand();
+
+        public static readonly Command InstallSuccessCommand = InternalReportinstallsuccessCommandParser.GetCommand();
 
         // Subcommands
         public static readonly Command[] Subcommands = new Command[]
@@ -49,11 +52,10 @@ namespace Microsoft.DotNet.Cli
             ToolCommandParser.GetCommand(),
             VSTestCommandParser.GetCommand(),
             HelpCommandParser.GetCommand(),
-            SdkCommandParser.GetCommand()
+            SdkCommandParser.GetCommand(),
+            InstallSuccessCommand,
+            WorkloadCommandParser.GetCommand()
         };
-
-        // Internal commands
-        public static readonly Command InstallSuccessCommand = InternalReportinstallsuccessCommandParser.GetCommand();
 
         // Options
         public static readonly Option<bool> DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" });
@@ -76,11 +78,6 @@ namespace Microsoft.DotNet.Cli
             {
                 rootCommand.AddCommand(subcommand);
             }
-
-            rootCommand.AddCommand(WorkloadCommandParser.GetCommand());
-
-            //Add internal commands
-            rootCommand.AddCommand(InstallSuccessCommand);
 
             // Add options
             rootCommand.AddOption(DiagOption);
@@ -110,7 +107,7 @@ namespace Microsoft.DotNet.Cli
         public static System.CommandLine.Parsing.Parser Instance { get; } = new CommandLineBuilder(ConfigureCommandLine(RootCommand))
             .UseExceptionHandler(ExceptionHandler)
             .UseHelp()
-            .UseHelpBuilder(context => new DotnetHelpBuilder(context.Console))
+            .UseHelpBuilder(context => new DotnetHelpBuilder())
             .UseResources(new CommandLineValidationMessages())
             .UseParseDirective()
             .UseSuggestDirective()
@@ -156,27 +153,27 @@ namespace Microsoft.DotNet.Cli
 
         internal class DotnetHelpBuilder : HelpBuilder
         {
-            public DotnetHelpBuilder(IConsole console, int maxWidth = int.MaxValue) : base(console, Resources.Instance, maxWidth) { }
+            public DotnetHelpBuilder(int maxWidth = int.MaxValue) : base(Resources.Instance, maxWidth) { }
 
             public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => {
                 int windowWidth;
                 try
                 {
-                    windowWidth = System.Console.WindowWidth;
+                    windowWidth = Console.WindowWidth;
                 }
                 catch
                 {
                     windowWidth = int.MaxValue;
                 }
 
-                DotnetHelpBuilder dotnetHelpBuilder = new DotnetHelpBuilder(new SystemConsole(), windowWidth);
+                DotnetHelpBuilder dotnetHelpBuilder = new DotnetHelpBuilder(windowWidth);
                 dotnetHelpBuilder.Customize(FormatCommandCommon.DiagnosticsOption, defaultValue: Tools.Format.LocalizableStrings.whichever_ids_are_listed_in_the_editorconfig_file);
                 dotnetHelpBuilder.Customize(FormatCommandCommon.IncludeOption, defaultValue: Tools.Format.LocalizableStrings.all_files_in_the_solution_or_project);
                 dotnetHelpBuilder.Customize(FormatCommandCommon.ExcludeOption, defaultValue: Tools.Format.LocalizableStrings.none);
                 return dotnetHelpBuilder;
             });
 
-            public override void Write(ICommand command)
+            public override void Write(ICommand command, TextWriter writer)
             {
                 var helpArgs = new string[] { "--help" };
                 if (command.Equals(RootCommand))
@@ -212,7 +209,7 @@ namespace Microsoft.DotNet.Cli
                         AddPackageParser.CmdPackageArgument.Suggestions.Clear();
                     }
 
-                    base.Write(command);
+                    base.Write(command, writer);
                 }
             }
         }

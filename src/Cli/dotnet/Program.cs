@@ -226,6 +226,8 @@ namespace Microsoft.DotNet.Cli
             TelemetryEventEntry.SendFiltered(Tuple.Create(parseResult, performanceData));
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
+            //throw new Exception("root sub command: " + parseResult.RootSubCommandResult());
+
             int exitCode;
             if (parseResult.CommandResult.Command.Name.Equals("dotnet") && string.IsNullOrEmpty(parseResult.ValueForArgument<string>(Parser.DotnetSubCommand)))
             {
