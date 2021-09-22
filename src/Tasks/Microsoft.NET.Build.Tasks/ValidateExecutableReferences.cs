@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] ReferencedProjects { get; set; } = Array.Empty<ITaskItem>();
 
-        public string MSBuildVersion { get; set; }
+        public bool UseAttributeForTargetFrameworkInfoPropertyNames { get; set; }
 
         protected override void ExecuteCore()
         {
@@ -40,8 +40,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 var additionalPropertiesXml = XElement.Parse(project.GetMetadata("AdditionalPropertiesFromProject"));
-                bool msbuild17OrLater = Version.TryParse(MSBuildVersion, out Version v) && v >= Version.Parse("17.0");
-                XElement targetFrameworkElement = msbuild17OrLater ?
+                XElement targetFrameworkElement = UseAttributeForTargetFrameworkInfoPropertyNames ?
                     additionalPropertiesXml.Elements().Where(el => el.HasAttributes && el.FirstAttribute.Value.Equals(nearestTargetFramework)).Single() :
                     additionalPropertiesXml.Element(nearestTargetFramework);
                 Dictionary<string, string> projectAdditionalProperties = new(StringComparer.OrdinalIgnoreCase);
