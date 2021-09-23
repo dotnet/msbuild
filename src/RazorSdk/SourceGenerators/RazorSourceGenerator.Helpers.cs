@@ -103,6 +103,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 b.Features.Add(new ConfigureRazorCodeGenerationOptions(options =>
                 {
                     options.SuppressMetadataSourceChecksumAttributes = !razorSourceGeneratorOptions.GenerateMetadataSourceChecksumAttributes;
+                    options.SupportLocalizedComponentNames = razorSourceGeneratorOptions.SupportLocalizedComponentNames;
                 }));
 
                 b.Features.Add(new StaticTagHelperFeature { TagHelpers = tagHelpers });

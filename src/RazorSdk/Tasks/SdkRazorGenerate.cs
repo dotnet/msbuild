@@ -49,6 +49,8 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
         public bool GenerateDeclaration { get; set; }
 
+        public bool SupportLocalizedComponentNames { get; set; }
+
         internal override string Command => "generate";
 
         protected override bool ValidateParameters()
@@ -172,6 +174,15 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 if (GenerateDeclaration)
                 {
                     builder.AppendLine("--generate-declaration");
+                }
+            }
+
+            // Added in 6.0
+            if (parsedVersion.Major >= 6)
+            {
+                if (SupportLocalizedComponentNames)
+                {
+                    builder.AppendLine("--support-localized-component-names");
                 }
             }
 
