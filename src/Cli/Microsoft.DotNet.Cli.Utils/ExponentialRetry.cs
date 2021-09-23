@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Cli.Utils
             Func<IEnumerable<Task>> timer = null)
         {
             timer = timer == null ? () => ExponentialRetry.Timer(ExponentialRetry.Intervals): timer;
-            return await ExecuteAsyncWithRetry(action, _ => false, maxRetryCount, timer);
+            return await ExecuteAsyncWithRetry(action, result => result != null && !result.Equals(default), maxRetryCount, timer);
         }
 
         public static IEnumerable<Task> Timer(IEnumerable<TimeSpan> interval)
