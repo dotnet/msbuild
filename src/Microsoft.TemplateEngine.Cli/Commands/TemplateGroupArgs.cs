@@ -9,13 +9,13 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class TemplateGroupArgs : GlobalArgs
+    internal class TemplateGroupArgs
     {
         private static Option<string> _outputOption = new Option<string>("-o");
         private static Option<string> _nameOption = new Option<string>("-n");
         private static Option<bool> _helpOption = new Option<bool>(new string[] { "-h", "--help", "-?" });
 
-        public TemplateGroupArgs(ITemplateInfo template, ParseResult parseResult, Dictionary<string, Option> templateSpecificOptions) : base(parseResult)
+        public TemplateGroupArgs(ITemplateInfo template, ParseResult parseResult, Dictionary<string, Option> templateSpecificOptions)
         {
             Name = parseResult.ValueForOption(_nameOption);
             OutputPath = parseResult.ValueForOption(_outputOption);

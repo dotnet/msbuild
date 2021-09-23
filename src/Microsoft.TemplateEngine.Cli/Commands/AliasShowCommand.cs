@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class AliasShowCommandArgs : GlobalArgs
     {
-        public AliasShowCommandArgs(ParseResult parseResult) : base(parseResult)
+        public AliasShowCommandArgs(AliasShowCommand command, ParseResult parseResult) : base(command, parseResult)
         {
         }
     }

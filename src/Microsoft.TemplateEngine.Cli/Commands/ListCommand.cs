@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class ListCommandArgs : GlobalArgs
     {
-        public ListCommandArgs(ParseResult parseResult) : base(parseResult)
+        public ListCommandArgs(ListCommand command, ParseResult parseResult) : base(command, parseResult)
         {
         }
     }

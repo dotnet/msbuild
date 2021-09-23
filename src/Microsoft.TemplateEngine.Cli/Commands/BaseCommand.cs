@@ -15,7 +15,44 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal abstract class BaseCommand<TArgs> : Command, ICommandHandler where TArgs : GlobalArgs
+    internal abstract class BaseCommand : Command
+    {
+        protected BaseCommand(string name, string? description = null) : base(name, description)
+        {
+        }
+
+        internal Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive", "Sets custom settings location")
+        {
+            IsHidden = true
+        };
+
+        internal Option<bool> DebugVirtualizeSettingsOption { get; } = new("--debug:ephemeral-hive", "Use virtual settings")
+        {
+            IsHidden = true
+        };
+
+        internal Option<bool> DebugAttachOption { get; } = new("--debug:attach", "Allows to pause execution in order to attach to the process for debug purposes")
+        {
+            IsHidden = true
+        };
+
+        internal Option<bool> DebugReinitOption { get; } = new("--debug:reinit", "Resets the settings")
+        {
+            IsHidden = true
+        };
+
+        internal Option<bool> DebugRebuildCacheOption { get; } = new(new[] { "--debug:rebuild-cache", "--debug:rebuildcache" }, "Resets template cache")
+        {
+            IsHidden = true
+        };
+
+        internal Option<bool> DebugShowConfigOption { get; } = new(new[] { "--debug:show-config", "--debug:showconfig" }, "Shows the template engine config")
+        {
+            IsHidden = true
+        };
+    }
+
+    internal abstract class BaseCommand<TArgs> : BaseCommand, ICommandHandler where TArgs : GlobalArgs
     {
         private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
         private readonly ITemplateEngineHost _host;
@@ -27,7 +64,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             TelemetryLogger = logger;
             Callbacks = callbacks;
             this.Handler = this;
-            GlobalArgs.AddGlobalsToCommand(this);
+
+            this.AddOption(DebugCustomSettingsLocationOption);
+            this.AddOption(DebugVirtualizeSettingsOption);
+            this.AddOption(DebugAttachOption);
+            this.AddOption(DebugReinitOption);
+            this.AddOption(DebugRebuildCacheOption);
+            this.AddOption(DebugShowConfigOption);
         }
 
         internal ITelemetryLogger TelemetryLogger { get; }

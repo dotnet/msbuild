@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class SearchCommandArgs : GlobalArgs
     {
-        public SearchCommandArgs(ParseResult parseResult) : base(parseResult)
+        public SearchCommandArgs(SearchCommand command, ParseResult parseResult) : base(command, parseResult)
         {
         }
     }

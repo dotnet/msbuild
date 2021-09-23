@@ -14,28 +14,80 @@ using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class InstallCommand : BaseCommand<InstallCommandArgs>
+    internal class InstallCommand : BaseInstallCommand
     {
-        internal InstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName)
+        private readonly LegacyInstallCommand _legacyInstallCommand;
+
+        public InstallCommand(
+                LegacyInstallCommand legacyInstallCommand,
+                ITemplateEngineHost host,
+                ITelemetryLogger logger,
+                NewCommandCallbacks callbacks)
+            : base(host, logger, callbacks, "install")
+        {
+            AddValidator(ValidateLegacyUsage);
+            _legacyInstallCommand = legacyInstallCommand;
+        }
+
+        private string? ValidateLegacyUsage(CommandResult symbolResult)
+        {
+            //if (symbolResult.Parent!.Children.Any((a)=> a // _legacyInstallCommand.InteractiveOption))
+            //{
+            //    return "We are doomed!";
+            //}
+            return null;
+        }
+    }
+
+    internal class LegacyInstallCommand : BaseInstallCommand
+    {
+        public LegacyInstallCommand(NewCommand newCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
+            : base(host, logger, callbacks, "--install")
+        {
+            this.IsHidden = true;
+            this.AddAlias("-i");
+            AddSourceOption.AddAlias("--nuget-source");
+            AddSourceOption.IsHidden = true;
+            InteractiveOption.IsHidden = true;
+
+            newCommand.AddOption(AddSourceOption);
+            newCommand.AddOption(InteractiveOption);
+        }
+
+        public void AddOptionsToNewCommand(Command rootCommand)
+        {
+            rootCommand.Add(AddSourceOption);
+            rootCommand.Add(InteractiveOption);
+        }
+    }
+
+    internal abstract class BaseInstallCommand : BaseCommand<InstallCommandArgs>
+    {
+        internal BaseInstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName)
             : base(host, logger, callbacks, commandName)
         {
+            this.AddArgument(NameArgument);
+            this.AddOption(InteractiveOption);
+            this.AddOption(AddSourceOption);
         }
 
-        internal static InstallCommand GetCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
+        internal Argument<IReadOnlyList<string>> NameArgument { get; } = new("name")
         {
-            InstallCommand command = new InstallCommand(host, logger, callbacks, "install");
-            InstallCommandArgs.AddToCommand(command);
-            return command;
-        }
+            Description = "Name of NuGet package or folder.",
+            Arity = new ArgumentArity(1, 99)
+        };
 
-        internal static InstallCommand GetLegacyCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
+        internal Option<bool> InteractiveOption { get; } = new("--interactive")
         {
-            InstallCommand command = new InstallCommand(host, logger, callbacks, "--install");
-            command.IsHidden = true;
-            command.AddAlias("-i");
-            InstallCommandArgs.AddToCommand(command, legacy: true);
-            return command;
-        }
+            Description = "When downloading enable NuGet interactive."
+        };
+
+        internal Option<IReadOnlyList<string>> AddSourceOption { get; } = new(new[] { "--add-source" })
+        {
+            Description = "Add NuGet source when looking for package.",
+            AllowMultipleArgumentsPerToken = true,
+            IsHidden = true
+        };
 
         protected override Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
@@ -60,29 +112,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected override InstallCommandArgs ParseContext(ParseResult parseResult)
         {
-            return new InstallCommandArgs(parseResult, IsLegacyCommand());
-        }
-
-        private bool IsLegacyCommand()
-        {
-           return this.Name == "--install";
+            return new InstallCommandArgs(this, parseResult);
         }
     }
 
     internal class InstallCommandArgs : GlobalArgs
     {
-        public InstallCommandArgs(ParseResult parseResult, bool legacy = false) : base(parseResult)
+        public InstallCommandArgs(BaseInstallCommand installCommand, ParseResult parseResult) : base(installCommand, parseResult)
         {
-            if (legacy)
-            {
-                TemplatePackages = parseResult.ValueForArgument(Legacy.NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
-                Interactive = parseResult.ValueForOption(Legacy.InteractiveOption);
-                AdditionalSources = parseResult.ValueForOption(Legacy.AddSourceOption);
-                return;
-            }
-            TemplatePackages = parseResult.ValueForArgument(NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
-            Interactive = parseResult.ValueForOption(InteractiveOption);
-            AdditionalSources = parseResult.ValueForOption(AddSourceOption);
+            TemplatePackages = parseResult.ValueForArgument(installCommand.NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
+            Interactive = parseResult.ValueForOption(installCommand.InteractiveOption);
+            AdditionalSources = parseResult.ValueForOption(installCommand.AddSourceOption);
         }
 
         public IReadOnlyList<string> TemplatePackages { get; }
@@ -90,65 +130,5 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public bool Interactive { get; }
 
         public IReadOnlyList<string>? AdditionalSources { get; }
-
-        private static Argument<IReadOnlyList<string>> NameArgument { get; } = new("name")
-        {
-            Description = "Name of NuGet package or folder.",
-            Arity = new ArgumentArity(1, 99)
-        };
-
-        private static Option<bool> InteractiveOption { get; } = new("--interactive")
-        {
-            Description = "When downloading enable NuGet interactive."
-        };
-
-        private static Option<IReadOnlyList<string>> AddSourceOption { get; } = new(new[] { "--add-source" })
-        {
-            Description = "Add NuGet source when looking for package.",
-            AllowMultipleArgumentsPerToken = true,
-        };
-
-        internal static void AddLegacyOptionsToCommand(Command command)
-        {
-            command.AddOption(Legacy.InteractiveOption);
-            command.AddOption(Legacy.AddSourceOption);
-        }
-
-        internal static void AddToCommand(Command command, bool legacy = false)
-        {
-            if (legacy)
-            {
-                command.AddArgument(Legacy.NameArgument);
-                AddLegacyOptionsToCommand(command);
-                return;
-            }
-
-            command.AddArgument(NameArgument);
-            command.AddOption(InteractiveOption);
-            command.AddOption(AddSourceOption);
-        }
-
-        private static class Legacy
-        {
-            internal static Argument<IReadOnlyList<string>> NameArgument { get; } = new("name")
-            {
-                Description = "Name of NuGet package or folder.",
-                Arity = new ArgumentArity(1, 99),
-                IsHidden = true
-            };
-
-            internal static Option<bool> InteractiveOption { get; } = new("--interactive")
-            {
-                Description = "When downloading enable NuGet interactive.",
-                IsHidden = true,
-            };
-
-            internal static Option<IReadOnlyList<string>> AddSourceOption { get; } = new(new[] { "--add-source" })
-            {
-                Description = "Add NuGet source when looking for package.",
-                AllowMultipleArgumentsPerToken = true,
-                IsHidden = true,
-            };
-        }
     }
 }

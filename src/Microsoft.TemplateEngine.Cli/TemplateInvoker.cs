@@ -83,7 +83,8 @@ namespace Microsoft.TemplateEngine.Cli
             }
             finally
             {
-                _telemetryLogger.TrackEvent(templateGroupArgs.CommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
+                //TODO: undo harded "new" below
+                _telemetryLogger.TrackEvent("new" + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
                     {
                         { TelemetryConstants.Language, templateLanguage },
                         { TelemetryConstants.ArgError, "False" },

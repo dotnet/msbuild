@@ -3,18 +3,17 @@
 
 #nullable enable
 
-using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class NewCommandArgs : GlobalArgs
     {
-        public NewCommandArgs(ParseResult parseResult) : base(parseResult)
+        public NewCommandArgs(NewCommand command, ParseResult parseResult) : base(command, parseResult)
         {
-            Arguments = parseResult.ValueForArgument(RemainingArguments);
-            ShortName = parseResult.ValueForArgument(ShortNameArgument);
-            HelpRequested = parseResult.ValueForOption(HelpOption);
+            Arguments = parseResult.ValueForArgument(command.RemainingArguments);
+            ShortName = parseResult.ValueForArgument(command.ShortNameArgument);
+            HelpRequested = parseResult.ValueForOption(command.HelpOption);
         }
 
         internal string? ShortName { get; }
@@ -22,25 +21,5 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal string[]? Arguments { get; }
 
         internal bool HelpRequested { get; }
-
-        private static Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
-        {
-            Arity = new ArgumentArity(0, 1)
-        };
-
-        private static Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
-        {
-            Arity = new ArgumentArity(0, 999)
-        };
-
-        private static Option<bool> HelpOption { get; } = new Option<bool>(new string[] { "-h", "--help", "-?" });
-
-        internal static void AddToCommand(Command command)
-        {
-            command.AddArgument(ShortNameArgument);
-            command.AddArgument(RemainingArguments);
-            InstallCommandArgs.AddLegacyOptionsToCommand(command);
-            command.AddOption(HelpOption);
-        }
     }
 }

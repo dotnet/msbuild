@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class UninstallCommandArgs : GlobalArgs
     {
-        public UninstallCommandArgs(ParseResult parseResult) : base(parseResult)
+        public UninstallCommandArgs(UninstallCommand uninstallCommand, ParseResult parseResult) : base(uninstallCommand, parseResult)
         {
         }
     }

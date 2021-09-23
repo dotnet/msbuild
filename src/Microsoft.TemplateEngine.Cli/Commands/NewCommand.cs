@@ -19,18 +19,35 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal NewCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks) : base(host, telemetryLogger, callbacks, commandName, LocalizableStrings.CommandDescription)
         {
             _commandName = commandName;
-            NewCommandArgs.AddToCommand(this);
+
+            this.AddArgument(ShortNameArgument);
+            this.AddArgument(RemainingArguments);
+            this.AddOption(HelpOption);
+
             this.TreatUnmatchedTokensAsErrors = true;
 
             this.Add(new InstantiateCommand(host, telemetryLogger, callbacks));
-            this.Add(InstallCommand.GetCommand(host, telemetryLogger, callbacks));
-            this.Add(InstallCommand.GetLegacyCommand(host, telemetryLogger, callbacks));
+            LegacyInstallCommand legacyInstall = new LegacyInstallCommand(this, host, telemetryLogger, callbacks);
+            this.Add(legacyInstall);
+            this.Add(new InstallCommand(legacyInstall, host, telemetryLogger, callbacks));
             //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new SearchCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new UninstallCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new UpdateCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new AliasCommand(host, telemetryLogger, callbacks);
         }
+
+        internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
+        {
+            Arity = new ArgumentArity(0, 1)
+        };
+
+        internal Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
+        {
+            Arity = new ArgumentArity(0, 999)
+        };
+
+        internal Option<bool> HelpOption { get; } = new Option<bool>(new string[] { "-h", "--help", "-?" });
 
         protected override IEnumerable<string> GetSuggestions(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
         {
@@ -90,7 +107,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return (NewCommandStatus)newC.Invoke(context.ParseResult.Tokens.Select(s => s.Value).ToArray());
         }
 
-        protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(parseResult);
+        protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
 
     }
 }

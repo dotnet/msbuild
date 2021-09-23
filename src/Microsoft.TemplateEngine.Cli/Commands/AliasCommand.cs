@@ -21,12 +21,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected override Task<NewCommandStatus> ExecuteAsync(AliasCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 
-        protected override AliasCommandArgs ParseContext(ParseResult parseResult) => new(parseResult);
+        protected override AliasCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
     }
 
     internal class AliasCommandArgs : GlobalArgs
     {
-        public AliasCommandArgs(ParseResult parseResult) : base(parseResult)
+        public AliasCommandArgs(AliasCommand command, ParseResult parseResult) : base(command, parseResult)
         {
         }
 

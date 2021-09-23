@@ -25,7 +25,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class InstantiateCommandArgs : GlobalArgs
     {
-        public InstantiateCommandArgs(ParseResult parseResult) : base(parseResult)
+        public InstantiateCommandArgs(InstantiateCommand command, ParseResult parseResult) : base(command, parseResult)
         {
             OutputPath = parseResult.ValueForOption(OutputPathOption);
         }

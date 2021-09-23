@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class UpdateCommandArgs : GlobalArgs
     {
-        public UpdateCommandArgs(ParseResult parseResult) : base(parseResult)
+        public UpdateCommandArgs(UpdateCommand command, ParseResult parseResult) : base(command, parseResult)
         {
         }
     }
