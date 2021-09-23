@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tests
                 retryCount++;
                 throw new Exception();
             };
-            Assert.Throws<AggregateException>(() => ExponentialRetry.ExecuteWithRetryOnFailure<string>(action, 2).Result);
+            Assert.Throws<AggregateException>(() => ExponentialRetry.ExecuteWithRetryOnFailure<string>(action, 2, timer: () => ExponentialRetry.Timer(ExponentialRetry.TestingIntervals)).Result);
 
             retryCount.Should().Be(2);
         }
