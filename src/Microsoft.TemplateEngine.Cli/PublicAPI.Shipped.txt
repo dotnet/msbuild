@@ -28,3 +28,4 @@ static Microsoft.TemplateEngine.Cli.New3Command.Run(string! commandName, Microso
 ~Microsoft.TemplateEngine.Cli.New3Callbacks.RestoreProject.set -> void
 ~Microsoft.TemplateEngine.Cli.TelemetryLogger.TelemetryLogger(System.Action<string, System.Collections.Generic.IDictionary<string, string>, System.Collections.Generic.IDictionary<string, double>> trackEvent, bool writeToConsole = false) -> void
 ~Microsoft.TemplateEngine.Cli.TelemetryLogger.TrackEvent(string eventName, System.Collections.Generic.IDictionary<string, string> properties = null, System.Collections.Generic.IDictionary<string, double> measurements = null) -> void
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.UsageExamples.get -> System.Collections.Generic.IReadOnlyList<string!>!
