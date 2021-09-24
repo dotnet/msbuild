@@ -1642,7 +1642,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                               Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
     </ItemGroup>
 
-    <!-- Managed Platform "source of truth" is $(PlatformTarget). For cpp it's $(Platform) -->
+    <!-- $(PlatformTarget) in managed projects is guaranteed to be a valid value for the compiler.
+         For cpp it's $(Platform) -->
     <PropertyGroup>
       <CurrentPlatform>$(PlatformTarget)</CurrentPlatform>
       <CurrentPlatform Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">$(Platform)</CurrentPlatform>
@@ -1675,13 +1676,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment)' != ''">
       <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
-        <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
-        <SetPlatform Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' == 'true'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+        <SetPlatform>Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
 
+      <!-- When GetCompatiblePlatform fails to assign NearestPlatform, undefine Platform and let that project build "on its own" -->
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
-        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' == 'true'">%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
-        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' != 'true'">%(ProjectsWithNearestPlatform.UndefineProperties);PlatformTarget</UndefineProperties>
+        <UndefineProperties>%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
       </ProjectsWithNearestPlatform>
 
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
