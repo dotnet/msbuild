@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <summary>
         /// Thread safe queue use to store incoming log request messages.
         /// </summary>
-        private ConcurrentQueue<string> _messageQueue = new ConcurrentQueue<string>();
+        private readonly BlockingCollection<string> _messageQueue = new BlockingCollection<string>();
 
         private bool _disposed;
         private readonly StreamWriter _stream;
@@ -42,8 +42,6 @@ namespace Microsoft.DotNet.Installer.Windows
         {
             get;
         }
-
-        private bool Done = false;
 
         private Thread LogWriter;
 
@@ -114,13 +112,14 @@ namespace Microsoft.DotNet.Installer.Windows
         {
             if (!_disposed)
             {
-                Done = true;
+                _messageQueue.CompleteAdding();
                 LogWriter?.Join();
                 _stream.WriteLine($"{TimeStamp} {FormatMessage("=== Logging ended ===")}");
 
                 if (disposing)
                 {
                     _stream?.Dispose();
+                    _messageQueue.Dispose();
                 }
 
                 _disposed = true;
@@ -174,26 +173,14 @@ namespace Microsoft.DotNet.Installer.Windows
             int writeCount = 0;
             int threshold = (int)flushThreshold;
 
-            while (!Done)
+            foreach (var message in _messageQueue.GetConsumingEnumerable())
             {
-                if (_messageQueue.TryDequeue(out string message))
-                {
-                    _stream.WriteLine($"{TimeStamp} {message}");
-                    writeCount = (writeCount + 1) % threshold;
+                _stream.WriteLine($"{TimeStamp} {message}");
+                writeCount = (writeCount + 1) % threshold;
 
-                    if (writeCount == 0)
-                    {
-                        _stream.Flush();
-                    }
-                }
-            }
-
-            // Clean out any remaining messages.
-            while (!_messageQueue.IsEmpty)
-            {
-                if (_messageQueue.TryDequeue(out string message))
+                if (writeCount == 0)
                 {
-                    _stream.WriteLine($"{TimeStamp} {message}");
+                    _stream.Flush();
                 }
             }
 
@@ -202,7 +189,17 @@ namespace Microsoft.DotNet.Installer.Windows
 
         protected override void WriteMessage(string message)
         {
-            _messageQueue.Enqueue(message);
+            if (!_disposed)
+            {
+                try
+                {
+                    _messageQueue.Add(message);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // There's a possible race condition where the queue has been disposed but the flag hasn't been set yet
+                }
+            }
         }
     }
 }
