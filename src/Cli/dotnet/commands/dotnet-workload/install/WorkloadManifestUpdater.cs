@@ -210,7 +210,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             if (!manifestRollbacks.All(rollbackManifest => currentManifestIds.Contains(rollbackManifest.Item1)))
             {
-                throw new Exception(string.Format(LocalizableStrings.RollbackDefinitionContainsExtraneousManifestIds, rollbackDefinitionFilePath));
+                _reporter.WriteLine(string.Format(LocalizableStrings.RollbackDefinitionContainsExtraneousManifestIds, rollbackDefinitionFilePath).Yellow());
+                manifestRollbacks = manifestRollbacks.Where(rollbackManifest => currentManifestIds.Contains(rollbackManifest.Item1));
             }
 
             var manifestUpdates = manifestRollbacks

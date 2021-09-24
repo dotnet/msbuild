@@ -347,6 +347,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenWorkloadInstallItErrorsOnInvalidWorkloadRollbackFile()
         {
+            _reporter.Clear();
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var userProfileDir = Path.Combine(testDirectory, "user-profile");
@@ -363,9 +364,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
                 userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             
-            var exceptionThrown = Assert.Throws<GracefulException>(() => installCommand.Execute());
-            exceptionThrown.Message.Should().Contain("Invalid rollback definition");
-
+            Assert.Throws<GracefulException>(() => installCommand.Execute());
+            string.Join(" ", _reporter.Lines).Should().Contain("Invalid rollback definition");
         }
 
         private string AppendForUserLocal(string identifier, bool userLocal)
