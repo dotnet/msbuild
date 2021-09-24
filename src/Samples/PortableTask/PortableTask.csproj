@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <UseProductOutputPath>true</UseProductOutputPath>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFrameworks>netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="portableTaskTest.proj">

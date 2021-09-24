@@ -1171,6 +1171,25 @@ elementFormDefault="qualified">
       </xs:simpleType>
     </xs:element>
     <xs:element name="AppConfigForCompiler" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="ApplicationDefaultFont" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ApplicationDefaultFont" _locComment="" -->Customizes the application default font. The format equivalent to the output of FontConverter.ConvertToInvariantString(). Applies only to Windows Forms projects.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ApplicationHighDpiMode" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="ApplicationHighDpiMode" _locComment="" -->Customizes the application DPI awareness mode. Applies only to Windows Forms projects.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="SystemAware" />
+          <xs:enumeration value="PerMonitorV2" />
+          <xs:enumeration value="PerMonitor" />
+          <xs:enumeration value="DpiUnaware" />
+          <xs:enumeration value="DpiUnawareGdiScaled" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
     <xs:element name="ApplicationIcon" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ApplicationRevision" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
@@ -1180,6 +1199,16 @@ elementFormDefault="qualified">
     <xs:element name="ApplicationVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ApplicationVersion" _locComment="" -->Matches the expression "\d\.\d\.\d\.(\d|\*)"</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ApplicationUseCompatibleTextRendering" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ApplicationUseCompatibleTextRendering" _locComment="" -->Indicates whether to set UseCompatibleTextRendering property defined on certain controls (boolean). Applies only to Windows Forms projects.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ApplicationVisualStyles" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ApplicationVisualStyles" _locComment="" -->Indicates whether to enable or disable visual styles (boolean). Applies only to Windows Forms projects.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="AppDesignerFolder" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1252,10 +1281,19 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="DebugSymbols" _locComment="" -->Whether to emit symbols (boolean)</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="DebugType" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="DebugType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="DebugType" _locComment="" -->none, pdbonly, or full</xs:documentation>
+            <xs:documentation><!-- _locID_text="DebugType" _locComment="" -->none, pdbonly, embedded, portable, or full. From C# 6 onwards, pdbonly is the same as full.</xs:documentation>
         </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="none" />
+              <xs:enumeration value="pdbonly" />
+              <xs:enumeration value="embedded" />
+              <xs:enumeration value="portable" />
+              <xs:enumeration value="full" />
+            </xs:restriction>
+        </xs:simpleType>
     </xs:element>
     <xs:element name="DefaultClientScript" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DefaultHTMLPageLayout" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1811,6 +1849,11 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="RunPostBuildEvent" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="SatelliteResourceLanguages" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="SatelliteResourceLanguages" _locComment="" -->Semi-colon separated list of culture names to preserve satellite resource assemblies during build and publish. Names must be a valid culture name (like en-US;it; or fr). If left empty, all satellite resource assemblies will be preserved. Defaults to empty.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="SchemaVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SecureScoping" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SignAssembly" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>

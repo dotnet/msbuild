@@ -18,6 +18,7 @@
   <ItemGroup>
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
     <PackageReference Include="NuGet.Frameworks" >
       <PrivateAssets>all</PrivateAssets>
@@ -38,7 +39,7 @@
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' == 'true'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=netstandard2.0</SetTargetFramework>
     </ProjectReference>
-    <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="PortableTaskResolvedProjectReferencePath" SetTargetFramework="TargetFramework=netstandard1.3" />
+    <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="PortableTaskResolvedProjectReferencePath" SetTargetFramework="TargetFramework=netstandard2.0" />
 
     <ProjectReference Include="..\Samples\ProjectCachePlugin\ProjectCachePlugin.csproj" Private="false" ReferenceOutputAssembly="false">
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>

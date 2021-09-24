@@ -193,20 +193,4 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DisableLogTaskParameterItemMetadata_WriteLinesToFile_Lines>true</DisableLogTaskParameterItemMetadata_WriteLinesToFile_Lines>
   </PropertyGroup>
 
-   <!--
-        Define dummy optional workloads targets. Design-time builds use these targets
-        to determine whether the in-product acquisition experience should be enabled.
-        Since older SDKs do not have these targets, these dummy targets are defined here
-        to prevent builds using older SDKs and frameworks from failing. Ideally, they
-        would be Microsoft.Common.targets. Unfortunately, the workload targets are
-        imported before Microsoft.Common.targets and would therefore be overridden
-        by these dummy targets if they were defined in Microsoft.Common.targets. To work
-        around this issue, they are defined here in Microsoft.Common.props to ensure
-        they are the first workload targets defined.
-
-        See https://github.com/dotnet/project-system/issues/7561
-    -->
-  <Target Name="GetSuggestedWorkloads" />
-  <Target Name="CollectSuggestedWorkloads" />
-
 </Project>
