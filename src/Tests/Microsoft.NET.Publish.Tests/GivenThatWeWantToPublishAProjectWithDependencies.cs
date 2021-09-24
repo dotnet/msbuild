@@ -46,7 +46,7 @@ namespace Microsoft.NET.Publish.Tests
                 "SimpleDependencies.deps.json",
                 "SimpleDependencies.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
-                "SimpleDependencies.exe"
+                $"SimpleDependencies{EnvironmentInfo.ExecutableExtension}"
             });
 
             string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies", targetFramework);
