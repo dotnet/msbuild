@@ -1281,10 +1281,19 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="DebugSymbols" _locComment="" -->Whether to emit symbols (boolean)</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="DebugType" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="DebugType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="DebugType" _locComment="" -->none, pdbonly, or full</xs:documentation>
+            <xs:documentation><!-- _locID_text="DebugType" _locComment="" -->none, pdbonly, embedded, portable, or full. From C# 6 onwards, pdbonly is the same as full.</xs:documentation>
         </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="none" />
+              <xs:enumeration value="pdbonly" />
+              <xs:enumeration value="embedded" />
+              <xs:enumeration value="portable" />
+              <xs:enumeration value="full" />
+            </xs:restriction>
+        </xs:simpleType>
     </xs:element>
     <xs:element name="DefaultClientScript" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DefaultHTMLPageLayout" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
