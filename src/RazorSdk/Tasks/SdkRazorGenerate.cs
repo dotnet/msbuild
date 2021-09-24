@@ -177,13 +177,9 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 }
             }
 
-            // Added in 6.0
-            if (parsedVersion.Major >= 6)
+            if (SupportLocalizedComponentNames)
             {
-                if (SupportLocalizedComponentNames)
-                {
-                    builder.AppendLine("--support-localized-component-names");
-                }
+                builder.AppendLine("--support-localized-component-names");
             }
 
             if (!string.IsNullOrEmpty(CSharpLanguageVersion))

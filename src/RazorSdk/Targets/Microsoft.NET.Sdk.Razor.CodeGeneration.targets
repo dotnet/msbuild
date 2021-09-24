@@ -163,7 +163,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       Extensions="@(ResolvedRazorExtension)"
       Sources="@(RazorGenerateWithTargetPath)"
       ProjectRoot="$(MSBuildProjectDirectory)"
-      TagHelperManifest="$(_RazorTagHelperOutputCache)" />
+      TagHelperManifest="$(_RazorTagHelperOutputCache)"
+      SupportLocalizedComponentNames="$(SupportLocalizedComponentNames)" />
 
     <ItemGroup>
       <FileWrites Include="@(_RazorGenerateOutput)" />

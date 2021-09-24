@@ -52,6 +52,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 {
                     options.SuppressPrimaryMethodBody = true;
                     options.SuppressChecksum = true;
+                    options.SupportLocalizedComponentNames = razorSourceGeneratorOptions.SupportLocalizedComponentNames;
                 }));
 
                 b.SetRootNamespace(razorSourceGeneratorOptions.RootNamespace);
