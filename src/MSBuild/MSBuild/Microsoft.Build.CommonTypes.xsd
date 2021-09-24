@@ -1849,6 +1849,11 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="RunPostBuildEvent" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="SatelliteResourceLanguages" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="SatelliteResourceLanguages" _locComment="" -->Semi-colon separated list of culture names to preserve satellite resource assemblies during build and publish. Names must be a valid culture name (like en-US;it; or fr). If left empty, all satellite resource assemblies will be preserved. Defaults to empty.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="SchemaVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SecureScoping" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SignAssembly" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
