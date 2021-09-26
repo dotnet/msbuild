@@ -22,7 +22,7 @@ Importing `Microsoft.Common.targets` includes logic that consumes these items an
 
 ## Who this document is for
 
-This document describes that process, including what is required of a project to be referenceable through a `ProjectReference`. It is intended for for MSBuild SDK maintainers, and those who have created a completely custom project type that needs to interoperate with other projects. It may also be of interest if you'd like to see the implementation details of references. Understanding the details should not be necessary to _use_ `ProjectReferences` in your project.
+This document describes that process, including what is required of a project to be referenceable through a `ProjectReference`. It is intended for MSBuild SDK maintainers, and those who have created a completely custom project type that needs to interoperate with other projects. It may also be of interest if you'd like to see the implementation details of references. Understanding the details should not be necessary to _use_ `ProjectReferences` in your project.
 
 ## Targets related to consuming a reference
 
@@ -51,7 +51,7 @@ These targets should exist in a project to be compatible with the common targets
 
 These targets are all defined in `Microsoft.Common.targets` and are defined in Microsoft SDKs. You should only have to implement them yourself if you require custom behavior or are authoring a project that doesn't import the common targets.
 
-If implementing a project with an “outer” (determine what properties to pass to the real build) and “inner” (fully specified) build, only `GetTargetFrameworkProperties` is required in the “outer” build. The other targets listed can be “inner” build only.
+If implementing a project with an “outer” (determine what properties to pass to the real build) and “inner” (fully specified) build, only `GetTargetFrameworkProperties` and `GetTargetFrameworks` are required in the “outer” build. The other targets listed can be “inner” build only.
 
 * `GetTargetFrameworks` tells referencing projects what options are available to the build.
   * It returns an item with the following metadata:
@@ -106,7 +106,7 @@ As of MSBuild 16.10, it is possible to gather additional properties from referen
 
 These properties will then be gathered via the `GetTargetFrameworks` call.  They will be available to the referencing project via the `AdditionalPropertiesFromProject` metadata on the `_MSBuildProjectReferenceExistent` item.  The `AdditionalPropertiesFromProject` value will be an XML string which contains the values of the properties for each `TargetFramework` in the referenced project.  For example:
 
-> :warning: This format is being changed. Soon, the schema will replace <net5.0> with <TargetFramework Name="net5.0">. You can opt into that behavior early by setting the _UseAttributeForTargetFrameworkInfoPropertyNames property to true. This property will have no effect after the transition is complete.
+> :warning: This format is being changed. Soon, the schema will replace `<net5.0>` with `<TargetFramework Name="net5.0">`. You can opt into that behavior early by setting the `_UseAttributeForTargetFrameworkInfoPropertyNames` property to true. This property will have no effect after the transition is complete.
 
 ```xml
 <AdditionalProjectProperties>
