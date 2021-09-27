@@ -344,6 +344,30 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return (testDirectory, installManager, installer, workloadResolver, manifestUpdater, nugetDownloader);
         }
 
+        [Fact]
+        public void GivenWorkloadInstallItErrorsOnInvalidWorkloadRollbackFile()
+        {
+            _reporter.Clear();
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            var tmpDir = Path.Combine(testDirectory, "tmp");
+            var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), dotnetRoot);
+            var sdkFeatureVersion = "6.0.100";
+            var workload = "mock-1";
+            var mockRollbackFileContent = @"{""fake.manifest.name"":""1.0.0""}";
+            var rollbackFilePath = Path.Combine(testDirectory, "rollback.json");
+            File.WriteAllText(rollbackFilePath, mockRollbackFileContent);
+
+            var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", workload, "--from-rollback-file", rollbackFilePath });
+            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
+                userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            
+            Assert.Throws<GracefulException>(() => installCommand.Execute());
+            string.Join(" ", _reporter.Lines).Should().Contain("Invalid rollback definition");
+        }
+
         private string AppendForUserLocal(string identifier, bool userLocal)
         {
             if (!userLocal)
