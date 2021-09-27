@@ -465,11 +465,6 @@ namespace Microsoft.Build.BackEnd
                 creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
             }
 
-            BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new();
-            BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new();
-            processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-            threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-
             CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
 
             string exeName = msbuildLocation;
@@ -479,8 +474,7 @@ namespace Microsoft.Build.BackEnd
             if (!NativeMethodsShared.IsMono)
             {
                 // Run the child process with the same host as the currently-running process.
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(exeName, 2), "dotnet.exe");
-                exeName = File.Exists(dotnetExe) ? dotnetExe : GetCurrentHost();
+                exeName = GetCurrentHost();
             }
 #endif
 
@@ -525,14 +519,15 @@ namespace Microsoft.Build.BackEnd
             else
             {
 #if RUNTIME_TYPE_NETCORE
-                if (NativeMethodsShared.IsWindows)
-                {
-                    // Repeat the executable name in the args to suit CreateProcess
-                    commandLineArgs = "\"" + exeName + "\" " + commandLineArgs;
-                }
+                // Repeat the executable name in the args to suit CreateProcess
+                commandLineArgs = $"\"{exeName}\"{commandLineArgs}";
 #endif
 
-                BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
+                BackendNativeMethods.PROCESS_INFORMATION processInfo = new();
+                BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new();
+                BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new();
+                processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
+                threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
                 bool result = BackendNativeMethods.CreateProcess
                     (
@@ -595,9 +590,18 @@ namespace Microsoft.Build.BackEnd
 #if RUNTIME_TYPE_NETCORE || MONO
             if (CurrentHost == null)
             {
-                using (Process currentProcess = Process.GetCurrentProcess())
+                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, 2),
+                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
+                if (File.Exists(dotnetExe))
                 {
-                    CurrentHost = currentProcess.MainModule.FileName;
+                    CurrentHost = dotnetExe;
+                }
+                else
+                {
+                    using (Process currentProcess = Process.GetCurrentProcess())
+                    {
+                        CurrentHost = currentProcess.MainModule.FileName;
+                    }
                 }
             }
 
