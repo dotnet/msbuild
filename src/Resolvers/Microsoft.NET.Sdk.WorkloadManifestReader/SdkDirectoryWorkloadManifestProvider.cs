@@ -140,7 +140,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 foreach (var missingManifestId in missingManifestIds)
                 {
                     var manifestDir = FallbackForMissingManifest(missingManifestId);
-                    manifestIdsToDirectories.Add(missingManifestId, manifestDir);
+                    if (!string.IsNullOrEmpty(manifestDir))
+                    {
+                        manifestIdsToDirectories.Add(missingManifestId, manifestDir);
+                    }
                 }
             }
 
