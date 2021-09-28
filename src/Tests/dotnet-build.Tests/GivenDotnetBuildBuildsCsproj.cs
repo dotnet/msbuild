@@ -229,7 +229,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         [Theory]
         [InlineData("roslyn3.9")]
         [InlineData("roslyn4.0")]
-        public void It_resolves_analyzers_tareting_mulitple_roslyn_versions(string compilerApiVersion)
+        public void It_resolves_analyzers_targeting_mulitple_roslyn_versions(string compilerApiVersion)
         {
             var testProject = new TestProject()
             {
@@ -241,13 +241,6 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             testProject.ProjectChanges.Add(project =>
             {
-                var propertyGroup = XElement.Parse($@"
-  <PropertyGroup>
-    <CompilerApiVersion>{compilerApiVersion}</CompilerApiVersion>
-  </PropertyGroup>");
-
-                project.Root.Add(propertyGroup);
-
                 var itemGroup = XElement.Parse(@"
   <ItemGroup>
     <PackageReference Include=""Library.ContainsAnalyzer"" Version=""1.0.0"" />
@@ -264,6 +257,10 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var command = new GetValuesCommand(testAsset,
                 "Analyzer",
                 GetValuesCommand.ValueType.Item);
+
+            // set the CompilerApiVersion through a command line property to override any value brought in by
+            // the CodeAnalysis targets.
+            command.Properties.Add("CompilerApiVersion", compilerApiVersion);
 
             command.Execute().Should().Pass();
 
