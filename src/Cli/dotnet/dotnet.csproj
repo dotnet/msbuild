@@ -93,7 +93,7 @@
     <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(MicrosoftTemplateEngineUtilsPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateSearch.Common" Version="$(MicrosoftTemplateSearchCommonPackageVersion)" />
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
-    <PackageReference Include="Microsoft.Deployment.DotNet.Releases" Version="$(DeploymentReleasesVersion)" />
+    <PackageReference Include="Microsoft.Deployment.DotNet.Releases" Version="$(MicrosoftDeploymentDotNetReleasesVersion)" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="$(MicrosoftNETCoreAppRuntimePackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
