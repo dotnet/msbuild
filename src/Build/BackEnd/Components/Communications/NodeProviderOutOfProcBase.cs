@@ -520,7 +520,7 @@ namespace Microsoft.Build.BackEnd
             {
 #if RUNTIME_TYPE_NETCORE
                 // Repeat the executable name in the args to suit CreateProcess
-                commandLineArgs = $"\"{exeName}\"{commandLineArgs}";
+                commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
 #endif
 
                 BackendNativeMethods.PROCESS_INFORMATION processInfo = new();
