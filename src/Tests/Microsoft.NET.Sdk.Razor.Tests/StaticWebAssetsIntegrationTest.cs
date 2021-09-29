@@ -925,6 +925,42 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         }
 
         [Fact]
+        public void Pack_Incremental_IncludesStaticWebAssets()
+        {
+            var testAsset = "PackageLibraryDirectDependency";
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, subdirectory: "TestPackages");
+
+            var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path, "PackageLibraryDirectDependency");
+            pack.WithWorkingDirectory(projectDirectory.Path);
+            var result = pack.Execute("/bl");
+
+            result.Should().Pass();
+
+            var pack2 = new MSBuildCommand(Log, "Pack", projectDirectory.Path, "PackageLibraryDirectDependency");
+            pack2.WithWorkingDirectory(projectDirectory.Path);
+            var result2 = pack2.Execute("/bl");
+
+            result2.Should().Pass();
+
+            var outputPath = pack2.GetOutputDirectory(DefaultTfm, "Debug").ToString();
+
+            new FileInfo(Path.Combine(outputPath, "PackageLibraryDirectDependency.dll")).Should().Exist();
+
+            result2.Should().NuPkgContain(
+                Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "bin", "Debug", "PackageLibraryDirectDependency.1.0.0.nupkg"),
+                filePaths: new[]
+                {
+                    Path.Combine("staticwebassets", "js", "pkg-direct-dep.js"),
+                    Path.Combine("staticwebassets", "css", "site.css"),
+                    Path.Combine("staticwebassets", "PackageLibraryDirectDependency.bundle.scp.css"),
+                    Path.Combine("build", "Microsoft.AspNetCore.StaticWebAssets.props"),
+                    Path.Combine("build", "PackageLibraryDirectDependency.props"),
+                    Path.Combine("buildMultiTargeting", "PackageLibraryDirectDependency.props"),
+                    Path.Combine("buildTransitive", "PackageLibraryDirectDependency.props")
+                });
+        }
+
+        [Fact]
         public void Pack_StaticWebAssets_WithoutFileExtension_AreCorrectlyPacked()
         {
             var testAsset = "PackageLibraryDirectDependency";
@@ -1162,6 +1198,85 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 "PackageLibraryTransitiveDependency.1.0.0.nupkg");
 
             result.Should().NuPkgContain(
+                packagePath,
+                filePaths: new[]
+                {
+                    Path.Combine("staticwebassets", "exampleJsInterop.js"),
+                    Path.Combine("staticwebassets", "background.png"),
+                    Path.Combine("staticwebassets", "Component1.razor.js"),
+                    Path.Combine("staticwebassets", "PackageLibraryTransitiveDependency.bundle.scp.css"),
+                    Path.Combine("staticwebassets", "PackageLibraryTransitiveDependency.lib.module.js"),
+                    Path.Combine("build", "Microsoft.AspNetCore.StaticWebAssets.props"),
+                    Path.Combine("build", "PackageLibraryTransitiveDependency.props"),
+                    Path.Combine("buildMultiTargeting", "PackageLibraryTransitiveDependency.props"),
+                    Path.Combine("buildTransitive", "PackageLibraryTransitiveDependency.props")
+                });
+        }
+
+        [Fact]
+        public void Pack_Incremental_MultipleTargetFrameworks_WithScopedCssAndJsModules_IncludesAssetsAndProjectBundle()
+        {
+            var testAsset = "PackageLibraryTransitiveDependency";
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, subdirectory: "TestPackages");
+
+            projectDirectory.WithProjectChanges(document =>
+            {
+                var parse = XDocument.Parse($@"<Project Sdk=""Microsoft.NET.Sdk.Razor"">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0'"" Include=""browser"" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore.Components.Web"" Version=""{DefaultPackageVersion}"" />
+  </ItemGroup>
+
+</Project>
+");
+                document.Root.ReplaceWith(parse.Root);
+            });
+
+            Directory.Delete(Path.Combine(projectDirectory.Path, "wwwroot"), recursive: true);
+
+            var componentText = @"<div class=""my-component"">
+    This component is defined in the <strong>razorclasslibrarypack</strong> library.
+</div>";
+
+            // This mimics the structure of our default template project
+            Directory.CreateDirectory(Path.Combine(projectDirectory.Path, "wwwroot"));
+            File.WriteAllText(Path.Combine(projectDirectory.Path, "_Imports.razor"), "@using Microsoft.AspNetCore.Components.Web" + Environment.NewLine);
+            File.WriteAllText(Path.Combine(projectDirectory.Path, "Component1.razor"), componentText);
+            File.WriteAllText(Path.Combine(projectDirectory.Path, "Component1.razor.css"), "");
+            File.WriteAllText(Path.Combine(projectDirectory.Path, "Component1.razor.js"), "");
+            File.WriteAllText(Path.Combine(projectDirectory.Path, "ExampleJsInterop.cs"), "");
+            File.WriteAllText(Path.Combine(projectDirectory.Path, "wwwroot", "background.png"), "");
+            File.WriteAllText(Path.Combine(projectDirectory.Path, "wwwroot", "PackageLibraryTransitiveDependency.lib.module.js"), "");
+            File.WriteAllText(Path.Combine(projectDirectory.Path, "wwwroot", "exampleJsInterop.js"), "");
+
+            var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
+
+            var pack2 = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
+            pack2.WithWorkingDirectory(projectDirectory.Path);
+            var result2 = pack2.Execute("/bl");
+
+            result2.Should().Pass();
+
+            var outputPath = pack2.GetOutputDirectory(DefaultTfm, "Debug").ToString();
+
+            new FileInfo(Path.Combine(outputPath, "PackageLibraryTransitiveDependency.dll")).Should().Exist();
+
+            var packagePath = Path.Combine(
+                projectDirectory.Path,
+                "bin",
+                "Debug",
+                "PackageLibraryTransitiveDependency.1.0.0.nupkg");
+
+            result2.Should().NuPkgContain(
                 packagePath,
                 filePaths: new[]
                 {
