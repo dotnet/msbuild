@@ -260,9 +260,9 @@
       <Sha>bd9c63c9e74681617fccf2e371cd90f00d01cef7</Sha>
       <SourceBuild RepoName="command-line-api" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build" Version="0.1.0-alpha.1.21460.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build" Version="0.1.0-alpha.1.21475.1">
       <Uri>https://github.com/dotnet/source-build</Uri>
-      <Sha>3fb25b8db3bec654e37e71a5b2b7fde14444bc2f</Sha>
+      <Sha>a0b571f88fe49c8ab83787442f96244bb3dcb5f6</Sha>
       <SourceBuild RepoName="source-build" ManagedOnly="true" />
     </Dependency>
   </ProductDependencies>
