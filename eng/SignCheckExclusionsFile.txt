@@ -1,4 +1,4 @@
 ;; File passed to the SignCheck tool for exclusions
 
 ;; Ignore sourcebuild intermediate package. It is not expected to be signed.
-Microsoft.SourceBuild.Intermediate*.nupkg
+;Microsoft.SourceBuild.Intermediate*.nupkg;
