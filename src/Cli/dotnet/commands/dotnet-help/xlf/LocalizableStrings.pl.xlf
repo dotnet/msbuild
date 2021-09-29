@@ -267,11 +267,6 @@
         <target state="translated">Utwórz certyfikaty deweloperskie i zarządzaj nimi.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Narzędzia wiersza polecenia pamięci podręcznej programu SQL Server.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Zarządzaj wpisami tajnymi użytkowników dotyczącymi czynności deweloperskich.</target>
