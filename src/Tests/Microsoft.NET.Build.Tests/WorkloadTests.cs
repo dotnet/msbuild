@@ -140,8 +140,6 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1147")
                 .And
-                .HaveStdOutContaining("ios")
-                .And
                 .HaveStdOutContaining("android");
         }
 

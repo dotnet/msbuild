@@ -267,11 +267,6 @@
         <target state="translated">Créez et gérez des certificats de développement.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Outils en ligne de commande du cache SQL Server.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Gérez les secrets d'utilisateur de développement.</target>

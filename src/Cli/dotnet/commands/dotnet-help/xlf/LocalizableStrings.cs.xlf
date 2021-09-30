@@ -267,11 +267,6 @@
         <target state="translated">Vytvoří a spravuje certifikáty pro vývoj.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Nástroje příkazového řádku mezipaměti SQL Serveru</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Spravuje tajné kódy uživatelů pro vývoj.</target>

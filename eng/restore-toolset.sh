@@ -57,7 +57,6 @@ function CreateBuildEnvScript {
   scriptPath="$artifacts_dir/sdk-build-env.sh"
   scriptContents="
 #!/bin/bash
-export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 export DOTNET_ROOT=$DOTNET_INSTALL_DIR
