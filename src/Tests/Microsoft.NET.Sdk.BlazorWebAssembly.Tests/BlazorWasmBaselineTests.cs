@@ -32,12 +32,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 return null;
             }
 
-            if (originalValue.Replace("[[CustomPackageVersion]]", "__CustomVersion__").Contains("[["))
+            if (originalValue.Replace("[[CustomPackageVersion]]", "__CustomVersion__").Replace("[[hash]]", "__Hash__").Contains("[["))
             {
                 return null;
             }
 
-            var result = Path.Combine(Path.GetDirectoryName(asset.Identity), "[[" + asset.RelativePath + "]]");
+            var result = asset.Identity.Contains("[[") ? asset.Identity : Path.Combine(Path.GetDirectoryName(asset.Identity), "[[" + asset.RelativePath + "]]");
 
             if (GenerateBaselines)
             {

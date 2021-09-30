@@ -201,7 +201,24 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework\\[[_framework/blazorwasm-minimal.pdb.gz]]"
+      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/blazorwasm-minimal.pdb.gz]]"
+    },
+    {
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz]]",
+      "SourceId": "blazorwasm-minimal",
+      "SourceType": "Computed",
+      "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz",
+      "AssetKind": "Publish",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "RelatedAsset": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz]]"
     },
     {
       "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.wasm.gz]]",
@@ -218,7 +235,7 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework\\[[_framework/dotnet.wasm.gz]]"
+      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.wasm.gz]]"
     },
     {
       "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\compress\\[[_bin/publish.extension.txt.br]]",
@@ -2494,23 +2511,6 @@
       "RelatedAsset": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "br",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js"
-    },
-    {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz]]",
-      "SourceId": "blazorwasm-minimal",
-      "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
-      "BasePath": "/",
-      "RelativePath": "_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz",
-      "AssetKind": "Publish",
-      "AssetMode": "All",
-      "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
-      "AssetTraitName": "Content-Encoding",
-      "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js"
