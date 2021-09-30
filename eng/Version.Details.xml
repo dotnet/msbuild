@@ -149,6 +149,10 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>e013f14c5330375a18656dea8dca14e5602a3ae0</Sha>
     </Dependency>
+    <Dependency Name="System.IO.Pipelines" Version="6.0.0-rtm.21479.7">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>e013f14c5330375a18656dea8dca14e5602a3ae0</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="6.0.0-rtm.21479.3">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>32beecdf3d588f84d961874a3b0266979966bdc5</Sha>
