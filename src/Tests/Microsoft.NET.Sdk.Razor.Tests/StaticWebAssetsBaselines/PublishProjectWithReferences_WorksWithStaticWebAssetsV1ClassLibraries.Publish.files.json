@@ -12,5 +12,5 @@
   "${OutputPath}\\wwwroot\\js\\project-direct-dep.js",
   "${OutputPath}\\wwwroot\\js\\project-transitive-dep.js",
   "${OutputPath}\\wwwroot\\js\\project-transitive-dep.v4.js",
-  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
 ]

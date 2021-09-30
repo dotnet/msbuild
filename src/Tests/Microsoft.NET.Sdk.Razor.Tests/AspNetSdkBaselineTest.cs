@@ -309,6 +309,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 var updated = Regex.Replace(f, DotNetJSHashRegexPattern, DotNetJSHashTemplate);
                 updated = updated.Replace(restorePath, "${RestorePath}")
                     .Replace(RuntimeVersion, "${RuntimeVersion}")
+                    .Replace(DefaultTfm, "${Tfm}")
                     .Replace(DefaultPackageVersion, "${PackageVersion}")
                     .Replace(buildOrPublishFolder, "${OutputPath}")
                     .Replace(projectPath, "${ProjectPath}")
@@ -326,11 +327,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             string intermediateOutputPath) =>
                 files.Select(f => f.Replace("${RestorePath}", restorePath)
                                 .Replace("${RuntimeVersion}", RuntimeVersion)
-                               .Replace("${PackageVersion}", DefaultPackageVersion)
-                               .Replace("${OutputPath}", buildOrPublishFolder)
-                               .Replace("${IntermediateOutputPath}", intermediateOutputPath)
-                               .Replace("${ProjectPath}", projectPath)
-                               .Replace('\\', Path.DirectorySeparatorChar));
+                                .Replace("${Tfm}", DefaultTfm)
+                                .Replace("${PackageVersion}", DefaultPackageVersion)
+                                .Replace("${OutputPath}", buildOrPublishFolder)
+                                .Replace("${IntermediateOutputPath}", intermediateOutputPath)
+                                .Replace("${ProjectPath}", projectPath)
+                                .Replace('\\', Path.DirectorySeparatorChar));
 
 
         internal void AssertManifest(
@@ -423,6 +425,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             {
                 return property
                     .Replace("${RestorePath}", restorePath)
+                    .Replace("${Tfm}", DefaultTfm)
                     .Replace("${RuntimeVersion}", RuntimeVersion)
                     .Replace("${PackageVersion}", DefaultPackageVersion)
                     .Replace('\\', Path.DirectorySeparatorChar);
@@ -493,6 +496,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             string TemplatizeRestorePath(string restorePath, string property)
             {
                 property = property
+                    .Replace(DefaultTfm, "${Tfm}")
                     .Replace(restorePath, "${RestorePath}")
                     .Replace(Path.DirectorySeparatorChar, '\\');
 
