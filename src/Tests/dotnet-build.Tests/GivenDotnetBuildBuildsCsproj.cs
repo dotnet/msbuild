@@ -192,12 +192,12 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .HaveStdOutContaining("NETSDK1179");
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("build")]
         [InlineData("run")]
         public void It_does_not_warn_on_rid_with_self_contained_options(string commandName)
         {
-            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
+            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld", identifier: commandName)
                 .WithSource()
                 .WithTargetFrameworkOrFrameworks("net6.0", false)
                 .Restore(Log);
