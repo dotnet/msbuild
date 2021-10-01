@@ -1546,7 +1546,8 @@ namespace Microsoft.Build.CommandLine
         {
 #if FEATURE_OSVERSION
             if (Environment.OSVersion.Platform != PlatformID.Win32NT ||
-                Environment.OSVersion.Version.Major < 10) // Windows 10 is minimum
+                Environment.OSVersion.Version.Major < 6 ||
+                (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor < 1)) // Windows 7 is minimum
             {
                 // If we're running on any of the unsupported OS's, fail immediately.  This way,
                 // we don't run into some obscure error down the line, totally confusing the user.
