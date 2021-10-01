@@ -369,6 +369,7 @@ namespace Microsoft.Build.Tasks
                 if (!isInstanceFileStateUpToDate)
                 {
                     instanceLocalFileStateCache[path] = cachedProcessFileState;
+                    isDirty = true;
                 }
                 return cachedProcessFileState;
             }
