@@ -366,6 +366,10 @@ namespace Microsoft.Build.Tasks
             // If the process-wide cache contains an up-to-date FileState, always use it
             if (isProcessFileStateUpToDate)
             {
+                if (!isInstanceFileStateUpToDate)
+                {
+                    instanceLocalFileStateCache[path] = cachedProcessFileState;
+                }
                 return cachedProcessFileState;
             }
             // If the process-wide FileState is missing or out-of-date, this instance owns serialization;
