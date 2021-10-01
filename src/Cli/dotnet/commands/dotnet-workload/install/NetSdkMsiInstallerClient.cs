@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _workloadResolver = workloadResolver;
             _dependent = $"{DependentPrefix},{sdkFeatureBand},{HostArchitecture}";
 
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
             Log?.LogMessage($"Executing: {Windows.GetProcessCommandLine()}, PID: {CurrentProcess.Id}, PPID: {ParentProcess.Id}");
             Log?.LogMessage($"{nameof(IsElevated)}: {IsElevated}");
@@ -453,6 +453,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             Log?.LogMessage("Shutdown completed.");
             Log?.LogMessage($"Restart required: {Restart}");
+            ((TimestampedFileLogger)Log).Dispose();
             _shutdown = true;
         }
 
@@ -879,6 +880,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     // Don't rethrow. We'll call ShutDown during abnormal termination when control is passing back to the host
                     // so there's nothing in the CLI that will catch the exception.
                     Log?.LogMessage($"OnProcessExit: Shutdown failed, {ex.Message}");
+                }
+                finally
+                {
+                    ((TimestampedFileLogger)Log).Dispose();
                 }
             }
         }

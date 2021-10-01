@@ -302,6 +302,11 @@
         <target state="translated">Uruchom środowisko F# Interactive / wykonaj skrypty języka F#.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="new">Manage optional workloads.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
