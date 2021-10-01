@@ -23,12 +23,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _sdkVersionBand = sdkVersion;
         }
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream)>
+        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)>
             GetManifests()
         {
             foreach (var workloadManifestDirectory in GetManifestDirectories())
             {
-                string? workloadManifest = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
+                string? workloadManifestPath = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
                 var manifestId = Path.GetFileName(workloadManifestDirectory);
 
                 int index = manifestId.IndexOf(".Manifest", StringComparison.OrdinalIgnoreCase);
@@ -37,7 +37,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     manifestId = manifestId.Substring(0, index);
                 }
 
-                yield return (manifestId, workloadManifest, () => File.OpenRead(workloadManifest));
+                yield return (
+                    manifestId,
+                    workloadManifestPath,
+                    () => File.OpenRead(workloadManifestPath),
+                    () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(workloadManifestPath)
+                );
             }
         }
 
