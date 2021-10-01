@@ -89,12 +89,10 @@ namespace Microsoft.Build.CommandLine
             ProjectCacheFailure
         }
 
-#if FEATURE_OSVERSION
         /// <summary>
         /// True if the Main method was invoked. False indicates that we're running hosted in another process (e.g. unit tests).
         /// </summary>
         private static bool s_executingMainEntryPoint;
-#endif
 
         /// <summary>
         /// Whether the static constructor ran successfully.
@@ -221,9 +219,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
-#if FEATURE_OSVERSION
             s_executingMainEntryPoint = true;
-#endif
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
