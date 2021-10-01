@@ -124,5 +124,18 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
             _reporter.Lines[6].Should().Contain("mock-workload-2");
             _reporter.Lines[7].Should().Contain("mock-workload-3");
         }
+
+        [Fact]
+        public void GivenWorkloadSearchItSearchesDescription()
+        {
+            _reporter.Clear();
+            var parseResult = Parser.Instance.Parse("dotnet workload search description");
+            var workloadResolver = new MockWorkloadResolver(_availableWorkloads);
+            var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
+            command.Execute();
+
+            _reporter.Lines.Count.Should().Be(5);
+            _reporter.Lines[3].Should().Contain("fake-workload-2");
+        }
     }
 }

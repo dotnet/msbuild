@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli.Workload.Install.Tests;
 using Microsoft.DotNet.Cli.Workload.Search.Tests;
 using Microsoft.DotNet.PackageInstall.Tests;

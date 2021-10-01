@@ -32,6 +32,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private IWorkloadResolver _workloadResolver;
 
+        private bool _shutdown;
+
         private readonly PackageSourceLocation _packageSourceLocation;
 
         private readonly string _dependent;
@@ -53,9 +55,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _workloadResolver = workloadResolver;
             _dependent = $"{DependentPrefix},{sdkFeatureBand},{HostArchitecture}";
 
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
-            Log?.LogMessage($"Executing: {CurrentProcess.GetCommandLine()}, PID: {CurrentProcess.Id}, PPID: {ParentProcess.Id}");
+            Log?.LogMessage($"Executing: {Windows.GetProcessCommandLine()}, PID: {CurrentProcess.Id}, PPID: {ParentProcess.Id}");
             Log?.LogMessage($"{nameof(IsElevated)}: {IsElevated}");
             Log?.LogMessage($"{nameof(Is64BitProcess)}: {Is64BitProcess}");
             Log?.LogMessage($"{nameof(RebootPending)}: {RebootPending}");
@@ -351,8 +353,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
                 VerifyPackage(msi);
                 DetectState state = DetectPackage(msi, out Version installedVersion);
-                PlanPackage(msi, state, InstallAction.Repair, installedVersion, out _);
-                ExecutePackage(msi, InstallAction.Repair);
+                InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Repair, installedVersion, out _);
+                ExecutePackage(msi, plannedAction);
 
                 // Update the reference count against the MSI.
                 UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
@@ -451,6 +453,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             Log?.LogMessage("Shutdown completed.");
             Log?.LogMessage($"Restart required: {Restart}");
+            ((TimestampedFileLogger)Log).Dispose();
+            _shutdown = true;
         }
 
         private void LogPackInfo(PackInfo packInfo)
@@ -865,7 +869,23 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private void OnProcessExit(object sender, EventArgs e)
         {
-            Shutdown();
+            if (!_shutdown)
+            {
+                try
+                {
+                    Shutdown();
+                }
+                catch (Exception ex)
+                {
+                    // Don't rethrow. We'll call ShutDown during abnormal termination when control is passing back to the host
+                    // so there's nothing in the CLI that will catch the exception.
+                    Log?.LogMessage($"OnProcessExit: Shutdown failed, {ex.Message}");
+                }
+                finally
+                {
+                    ((TimestampedFileLogger)Log).Dispose();
+                }
+            }
         }
     }
 }

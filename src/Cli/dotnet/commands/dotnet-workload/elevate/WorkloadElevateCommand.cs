@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Elevate
                 }
                 catch (Exception e)
                 {
-                    throw new GracefulException(e.Message);
+                    throw new GracefulException(e.Message, isUserError: false);
                 }
                 finally
                 {
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Elevate
             }
             else
             {
-                throw new GracefulException(LocalizableStrings.RequiresWindows);
+                throw new GracefulException(LocalizableStrings.RequiresWindows, isUserError: false);
             }
 
             return 0;

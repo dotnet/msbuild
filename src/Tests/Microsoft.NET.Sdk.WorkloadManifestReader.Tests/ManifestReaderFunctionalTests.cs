@@ -60,7 +60,7 @@ namespace ManifestReaderTests
         {
             var workloadResolver =
                 WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] { ManifestPath }),
-                    new[] { "fakepath" });
+                    "fakepath");
 
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
             return workloadResolver;
@@ -71,7 +71,7 @@ namespace ManifestReaderTests
         {
             var workloadResolver =
                 WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] { ManifestPath }),
-                    new[] { "fakepath" });
+                    "fakepath");
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => false, directoryExists: (_) => true);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
             result.Should().HaveCount(0);
@@ -82,7 +82,7 @@ namespace ManifestReaderTests
         {
             var workloadResolver =
                 WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] { ManifestPath }),
-                    new[] { "fakepath" });
+                    "fakepath");
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => false);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);
             result.Should().HaveCount(0);
@@ -99,7 +99,7 @@ namespace ManifestReaderTests
 }");
 
             var workloadResolver =
-                WorkloadResolver.CreateForTests(new FakeManifestProvider(manifestPath), new[] { "fakepath" });
+                WorkloadResolver.CreateForTests(new FakeManifestProvider(manifestPath), "fakepath");
 
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
 

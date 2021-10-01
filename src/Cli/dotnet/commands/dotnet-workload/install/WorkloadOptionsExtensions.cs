@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal class WorkloadOptionsExtensions
     {
-        internal static ReleaseVersion GetValidatedSdkVersion(string versionOption, string providedVersion, string dotnetPath)
+        internal static ReleaseVersion GetValidatedSdkVersion(string versionOption, string providedVersion, string dotnetPath, string userProfileDir)
         {
 
             if (string.IsNullOrEmpty(versionOption))
@@ -26,10 +26,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             else
             {
-                var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption).GetManifests();
+                var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption, userProfileDir).GetManifests();
                 if (!manifests.Any())
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption));
+                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption), isUserError: false);
                 }
                 try
                 {
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 catch
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.IncompatibleManifests, versionOption));
+                    throw new GracefulException(string.Format(LocalizableStrings.IncompatibleManifests, versionOption), isUserError: false);
                 }
 
                 return new ReleaseVersion(versionOption);

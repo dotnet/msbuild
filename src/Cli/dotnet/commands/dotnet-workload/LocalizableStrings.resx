@@ -123,4 +123,10 @@
   <data name="CommandDescription" xml:space="preserve">
     <value>Install or work with workloads that extend the .NET experience.</value>
   </data>
+  <data name="EmscriptenDescription" xml:space="preserve">
+    <value>Emscripten SDK compiler tooling</value>
+  </data>
+  <data name="WasmToolsDescription" xml:space="preserve">
+    <value>.NET WebAssembly build tools</value>
+  </data>
 </root>

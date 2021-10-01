@@ -44,6 +44,12 @@ namespace Microsoft.DotNet.Cli
             return option;
         }
 
+        public static Option<T> Hide<T>(this Option<T> option)
+        {
+            option.IsHidden = true;
+            return option;
+        }
+
         private static IEnumerable<string> ForwardedArguments(string alias, IEnumerable<string> arguments)
         {
             foreach (string arg in arguments)

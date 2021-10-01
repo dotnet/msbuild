@@ -127,14 +127,25 @@ namespace Microsoft.DotNet.Cli
 
         public static IEnumerable<string> GetRunCommandShorthandProjectValues(this ParseResult parseResult)
         {
-            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+            var properties = GetRunPropertyOptions(parseResult, true);
             return properties.Where(property => !property.Contains("="));
         }
 
-        public static IEnumerable<string> GetRunCommandShorthandPropertyValues(this ParseResult parseResult)
+        public static IEnumerable<string> GetRunCommandPropertyValues(this ParseResult parseResult)
         {
-            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
-            return properties.Where(property => property.Contains("="));
+            var shorthandProperties = GetRunPropertyOptions(parseResult, true)
+                .Where(property => property.Contains("="));
+            var longhandProperties = GetRunPropertyOptions(parseResult, false);
+            return longhandProperties.Concat(shorthandProperties);
+        }
+
+        private static IEnumerable<string> GetRunPropertyOptions(ParseResult parseResult, bool shorthand)
+        {
+            var optionString = shorthand ? "-p" : "--property";
+            var options = parseResult.CommandResult.Children.Where(c => c.Token().Type.Equals(TokenType.Option));
+            var propertyOptions = options.Where(o => o.Token().Value.Equals(optionString));
+            var propertyValues = propertyOptions.SelectMany(o => o.Children.SelectMany(c => c.Tokens.Select(t=> t.Value))).ToArray();
+            return propertyValues;
         }
     }
 }

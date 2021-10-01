@@ -58,6 +58,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="RemoveManagedWinRTComponentWinMDReferences"
           AfterTargets="ResolveProjectReferences">
+    
+    <ItemGroup>
+      <!-- Before we remove them from _ResolvedProjectReferencePaths, grab the implementation .dll's path -->
+      <ManagedWinRTComponentImplementations 
+        Include="@(_ResolvedProjectReferencePaths->'%(ManagedImplementation)')" 
+        Condition="('%(_ResolvedProjectReferencePaths.Extension)' == '.winmd') And ('%(_ResolvedProjectReferencePaths.Implementation)' == 'WinRT.Host.dll')"
+      />
+    </ItemGroup>
 
     <!-- Managed WinRT components include both the WinMD and the .NET DLL in the result from GetTargetPath.  Managed projects need to only reference the .NET DLL, not the WinMD.
          The WinMD in this case can be identified because the Implementation metadata value is WinRT.Host.dll.  So here we remove any such WinMD references. -->
@@ -67,5 +75,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                                       />
     </ItemGroup>
     
+  </Target>
+
+  <Target Name="AddWinRTComponentImplementationReference" AfterTargets="ResolveProjectReferences" DependsOnTargets="RemoveManagedWinRTComponentWinMDReferences" Condition="'@(ManagedWinRTComponentImplementations)' != ''">
+    
+    <ItemGroup>
+      <Reference Include="@(ManagedWinRTComponentImplementations)"/>
+    </ItemGroup>
+
   </Target>
 </Project>
