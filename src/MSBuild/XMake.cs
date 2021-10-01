@@ -90,11 +90,6 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// True if the Main method was invoked. False indicates that we're running hosted in another process (e.g. unit tests).
-        /// </summary>
-        private static bool s_executingMainEntryPoint;
-
-        /// <summary>
         /// Whether the static constructor ran successfully.
         /// </summary>
         private static bool s_initialized;
@@ -219,8 +214,6 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
-            s_executingMainEntryPoint = true;
-
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -1552,14 +1545,8 @@ namespace Microsoft.Build.CommandLine
         private static void VerifyThrowSupportedOS()
         {
 #if FEATURE_OSVERSION
-            // We require Windows 10 but the OS may lie about the version if the .exe is not properly manifested
-            // (such as e.g. the unit test console runner).
-            var minimumVersion = s_executingMainEntryPoint
-                ? new Version(10, 0) // Windows 10
-                : new Version(6, 2); // Windows 10 pretending to be Windows 8
-
             if (Environment.OSVersion.Platform != PlatformID.Win32NT ||
-                Environment.OSVersion.Version < minimumVersion)
+                Environment.OSVersion.Version.Major < 10) // Windows 10 is minimum
             {
                 // If we're running on any of the unsupported OS's, fail immediately.  This way,
                 // we don't run into some obscure error down the line, totally confusing the user.
