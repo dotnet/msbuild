@@ -1,4 +1,11 @@
 setTimeout(async function () {
+  // Ensure we only try to connect once, even if the script is both injected and manually inserted
+  const scriptInjectedSentinel = '_dotnet_watch_ws_injected';
+  if (window.hasOwnProperty(scriptInjectedSentinel)) {
+    return;
+  }
+  window[scriptInjectedSentinel] = true;
+
   // dotnet-watch browser reload script
   const webSocketUrls = '{{hostString}}'.split(',');
   const sharedSecret = await getSecret('{{ServerKey}}');
@@ -133,7 +140,7 @@ setTimeout(async function () {
       }
     });
 
-    fetch('_framework/blazor-hotreload', { method: 'post', headers: { 'content-type': 'application/json' }, body: JSON.stringify(deltas) })
+    fetch('/_framework/blazor-hotreload', { method: 'post', headers: { 'content-type': 'application/json' }, body: JSON.stringify(deltas) })
       .then(response => {
         if (response.status == 200) {
           const etag = response.headers['etag'];
