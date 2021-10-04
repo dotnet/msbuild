@@ -2,10 +2,10 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.0.0</VersionPrefix>
+    <VersionPrefix>17.0.0</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <DotNetUseShippingVersions>true</DotNetUseShippingVersions><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.0.672</MicroBuildPluginsSwixBuildVersion>
