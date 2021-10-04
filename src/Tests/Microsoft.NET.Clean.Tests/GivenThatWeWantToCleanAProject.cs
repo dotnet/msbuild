@@ -24,7 +24,7 @@ namespace Microsoft.NET.Clean.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0")]
         public void It_cleans_without_logging_assets_message()
         {
             var testAsset = _testAssetsManager

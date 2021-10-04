@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly IReporter _reporter;
         private readonly string _targetSdkVersion;
         private readonly string _tempDirPath;
-        private readonly string _userHome;
+        private readonly string _userProfileDir;
         private readonly VerbosityOptions _verbosity;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             IWorkloadInstallationRecordRepository workloadRecordRepo = null,
             string currentSdkVersion = null,
             string dotnetDir = null,
-            string userHome = null,
+            string userProfileDir = null,
             string tempDirPath = null,
             INuGetPackageDownloader nugetPackageDownloader = null,
             IWorkloadManifestUpdater workloadManifestUpdater = null,
@@ -64,27 +64,29 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                ? Path.GetTempPath()
                                : result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption));
             _targetSdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
+            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             var workloadManifestProvider =
                 new SdkDirectoryWorkloadManifestProvider(_dotnetPath,
                     string.IsNullOrWhiteSpace(_targetSdkVersion)
                         ? currentSdkReleaseVersion.ToString()
-                        : _targetSdkVersion);
-            _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
+                        : _targetSdkVersion,
+                    _userProfileDir);
             DirectoryPath tempPackagesDir =
-                new(Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp"));
+                new(Path.Combine(_userProfileDir, "sdk-advertising-temp"));
             NullLogger nullLogger = new NullLogger();
             _nugetPackageDownloader = nugetPackageDownloader ??
                                       new NuGetPackageDownloader(tempPackagesDir, null,
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger),
                                           verboseLogger: nullLogger,
                                           restoreActionConfig: _parseResult.ToRestoreActionConfig());
-            workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString());
+            workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
 
             _workloadRecordRepo = workloadRecordRepo ??
-                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity).GetWorkloadInstallationRecordRepository();
+                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity, _userProfileDir,
+                elevationRequired: false).GetWorkloadInstallationRecordRepository();
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
-                workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, _workloadRecordRepo);
+                workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath, _workloadRecordRepo);
         }
 
         public override int Execute()
@@ -113,8 +115,11 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             }
             else
             {
-                _reporter.WriteLine();
-                _reporter.WriteLine(LocalizableStrings.WorkloadListHeader);
+                if (OperatingSystem.IsWindows())
+                {
+                    _reporter.WriteLine();
+                    _reporter.WriteLine(LocalizableStrings.WorkloadListHeader);
+                }
                 _reporter.WriteLine();
 
                 PrintableTable<WorkloadId> table = new();

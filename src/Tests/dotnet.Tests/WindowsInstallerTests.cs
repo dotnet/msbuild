@@ -8,7 +8,6 @@ using System.IO.Pipes;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Installer.Windows;
 using Microsoft.DotNet.Installer.Windows.Security;
@@ -22,33 +21,42 @@ namespace Microsoft.DotNet.Tests
     {
         private static string s_testDataPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestData");
 
+        private void LogTask(string pipeName)
+        {
+            using NamedPipeServerStream serverPipe = CreateServerPipe(pipeName);
+            PipeStreamSetupLogger logger = new PipeStreamSetupLogger(serverPipe, pipeName);
+
+            logger.Connect();
+
+            for (int i = 0; i < 10; i++)
+            {
+                logger.LogMessage($"Hello from {pipeName} ({i}).");
+            }
+        }
+
         [WindowsOnlyFact]
         public void MultipleProcessesCanWriteToTheLog()
         {
             var logFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             TimestampedFileLogger logger = new(logFile);
 
-            // Log requests operates using PipeTransmissionMode.Message
-            NamedPipeServerStream np1 = CreateServerPipe("np1");
-            PipeStreamSetupLogger pssl1 = new PipeStreamSetupLogger(np1, "np1");
-            NamedPipeServerStream np2 = CreateServerPipe("np2");
-            PipeStreamSetupLogger pssl2 = new PipeStreamSetupLogger(np2, "np2");
-
             logger.AddNamedPipe("np1");
             logger.AddNamedPipe("np2");
-            logger.LogMessage("Foo");
+            logger.AddNamedPipe("np3");
 
-            var t1 = Task.Run(() => { pssl1.Connect(); pssl1.LogMessage("Hello from np1"); });
-            var t2 = Task.Run(() => { pssl2.Connect(); pssl2.LogMessage("Hello from np2"); });
+            var t1 = Task.Run(() => { LogTask("np1"); });
+            var t2 = Task.Run(() => { LogTask("np2"); });
+            var t3 = Task.Run(() => { LogTask("np3"); });
 
-            // Give the other threads time to connect to the logging thread.
-            Task.WaitAll(t1, t2);
+            Task.WaitAll(t1, t2, t3);
             logger.Dispose();
 
             string logContent = File.ReadAllText(logFile);
 
             Assert.Contains("Hello from np1", logContent);
             Assert.Contains("Hello from np2", logContent);
+            Assert.Contains("Hello from np3", logContent);
+            Assert.Contains("=== Logging ended ===", logContent);
         }
 
         [WindowsOnlyFact]

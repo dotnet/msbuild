@@ -17,6 +17,8 @@ namespace Microsoft.DotNet.Installer.Windows
     {
         private TimestampedFileLogger _log;
 
+        private Process _serverProcess;
+
         public override bool IsClient => true;
 
         public InstallClientElevationContext(TimestampedFileLogger logger)
@@ -33,8 +35,8 @@ namespace Microsoft.DotNet.Installer.Windows
             {
                 // Use the path of the current host, otherwise we risk resolving against the wrong SDK version.
                 // To trigger UAC, UseShellExecute must be true and Verb must be "runas".
-                ProcessStartInfo startInfo = new(Environment.ProcessPath,
-                        $"{Assembly.GetExecutingAssembly().Location} workload elevate")
+                ProcessStartInfo startInfo = new($@"""{Environment.ProcessPath}""",
+                        $@"""{Assembly.GetExecutingAssembly().Location}"" workload elevate")
                 {
                     Verb = "runas",
                     UseShellExecute = true,
@@ -42,21 +44,25 @@ namespace Microsoft.DotNet.Installer.Windows
                     WindowStyle = ProcessWindowStyle.Hidden,
                 };
 
-                Process serverProcess = new Process
+                _log?.LogMessage($"Attempting to start the elevated command instance. {startInfo.FileName} {startInfo.Arguments}.");
+
+                _serverProcess = new Process
                 {
                     StartInfo = startInfo,
                     EnableRaisingEvents = true,
                 };
 
-                if (serverProcess.Start())
+                _serverProcess.Exited += ServerExited;
+
+                if (_serverProcess.Start())
                 {
-                    InitializeDispatcher(new NamedPipeClientStream(".", WindowsUtils.CreatePipeName(serverProcess.Id), PipeDirection.InOut));
+                    InitializeDispatcher(new NamedPipeClientStream(".", WindowsUtils.CreatePipeName(_serverProcess.Id), PipeDirection.InOut));
                     Dispatcher.Connect();
 
                     // Add a pipe to the logger to allow the server to send log requests. This avoids having an elevated process writing
                     // to a less privileged location. It also simplifies troubleshooting because log events will be chronologically
                     // ordered in a single file. 
-                    _log.AddNamedPipe(WindowsUtils.CreatePipeName(serverProcess.Id, "log"));
+                    _log.AddNamedPipe(WindowsUtils.CreatePipeName(_serverProcess.Id, "log"));
 
                     HasElevated = true;
 
@@ -64,9 +70,15 @@ namespace Microsoft.DotNet.Installer.Windows
                 }
                 else
                 {
-                    throw new Exception("Failed to start the server.");
+                    _log?.LogMessage($"Failed to start the elevated command instance.");
+                    throw new Exception("Failed to start the elevated command instance.");
                 }
             }
+        }
+
+        private void ServerExited(Object sender, EventArgs e)
+        {
+            _log?.LogMessage($"Elevated command instance has exited.");
         }
     }
 }

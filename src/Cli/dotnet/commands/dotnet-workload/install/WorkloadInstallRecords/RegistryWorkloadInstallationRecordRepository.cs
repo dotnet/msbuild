@@ -3,14 +3,13 @@
 
 #nullable disable
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.DotNet.Installer.Windows;
-using Microsoft.Win32;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
@@ -26,13 +25,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
         /// <summary>
         /// The base path of workload installation records in the registry.
         /// </summary>
-        internal readonly string BasePath = @"SOFTWARE\Microsoft\dotnet\InstalledWorkloads\Standalone";
+        internal readonly string BasePath = @$"SOFTWARE\Microsoft\dotnet\InstalledWorkloads\Standalone\{HostArchitecture}";
 
         /// <summary>
         /// The base key to use when reading/writing records.
         /// </summary>
         private RegistryKey _baseKey = Registry.LocalMachine;
-
 
         internal RegistryWorkloadInstallationRecordRepository(InstallElevationContextBase elevationContext, ISetupLogger logger)
             : base(elevationContext, logger)
@@ -45,7 +43,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
         /// </summary>
         /// <param name="baseKey">The base key to use, e.g. <see cref="Registry.CurrentUser"/>.</param>
         internal RegistryWorkloadInstallationRecordRepository(InstallElevationContextBase elevationContext, ISetupLogger logger,
-            RegistryKey baseKey, string basePath) 
+            RegistryKey baseKey, string basePath)
             : this(elevationContext, logger)
         {
             _baseKey = baseKey;
@@ -75,10 +73,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             using RegistryKey key = _baseKey.OpenSubKey(BasePath);
 
             // ToList() is needed to ensure deferred execution does not reference closed registry keys.
-            return (from string name in key.GetSubKeyNames()
-                    let subkey = key.OpenSubKey(name)
-                    where subkey.GetSubKeyNames().Length > 0
-                    select new SdkFeatureBand(name)).ToList();
+            return key is null
+                ? Enumerable.Empty<SdkFeatureBand>()
+                : (from string name in key.GetSubKeyNames()
+                   let subkey = key.OpenSubKey(name)
+                   where subkey.GetSubKeyNames().Length > 0
+                   select new SdkFeatureBand(name)).ToList();
         }
 
         public IEnumerable<WorkloadId> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand)

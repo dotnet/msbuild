@@ -1,7 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
 
+using System;
+using System.IO;
 using System.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.Win32;
@@ -43,9 +44,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             }
             finally
             {
-                // Clean up and delete everything
-                using RegistryKey providerKey = dep.BaseKey.OpenSubKey(DependencyProvider.DependenciesKeyRelativePath, writable: true);
-                providerKey?.DeleteSubKeyTree(dep.ProviderKeyName);
+                DeleteProviderKey(dep);
             }
         }
 
@@ -66,9 +65,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             }
             finally
             {
-                // Clean up and delete everything
-                using RegistryKey providerKey = dep.BaseKey.OpenSubKey(DependencyProvider.DependenciesKeyRelativePath, writable: true);
-                providerKey?.DeleteSubKeyTree(dep.ProviderKeyName);
+                DeleteProviderKey(dep);
             }
         }
 
@@ -91,10 +88,50 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             }
             finally
             {
-                // Clean up and delete everything
-                using RegistryKey providerKey = dep.BaseKey.OpenSubKey(DependencyProvider.DependenciesKeyRelativePath, writable: true);
-                providerKey?.DeleteSubKeyTree(dep.ProviderKeyName);
+                DeleteProviderKey(dep);
             }
+        }
+
+        [WindowsOnlyFact]
+        public void ItReturnsNullIfProductCodeDoesNotExist()
+        {
+            string providerKeyName = "Microsoft.NET.Test.Pack";
+            DependencyProvider dep = new DependencyProvider(providerKeyName, allUsers: false);
+            using RegistryKey providerKey = Registry.CurrentUser.CreateSubKey(Path.Combine(DependencyProvider.DependenciesKeyRelativePath, providerKeyName), writable: true);
+
+            try
+            {
+                Assert.Null(dep.ProductCode);
+            }
+            finally
+            {
+                DeleteProviderKey(dep);
+            }
+        }
+
+        [WindowsOnlyFact]
+        public void ItCanRetrieveTheProductCodeFromTheProviderKey()
+        {
+            string providerKeyName = "Microsoft.NET.Test.Pack";
+            DependencyProvider dep = new DependencyProvider(providerKeyName, allUsers: false);
+            using RegistryKey providerKey = Registry.CurrentUser.CreateSubKey(Path.Combine(DependencyProvider.DependenciesKeyRelativePath, providerKeyName), writable: true);
+            string productCode = Guid.NewGuid().ToString("B");
+            providerKey?.SetValue(null, productCode);
+
+            try
+            {
+                Assert.Equal(productCode, dep.ProductCode);
+            }
+            finally
+            {
+                DeleteProviderKey(dep);
+            }
+        }
+
+        private void DeleteProviderKey(DependencyProvider dep)
+        {
+            using RegistryKey providerKey = dep.BaseKey.OpenSubKey(DependencyProvider.DependenciesKeyRelativePath, writable: true);
+            providerKey?.DeleteSubKeyTree(dep.ProviderKeyName);
         }
     }
 #pragma warning restore CA1416

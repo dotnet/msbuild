@@ -12,11 +12,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
     internal class NetSdkManagedInstallationRecordRepository : IWorkloadInstallationRecordRepository
     {
         private readonly string _workloadMetadataDir;
-        private readonly string _installedWorkloadDir = "InstalledWorkloads";
+        private const string InstalledWorkloadDir = "InstalledWorkloads";
 
-        public NetSdkManagedInstallationRecordRepository(string dotnetDir)
+        public NetSdkManagedInstallationRecordRepository(string workloadMetadataDir)
         {
-            _workloadMetadataDir = Path.Combine(dotnetDir, "metadata", "workloads");
+            _workloadMetadataDir = workloadMetadataDir;
         }
 
         public IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords()
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             {
                 var bands = Directory.EnumerateDirectories(_workloadMetadataDir);
                 return bands
-                    .Where(band => Directory.Exists(Path.Combine(band, _installedWorkloadDir)) && Directory.GetFiles(Path.Combine(band, _installedWorkloadDir)).Any())
+                    .Where(band => Directory.Exists(Path.Combine(band, InstalledWorkloadDir)) && Directory.GetFiles(Path.Combine(band, InstalledWorkloadDir)).Any())
                     .Select(path => new SdkFeatureBand(Path.GetFileName(path)));
             }
             else
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 
         public IEnumerable<WorkloadId> GetInstalledWorkloads(SdkFeatureBand featureBand)
         {
-            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir);
+            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), InstalledWorkloadDir);
             if (Directory.Exists(path))
             {
                 return Directory.EnumerateFiles(path)
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 
         public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand featureBand)
         {
-            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir, workloadId.ToString());
+            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), InstalledWorkloadDir, workloadId.ToString());
             if (!File.Exists(path))
             {
                 var pathDir = Path.GetDirectoryName(path);
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 
         public void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand featureBand)
         {
-            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir, workloadId.ToString());
+            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), InstalledWorkloadDir, workloadId.ToString());
             if (File.Exists(path))
             {
                 File.Delete(path);

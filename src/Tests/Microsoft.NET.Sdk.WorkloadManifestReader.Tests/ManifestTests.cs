@@ -8,6 +8,7 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -51,7 +52,7 @@ namespace ManifestReaderTests
         public void AliasedPackPath()
         {
             var manifestProvider = new FakeManifestProvider(ManifestPath);
-            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { fakeRootPath });
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath);
 
             resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
 
@@ -67,7 +68,7 @@ namespace ManifestReaderTests
         public void UnresolvedAliasedPackPath()
         {
             var manifestProvider = new FakeManifestProvider(ManifestPath);
-            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { fakeRootPath }, new[] { "fake-platform" });
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath, currentRuntimeIdentifiers: new[] { "fake-platform" });
 
             resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
 
@@ -77,7 +78,7 @@ namespace ManifestReaderTests
         }
 
         [Fact]
-        public void GivenMultiplePackRoots_ItUsesTheLastOneIfThePackDoesntExist()
+        public void GivenMultiplePackRoots_ItUsesTheFirstInstallableIfThePackDoesntExist()
         {
             TestMultiplePackRoots(false, false);
         }
@@ -121,7 +122,7 @@ namespace ManifestReaderTests
             }
 
             var manifestProvider = new FakeManifestProvider(ManifestPath);
-            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { (additionalRoot, false), (dotnetRoot, true), ("other", true) });
 
             var pack = resolver.TryGetPackInfo(new WorkloadPackId("Xamarin.Android.Sdk"));
             pack.Should().NotBeNull();
@@ -143,7 +144,7 @@ namespace ManifestReaderTests
             Directory.CreateDirectory(defaultPackPath);
 
             var manifestProvider = new FakeManifestProvider(ManifestPath);
-            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { (additionalRoot, false), (dotnetRoot, true) });
 
             var pack = resolver.TryGetPackInfo(new WorkloadPackId("Xamarin.Android.Sdk"));
             pack.Should().NotBeNull();
@@ -183,14 +184,14 @@ namespace ManifestReaderTests
                 {  "DDD", MakeManifest("25.0.0") },
             };
 
-            WorkloadResolver.CreateForTests(goodManifestProvider, new[] { fakeRootPath });
+            WorkloadResolver.CreateForTests(goodManifestProvider, fakeRootPath);
 
             var missingManifestProvider = new InMemoryFakeManifestProvider
             {
                 {  "AAA", MakeManifest("20.0.0", ("BBB", "5.0.0"), ("CCC", "63.0.0"), ("DDD", "25.0.0")) }
             };
 
-            var missingManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(missingManifestProvider, new[] { fakeRootPath }));
+            var missingManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(missingManifestProvider, fakeRootPath));
             Assert.StartsWith("Did not find workload manifest dependency 'BBB' required by manifest 'AAA'", missingManifestEx.Message);
 
             var inconsistentManifestProvider = new InMemoryFakeManifestProvider
@@ -201,7 +202,7 @@ namespace ManifestReaderTests
                 {  "DDD", MakeManifest("30.0.0") },
             };
 
-            var inconsistentManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, new[] { fakeRootPath }));
+            var inconsistentManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, fakeRootPath));
             Assert.StartsWith("Workload manifest dependency 'DDD' version '39.0.0' is lower than version '30.0.0' required by manifest 'BBB'", inconsistentManifestEx.Message);
         }
 
@@ -210,8 +211,57 @@ namespace ManifestReaderTests
         {
             using FileStream fsSource = new FileStream(GetSampleManifestPath("NullAliasError.json"), FileMode.Open, FileAccess.Read);
 
-            var ex = Assert.Throws<WorkloadManifestFormatException> (() => WorkloadManifestReader.ReadWorkloadManifest("NullAliasError", fsSource));
+            var ex = Assert.Throws<WorkloadManifestFormatException>(() => WorkloadManifestReader.ReadWorkloadManifest("NullAliasError", fsSource));
             Assert.Contains("Expected string value at offset", ex.Message);
+        }
+
+        [Fact]
+        public void ItCanFindLocalizationCatalog()
+        {
+            string expected = MakePathNative("manifests/My.Manifest/localize/WorkloadManifest.pt-BR.json");
+
+            string? locPath = WorkloadManifestReader.GetLocalizationCatalogFilePath(
+                    "manifests/My.Manifest/WorkloadManifest.json",
+                    CultureInfo.GetCultureInfo("pt-BR"),
+                    s => true
+                );
+
+            Assert.Equal(expected, locPath);
+        }
+
+        [Fact]
+        public void ItCanFindParentCultureLocalizationCatalog()
+        {
+            string expected = MakePathNative("manifests/My.Manifest/localize/WorkloadManifest.pt.json");
+
+            string? locPath = WorkloadManifestReader.GetLocalizationCatalogFilePath(
+                    "manifests/My.Manifest/WorkloadManifest.json",
+                    CultureInfo.GetCultureInfo("pt-BR"),
+                    s => s == expected
+                );
+
+            Assert.Equal(expected, locPath);
+        }
+
+        static string MakePathNative(string path) => path.Replace('/', Path.DirectorySeparatorChar);
+
+        [Fact]
+        public void ItCanLocalizeDescriptions()
+        {
+            var manifest = GetSampleManifestPath("Sample.json");
+            var locCatalog = GetSampleManifestPath("Sample.loc.json");
+
+            var provider = new FakeManifestProvider((manifest, locCatalog));
+
+            var resolver = WorkloadResolver.CreateForTests(provider, fakeRootPath);
+
+            var workloads = resolver.GetAvailableWorkloads().ToList();
+
+            var xamAndroid = workloads.FirstOrDefault(w => w.Id == "xamarin-android");
+            Assert.Equal("Localized description for xamarin-android", xamAndroid?.Description);
+
+            var xamAndroidBuild = workloads.FirstOrDefault(w => w.Id == "xamarin-android-build");
+            Assert.Equal("Localized description for xamarin-android-build", xamAndroidBuild?.Description);
         }
     }
 }

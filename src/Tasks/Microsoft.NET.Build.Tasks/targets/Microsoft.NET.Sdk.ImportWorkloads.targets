@@ -28,9 +28,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ShowMissingWorkloads>
   </Target>
 
+  <!-- Skip this target for design time builds when there are missing workload packs.
+       This will prevent design time builds from failing and therefore allow
+       Visual Studio to collect the workloads from the GetSuggestedWorkloads target -->
   <Target Name="_CheckForMissingWorkload"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform;_CheckForUnsupportedTargetPlatformIdentifier"
-        Condition="'@(MissingWorkloadPack)' != ''">
+        Condition="'@(MissingWorkloadPack)' != '' And '$(DesignTimeBuild)' != 'true'">
 
     <ShowMissingWorkloads MissingWorkloadPacks="@(MissingWorkloadPack)"
                           NetCoreRoot="$(NetCoreRoot)"

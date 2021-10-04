@@ -6,8 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.NET.Sdk.Localization;
 using FXVersion = Microsoft.DotNet.MSBuildSdkResolver.FXVersion;
+#if USE_SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+#endif
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -22,34 +26,50 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly Dictionary<WorkloadPackId, (WorkloadPack pack, WorkloadManifest manifest)> _packs = new();
         private IWorkloadManifestProvider? _manifestProvider;
         private string[] _currentRuntimeIdentifiers;
-        private readonly string[] _dotnetRootPaths;
+        private readonly (string path, bool installable)[] _dotnetRootPaths;
 
         private Func<string, bool>? _fileExistOverride;
         private Func<string, bool>? _directoryExistOverride;
 
-        public static WorkloadResolver Create(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion)
+        public static WorkloadResolver Create(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion, string? userProfileDir)
         {
             string runtimeIdentifierChainPath = Path.Combine(dotnetRootPath, "sdk", sdkVersion, "NETCoreSdkRuntimeIdentifierChain.txt");
             string[] currentRuntimeIdentifiers = File.Exists(runtimeIdentifierChainPath) ?
                 File.ReadAllLines(runtimeIdentifierChainPath).Where(l => !string.IsNullOrEmpty(l)).ToArray() :
                 new string[] { };
 
-            var packRootEnvironmentVariable = Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_PACK_ROOTS);
-
-            string[] dotnetRootPaths;
-            if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
+            (string path, bool installable)[] workloadRootPaths;
+            if (userProfileDir != null && WorkloadFileBasedInstall.IsUserLocal(dotnetRootPath, sdkVersion) && Directory.Exists(userProfileDir))
             {
-                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.PathSeparator).Append(dotnetRootPath).ToArray();
+                workloadRootPaths = new[] { (userProfileDir, true), (dotnetRootPath, true) };
             }
             else
             {
-                dotnetRootPaths = new[] { dotnetRootPath };
+                workloadRootPaths = new[] { (dotnetRootPath, true) };
             }
 
-            return new WorkloadResolver(manifestProvider, dotnetRootPaths, currentRuntimeIdentifiers);
+            var packRootEnvironmentVariable = Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_PACK_ROOTS);
+            if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
+            {
+                workloadRootPaths = packRootEnvironmentVariable.Split(Path.PathSeparator).Select(path => (path, false)).Concat(workloadRootPaths).ToArray();
+            }
+
+            return new WorkloadResolver(manifestProvider, workloadRootPaths, currentRuntimeIdentifiers);
         }
 
-        public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, string[] dotNetRootPaths, string[]? currentRuntimeIdentifiers = null)
+        public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, string dotNetRoot, bool userLocal = false, string? userProfileDir = null, string[]? currentRuntimeIdentifiers = null)
+        {
+            if (userLocal && userProfileDir is null)
+            {
+                throw new ArgumentNullException(nameof(userProfileDir));
+            }
+            (string path, bool installable)[] dotNetRootPaths = userLocal
+                                                                ? new[] { (userProfileDir!, true), (dotNetRoot, true) }
+                                                                : new[] { (dotNetRoot, true) };
+            return CreateForTests(manifestProvider, dotNetRootPaths, currentRuntimeIdentifiers);
+        }
+
+        public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, (string path, bool installable)[] dotNetRootPaths, string[]? currentRuntimeIdentifiers = null)
         {
             if (currentRuntimeIdentifiers == null)
             {
@@ -61,7 +81,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// Creates a resolver by composing all the manifests from the provider.
         /// </summary>
-        private WorkloadResolver(IWorkloadManifestProvider manifestProvider, string[] dotnetRootPaths, string[] currentRuntimeIdentifiers)
+        private WorkloadResolver(IWorkloadManifestProvider manifestProvider, (string path, bool installable)[] dotnetRootPaths, string[] currentRuntimeIdentifiers)
             : this(dotnetRootPaths, currentRuntimeIdentifiers)
         {
             _manifestProvider = manifestProvider;
@@ -73,7 +93,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// Creates a resolver with no manifests.
         /// </summary>A
-        private WorkloadResolver(string[] dotnetRootPaths, string[] currentRuntimeIdentifiers)
+        private WorkloadResolver((string path, bool installable)[] dotnetRootPaths, string[] currentRuntimeIdentifiers)
         {
             _dotnetRootPaths = dotnetRootPaths;
             _currentRuntimeIdentifiers = currentRuntimeIdentifiers;
@@ -92,11 +112,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private void LoadManifestsFromProvider(IWorkloadManifestProvider manifestProvider)
         {
-            foreach ((string manifestId, string? informationalPath, Func<Stream> openManifestStream) in manifestProvider.GetManifests())
+            foreach ((string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream) in manifestProvider.GetManifests())
             {
-                using (var manifestStream = openManifestStream())
+                using (Stream manifestStream = openManifestStream())
+                using (Stream? localizationStream = openLocalizationStream())
                 {
-                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream, informationalPath);
+                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream, localizationStream, informationalPath);
                     if (!_manifests.TryAdd(manifestId, manifest))
                     {
                         var existingManifest = _manifests[manifestId];
@@ -283,31 +304,38 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             string GetPackPath(WorkloadPackId resolvedPackageId, string packageVersion, WorkloadPackKind kind, out bool isInstalled)
             {
                 isInstalled = false;
-                string packPath = "";
-                bool isFile;
+                string? firstInstallablePackPath = null;
+                string? installedPackPath = null;
                 foreach (var rootPath in _dotnetRootPaths)
                 {
+                    string packPath;
+                    bool isFile;
                     switch (kind)
                     {
                         case WorkloadPackKind.Framework:
                         case WorkloadPackKind.Sdk:
-                            packPath = Path.Combine(rootPath, "packs", resolvedPackageId.ToString(), packageVersion);
+                            packPath = Path.Combine(rootPath.path, "packs", resolvedPackageId.ToString(), packageVersion);
                             isFile = false;
                             break;
                         case WorkloadPackKind.Template:
-                            packPath = Path.Combine(rootPath, "template-packs", resolvedPackageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                            packPath = Path.Combine(rootPath.path, "template-packs", resolvedPackageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
                             isFile = true;
                             break;
                         case WorkloadPackKind.Library:
-                            packPath = Path.Combine(rootPath, "library-packs", resolvedPackageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                            packPath = Path.Combine(rootPath.path, "library-packs", resolvedPackageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
                             isFile = true;
                             break;
                         case WorkloadPackKind.Tool:
-                            packPath = Path.Combine(rootPath, "tool-packs", resolvedPackageId.ToString(), packageVersion);
+                            packPath = Path.Combine(rootPath.path, "tool-packs", resolvedPackageId.ToString(), packageVersion);
                             isFile = false;
                             break;
                         default:
                             throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
+                    }
+
+                    if (rootPath.installable && firstInstallablePackPath is null)
+                    {
+                        firstInstallablePackPath = packPath;
                     }
 
                     //can we do a more robust check than directory.exists?
@@ -317,10 +345,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                     if (isInstalled)
                     {
+                        installedPackPath = packPath;
                         break;
                     }
                 }
-                return packPath;
+                return installedPackPath ?? firstInstallablePackPath ?? "";
             }
         }
 
@@ -585,6 +614,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             /// <summary>
             /// The workload pack ID. The NuGet package ID <see cref="ResolvedPackageId"/> may differ from this.
             /// </summary>
+#if USE_SYSTEM_TEXT_JSON
+            [JsonConverter(typeof(PackIdJsonConverter))]
+#endif
             public WorkloadPackId Id { get; }
 
             public string Version { get; }

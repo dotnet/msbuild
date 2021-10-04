@@ -24,6 +24,7 @@ using Microsoft.DotNet.Tools.VSTest;
 using System.Collections.Generic;
 using Microsoft.DotNet.Tools.Tool;
 using Microsoft.DotNet.Workloads.Workload;
+using Microsoft.DotNet.Tools.Format;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -124,6 +125,7 @@ namespace Microsoft.DotNet.Cli
             ["sdk"] = new BuiltInCommandMetadata
             {
                 Command = SdkCommand.Run,
+                DocLink = "https://aka.ms/dotnet-sdk"
             },
             ["sln"] = new BuiltInCommandMetadata
             {
@@ -173,7 +175,8 @@ namespace Microsoft.DotNet.Cli
             },
             ["workload"] = new BuiltInCommandMetadata
             {
-                Command = WorkloadCommand.Run
+                Command = WorkloadCommand.Run,
+                DocLink = "https://aka.ms/dotnet-workload"
             },
         };
     }
