@@ -1545,11 +1545,9 @@ namespace Microsoft.Build.CommandLine
         private static void VerifyThrowSupportedOS()
         {
 #if FEATURE_OSVERSION
-            if ((Environment.OSVersion.Platform == PlatformID.Win32S) ||        // Win32S
-                (Environment.OSVersion.Platform == PlatformID.Win32Windows) ||  // Windows 95, Windows 98, Windows ME
-                (Environment.OSVersion.Platform == PlatformID.WinCE) ||         // Windows CE
-                ((Environment.OSVersion.Platform == PlatformID.Win32NT) &&      // Windows NT 4.0 and earlier
-                (Environment.OSVersion.Version.Major <= 4)))
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT ||
+                Environment.OSVersion.Version.Major < 6 ||
+                (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor < 1)) // Windows 7 is minimum
             {
                 // If we're running on any of the unsupported OS's, fail immediately.  This way,
                 // we don't run into some obscure error down the line, totally confusing the user.
