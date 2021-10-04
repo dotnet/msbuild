@@ -73,10 +73,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             using RegistryKey key = _baseKey.OpenSubKey(BasePath);
 
             // ToList() is needed to ensure deferred execution does not reference closed registry keys.
-            return (from string name in key.GetSubKeyNames()
-                    let subkey = key.OpenSubKey(name)
-                    where subkey.GetSubKeyNames().Length > 0
-                    select new SdkFeatureBand(name)).ToList();
+            return key is null
+                ? Enumerable.Empty<SdkFeatureBand>()
+                : (from string name in key.GetSubKeyNames()
+                   let subkey = key.OpenSubKey(name)
+                   where subkey.GetSubKeyNames().Length > 0
+                   select new SdkFeatureBand(name)).ToList();
         }
 
         public IEnumerable<WorkloadId> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand)

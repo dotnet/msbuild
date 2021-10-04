@@ -8,6 +8,7 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -210,8 +211,57 @@ namespace ManifestReaderTests
         {
             using FileStream fsSource = new FileStream(GetSampleManifestPath("NullAliasError.json"), FileMode.Open, FileAccess.Read);
 
-            var ex = Assert.Throws<WorkloadManifestFormatException> (() => WorkloadManifestReader.ReadWorkloadManifest("NullAliasError", fsSource));
+            var ex = Assert.Throws<WorkloadManifestFormatException>(() => WorkloadManifestReader.ReadWorkloadManifest("NullAliasError", fsSource));
             Assert.Contains("Expected string value at offset", ex.Message);
+        }
+
+        [Fact]
+        public void ItCanFindLocalizationCatalog()
+        {
+            string expected = MakePathNative("manifests/My.Manifest/localize/WorkloadManifest.pt-BR.json");
+
+            string? locPath = WorkloadManifestReader.GetLocalizationCatalogFilePath(
+                    "manifests/My.Manifest/WorkloadManifest.json",
+                    CultureInfo.GetCultureInfo("pt-BR"),
+                    s => true
+                );
+
+            Assert.Equal(expected, locPath);
+        }
+
+        [Fact]
+        public void ItCanFindParentCultureLocalizationCatalog()
+        {
+            string expected = MakePathNative("manifests/My.Manifest/localize/WorkloadManifest.pt.json");
+
+            string? locPath = WorkloadManifestReader.GetLocalizationCatalogFilePath(
+                    "manifests/My.Manifest/WorkloadManifest.json",
+                    CultureInfo.GetCultureInfo("pt-BR"),
+                    s => s == expected
+                );
+
+            Assert.Equal(expected, locPath);
+        }
+
+        static string MakePathNative(string path) => path.Replace('/', Path.DirectorySeparatorChar);
+
+        [Fact]
+        public void ItCanLocalizeDescriptions()
+        {
+            var manifest = GetSampleManifestPath("Sample.json");
+            var locCatalog = GetSampleManifestPath("Sample.loc.json");
+
+            var provider = new FakeManifestProvider((manifest, locCatalog));
+
+            var resolver = WorkloadResolver.CreateForTests(provider, fakeRootPath);
+
+            var workloads = resolver.GetAvailableWorkloads().ToList();
+
+            var xamAndroid = workloads.FirstOrDefault(w => w.Id == "xamarin-android");
+            Assert.Equal("Localized description for xamarin-android", xamAndroid?.Description);
+
+            var xamAndroidBuild = workloads.FirstOrDefault(w => w.Id == "xamarin-android-build");
+            Assert.Equal("Localized description for xamarin-android-build", xamAndroidBuild?.Description);
         }
     }
 }
