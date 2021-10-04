@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System.Text;
 using Microsoft.NET.TestFramework.Assertions;
 using Xunit;
 using Xunit.Abstractions;
@@ -783,7 +784,7 @@ Examples:
             string headerLine = lines[headerLineIndex];
             //table ends after empty line
             int lastLineIndex = Array.FindIndex(lines, headerLineIndex + 1, line => line.Length == 0) - 1;
-            var columnsIndexes = expectedColumns.Select(column => headerLine.IndexOf(column)).ToArray();
+            var columnIndexes = expectedColumns.Select(column => headerLine.IndexOf(column)).ToArray();
 
             var parsedTable = new List<List<string>>();
             // first array contain headers
@@ -797,15 +798,39 @@ Examples:
             //we start from 2nd row after header (1st row contains separator)
             for (int i = headerLineIndex + 2; i <= lastLineIndex; i++)
             {
-                var parsedRow = new List<string>();
-                for (int j = 0; j < columnsIndexes.Length - 1; j++)
-                {
-                    parsedRow.Add(lines[i].Substring(columnsIndexes[j], columnsIndexes[j + 1] - columnsIndexes[j]).Trim());
-                }
-                parsedRow.Add(lines[i].Substring(columnsIndexes[columnsIndexes.Length - 1]).Trim());
+                List<string> parsedRow = new(SplitLineByColumns(lines[i], columnIndexes).Select(c => c.Trim()));
                 parsedTable.Add(parsedRow);
             }
             return parsedTable;
+        }
+
+        /// <summary>
+        /// Splits the given input string into multiple columns using the given indices.
+        /// Indices do not refer to the number of characters, but to the visual space occupied by characters when drawn.
+        /// </summary>
+        /// <param name="input">Input string to be splitted.</param>
+        /// <param name="indexes">Indices to split the string from.</param>
+        /// <returns></returns>
+        private static IEnumerable<string> SplitLineByColumns(string input, int[] indexes)
+        {
+            StringBuilder columnBuilder = new(capacity: 16);
+            int processedCharCount = 0;
+
+            for (int j = 0; j < indexes.Length; j++)
+            {
+                int unfilledColumnWidth = (j == indexes.Length - 1 ? input.Length : indexes[j + 1]) - indexes[j];
+                columnBuilder.Clear();
+
+                while (unfilledColumnWidth > 0)
+                {
+                    char c = input[processedCharCount++];
+                    int charLength = Wcwidth.UnicodeCalculator.GetWidth(c);
+                    columnBuilder.Append(c);
+                    unfilledColumnWidth -= charLength;
+                }
+
+                yield return columnBuilder.ToString();
+            }
         }
 
         private class ShrinkAwareOrdinalStringComparer : IComparer<string>
@@ -833,7 +858,7 @@ Examples:
                 {
                     return string.Compare(left, right, StringComparison.OrdinalIgnoreCase);
                 }
-                
+
                 if (rightIsShrunk && left.StartsWith(right.Substring(0, right.Length - 3), StringComparison.OrdinalIgnoreCase))
                 {
                     return -1;

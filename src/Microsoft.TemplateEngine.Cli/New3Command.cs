@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.Reflection;
+using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Cli.Alias;
@@ -86,6 +87,11 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
+                if (Console.IsOutputRedirected)
+                {
+                    Console.OutputEncoding = Encoding.UTF8;
+                }
+
                 return ActualRun(commandName, host, telemetryLogger, callbacks, args, hivePath);
             }
             finally

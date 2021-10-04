@@ -4,8 +4,9 @@
 using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Wcwidth;
 
-namespace Microsoft.TemplateEngine.Cli
+namespace Microsoft.TemplateEngine.Cli.TableOutput
 {
     internal class HelpFormatter
     {
@@ -92,13 +93,15 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 for (int j = 0; j < headerLines; ++j)
                 {
-                    for (int i = 0; i < _columns.Count - 1; ++i)
+                    for (int i = 0; i < _columns.Count; ++i)
                     {
-                        b.Append(header[i].GetTextWithPadding(j, _columns[i].CalculatedWidth, _columns[i].RightAlign));
-                        b.Append("".PadRight(_columnPadding));
+                        header[i].AppendTextWithPadding(b, j, _columns[i].CalculatedWidth, _columns[i].RightAlign);
+                        if (i != _columns.Count - 1)
+                        {
+                            b.Append(' ', _columnPadding);
+                        }
                     }
-
-                    b.AppendLine(header[_columns.Count - 1].GetTextWithPadding(j, _columns[_columns.Count - 1].CalculatedWidth, _columns[_columns.Count - 1].RightAlign));
+                    b.AppendLine();
                 }
             }
 
@@ -155,15 +158,16 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 for (int lineWithinRow = 0; lineWithinRow < rowToRender.Max(row => row.LineCount); ++lineWithinRow)
                 {
-                    // Render all columns except last column
-                    for (int columnIndex = 0; columnIndex < _columns.Count - 1; ++columnIndex)
+                    // Render all columns
+                    for (int columnIndex = 0; columnIndex < _columns.Count; ++columnIndex)
                     {
-                        b.Append(rowToRender[columnIndex].GetTextWithPadding(lineWithinRow, _columns[columnIndex].CalculatedWidth, _columns[columnIndex].RightAlign));
-                        b.Append("".PadRight(_columnPadding));
+                        rowToRender[columnIndex].AppendTextWithPadding(b, lineWithinRow, _columns[columnIndex].CalculatedWidth, _columns[columnIndex].RightAlign);
+                        if (columnIndex != _columns.Count - 1)
+                        {
+                            b.Append(' ', _columnPadding);
+                        }
                     }
-
-                    // Render last column
-                    b.AppendLine(rowToRender[_columns.Count - 1].GetTextWithPadding(lineWithinRow, _columns[_columns.Count - 1].CalculatedWidth, _columns[_columns.Count - 1].RightAlign));
+                    b.AppendLine();
                 }
 
                 if (_blankLineBetweenRows)
@@ -207,13 +211,20 @@ namespace Microsoft.TemplateEngine.Cli
 
         private static string ShrinkTextToLength(string text, int maxLength)
         {
-            if (text.Length <= maxLength)
+            if (text.GetUnicodeLength() <= maxLength)
             {
                 // The text is short enough, so return it
                 return text;
             }
             // If the text is too long, shorten it enough to allow room for the ellipsis, then add the ellipsis
-            return text.Substring(0, Math.Max(0, maxLength - ShrinkReplacement.Length)) + ShrinkReplacement;
+
+            int desiredLength = maxLength - ShrinkReplacement.Length;
+            int possibleLength = 1;
+            while (text.Substring(0, possibleLength).GetUnicodeLength() <= desiredLength)
+            {
+                possibleLength++;
+            }
+            return text.Substring(0, possibleLength - 1) + ShrinkReplacement;
         }
 
         private void CalculateColumnWidth(IReadOnlyDictionary<int, int> columnWidthLookup)
@@ -346,7 +357,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                         if (newlineIndex > -1)
                         {
-                            if (newlineIndex - position <= maxWidth)
+                            if (text.Substring(position, newlineIndex - position).GetUnicodeLength() <= maxWidth)
                             {
                                 lines.Add(text.Substring(position, newlineIndex - position).TrimEnd());
                                 position = newlineIndex + environmentSettings.Environment.NewLine.Length;
@@ -361,7 +372,7 @@ namespace Microsoft.TemplateEngine.Cli
                             GetLineText(text, lines, maxWidth, text.Length - 1, ref position);
                         }
 
-                        realMaxWidth = Math.Max(realMaxWidth, lines[lines.Count - 1].Length);
+                        realMaxWidth = Math.Max(realMaxWidth, lines[lines.Count - 1].GetUnicodeLength());
                     }
                 }
 
@@ -376,24 +387,24 @@ namespace Microsoft.TemplateEngine.Cli
 
             internal string RawText { get; }
 
-            internal string GetTextWithPadding(int line, int maxColumnWidth, bool rightAlign = false)
+            internal void AppendTextWithPadding(StringBuilder b, int line, int maxColumnWidth, bool rightAlign = false)
             {
                 var text = _lines.Count > line ? _lines[line] : string.Empty;
                 var abbreviatedText = ShrinkTextToLength(text, maxColumnWidth);
 
                 if (rightAlign)
                 {
-                    return abbreviatedText.PadLeft(maxColumnWidth);
+                    b.Append(' ', maxColumnWidth - abbreviatedText.GetUnicodeLength()).Append(abbreviatedText);
                 }
                 else
                 {
-                    return abbreviatedText.PadRight(maxColumnWidth);
+                    b.Append(abbreviatedText).Append(' ', maxColumnWidth - abbreviatedText.GetUnicodeLength());
                 }
             }
 
             private static void GetLineText(string text, List<string> lines, int maxLength, int end, ref int position)
             {
-                if (text.Length - position < maxLength)
+                if (text.Substring(position, text.Length - position).GetUnicodeLength() < maxLength)
                 {
                     lines.Add(text.Substring(position));
                     position = text.Length;
@@ -401,7 +412,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 int lastBreak = text.LastIndexOfAny(new[] { ' ', '-' }, end, end - position);
-                while (lastBreak > 0 && lastBreak - position > maxLength)
+                while (lastBreak > 0 && text.Substring(position, lastBreak - position).GetUnicodeLength() > maxLength)
                 {
                     --lastBreak;
                     lastBreak = text.LastIndexOfAny(new[] { ' ', '-' }, lastBreak, lastBreak - position);

@@ -7,6 +7,7 @@
     <EnablePublicApiAnalyzer>true</EnablePublicApiAnalyzer>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ImplicitUsings>enable</ImplicitUsings>
+    <DefineConstants>$(DefineConstants);WCWIDTH_VISIBILITY_INTERNAL</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Shared\JExtensions.cs" Link="JExtensions.cs" />
@@ -30,6 +31,7 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+    <PackageReference Include="Wcwidth.Sources" ExcludeAssets="all" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,4 +48,14 @@
       <LastGenOutput>LocalizableStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <Target Name="CopyExternalSourceFilesIntoProject" BeforeTargets="BeforeBuild" >
+    <ItemGroup>
+      <WcwidthFiles Include="$(PkgWcwidth_Sources)\contentFiles\cs\net5.0\External\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(WcwidthFiles)" DestinationFolder="$(BaseIntermediateOutputPath)/External/%(RecursiveDir)"/>
+    <ItemGroup>
+      <Compile Include="$(BaseIntermediateOutputPath)/External/**/*.cs" />
+    </ItemGroup> 
+  </Target>
 </Project>

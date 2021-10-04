@@ -3,6 +3,7 @@
 
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.TableOutput;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
 using Microsoft.TemplateEngine.Mocks;
 using Xunit;
@@ -11,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 {
     public class HelpFormatterTests
     {
-        [Fact(DisplayName = nameof(CanShrinkOneColumn))]
+        [Fact]
         public void CanShrinkOneColumn()
         {
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -48,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             Assert.Equal(expectedOutput, result);
         }
 
-        [Fact(DisplayName = nameof(CanShrinkMultipleColumnsAndBalanceShrinking))]
+        [Fact]
         public void CanShrinkMultipleColumnsAndBalanceShrinking()
         {
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -85,7 +86,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             Assert.Equal(expectedOutput, result);
         }
 
-        [Fact(DisplayName = nameof(CannotShrinkOverMinimumWidth))]
+        [Fact]
         public void CannotShrinkOverMinimumWidth()
         {
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -122,7 +123,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             Assert.Equal(expectedOutput, result);
         }
 
-        [Fact(DisplayName = nameof(CanShowDefaultColumns))]
+        [Fact]
         public void CanShowDefaultColumns()
         {
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -160,7 +161,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             Assert.Equal(expectedOutput, result);
         }
 
-        [Fact(DisplayName = nameof(CanShowUserSelectedColumns))]
+        [Fact]
         public void CanShowUserSelectedColumns()
         {
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -198,7 +199,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             Assert.Equal(expectedOutput, result);
         }
 
-        [Fact(DisplayName = nameof(CanShowAllColumns))]
+        [Fact]
         public void CanShowAllColumns()
         {
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -236,7 +237,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             Assert.Equal(expectedOutput, result);
         }
 
-        [Fact(DisplayName = nameof(CanRightAlign))]
+        [Fact]
         public void CanRightAlign()
         {
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -268,6 +269,98 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                      blankLineBetweenRows: false)
                  .DefineColumn(t => t.Item1, "Column 1")
                  .DefineColumn(t => t.Item2, "Column 2", rightAlign: true);
+
+            string result = formatter.Layout();
+            Assert.Equal(expectedOutput, result);
+        }
+
+        [Fact]
+        public void CanCalculateWidthCorrectly()
+        {
+            IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
+            {
+                Environment = new MockEnvironment()
+                {
+                    ConsoleBufferWidth = 100, 
+                }
+            };
+
+            INewCommandInput command = new MockNewCommandInput();
+
+            IEnumerable<Tuple<string, string>> data = new List<Tuple<string, string>>()
+            {
+                new Tuple<string, string>("dotnet gitignore 文件", "gitignore"),
+                new Tuple<string, string>("Dotnet 本地工具清单文件", "tool-manifest"),
+                new Tuple<string, string>("控制台应用程序", "console"),
+                new Tuple<string, string>("类库", "classlib"),
+            };
+
+            string expectedOutput =
+@"模板名                   短名称       
+-----------------------  -------------
+dotnet gitignore 文件    gitignore    
+Dotnet 本地工具清单文件  tool-manifest
+控制台应用程序           console      
+类库                     classlib     
+";
+
+            HelpFormatter<Tuple<string, string>> formatter =
+             HelpFormatter
+                 .For(
+                     environmentSettings,
+                     command,
+                     data,
+                     columnPadding: 2,
+                     headerSeparator: '-',
+                     blankLineBetweenRows: false)
+                 .DefineColumn(t => t.Item1, "模板名")
+                 .DefineColumn(t => t.Item2, "短名称");
+
+            string result = formatter.Layout();
+            Assert.Equal(expectedOutput, result);
+        }
+
+        [Fact]
+        public void CanShrinkWideCharsCorrectly()
+        {
+            IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
+            {
+                Environment = new MockEnvironment()
+                {
+                    ConsoleBufferWidth = 30,
+                }
+            };
+
+            INewCommandInput command = new MockNewCommandInput();
+
+            IEnumerable<Tuple<string, string>> data = new List<Tuple<string, string>>()
+            {
+                new Tuple<string, string>("dotnet gitignore 文件", "gitignore"),
+                new Tuple<string, string>("Dotnet 本地工具清单文件", "tool-manifest"),
+                new Tuple<string, string>("控制台应用程序", "console"),
+                new Tuple<string, string>("类库", "classlib"),
+            };
+
+            string expectedOutput =
+@"模板名          短名称       
+--------------  -------------
+dotnet giti...  gitignore    
+Dotnet 本地...  tool-manifest
+控制台应用程序  console      
+类库            classlib     
+";
+
+            HelpFormatter<Tuple<string, string>> formatter =
+             HelpFormatter
+                 .For(
+                     environmentSettings,
+                     command,
+                     data,
+                     columnPadding: 2,
+                     headerSeparator: '-',
+                     blankLineBetweenRows: false)
+                 .DefineColumn(t => t.Item1, "模板名", shrinkIfNeeded: true)
+                 .DefineColumn(t => t.Item2, "短名称");
 
             string result = formatter.Layout();
             Assert.Equal(expectedOutput, result);

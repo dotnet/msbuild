@@ -6,6 +6,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.TableOutput;
 
 namespace Microsoft.TemplateEngine.Cli.Alias
 {
