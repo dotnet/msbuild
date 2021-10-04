@@ -24,10 +24,6 @@ MSBuild 16.7 builds from the branch [`vs16.7`](https://github.com/dotnet/msbuild
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.7)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs16.7)
 
-MSBuild 16.4 builds from the branch [`vs16.4`](https://github.com/dotnet/msbuild/tree/vs16.4). Only high-priority bugfixes will be considered for servicing 16.4.
-
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.4)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs16.4)
-
 MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/dotnet/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
 
 ## Building
