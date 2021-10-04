@@ -56,8 +56,7 @@ namespace Microsoft.Build.Evaluation
 
                 return Compare(leftEmpty, rightEmpty);
             }
-
-            if (LeftChild.TryNumericEvaluate(state, out double leftNumericValue))
+            else if (LeftChild.TryNumericEvaluate(state, out double leftNumericValue) && RightChild.TryNumericEvaluate(state, out double rightNumericValue))
             {
                 // The left child evaluating to a number and the right child not evaluating to a number
                 // is insufficient to say they are not equal because $(MSBuildToolsVersion) evaluates to
@@ -65,17 +64,11 @@ namespace Microsoft.Build.Evaluation
                 // as a version and returns "17.0" (or whatever the current tools version is). This means
                 // that if '$(MSBuildToolsVersion)' is "equal" to BOTH '17.0' and 'Current' (if 'Current'
                 // is 17.0).
-                if (RightChild.TryNumericEvaluate(state, out double rightNumericValue))
-                {
-                    return Compare(leftNumericValue, rightNumericValue);
-                }
+                return Compare(leftNumericValue, rightNumericValue);
             }
-
-            if (LeftChild.TryBoolEvaluate(state, out bool leftBoolValue))
+            else if (LeftChild.TryBoolEvaluate(state, out bool leftBoolValue) && RightChild.TryBoolEvaluate(state, out bool rightBoolValue))
             {
-                return RightChild.TryBoolEvaluate(state, out bool rightBoolValue) ?
-                    Compare(leftBoolValue, rightBoolValue) :
-                    this is NotEqualExpressionNode; // If the left child is a bool, and the right child is not, then they are not equal. Return true for != and false for ==
+                return Compare(leftBoolValue, rightBoolValue);
             }
 
             string leftExpandedValue = LeftChild.GetExpandedValue(state);
