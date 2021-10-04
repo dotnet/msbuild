@@ -52,7 +52,7 @@ stages:
 
   - job: Windows_NT
     pool:
-      name: VSEngSS-MicroBuild2019-1ES
+      name: VSEngSS-MicroBuild2022-1ES
       demands:
       - agent.os -equals Windows_NT
 
@@ -90,14 +90,14 @@ stages:
         signType: $(SignType)
         zipSources: false
       condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
-      
+
     - task: MicroBuildOptProfPlugin@6
       inputs:
         ProfilingInputsDropName: '$(VisualStudio.DropName)'
         ShouldSkipOptimize: true
         AccessToken: '$(System.AccessToken)'
         feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
-      displayName: 'Install OptProf Plugin'      
+      displayName: 'Install OptProf Plugin'
 
     # Required by MicroBuildBuildVSBootstrapper
     - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
