@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/eng/" # Location of package manifests
+    schedule:
+      interval: "daily"
