@@ -36,6 +36,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             RootNamespace = Option("--root-namespace", "root namespace for generated code", CommandOptionType.SingleValue);
             CSharpLanguageVersion = Option("--csharp-language-version", "csharp language version generated code", CommandOptionType.SingleValue);
             GenerateDeclaration = Option("--generate-declaration", "Generate declaration", CommandOptionType.NoValue);
+            SupportLocalizedComponentNames = Option("--support-localized-component-names", "support localized component names", CommandOptionType.NoValue);
         }
 
         public CommandOption Sources { get; }
@@ -67,6 +68,8 @@ namespace Microsoft.NET.Sdk.Razor.Tool
         public CommandOption CSharpLanguageVersion { get; }
 
         public CommandOption GenerateDeclaration { get; }
+
+        public CommandOption SupportLocalizedComponentNames { get; }
 
         protected override Task<int> ExecuteCoreAsync()
         {
@@ -201,6 +204,11 @@ namespace Microsoft.NET.Sdk.Razor.Tool
                 {
                     b.Features.Add(new SetSuppressPrimaryMethodBodyOptionFeature());
                     b.Features.Add(new SuppressChecksumOptionsFeature());
+                }
+
+                if (SupportLocalizedComponentNames.HasValue())
+                {
+                    b.Features.Add(new SetSupportLocalizedComponentNamesFeature());
                 }
 
                 if (RootNamespace.HasValue())
@@ -419,6 +427,21 @@ namespace Microsoft.NET.Sdk.Razor.Tool
                 }
 
                 options.SuppressPrimaryMethodBody = true;
+            }
+        }
+
+        private class SetSupportLocalizedComponentNamesFeature : RazorEngineFeatureBase, IConfigureRazorCodeGenerationOptionsFeature
+        {
+            public int Order { get; set; }
+
+            public void Configure(RazorCodeGenerationOptionsBuilder options)
+            {
+                if (options == null)
+                {
+                    throw new ArgumentNullException(nameof(options));
+                }
+
+                options.SupportLocalizedComponentNames = true;
             }
         }
     }
