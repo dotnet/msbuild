@@ -51,7 +51,7 @@ These targets should exist in a project to be compatible with the common targets
 
 These targets are all defined in `Microsoft.Common.targets` and are defined in Microsoft SDKs. You should only have to implement them yourself if you require custom behavior or are authoring a project that doesn't import the common targets.
 
-If implementing a project with an “outer” (determine what properties to pass to the real build) and “inner” (fully specified) build, only `GetTargetFrameworkProperties` and `GetTargetFrameworks` are required in the “outer” build. The other targets listed can be “inner” build only.
+If implementing a project with an “outer” (determine what properties to pass to the real build) and “inner” (fully specified) build, only `GetTargetFrameworks` is required in the “outer” build. The other targets listed can be “inner” build only.
 
 * `GetTargetFrameworks` tells referencing projects what options are available to the build.
   * It returns an item with the following metadata:
