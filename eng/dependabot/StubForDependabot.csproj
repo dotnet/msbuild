@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- This project isn't a real project, but Dependabot requires
+       a project. If one is, it'll update stuff in Packages.props
+       as well, which is all we really want here. -->
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+  </PropertyGroup>
+
+</Project>
