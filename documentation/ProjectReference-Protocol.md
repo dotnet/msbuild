@@ -176,7 +176,7 @@ Project B: Unmanaged, has `$(Platforms)` constructed from its `Platform` metadat
 Because `AnyCPU` does not map to anything architecture-specific, a custom mapping must be defined. Project A can either:
 1. Define `PlatformLookupTable` in its project or a Directory.Build.props as `AnyCPU=x64` or `AnyCPU=Win32`.
 2. Define `PlatformLookupTable` as metadata on the `ProjectReference` item, which would take priority over a lookup table defined elsewhere.
-     *  When only one mapping is valid, you could also directly define `SetPlatform` metadata as `Platform=foo` (for unmanaged) or `PlatformTarget=bar` (for managed). This would skip over most negotiation logic.
+     *  When only one mapping is valid, you could also directly define `SetPlatform` metadata as `Platform=foo`. This would skip over most negotiation logic.
 
 Example of project A defining a lookup table directly on the `ProjectReference`:
 ```xml
