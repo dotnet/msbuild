@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "nuget"
-    directory: "/eng/"
-    open-pull-requests-limit: 1
+    directory: "/eng/dependabot"
+    open-pull-requests-limit: 3
     schedule:
       interval: "daily"
