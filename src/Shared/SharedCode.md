@@ -1,7 +1,7 @@
 # Shared Code
 
 ## **Namespace**
-All sahred code _must_ live in `Microsoft.Build.Shared` namespace.
+All shared code _must_ live in `Microsoft.Build.Shared` namespace.
 ___
 
 ## **Internal Access Only**
