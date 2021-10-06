@@ -35,7 +35,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private const string OSVersion = "OS Version";
         private const string OSPlatform = "OS Platform";
         private const string OSArchitecture = "OS Architecture";
-        private const string ProcessArchitecture = "Process Architecture";
         private const string OutputRedirected = "Output Redirected";
         private const string RuntimeId = "Runtime Id";
         private const string ProductVersion = "Product Version";
@@ -63,7 +62,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 {OSVersion, RuntimeEnvironment.OperatingSystemVersion},
                 {OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString()},
                 {OSArchitecture, RuntimeInformation.OSArchitecture.ToString()},
-                {ProcessArchitecture, RuntimeInformation.ProcessArchitecture.ToString()},
                 {OutputRedirected, Console.IsOutputRedirected.ToString()},
                 {RuntimeId, RuntimeInformation.RuntimeIdentifier},
                 {ProductVersion, Product.Version},

@@ -83,7 +83,6 @@ namespace Microsoft.DotNet.Tests
         {
             var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingCache());
             unitUnderTest.GetTelemetryCommonProperties()["OS Architecture"].Should().Be(RuntimeInformation.OSArchitecture.ToString());
-            unitUnderTest.GetTelemetryCommonProperties()["Process Architecture"].Should().Be(RuntimeInformation.ProcessArchitecture.ToString());
         }
 
         [WindowsOnlyFact]
