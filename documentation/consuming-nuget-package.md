@@ -1,6 +1,6 @@
 # Consuming MSBuild NuGet packages
 
-The MSBuild team currently publishes five NuGet packages.  Our packages are published to NuGet.org
+The MSBuild team currently publishes five NuGet packages.  Our packages are published to NuGet.org 
 
 | Package ID    | URL      | Status   |
 | ------------- |-------------| -----|
@@ -20,7 +20,7 @@ The items in this namespace are primarily base-level classes and interfaces shar
 This package contains the `Microsoft.Build.Utilities.Core.dll` assembly which makes available items in the [Microsoft.Build.Utilities](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities.aspx) namespace.
 The items in this namespace are used by MSBuild to implement utility classes which do things such as create command lines, implement ILogger, locate tools, and track dependencies.
 
-MSBuild task developers often reference this package to develop tasks that inherit from the base class [Task](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities.task.aspx).  This class is implements [ITask]
+MSBuild task developers often reference this package to develop tasks that inherit from the base class [Task](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities.task.aspx).  This class is implements [ITask] 
 but also provides a logging helper which can reduce code required to develop an MSBuild task.  It also contains the [ToolTask](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities.tooltask.aspx) class which
 should be used by tasks which wrap the execution of another tool.  It provides functionality to capture standard output and standard error as well as the exit code of the process.
 
@@ -29,7 +29,7 @@ This package contains the `Microsoft.Build.Tasks.Core.dll` assembly which makes 
 The items in this namespace are MSBuild tasks that have been developed by the MSBuild team.  This includes [Copy](https://msdn.microsoft.com/en-us/library/microsoft.build.tasks.copy.aspx),
 [Csc](https://msdn.microsoft.com/en-us/library/microsoft.build.tasks.csc.aspx), and [Exec](https://msdn.microsoft.com/en-us/library/microsoft.build.tasks.exec.aspx).
 
-Most developers do not need to reference this package unless they want to extend a stock MSBuild task with custom functionality.  Alternatively, we recommend that MSBuild task developers reference the
+Most developers do not need to reference this package unless they want to extend a stock MSBuild task with custom functionality.  Alternatively, we recommend that MSBuild task developers reference the 
 `Microsoft.Build.Utilities.Core` package and implement the abstract class [Task](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities.task.aspx) or
 [ToolTask](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities.tooltask.aspx).
 
@@ -38,7 +38,7 @@ This package contains the `Microsoft.Build.dll` assembly which makes available i
 [Microsoft.Build.Evaluation](https://msdn.microsoft.com/en-us/library/microsoft.build.evaluation.aspx), and [Microsoft.Build.Execution](https://msdn.microsoft.com/en-us/library/microsoft.build.execution.aspx) namespaces.
 Developers should reference this package to create, edit, evaluate, or build MSBuild projects.
 
-To create or edit an MSBuild project, use the [Microsoft.Build.Construction.ProjectRootElement](https://msdn.microsoft.com/en-us/library/microsoft.build.construction.projectrootelement.aspx) class and call the
+To create or edit an MSBuild project, use the [Microsoft.Build.Construction.ProjectRootElement](https://msdn.microsoft.com/en-us/library/microsoft.build.construction.projectrootelement.aspx) class and call the 
 [Create](https://msdn.microsoft.com/en-us/library/microsoft.build.construction.projectrootelement.create.aspx) or
 [Open](https://msdn.microsoft.com/en-us/library/microsoft.build.construction.projectrootelement.open.aspx) method.
 
@@ -49,4 +49,4 @@ or [GetPropertyValue](https://msdn.microsoft.com/en-us/library/microsoft.build.e
 ## Microsoft.Build.Runtime
 This package contains the standard set of MSBuild projects which are imported by other projects such as CSharp and Visual Basic as well as the MSBuild executable.  Developers should reference this package if they want to
 redistribute the MSBuild runtime to evaluate or build MSBuild projects within their application.  This can be necessary because prior to MSBuild version 15, MSBuild was installed globally on a machine and universally
-available to all applications.  However, in MSBuild version 15 and forward, MSBuild is redistributed by each application that uses it and applications are unable to share other instances.
+available to all applications.  However, in MSBuild version 15 and forward, MSBuild is redistributed by each application that uses it and applications are unable to share other instances.  
