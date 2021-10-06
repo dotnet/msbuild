@@ -26,6 +26,10 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>72fe1caeed1d1fa68b721a42f16782e4ea0ca136</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.DotNet.Common.ProjectTemplates.6.0" Version="6.0.100-rtm.21504.8">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>72fe1caeed1d1fa68b721a42f16782e4ea0ca136</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="6.0.0-rtm.21505.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>5e06d805f207de1607f11b30e37891c4e2b44b13</Sha>
