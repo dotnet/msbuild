@@ -38,11 +38,11 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveMsBuildForwardOption;
 
+        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption;
+
+        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
+
         private static readonly Command Command = ConstructCommand();
-
-        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption();
-
-        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption();
 
         public static Command GetCommand()
         {

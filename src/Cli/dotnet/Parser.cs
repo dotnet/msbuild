@@ -10,8 +10,6 @@ using System.CommandLine.IO;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.DotNet.Cli.Format;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Format;
 using Microsoft.DotNet.Tools.Help;
@@ -109,7 +107,7 @@ namespace Microsoft.DotNet.Cli
             .UseExceptionHandler(ExceptionHandler)
             .UseHelp()
             .UseHelpBuilder(context => new DotnetHelpBuilder())
-            .UseResources(new CommandLineValidationMessages())
+            .UseLocalizationResources(new CommandLineValidationMessages())
             .UseParseDirective()
             .UseSuggestDirective()
             .DisablePosixBinding()
@@ -154,7 +152,7 @@ namespace Microsoft.DotNet.Cli
 
         internal class DotnetHelpBuilder : HelpBuilder
         {
-            public DotnetHelpBuilder(int maxWidth = int.MaxValue) : base(Resources.Instance, maxWidth) { }
+            public DotnetHelpBuilder(int maxWidth = int.MaxValue) : base(LocalizationResources.Instance, maxWidth) { }
 
             public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => {
                 int windowWidth;

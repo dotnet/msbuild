@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PublishCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(parseResult.ValueForArgument<IEnumerable<string>>(PublishCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(parseResult.GetValueForArgument<IEnumerable<string>>(PublishCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PublishCommandParser.NoRestoreOption)
                           || parseResult.HasOption(PublishCommandParser.NoBuildOption);

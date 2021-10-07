@@ -23,6 +23,10 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new DocumentedCommand("vstest", DocsLink);
 
+            command.AddOption(CommonOptions.TestPlatformOption);
+            command.AddOption(CommonOptions.TestFrameworkOption);
+            command.AddOption(CommonOptions.TestLoggerOption);
+
             command.Handler = CommandHandler.Create<ParseResult>(VSTestCommand.Run);
 
             return command;

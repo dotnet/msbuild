@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             msbuildArgs.AddRange(result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(result.ValueForArgument<IEnumerable<string>>(TestCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.GetValueForArgument<IEnumerable<string>>(TestCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             if (settings.Any())
             {
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Tools.Test
                 return;
             }
 
-            foreach (var env in parseResult.ValueForOption<IEnumerable<string>>(option))
+            foreach (var env in parseResult.GetValueForOption<IEnumerable<string>>(option))
             {
                 var name = env;
                 var value = string.Empty;

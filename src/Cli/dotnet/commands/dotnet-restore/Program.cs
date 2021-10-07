@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tools.Restore
 
             msbuildArgs.AddRange(result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(result.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.GetValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             return new RestoreCommand(msbuildArgs, msbuildPath);
         }

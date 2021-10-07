@@ -60,25 +60,25 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             : base(parseResult)
         {
             _printDownloadLinkOnly =
-                parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.PrintDownloadLinkOnlyOption);
-            _fromCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromCacheOption);
+                parseResult.GetValueForOption<bool>(WorkloadUpdateCommandParser.PrintDownloadLinkOnlyOption);
+            _fromCacheOption = parseResult.GetValueForOption<string>(WorkloadUpdateCommandParser.FromCacheOption);
             _reporter = reporter ?? Reporter.Output;
-            _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
-            _fromPreviousSdk = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.FromPreviousSdkOption);
-            _adManifestOnlyOption = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.AdManifestOnlyOption);
-            _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
-            _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
+            _includePreviews = parseResult.GetValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
+            _fromPreviousSdk = parseResult.GetValueForOption<bool>(WorkloadUpdateCommandParser.FromPreviousSdkOption);
+            _adManifestOnlyOption = parseResult.GetValueForOption<bool>(WorkloadUpdateCommandParser.AdManifestOnlyOption);
+            _downloadToCacheOption = parseResult.GetValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
+            _verbosity = parseResult.GetValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
-            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
+            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
-                parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
-            _printRollbackDefinitionOnly = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.PrintRollbackOption);
-            _fromRollbackDefinition = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromRollbackFileOption);
+                parseResult.GetValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
+            _printRollbackDefinitionOnly = parseResult.GetValueForOption<bool>(WorkloadUpdateCommandParser.PrintRollbackOption);
+            _fromRollbackDefinition = parseResult.GetValueForOption<string>(WorkloadUpdateCommandParser.FromRollbackFileOption);
 
-            var configOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.ConfigOption);
-            var sourceOption = parseResult.ValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
+            var configOption = parseResult.GetValueForOption<string>(WorkloadUpdateCommandParser.ConfigOption);
+            var sourceOption = parseResult.GetValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  sourceOption);
 

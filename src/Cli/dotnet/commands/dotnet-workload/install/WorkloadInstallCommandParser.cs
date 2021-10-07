@@ -64,9 +64,9 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption;
 
-        private static readonly Command Command = ConstructCommand();
-
         public static readonly Option<string> FromRollbackFileOption = WorkloadUpdateCommandParser.FromRollbackFileOption;
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
         {

@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Pack
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(parseResult.ValueForArgument<IEnumerable<string>>(PackCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(parseResult.GetValueForArgument<IEnumerable<string>>(PackCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PackCommandParser.NoRestoreOption) || parseResult.HasOption(PackCommandParser.NoBuildOption);
 
