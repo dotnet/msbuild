@@ -4700,9 +4700,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          input to projects that reference this one. -->
     <Touch Files="@(CopyUpToDateMarker)"
            AlwaysCreate="true"
-           Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(WroteAtLeastOneFile)' == 'true'">
-        <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
-    </Touch>
+           Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(WroteAtLeastOneFile)' == 'true'" />
+
+    <ItemGroup>
+      <FileWrites Include="@(CopyUpToDateMarker)" />
+    </ItemGroup>
 
   </Target>
 
