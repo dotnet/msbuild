@@ -30,8 +30,8 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                 toolUpdateGlobalOrToolPathCommand
                 ?? new ToolUpdateGlobalOrToolPathCommand(result);
 
-            _global = result.GetValueForOption<bool>(ToolUpdateCommandParser.GlobalOption);
-            _toolPath = result.GetValueForOption<string>(ToolUpdateCommandParser.ToolPathOption);
+            _global = result.GetValueForOption(ToolUpdateCommandParser.GlobalOption);
+            _toolPath = result.GetValueForOption(ToolUpdateCommandParser.ToolPathOption);
         }
 
         public override int Execute()

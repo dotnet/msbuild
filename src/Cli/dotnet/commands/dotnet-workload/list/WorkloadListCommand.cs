@@ -50,20 +50,20 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         ) : base(result)
         {
             _reporter = reporter ?? Reporter.Output;
-            _machineReadableOption = result.GetValueForOption<bool>(WorkloadListCommandParser.MachineReadableOption);
-            _verbosity = result.GetValueForOption<VerbosityOptions>(WorkloadListCommandParser.VerbosityOption);
+            _machineReadableOption = result.GetValueForOption(WorkloadListCommandParser.MachineReadableOption);
+            _verbosity = result.GetValueForOption(WorkloadListCommandParser.VerbosityOption);
 
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             ReleaseVersion currentSdkReleaseVersion = new(currentSdkVersion ?? Product.Version);
             _currentSdkFeatureBand = new SdkFeatureBand(currentSdkReleaseVersion);
             
-            _includePreviews = result.GetValueForOption<bool>(WorkloadListCommandParser.IncludePreviewsOption);
+            _includePreviews = result.GetValueForOption(WorkloadListCommandParser.IncludePreviewsOption);
             _tempDirPath = tempDirPath ??
                            (string.IsNullOrWhiteSpace(
-                               result.GetValueForOption<string>(WorkloadListCommandParser.TempDirOption))
+                               result.GetValueForOption(WorkloadListCommandParser.TempDirOption))
                                ? Path.GetTempPath()
-                               : result.GetValueForOption<string>(WorkloadListCommandParser.TempDirOption));
-            _targetSdkVersion = result.GetValueForOption<string>(WorkloadListCommandParser.VersionOption);
+                               : result.GetValueForOption(WorkloadListCommandParser.TempDirOption));
+            _targetSdkVersion = result.GetValueForOption(WorkloadListCommandParser.VersionOption);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             var workloadManifestProvider =
                 new SdkDirectoryWorkloadManifestProvider(_dotnetPath,

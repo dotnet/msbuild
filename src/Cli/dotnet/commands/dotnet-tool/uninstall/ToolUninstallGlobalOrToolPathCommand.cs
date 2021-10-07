@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             var appHostSourceDirectory = ShellShimTemplateFinder.GetDefaultAppHostSourceDirectory();
             IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolDirectoryPath);
 
-            var packageId = new PackageId(_parseResult.GetValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
+            var packageId = new PackageId(_parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
             IToolPackage package = null;
             try
             {

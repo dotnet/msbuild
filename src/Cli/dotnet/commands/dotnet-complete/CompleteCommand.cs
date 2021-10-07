@@ -50,9 +50,9 @@ namespace Microsoft.DotNet.Cli
 
         private static string[] Suggestions(ParseResult complete)
         {
-            var input = complete.GetValueForArgument<string>(CompleteCommandParser.PathArgument) ?? string.Empty;
+            var input = complete.GetValueForArgument(CompleteCommandParser.PathArgument) ?? string.Empty;
 
-            var position = complete.GetValueForOption<int>(CompleteCommandParser.PositionOption);
+            var position = complete.GetValueForOption(CompleteCommandParser.PositionOption);
 
             if (position > input.Length)
             {

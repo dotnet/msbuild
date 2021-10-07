@@ -62,24 +62,24 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;
-            _skipManifestUpdate = parseResult.GetValueForOption<bool>(WorkloadInstallCommandParser.SkipManifestUpdateOption);
-            _includePreviews = parseResult.GetValueForOption<bool>(WorkloadInstallCommandParser.IncludePreviewOption);
-            _printDownloadLinkOnly = parseResult.GetValueForOption<bool>(WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption);
-            _fromCacheOption = parseResult.GetValueForOption<string>(WorkloadInstallCommandParser.FromCacheOption);
-            _downloadToCacheOption = parseResult.GetValueForOption<string>(WorkloadInstallCommandParser.DownloadToCacheOption);
-            _workloadIds = workloadIds ?? parseResult.GetValueForArgument<IEnumerable<string>>(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
-            _verbosity = parseResult.GetValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption);
+            _skipManifestUpdate = parseResult.GetValueForOption(WorkloadInstallCommandParser.SkipManifestUpdateOption);
+            _includePreviews = parseResult.GetValueForOption(WorkloadInstallCommandParser.IncludePreviewOption);
+            _printDownloadLinkOnly = parseResult.GetValueForOption(WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption);
+            _fromCacheOption = parseResult.GetValueForOption(WorkloadInstallCommandParser.FromCacheOption);
+            _downloadToCacheOption = parseResult.GetValueForOption(WorkloadInstallCommandParser.DownloadToCacheOption);
+            _workloadIds = workloadIds ?? parseResult.GetValueForArgument(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
+            _verbosity = parseResult.GetValueForOption(WorkloadInstallCommandParser.VerbosityOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption<string>(WorkloadInstallCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadInstallCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
             _sdkFeatureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
-            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
+            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
-                parseResult.GetValueForOption<string>(WorkloadInstallCommandParser.TempDirOption));
-            _fromRollbackDefinition = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromRollbackFileOption);
+                parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption));
+            _fromRollbackDefinition = parseResult.ValueForOption(WorkloadInstallCommandParser.FromRollbackFileOption);
 
-            var configOption = parseResult.GetValueForOption<string>(WorkloadInstallCommandParser.ConfigOption);
-            var sourceOption = parseResult.GetValueForOption<string[]>(WorkloadInstallCommandParser.SourceOption);
+            var configOption = parseResult.GetValueForOption(WorkloadInstallCommandParser.ConfigOption);
+            var sourceOption = parseResult.GetValueForOption(WorkloadInstallCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 

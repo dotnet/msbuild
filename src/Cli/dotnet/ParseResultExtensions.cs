@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Cli
         internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
         {
             return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
-                parseResult.GetValueForOption<string>(RunCommandParser.RuntimeOption) :
+                parseResult.GetValueForOption(RunCommandParser.RuntimeOption) :
                 parseResult.HasOption(CommonOptions.OperatingSystemOption.Aliases.First()) || parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) ?
                 CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
                     parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption.Aliases.First()),
