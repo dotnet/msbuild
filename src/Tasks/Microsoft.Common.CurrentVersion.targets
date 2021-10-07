@@ -4832,10 +4832,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          not be considered up to date, so touch this marker file that is considered an
          input to projects that reference this one. -->
     <Touch Files="@(CopyUpToDateMarker)"
-           AlwaysCreate="true"
-           Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(WroteAtLeastOneFile)' == 'true'">
-        <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
-    </Touch>
+      AlwaysCreate="true"
+      Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(WroteAtLeastOneFile)' == 'true'" />
+
+    <ItemGroup>
+      <FileWrites Include="@(CopyUpToDateMarker)" />
+    </ItemGroup>
 
   </Target>
 
