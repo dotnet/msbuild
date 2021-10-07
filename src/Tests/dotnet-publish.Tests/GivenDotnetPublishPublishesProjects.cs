@@ -98,7 +98,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
         [Theory]
         [InlineData(null)]
+        [InlineData("--sc")]
         [InlineData("--self-contained")]
+        [InlineData("--sc=true")]
         [InlineData("--self-contained=true")]
         public void ItPublishesSelfContainedWithRid(string args)
         {
@@ -115,6 +117,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
+        [InlineData("--sc=false")]
         [InlineData("--self-contained=false")]
         [InlineData("--no-self-contained")]
         public void ItPublishesFrameworkDependentWithRid(string args)
@@ -142,6 +145,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
+        [InlineData("--sc=false")]
         [InlineData("--self-contained=false")]
         [InlineData(null)]
         [InlineData("--no-self-contained")]
@@ -165,7 +169,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
+        [InlineData("--sc --no-self-contained")]
         [InlineData("--self-contained --no-self-contained")]
+        [InlineData("--sc=true --no-self-contained")]
         [InlineData("--self-contained=true --no-self-contained")]
         public void ItFailsToPublishWithConflictingArgument(string args)
         {

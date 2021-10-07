@@ -77,7 +77,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
                     throw new GracefulException(
                         string.Format(
                             LocalizableStrings.FailedToRunTarget,
-                            projectFile));
+                            projectFile),
+                        isUserError: false);
                 }
 
                 var targetResult = targetOutputs["_GetRequiredWorkloads"];

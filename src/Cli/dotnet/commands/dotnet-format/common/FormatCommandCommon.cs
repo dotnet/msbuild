@@ -2,14 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using LocalizableStrings = Microsoft.DotNet.Tools.Format.LocalizableStrings;
-using Microsoft.DotNet.Tools;
-using System.Collections.Generic;
-using System;
 
-namespace Microsoft.DotNet.Cli.Format
+using Microsoft.DotNet.Cli;
+
+namespace Microsoft.DotNet.Tools.Format
 {
     internal static class FormatCommandCommon
     {
@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Cli.Format
             Arity = ArgumentArity.ZeroOrOne
         }.DefaultToCurrentDirectory();
 
+        internal static readonly Option<bool> FolderOption = new(new[] { "--folder" }, LocalizableStrings.Whether_to_treat_the_workspace_argument_as_a_simple_folder_of_files);
         internal static readonly Option<bool> NoRestoreOption = new(new[] { "--no-restore" }, LocalizableStrings.Doesnt_execute_an_implicit_restore_before_formatting);
         internal static readonly Option<bool> VerifyNoChanges = new(new[] { "--verify-no-changes" }, LocalizableStrings.Verify_no_formatting_changes_would_be_performed_Terminates_with_a_non_zero_exit_code_if_any_files_would_have_been_formatted);
         internal static readonly Option<string[]> DiagnosticsOption = new(new[] { "--diagnostics" }, () => Array.Empty<string>(), LocalizableStrings.A_space_separated_list_of_diagnostic_ids_to_use_as_a_filter_when_fixing_code_style_or_3rd_party_issues);
@@ -118,7 +119,7 @@ namespace Microsoft.DotNet.Cli.Format
         public static void AddStyleDotnetFormatArgs(this List<string> dotnetFormatArgs, ParseResult parseResult)
         {
             dotnetFormatArgs.Add("--fix-style");
-            if (parseResult.HasOption(SeverityOption) && 
+            if (parseResult.HasOption(SeverityOption) &&
                 parseResult.ValueForOption(SeverityOption) is string { Length: > 0 } styleSeverity)
             {
                 dotnetFormatArgs.Add(styleSeverity);

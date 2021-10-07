@@ -63,11 +63,11 @@ SDK commands:
   test              Run unit tests using the test runner specified in a .NET project.
   tool              Install or manage tools that extend the .NET experience.
   vstest            Run Microsoft Test Engine (VSTest) commands.
+  workload          Manage optional workloads.
 
 Additional commands from bundled tools:
   dev-certs         Create and manage development certificates.
   fsi               Start F# Interactive / execute F# scripts.
-  sql-cache         SQL Server cache command-line tools.
   user-secrets      Manage development user secrets.
   watch             Start a file watcher that runs a command when files change.
 

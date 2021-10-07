@@ -10,6 +10,8 @@ using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
+using static Microsoft.DotNet.Cli.EnvironmentVariableNames;
+
 namespace Microsoft.NET.Build.Tasks
 {
     public class ResolveTargetingPackAssets : TaskBase
@@ -46,50 +48,104 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] UsedRuntimeFrameworks { get; set; }
 
+        private static readonly bool s_allowCacheLookup = Environment.GetEnvironmentVariable(ALLOW_TARGETING_PACK_CACHING) != "0";
+
         public ResolveTargetingPackAssets()
         {
         }
 
         protected override void ExecuteCore()
         {
+            StronglyTypedInputs inputs = GetInputs();
+
+            string cacheKey = inputs.CacheKey();
+
+            ResolvedAssetsCacheEntry results;
+
+            if (s_allowCacheLookup &&
+                BuildEngine4?.GetRegisteredTaskObject(
+                    cacheKey,
+                    RegisteredTaskObjectLifetime.AppDomain /* really "until process exit" */)
+                  is ResolvedAssetsCacheEntry cacheEntry)
+            {
+                // NOTE: It's conceivably possible that the user modified the targeting
+                //       packs between builds. Since that is extremely rare and the standard
+                //       user scenario reads the targeting pack contents over and over without
+                //       modification, we're electing not to check for file modification and
+                //       returning any cached results that we have.
+
+                results = cacheEntry;
+            }
+            else
+            {
+                results = Resolve(inputs, Log, BuildEngine4);
+
+                if (s_allowCacheLookup)
+                {
+                    BuildEngine4?.RegisterTaskObject(cacheKey, results, RegisteredTaskObjectLifetime.AppDomain, allowEarlyCollection: true);
+                }
+            }
+
+            ReferencesToAdd = results.ReferencesToAdd;
+            AnalyzersToAdd = results.AnalyzersToAdd;
+            PlatformManifests = results.PlatformManifests;
+            PackageConflictOverrides = results.PackageConflictOverrides;
+            PackageConflictPreferredPackages = results.PackageConflictPreferredPackages;
+            UsedRuntimeFrameworks = results.UsedRuntimeFrameworks;
+        }
+
+        internal StronglyTypedInputs GetInputs() => new(
+                        FrameworkReferences,
+                        ResolvedTargetingPacks,
+                        RuntimeFrameworks,
+                        GenerateErrorForMissingTargetingPacks,
+                        NuGetRestoreSupported,
+                        NetCoreTargetingPackRoot,
+                        ProjectLanguage);
+
+        private static ResolvedAssetsCacheEntry Resolve(StronglyTypedInputs inputs, Logger log, IBuildEngine4 buildEngine)
+        {
             List<TaskItem> referencesToAdd = new List<TaskItem>();
             List<TaskItem> analyzersToAdd = new List<TaskItem>();
             List<TaskItem> platformManifests = new List<TaskItem>();
-            PackageConflictPreferredPackages = string.Empty;
             List<TaskItem> packageConflictOverrides = new List<TaskItem>();
             List<string> preferredPackages = new List<string>();
 
-            var resolvedTargetingPacks = ResolvedTargetingPacks.ToDictionary(item => item.ItemSpec, StringComparer.OrdinalIgnoreCase);
+            var resolvedTargetingPacks = inputs.ResolvedTargetingPacks
+                .ToDictionary(
+                    tp => tp.Name,
+                    StringComparer.OrdinalIgnoreCase);
 
-            foreach (var frameworkReference in FrameworkReferences)
+            FrameworkReference[] frameworkReferences = inputs.FrameworkReferences;
+
+            foreach (var frameworkReference in frameworkReferences)
             {
-                ITaskItem targetingPack;
-                resolvedTargetingPacks.TryGetValue(frameworkReference.ItemSpec, out targetingPack);
-                string targetingPackRoot = targetingPack?.GetMetadata(MetadataKeys.Path);
+                bool foundTargetingPack = resolvedTargetingPacks.TryGetValue(frameworkReference.Name, out TargetingPack targetingPack);
+                string targetingPackRoot = targetingPack?.Path;
 
                 if (string.IsNullOrEmpty(targetingPackRoot) || !Directory.Exists(targetingPackRoot))
                 {
-                    if (GenerateErrorForMissingTargetingPacks)
+                    if (inputs.GenerateErrorForMissingTargetingPacks)
                     {
-                        if (targetingPack == null)
+                        if (!foundTargetingPack)
                         {
-                            Log.LogError(Strings.UnknownFrameworkReference, frameworkReference.ItemSpec);
+                            log.LogError(Strings.UnknownFrameworkReference, frameworkReference.Name);
                         }
                         else
                         {
-                            if (NuGetRestoreSupported)
+                            if (inputs.NuGetRestoreSupported)
                             {
-                                Log.LogError(Strings.TargetingPackNeedsRestore, frameworkReference.ItemSpec);
+                                log.LogError(Strings.TargetingPackNeedsRestore, frameworkReference.Name);
                             }
                             else
                             {
-                                Log.LogError(
+                                log.LogError(
                                     Strings.TargetingApphostPackMissingCannotRestore,
                                     "Targeting",
-                                    $"{NetCoreTargetingPackRoot}\\{targetingPack.GetMetadata("NuGetPackageId") ?? ""}",
-                                    targetingPack.GetMetadata("TargetFramework") ?? "",
-                                    targetingPack.GetMetadata("NuGetPackageId") ?? "",
-                                    targetingPack.GetMetadata("NuGetPackageVersion") ?? ""
+                                    $"{inputs.NetCoreTargetingPackRoot}\\{targetingPack.NuGetPackageId ?? ""}",
+                                    targetingPack.TargetFramework ?? "",
+                                    targetingPack.NuGetPackageId ?? "",
+                                    targetingPack.NuGetPackageVersion ?? ""
                                     );
                             }
                         }
@@ -97,7 +153,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    string targetingPackFormat = targetingPack.GetMetadata("TargetingPackFormat");
+                    string targetingPackFormat = targetingPack.Format;
 
                     if (targetingPackFormat.Equals("NETStandardLegacy", StringComparison.OrdinalIgnoreCase))
                     {
@@ -105,7 +161,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     else
                     {
-                        string targetingPackTargetFramework = targetingPack.GetMetadata("TargetFramework");
+                        string targetingPackTargetFramework = targetingPack.TargetFramework;
                         if (string.IsNullOrEmpty(targetingPackTargetFramework))
                         {
                             targetingPackTargetFramework = "netcoreapp3.0";
@@ -129,8 +185,17 @@ namespace Microsoft.NET.Build.Tasks
 
                         string frameworkListPath = Path.Combine(targetingPackDataPath, "FrameworkList.xml");
 
-                        AddItemsFromFrameworkList(frameworkListPath, targetingPackRoot, targetingPackDllFolder,
-                                                  targetingPack, referencesToAdd, analyzersToAdd);
+                        FrameworkListDefinition definition = new(
+                            frameworkListPath,
+                            targetingPackRoot,
+                            targetingPackDllFolder,
+                            targetingPack.Name,
+                            targetingPack.Profile,
+                            targetingPack.NuGetPackageId,
+                            targetingPack.NuGetPackageVersion,
+                            inputs.ProjectLanguage);
+
+                        AddItemsFromFrameworkList(definition, buildEngine, referencesToAdd, analyzersToAdd);
 
                         if (File.Exists(platformManifestPath))
                         {
@@ -139,29 +204,33 @@ namespace Microsoft.NET.Build.Tasks
 
                         if (File.Exists(packageOverridesPath))
                         {
-                            packageConflictOverrides.Add(CreatePackageOverride(targetingPack.GetMetadata(MetadataKeys.NuGetPackageId), packageOverridesPath));
+                            packageConflictOverrides.Add(CreatePackageOverride(targetingPack.NuGetPackageId, packageOverridesPath));
                         }
 
-                        preferredPackages.AddRange(targetingPack.GetMetadata(MetadataKeys.PackageConflictPreferredPackages).Split(';'));
+                        preferredPackages.AddRange(targetingPack.PackageConflictPreferredPackages.Split(';'));
                     }
                 }
             }
 
             //  Calculate which RuntimeFramework items should actually be used based on framework references
-            HashSet<string> frameworkReferenceNames = new HashSet<string>(FrameworkReferences.Select(fr => fr.ItemSpec), StringComparer.OrdinalIgnoreCase);
-            UsedRuntimeFrameworks = RuntimeFrameworks.Where(rf => frameworkReferenceNames.Contains(rf.GetMetadata(MetadataKeys.FrameworkName)))
-                                    .ToArray();
+            HashSet<string> frameworkReferenceNames = new HashSet<string>(frameworkReferences.Select(fr => fr.Name), StringComparer.OrdinalIgnoreCase);
 
             //  Filter out duplicate references (which can happen when referencing two different profiles that overlap)
             List<TaskItem> deduplicatedReferences = DeduplicateItems(referencesToAdd);
-            ReferencesToAdd = deduplicatedReferences.Distinct().ToArray();
-
             List<TaskItem> deduplicatedAnalyzers = DeduplicateItems(analyzersToAdd);
-            AnalyzersToAdd = deduplicatedAnalyzers.Distinct().ToArray();
 
-            PlatformManifests = platformManifests.ToArray();
-            PackageConflictOverrides = packageConflictOverrides.ToArray();
-            PackageConflictPreferredPackages = string.Join(";", preferredPackages);
+            ResolvedAssetsCacheEntry newCacheEntry = new()
+            {
+                ReferencesToAdd = deduplicatedReferences.Distinct().ToArray(),
+                AnalyzersToAdd = deduplicatedAnalyzers.Distinct().ToArray(),
+                PlatformManifests = platformManifests.ToArray(),
+                PackageConflictOverrides = packageConflictOverrides.ToArray(),
+                PackageConflictPreferredPackages = string.Join(";", preferredPackages),
+                UsedRuntimeFrameworks = inputs.RuntimeFrameworks.Where(rf => frameworkReferenceNames.Contains(rf.FrameworkName))
+                    .Select(rf => rf.Item)
+                    .ToArray(),
+            };
+            return newCacheEntry;
         }
 
         //  Get distinct items based on case-insensitive ItemSpec comparison
@@ -179,21 +248,25 @@ namespace Microsoft.NET.Build.Tasks
             return deduplicatedItems;
         }
 
-        private TaskItem CreatePackageOverride(string runtimeFrameworkName, string packageOverridesPath)
+        private static TaskItem CreatePackageOverride(string runtimeFrameworkName, string packageOverridesPath)
         {
             TaskItem packageOverride = new TaskItem(runtimeFrameworkName);
             packageOverride.SetMetadata("OverriddenPackages", File.ReadAllText(packageOverridesPath));
             return packageOverride;
         }
 
-        private void AddNetStandardTargetingPackAssets(ITaskItem targetingPack, string targetingPackRoot, List<TaskItem> referencesToAdd)
+        private static void AddNetStandardTargetingPackAssets(TargetingPack targetingPack, string targetingPackRoot, List<TaskItem> referencesToAdd)
         {
-            string targetingPackTargetFramework = targetingPack.GetMetadata("TargetFramework");
+            string targetingPackTargetFramework = targetingPack.TargetFramework;
             string targetingPackAssetPath = Path.Combine(targetingPackRoot, "build", targetingPackTargetFramework, "ref");
 
             foreach (var dll in Directory.GetFiles(targetingPackAssetPath, "*.dll"))
             {
-                var reference = CreateItem(dll, targetingPack);
+                var reference = CreateItem(
+                    dll,
+                    targetingPack.Name,
+                    targetingPack.NuGetPackageId,
+                    targetingPack.NuGetPackageVersion);
 
                 if (!Path.GetFileName(dll).Equals("netstandard.dll", StringComparison.OrdinalIgnoreCase))
                 {
@@ -204,16 +277,33 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private void AddItemsFromFrameworkList(string frameworkListPath, string targetingPackRoot,
-            string targetingPackDllFolder,
-            ITaskItem targetingPack, List<TaskItem> referenceItems, List<TaskItem> analyzerItems)
+        private static void AddItemsFromFrameworkList(FrameworkListDefinition definition, IBuildEngine4 buildEngine4, List<TaskItem> referenceItems, List<TaskItem> analyzerItems)
         {
-            XDocument frameworkListDoc = XDocument.Load(frameworkListPath);
+            string frameworkListKey = definition.CacheKey();
 
-            string profile = targetingPack.GetMetadata("Profile");
+            if (s_allowCacheLookup &&
+                buildEngine4?.GetRegisteredTaskObject(
+                  frameworkListKey,
+                  RegisteredTaskObjectLifetime.AppDomain)
+                is FrameworkList cacheEntry)
+            {
+                // As above, we are not even checking timestamps here
+                // and instead assuming that the targeting pack folder
+                // is fully immutable.
+
+                analyzerItems.AddRange(cacheEntry.Analyzers);
+                referenceItems.AddRange(cacheEntry.References);
+            }
+
+            XDocument frameworkListDoc = XDocument.Load(definition.FrameworkListPath);
+
+            string profile = definition.Profile;
 
             bool usePathElementsInFrameworkListAsFallBack =
-                TestFirstFileInFrameworkListUsingAssemblyNameConvention(targetingPackDllFolder, frameworkListDoc);
+                TestFirstFileInFrameworkListUsingAssemblyNameConvention(definition.TargetingPackDllFolder, frameworkListDoc);
+
+            List<TaskItem> referenceItemsFromThisFramework = new List<TaskItem>();
+            List<TaskItem> analyzerItemsFromThisFramework = new List<TaskItem>();
 
             foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
             {
@@ -247,10 +337,10 @@ namespace Microsoft.NET.Build.Tasks
                 bool isAnalyzer = itemType?.Equals("Analyzer", StringComparison.OrdinalIgnoreCase) ?? false;
 
                 string dllPath = usePathElementsInFrameworkListAsFallBack || isAnalyzer ?
-                    Path.Combine(targetingPackRoot, fileElement.Attribute("Path").Value) :
-                    GetDllPathViaAssemblyName(targetingPackDllFolder, fileElement);
+                    Path.Combine(definition.TargetingPackRoot, fileElement.Attribute("Path").Value) :
+                    GetDllPathViaAssemblyName(definition.TargetingPackDllFolder, fileElement);
 
-                var item = CreateItem(dllPath, targetingPack);
+                var item = CreateItem(dllPath, definition.FrameworkReferenceName, definition.NuGetPackageId, definition.NuGetPackageVersion);
 
                 item.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion").Value);
                 item.SetMetadata("FileVersion", fileElement.Attribute("FileVersion").Value);
@@ -263,7 +353,7 @@ namespace Microsoft.NET.Build.Tasks
                     if (itemLanguage != null)
                     {
                         // expect cs instead of C#, fs rather than F# per NuGet conventions
-                        string projectLanguage = ProjectLanguage?.Replace('#', 's');
+                        string projectLanguage = definition.ProjectLanguage?.Replace('#', 's');
 
                         if (projectLanguage == null || !projectLanguage.Equals(itemLanguage, StringComparison.OrdinalIgnoreCase))
                         {
@@ -271,13 +361,27 @@ namespace Microsoft.NET.Build.Tasks
                         }
                     }
 
-                    analyzerItems.Add(item);
+                    analyzerItemsFromThisFramework.Add(item);
                 }
                 else
                 {
-                    referenceItems.Add(item);
+                    referenceItemsFromThisFramework.Add(item);
                 }
             }
+
+            if (s_allowCacheLookup)
+            {
+                FrameworkList list = new()
+                {
+                    Analyzers = analyzerItemsFromThisFramework.ToArray(),
+                    References = referenceItemsFromThisFramework.ToArray(),
+                };
+
+                buildEngine4?.RegisterTaskObject(frameworkListKey, list, RegisteredTaskObjectLifetime.AppDomain, allowEarlyCollection: true);
+            }
+
+            analyzerItems.AddRange(analyzerItemsFromThisFramework);
+            referenceItems.AddRange(referenceItemsFromThisFramework);
         }
 
         /// <summary>
@@ -311,19 +415,252 @@ namespace Microsoft.NET.Build.Tasks
             return dllPath;
         }
 
-        private TaskItem CreateItem(string dll, ITaskItem targetingPack)
+        private static TaskItem CreateItem(string dll, ITaskItem targetingPack)
+        {
+            return CreateItem(
+                dll,
+                targetingPack.ItemSpec,
+                targetingPack.GetMetadata(MetadataKeys.NuGetPackageId),
+                targetingPack.GetMetadata(MetadataKeys.NuGetPackageVersion));
+        }
+
+        private static TaskItem CreateItem(string dll, string frameworkReferenceName, string nuGetPackageId, string nuGetPackageVersion)
         {
             var reference = new TaskItem(dll);
 
             reference.SetMetadata(MetadataKeys.ExternallyResolved, "true");
             reference.SetMetadata(MetadataKeys.Private, "false");
-            reference.SetMetadata(MetadataKeys.NuGetPackageId, targetingPack.GetMetadata(MetadataKeys.NuGetPackageId));
-            reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.NuGetPackageVersion));
+            reference.SetMetadata(MetadataKeys.NuGetPackageId, nuGetPackageId);
+            reference.SetMetadata(MetadataKeys.NuGetPackageVersion, nuGetPackageVersion);
 
-            reference.SetMetadata("FrameworkReferenceName", targetingPack.ItemSpec);
-            reference.SetMetadata("FrameworkReferenceVersion", targetingPack.GetMetadata(MetadataKeys.NuGetPackageVersion));
-            
+            reference.SetMetadata("FrameworkReferenceName", frameworkReferenceName);
+            reference.SetMetadata("FrameworkReferenceVersion", nuGetPackageVersion);
+
             return reference;
+        }
+
+        internal class StronglyTypedInputs
+        {
+            public FrameworkReference[] FrameworkReferences { get; private set; }
+            public TargetingPack[] ResolvedTargetingPacks {get; private set;}
+            public RuntimeFramework[] RuntimeFrameworks {get; private set;}
+            public bool GenerateErrorForMissingTargetingPacks {get; private set;}
+            public bool NuGetRestoreSupported {get; private set;}
+            public string NetCoreTargetingPackRoot {get; private set;}
+            public string ProjectLanguage {get; private set;}
+
+            public StronglyTypedInputs(
+                ITaskItem[] frameworkReferences,
+                ITaskItem[] resolvedTargetingPacks,
+                ITaskItem[] runtimeFrameworks,
+                bool generateErrorForMissingTargetingPacks,
+                bool nuGetRestoreSupported,
+                string netCoreTargetingPackRoot,
+                string projectLanguage)
+            {
+                FrameworkReferences = frameworkReferences.Select(fr => new FrameworkReference(fr.ItemSpec)).ToArray();
+                ResolvedTargetingPacks = resolvedTargetingPacks.Select(
+                    item => new TargetingPack(
+                        item.ItemSpec,
+                        item.GetMetadata(MetadataKeys.Path),
+                        item.GetMetadata("TargetingPackFormat"),
+                        item.GetMetadata("TargetFramework"),
+                        item.GetMetadata("Profile"),
+                        item.GetMetadata(MetadataKeys.NuGetPackageId),
+                        item.GetMetadata(MetadataKeys.NuGetPackageVersion),
+                        item.GetMetadata(MetadataKeys.PackageConflictPreferredPackages)))
+                    .ToArray();
+                RuntimeFrameworks = runtimeFrameworks.Select(item => new RuntimeFramework(item.ItemSpec, item.GetMetadata(MetadataKeys.FrameworkName), item)).ToArray();
+                GenerateErrorForMissingTargetingPacks = generateErrorForMissingTargetingPacks;
+                NuGetRestoreSupported = nuGetRestoreSupported;
+                NetCoreTargetingPackRoot = netCoreTargetingPackRoot;
+                ProjectLanguage = projectLanguage;
+            }
+
+            public string CacheKey()
+            {
+                StringBuilder cacheKeyBuilder = new(nameof(ResolveTargetingPackAssets) + nameof(StronglyTypedInputs));
+                cacheKeyBuilder.AppendLine();
+
+                foreach (var frameworkReference in FrameworkReferences)
+                {
+                    cacheKeyBuilder.AppendLine(frameworkReference.CacheKey());
+                }
+                cacheKeyBuilder.AppendLine();
+                foreach (var resolvedTargetingPack in ResolvedTargetingPacks)
+                {
+                    cacheKeyBuilder.AppendLine(resolvedTargetingPack.CacheKey());
+                }
+
+                cacheKeyBuilder.AppendLine(nameof(RuntimeFrameworks));
+                foreach (var runtimeFramework in RuntimeFrameworks)
+                {
+                    cacheKeyBuilder.AppendLine(runtimeFramework.CacheKey());
+                }
+
+                cacheKeyBuilder.AppendLine($"{nameof(GenerateErrorForMissingTargetingPacks)}={GenerateErrorForMissingTargetingPacks}");
+                cacheKeyBuilder.AppendLine($"{nameof(NuGetRestoreSupported)}={NuGetRestoreSupported}");
+
+                cacheKeyBuilder.AppendLine($"{nameof(NetCoreTargetingPackRoot)}={NetCoreTargetingPackRoot}");
+
+                cacheKeyBuilder.AppendLine($"{nameof(ProjectLanguage)}={ProjectLanguage}");
+
+                return cacheKeyBuilder.ToString();
+
+            }
+        }
+
+        private class FrameworkList
+        {
+            public IReadOnlyList<TaskItem> Analyzers;
+            public IReadOnlyList<TaskItem> References;
+        }
+
+        internal class FrameworkReference
+        {
+            public string Name { get; private set; }
+
+            public FrameworkReference(string name)
+            {
+                Name = name;
+            }
+
+            public string CacheKey()
+            {
+                return $"FrameworkReference: {Name}";
+            }
+        }
+
+        internal class TargetingPack
+        {
+            public string Name { get; private set; }
+            public string Path { get; private set; }
+            public string Format { get; private set; }
+            public string TargetFramework { get; private set; }
+            public string Profile { get; private set; }
+            public string NuGetPackageId { get; private set; }
+            public string NuGetPackageVersion { get; private set; }
+            public string PackageConflictPreferredPackages { get; private set; }
+
+            public TargetingPack(
+                string name,
+                string path,
+                string format,
+                string targetFramework,
+                string profile,
+                string nuGetPackageId,
+                string nuGetPackageVersion,
+                string packageConflictPreferredPackages)
+            {
+                Name = name;
+                Path = path;
+                Format = format;
+                TargetFramework = targetFramework;
+                Profile = profile;
+                NuGetPackageId = nuGetPackageId;
+                NuGetPackageVersion = nuGetPackageVersion;
+                PackageConflictPreferredPackages = packageConflictPreferredPackages;
+            }
+
+            public string CacheKey()
+            {
+                StringBuilder builder = new();
+                builder.AppendLine(nameof(TargetingPack));
+
+                builder.AppendLine(Name);
+                builder.AppendLine(Path);
+                builder.AppendLine(Format);
+                builder.AppendLine(TargetFramework);
+                builder.AppendLine(Profile);
+                builder.AppendLine(NuGetPackageId);
+                builder.AppendLine(NuGetPackageVersion);
+                builder.AppendLine(PackageConflictPreferredPackages);
+
+                return builder.ToString();
+            }
+        }
+
+        internal class RuntimeFramework
+        {
+            public string Name { get; private set; }
+            public string FrameworkName { get; private set; }
+            public readonly ITaskItem Item;
+
+            public RuntimeFramework(string name, string frameworkName, ITaskItem item)
+            {
+                Name = name;
+                FrameworkName = frameworkName;
+                Item = item;
+            }
+
+            public string CacheKey()
+            {
+                return $"{nameof(RuntimeFramework)}: {Name} ({FrameworkName})";
+            }
+        }
+
+        internal readonly struct FrameworkListDefinition
+        {
+            public readonly string FrameworkListPath;
+            public readonly string TargetingPackRoot;
+            public readonly string TargetingPackDllFolder;
+            public readonly string ProjectLanguage;
+
+            public readonly string FrameworkReferenceName;
+            public readonly string Profile;
+            public readonly string NuGetPackageId;
+            public readonly string NuGetPackageVersion;
+
+            public FrameworkListDefinition(string frameworkListPath,
+                                           string targetingPackRoot,
+                                           string targetingPackDllFolder,
+                                           string frameworkReferenceName,
+                                           string profile,
+                                           string nuGetPackageId,
+                                           string nuGetPackageVersion,
+                                           string projectLanguage)
+            {
+                FrameworkListPath = frameworkListPath;
+                TargetingPackRoot = targetingPackRoot;
+                TargetingPackDllFolder = targetingPackDllFolder;
+                ProjectLanguage = projectLanguage;
+
+                FrameworkReferenceName = frameworkReferenceName;
+                Profile = profile;
+                NuGetPackageId = nuGetPackageId;
+                NuGetPackageVersion = nuGetPackageVersion;
+            }
+
+            /// <summary>
+            /// Construct a key for the framework-specific cache lookup.
+            /// </summary>
+            public string CacheKey()
+            {
+                // IMPORTANT: any input changes that can affect the output should be included in this key.
+                StringBuilder keyBuilder = new(nameof(FrameworkListDefinition));
+                keyBuilder.AppendLine();
+                keyBuilder.AppendLine(FrameworkListPath);
+                keyBuilder.AppendLine(TargetingPackRoot);
+                keyBuilder.AppendLine(TargetingPackDllFolder);
+                keyBuilder.AppendLine(FrameworkReferenceName);
+                keyBuilder.AppendLine(Profile);
+                keyBuilder.AppendLine(NuGetPackageId);
+                keyBuilder.AppendLine(NuGetPackageVersion);
+                keyBuilder.AppendLine(ProjectLanguage);
+
+                string frameworkListKey = keyBuilder.ToString();
+                return frameworkListKey;
+            }
+        }
+
+        private class ResolvedAssetsCacheEntry
+        {
+            public ITaskItem[] ReferencesToAdd;
+            public ITaskItem[] AnalyzersToAdd;
+            public ITaskItem[] PlatformManifests;
+            public string PackageConflictPreferredPackages;
+            public ITaskItem[] PackageConflictOverrides;
+            public ITaskItem[] UsedRuntimeFrameworks;
         }
     }
 }

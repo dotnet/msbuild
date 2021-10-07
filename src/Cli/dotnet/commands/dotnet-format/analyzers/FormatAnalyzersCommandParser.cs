@@ -3,14 +3,10 @@
 //
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
 
-using Microsoft.DotNet.Cli.Format;
-using LocalizableStrings = Microsoft.DotNet.Tools.Format.LocalizableStrings;
-using static Microsoft.DotNet.Cli.Format.FormatCommandCommon;
-using System.Threading.Tasks;
+using static Microsoft.DotNet.Tools.Format.FormatCommandCommon;
 
-namespace Microsoft.DotNet.Cli
+namespace Microsoft.DotNet.Tools.Format
 {
     internal static class FormatAnalyzersCommandParser
     {
@@ -31,14 +27,7 @@ namespace Microsoft.DotNet.Cli
                 SeverityOption,
             };
             command.AddCommonOptions();
-            command.Handler = s_analyzerHandler;
             return command;
-        }
-
-        class FormatAnalyzersHandler : ICommandHandler
-        {
-            public Task<int> InvokeAsync(InvocationContext context)
-                => Task.FromResult(new FormatAnalyzersCommand().FromArgs(context.ParseResult).Execute());
         }
     }
 }

@@ -288,6 +288,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <TargetsForTfmSpecificContentInPackage>
       GenerateStaticWebAssetsPackTargets;
+      IncludeStaticWebAssetsPackItems;
       $(TargetsForTfmSpecificContentInPackage)
     </TargetsForTfmSpecificContentInPackage>
 
@@ -947,6 +948,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <FileWrites Include="$(_GeneratedBuildTransitivePropsFile)" />
     </ItemGroup>
 
+  </Target>
+
+  <!-- We need to use a separate target because MSBuild doesn't capture the output item groups from tasks
+       and as a result, the output of ComputeStaticWebAssetsTargetPaths is not defined on incremental builds 
+  -->
+  <Target Name="IncludeStaticWebAssetsPackItems">
     <!-- We need to adjust the path for files without extension (LICENSE) for example. Otherwise, when they get packed, nuget creates an
          additional folder for the file. -->
     <ComputeStaticWebAssetsTargetPaths Assets="@(_CurrentProjectStaticWebAsset)" PathPrefix="staticwebassets" AdjustPathsForPack="true">

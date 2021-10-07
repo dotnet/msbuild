@@ -282,9 +282,6 @@
   <data name="DevCertsDefinition" xml:space="preserve">
     <value>Create and manage development certificates.</value>
   </data>
-  <data name="SqlCacheDefinition" xml:space="preserve">
-    <value>SQL Server cache command-line tools.</value>
-  </data>
   <data name="UserSecretsDefinition" xml:space="preserve">
     <value>Manage development user secrets.</value>
   </data>
@@ -296,5 +293,8 @@
   </data>
   <data name="FormatDefinition" xml:space="preserve">
     <value>Apply style preferences to a project or solution.</value>
+  </data>
+  <data name="WorkloadDefinition" xml:space="preserve">
+    <value>Manage optional workloads.</value>
   </data>
 </root>

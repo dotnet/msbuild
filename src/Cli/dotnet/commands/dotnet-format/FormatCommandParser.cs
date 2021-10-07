@@ -3,14 +3,10 @@
 //
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
 
-using Microsoft.DotNet.Cli.Format;
-using LocalizableStrings = Microsoft.DotNet.Tools.Format.LocalizableStrings;
-using static Microsoft.DotNet.Cli.Format.FormatCommandCommon;
-using System.Threading.Tasks;
+using static Microsoft.DotNet.Tools.Format.FormatCommandCommon;
 
-namespace Microsoft.DotNet.Cli
+namespace Microsoft.DotNet.Tools.Format
 {
     internal static partial class FormatCommandParser
     {
@@ -36,14 +32,7 @@ namespace Microsoft.DotNet.Cli
                 SeverityOption,
             };
             formatCommand.AddCommonOptions();
-            formatCommand.Handler = s_formatCommandHandler;
             return formatCommand;
-        }
-
-        class FormatCommandDefaultHandler : ICommandHandler
-        {
-            public Task<int> InvokeAsync(InvocationContext context)
-                => Task.FromResult(new FormatCommand().FromArgs(context.ParseResult).Execute());
         }
     }
 }

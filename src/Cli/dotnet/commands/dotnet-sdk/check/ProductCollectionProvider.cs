@@ -10,11 +10,13 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
 {
     public class ProductCollectionProvider : IProductCollectionProvider
     {
-        public ProductCollection GetProductCollection()
+        public ProductCollection GetProductCollection(Uri uri = null, string filePath = null)
         {
             try
             {
-                return ProductCollection.GetAsync().Result;
+                return uri != null ? ProductCollection.GetAsync(uri.ToString()).Result :
+                    filePath != null ? ProductCollection.GetFromFileAsync(filePath, false).Result :
+                    ProductCollection.GetAsync().Result;
             }
             catch (Exception e)
             {

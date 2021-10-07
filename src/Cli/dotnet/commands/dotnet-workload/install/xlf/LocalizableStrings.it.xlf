@@ -22,6 +22,11 @@
         <target state="new">Uninstalling workload pack {0} version {1}…</target>
         <note />
       </trans-unit>
+      <trans-unit id="DownloadToCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="new">DIRECTORY</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DownloadToCacheOptionDescription">
         <source>Download packages needed to install a workload to a folder that can be used for offline installation.</source>
         <target state="new">Download packages needed to install a workload to a folder that can be used for offline installation.</target>
@@ -50,6 +55,11 @@
       <trans-unit id="FailedToInstallWorkloadManifest">
         <source>Failed to install manifest {0} version {1}: {2}.</source>
         <target state="new">Failed to install manifest {0} version {1}: {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="new">DIRECTORY</target>
         <note />
       </trans-unit>
       <trans-unit id="FromCacheOptionDescription">
@@ -173,8 +183,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
-        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</target>
+        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
+        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">

@@ -29,6 +29,9 @@ namespace Microsoft.DotNet.Cli
                 {
                     ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
                 }.ForwardAsSingle(o => $"-verbosity:{o}");
+        
+        public static Option<VerbosityOptions> HiddenVerbosityOption() =>
+            VerbosityOption().Hide();
 
         public static Option<string> FrameworkOption(string description) =>
             new ForwardedOption<string>(
@@ -108,7 +111,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Option<bool> SelfContainedOption =
             new ForwardedOption<bool>(
-                "--self-contained",
+                new string[] { "--sc", "--self-contained" },
                 CommonLocalizableStrings.SelfContainedOptionDescription)
             .ForwardAsMany(o => new string[] { $"-property:SelfContained={o}", "-property:_CommandLineDefinedSelfContained=true" });
 
@@ -189,7 +192,7 @@ namespace Microsoft.DotNet.Cli
         {
             var dotnetRootPath = Path.GetDirectoryName(Environment.ProcessPath);
             // When running under test the path does not always contain "dotnet" and Product.Version is empty.
-            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
+            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
             var ridFileName = "NETCoreSdkRuntimeIdentifierChain.txt";
             string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) ?
                 Path.Combine(Directory.GetDirectories(Path.Combine(dotnetRootPath, "sdk"))[0], ridFileName) :

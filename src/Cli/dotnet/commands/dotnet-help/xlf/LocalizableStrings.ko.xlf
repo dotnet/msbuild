@@ -267,11 +267,6 @@
         <target state="translated">개발 인증서를 만들고 관리합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server 캐시 명령줄 도구입니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">개발 사용자 비밀을 관리합니다.</target>
@@ -300,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">F# Interactive를 시작하고 F# 스크립트를 실행합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="new">Manage optional workloads.</target>
         <note />
       </trans-unit>
     </body>

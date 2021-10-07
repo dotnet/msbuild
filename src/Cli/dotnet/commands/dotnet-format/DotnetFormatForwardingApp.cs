@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Microsoft.DotNet.Cli
+using Microsoft.DotNet.Cli;
+
+namespace Microsoft.DotNet.Tools.Format
 {
     public class DotnetFormatForwardingApp : ForwardingApp
     {

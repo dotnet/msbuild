@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<IEnumerable<string>> PropertyOption =
             new ForwardedOption<IEnumerable<string>>(new string[] { "--property", "-p" }, LocalizableStrings.PropertyOptionDescription)
-                .SetForwardingFunction((values, parseResult) => parseResult.GetRunCommandShorthandPropertyValues().Select(value => $"-p:{value}"));
+                .SetForwardingFunction((values, parseResult) => parseResult.GetRunCommandPropertyValues().Select(value => $"-p:{value}"));
 
         public static readonly Option<string> LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription);
 
@@ -39,6 +39,10 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveMsBuildForwardOption;
 
         private static readonly Command Command = ConstructCommand();
+
+        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption();
+
+        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption();
 
         public static Command GetCommand()
         {
@@ -59,6 +63,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoBuildOption);
             command.AddOption(InteractiveOption);
             command.AddOption(NoRestoreOption);
+            command.AddOption(SelfContainedOption);
+            command.AddOption(NoSelfContainedOption);
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.ArchitectureOption());
             command.AddOption(CommonOptions.OperatingSystemOption);

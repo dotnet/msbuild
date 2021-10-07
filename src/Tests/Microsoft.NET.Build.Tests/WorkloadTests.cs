@@ -78,6 +78,7 @@ namespace Microsoft.NET.Build.Tests
             var getValuesCommand = new GetValuesCommand(testAsset, "SuggestedWorkload", GetValuesCommand.ValueType.Item);
             getValuesCommand.DependsOnTargets = "GetSuggestedWorkloads";
             getValuesCommand.MetadataNames.Add("VisualStudioComponentId");
+            getValuesCommand.MetadataNames.Add("VisualStudioComponentIds");
             getValuesCommand.ShouldRestore = false;
 
             getValuesCommand.Execute()
@@ -85,6 +86,10 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             getValuesCommand.GetValuesWithMetadata().Select(valueAndMetadata => (valueAndMetadata.value, valueAndMetadata.metadata["VisualStudioComponentId"]))
+                .Should()
+                .BeEquivalentTo(("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload"));
+
+            getValuesCommand.GetValuesWithMetadata().Select(valueAndMetadata => (valueAndMetadata.value, valueAndMetadata.metadata["VisualStudioComponentIds"]))
                 .Should()
                 .BeEquivalentTo(("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload"));
         }
@@ -116,7 +121,7 @@ namespace Microsoft.NET.Build.Tests
             //  .HaveStdOutContaining("android");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19866")]
         public void It_should_fail_to_build_without_workload_when_multitargeted()
         {
             var testProject = new TestProject()
@@ -236,7 +241,7 @@ namespace Microsoft.NET.Build.Tests
                 .BeEquivalentTo("true");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19866")]
         public void It_should_get_suggested_workload_by_GetRequiredWorkloads_target()
         {
             var mainProject = new TestProject()

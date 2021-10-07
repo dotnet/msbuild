@@ -353,7 +353,7 @@ public class Person
 @code
 {
     private int count;
-    
+
     public void Click() => count++;
 }
 
@@ -435,7 +435,7 @@ public class Person
 @code
 {
     private int count;
-    
+
     public void Click() => count++;
 
     [Parameter] public int IncrementAmount { get; set; }
@@ -521,9 +521,9 @@ public class Person
             Assert.Equal(2, result.GeneratedSources.Length);
 
             eventListener.Events.Clear();
-            
-            var surveryPromptAssembly = GetSurveyPromptMetadataReference(compilation!);
-            compilation = compilation!.AddReferences(surveryPromptAssembly);
+
+            var surveyPromptAssembly = GetSurveyPromptMetadataReference(compilation!);
+            compilation = compilation!.AddReferences(surveyPromptAssembly);
 
             result = RunGenerator(compilation, ref driver);
 
@@ -942,6 +942,64 @@ public class HeaderTagHelper : TagHelper
 
             Assert.Empty(result.Diagnostics);
             Assert.Empty(result.GeneratedSources);
+        }
+
+        [Fact]
+        public async Task SourceGenerator_CorrectlyGeneratesSourcesOnceSuppressRazorSourceGeneratorIsUnset()
+        {
+            // Regression test for https://github.com/dotnet/aspnetcore/issues/36227
+            // Arrange
+            var project = CreateTestProject(new()
+            {
+                ["Pages/Index.razor"] = "<h1>Hello world</h1>",
+                ["Pages/Counter.razor"] =
+@"
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+<h1>Counter</h1>
+<button @onclick=""@(() => {})"">Click me</button>",
+            });
+
+            var compilation = await project.GetCompilationAsync();
+            TestAnalyzerConfigOptionsProvider? testOptionsProvider = null;
+            var (driver, additionalTexts) = await GetDriverWithAdditionalTextAsync(project, optionsProvider =>
+            {
+                testOptionsProvider = optionsProvider;
+                optionsProvider.TestGlobalOptions["build_property.SuppressRazorSourceGenerator"] = "true";
+            });
+
+            var result = RunGenerator(compilation!, ref driver);
+            Assert.Empty(result.Diagnostics);
+            Assert.Empty(result.GeneratedSources);
+            var updatedOptionsProvider = new TestAnalyzerConfigOptionsProvider();
+            foreach (var option in testOptionsProvider!.AdditionalTextOptions)
+            {
+                updatedOptionsProvider.AdditionalTextOptions[option.Key] = option.Value;
+            }
+
+            foreach (var option in testOptionsProvider!.TestGlobalOptions.Options)
+            {
+                updatedOptionsProvider.TestGlobalOptions[option.Key] = option.Value;
+            }
+
+            updatedOptionsProvider.TestGlobalOptions["build_property.SuppressRazorSourceGenerator"] = "false";
+
+            driver = driver.WithUpdatedAnalyzerConfigOptions(updatedOptionsProvider);
+            result = RunGenerator(compilation!, ref driver);
+
+            Assert.Collection(
+                result.GeneratedSources,
+                sourceResult =>
+                {
+                    Assert.Contains("public partial class Index", sourceResult.SourceText.ToString());
+                },
+                sourceResult =>
+                {
+                    var sourceText = sourceResult.SourceText.ToString();
+                    Assert.Contains("public partial class Counter", sourceText);
+                    // Regression test for https://github.com/dotnet/aspnetcore/issues/36116. Verify that @onclick is resolved as a component, and not as a regular attribute
+                    Assert.Contains("__builder.AddAttribute(2, \"onclick\", Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,", sourceText);
+                });
         }
 
         private static async ValueTask<GeneratorDriver> GetDriverAsync(Project project)

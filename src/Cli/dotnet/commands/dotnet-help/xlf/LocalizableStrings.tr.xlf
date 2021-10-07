@@ -267,11 +267,6 @@
         <target state="translated">Geliştirme sertifikaları oluşturun ve yönetin.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server önbellek komut satırı araçları.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Kullanıcı gizli dizilerini yönetin.</target>
@@ -300,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">F# Etkileşimli'yi başlatın / F# betiklerini yürütün.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="new">Manage optional workloads.</target>
         <note />
       </trans-unit>
     </body>

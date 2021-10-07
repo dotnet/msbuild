@@ -8,8 +8,8 @@ namespace Microsoft.NET.Publish.Tests
 {
     internal static class PublishTestUtils
     {
-#if NET6_0
-        public const string LatestTfm = "net6.0";
+#if NET7_0
+        public const string LatestTfm = "net7.0";
 
         public static IEnumerable<object[]> SupportedTfms { get; } = new List<object[]>
         {

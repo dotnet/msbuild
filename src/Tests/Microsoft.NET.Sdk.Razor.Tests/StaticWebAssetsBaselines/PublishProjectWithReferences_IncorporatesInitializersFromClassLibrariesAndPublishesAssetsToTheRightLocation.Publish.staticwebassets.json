@@ -98,10 +98,10 @@
       "OriginalItemSpec": "wwwroot\\js\\project-direct-dep.js"
     },
     {
-      "Identity": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\jsmodules\\jsmodules.publish.manifest.json",
+      "Identity": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\jsmodules\\jsmodules.publish.manifest.json",
       "SourceId": "AppWithPackageAndP2PReference",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\jsmodules\\",
+      "ContentRoot": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\jsmodules\\",
       "BasePath": "_content/AppWithPackageAndP2PReference",
       "RelativePath": "AppWithPackageAndP2PReference.modules.json",
       "AssetKind": "Publish",
@@ -112,13 +112,13 @@
       "AssetTraitValue": "JSModuleManifest",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\net6.0\\jsmodules\\jsmodules.publish.manifest.json"
+      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\jsmodules\\jsmodules.publish.manifest.json"
     },
     {
-      "Identity": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css",
+      "Identity": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css",
       "SourceId": "AppWithPackageAndP2PReference",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\scopedcss\\bundle\\",
+      "ContentRoot": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\",
       "BasePath": "_content/AppWithPackageAndP2PReference",
       "RelativePath": "AppWithPackageAndP2PReference.styles.css",
       "AssetKind": "All",
@@ -129,13 +129,13 @@
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
+      "OriginalItemSpec": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
     },
     {
-      "Identity": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css",
+      "Identity": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css",
       "SourceId": "ClassLibrary",
       "SourceType": "Project",
-      "ContentRoot": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\",
+      "ContentRoot": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\",
       "BasePath": "_content/ClassLibrary",
       "RelativePath": "ClassLibrary.bundle.scp.css",
       "AssetKind": "All",
@@ -146,7 +146,7 @@
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css"
+      "OriginalItemSpec": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css"
     },
     {
       "Identity": "${ProjectRoot}\\ClassLibrary\\wwwroot\\AnotherClassLib.lib.module.js",

@@ -14,13 +14,15 @@ namespace Microsoft.DotNet.Cli
         // arguments are a list of workload to be detected
         public static readonly Option<bool> MachineReadableOption = new Option<bool>("--machine-readable") {IsHidden = true};
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption;
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.HiddenVerbosityOption;
 
         public static readonly Option<string> VersionOption = WorkloadUpdateCommandParser.VersionOption;
 
-        public static readonly Option<string> TempDirOption = WorkloadUpdateCommandParser.TempDirOption;
+        public static readonly Option<string> TempDirOption = 
+            new Option<string>("--temp-dir", Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings.TempDirOptionDescription).Hide();
         
-        public static readonly Option<bool> IncludePreviewsOption = WorkloadUpdateCommandParser.IncludePreviewsOption;
+        public static readonly Option<bool> IncludePreviewsOption = 
+            new Option<bool>("--include-previews", Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings.IncludePreviewOptionDescription).Hide();
 
         private static readonly Command Command = ConstructCommand();
 
@@ -37,7 +39,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VersionOption);
             command.AddOption(TempDirOption);
             command.AddOption(IncludePreviewsOption);
-            command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
+            command.AddWorkloadCommandNuGetRestoreActionConfigOptions(true);
 
             command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadListCommand(parseResult).Execute());
 

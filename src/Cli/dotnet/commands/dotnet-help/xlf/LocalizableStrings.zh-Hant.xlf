@@ -267,11 +267,6 @@
         <target state="translated">建立及管理開發憑證。</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server 快取命令列工具。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">管理開發使用者祕密。</target>
@@ -300,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">啟動 F# Interactive/執行 F# 指令碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="new">Manage optional workloads.</target>
         <note />
       </trans-unit>
     </body>

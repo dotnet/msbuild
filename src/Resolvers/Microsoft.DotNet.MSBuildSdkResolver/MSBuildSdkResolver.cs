@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.DotNetSdkResolver;
 using Microsoft.DotNet.NativeWrapper;
 using System;
@@ -170,7 +171,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             };
 
             //  First check if requested SDK resolves to a workload SDK pack
-            var workloadResult = workloadResolver.Resolve(sdkReference.Name, dotnetRoot, netcoreSdkVersion);
+            string userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
+            var workloadResult = workloadResolver.Resolve(sdkReference.Name, dotnetRoot, netcoreSdkVersion, userProfileDir);
 
             if (workloadResult is not CachingWorkloadResolver.NullResolutionResult)
             {

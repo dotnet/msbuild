@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Principal;
 using System.Threading;
@@ -49,6 +50,15 @@ namespace Microsoft.DotNet.Cli.Utils
         public static bool RebootRequired()
         {
             return new SystemInformationClass().RebootRequired;
+        }
+
+        /// <summary>
+        /// Returns the commandline of the currently executing process.
+        /// </summary>
+        /// <returns>The commandline of the current process.</returns>
+        public static string GetProcessCommandLine()
+        {
+            return Marshal.PtrToStringAuto(NativeMethods.Windows.GetCommandLine());
         }
     }
 }

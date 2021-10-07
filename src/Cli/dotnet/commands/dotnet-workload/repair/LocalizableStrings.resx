@@ -129,4 +129,7 @@
   <data name="RepairingWorkloads" xml:space="preserve">
     <value>Repairing workload installation for workloads: {0}</value>
   </data>
+  <data name="NoWorkloadsToRepair" xml:space="preserve">
+    <value>No workloads are installed, nothing to repair. Run `dotnet workload search` to find workloads to install.</value>
+  </data>
 </root>

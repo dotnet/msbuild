@@ -267,11 +267,6 @@
         <target state="translated">Consente di creare e gestire i certificati di sviluppo.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Strumenti da riga di comando della cache di SQL Server.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Consente di gestire i segreti degli utenti di sviluppo.</target>
@@ -300,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">Avvia F# Interactive/esegue script F#.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="new">Manage optional workloads.</target>
         <note />
       </trans-unit>
     </body>
