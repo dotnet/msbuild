@@ -29,6 +29,10 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
+        public static readonly Option FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
+
+        public static readonly Option ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -41,9 +45,9 @@ namespace Microsoft.DotNet.Cli
             var command = new DocumentedCommand("clean", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(SlnOrProjectArgument);
-            command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
+            command.AddOption(FrameworkOption);
             command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
-            command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
+            command.AddOption(ConfigurationOption);
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(OutputOption);

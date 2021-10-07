@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Cli
             .UseExceptionHandler(ExceptionHandler)
             .UseHelp()
             .UseHelpBuilder(context => new DotnetHelpBuilder())
-            .UseResources(new CommandLineValidationMessages())
+            .UseLocalizationResources(new CommandLineValidationMessages())
             .UseParseDirective()
             .UseSuggestDirective()
             .DisablePosixBinding()
@@ -153,7 +153,7 @@ namespace Microsoft.DotNet.Cli
 
         internal class DotnetHelpBuilder : HelpBuilder
         {
-            public DotnetHelpBuilder(int maxWidth = int.MaxValue) : base(Resources.Instance, maxWidth) { }
+            public DotnetHelpBuilder(int maxWidth = int.MaxValue) : base(LocalizationResources.Instance, maxWidth) { }
 
             public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => {
                 int windowWidth;

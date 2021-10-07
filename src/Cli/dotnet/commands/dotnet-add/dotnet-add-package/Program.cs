@@ -21,8 +21,8 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
         public AddPackageReferenceCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.ValueForArgument<string>(AddCommandParser.ProjectArgument);
-            _packageId = parseResult.ValueForArgument<string>(AddPackageParser.CmdPackageArgument);
+            _fileOrDirectory = parseResult.GetValueForArgument<string>(AddCommandParser.ProjectArgument);
+            _packageId = parseResult.GetValueForArgument<string>(AddPackageParser.CmdPackageArgument);
         }
 
         public override int Execute()

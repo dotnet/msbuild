@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.Errors.Any())
             {
                 var unrecognizedTokenErrors = parseResult.Errors.Where(error =>
-                    error.Message.Contains(Parser.Instance.Configuration.Resources.UnrecognizedCommandOrArgument(string.Empty).Replace("'", string.Empty)));
+                    error.Message.Contains(Parser.Instance.Configuration.LocalizationResources.UnrecognizedCommandOrArgument(string.Empty).Replace("'", string.Empty)));
                 if (parseResult.CommandResult.Command.TreatUnmatchedTokensAsErrors ||
                     parseResult.Errors.Except(unrecognizedTokenErrors).Any())
                 {
@@ -56,6 +56,13 @@ namespace Microsoft.DotNet.Cli
         public static bool IsTopLevelDotnetCommand(this ParseResult parseResult)
         {
             return parseResult.CommandResult.Command.Equals(RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
+        }
+
+        public static bool CanBeInvoked(this ParseResult parseResult)
+        {
+            return Parser.GetBuiltInCommand(parseResult.RootSubCommandResult()) != null ||
+                parseResult.Directives.Count() > 0 ||
+                (parseResult.IsTopLevelDotnetCommand() && string.IsNullOrEmpty(parseResult.GetValueForArgument(Parser.DotnetSubCommand)));
         }
 
         public static int HandleMissingCommand(this ParseResult parseResult)
@@ -116,7 +123,7 @@ namespace Microsoft.DotNet.Cli
         internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
         {
             return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
-                parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption) :
+                parseResult.GetValueForOption<string>(RunCommandParser.RuntimeOption) :
                 parseResult.HasOption(CommonOptions.OperatingSystemOption.Aliases.First()) || parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) ?
                 CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
                     parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption.Aliases.First()),
@@ -126,7 +133,7 @@ namespace Microsoft.DotNet.Cli
 
         public static bool UsingRunCommandShorthandProjectOption(this ParseResult parseResult)
         {
-            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.ValueForOption(RunCommandParser.PropertyOption).Any())
+            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.GetValueForOption(RunCommandParser.PropertyOption).Any())
             {
                 var projVals = parseResult.GetRunCommandShorthandProjectValues();
                 if (projVals.Any())

@@ -27,8 +27,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool install -g console.test.app --version 1.0.1");
 
-            var packageId = result.ValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument);
-            var packageVersion = result.ValueForOption<string>(ToolInstallCommandParser.VersionOption);
+            var packageId = result.GetValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument);
+            var packageVersion = result.GetValueForOption<string>(ToolInstallCommandParser.VersionOption);
 
             packageId.Should().Be("console.test.app");
             packageVersion.Should().Be("1.0.1");
@@ -41,8 +41,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 Parser.Instance.Parse(
                     @"dotnet tool install -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
 
-            result.ValueForOption<string>(ToolInstallCommandParser.ConfigOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
-            result.ValueForOption<string>(ToolInstallCommandParser.FrameworkOption).Should().Be("netcoreapp2.0");
+            result.GetValueForOption<string>(ToolInstallCommandParser.ConfigOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
+            result.GetValueForOption<string>(ToolInstallCommandParser.FrameworkOption).Should().Be("netcoreapp2.0");
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse($"dotnet tool install -g --add-source {expectedSourceValue} console.test.app");
 
-            result.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption).First().Should().Be(expectedSourceValue);
+            result.GetValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption).First().Should().Be(expectedSourceValue);
         }
 
         [Fact]
@@ -69,8 +69,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
                     $"--add-source {expectedSourceValue2} console.test.app");
 
             
-            result.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption)[0].Should().Be(expectedSourceValue1);
-            result.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption)[1].Should().Be(expectedSourceValue2);
+            result.GetValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption)[0].Should().Be(expectedSourceValue1);
+            result.GetValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption)[1].Should().Be(expectedSourceValue2);
         }
 
         [Fact]
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             var result = Parser.Instance.Parse($"dotnet tool install -g --verbosity:{expectedVerbosityLevel} console.test.app");
 
-            Enum.GetName(result.ValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption)).Should().Be(expectedVerbosityLevel);
+            Enum.GetName(result.GetValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption)).Should().Be(expectedVerbosityLevel);
         }
 
         [Fact]

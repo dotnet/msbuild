@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Store
 
             msbuildArgs.AddRange(result.OptionValuesToBeForwarded(StoreCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(result.ValueForArgument<IEnumerable<string>>(StoreCommandParser.Argument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.GetValueForArgument<IEnumerable<string>>(StoreCommandParser.Argument) ?? Array.Empty<string>());
 
             return new StoreCommand(msbuildArgs, msbuildPath);
         }

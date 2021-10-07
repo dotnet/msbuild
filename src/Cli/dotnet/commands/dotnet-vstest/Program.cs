@@ -4,6 +4,9 @@
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using System.CommandLine.Parsing;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 namespace Microsoft.DotNet.Tools.VSTest
 {
@@ -13,9 +16,24 @@ namespace Microsoft.DotNet.Tools.VSTest
         {
             parseResult.HandleDebugSwitch();
 
-            VSTestForwardingApp vsTestforwardingApp = new VSTestForwardingApp(parseResult.GetArguments());
+            VSTestForwardingApp vsTestforwardingApp = new VSTestForwardingApp(GetArgs(parseResult));
 
             return vsTestforwardingApp.Execute();
+        }
+
+        private static string[] GetArgs(ParseResult parseResult)
+        {
+            IEnumerable<string> args = parseResult.GetArguments();
+
+            if (parseResult.HasOption(CommonOptions.TestLoggerOption))
+            {
+                // Format test logger option
+                var loggerValue = parseResult.GetValueForOption(CommonOptions.TestLoggerOption);
+                args = args.Where(a => !a.Equals(loggerValue) && !CommonOptions.TestLoggerOption.Aliases.Contains(a));
+                args = args.Prepend($"{CommonOptions.TestLoggerOption.Aliases.First()}:{loggerValue}");
+            }
+
+            return args.ToArray();
         }
     }
 }

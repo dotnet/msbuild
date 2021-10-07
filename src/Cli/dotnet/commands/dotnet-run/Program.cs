@@ -20,13 +20,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         public static RunCommand FromParseResult(ParseResult parseResult)
         {
-            if (parseResult.HasOption("--help"))
-            {
-                parseResult.ShowHelp();
-                throw new HelpException(string.Empty);
-            }
-
-            var project = parseResult.ValueForOption(RunCommandParser.ProjectOption);
+            var project = parseResult.GetValueForOption(RunCommandParser.ProjectOption);
             if (parseResult.UsingRunCommandShorthandProjectOption())
             {
                 Console.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
@@ -34,12 +28,12 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             var command = new RunCommand(
-                configuration: parseResult.ValueForOption<string>(RunCommandParser.ConfigurationOption),
-                framework: parseResult.ValueForOption<string>(RunCommandParser.FrameworkOption),
+                configuration: parseResult.GetValueForOption<string>(RunCommandParser.ConfigurationOption),
+                framework: parseResult.GetValueForOption<string>(RunCommandParser.FrameworkOption),
                 runtime: parseResult.GetCommandLineRuntimeIdentifier(),
                 noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
                 project: project,
-                launchProfile: parseResult.ValueForOption<string>(RunCommandParser.LaunchProfileOption),
+                launchProfile: parseResult.GetValueForOption<string>(RunCommandParser.LaunchProfileOption),
                 noLaunchProfile: parseResult.HasOption(RunCommandParser.NoLaunchProfileOption),
                 noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
                 interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),

@@ -30,8 +30,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
                 toolUninstallGlobalOrToolPathCommand
                 ?? new ToolUninstallGlobalOrToolPathCommand(result);
 
-            _global = result.ValueForOption<bool>(ToolUninstallCommandParser.GlobalOption);
-            _toolPath = result.ValueForOption<string>(ToolUninstallCommandParser.ToolPathOption);
+            _global = result.GetValueForOption<bool>(ToolUninstallCommandParser.GlobalOption);
+            _toolPath = result.GetValueForOption<string>(ToolUninstallCommandParser.ToolPathOption);
         }
 
         public override int Execute()

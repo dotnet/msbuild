@@ -42,6 +42,10 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
 
+        public static readonly Option FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
+
+        public static readonly Option ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -55,8 +59,8 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(SlnOrProjectArgument);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: false, includeNoDependenciesOption: false);
-            command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
-            command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
+            command.AddOption(FrameworkOption);
+            command.AddOption(ConfigurationOption);
             command.AddOption(RuntimeOption);
             command.AddOption(CommonOptions.VersionSuffixOption);
             command.AddOption(NoRestoreOption);

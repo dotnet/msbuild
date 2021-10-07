@@ -22,9 +22,6 @@ namespace Microsoft.DotNet.Cli
             }.ForwardAsProperty()
             .AllowSingleArgPerToken();
             
-        public static Option<VerbosityOptions> HiddenVerbosityOption =
-            VerbosityOption().Hide();
-
         public static Option<VerbosityOptions> VerbosityOption =
             new ForwardedOption<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
@@ -32,6 +29,9 @@ namespace Microsoft.DotNet.Cli
                 {
                     ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
                 }.ForwardAsSingle(o => $"-verbosity:{o}");
+        
+        public static Option<VerbosityOptions> HiddenVerbosityOption =>
+            VerbosityOption.Hide();
 
         public static Option<string> FrameworkOption(string description) =>
             new ForwardedOption<string>(
@@ -120,6 +120,12 @@ namespace Microsoft.DotNet.Cli
                 "--no-self-contained",
                 CommonLocalizableStrings.FrameworkDependentOptionDescription)
             .ForwardAsMany(o => new string[] { "-property:SelfContained=false", "-property:_CommandLineDefinedSelfContained=true" });
+
+        public static readonly Option<string> TestPlatformOption = new Option<string>("--Platform");
+
+        public static readonly Option<string> TestFrameworkOption = new Option<string>("--Framework");
+
+        public static readonly Option<string> TestLoggerOption = new Option<string>("--logger");
 
         public static bool VerbosityIsDetailedOrDiagnostic(this VerbosityOptions verbosity)
         {

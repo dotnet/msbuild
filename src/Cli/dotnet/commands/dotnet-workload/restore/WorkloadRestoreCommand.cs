@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
             _result = result;
             _reporter = reporter ?? Reporter.Output;
             _slnOrProjectArgument =
-                result.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument);
+                result.GetValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument);
         }
 
         public override int Execute()
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
                     loggers: new ILogger[]
                     {
                         new ConsoleLogger(_result
-                            .ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption)
+                            .GetValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption)
                             .ToLoggerVerbosity())
                     },
                     remoteLoggers: Enumerable.Empty<ForwardingLoggerRecord>(),

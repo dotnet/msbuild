@@ -3,7 +3,9 @@
 //
 
 using System.CommandLine;
-
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli;
 using static Microsoft.DotNet.Tools.Format.FormatCommandCommon;
 
 namespace Microsoft.DotNet.Tools.Format
@@ -11,8 +13,6 @@ namespace Microsoft.DotNet.Tools.Format
     internal static partial class FormatCommandParser
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-format";
-
-        private static readonly FormatCommandDefaultHandler s_formatCommandHandler = new();
 
         private static readonly Command Command = ConstructCommand();
 
@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Tools.Format
                 SeverityOption,
             };
             formatCommand.AddCommonOptions();
+            formatCommand.Handler = CommandHandler.Create<ParseResult>((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
             return formatCommand;
         }
     }

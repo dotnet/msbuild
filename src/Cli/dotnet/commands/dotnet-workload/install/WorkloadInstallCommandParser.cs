@@ -71,6 +71,8 @@ namespace Microsoft.DotNet.Cli
             IsHidden = true
         };
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
         {
             return Command;

@@ -3,15 +3,15 @@
 //
 
 using System.CommandLine;
-
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli;
 using static Microsoft.DotNet.Tools.Format.FormatCommandCommon;
 
 namespace Microsoft.DotNet.Tools.Format
 {
     internal static class FormatAnalyzersCommandParser
     {
-        private static readonly FormatAnalyzersHandler s_analyzerHandler = new();
-
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -27,6 +27,7 @@ namespace Microsoft.DotNet.Tools.Format
                 SeverityOption,
             };
             command.AddCommonOptions();
+            command.Handler = CommandHandler.Create<ParseResult>((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
             return command;
         }
     }

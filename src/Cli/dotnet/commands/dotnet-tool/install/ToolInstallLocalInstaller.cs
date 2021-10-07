@@ -29,11 +29,11 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             IToolPackageInstaller toolPackageInstaller = null)
         {
             _parseResult = parseResult;
-            _packageId = new PackageId(parseResult.ValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
-            _packageVersion = parseResult.ValueForOption<string>(ToolInstallCommandParser.VersionOption);
-            _configFilePath = parseResult.ValueForOption<string>(ToolInstallCommandParser.ConfigOption);
-            _sources = parseResult.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption);
-            _verbosity = Enum.GetName(parseResult.ValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption));
+            _packageId = new PackageId(parseResult.GetValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
+            _packageVersion = parseResult.GetValueForOption<string>(ToolInstallCommandParser.VersionOption);
+            _configFilePath = parseResult.GetValueForOption<string>(ToolInstallCommandParser.ConfigOption);
+            _sources = parseResult.GetValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption);
+            _verbosity = Enum.GetName(parseResult.GetValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption));
 
             if (toolPackageInstaller == null)
             {

@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli
 
         public static void ProcessInputAndSendTelemetry(ParseResult result, ITelemetry telemetry)
         {
-            var exeName = Path.GetFileName(result.ValueForArgument<string>(InternalReportinstallsuccessCommandParser.Argument));
+            var exeName = Path.GetFileName(result.GetValueForArgument<string>(InternalReportinstallsuccessCommandParser.Argument));
 
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             foreach (var e in filter.Filter(new InstallerSuccessReport(exeName)))

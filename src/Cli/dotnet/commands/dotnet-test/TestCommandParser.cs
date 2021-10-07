@@ -112,6 +112,10 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
 
+        public static readonly Option<string> FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
+
+        public static readonly Option ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -144,8 +148,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(BlameHangDumpOption);
             command.AddOption(BlameHangTimeoutOption);
             command.AddOption(NoLogoOption);
-            command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
-            command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
+            command.AddOption(ConfigurationOption);
+            command.AddOption(FrameworkOption);
             command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription, withShortOption: false));
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);

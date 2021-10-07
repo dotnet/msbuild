@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Clean
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            msbuildArgs.AddRange(result.ValueForArgument<IEnumerable<string>>(CleanCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.GetValueForArgument<IEnumerable<string>>(CleanCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             msbuildArgs.Add("-target:Clean");
 

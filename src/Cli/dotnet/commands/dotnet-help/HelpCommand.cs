@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Help
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            if (!string.IsNullOrEmpty(result.ValueForArgument<string>(HelpCommandParser.Argument)))
+            if (!string.IsNullOrEmpty(result.GetValueForArgument<string>(HelpCommandParser.Argument)))
             {
                 return new HelpCommand(result).Execute();
             }
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Tools.Help
         public int Execute()
         {
             if (TryGetDocsLink(
-                _parseResult.ValueForArgument<string>(HelpCommandParser.Argument),
+                _parseResult.GetValueForArgument<string>(HelpCommandParser.Argument),
                 out var docsLink) &&
                 !string.IsNullOrEmpty(docsLink))
             {
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Tools.Help
                 Reporter.Error.WriteLine(
                     string.Format(
                         LocalizableStrings.CommandDoesNotExist,
-                        _parseResult.ValueForArgument<string>(HelpCommandParser.Argument)).Red());
+                        _parseResult.GetValueForArgument<string>(HelpCommandParser.Argument)).Red());
                 Reporter.Output.WriteLine(HelpUsageText.UsageText);
                 return 1;
             }

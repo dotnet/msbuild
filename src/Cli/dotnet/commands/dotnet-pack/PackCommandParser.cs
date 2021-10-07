@@ -43,6 +43,8 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
 
+        public static readonly Option<string> ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -65,7 +67,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.VersionSuffixOption);
-            command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
+            command.AddOption(ConfigurationOption);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: true, includeNoDependenciesOption: true);
 
             command.Handler = CommandHandler.Create<ParseResult>(PackCommand.Run);
