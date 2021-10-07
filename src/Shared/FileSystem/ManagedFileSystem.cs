@@ -40,7 +40,7 @@ namespace Microsoft.Build.Shared.FileSystem
         }
 
 #if FEATURE_MSIOREDIST
-        private IEnumerable<string> HandleFileLoadException(
+        private static IEnumerable<string> HandleFileLoadException(
             Func<string, string, Microsoft.IO.SearchOption, IEnumerable<string>> enumerateFunctionDelegate,
             string path,
             string searchPattern,
@@ -56,12 +56,12 @@ namespace Microsoft.Build.Shared.FileSystem
             // We rethrow it to make it fail with a proper error message and call stack.
             catch (FileLoadException ex)
             {
-                throw new InvalidOperationException("Could not load file or assembly.", ex);
+                throw new InvalidOperationException(ex.Message, ex);
             }
             // Sometimes FileNotFoundException is thrown when there is an assembly load failure. In this case it should have FusionLog.
             catch (FileNotFoundException ex) when (ex.FusionLog != null)
             {
-                throw new InvalidOperationException("Could not load file or assembly.", ex);
+                throw new InvalidOperationException(ex.Message, ex);
             }
         }
 #endif
@@ -70,8 +70,13 @@ namespace Microsoft.Build.Shared.FileSystem
         {
 #if FEATURE_MSIOREDIST
             return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                    ? HandleFileLoadException(Microsoft.IO.Directory.EnumerateFiles, path, searchPattern, (Microsoft.IO.SearchOption)searchOption)
-                    : Directory.EnumerateFiles(path, searchPattern, searchOption);
+                ? HandleFileLoadException(
+                    (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateFiles(path, searchPattern, searchOption),
+                    path,
+                    searchPattern,
+                    (Microsoft.IO.SearchOption)searchOption
+                )
+                : Directory.EnumerateFiles(path, searchPattern, searchOption);
 #else
             return Directory.EnumerateFiles(path, searchPattern, searchOption);
 #endif
@@ -81,7 +86,12 @@ namespace Microsoft.Build.Shared.FileSystem
         {
 #if FEATURE_MSIOREDIST
             return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? HandleFileLoadException(Microsoft.IO.Directory.EnumerateDirectories, path, searchPattern, (Microsoft.IO.SearchOption)searchOption)
+                ? HandleFileLoadException(
+                    (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateDirectories(path, searchPattern, searchOption),
+                    path,
+                    searchPattern,
+                    (Microsoft.IO.SearchOption)searchOption
+                )
                 : Directory.EnumerateDirectories(path, searchPattern, searchOption);
 #else
             return Directory.EnumerateDirectories(path, searchPattern, searchOption);
@@ -92,7 +102,11 @@ namespace Microsoft.Build.Shared.FileSystem
         {
 #if FEATURE_MSIOREDIST
             return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? HandleFileLoadException(Microsoft.IO.Directory.EnumerateFileSystemEntries, path, searchPattern, (Microsoft.IO.SearchOption)searchOption)
+                ? HandleFileLoadException(
+                    (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption),
+                    path,
+                    searchPattern, (Microsoft.IO.SearchOption)searchOption
+                )
                 : Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);
 #else
             return Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);
