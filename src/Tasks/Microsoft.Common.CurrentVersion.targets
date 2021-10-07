@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 ***********************************************************************************************
 Microsoft.Common.CurrentVersion.targets
 
@@ -1779,7 +1779,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;SelfContained;$(_GlobalPropertiesToRemoveFromProjectReferences)"
         Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' != 'true'"
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
@@ -1795,7 +1795,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Targets="GetTargetFrameworks"
         BuildInParallel="$(BuildInParallel)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;Platform;Configuration$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;SelfContained;Platform;Configuration$(_GlobalPropertiesToRemoveFromProjectReferences)"
         Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' == 'true'"
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
@@ -1866,6 +1866,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- If the project is RID agnostic, undefine the RuntimeIdentifier property to avoid another evaluation. -->
       <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' == 'true'">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier</UndefineProperties>
+
+        <!-- Also undefine SelfContained property if it was defined on the command line.  Otherwise a command such as
+             "dotnet build -r win-x64 -/-self-contained" would fail to build referenced projects, as they would have
+             SelfContained defined but no RuntimeIdentifier.
+             We only undefine this if the specific command-line option was used, in order to avoid breaking projects
+             that were passing /p:SelfContained=true on the command-line and relying on it flowing acress projects
+             (they were then setting the RuntimeIdentifier if SelfContained was true in their props files) -->
+        <UndefineProperties Condition="'$(_CommandLineDefinedSelfContained)' == 'true'">%(AnnotatedProjects.UndefineProperties);SelfContained</UndefineProperties>
       </AnnotatedProjects>
 
       <!--
