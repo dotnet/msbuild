@@ -433,7 +433,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 MockLogger logger = proj.BuildProjectExpectSuccess();
 
-                // When ContinueOnError is true, we no longer log MSB4141 (your task returned false but didn't log an error)
+                // When ContinueOnError is true, we no longer log MSB4181 (your task returned false but didn't log an error)
                 logger.AssertLogDoesntContain("MSB4181");
             }
         }
