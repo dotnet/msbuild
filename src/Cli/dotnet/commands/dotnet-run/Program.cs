@@ -28,12 +28,12 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             var command = new RunCommand(
-                configuration: parseResult.GetValueForOption<string>(RunCommandParser.ConfigurationOption),
-                framework: parseResult.GetValueForOption<string>(RunCommandParser.FrameworkOption),
+                configuration: parseResult.GetValueForOption(RunCommandParser.ConfigurationOption),
+                framework: parseResult.GetValueForOption(RunCommandParser.FrameworkOption),
                 runtime: parseResult.GetCommandLineRuntimeIdentifier(),
                 noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
                 project: project,
-                launchProfile: parseResult.GetValueForOption<string>(RunCommandParser.LaunchProfileOption),
+                launchProfile: parseResult.GetValueForOption(RunCommandParser.LaunchProfileOption),
                 noLaunchProfile: parseResult.HasOption(RunCommandParser.NoLaunchProfileOption),
                 noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
                 interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),

@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
             _local = parseResult.ValueForOption<bool>(ToolAppliedOption.LocalOptionAlias);
             _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
-            _framework = parseResult.GetValueForOption<string>(ToolInstallCommandParser.FrameworkOption);
+            _framework = parseResult.GetValueForOption(ToolInstallCommandParser.FrameworkOption);
         }
 
         public override int Execute()

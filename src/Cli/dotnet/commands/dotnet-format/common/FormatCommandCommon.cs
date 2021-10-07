@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Tools.Format
 
         public static void AddProjectOrSolutionDotnetFormatArgs(this List<string> dotnetFormatArgs, ParseResult parseResult)
         {
-            if (parseResult.GetValueForArgument<string>(SlnOrProjectArgument) is string { Length: > 0 } slnOrProject)
+            if (parseResult.GetValueForArgument(SlnOrProjectArgument) is string { Length: > 0 } slnOrProject)
             {
                 dotnetFormatArgs.Add(slnOrProject);
             }

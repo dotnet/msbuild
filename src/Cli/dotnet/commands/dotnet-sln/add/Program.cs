@@ -22,10 +22,10 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         public AddProjectToSolutionCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.GetValueForArgument<string>(SlnCommandParser.SlnArgument);
+            _fileOrDirectory = parseResult.GetValueForArgument(SlnCommandParser.SlnArgument);
 
-            _inRoot = parseResult.GetValueForOption<bool>(SlnAddParser.InRootOption);
-            string relativeRoot = parseResult.GetValueForOption<string>(SlnAddParser.SolutionFolderOption);
+            _inRoot = parseResult.GetValueForOption(SlnAddParser.InRootOption);
+            string relativeRoot = parseResult.GetValueForOption(SlnAddParser.SolutionFolderOption);
             bool hasRelativeRoot = !string.IsNullOrEmpty(relativeRoot);
             
             if (_inRoot && hasRelativeRoot)

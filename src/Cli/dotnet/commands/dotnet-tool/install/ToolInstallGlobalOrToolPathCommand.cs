@@ -56,15 +56,15 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             INuGetPackageDownloader nugetPackageDownloader = null)
             : base(parseResult)
         {
-            _packageId = new PackageId(parseResult.GetValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
-            _packageVersion = parseResult.GetValueForOption<string>(ToolInstallCommandParser.VersionOption);
-            _configFilePath = parseResult.GetValueForOption<string>(ToolInstallCommandParser.ConfigOption);
-            _framework = parseResult.GetValueForOption<string>(ToolInstallCommandParser.FrameworkOption);
-            _source = parseResult.GetValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption);
+            _packageId = new PackageId(parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
+            _packageVersion = parseResult.GetValueForOption(ToolInstallCommandParser.VersionOption);
+            _configFilePath = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
+            _framework = parseResult.GetValueForOption(ToolInstallCommandParser.FrameworkOption);
+            _source = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
             _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
-            _verbosity = Enum.GetName(parseResult.GetValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption));
+            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolInstallCommandParser.VerbosityOption));
             _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
-            _architectureOption = parseResult.GetValueForOption<string>(ToolInstallCommandParser.ArchitectureOption);
+            _architectureOption = parseResult.GetValueForOption(ToolInstallCommandParser.ArchitectureOption);
 
             _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;
 			_forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand());

@@ -36,15 +36,15 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
 
-        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption;
+        public static readonly Option<bool> SelfContainedOption = CommonOptions.SelfContainedOption;
 
-        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
+        public static readonly Option<bool> NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
 
-        public static readonly Option RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
+        public static readonly Option<string> RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
 
-        public static readonly Option FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
+        public static readonly Option<string> FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
 
-        public static readonly Option ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
+        public static readonly Option<string> ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
 
         private static readonly Command Command = ConstructCommand();
 

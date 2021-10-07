@@ -29,9 +29,15 @@ namespace Microsoft.DotNet.Cli
                 {
                     ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
                 }.ForwardAsSingle(o => $"-verbosity:{o}");
-        
+
         public static Option<VerbosityOptions> HiddenVerbosityOption =>
-            VerbosityOption.Hide();
+            new ForwardedOption<VerbosityOptions>(
+                new string[] { "-v", "--verbosity" },
+                description: CommonLocalizableStrings.VerbosityOptionDescription)
+            {
+                ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName,
+                IsHidden = true
+            }.ForwardAsSingle(o => $"-verbosity:{o}");
 
         public static Option<string> FrameworkOption(string description) =>
             new ForwardedOption<string>(

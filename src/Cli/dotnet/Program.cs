@@ -227,7 +227,7 @@ namespace Microsoft.DotNet.Cli
             {
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStart();
                 var resolvedCommand = CommandFactoryUsingResolver.Create(
-                        "dotnet-" + parseResult.GetValueForArgument<string>(Parser.DotnetSubCommand),
+                        "dotnet-" + parseResult.GetValueForArgument(Parser.DotnetSubCommand),
                         args.GetSubArguments(),
                         FrameworkConstants.CommonFrameworks.NetStandardApp15);
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStop();

@@ -27,9 +27,9 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
             IReporter reporter = null)
             : base(result)
         {
-            bool msbuild = result.GetValueForOption<bool>(ServerShutdownCommandParser.MSBuildOption);
-            bool vbcscompiler = result.GetValueForOption<bool>(ServerShutdownCommandParser.VbcsOption);
-            bool razor = result.GetValueForOption<bool>(ServerShutdownCommandParser.RazorOption);
+            bool msbuild = result.GetValueForOption(ServerShutdownCommandParser.MSBuildOption);
+            bool vbcscompiler = result.GetValueForOption(ServerShutdownCommandParser.VbcsOption);
+            bool razor = result.GetValueForOption(ServerShutdownCommandParser.RazorOption);
             bool all = !msbuild && !vbcscompiler && !razor;
 
             _enumerationFlags = ServerEnumerationFlags.None;

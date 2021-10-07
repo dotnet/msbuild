@@ -31,11 +31,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             string userProfileDir = null) : base(result)
         {
             _reporter = reporter ?? Reporter.Output;
-            _verbosity = result.GetValueForOption<VerbosityOptions>(WorkloadSearchCommandParser.VerbosityOption);
-            _workloadIdStub = result.GetValueForArgument<string>(WorkloadSearchCommandParser.WorkloadIdStubArgument);
+            _verbosity = result.GetValueForOption(WorkloadSearchCommandParser.VerbosityOption);
+            _workloadIdStub = result.GetValueForArgument(WorkloadSearchCommandParser.WorkloadIdStubArgument);
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(result.GetValueForOption<string>(WorkloadSearchCommandParser.VersionOption), version, dotnetPath, userProfileDir);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(result.GetValueForOption(WorkloadSearchCommandParser.VersionOption), version, dotnetPath, userProfileDir);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
         }
