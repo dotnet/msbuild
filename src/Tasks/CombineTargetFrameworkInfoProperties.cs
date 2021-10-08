@@ -23,11 +23,6 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] PropertiesAndValues { get; set; }
 
         /// <summary>
-        /// Opts into or out of using the new schema with Property Name=... rather than just specifying the RootElementName.
-        /// </summary>
-        public bool UseAttributeForTargetFrameworkInfoPropertyNames { get; set; } = false;
-
-        /// <summary>
         /// The generated XML representation of the properties and values.
         /// </summary>
         [Output]
@@ -37,9 +32,7 @@ namespace Microsoft.Build.Tasks
         {
             if (PropertiesAndValues != null)
             {
-                XElement root = UseAttributeForTargetFrameworkInfoPropertyNames ?
-                    new("TargetFramework", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
-                    new(RootElementName);
+                XElement root = new("TargetFramework", new XAttribute("Name", EscapingUtilities.Escape(RootElementName)));
 
                 foreach (ITaskItem item in PropertiesAndValues)
                 {
