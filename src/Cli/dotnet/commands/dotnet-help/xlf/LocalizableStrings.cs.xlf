@@ -304,7 +304,7 @@
       </trans-unit>
       <trans-unit id="WorkloadDefinition">
         <source>Manage optional workloads.</source>
-        <target state="new">Manage optional workloads.</target>
+        <target state="translated">Spravujte volitelné úlohy.</target>
         <note />
       </trans-unit>
     </body>
