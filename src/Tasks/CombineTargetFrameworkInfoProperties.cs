@@ -23,6 +23,11 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] PropertiesAndValues { get; set; }
 
         /// <summary>
+        /// Opts into or out of using the new schema with Property Name=... rather than just specifying the RootElementName.
+        /// </summary>
+        public bool UseAttributeForTargetFrameworkInfoPropertyNames { get; set; } = false;
+
+        /// <summary>
         /// The generated XML representation of the properties and values.
         /// </summary>
         [Output]
