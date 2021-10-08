@@ -184,7 +184,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="translated">不正確的復原定義。復原定義中的資訊清單識別碼 {0} 不符合已安裝的資訊清單識別碼。 {1}</target>
+        <target state="translated">無效的復原定義。復原定義 {0} 中的資訊清單識別碼不符合已安裝的資訊清單識別碼 {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">

@@ -184,7 +184,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="translated">롤백 정의가 잘못되었습니다. 롤백 정의 {0}의 매니페스트 ID와 일치하지 않습니다 {1}.</target>
+        <target state="translated">롤백 정의가 잘못되었습니다. 롤백 정의 {0}의 매니페스트 ID {1}와(과) 일치하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
