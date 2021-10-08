@@ -52,7 +52,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/nuget/nuget.client -->
-    <NuGetBuildTasksPackageVersion>6.0.0-rc.258</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>6.0.0-rc.262</NuGetBuildTasksPackageVersion>
     <NuGetBuildTasksConsolePackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksConsolePackageVersion>
     <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
     <NuGetCommandLineXPlatPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommandLineXPlatPackageVersion>
