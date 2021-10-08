@@ -86,7 +86,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/format -->
-    <dotnetformatVersion>6.0.250802</dotnetformatVersion>
+    <dotnetformatVersion>6.0.250803</dotnetformatVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn-analyzers -->
