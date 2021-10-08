@@ -1915,7 +1915,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <CombineTargetFrameworkInfoProperties
         RootElementName="$(TargetFramework)"
-        PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)"
+        PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)">
       <Output TaskParameter="Result"
               PropertyName="_AdditionalTargetFrameworkInfoProperties"/>
     </CombineTargetFrameworkInfoProperties>
