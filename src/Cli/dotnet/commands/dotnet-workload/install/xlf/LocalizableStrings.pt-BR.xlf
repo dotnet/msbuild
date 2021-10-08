@@ -184,7 +184,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="translated">Definição de reversão inválida. As IDs do manifesto na {0} de definição de reversão não correspondem às IDs de manifesto instaladas {1}.</target>
+        <target state="translated">Definição de reversão inválida. Os IDs de manifesto na definição de reversão {0} não correspondem aos IDs de manifesto instalados {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">

@@ -184,7 +184,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="translated">無効なロールバック定義。ロールバック定義 {0} のマニフェスト ID が、インストール済みのマニフェスト ID と一致しません。 {1}</target>
+        <target state="translated">無効なロールバック定義。ロールバック定義 {0} のマニフェスト ID が、インストール済みのマニフェスト ID {1} と一致しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
