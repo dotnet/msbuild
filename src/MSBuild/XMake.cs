@@ -1704,8 +1704,8 @@ namespace Microsoft.Build.CommandLine
                             }
                             else
                             {
-                                switchName = unquotedCommandLineArg.Substring(switchIndicatorsLength, switchParameterIndicator - 1);
-                                switchParameters = ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, switchName, switchParameterIndicator);
+                                switchName = unquotedCommandLineArg.Substring(switchIndicatorsLength, switchParameterIndicator - switchIndicatorsLength);
+                                switchParameters = ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, switchName, switchParameterIndicator, switchIndicatorsLength);
                             }
                         }
 
@@ -1764,6 +1764,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="doubleQuotesRemovedFromArg"></param>
         /// <param name="switchName"></param>
         /// <param name="switchParameterIndicator"></param>
+        /// <param name="switchIndicatorsLength"></param>
         /// <returns>The given switch's parameters (with interesting quoting preserved).</returns>
         internal static string ExtractSwitchParameters
         (
@@ -1771,7 +1772,8 @@ namespace Microsoft.Build.CommandLine
             string unquotedCommandLineArg,
             int doubleQuotesRemovedFromArg,
             string switchName,
-            int switchParameterIndicator
+            int switchParameterIndicator,
+            int switchIndicatorsLength
         )
         {
 
@@ -1783,7 +1785,7 @@ namespace Microsoft.Build.CommandLine
             // check if there is any quoting in the name portion of the switch
             string unquotedSwitchIndicatorAndName = QuotingUtilities.Unquote(commandLineArg.Substring(0, quotedSwitchParameterIndicator), out var doubleQuotesRemovedFromSwitchIndicatorAndName);
 
-            ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(1),
+            ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(switchIndicatorsLength),
                 "The switch name extracted from either the partially or completely unquoted arg should be the same.");
 
             ErrorUtilities.VerifyThrow(doubleQuotesRemovedFromArg >= doubleQuotesRemovedFromSwitchIndicatorAndName,
