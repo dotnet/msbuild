@@ -571,7 +571,12 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
 
-                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile);
+                GatherAllSwitches(
+                    commandLine,
+                    out var switchesFromAutoResponseFile,
+                    out var switchesNotFromAutoResponseFile,
+                    out var shouldRecurse
+                    );
 
                 if (ProcessCommandLineSwitches(
                         switchesFromAutoResponseFile,
@@ -604,7 +609,8 @@ namespace Microsoft.Build.CommandLine
                         ref inputResultsCaches,
                         ref outputResultsCache,
                         ref lowPriority,
-                        recursing: false
+                        recursing: false,
+                        shouldRecurse
                         ))
                 {
                     // Unfortunately /m isn't the default, and we are not yet brave enough to make it the default.
@@ -1615,7 +1621,9 @@ namespace Microsoft.Build.CommandLine
 #else
             string [] commandLine,
 #endif
-            out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile)
+            out CommandLineSwitches switchesFromAutoResponseFile,
+            out CommandLineSwitches switchesNotFromAutoResponseFile,
+            out bool shouldRecurse)
         {
 #if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
@@ -1652,6 +1660,34 @@ namespace Microsoft.Build.CommandLine
             {
                 GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile);
             }
+
+            GatherDirectoryBuildRspSwitches(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, out shouldRecurse);
+        }
+
+        static void GatherDirectoryBuildRspSwitches(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, out bool shouldRecurse)
+        {
+            CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            commandLineSwitches.Append(switchesFromAutoResponseFile);    // lowest precedence
+            commandLineSwitches.Append(switchesNotFromAutoResponseFile);
+
+            // figure out what project we are building
+            var projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+
+            string projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
+
+            // gather any switches from the first Directory.Build.rsp found in the project directory or above
+            string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
+
+            var found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
+
+            // Don't look for more response files if it's only in the same place we already looked (next to the exe)
+            if (!string.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
+            {
+                // this combines any found, with higher precedence, with the switches from the original auto response file switches
+                found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
+            }
+
+            shouldRecurse = found;
         }
 
         /// <summary>
@@ -2115,7 +2151,8 @@ namespace Microsoft.Build.CommandLine
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
             ref bool lowPriority,
-            bool recursing
+            bool recursing,
+            bool shouldRecurse
         )
         {
             bool invokeBuild = false;
@@ -2177,64 +2214,47 @@ namespace Microsoft.Build.CommandLine
                     // figure out what project we are building
                     projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
 
-                    if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
+                    if (!recursing && shouldRecurse && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
                     {
-                        // gather any switches from an msbuild.rsp that is next to the project or solution file itself
-                        string projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
-
-                        // gather any switches from the first Directory.Build.rsp found in the project directory or above
-                        string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
-
-                        bool found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
-
-                        // Don't look for more response files if it's only in the same place we already looked (next to the exe)
-                        if (!string.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
-                        {
-                            // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                            found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
-                        }
-
-                        if (found)
-                        {
-                            // we presumably read in more switches, so start our switch processing all over again,
-                            // so that we consume switches in the following sequence of increasing priority:
-                            // (1) switches from the msbuild.rsp next to msbuild.exe, including recursively included response files
-                            // (2) switches from this msbuild.rsp next to the project or solution <<--------- these we have just now merged with (1)
-                            // (3) switches from the command line, including recursively included response file switches inserted at the point they are declared with their "@" symbol
-                            return ProcessCommandLineSwitches(
-                                                               switchesFromAutoResponseFile,
-                                                               switchesNotFromAutoResponseFile,
-                                                               ref projectFile,
-                                                               ref targets,
-                                                               ref toolsVersion,
-                                                               ref globalProperties,
-                                                               ref loggers,
-                                                               ref verbosity,
-                                                               ref distributedLoggerRecords,
+                        // we presumably read in more switches, so start our switch processing all over again,
+                        // so that we consume switches in the following sequence of increasing priority:
+                        // (1) switches from the msbuild.rsp next to msbuild.exe, including recursively included response files
+                        // (2) switches from this msbuild.rsp next to the project or solution <<--------- these we have just now merged with (1)
+                        // (3) switches from the command line, including recursively included response file switches inserted at the point they are declared with their "@" symbol
+                        return ProcessCommandLineSwitches(
+                                                            switchesFromAutoResponseFile,
+                                                            switchesNotFromAutoResponseFile,
+                                                            ref projectFile,
+                                                            ref targets,
+                                                            ref toolsVersion,
+                                                            ref globalProperties,
+                                                            ref loggers,
+                                                            ref verbosity,
+                                                            ref distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
-                                                               ref needToValidateProject,
-                                                               ref schemaFile,
+                                                            ref needToValidateProject,
+                                                            ref schemaFile,
 #endif
-                                                               ref cpuCount,
-                                                               ref enableNodeReuse,
-                                                               ref preprocessWriter,
-                                                               ref targetsWriter,
-                                                               ref detailedSummary,
-                                                               ref warningsAsErrors,
-                                                               ref warningsAsMessages,
-                                                               ref enableRestore,
-                                                               ref interactive,
-                                                               ref profilerLogger,
-                                                               ref enableProfiler,
-                                                               ref restoreProperties,
-                                                               ref isolateProjects,
-                                                               ref graphBuild,
-                                                               ref inputResultsCaches,
-                                                               ref outputResultsCache,
-                                                               ref lowPriority,
-                                                               recursing: true
-                                                             );
-                        }
+                                                            ref cpuCount,
+                                                            ref enableNodeReuse,
+                                                            ref preprocessWriter,
+                                                            ref targetsWriter,
+                                                            ref detailedSummary,
+                                                            ref warningsAsErrors,
+                                                            ref warningsAsMessages,
+                                                            ref enableRestore,
+                                                            ref interactive,
+                                                            ref profilerLogger,
+                                                            ref enableProfiler,
+                                                            ref restoreProperties,
+                                                            ref isolateProjects,
+                                                            ref graphBuild,
+                                                            ref inputResultsCaches,
+                                                            ref outputResultsCache,
+                                                            ref lowPriority,
+                                                            recursing: true,
+                                                            shouldRecurse
+                                                            );
                     }
 
                     // figure out which targets we are building
