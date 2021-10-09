@@ -103,7 +103,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new DotnetCommand(Log)
                 .Execute(outputDll)
-                .Should().Pass()
+                .Should().Fail()
+                .And.HaveStdErrContaining($"Error:{Environment.NewLine}" +
+                    $"  An assembly specified in the application dependencies manifest (NuGetConfigDependentProject.deps.json) was not found:{Environment.NewLine}" +
+                    $"    package: 'NuGet.Configuration', version: '4.3.0'{Environment.NewLine}" +
+                    "    path: 'lib/netstandard1.3/NuGet.Configuration.dll'");
         }
 
         //  Windows only for now due to https://github.com/dotnet/cli/issues/7501
