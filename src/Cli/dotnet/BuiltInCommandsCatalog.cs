@@ -125,6 +125,7 @@ namespace Microsoft.DotNet.Cli
             ["sdk"] = new BuiltInCommandMetadata
             {
                 Command = SdkCommand.Run,
+                DocLink = "https://aka.ms/dotnet-sdk"
             },
             ["sln"] = new BuiltInCommandMetadata
             {
@@ -174,7 +175,8 @@ namespace Microsoft.DotNet.Cli
             },
             ["workload"] = new BuiltInCommandMetadata
             {
-                Command = WorkloadCommand.Run
+                Command = WorkloadCommand.Run,
+                DocLink = "https://aka.ms/dotnet-workload"
             },
         };
     }

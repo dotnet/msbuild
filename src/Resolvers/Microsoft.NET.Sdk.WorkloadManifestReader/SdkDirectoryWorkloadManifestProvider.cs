@@ -83,13 +83,19 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream)> GetManifests()
+        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)> GetManifests()
         {
             foreach (var workloadManifestDirectory in GetManifestDirectories())
             {
-                var workloadManifest = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
+                var workloadManifestPath = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
                 var id = Path.GetFileName(workloadManifestDirectory);
-                yield return (id, workloadManifest, () => File.OpenRead(workloadManifest));
+
+                yield return (
+                    id,
+                    workloadManifestPath,
+                    () => File.OpenRead(workloadManifestPath),
+                    () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(workloadManifestPath)
+                );
             }
         }
 
@@ -140,7 +146,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 foreach (var missingManifestId in missingManifestIds)
                 {
                     var manifestDir = FallbackForMissingManifest(missingManifestId);
-                    manifestIdsToDirectories.Add(missingManifestId, manifestDir);
+                    if (!string.IsNullOrEmpty(manifestDir))
+                    {
+                        manifestIdsToDirectories.Add(missingManifestId, manifestDir);
+                    }
                 }
             }
 
