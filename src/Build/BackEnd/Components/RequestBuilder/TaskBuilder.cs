@@ -940,7 +940,17 @@ namespace Microsoft.Build.BackEnd
                 IBuildEngine be = host.TaskInstance.BuildEngine;
                 if (taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors && (be is TaskHost th ? th.BuildRequestsSucceeded : false) && (be is IBuildEngine7 be7 ? !be7.AllowFailureWithoutError : true))
                 {
-                    if (_continueOnError != ContinueOnError.WarnAndContinue)
+
+                    if (_continueOnError == ContinueOnError.WarnAndContinue)
+                    {
+                        taskLoggingContext.LogWarning(null,
+                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            "TaskReturnedFalseButDidNotLogError",
+                            _taskNode.Name);
+
+                        taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                    }
+                    else
                     {
                         taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
                             "TaskReturnedFalseButDidNotLogError",
