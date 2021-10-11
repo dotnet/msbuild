@@ -185,7 +185,6 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ElementLocation Create(string file, int line, int column)
         {
-            // return EmptyLocation;
             if (line == 0 && column == 0 && string.IsNullOrEmpty(file))
             {
                 return EmptyLocation;
