@@ -2374,7 +2374,8 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-            using (_evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
+            ElementLocation location = element.ConditionLocation;
+            using (_evaluationProfiler.TrackCondition(location, condition))
             {
                 bool result = ConditionEvaluator.EvaluateCondition
                     (
@@ -2383,7 +2384,7 @@ namespace Microsoft.Build.Evaluation
                     _expander,
                     expanderOptions,
                     GetCurrentDirectoryForConditionEvaluation(element),
-                    element.ConditionLocation,
+                    location,
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem
@@ -2413,7 +2414,8 @@ namespace Microsoft.Build.Evaluation
                 return EvaluateCondition(element, condition, expanderOptions, parserOptions);
             }
 
-            using (_evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
+            ElementLocation location = element.ConditionLocation;
+            using (_evaluationProfiler.TrackCondition(location, condition))
             {
                 bool result = ConditionEvaluator.EvaluateConditionCollectingConditionedProperties
                     (
@@ -2423,7 +2425,7 @@ namespace Microsoft.Build.Evaluation
                     expanderOptions,
                     _data.ConditionedProperties,
                     GetCurrentDirectoryForConditionEvaluation(element),
-                    element.ConditionLocation,
+                    location,
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,

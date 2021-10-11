@@ -171,7 +171,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ElementLocation Create(string file)
         {
-            return Create(file, 0, 0);
+            return new ElementLocation.SmallElementLocation(file, 0, 0);
         }
 
         /// <summary>
@@ -185,7 +185,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ElementLocation Create(string file, int line, int column)
         {
-            if (string.IsNullOrEmpty(file) && line == 0 && column == 0)
+            // return EmptyLocation;
+            if (line == 0 && column == 0 && string.IsNullOrEmpty(file))
             {
                 return EmptyLocation;
             }
