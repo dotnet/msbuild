@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -31,6 +33,30 @@ namespace Microsoft.Build.UnitTests
 
             // Output ItemSpec should not be overwritten.
             Assert.Equal("MyNonExistentDirectory", t.RemovedDirectories[0].ItemSpec);
+        }
+
+        [Fact]
+        public void SimpleDir()
+        {
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                List<TaskItem> list = new List<TaskItem>();
+
+                for (int i = 0; i < 20; i++)
+                {
+                    list.Add(new TaskItem(env.CreateFolder().Path));
+                }
+
+                RemoveDir t = new RemoveDir();
+
+                t.Directories = list.ToArray();
+                t.BuildEngine = new MockEngine();
+
+                t.Execute().ShouldBeTrue();
+
+                Assert.Equal(list.Count, t.RemovedDirectories.Length);
+            }
         }
     }
 }
