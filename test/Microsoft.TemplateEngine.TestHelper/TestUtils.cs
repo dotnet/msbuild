@@ -29,6 +29,45 @@ namespace Microsoft.TemplateEngine.TestHelper
             return Path.GetFullPath(templateLocation);
         }
 
+        public static string GetPackagesLocation()
+        {
+            string codebase = typeof(TestUtils).GetTypeInfo().Assembly.Location;
+            string dir = Path.GetDirectoryName(codebase);
+
+#if DEBUG
+            string configuration = "Debug";
+#elif RELEASE
+            string configuration = "Release";
+#else
+            throw new NotSupportedException("The configuration is not supported");
+#endif
+
+            string packagesLocation = Path.Combine(dir, "..", "..", "..", "..", "..", "artifacts", "packages", configuration, "Shipping");
+
+            if (!Directory.Exists(packagesLocation))
+            {
+                throw new Exception($"{packagesLocation} does not exist");
+            }
+            return Path.GetFullPath(packagesLocation);
+        }
+
+        public static void SetupNuGetConfigForPackagesLocation(string projectDirectory)
+        {
+            string nugetConfigShim =
+$@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <config>
+    <add key=""globalPackagesFolder"" value=""{CreateTemporaryFolder("Packages")}"" />
+  </config>
+  <packageSources>
+    <clear />
+    <add key=""testPackages"" value=""{GetPackagesLocation()}"" />
+  </packageSources>
+</configuration>";
+
+            File.WriteAllText(Path.Combine(projectDirectory, "nuget.config"), nugetConfigShim);
+        }
+
         public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
         {
             // Get the subdirectories for the specified directory.
