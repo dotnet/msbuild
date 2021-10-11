@@ -432,6 +432,45 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":\"foo foo\"=\"bar bar\";\"baz=onga\"");
             doubleQuotesRemovedFromArg.ShouldBe(6);
         }
+        
+        [Fact]
+        public void ExtractSwitchParametersTestDoubleDash()
+        {
+            var commandLineArg = "\"--p:foo=\"bar";
+            var unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out var doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":\"foo=\"bar");
+            doubleQuotesRemovedFromArg.ShouldBe(2);
+
+            commandLineArg = "\"--p:foo=bar\"";
+            unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
+            doubleQuotesRemovedFromArg.ShouldBe(2);
+
+            commandLineArg = "--p:foo=bar";
+            unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
+            doubleQuotesRemovedFromArg.ShouldBe(0);
+
+            commandLineArg = "\"\"--p:foo=bar\"";
+            unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar\"");
+            doubleQuotesRemovedFromArg.ShouldBe(3);
+
+            commandLineArg = "\"--pr\"operty\":foo=bar";
+            unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
+            doubleQuotesRemovedFromArg.ShouldBe(3);
+
+            commandLineArg = "\"--pr\"op\"\"erty\":foo=bar\"";
+            unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
+            doubleQuotesRemovedFromArg.ShouldBe(6);
+
+            commandLineArg = "--p:\"foo foo\"=\"bar bar\";\"baz=onga\"";
+            unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
+            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":\"foo foo\"=\"bar bar\";\"baz=onga\"");
+            doubleQuotesRemovedFromArg.ShouldBe(6);
+        }        
 
         [Fact]
         public void GetLengthOfSwitchIndicatorTest()
