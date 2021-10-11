@@ -43,22 +43,24 @@ namespace Microsoft.Build.Evaluation
             bool isRightNum = RightChild.TryNumericEvaluate(state, out double rightNum);
             bool isRightVersion = RightChild.TryVersionEvaluate(state, out Version rightVersion);
 
-            return isLeftNum, isLeftVersion, isRightNum, isRightVersion switch
-            {
-                true, _, true, _ => Compare(leftNum, rightNum),
-                _, true, _, true => Compare(leftVersion, rightVersion),
-                true, _, _, true => Compare(leftNum, rightVersion),
-                _, true, true, _ => Compare(leftVersion, rightNum),
-
-                _ => ProjectErrorUtilities.VerifyThrowInvalidProject
-                (false,
+            ProjectErrorUtilities.VerifyThrowInvalidProject
+                ((isLeftNum || isLeftVersion) && (isRightNum || isRightVersion),
                  state.ElementLocation,
                 "ComparisonOnNonNumericExpression",
                  state.Condition,
                  /* helpfully display unexpanded token and expanded result in error message */
                  isLeftNum ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state),
-                 isLeftNum ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state)); false
-            }
+                 isLeftNum ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state));
+
+            return (isLeftNum, isLeftVersion, isRightNum, isRightVersion) switch
+            {
+                (true, _, true, _) => Compare(leftNum, rightNum),
+                (_, true, _, true) => Compare(leftVersion, rightVersion),
+                (true, _, _, true) => Compare(leftNum, rightVersion),
+                (_, true, true, _) => Compare(leftVersion, rightNum),
+
+                _ => false
+            };
         }
     }
 }
