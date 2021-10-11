@@ -2005,20 +2005,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache.
         /// </summary>
-        internal void ReadStateFile(FileExists fileExists)
+        internal void InitializeStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCache(_stateFile, Log, typeof(SystemState)) as SystemState;
-
-            // Construct the cache only if we can't find any caches.
-            if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
-            {
-                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists);
-            }
-
-            if (_cache == null)
-            {
-                _cache = new SystemState();
-            }
+            _cache = new SystemState(_stateFile, AssemblyInformationCachePaths, Log, fileExists);
         }
 
         /// <summary>
@@ -2026,9 +2015,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void WriteStateFile()
         {
+            if (!_cache.deserializedFromCache)
+            {
+                // The cache is empty; don't bother serializing it.
+                return;
+            }
             if (!String.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
-                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
+                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath);
             }
             else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
@@ -2262,7 +2256,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Load any prior saved state.
-                    ReadStateFile(fileExists);
+                    InitializeStateFile(fileExists);
                     _cache.SetGetLastWriteTime(getLastWriteTime);
                     _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
 

@@ -86,7 +86,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // When we read the state file, it should read from the caches produced in a normal build. In this case,
                 // the normal cache does not have dll.dll, whereas the precomputed cache does, so it should not be
                 // present when we read it.
-                rarReaderTask.ReadStateFile(p => true);
+                rarReaderTask.InitializeStateFile(p => true);
+                rarReaderTask._cache.InitializeSystemState();
                 rarReaderTask._cache.instanceLocalFileStateCache.ShouldNotContainKey(dllName);
             }
         }
@@ -128,7 +129,8 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 // At this point, the standard cache does not exist, so it defaults to reading the "precomputed" cache.
                 // Then we verify that the information contained in that cache matches what we'd expect.
-                rarReaderTask.ReadStateFile(p => true);
+                rarReaderTask.InitializeStateFile(p => true);
+                rarReaderTask._cache.InitializeSystemState();
                 rarReaderTask._cache.instanceLocalFileStateCache.ShouldContainKey(dllName);
                 SystemState.FileState assembly3 = rarReaderTask._cache.instanceLocalFileStateCache[dllName];
                 assembly3.Assembly.ShouldBeNull();

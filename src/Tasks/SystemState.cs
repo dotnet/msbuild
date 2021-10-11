@@ -101,6 +101,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private GetAssemblyRuntimeVersion getAssemblyRuntimeVersion;
 
+        internal bool deserializedFromCache = false;
+        private readonly string stateFile;
+        private readonly ITaskItem[] assemblyInformationCachePaths;
+        private readonly TaskLoggingHelper log;
+        private readonly FileExists fileExists;
+
         /// <summary>
         /// Class that holds the current file state.
         /// </summary>
@@ -215,6 +221,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public SystemState()
         {
+        }
+
+        public SystemState(string stateFile, ITaskItem[] assemblyInformationCachePaths, TaskLoggingHelper log, FileExists fileExists)
+        {
+            this.stateFile = stateFile;
+            this.assemblyInformationCachePaths = assemblyInformationCachePaths;
+            this.log = log;
+            this.fileExists = fileExists;
         }
 
         public SystemState(ITranslator translator)
@@ -357,30 +371,42 @@ namespace Microsoft.Build.Tasks
         private FileState ComputeFileStateFromCachesAndDisk(string path)
         {
             DateTime lastModified = GetAndCacheLastModified(path);
-            bool isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out FileState cachedInstanceFileState);
             bool isCachedInProcess = s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
-            
-            bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
             // If the process-wide cache contains an up-to-date FileState, always use it
             if (isProcessFileStateUpToDate)
             {
-                // For the next build, we may be using a different process. Update the file cache.
-                if (!isInstanceFileStateUpToDate)
+                if (deserializedFromCache)
                 {
-                    instanceLocalFileStateCache[path] = cachedProcessFileState;
-                    isDirty = true;
+                    bool isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out FileState cachedInstanceFileState);
+                    bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
+                    // For the next build, we may be using a different process. Update the file cache.
+                    if (!isInstanceFileStateUpToDate)
+                    {
+                        instanceLocalFileStateCache[path] = cachedProcessFileState;
+                        isDirty = true;
+                    }
                 }
+
                 return cachedProcessFileState;
             }
-            if (isInstanceFileStateUpToDate)
+            else
             {
-                return s_processWideFileStateCache[path] = cachedInstanceFileState;
-            }
+                if (!deserializedFromCache)
+                {
+                    InitializeSystemState();
+                }
+                bool isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out FileState cachedInstanceFileState);
+                bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
+                if (isInstanceFileStateUpToDate)
+                {
+                    return s_processWideFileStateCache[path] = cachedInstanceFileState;
+                }
 
-            // If no up-to-date FileState exists at this point, create one and take ownership
-            return InitializeFileState(path, lastModified);
+                // If no up-to-date FileState exists at this point, create one and take ownership
+                return InitializeFileState(path, lastModified);
+            }
         }
 
         private DateTime GetAndCacheLastModified(string path)
@@ -515,20 +541,32 @@ namespace Microsoft.Build.Tasks
             frameworkName = fileState.frameworkName;
         }
 
+        internal void InitializeSystemState()
+        {
+            SystemState cache = SystemState.DeserializeCache(stateFile, log, typeof(SystemState)) as SystemState;
+            if (cache is null && assemblyInformationCachePaths?.Length > 0)
+            {
+                cache = DeserializePrecomputedCaches();
+            }
+
+            if (cache is not null)
+            {
+                instanceLocalFileStateCache = cache.instanceLocalFileStateCache;
+            }
+            deserializedFromCache = true;
+        }
+
         /// <summary>
         /// Reads in cached data from stateFiles to build an initial cache. Avoids logging warnings or errors.
         /// </summary>
-        /// <param name="stateFiles">List of locations of caches on disk.</param>
-        /// <param name="log">How to log</param>
-        /// <param name="fileExists">Whether a file exists</param>
         /// <returns>A cache representing key aspects of file states.</returns>
-        internal static SystemState DeserializePrecomputedCaches(ITaskItem[] stateFiles, TaskLoggingHelper log, FileExists fileExists)
+        internal SystemState DeserializePrecomputedCaches()
         {
             SystemState retVal = new SystemState();
-            retVal.isDirty = stateFiles.Length > 0;
+            retVal.isDirty = assemblyInformationCachePaths.Length > 0;
             HashSet<string> assembliesFound = new HashSet<string>();
 
-            foreach (ITaskItem stateFile in stateFiles)
+            foreach (ITaskItem stateFile in assemblyInformationCachePaths)
             {
                 // Verify that it's a real stateFile. Log message but do not error if not.
                 SystemState sysState = DeserializeCache(stateFile.ToString(), log, typeof(SystemState)) as SystemState;
@@ -560,8 +598,7 @@ namespace Microsoft.Build.Tasks
         /// Modifies this object to be more portable across machines, then writes it to filePath.
         /// </summary>
         /// <param name="stateFile">Path to which to write the precomputed cache</param>
-        /// <param name="log">How to log</param>
-        internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
+        internal void SerializePrecomputedCache(string stateFile)
         {
             // Save a copy of instanceLocalFileStateCache so we can restore it later. SerializeCacheByTranslator serializes
             // instanceLocalFileStateCache by default, so change that to the relativized form, then change it back.
