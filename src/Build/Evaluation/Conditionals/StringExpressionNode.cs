@@ -83,7 +83,7 @@ namespace Microsoft.Build.Evaluation
                             _cachedExpandedValue = _value;
                             return false;
                         default:
-                            if (_value[1] != '(' || _value[_value.Length - 1] != ')' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@'))
+                            if (_value[1] != '(' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@') || _value[_value.Length - 1] != ')')
                             {
                                 // This isn't just a property, item, or metadata value, and it isn't empty.
                                 return false;
