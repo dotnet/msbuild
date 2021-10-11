@@ -17,12 +17,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            return !LeftChild.BoolEvaluate(state);
-        }
-
-        internal override bool CanBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            return LeftChild.CanBoolEvaluate(state);
+            LeftChild.TryBoolEvaluate(state, out bool boolValue);
+            return !boolValue;
         }
 
         /// <summary>

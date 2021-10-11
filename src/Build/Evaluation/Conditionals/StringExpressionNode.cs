@@ -28,62 +28,6 @@ namespace Microsoft.Build.Evaluation
             _expandable = expandable;
         }
 
-        /// <summary>
-        /// Evaluate as boolean
-        /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            return ConversionUtilities.ConvertStringToBool(GetExpandedValue(state));
-        }
-
-        /// <summary>
-        /// Evaluate as numeric
-        /// </summary>
-        internal override double NumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
-            {
-                return ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
-            }
-
-            return ConversionUtilities.ConvertDecimalOrHexToDouble(GetExpandedValue(state));
-        }
-
-        internal override Version VersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
-            {
-                return Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
-            }
-
-            return Version.Parse(GetExpandedValue(state));
-        }
-
-        internal override bool CanBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            return ConversionUtilities.CanConvertStringToBool(GetExpandedValue(state));
-        }
-
-        internal override bool CanNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
-            {
-                return true;
-            }
-
-            return ConversionUtilities.ValidDecimalOrHexNumber(GetExpandedValue(state));
-        }
-
-        internal override bool CanVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
-            {
-                return true;
-            }
-
-            return Version.TryParse(GetExpandedValue(state), out _);
-        }
-
         internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
         {
             return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state), out result);
