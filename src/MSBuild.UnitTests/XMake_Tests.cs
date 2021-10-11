@@ -58,6 +58,23 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void GatherCommandLineSwitchesAnyDash()
+        {
+            var switches = new CommandLineSwitches();
+
+            var arguments = new List<string> {
+                "-p:c=d",
+                "--p:a=b"
+            };
+
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
+
+            string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
+            parameters[0].ShouldBe("a=b");
+            parameters[1].ShouldBe("c=d");
+        }
+
+        [Fact]
         public void GatherCommandLineSwitchesMaxCpuCountWithArgument()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
