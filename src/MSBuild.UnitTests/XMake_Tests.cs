@@ -63,8 +63,8 @@ namespace Microsoft.Build.UnitTests
             var switches = new CommandLineSwitches();
 
             var arguments = new List<string> {
-                "-p:c=d",
-                "--p:a=b"
+                "-p:a=b",
+                "--p:c=d"
             };
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
