@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Shared;
 using System.Diagnostics;
 
 namespace Microsoft.Build.Evaluation
@@ -17,7 +18,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            LeftChild.TryBoolEvaluate(state, out bool boolValue);
+            ProjectErrorUtilities.VerifyThrowInvalidProject
+                    (LeftChild.TryBoolEvaluate(state, out bool boolValue),
+                     state.ElementLocation,
+                     "ExpressionDoesNotEvaluateToBoolean",
+                     LeftChild.GetUnexpandedValue(state),
+                     LeftChild.GetExpandedValue(state),
+                     state.Condition);
             return !boolValue;
         }
 

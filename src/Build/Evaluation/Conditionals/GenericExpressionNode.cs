@@ -60,7 +60,7 @@ namespace Microsoft.Build.Evaluation
                 state.Condition,
                 GetExpandedValue(state));
 
-            return boolValue; ;
+            return boolValue;
         }
 
         /// <summary>
