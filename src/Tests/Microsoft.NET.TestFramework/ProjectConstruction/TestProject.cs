@@ -327,11 +327,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
             if (SourceFiles.Count == 0)
             {
-                string source;
-
                 if (this.IsExe || this.IsWinExe)
                 {
-                    source =
+                    string source =
     @"using System;
 
 class Program
@@ -343,40 +341,49 @@ class Program
 
                     foreach (var dependency in this.ReferencedProjects)
                     {
-                        source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.Name);" + Environment.NewLine;
-                        source += $"        Console.WriteLine({dependency.Name}.{dependency.Name}Class.List);" + Environment.NewLine;
+                        string safeDependencyName = dependency.Name.Replace('.', '_');
+
+                        source += $"        Console.WriteLine({safeDependencyName}.{safeDependencyName}Class.Name);" + Environment.NewLine;
+                        source += $"        Console.WriteLine({safeDependencyName}.{safeDependencyName}Class.List);" + Environment.NewLine;
                     }
 
                     source +=
     @"    }
 }";
+                    string sourcePath = Path.Combine(targetFolder, this.Name + "Program.cs");
+
+                    File.WriteAllText(sourcePath, source);
                 }
-                else
+
                 {
-                    source =
+                    string safeThisName = this.Name.Replace('.', '_');
+                    string source =
     $@"using System;
 using System.Collections.Generic;
 
-namespace {this.Name}
+namespace {safeThisName}
 {{
-    public class {this.Name}Class
+    public class {safeThisName}Class
     {{
         public static string Name {{ get {{ return ""{this.Name}""; }} }}
         public static List<string> List {{ get {{ return null; }} }}
 ";
                     foreach (var dependency in this.ReferencedProjects)
                     {
-                        source += $"        public string {dependency.Name}Name {{ get {{ return {dependency.Name}.{dependency.Name}Class.Name; }} }}" + Environment.NewLine;
-                        source += $"        public List<string> {dependency.Name}List {{ get {{ return {dependency.Name}.{dependency.Name}Class.List; }} }}" + Environment.NewLine;
+                        string safeDependencyName = dependency.Name.Replace('.', '_');
+
+                        source += $"        public string {safeDependencyName}Name {{ get {{ return {safeDependencyName}.{safeDependencyName}Class.Name; }} }}" + Environment.NewLine;
+                        source += $"        public List<string> {safeDependencyName}List {{ get {{ return {safeDependencyName}.{safeDependencyName}Class.List; }} }}" + Environment.NewLine;
                     }
 
                     source +=
     @"    }
 }";
-                }
-                string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
+                    string sourcePath = Path.Combine(targetFolder, this.Name + ".cs");
 
-                File.WriteAllText(sourcePath, source);
+                    File.WriteAllText(sourcePath, source);
+                }
+
             }
             else
             {
