@@ -1096,12 +1096,25 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="$([MSBuild]::VersionGreaterThanOrEquals($(MSBuildVersion), '17.0'))">true</_UseAttributeForTargetFrameworkInfoPropertyNames>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Check if SelfContained is specified as a global property, by trying to change its value and seeing if that's successful.
+         We need to know if it's a global property because if it is, then it will flow to referenced projects that had
+         AcceptsRuntimeIdentifier set to true, possibly overriding the value for SelfContained that we got back from
+         the GetTargetFrameworks negotiation. -->
+    <_SelfContainedBackupValue>$(SelfContained)</_SelfContainedBackupValue>
+    <SelfContained>NotAValue</SelfContained>
+    <_SelfContainedIsGlobalProperty Condition="'$(SelfContained)' == '$(_SelfContainedBackupValue)'">true</_SelfContainedIsGlobalProperty>
+    <SelfContained>$(_SelfContainedBackupValue)</SelfContained>
+    <_SelfContainedBackupValue></_SelfContainedBackupValue>
+  </PropertyGroup>
+  
   <Target Name="ValidateExecutableReferences"
           AfterTargets="_GetProjectReferenceTargetFrameworkProperties"
           Condition="'$(ValidateExecutableReferencesMatchSelfContained)' != 'false'">
 
     <ValidateExecutableReferences
       SelfContained="$(SelfContained)"
+      SelfContainedIsGlobalProperty="$(_SelfContainedIsGlobalProperty)"
       IsExecutable="$(_IsExecutable)"
       ReferencedProjects="@(_MSBuildProjectReferenceExistent)"
       UseAttributeForTargetFrameworkInfoPropertyNames="$(_UseAttributeForTargetFrameworkInfoPropertyNames)"

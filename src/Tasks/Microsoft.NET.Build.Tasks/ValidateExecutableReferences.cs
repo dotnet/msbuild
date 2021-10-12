@@ -14,6 +14,8 @@ namespace Microsoft.NET.Build.Tasks
     {
         public bool SelfContained { get; set; }
 
+        public bool SelfContainedIsGlobalProperty { get; set; }
+
         public bool IsExecutable { get; set; }
 
         public ITaskItem[] ReferencedProjects { get; set; } = Array.Empty<ITaskItem>();
@@ -52,6 +54,14 @@ namespace Microsoft.NET.Build.Tasks
                 bool shouldBeValidatedAsExecutableReference = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["ShouldBeValidatedAsExecutableReference"], true);
                 bool referencedProjectIsExecutable = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_IsExecutable"]);
                 bool referencedProjectIsSelfContained = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["SelfContained"]);
+
+                if (SelfContainedIsGlobalProperty && project.GetBooleanMetadata("AcceptsRuntimeIdentifier") == true)
+                {
+                    //  If AcceptsRuntimeIdentifier is true for the project, and SelfContained was set as a global property,
+                    //  then the SelfContained value will flow across the project reference when we go to build it, despite the
+                    //  fact that we ignored it when doing the GetTargetFrameworks negotiation.
+                    referencedProjectIsSelfContained = SelfContained;
+                }
 
                 if (referencedProjectIsExecutable && shouldBeValidatedAsExecutableReference)
                 {

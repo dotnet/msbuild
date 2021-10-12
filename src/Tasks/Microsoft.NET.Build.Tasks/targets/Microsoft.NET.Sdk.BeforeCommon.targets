@@ -22,6 +22,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
+
+  </PropertyGroup>
+  
+  <!-- Set the AcceptsRuntimeIdentifier property if this project should accept global RuntimeIdentifier and SelfContained
+       property values from referencing projects. -->
+  <PropertyGroup Condition="'$(AcceptsRuntimeIdentifier)' == ''">
+    <AcceptsRuntimeIdentifier Condition="'$(_IsExecutable)' == 'true' Or
+                                         '$(RuntimeIdentifier)' != '' Or
+                                         '$(RuntimeIdentifiers)' != ''">true</AcceptsRuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
