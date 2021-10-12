@@ -160,7 +160,7 @@ function Check-RequiredVersionBumps() {
   # Log VSTS errors for missing required version bumps
   if ($env:SYSTEM_PULLREQUEST_TARGETBRANCH) {
     $versionLineChanged = $false
-    git --no-pager diff --unified --no-color --exit-code -w origin/$env:SYSTEM_PULLREQUEST_TARGETBRANCH HEAD src\Framework\EngineServices.cs `
+    git --no-pager diff --unified --no-color --exit-code -w $env:SYSTEM_PULLREQUEST_TARGETBRANCH HEAD src\Framework\EngineServices.cs `
       | Select-String -Pattern "int Version =" | ForEach-Object -process { $versionLineChanged = $true }
     if (($LASTEXITCODE -ne 0) -and (-not $versionLineChanged)) {
       throw "##vso[task.logissue type=error] Detected changes in Framework\EngineServices.cs without a version bump.  " +
