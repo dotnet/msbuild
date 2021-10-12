@@ -291,20 +291,7 @@ namespace Microsoft.Build.Construction
         /// In the case of an unsaved edit, the location only
         /// contains the path to the file that the element originates from.
         /// </summary>
-        public ElementLocation Location
-        {
-            get
-            {
-                if (_location == null)
-                {
-                    _location = Link != null ? Link.Location : XmlElement.Location;
-                }
-
-                return _location;
-            }
-        }
-
-        private ElementLocation _location = null;
+        public ElementLocation Location => Link != null ? Link.Location : XmlElement.Location;
 
         /// <inheritdoc/>
         public string ElementName => Link != null ? Link.ElementName : XmlElement.Name;
