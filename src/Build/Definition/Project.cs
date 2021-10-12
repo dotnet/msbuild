@@ -447,15 +447,15 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             ProjectCollection = projectCollection;
-            var defailtImplementation = new ProjectImpl(this, projectFile, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
-            implementationInternal = (IProjectLinkInternal)defailtImplementation;
-            implementation = defailtImplementation;
+            var defaultImplementation = new ProjectImpl(this, projectFile, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defaultImplementation;
+            implementation = defaultImplementation;
 
             // Note: not sure why only this ctor flavor do TryUnloadProject
             // seems the XmlReader based one should also clean the same way.
             try
             {
-                defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+                defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
             }
             catch (Exception ex)
             {
