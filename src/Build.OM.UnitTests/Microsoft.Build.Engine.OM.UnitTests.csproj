@@ -37,6 +37,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\Constants.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\EncodingStringWriter.cs">
       <Link>EncodingStringWriter.cs</Link>
     </Compile>
