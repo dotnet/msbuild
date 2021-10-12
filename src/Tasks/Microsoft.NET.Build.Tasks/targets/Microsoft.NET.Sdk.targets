@@ -79,6 +79,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PredefinedCulturesOnly Condition="'$(PredefinedCulturesOnly)' == '' and '$(InvariantGlobalization)' == 'true'">true</PredefinedCulturesOnly>
   </PropertyGroup>
 
+  <!-- Set the AcceptsRuntimeIdentifier property if this project should accept global RuntimeIdentifier and SelfContained
+       property values from referencing projects. -->
+  <PropertyGroup Condition="'$(AcceptsRuntimeIdentifier)' == '' And '$(IsTestProject)' != 'true'">
+    <AcceptsRuntimeIdentifier Condition="'$(_IsExecutable)' == 'true' Or
+                                         '$(RuntimeIdentifier)' != '' Or
+                                         '$(RuntimeIdentifiers)' != ''">true</AcceptsRuntimeIdentifier>
+  </PropertyGroup>
+
   <!-- Opt into .NET Core resource-serialization strategy by default when targeting frameworks
        that support it by default.
        -->
