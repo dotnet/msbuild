@@ -171,7 +171,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ElementLocation Create(string file)
         {
-            return new ElementLocation.SmallElementLocation(file, 0, 0);
+            return string.IsNullOrEmpty(file) ? EmptyLocation : new ElementLocation.SmallElementLocation(file, 0, 0);
         }
 
         /// <summary>
