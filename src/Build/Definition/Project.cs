@@ -352,11 +352,11 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
             ProjectCollection = projectCollection;
-            var defailtImplementation = new ProjectImpl(this, xmlReader, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
-            implementationInternal = (IProjectLinkInternal)defailtImplementation;
-            implementation = defailtImplementation;
+            var defaultImplementation = new ProjectImpl(this, xmlReader, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defaultImplementation;
+            implementation = defaultImplementation;
 
-            defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
         }
 
         /// <summary>
