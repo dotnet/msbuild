@@ -161,7 +161,7 @@ function Check-RequiredVersionBumps() {
   $targetBranch = $env:SYSTEM_PULLREQUEST_TARGETBRANCH
   if ($targetBranch) {
     # Prepend remote reference if the branch is not local
-    if (!$targetBranch.StartsWith("refs/head/")) {
+    if (!$targetBranch.StartsWith("refs/heads/")) {
       $targetBranch = "refs/remotes/origin/" + $targetBranch
     }
     $versionLineChanged = $false
