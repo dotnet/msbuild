@@ -11,6 +11,7 @@ using System.IO;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
@@ -115,23 +116,23 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 try
                 {
+                    MSBuildEventSource.Log.SdkResolverResolveSdkStart();
                     result = (SdkResult)sdkResolver.Resolve(sdk, context, resultFactory);
+                    MSBuildEventSource.Log.SdkResolverResolveSdkStop(sdkResolver.Name, sdk.Name, solutionPath, projectPath, result?.Path, result?.Success ?? false);
                 }
-                catch (Exception e) when (e is FileNotFoundException || (e is FileLoadException && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal)))
+                catch (Exception e) when ((e is FileNotFoundException || e is FileLoadException) && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
                     // Since we explicitly add the NuGetSdkResolver, we special case this.  The NuGetSdkResolver has special logic
                     // to load NuGet assemblies at runtime which could fail if the user is not running installed MSBuild.  Rather
                     // than give them a generic error, we want to give a more specific message.  This exception cannot be caught by
                     // the resolver itself because it is usually thrown before the class is loaded
-                    // MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}
-                    loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "CouldNotRunNuGetSdkResolver", MSBuildConstants.NuGetAssemblyPathEnvironmentVariableName, e.Message);
-                    continue;
+                    // The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}
+                    throw new SdkResolverException("CouldNotRunNuGetSdkResolver", sdkResolver, sdk, e, MSBuildConstants.NuGetAssemblyPathEnvironmentVariableName, e.ToString());
                 }
                 catch (Exception e)
                 {
-                    // MSB4242: The SDK resolver "{0}" failed to run. {1}
-                    loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "CouldNotRunSdkResolver", sdkResolver.Name, e.Message);
-                    continue;
+                    // The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}": {2}
+                    throw new SdkResolverException("SDKResolverFailed", sdkResolver, sdk, e, sdkResolver.Name, sdk.ToString(), e.ToString());
                 }
 
                 SetResolverState(submissionId, sdkResolver, context.State);
@@ -234,8 +235,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     return;
                 }
 
+                MSBuildEventSource.Log.SdkResolverServiceInitializeStart();
                 _resolvers = _sdkResolverLoader.LoadResolvers(loggingContext, location);
+                MSBuildEventSource.Log.SdkResolverServiceInitializeStop(_resolvers.Count);
             }
+
         }
 
         private void SetResolverState(int submissionId, SdkResolver resolver, object state)

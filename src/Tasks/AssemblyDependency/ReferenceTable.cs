@@ -407,6 +407,12 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
+            if (reference.FullPath.Length > 0 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            {
+                // Saves effort and makes deduplication possible downstream
+                reference.NormalizeFullPath();
+            }
+
             References[assemblyName] = reference;
         }
 
@@ -735,13 +741,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void TryConvertToAssemblyName(string itemSpec, string fusionName, ref AssemblyNameExtension assemblyName)
         {
-            // FusionName is used if available.
-            string finalName = fusionName;
-            if (string.IsNullOrEmpty(finalName))
-            {
-                // Otherwise, its itemSpec.
-                finalName = itemSpec;
-            }
+            // FusionName is used if available; otherwise use itemspec.
+            string finalName = string.IsNullOrEmpty(fusionName) ? itemSpec : fusionName;
 
             bool pathRooted = false;
             try
@@ -1337,7 +1338,11 @@ namespace Microsoft.Build.Tasks
             // If the path was resolved, then specify the full path on the reference.
             if (resolvedPath != null)
             {
-                if (!Path.IsPathRooted(resolvedPath))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+                {
+                    resolvedPath = FileUtilities.NormalizePath(resolvedPath);
+                }
+                else if (!Path.IsPathRooted(resolvedPath))
                 {
                     resolvedPath = Path.GetFullPath(resolvedPath);
                 }

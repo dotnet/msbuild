@@ -109,7 +109,7 @@ namespace Microsoft.Build.Utilities
         /// breaking change. Use 'Latest' if possible, but note the
         /// compatibility implications.
         /// </summary>
-        VersionLatest = Version462,
+        VersionLatest = Version48,
 
         /// <summary>
         /// Sentinel value for the latest version that this version of MSBuild is aware of. Similar
@@ -160,7 +160,7 @@ namespace Microsoft.Build.Utilities
         Version160,
 
         /// <summary>
-        /// Visual Studio "Dev17"
+        /// Visual Studio 2022 (Dev17)
         /// </summary>
         Version170,
 
@@ -168,7 +168,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// The latest version available at the time of release
         /// </summary>
-        VersionLatest = Version150
+        VersionLatest = Version170
     }
 
     /// <summary>
@@ -1903,14 +1903,14 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given target framework.
         /// This method will assume the requested ReferenceAssemblyRoot path will be the ProgramFiles directory specified by Environment.SpecialFolder.ProgramFiles
-        /// In additon when the .NETFramework or .NET Framework targetFrameworkIdentifiers are seen and targetFrameworkVersion is 2.0, 3.0, 3.5 or 4.0 we will return the correctly chained reference assembly paths
+        /// In addition when the .NETFramework or .NET Framework targetFrameworkIdentifiers are seen and targetFrameworkVersion is 2.0, 3.0, 3.5 or 4.0 we will return the correctly chained reference assembly paths
         /// for the legacy .net frameworks. This chaining will use the existing GetPathToDotNetFrameworkReferenceAssemblies to build up the list of reference assembly paths.
         /// </summary>
         /// <param name="targetFrameworkIdentifier">Identifier being targeted</param>
         /// <param name="targetFrameworkVersion">Version being targeted</param>
         /// <param name="targetFrameworkProfile">Profile being targeted</param>
         /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assemblies will be
-        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the framework cannot be found in @targetFrameworkRootPath</param>
+        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the framework cannot be found in <paramref name="targetFrameworkRootPath"/></param>
         /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
         /// Uses the default path if this is null.
         /// </param>

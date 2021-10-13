@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -124,12 +125,13 @@ namespace Microsoft.Build.Evaluation
 
         public struct ItemData
         {
-            public ItemData(I item, ProjectItemElement originatingItemElement, int elementOrder, bool conditionResult)
+            public ItemData(I item, ProjectItemElement originatingItemElement, int elementOrder, bool conditionResult, string normalizedItemValue = null)
             {
                 Item = item;
                 OriginatingItemElement = originatingItemElement;
                 ElementOrder = elementOrder;
                 ConditionResult = conditionResult;
+                _normalizedItemValue = normalizedItemValue;
             }
 
             public ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
@@ -140,19 +142,37 @@ namespace Microsoft.Build.Evaluation
                 var clonedItem = itemFactory.CreateItem(Item, OriginatingItemElement.ContainingProject.FullPath);
                 itemFactory.ItemElement = initialItemElementForFactory;
 
-                return new ItemData(clonedItem, OriginatingItemElement, ElementOrder, ConditionResult);
+                return new ItemData(clonedItem, OriginatingItemElement, ElementOrder, ConditionResult, _normalizedItemValue);
             }
 
             public I Item { get; }
             public ProjectItemElement OriginatingItemElement { get; }
             public int ElementOrder { get; }
             public bool ConditionResult { get; }
+
+            /// <summary>
+            /// Lazily created normalized item value.
+            /// </summary>
+            private string _normalizedItemValue;
+            public string NormalizedItemValue
+            {
+                get
+                {
+                    var normalizedItemValue = Volatile.Read(ref _normalizedItemValue);
+                    if (normalizedItemValue == null)
+                    {
+                        normalizedItemValue = FileUtilities.NormalizePathForComparisonNoThrow(Item.EvaluatedInclude, Item.ProjectDirectory);
+                        Volatile.Write(ref _normalizedItemValue, normalizedItemValue);
+                    }
+                    return normalizedItemValue;
+                }
+            }
         }
 
         private class MemoizedOperation : IItemOperation
         {
             public LazyItemOperation Operation { get; }
-            private Dictionary<ISet<string>, ImmutableList<ItemData>> _cache;
+            private Dictionary<ISet<string>, OrderedItemDataCollection> _cache;
 
             private bool _isReferenced;
 #if DEBUG
@@ -164,7 +184,7 @@ namespace Microsoft.Build.Evaluation
                 Operation = operation;
             }
 
-            public void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
 #if DEBUG
                 CheckInvariant();
@@ -200,7 +220,7 @@ namespace Microsoft.Build.Evaluation
             }
 #endif
 
-            public bool TryGetFromCache(ISet<string> globsToIgnore, out ImmutableList<ItemData> items)
+            public bool TryGetFromCache(ISet<string> globsToIgnore, out OrderedItemDataCollection items)
             {
                 if (_cache != null)
                 {
@@ -219,11 +239,11 @@ namespace Microsoft.Build.Evaluation
                 _isReferenced = true;
             }
 
-            private void AddItemsToCache(ImmutableHashSet<string> globsToIgnore, ImmutableList<ItemData> items)
+            private void AddItemsToCache(ImmutableHashSet<string> globsToIgnore, OrderedItemDataCollection items)
             {
                 if (_cache == null)
                 {
-                    _cache = new Dictionary<ISet<string>, ImmutableList<ItemData>>();
+                    _cache = new Dictionary<ISet<string>, OrderedItemDataCollection>();
                 }
 
                 _cache[globsToIgnore] = items;
@@ -253,7 +273,7 @@ namespace Microsoft.Build.Evaluation
                 return items.ToImmutable();
             }
 
-            public ImmutableList<ItemData>.Builder GetItemData(ImmutableHashSet<string> globsToIgnore)
+            public OrderedItemDataCollection.Builder GetItemData(ImmutableHashSet<string> globsToIgnore)
             {
                 // Cache results only on the LazyItemOperations whose results are required by an external caller (via GetItems). This means:
                 //   - Callers of GetItems who have announced ahead of time that they would reference an operation (via MarkAsReferenced())
@@ -275,7 +295,7 @@ namespace Microsoft.Build.Evaluation
                 // does not mutate: one can add operations on top, but the base never changes, and (ii) the globsToIgnore passed to the tail is the concatenation between
                 // the globsToIgnore received as an arg, and the globsToIgnore produced by the head (if the head is a Remove operation)
 
-                ImmutableList<ItemData> items;
+                OrderedItemDataCollection items;
                 if (_memoizedOperation.TryGetFromCache(globsToIgnore, out items))
                 {
                     return items.ToBuilder();
@@ -299,12 +319,12 @@ namespace Microsoft.Build.Evaluation
             /// is to optimize the case in which as series of UpdateOperations, each of which affects a single ItemSpec, are applied to all
             /// items in the list, leading to a quadratic-time operation.
             /// </summary>
-            private static ImmutableList<ItemData>.Builder ComputeItems(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)
+            private static OrderedItemDataCollection.Builder ComputeItems(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)
             {
                 // Stack of operations up to the first one that's cached (exclusive)
                 Stack<LazyItemList> itemListStack = new Stack<LazyItemList>();
 
-                ImmutableList<ItemData>.Builder items = null;
+                OrderedItemDataCollection.Builder items = null;
 
                 // Keep a separate stack of lists of globs to ignore that only gets modified for Remove operations
                 Stack<ImmutableHashSet<string>> globsToIgnoreStack = null;
@@ -313,7 +333,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     var globsToIgnoreFromFutureOperations = globsToIgnoreStack?.Peek() ?? globsToIgnore;
 
-                    ImmutableList<ItemData> itemsFromCache;
+                    OrderedItemDataCollection itemsFromCache;
                     if (currentList._memoizedOperation.TryGetFromCache(globsToIgnoreFromFutureOperations, out itemsFromCache))
                     {
                         // the base items on top of which to apply the uncached operations are the items of the first operation that is cached
@@ -341,7 +361,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (items == null)
                 {
-                    items = ImmutableList.CreateBuilder<ItemData>();
+                    items = OrderedItemDataCollection.CreateBuilder();
                 }
 
                 ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack == null ? globsToIgnore : globsToIgnoreStack.Peek();
@@ -419,7 +439,7 @@ namespace Microsoft.Build.Evaluation
                 return items;
             }
 
-            private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, ImmutableList<ItemData>.Builder items)
+            private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, OrderedItemDataCollection.Builder items)
             {
 #if DEBUG
                 ErrorUtilities.VerifyThrow(itemsWithNoWildcards.All(fragment => !MSBuildConstants.CharactersForExpansion.Any(fragment.Key.Contains)), $"{nameof(itemsWithNoWildcards)} should not contain any text fragments with wildcards.");
@@ -612,38 +632,36 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander)
+        {
+            // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
+            // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
+            // See: https://github.com/Microsoft/msbuild/issues/3460
+            const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
+
+            // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
+            // if so we need to add the right item reference.
+            foreach (var metadatumElement in metadata)
+            {
+                yield return expander.ExpandIntoStringLeaveEscaped(
+                    metadatumElement.Value,
+                    expanderOptions,
+                    metadatumElement.Location);
+
+                yield return expander.ExpandIntoStringLeaveEscaped(
+                    metadatumElement.Condition,
+                    expanderOptions,
+                    metadatumElement.ConditionLocation);
+            }
+        }
+
         private void ProcessMetadataElements(ProjectItemElement itemElement, OperationBuilderWithMetadata operationBuilder)
         {
             if (itemElement.HasMetadata)
             {
                 operationBuilder.Metadata.AddRange(itemElement.Metadata);
 
-                var values = new List<string>(itemElement.Metadata.Count * 2);
-
-                // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
-                // if so we need to add the right item reference.
-                foreach (var metadatumElement in itemElement.Metadata)
-                {
-                    // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
-                    // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
-                    // See: https://github.com/Microsoft/msbuild/issues/3460
-                    const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
-
-                    var valueWithPropertiesExpanded = _expander.ExpandIntoStringLeaveEscaped(
-                        metadatumElement.Value,
-                        expanderOptions,
-                        metadatumElement.Location);
-
-                    var conditionWithPropertiesExpanded = _expander.ExpandIntoStringLeaveEscaped(
-                        metadatumElement.Condition,
-                        expanderOptions,
-                        metadatumElement.ConditionLocation);
-
-                    values.Add(valueWithPropertiesExpanded);
-                    values.Add(conditionWithPropertiesExpanded);
-                }
-
-                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
+                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander));
                 if (itemsAndMetadataFound.Items != null)
                 {
                     foreach (var itemType in itemsAndMetadataFound.Items)

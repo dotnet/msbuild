@@ -40,7 +40,7 @@ function Print-Usage() {
   Write-Host "  -verbosity <value>      Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
   Write-Host "  -binaryLog              Output binary log (short: -bl)"
   Write-Host ""
- 
+
   Write-Host "Actions:"
   Write-Host "  -restore                Restore dependencies (short: -r)"
   Write-Host "  -build                  Build solution (short: -b)"
@@ -55,14 +55,14 @@ function Print-Usage() {
   Write-Host "  -sign                   Sign build outputs"
   Write-Host "  -publish                Publish artifacts (e.g. symbols)"
   Write-Host ""
- 
+
   Write-Host "Advanced settings:"
   Write-Host "  -projects <value>       Semi-colon delimited list of sln/proj's to build. Globbing is supported (*.sln)"
   Write-Host "  -ci                     Set when running on CI server"
   Write-Host "  -prepareMachine         Prepare machine for CI run"
   Write-Host "  -msbuildEngine <value>  Msbuild engine to use to run build ('dotnet', 'vs', or unspecified)."
   Write-Host ""
- 
+
   Write-Host "Official build settings:"
   Write-Host "  -officialBuildId                            An official build id, e.g. 20190102.3"
   Write-Host "  -officialSkipApplyOptimizationData <bool>   Pass 'true' to not apply optimization data"
@@ -151,19 +151,42 @@ function Set-OptProfVariables() {
 function Check-EditedFiles() {
   # Log VSTS errors for changed lines
   git --no-pager diff HEAD --unified=0 --no-color --exit-code | ForEach-Object { "##vso[task.logissue type=error] $_" }
-  if($LASTEXITCODE -ne 0) {
+  if ($LASTEXITCODE -ne 0) {
     throw "##vso[task.logissue type=error] After building, there are changed files.  Please build locally and include these changes in your pull request."
+  }
+}
+
+function Check-RequiredVersionBumps() {
+  # Log VSTS errors for missing required version bumps
+  $targetBranch = $env:SYSTEM_PULLREQUEST_TARGETBRANCH
+  if ($targetBranch) {
+    # Prepend remote reference if the branch is not local
+    if (!$targetBranch.StartsWith("refs/heads/")) {
+      $targetBranch = "refs/remotes/origin/" + $targetBranch
+    }
+    $versionLineChanged = $false
+    git --no-pager diff --unified --no-color --exit-code -w $targetBranch HEAD src\Framework\EngineServices.cs `
+      | Select-String -Pattern "int Version =" | ForEach-Object -process { $versionLineChanged = $true }
+    if (($LASTEXITCODE -ne 0) -and (-not $versionLineChanged)) {
+      throw "##vso[task.logissue type=error] Detected changes in Framework\EngineServices.cs without a version bump.  " +
+            "If you are making API changes, please bump the version.  " +
+            "If the changes in the file are cosmetic, please add/change a comment on the Version prop to silence the error."
+    }
   }
 }
 
 try {
   Process-Arguments
- 
+
   # Import Arcade functions
   . (Join-Path $PSScriptRoot "common\tools.ps1")
   . (Join-Path $PSScriptRoot "configure-toolset.ps1")
 
   $VSSetupDir = Join-Path $ArtifactsDir "VSSetup\$configuration"
+
+  if ($ci -and $build) {
+    Check-RequiredVersionBumps
+  }
 
   Build-Repo
 

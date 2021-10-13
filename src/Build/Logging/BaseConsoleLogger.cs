@@ -2,19 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text;
+
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Collections;
-using System.Globalization;
-using System.IO;
 
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
-using Microsoft.Build.Exceptions;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -330,6 +332,33 @@ namespace Microsoft.Build.BackEnd.Logging
         internal bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity) => Verbosity >= checkVerbosity;
 
         /// <summary>
+        /// Returns the minimum logger verbosity required to log a message with the given importance.
+        /// </summary>
+        /// <param name="importance">The message importance.</param>
+        /// <param name="lightenText">True if the message should be rendered using lighter colored text.</param>
+        /// <returns>The logger verbosity required to log a message of the given <paramref name="importance"/>.</returns>
+        internal static LoggerVerbosity ImportanceToMinimumVerbosity(MessageImportance importance, out bool lightenText)
+        {
+            switch (importance)
+            {
+                case MessageImportance.High:
+                    lightenText = false;
+                    return LoggerVerbosity.Minimal;
+                case MessageImportance.Normal:
+                    lightenText = true;
+                    return LoggerVerbosity.Normal;
+                case MessageImportance.Low:
+                    lightenText = true;
+                    return LoggerVerbosity.Detailed;
+
+                default:
+                    ErrorUtilities.VerifyThrow(false, "Impossible");
+                    lightenText = false;
+                    return LoggerVerbosity.Detailed;
+            }
+        }
+
+        /// <summary>
         /// Sets foreground color to color specified
         /// </summary>
         internal static void SetColor(ConsoleColor c)
@@ -642,40 +671,54 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal virtual void OutputItems(string itemType, ArrayList itemTypeList)
         {
-            // Write each item, one per line
-            bool haveWrittenItemType = false;
-            setColor(ConsoleColor.DarkGray);
-            foreach (ITaskItem item in itemTypeList)
+            WriteItemType(itemType);
+
+            foreach (var item in itemTypeList)
             {
-                if (!haveWrittenItemType)
+                string itemSpec = item switch
                 {
-                    setColor(ConsoleColor.Gray);
-                    WriteLinePretty(itemType);
-                    haveWrittenItemType = true;
-                    setColor(ConsoleColor.DarkGray);
-                }
-                WriteLinePretty("    "  /* indent slightly*/ + item.ItemSpec);
+                    ITaskItem taskItem => taskItem.ItemSpec,
+                    IItem iitem => iitem.EvaluatedInclude,
+                    { } misc => Convert.ToString(misc),
+                    null => "null"
+                };
 
-                IDictionary metadata = item.CloneCustomMetadata();
+                WriteItemSpec(itemSpec);
 
-                foreach (DictionaryEntry metadatum in metadata)
+                var metadata = item switch
                 {
-                    string valueOrError;
-                    try
-                    {
-                        valueOrError = item.GetMetadata(metadatum.Key as string);
-                    }
-                    catch (InvalidProjectFileException e)
-                    {
-                        valueOrError = e.Message;
-                    }
+                    IMetadataContainer metadataContainer => metadataContainer.EnumerateMetadata(),
+                    IItem<ProjectMetadata> iitem => iitem.Metadata?.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue)),
+                    _ => null
+                };
 
-                    // A metadatum's "value" is its escaped value, since that's how we represent them internally.
-                    // So unescape before returning to the world at large.
-                    WriteLinePretty("        " + metadatum.Key + " = " + valueOrError);
+                if (metadata != null)
+                {
+                    foreach (var metadatum in metadata)
+                    {
+                        WriteMetadata(metadatum.Key, metadatum.Value);
+                    }
                 }
             }
+
             resetColor();
+        }
+
+        protected virtual void WriteItemType(string itemType)
+        {
+            setColor(ConsoleColor.Gray);
+            WriteLinePretty(itemType);
+            setColor(ConsoleColor.DarkGray);
+        }
+
+        protected virtual void WriteItemSpec(string itemSpec)
+        {
+            WriteLinePretty("    " + itemSpec);
+        }
+
+        protected virtual void WriteMetadata(string name, string value)
+        {
+            WriteLinePretty("        " + name + " = " + value);
         }
 
         /// <summary>
@@ -959,6 +1002,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 eventSource.MessageRaised += MessageHandler;
                 eventSource.CustomEventRaised += CustomEventHandler;
                 eventSource.StatusEventRaised += StatusEventHandler;
+
+                bool logPropertiesAndItemsAfterEvaluation = Utilities.Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
+                if (logPropertiesAndItemsAfterEvaluation && eventSource is IEventSource4 eventSource4)
+                {
+                    eventSource4.IncludeEvaluationPropertiesAndItems();
+                }
             }
         }
 

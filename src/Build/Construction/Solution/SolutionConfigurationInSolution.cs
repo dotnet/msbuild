@@ -14,7 +14,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal const char ConfigurationPlatformSeparator = '|';
 
-        internal static readonly char[] ConfigurationPlatformSeparatorArray = new char[] { '|' };
+        internal static readonly char[] ConfigurationPlatformSeparatorArray = { '|' };
 
         /// <summary>
         /// Constructor

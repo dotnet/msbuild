@@ -2716,7 +2716,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/microsoft/msbuild/issues/4094")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "https://github.com/Microsoft/msbuild/issues/677")]
+        [SkipOnMono("https://github.com/Microsoft/msbuild/issues/677")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2894,7 +2894,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// </summary>
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/microsoft/msbuild/issues/4094")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "https://github.com/Microsoft/msbuild/issues/677")]
+        [SkipOnMono("https://github.com/Microsoft/msbuild/issues/677")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

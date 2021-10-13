@@ -14,7 +14,7 @@
     <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
          versions of this project -->
-    <RuntimeIdentifiers>win7-x86;win7-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers Condition="'$(DotNetBuildFromSource)' != 'true'">win7-x86;win7-x64</RuntimeIdentifiers>
 
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -25,11 +25,17 @@
 
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ApplicationManifest>MSBuild.exe.manifest</ApplicationManifest>
+
     <AppConfig>app.config</AppConfig>
     <!-- Temporary solution for
          https://github.com/Microsoft/msbuild/issues/834 Long term
          two files should be generated from a single source. -->
     <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
+    <!-- Disable binding redirect generation: we want to be deliberate
+         about the redirects we expose plugins to, and we explicitly
+         redirect ValueTuple _down_ to match VS. -->
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+
     <IsPackable>true</IsPackable>
     <ContentTargetFolders>contentFiles</ContentTargetFolders>
     <BuildOutputTargetFolder>contentFiles\any\</BuildOutputTargetFolder>

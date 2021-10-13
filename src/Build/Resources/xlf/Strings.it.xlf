@@ -262,6 +262,16 @@
         <target state="translated">MSB4274: la disabilitazione del nodo InProc porta a una riduzione del livello delle prestazioni quando si usano plug-in della cache del progetto che emettono richieste di compilazione proxy.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverCriticalFailure">
+        <source>MSB4242: SDK Resolver Failure: "{0}"</source>
+        <target state="translated">MSB4242: errore sistema di risoluzione SDK: "{0}"</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="SDKResolverFailed">
+        <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
+        <target state="translated">Il sistema di risoluzione SDK "{0}" non è riuscito durante il tentativo di risolvere l'SDK "{1}". Eccezione: "{2}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: il progetto "{0}" ha ignorato i vincoli di isolamento del grafico nel progetto di riferimento "{1}"</target>
@@ -1790,8 +1800,8 @@
         <note>{StrBegin="MSB4209: "}</note>
       </trans-unit>
       <trans-unit id="AffinityConflict">
-        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: l'affinità della richiesta specificata {0} è in conflitto con l'affinità {1} precedentemente specificata per il progetto.</target>
+        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</source>
+        <target state="translated">MSB4213: l'affinità della richiesta specificata {0} è in conflitto con l'affinità {1} precedentemente specificata per il progetto {2} con le proprietà globali {3}</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -2379,15 +2389,10 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
         <target state="translated">MSB4244: non è stato possibile caricare l'assembly "{0}" del resolver SDK. {1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
-      <trans-unit id="CouldNotRunSdkResolver">
-        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: non è stato possibile eseguire il resolver SDK "{0}". {1}</target>
-        <note>{StrBegin="MSB4242: "}</note>
-      </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
-        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: non è stato possibile eseguire il resolver SDK basato su NuGet perché non sono stati trovati assembly NuGet. Controllare l'installazione di MSBuild oppure impostare la variabile di ambiente "{0}" sulla cartella che contiene gli assembly NuGet richiesti. {1}</target>
-        <note>{StrBegin="MSB4243: "}</note>
+        <source>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="translated">Non è stato possibile eseguire il resolver SDK basato su NuGet perché non sono stati trovati assembly NuGet. Controllare l'installazione di MSBuild oppure impostare la variabile di ambiente "{0}" sulla cartella che contiene gli assembly NuGet richiesti. {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>

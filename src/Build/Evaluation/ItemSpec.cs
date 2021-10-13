@@ -85,6 +85,11 @@ namespace Microsoft.Build.Evaluation
                 return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
             }
 
+            public override IEnumerable<string> GetReferencedItems()
+            {
+                return ReferencedItems.Select(v => EscapingUtilities.UnescapeAll(v.ItemAsValueFragment.TextFragment));
+            }
+
             public override IMSBuildGlob ToMSBuildGlob()
             {
                 return MsBuildGlob;
@@ -317,6 +322,48 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Returns a list of normalized paths that are common between this itemspec and keys of the given dictionary.
+        /// </summary>
+        /// <param name="itemsByNormalizedValue">The dictionary to match this itemspec against.</param>
+        /// <returns>The keys of <paramref name="itemsByNormalizedValue"/> that are also referenced by this itemspec.</returns>
+        public IList<string> IntersectsWith(IReadOnlyDictionary<string, ItemDataCollectionValue<I>> itemsByNormalizedValue)
+        {
+            IList<string> matches = null;
+
+            foreach (var fragment in Fragments)
+            {
+                IEnumerable<string> referencedItems = fragment.GetReferencedItems();
+                if (referencedItems != null)
+                {
+                    // The fragment can enumerate its referenced items, we can do dictionary lookups.
+                    foreach (var spec in referencedItems)
+                    {
+                        string key = FileUtilities.NormalizePathForComparisonNoThrow(spec, fragment.ProjectDirectory);
+                        if (itemsByNormalizedValue.TryGetValue(key, out var multiValue))
+                        {
+                            matches ??= new List<string>();
+                            matches.Add(key);
+                        }
+                    }
+                }
+                else
+                {
+                    // The fragment cannot enumerate its referenced items. Iterate over the dictionary and test each item.
+                    foreach (var kvp in itemsByNormalizedValue)
+                    {
+                        if (fragment.IsMatchNormalized(kvp.Key))
+                        {
+                            matches ??= new List<string>();
+                            matches.Add(kvp.Key);
+                        }
+                    }
+                }
+            }
+
+            return matches ?? Array.Empty<string>();
+        }
+
+        /// <summary>
         ///     Return an MSBuildGlob that represents this ItemSpec.
         /// </summary>
         public IMSBuildGlob ToMSBuildGlob()
@@ -415,6 +462,16 @@ namespace Microsoft.Build.Evaluation
             return FileMatcher.IsMatch(itemToMatch);
         }
 
+        public virtual bool IsMatchNormalized(string normalizedItemToMatch)
+        {
+            return FileMatcher.IsMatchNormalized(normalizedItemToMatch);
+        }
+
+        public virtual IEnumerable<string> GetReferencedItems()
+        {
+            return Enumerable.Repeat(EscapingUtilities.UnescapeAll(TextFragment), 1);
+        }
+
         public virtual IMSBuildGlob ToMSBuildGlob()
         {
             return MsBuildGlob;
@@ -446,6 +503,12 @@ namespace Microsoft.Build.Evaluation
         {
         }
 
+        public override IEnumerable<string> GetReferencedItems()
+        {
+            // This fragment cannot efficiently enumerate its referenced items.
+            return null;
+        }
+
         /// <summary>
         /// True if TextFragment starts with /**/ or a variation thereof with backslashes.
         /// </summary>
@@ -462,7 +525,7 @@ namespace Microsoft.Build.Evaluation
     /// on multiple metadata. If one item specifies NotTargetFramework to be net46 and TargetFramework to
     /// be netcoreapp3.1, we wouldn't want to match that to an item with TargetFramework 46 and
     /// NotTargetFramework netcoreapp3.1.
-    /// 
+    ///
     /// Implementing this as a list of sets where each metadatum key has its own set also would not work
     /// because different items could match on different metadata, and we want to check to see if any
     /// single item matches on all the metadata. As an example, consider this scenario:
@@ -474,10 +537,10 @@ namespace Microsoft.Build.Evaluation
     /// should match none of them because Forgind doesn't match all three metadata of any of the items.
     /// With a list of sets, Forgind would match Baby on BadAt, Child on GoodAt, and Adolescent on OkAt,
     /// and Forgind would be erroneously removed.
-    /// 
+    ///
     /// With a Trie as below, Items specify paths in the tree, so going to any child node eliminates all
     /// items that don't share that metadatum. This ensures the match is proper.
-    /// 
+    ///
     /// Todo: Tries naturally can have different shapes depending on in what order the metadata are considered.
     /// Specifically, if all the items share a single metadata value for the one metadatum and have different
     /// values for a second metadatum, it will have only one node more than the number of items if the first

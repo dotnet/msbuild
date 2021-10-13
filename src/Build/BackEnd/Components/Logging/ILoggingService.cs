@@ -207,6 +207,15 @@ namespace Microsoft.Build.BackEnd.Logging
             set;
         }
 
+        /// <summary>
+        /// Returns the minimum logging importance that must be logged because there is a possibility that
+        /// at least one registered logger consumes it.
+        /// </summary>
+        MessageImportance MinimumRequiredMessageImportance
+        {
+            get;
+        }
+
         #endregion
 
         /// <summary>
@@ -525,8 +534,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskName">The name of the task</param>
         /// <param name="projectFile">The project file which is being built</param>
         /// <param name="projectFileOfTaskNode">The file in which the task is defined - typically a .targets file</param>
+        /// <param name="line">The line number in the file where the task invocation is located.</param>
+        /// <param name="column">The column number in the file where the task invocation is located.</param>
         /// <returns>The task build event context</returns>
-        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode);
+        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column);
 
         /// <summary>
         /// Log that a task has just completed

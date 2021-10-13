@@ -1171,6 +1171,25 @@ elementFormDefault="qualified">
       </xs:simpleType>
     </xs:element>
     <xs:element name="AppConfigForCompiler" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="ApplicationDefaultFont" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ApplicationDefaultFont" _locComment="" -->Customizes the application default font. The format equivalent to the output of FontConverter.ConvertToInvariantString(). Applies only to Windows Forms projects.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ApplicationHighDpiMode" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="ApplicationHighDpiMode" _locComment="" -->Customizes the application DPI awareness mode. Applies only to Windows Forms projects.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="SystemAware" />
+          <xs:enumeration value="PerMonitorV2" />
+          <xs:enumeration value="PerMonitor" />
+          <xs:enumeration value="DpiUnaware" />
+          <xs:enumeration value="DpiUnawareGdiScaled" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
     <xs:element name="ApplicationIcon" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ApplicationRevision" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
@@ -1180,6 +1199,16 @@ elementFormDefault="qualified">
     <xs:element name="ApplicationVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ApplicationVersion" _locComment="" -->Matches the expression "\d\.\d\.\d\.(\d|\*)"</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ApplicationUseCompatibleTextRendering" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ApplicationUseCompatibleTextRendering" _locComment="" -->Indicates whether to set UseCompatibleTextRendering property defined on certain controls (boolean). Applies only to Windows Forms projects.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ApplicationVisualStyles" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ApplicationVisualStyles" _locComment="" -->Indicates whether to enable or disable visual styles (boolean). Applies only to Windows Forms projects.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="AppDesignerFolder" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1252,10 +1281,19 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="DebugSymbols" _locComment="" -->Whether to emit symbols (boolean)</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="DebugType" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="DebugType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="DebugType" _locComment="" -->none, pdbonly, or full</xs:documentation>
+            <xs:documentation><!-- _locID_text="DebugType" _locComment="" -->none, pdbonly, embedded, portable, or full. From C# 6 onwards, pdbonly is the same as full.</xs:documentation>
         </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="none" />
+              <xs:enumeration value="pdbonly" />
+              <xs:enumeration value="embedded" />
+              <xs:enumeration value="portable" />
+              <xs:enumeration value="full" />
+            </xs:restriction>
+        </xs:simpleType>
     </xs:element>
     <xs:element name="DefaultClientScript" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DefaultHTMLPageLayout" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1552,6 +1590,18 @@ elementFormDefault="qualified">
     <xs:element name="GenerateSerializationAssemblies" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="HostInBrowser" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="IgnoreImportLibrary" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="ImplicitUsings" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="ImplicitUsings" _locComment="" -->Enable implicit global usings for the C# project. Possible values are enable, true, and disable.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="enable" />
+          <xs:enumeration value="true" />
+          <xs:enumeration value="disable" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
     <xs:element name="Install" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="InstallFrom" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
@@ -1799,6 +1849,11 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="RunPostBuildEvent" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="SatelliteResourceLanguages" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="SatelliteResourceLanguages" _locComment="" -->Semi-colon separated list of culture names to preserve satellite resource assemblies during build and publish. Names must be a valid culture name (like en-US;it; or fr). If left empty, all satellite resource assemblies will be preserved. Defaults to empty.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="SchemaVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SecureScoping" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SignAssembly" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -5760,5 +5815,68 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="Using" substitutionGroup="msb:Item">
+    <xs:annotation>
+      <xs:documentation>
+        <!-- _locID_text="Using" _locComment="" -->A C# global using to add to the project.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="msb:SimpleItemType">
+          <xs:attribute name="Include" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="Using_Include" _locComment="" -->The namespace or type identifier to add, e.g. Microsoft.AspNetCore
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Alias" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="Using_Alias" _locComment="" -->Optional alias for the namespace or type.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Static" type="msb:boolean" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="Using_Static" _locComment="" -->Determines whether the identifier should be registered as a static import.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="InternalsVisibleTo" substitutionGroup="msb:Item">
+  <xs:annotation>
+    <xs:documentation>
+      <!-- _locID_text="InternalsVisibleTo" _locComment="" -->Specifies that internal types and members are visible to the specified friend assemblies.
+    </xs:documentation>
+  </xs:annotation>
+  <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="msb:SimpleItemType">
+          <xs:attribute name="Include" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="InternalsVisibleTo_Include" _locComment="" -->The name of the friend assembly to make internal types and members visible to.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="PublicKey" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="InternalsVisibleTo_PublicKey" _locComment="" -->Optional public key associated with the strong name signature of the friend assembly.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
 
 </xs:schema>

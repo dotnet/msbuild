@@ -1247,7 +1247,8 @@ namespace Microsoft.Build.Tasks
             }
 
 #if FEATURE_WIN32_REGISTRY
-            if (dependencyTable.Resolvers != null)
+            MessageImportance messageImportance = MessageImportance.Low;
+            if (dependencyTable.Resolvers != null && Log.LogsMessagesOfImportance(messageImportance))
             {
                 foreach (Resolver r in dependencyTable.Resolvers)
                 {
@@ -1255,7 +1256,6 @@ namespace Microsoft.Build.Tasks
                     {
                         AssemblyFoldersEx assemblyFoldersEx = ((AssemblyFoldersExResolver)r).AssemblyFoldersExLocations;
 
-                        MessageImportance messageImportance = MessageImportance.Low;
                         if (assemblyFoldersEx != null && _showAssemblyFoldersExLocations.TryGetValue(r.SearchPath, out messageImportance))
                         {
                             Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.AssemblyFoldersExSearchLocations", r.SearchPath);
@@ -1347,6 +1347,10 @@ namespace Microsoft.Build.Tasks
         {
             // Set an importance level to be used for secondary messages.
             MessageImportance importance = ChooseReferenceLoggingImportance(reference);
+            if (!Log.LogsMessagesOfImportance(importance))
+            {
+                return;
+            }
 
             // Log the fusion name and whether this is a primary or a dependency.
             LogPrimaryOrDependency(reference, fusionName, importance);
@@ -1413,7 +1417,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogInputs()
         {
-            if (Traits.Instance.EscapeHatches.LogTaskInputs || Silent)
+            MessageImportance importance = MessageImportance.Low;
+            if (Silent || Log.IsTaskInputLoggingEnabled || !Log.LogsMessagesOfImportance(importance))
             {
                 // the inputs will be logged automatically anyway, avoid duplication in the logs
                 return;
@@ -1421,7 +1426,6 @@ namespace Microsoft.Build.Tasks
 
             string indent = Strings.FourSpaces;
             string property = Strings.LogTaskPropertyFormat;
-            MessageImportance importance = MessageImportance.Low;
 
             Log.LogMessage(importance, property, "TargetFrameworkMoniker");
             Log.LogMessage(importance, indent + _targetedFrameworkMoniker);
@@ -2003,12 +2007,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
+            _cache = SystemState.DeserializeCache(_stateFile, Log, typeof(SystemState)) as SystemState;
 
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
             {
-                _cache = SystemState.DeserializePrecomputedCachesByTranslator(AssemblyInformationCachePaths, Log, fileExists);
+                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists);
             }
 
             if (_cache == null)
@@ -2024,11 +2028,11 @@ namespace Microsoft.Build.Tasks
         {
             if (!String.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
-                _cache.SerializePrecomputedCacheByTranslator(AssemblyInformationCacheOutputPath, Log);
+                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
             }
             else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
-                _cache.SerializeCacheByTranslator(_stateFile, Log);
+                _cache.SerializeCache(_stateFile, Log);
             }
         }
         #endregion
@@ -2265,7 +2269,7 @@ namespace Microsoft.Build.Tasks
                     // Cache delegates.
                     getAssemblyName = _cache.CacheDelegate(getAssemblyName);
                     getAssemblyMetadata = _cache.CacheDelegate(getAssemblyMetadata);
-                    fileExists = _cache.CacheDelegate(fileExists);
+                    fileExists = _cache.CacheDelegate();
                     directoryExists = _cache.CacheDelegate(directoryExists);
                     getDirectories = _cache.CacheDelegate(getDirectories);
                     getRuntimeVersion = _cache.CacheDelegate(getRuntimeVersion);

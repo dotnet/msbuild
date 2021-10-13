@@ -55,6 +55,8 @@
     <PackageReference Include="xunit.core" />
     <PackageReference Include="xunit.assert" />
 
+    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
+
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 
@@ -67,6 +69,9 @@
          PrivateAssets to keep this reference (auto-added when targeting netcoreapp*)
          from making it into our NuGet packages. -->
     <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
+
+    <!-- Configure analyzer to forbid certain API calls -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
   </ItemGroup>
 
   <!-- GenAPI settings -->
@@ -78,10 +83,9 @@
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
     <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
     <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net4'))">net</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netstandard'))">netstandard</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netcoreapp'))">netstandard</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net5'))">netstandard</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">net</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">netstandard</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">netstandard</GenAPIShortFrameworkIdentifier>
     <GenAPITargetPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
 
@@ -99,6 +103,16 @@
     <Content Include="$(RepoRoot)src\Shared\EmptyDirectoryBuildFiles\*" CopyToOutputDirectory="PreserveNewest"
              Visible="false" Pack="false"/>
   </ItemGroup>
+
+  <Target Name="SetResourceProperties" BeforeTargets="_GetEmbeddedResourcesWithSourceGeneration">
+    <ItemGroup>
+      <EmbeddedResource Update="@(EmbeddedResource)" Condition="'%(EmbeddedResource.NuGetPackageId)' == 'Microsoft.CodeAnalysis.Collections' AND '%(FileName)' == 'Strings'">
+        <GenerateSource>true</GenerateSource>
+        <Generator>MSBuild:_GenerateResxSource</Generator>
+        <ClassName>Microsoft.CodeAnalysis.Collections.SR</ClassName>
+      </EmbeddedResource>
+    </ItemGroup>
+  </Target>
 
   <!-- Override in-box GenerateSatelliteAssemblies, as we are using CoreGenerateSatelliteAssemblies instead.
        With https://github.com/Microsoft/msbuild/pull/2726 this is no longer necessary, but that change is not

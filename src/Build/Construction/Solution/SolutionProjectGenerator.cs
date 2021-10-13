@@ -50,6 +50,11 @@ namespace Microsoft.Build.Construction
 #endif // FEATURE_ASPNET_COMPILER
 
         /// <summary>
+        /// Property set by VS when building projects. It's an XML containing the project configurations for ALL projects in the solution for the currently selected solution configuration.
+        /// </summary>
+        internal const string CurrentSolutionConfigurationContents = nameof(CurrentSolutionConfigurationContents);
+
+        /// <summary>
         /// The set of properties all projects in the solution should be built with
         /// </summary>
         private const string SolutionProperties = "BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)";
@@ -66,7 +71,11 @@ namespace Microsoft.Build.Construction
             "Build",
             "Clean",
             "Rebuild",
-            "Publish"
+            "Publish",
+            "ValidateSolutionConfiguration",
+            "ValidateToolsVersions",
+            "ValidateProjects",
+            "GetSolutionConfigurationContents"
             );
 
 #if FEATURE_ASPNET_COMPILER
@@ -226,6 +235,7 @@ namespace Microsoft.Build.Construction
             };
             using (XmlWriter xw = XmlWriter.Create(solutionConfigurationContents, settings))
             {
+                // TODO: fix code clone for parsing CurrentSolutionConfiguration xml: https://github.com/dotnet/msbuild/issues/6751
                 xw.WriteStartElement("SolutionConfiguration");
 
                 // add a project configuration entry for each project in the solution
@@ -975,6 +985,10 @@ namespace Microsoft.Build.Construction
                 _submissionId
                 );
 
+            // Traversal meta project entire state has to be serialized as it was generated and hence
+            // does not have disk representation to load project from.
+            traversalInstance.TranslateEntireState = true;
+
             // Make way for the real ones
             foreach (string targetName in dummyTargetsForEvaluationTime)
             {
@@ -1181,6 +1195,10 @@ namespace Microsoft.Build.Construction
         {
             // Create a new project instance with global properties and tools version from the existing project
             ProjectInstance metaprojectInstance = new ProjectInstance(EscapingUtilities.UnescapeAll(GetMetaprojectName(project)), traversalProject, GetMetaprojectGlobalProperties(traversalProject));
+
+            // Traversal meta project entire state has to be serialized as it was generated and hence
+            // does not have disk representation to load project from.
+            metaprojectInstance.TranslateEntireState = true;
 
             // Add the project references which must build before this one.
             AddMetaprojectReferenceItems(traversalProject, metaprojectInstance, project);

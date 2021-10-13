@@ -1545,11 +1545,9 @@ namespace Microsoft.Build.CommandLine
         private static void VerifyThrowSupportedOS()
         {
 #if FEATURE_OSVERSION
-            if ((Environment.OSVersion.Platform == PlatformID.Win32S) ||        // Win32S
-                (Environment.OSVersion.Platform == PlatformID.Win32Windows) ||  // Windows 95, Windows 98, Windows ME
-                (Environment.OSVersion.Platform == PlatformID.WinCE) ||         // Windows CE
-                ((Environment.OSVersion.Platform == PlatformID.Win32NT) &&      // Windows NT 4.0 and earlier
-                (Environment.OSVersion.Version.Major <= 4)))
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT ||
+                Environment.OSVersion.Version.Major < 6 ||
+                (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor < 1)) // Windows 7 is minimum
             {
                 // If we're running on any of the unsupported OS's, fail immediately.  This way,
                 // we don't run into some obscure error down the line, totally confusing the user.
@@ -3133,7 +3131,9 @@ namespace Microsoft.Build.CommandLine
                 LoggerVerbosity defaultFileLoggerVerbosity = LoggerVerbosity.Detailed;
                 fileLogger.Verbosity = defaultFileLoggerVerbosity;
 
-                if (cpuCount == 1)
+                // Check to see if there is a possibility we will be logging from an out-of-proc node.
+                // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
+                if (cpuCount == 1 && Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") != "1")
                 {
                     // We've decided to use the MP logger even in single proc mode.
                     // Switch it on here, rather than in the logger, so that other hosts that use
@@ -3197,7 +3197,9 @@ namespace Microsoft.Build.CommandLine
                     consoleParameters = AggregateParameters(consoleParameters, consoleLoggerParameters);
                 }
 
-                if (cpuCount == 1)
+                // Check to see if there is a possibility we will be logging from an out-of-proc node.
+                // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
+                if (cpuCount == 1 && Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") != "1")
                 {
                     // We've decided to use the MP logger even in single proc mode.
                     // Switch it on here, rather than in the logger, so that other hosts that use

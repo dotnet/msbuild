@@ -1285,13 +1285,15 @@
     <value>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</value>
     <comment>{StrBegin="MSB4244: "}</comment>
   </data>
-  <data name="CouldNotRunSdkResolver" xml:space="preserve">
-    <value>MSB4242: The SDK resolver "{0}" failed to run. {1}</value>
+  <data name="SDKResolverCriticalFailure" xml:space="preserve">
+    <value>MSB4242: SDK Resolver Failure: "{0}"</value>
     <comment>{StrBegin="MSB4242: "}</comment>
   </data>
+  <data name="SDKResolverFailed" xml:space="preserve">
+    <value>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</value>
+  </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
-    <value>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
-    <comment>{StrBegin="MSB4243: "}</comment>
+    <value>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
   </data>
   <data name="SdkResolverManifestInvalid" xml:space="preserve">
     <value>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</value>
@@ -1353,7 +1355,7 @@
     <comment>{StrBegin="MSB4209: "}</comment>
   </data>
   <data name="AffinityConflict" xml:space="preserve">
-    <value>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</value>
+    <value>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</value>
     <comment>{StrBegin="MSB4213: "}</comment>
   </data>
   <data name="UnableToCreateNode" xml:space="preserve">

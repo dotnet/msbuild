@@ -7,9 +7,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
@@ -235,10 +237,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
         public class ConfigurableMockCache : ProjectCachePluginBase
         {
+            public Func<CacheContext, PluginLoggerBase, CancellationToken, Task>? BeginBuildImplementation { get; set; }
             public Func<BuildRequestData, PluginLoggerBase, CancellationToken, Task<CacheResult>>? GetCacheResultImplementation { get; set; }
+
             public override Task BeginBuildAsync(CacheContext context, PluginLoggerBase logger, CancellationToken cancellationToken)
             {
-                return Task.CompletedTask;
+                return BeginBuildImplementation != null
+                    ? BeginBuildImplementation(context, logger, cancellationToken)
+                    : Task.CompletedTask;
             }
 
             public override Task<CacheResult> GetCacheResultAsync(
@@ -469,16 +475,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            if (buildParameters.DisableInProcNode
-                && testData.NonCacheMissResults.Any(c => c.Value.ProxyTargets is not null))
-            {
-                // TODO: remove this branch when the DisableInProcNode failure is fixed by https://github.com/dotnet/msbuild/pull/6400
-                graphResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-                buildSession.Logger.Errors.First().Code.ShouldBe("MSB4223");
-                return;
-            }
-
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
 
             buildSession.Dispose();
 
@@ -513,17 +510,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             {
                 var buildResult = buildSession.BuildProjectFile(node.ProjectInstance.FullPath);
 
-                if (buildParameters.DisableInProcNode &&
-                    testData.NonCacheMissResults.TryGetValue(GetProjectNumber(node), out var cacheResult) &&
-                    cacheResult.ProxyTargets is not null)
-                {
-                    // TODO: remove this branch when the DisableInProcNode failure is fixed by https://github.com/dotnet/msbuild/pull/6400
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-                    buildSession.Logger.Errors.First().Code.ShouldBe("MSB4223");
-                    return;
-                }
-
-                buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                buildResult.ShouldHaveSucceeded();
 
                 nodesToBuildResults[node] = buildResult;
             }
@@ -539,6 +526,84 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [MemberData(nameof(SuccessfulGraphsWithBuildParameters))]
         public void ProjectCacheByVsWorkaroundWorks(GraphCacheResponse testData, BuildParameters buildParameters)
         {
+            ProjectGraph? graph = null;
+
+            var (logger, nodesToBuildResults) = BuildGraphByVsWorkaround(
+                () =>
+                {
+                    graph = testData.CreateGraph(_env);
+                    return graph;
+                },
+                buildParameters);
+
+            graph.ShouldNotBeNull();
+
+            AssertCacheBuild(graph!, testData, null, logger, nodesToBuildResults);
+        }
+
+        [Fact]
+        public void ProjectCacheByVsWorkaroundIgnoresSlnDisabledProjects()
+        {
+            var testData = new GraphCacheResponse(
+                new Dictionary<int, int[]>
+                {
+                    {1, new[] {2}}
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>()
+                {
+                    {1, "<PropertyGroup> <BuildProjectInSolution>false</BuildProjectInSolution> </PropertyGroup>"}
+                });
+
+            ProjectGraph? graph = null;
+
+            var (logger, nodesToBuildResults) = BuildGraphByVsWorkaround(
+                graphProducer: () =>
+                {
+                    graph = testData.CreateGraph(_env);
+                    return graph;
+                },
+                assertBuildResults: false
+            );
+
+            graph.ShouldNotBeNull();
+
+            logger.FullLog.ShouldNotContain($"EntryPoint: {graph!.GraphRoots.First().ProjectInstance.FullPath}");
+            logger.FullLog.ShouldContain($"EntryPoint: {graph.GraphRoots.First().ProjectReferences.First().ProjectInstance.FullPath}");
+        }
+
+        [Fact]
+        public void ProjectCacheByVsWorkaroundShouldNotSupportSolutionOnlyDependencies()
+        {
+            var testData = new GraphCacheResponse(
+                new Dictionary<int, int[]>
+                {
+                    {1, Array.Empty<int>()}
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>()
+                {
+                    {1, $"<PropertyGroup> <ProjectDependency>{Guid.NewGuid()}</ProjectDependency> </PropertyGroup>"}
+                });
+
+            var (logger, nodeResults) = BuildGraphByVsWorkaround(
+                graphProducer: () => testData.CreateGraph(_env),
+                assertBuildResults: false);
+
+            nodeResults.ShouldHaveSingleItem();
+
+            var buildResult = nodeResults.First().Value;
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult.Exception.Message.ShouldContain("Project cache service does not support solution only dependencies when running under Visual Studio.");
+        }
+
+        private (MockLogger logger, Dictionary<ProjectGraphNode, BuildResult> nodesToBuildResults) BuildGraphByVsWorkaround(
+            Func<ProjectGraph> graphProducer,
+            BuildParameters? buildParameters = null,
+            bool assertBuildResults = true
+        )
+        {
+            var nodesToBuildResults = new Dictionary<ProjectGraphNode, BuildResult>();
+            MockLogger? logger;
+
             var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
 
             try
@@ -552,39 +617,103 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
                 // Reset the environment variables stored in the build params to take into account TestEnvironmentChanges.
-                buildParameters = new BuildParameters(buildParameters, resetEnvironment: true);
+                buildParameters = buildParameters  is null
+                    ? new BuildParameters()
+                    : new BuildParameters(buildParameters, resetEnvironment: true);
 
                 BuildManager.ProjectCacheItems.ShouldBeEmpty();
 
-                var graph = testData.CreateGraph(_env);
+                var graph = graphProducer.Invoke();
 
                 BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
 
+                var projectPaths = graph.ProjectNodes.Select(n => n.ProjectInstance.FullPath).ToArray();
+
+                // VS sets this global property on every project it builds.
+                var solutionConfigurationGlobalProperty = CreateSolutionConfigurationProperty(graph.ProjectNodes);
+
                 using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
-                var nodesToBuildResults = new Dictionary<ProjectGraphNode, BuildResult>();
 
                 foreach (var node in graph.ProjectNodesTopologicallySorted)
                 {
                     var buildResult = buildSession.BuildProjectFile(
                         node.ProjectInstance.FullPath,
                         globalProperties:
-                            new Dictionary<string, string> {{"SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath}});
+                            new Dictionary<string, string>
+                            {
+                                { SolutionProjectGenerator.SolutionPathPropertyName, graph.GraphRoots.First().ProjectInstance.FullPath },
+                                { SolutionProjectGenerator.CurrentSolutionConfigurationContents, solutionConfigurationGlobalProperty },
+                                { PropertyNames.InnerBuildProperty, "TheInnerBuildProperty"},
+                                { "TheInnerBuildProperty", "FooBar"},
+                            });
 
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                    if (assertBuildResults)
+                    {
+                        buildResult.ShouldHaveSucceeded();
+                    }
 
                     nodesToBuildResults[node] = buildResult;
                 }
 
-                buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
-                buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
+                logger = buildSession.Logger;
 
-                AssertCacheBuild(graph, testData, null, buildSession.Logger, nodesToBuildResults);
+                if (assertBuildResults)
+                {
+                    logger.FullLog.ShouldContain("Visual Studio Workaround based");
+                    logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
+
+                    foreach (var node in graph.ProjectNodes)
+                    {
+                        var projectPath = node.ProjectInstance.FullPath;
+                        var projectName = Path.GetFileNameWithoutExtension(projectPath);
+
+                        // Ensure MSBuild passes config / platform information set by VS.
+                        logger.FullLog.ShouldContain($"EntryPoint: {projectPath}");
+                        logger.FullLog.ShouldContain($"Configuration:{projectName}Debug");
+                        logger.FullLog.ShouldContain($"Platform:{projectName}x64");
+
+                        // Ensure MSBuild removes the inner build property if present.
+                        logger.FullLog.ShouldContain($"{PropertyNames.InnerBuildProperty}:TheInnerBuildProperty");
+                        logger.FullLog.ShouldNotContain("TheInnerBuildProperty:FooBar");
+                    }
+                }
             }
             finally
             {
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(currentBuildEnvironment);
                 BuildManager.ProjectCacheItems.Clear();
             }
+
+            return (logger, nodesToBuildResults);
+        }
+
+        private static string CreateSolutionConfigurationProperty(IReadOnlyCollection<ProjectGraphNode> projectNodes)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("<SolutionConfiguration>");
+
+            foreach (var node in projectNodes)
+            {
+                var projectPath = node.ProjectInstance.FullPath;
+                var projectName = Path.GetFileNameWithoutExtension(projectPath);
+
+                var buildProjectInSolutionValue = node.ProjectInstance.GetPropertyValue("BuildProjectInSolution");
+                var buildProjectInSolutionAttribute = string.IsNullOrWhiteSpace(buildProjectInSolutionValue)
+                    ? string.Empty
+                    : $"BuildProjectInSolution=\"{buildProjectInSolutionValue}\"";
+
+                var projectDependencyValue = node.ProjectInstance.GetPropertyValue("ProjectDependency");
+                var projectDependencyElement = string.IsNullOrWhiteSpace(projectDependencyValue)
+                    ? string.Empty
+                    : $"<ProjectDependency Project=\"{projectDependencyValue}\" />";
+
+                sb.AppendLine($"<ProjectConfiguration Project=\"{Guid.NewGuid()}\" AbsolutePath=\"{projectPath}\" {buildProjectInSolutionAttribute}>{projectName}Debug|{projectName}x64{projectDependencyElement}</ProjectConfiguration>");
+            }
+
+            sb.AppendLine("</SolutionConfiguration>");
+
+            return sb.ToString();
         }
 
         [Fact]
@@ -631,12 +760,12 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 foreach (var task in referenceBuildTasks)
                 {
                     var buildResult = task.Result;
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                    buildResult.ShouldHaveSucceeded();
                 }
 
                 buildSession
                     .BuildProjectFile(rootNode.ProjectInstance.FullPath, globalProperties: globalProperties)
-                    .OverallResult.ShouldBe(BuildResultCode.Success);
+                    .ShouldHaveSucceeded();
 
                 buildSession.Dispose();
 
@@ -701,15 +830,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            if (!disableInprocNodeViaEnvironmentVariable)
-            {
-                // TODO: remove this branch when the DisableInProcNode failure is fixed by https://github.com/dotnet/msbuild/pull/6400
-                graphResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-                buildSession.Logger.Errors.First().Code.ShouldBe("MSB4223");
-                return;
-            }
-
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
 
             buildSession.Dispose();
 
@@ -854,7 +975,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var buildResult = buildSession.BuildProjectFile(project1.Path);
 
-            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            buildResult.ShouldHaveSucceeded();
 
             buildSession.Logger.ProjectStartedEvents.Count.ShouldBe(2);
 
@@ -886,7 +1007,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
 
             buildSession.Logger.FullLog.ShouldContain("Explicit entry-point based");
 
@@ -909,7 +1030,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
 
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
@@ -963,10 +1084,10 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             mockCache.Requests.Count.ShouldBe(2);
 
-            buildResult.ResultsByNode.First(r => GetProjectNumber(r.Key) == 2).Value.OverallResult.ShouldBe(BuildResultCode.Success);
-            buildResult.ResultsByNode.First(r => GetProjectNumber(r.Key) == 1).Value.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult.ResultsByNode.First(r => GetProjectNumber(r.Key) == 2).Value.ShouldHaveSucceeded();
+            buildResult.ResultsByNode.First(r => GetProjectNumber(r.Key) == 1).Value.ShouldHaveFailed();
 
-            buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult.ShouldHaveFailed();
 
             buildSession.Logger.FullLog.ShouldContain("Reference file [Invalid file] does not exist");
         }
@@ -990,9 +1111,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             using var buildSession = new Helpers.BuildManagerSession(_env);
 
             var graphResult = buildSession.BuildGraph(graph);
-
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-            graphResult.Exception.Message.ShouldContain("A single project cache plugin must be specified but multiple where found:");
+            
+            graphResult.ShouldHaveFailed("A single project cache plugin must be specified but multiple where found:");
         }
 
         [Fact]
@@ -1019,9 +1139,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             using var buildSession = new Helpers.BuildManagerSession(_env);
 
             var graphResult = buildSession.BuildGraph(graph);
-
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-            graphResult.Exception.Message.ShouldContain("When any static graph node defines a project cache, all nodes must define the same project cache.");
+            
+            graphResult.ShouldHaveFailed("When any static graph node defines a project cache, all nodes must define the same project cache.");
         }
 
         public static IEnumerable<object[]> CacheExceptionLocationsTestData
@@ -1103,11 +1222,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 // so the build submission should be successful.
                 if (errorLocations == ErrorLocations.EndBuildAsync)
                 {
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                    buildResult.ShouldHaveSucceeded();
                 }
                 else
                 {
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+                    buildResult.ShouldHaveFailed();
                 }
             }
             finally
@@ -1208,7 +1327,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 logger.FullLog.ShouldContain("Loading the following project cache plugin:");
 
                 // Static graph build initializes and tears down the cache plugin so all cache plugin exceptions should end up in the GraphBuildResult
-                buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+                buildResult.ShouldHaveFailed();
 
                 buildResult.Exception.ShouldBeOfType<ProjectCacheException>();
 
@@ -1279,14 +1398,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var logger = buildSession.Logger;
 
-            GraphBuildResult? buildResult = null;
+            GraphBuildResult buildResult = null!;
             Should.NotThrow(
                 () =>
                 {
                     buildResult = buildSession.BuildGraph(new ProjectGraph(project.Path));
                 });
 
-            buildResult!.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult.ShouldHaveFailed();
             buildResult.Exception.InnerException!.ShouldNotBeNull();
             buildResult.Exception.InnerException!.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
 
@@ -1300,12 +1419,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [InlineData(true, true)]
         public void CacheShouldBeQueriedInParallelDuringGraphBuilds(bool useSynchronousLogging, bool disableInprocNode)
         {
-            if (disableInprocNode)
-            {
-                // TODO: remove this branch when the DisableInProcNode failure is fixed by https://github.com/dotnet/msbuild/pull/6400
-                return;
-            }
-
             var referenceNumbers = new []{2, 3, 4};
 
             var testData = new GraphCacheResponse(
@@ -1357,9 +1470,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             var task3 = BuildProjectFileAsync(3);
             var task4 = BuildProjectFileAsync(4);
 
-            task3.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            task3.Result.ShouldHaveSucceeded();
             completedCacheRequests.ShouldContain(3);
-            task4.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            task4.Result.ShouldHaveSucceeded();
             completedCacheRequests.ShouldContain(4);
 
             // task 2 hasn't been instructed to finish yet
@@ -1368,11 +1481,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             task2Completion.SetResult(true);
 
-            task2.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            task2.Result.ShouldHaveSucceeded();
             completedCacheRequests.ShouldContain(2);
 
             var task1 = BuildProjectFileAsync(1);
-            task1.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            task1.Result.ShouldHaveSucceeded();
             completedCacheRequests.ShouldContain(1);
 
             Task<BuildResult> BuildProjectFileAsync(int projectNumber)
@@ -1416,6 +1529,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 // Even though the assembly cache is discovered, we'll be overriding it with a descriptor based cache.
                 BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
 
+                var solutionConfigurationGlobalProperty =
+                    CreateSolutionConfigurationProperty(graph.ProjectNodes);
+
                 using var buildSession = new Helpers.BuildManagerSession(_env, new BuildParameters
                 {
                     MaxNodeCount = NativeMethodsShared.GetLogicalCoreCount(),
@@ -1430,21 +1546,25 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     var buildResultTask = buildSession.BuildProjectFileAsync(
                         node.ProjectInstance.FullPath,
                         globalProperties:
-                        new Dictionary<string, string> { { "SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath } });
+                        new Dictionary<string, string>
+                        {
+                            { SolutionProjectGenerator.SolutionPathPropertyName, graph.GraphRoots.First().ProjectInstance.FullPath },
+                            { SolutionProjectGenerator.CurrentSolutionConfigurationContents, solutionConfigurationGlobalProperty }
+                        });
 
                     buildResultTasks.Add(buildResultTask);
                 }
 
                 foreach (var buildResultTask in buildResultTasks)
                 {
-                    buildResultTask.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+                    buildResultTask.Result.ShouldHaveSucceeded();
                 }
 
                 buildSession.BuildProjectFile(
                         graph.GraphRoots.First().ProjectInstance.FullPath,
                         globalProperties:
                         new Dictionary<string, string> {{"SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath}})
-                    .OverallResult.ShouldBe(BuildResultCode.Success);
+                    .ShouldHaveSucceeded();
 
                 StringShouldContainSubstring(buildSession.Logger.FullLog, $"{AssemblyMockCache}: GetCacheResultAsync for", graph.ProjectNodes.Count);
 
@@ -1463,12 +1583,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [InlineData(true, true)]
         public void ParallelStressTest(bool useSynchronousLogging, bool disableInprocNode)
         {
-            if (disableInprocNode)
-            {
-                // TODO: remove this branch when the DisableInProcNode failure is fixed by https://github.com/dotnet/msbuild/pull/6400
-                return;
-            }
-
             var referenceNumbers = Enumerable.Range(2, NativeMethodsShared.GetLogicalCoreCount() * 2).ToArray();
 
             var testData = new GraphCacheResponse(
@@ -1495,7 +1609,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
             cache.QueryStartStops.Count.ShouldBe(graph.ProjectNodes.Count * 2);
         }
 
@@ -1581,7 +1695,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             foreach (var buildResult in buildTasks.Select(buildTask => buildTask.Result))
             {
                 buildResult.Exception.ShouldBeNull();
-                buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                buildResult.ShouldHaveSucceeded();
             }
 
             buildSession.Logger.ProjectStartedEvents.Count.ShouldBe(2 * projectPaths.Length);

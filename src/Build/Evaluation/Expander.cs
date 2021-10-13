@@ -610,7 +610,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static bool IsTruncationEnabled(ExpanderOptions options)
         {
-            return (options & ExpanderOptions.Truncate) != 0 && !Traits.Instance.EscapeHatches.DoNotTruncateConditions && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8);
+            return (options & ExpanderOptions.Truncate) != 0 && !Traits.Instance.EscapeHatches.DoNotTruncateConditions;
         }
 
         /// <summary>
@@ -1759,7 +1759,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 List<ExpressionShredder.ItemExpressionCapture> matches;
-                if (s_invariantCompareInfo.IndexOf(expression, '@') == -1)
+                if (expression.IndexOf('@') == -1)
                 {
                     return null;
                 }
@@ -2539,7 +2539,7 @@ namespace Microsoft.Build.Evaluation
                             {
                                 // It may be that the itemspec has unescaped ';'s in it so we need to split here to handle
                                 // that case.
-                                if (s_invariantCompareInfo.IndexOf(metadataValue, ';') >= 0)
+                                if (metadataValue.IndexOf(';') >= 0)
                                 {
                                     var splits = ExpressionShredder.SplitSemiColonSeparatedList(metadataValue);
 
@@ -3352,6 +3352,12 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
+                        // Check that the function that we're going to call is valid to call
+                        if (!IsInstanceMethodAvailable(_methodMethodName))
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionMethodUnavailable", _methodMethodName, _receiverType.FullName);
+                        }
+
                         _bindingFlags |= BindingFlags.Instance;
 
                         // The object that we're about to call methods on may have escaped characters
@@ -5015,6 +5021,19 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static bool IsInstanceMethodAvailable(string methodName)
+            {
+                if (Traits.Instance.EnableAllPropertyFunctions)
+                {
+                    // anything goes
+                    return true;
+                }
+
+                // This could be expanded to an allow / deny list.
+                return methodName != "GetType";
             }
 
             /// <summary>

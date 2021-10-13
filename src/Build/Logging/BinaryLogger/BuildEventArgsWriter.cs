@@ -370,7 +370,9 @@ Build
         private void Write(TaskStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.TaskStarted);
-            WriteBuildEventArgsFields(e, writeMessage: false);
+            WriteBuildEventArgsFields(e, writeMessage: false, writeLineAndColumn: true);
+            Write(e.LineNumber);
+            Write(e.ColumnNumber);
             WriteDeduplicatedString(e.TaskName);
             WriteDeduplicatedString(e.ProjectFile);
             WriteDeduplicatedString(e.TaskFile);
@@ -390,6 +392,7 @@ Build
         {
             Write(BinaryLogRecordKind.Error);
             WriteBuildEventArgsFields(e);
+            WriteArguments(e.RawArguments);
             WriteDeduplicatedString(e.Subcategory);
             WriteDeduplicatedString(e.Code);
             WriteDeduplicatedString(e.File);
@@ -404,6 +407,7 @@ Build
         {
             Write(BinaryLogRecordKind.Warning);
             WriteBuildEventArgsFields(e);
+            WriteArguments(e.RawArguments);
             WriteDeduplicatedString(e.Subcategory);
             WriteDeduplicatedString(e.Code);
             WriteDeduplicatedString(e.File);
@@ -454,6 +458,8 @@ Build
             WriteDeduplicatedString(e.EvaluatedCondition);
             Write(e.OriginallySucceeded);
             Write((int)e.BuildReason);
+            Write((int)e.SkipReason);
+            binaryWriter.WriteOptionalBuildEventContext(e.OriginalBuildEventContext);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)
@@ -512,9 +518,14 @@ Build
             WriteTaskItemList(e.Items, e.LogItemMetadata);
         }
 
-        private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true)
+        private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true, bool writeLineAndColumn = false)
         {
             var flags = GetBuildEventArgsFieldFlags(e, writeMessage);
+            if (writeLineAndColumn)
+            {
+                flags |= BuildEventArgsFieldFlags.LineNumber | BuildEventArgsFieldFlags.ColumnNumber;
+            }
+
             Write((int)flags);
             WriteBaseFields(e, flags);
         }
@@ -555,7 +566,7 @@ Build
         private void WriteMessageFields(BuildMessageEventArgs e, bool writeMessage = true, bool writeImportance = false)
         {
             var flags = GetBuildEventArgsFieldFlags(e, writeMessage);
-            flags = GetMessageFlags(e, flags, writeMessage, writeImportance);
+            flags = GetMessageFlags(e, flags, writeImportance);
 
             Write((int)flags);
 
@@ -603,12 +614,7 @@ Build
 
             if ((flags & BuildEventArgsFieldFlags.Arguments) != 0)
             {
-                Write(e.RawArguments.Length);
-                for (int i = 0; i < e.RawArguments.Length; i++)
-                {
-                    string argument = Convert.ToString(e.RawArguments[i], CultureInfo.CurrentCulture);
-                    WriteDeduplicatedString(argument);
-                }
+                WriteArguments(e.RawArguments);
             }
 
             if ((flags & BuildEventArgsFieldFlags.Importance) != 0)
@@ -617,7 +623,23 @@ Build
             }
         }
 
-        private static BuildEventArgsFieldFlags GetMessageFlags(BuildMessageEventArgs e, BuildEventArgsFieldFlags flags, bool writeMessage = true, bool writeImportance = false)
+        private void WriteArguments(object[] arguments)
+        {
+            if (arguments == null || arguments.Length == 0)
+            {
+                return;
+            }
+
+            int count = arguments.Length;
+            Write(count);
+            for (int i = 0; i < count; i++)
+            {
+                string argument = Convert.ToString(arguments[i], CultureInfo.CurrentCulture);
+                WriteDeduplicatedString(argument);
+            }
+        }
+
+        private static BuildEventArgsFieldFlags GetMessageFlags(BuildMessageEventArgs e, BuildEventArgsFieldFlags flags, bool writeImportance = false)
         {
             if (e.Subcategory != null)
             {
@@ -659,11 +681,6 @@ Build
                 flags |= BuildEventArgsFieldFlags.EndColumnNumber;
             }
 
-            if (writeMessage && e.RawArguments != null && e.RawArguments.Length > 0)
-            {
-                flags |= BuildEventArgsFieldFlags.Arguments;
-            }
-
             if (writeImportance && e.Importance != MessageImportance.Low)
             {
                 flags |= BuildEventArgsFieldFlags.Importance;
@@ -688,6 +705,14 @@ Build
             if (writeMessage)
             {
                 flags |= BuildEventArgsFieldFlags.Message;
+
+                // We're only going to write the arguments for messages,
+                // warnings and errors. Only set the flag for these.
+                if (e is LazyFormattedBuildEventArgs { RawArguments: { Length: > 0 } } and
+                    (BuildMessageEventArgs or BuildWarningEventArgs or BuildErrorEventArgs))
+                {
+                    flags |= BuildEventArgsFieldFlags.Arguments;
+                }
             }
 
             // no need to waste space for the default sender name
@@ -695,12 +720,6 @@ Build
             {
                 flags |= BuildEventArgsFieldFlags.SenderName;
             }
-
-            // ThreadId never seems to be used or useful for anything.
-            //if (e.ThreadId > 0)
-            //{
-            //    flags |= BuildEventArgsFieldFlags.ThreadId;
-            //}
 
             if (e.Timestamp != default(DateTime))
             {

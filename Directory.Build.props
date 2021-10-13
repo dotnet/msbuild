@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
@@ -35,11 +35,10 @@
          NU5105: we're explicitly opting in to semver2, as is most of .NET Core
         CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
         you don't get those defaults.
-        NU5125: Arcade uses licenseUrl when doing pack, which now causes NU5125 warning. This disables that warning until arcade can switch over.
         SYSLIB0011: Removing binary formatter will happen as part of a larger .NET-wide effort.
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702;SYSLIB0011</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702;SYSLIB0011</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
@@ -63,9 +62,20 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <AssemblyInformationCachePaths Condition="Exists('$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SdkPrecomputedAssemblyReferences.cache')">$(AssemblyInformationCachePaths);$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SDKPrecomputedAssemblyReferences.cache</AssemblyInformationCachePaths>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <DefaultItemExcludes>$(DefaultItemExcludes);*.log</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);*.binlog</DefaultItemExcludes>
 
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
+  
+  <Import Project="$(RepositoryEngineeringDir)Analyzers.props" />
+
+  <PropertyGroup>
+    <EnableAnalyzers>true</EnableAnalyzers>
+  </PropertyGroup>
+  
 </Project>

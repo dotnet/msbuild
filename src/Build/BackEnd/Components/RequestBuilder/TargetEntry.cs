@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -354,7 +355,10 @@ namespace Microsoft.Build.BackEnd
 
             if (!condition)
             {
-                _targetResult = new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
+                _targetResult = new TargetResult(
+                    Array.Empty<TaskItem>(),
+                    new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null),
+                    projectLoggingContext.BuildEventContext);
                 _state = TargetEntryState.Completed;
 
                 if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
@@ -375,6 +379,7 @@ namespace Microsoft.Build.BackEnd
                         TargetFile = _target.Location.File,
                         ParentTarget = ParentEntry?.Target?.Name,
                         BuildReason = BuildReason,
+                        SkipReason = TargetSkipReason.ConditionWasFalse,
                         Condition = _target.Condition,
                         EvaluatedCondition = expanded
                     };
@@ -460,8 +465,10 @@ namespace Microsoft.Build.BackEnd
                         Lookup lookupForExecution;
 
                         // UNDONE: (Refactor) Refactor TargetUpToDateChecker to take a logging context, not a logging service.
+                        MSBuildEventSource.Log.TargetUpToDateStart();
                         TargetUpToDateChecker dependencyAnalyzer = new TargetUpToDateChecker(requestEntry.RequestConfiguration.Project, _target, targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext);
                         DependencyAnalysisResult dependencyResult = dependencyAnalyzer.PerformDependencyAnalysis(bucket, out changedTargetInputs, out upToDateTargetInputs);
+                        MSBuildEventSource.Log.TargetUpToDateStop((int)dependencyResult);
 
                         switch (dependencyResult)
                         {
@@ -640,14 +647,11 @@ namespace Microsoft.Build.BackEnd
                 }
                 finally
                 {
-                       
-                    
-                        // log the last target finished since we now have the target outputs. 
-                        targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
-                    
+                    // log the last target finished since we now have the target outputs. 
+                    targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
                 }
 
-                _targetResult = new TargetResult(targetOutputItems.ToArray(), aggregateResult);
+                _targetResult = new TargetResult(targetOutputItems.ToArray(), aggregateResult, targetLoggingContext?.BuildEventContext);
 
                 if (aggregateResult.ResultCode == WorkUnitResultCode.Failed && aggregateResult.ActionCode == WorkUnitActionCode.Stop)
                 {

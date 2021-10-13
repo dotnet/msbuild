@@ -514,9 +514,6 @@ namespace Microsoft.Build.Shared
             //     https://github.com/dotnet/runtime/issues/29686
             // so always double-check it.
             if (IsWindows
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8)
-#endif
 #if NETFRAMEWORK
                 // .NET Framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
                 // So if we get a high core count on full framework, double-check it.
@@ -635,6 +632,9 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        // CA1416 warns about code that can only run on Windows, but we verified we're running on Windows before this.
+        // This is the most reasonable way to resolve this part because other ways would require ifdef'ing on NET472.
+#pragma warning disable CA1416
         private static bool IsLongPathsEnabledRegistry()
         {
             using (RegistryKey fileSystemKey = Registry.LocalMachine.OpenSubKey(WINDOWS_FILE_SYSTEM_REGISTRY_KEY))
@@ -643,6 +643,7 @@ namespace Microsoft.Build.Shared
                 return fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1;
             }
         }
+#pragma warning restore CA1416
 
         /// <summary>
         /// Cached value for IsUnixLike (this method is called frequently during evaluation).
@@ -872,33 +873,6 @@ namespace Microsoft.Build.Shared
         /// Native architecture getter
         /// </summary>
         internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.ProcessorArchitectureTypeNative;
-
-#endregion
-
-#region Set Error Mode (copied from BCL)
-
-        private static readonly Version s_threadErrorModeMinOsVersion = new Version(6, 1, 0x1db0);
-
-        internal static int SetErrorMode(int newMode)
-        {
-#if FEATURE_OSVERSION
-            if (Environment.OSVersion.Version < s_threadErrorModeMinOsVersion)
-            {
-                return SetErrorMode_VistaAndOlder(newMode);
-            }
-#endif
-            int num;
-            SetErrorMode_Win7AndNewer(newMode, out num);
-            return num;
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport("kernel32.dll", EntryPoint = "SetThreadErrorMode", SetLastError = true)]
-        private static extern bool SetErrorMode_Win7AndNewer(int newMode, out int oldMode);
-
-        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport("kernel32.dll", EntryPoint = "SetErrorMode", ExactSpelling = true)]
-        private static extern int SetErrorMode_VistaAndOlder(int newMode);
 
 #endregion
 
@@ -1635,8 +1609,10 @@ namespace Microsoft.Build.Shared
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-
         internal static extern bool CloseHandle(IntPtr hObject);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool SetThreadErrorMode(int newMode, out int oldMode);
 
 #endregion
 

@@ -164,6 +164,7 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public string Result { get { throw null; } set { } }
         public string RootElementName { get { throw null; } set { } }
+        public bool UseAttributeForTargetFrameworkInfoPropertyNames { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
     public partial class CombineXmlElements : Microsoft.Build.Tasks.TaskExtension
@@ -611,6 +612,18 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] Assemblies { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] AssemblyFiles { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
+    public partial class GetCompatiblePlatform : Microsoft.Build.Tasks.TaskExtension
+    {
+        public GetCompatiblePlatform() { }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] AnnotatedProjects { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] AssignedProjectsWithPlatform { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string CurrentProjectPlatform { get { throw null; } set { } }
+        public string PlatformLookupTable { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
     public sealed partial class GetFileHash : Microsoft.Build.Tasks.TaskExtension
