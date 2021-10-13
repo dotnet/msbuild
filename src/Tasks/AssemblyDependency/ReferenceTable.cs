@@ -741,13 +741,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void TryConvertToAssemblyName(string itemSpec, string fusionName, ref AssemblyNameExtension assemblyName)
         {
-            // FusionName is used if available.
-            string finalName = fusionName;
-            if (string.IsNullOrEmpty(finalName))
-            {
-                // Otherwise, its itemSpec.
-                finalName = itemSpec;
-            }
+            // FusionName is used if available; otherwise use itemspec.
+            string finalName = string.IsNullOrEmpty(fusionName) ? itemSpec : fusionName;
 
             bool pathRooted = false;
             try
