@@ -1331,7 +1331,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="UnsupportedOS">
         <source>MSBUILD : error MSB1015: MSBuild does not run on this version of the operating system. It is only supported on Windows 7 and later versions.</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1015: MSBuild nejde spustit v této verzi operačního systému. Podporuje se jenom v systémech Windows 2000, Windows XP a novějších verzích.</target>
+        <target state="translated">MSBUILD : error MSB1015: MSBuild nejde spustit v této verzi operačního systému. Podporuje se jenom v systémech Windows 7 a novějších verzích.</target>
         <note>{StrBegin="MSBUILD : error MSB1015: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Using35Engine">
