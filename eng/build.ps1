@@ -160,10 +160,9 @@ function Check-RequiredVersionBumps() {
   # Log VSTS errors for missing required version bumps
   $targetBranch = $env:SYSTEM_PULLREQUEST_TARGETBRANCH
   if ($targetBranch) {
-    # Prepend remote reference if the branch is not local
-    if (!$targetBranch.StartsWith("refs/heads/")) {
-      $targetBranch = "refs/remotes/origin/" + $targetBranch
-    }
+    # Some PRs specify the bare target branch (most commonly "main"), some prefix it with "refs/heads/".
+    # The following statement normalizes both to a revision spec that git understands.
+    $targetBranch = "refs/remotes/origin/" + ($targetBranch -replace "^refs/heads/", "")
     $versionLineChanged = $false
     git --no-pager diff --unified --no-color --exit-code -w $targetBranch HEAD src\Framework\EngineServices.cs `
       | Select-String -Pattern "int Version =" | ForEach-Object -process { $versionLineChanged = $true }
