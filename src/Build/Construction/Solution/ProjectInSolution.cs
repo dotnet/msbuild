@@ -8,7 +8,9 @@ using System.IO;
 using System.Security;
 using System.Text;
 using System.Xml;
+#if !NETFRAMEWORK || MONO
 using Microsoft.Build.Shared;
+#endif
 
 using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;
 using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
