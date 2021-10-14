@@ -18,13 +18,16 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (LeftChild.TryBoolEvaluate(state, out bool boolValue),
-                     state.ElementLocation,
-                     "ExpressionDoesNotEvaluateToBoolean",
-                     LeftChild.GetUnexpandedValue(state),
-                     LeftChild.GetExpandedValue(state),
-                     state.Condition);
+            if (!LeftChild.TryBoolEvaluate(state, out bool boolValue))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    state.ElementLocation,
+                    "ExpressionDoesNotEvaluateToBoolean",
+                    LeftChild.GetUnexpandedValue(state),
+                    LeftChild.GetExpandedValue(state),
+                    state.Condition);
+            }
+
             return !boolValue;
         }
 
