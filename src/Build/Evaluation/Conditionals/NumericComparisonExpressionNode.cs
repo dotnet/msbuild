@@ -43,14 +43,16 @@ namespace Microsoft.Build.Evaluation
             bool isRightNum = RightChild.TryNumericEvaluate(state, out double rightNum);
             bool isRightVersion = RightChild.TryVersionEvaluate(state, out Version rightVersion);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                ((isLeftNum || isLeftVersion) && (isRightNum || isRightVersion),
-                 state.ElementLocation,
-                "ComparisonOnNonNumericExpression",
-                 state.Condition,
-                 /* helpfully display unexpanded token and expanded result in error message */
-                 isLeftNum ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state),
-                 isLeftNum ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state));
+            if ((!isLeftNum && !isLeftVersion) || (!isRightNum && !isRightVersion))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    state.ElementLocation,
+                    "ComparisonOnNonNumericExpression",
+                    state.Condition,
+                    /* helpfully display unexpanded token and expanded result in error message */
+                    isLeftNum ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state),
+                    isLeftNum ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state));
+            }
 
             return (isLeftNum, isLeftVersion, isRightNum, isRightVersion) switch
             {
