@@ -17,6 +17,20 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public static ManagedFileSystem Singleton() => ManagedFileSystem.Instance;
 
+        private static bool ShouldUseMicrosoftIO
+        {
+            get
+            {
+#if !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0);
+#else
+                // We need to mock usage of ChangeWaves class,
+                // because Microsoft.Build.Engine.OM.UnitTests should not have access to internals of Microsoft.Build.Framework.
+                return true;
+#endif
+            }
+        }
+
         protected ManagedFileSystem() { }
 
         public TextReader ReadFile(string path)
@@ -69,7 +83,7 @@ namespace Microsoft.Build.Shared.FileSystem
         public virtual IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
         {
 #if FEATURE_MSIOREDIST
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+            return ShouldUseMicrosoftIO
                 ? HandleFileLoadException(
                     (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateFiles(path, searchPattern, searchOption),
                     path,
@@ -85,7 +99,7 @@ namespace Microsoft.Build.Shared.FileSystem
         public virtual IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
         {
 #if FEATURE_MSIOREDIST
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+            return ShouldUseMicrosoftIO
                 ? HandleFileLoadException(
                     (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateDirectories(path, searchPattern, searchOption),
                     path,
@@ -101,7 +115,7 @@ namespace Microsoft.Build.Shared.FileSystem
         public virtual IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
         {
 #if FEATURE_MSIOREDIST
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+            return ShouldUseMicrosoftIO
                 ? HandleFileLoadException(
                     (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption),
                     path,
