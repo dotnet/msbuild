@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
             ITaskItem i = new TaskItem("MyNonExistentDirectory");
             i.SetMetadata("Locale", "en-GB");
             t.Directories = new ITaskItem[] { i };
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Execute();
 
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
                 RemoveDir t = new RemoveDir();
 
                 t.Directories = list.ToArray();
-                t.BuildEngine = new MockEngine();
+                t.BuildEngine = new MockEngine(_output);
 
                 t.Execute().ShouldBeTrue();
 
