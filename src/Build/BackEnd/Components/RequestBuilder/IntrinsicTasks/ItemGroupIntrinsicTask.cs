@@ -583,7 +583,7 @@ namespace Microsoft.Build.BackEnd
             ItemSpec<ProjectPropertyInstance, ProjectItemInstance> itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, expander, child.RemoveLocation, Project.Directory, true);
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                 itemSpec.Fragments.All(f => f is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment),
-                new BuildEventFileInfo(string.Empty),
+                BuildEventFileInfo.Empty,
                 "OM_MatchOnMetadataIsRestrictedToReferencedItems",
                 child.RemoveLocation,
                 child.Remove);
