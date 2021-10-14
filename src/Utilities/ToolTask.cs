@@ -1522,7 +1522,7 @@ namespace Microsoft.Build.Utilities
                 // Raise a comment event to notify that the process completed
                 if (_terminatedTool)
                 {
-                    return false;
+                    return !Log.HasLoggedErrors;
                 }
                 else if (ExitCode != 0)
                 {

@@ -154,13 +154,13 @@ namespace Microsoft.Build.UnitTests
             exec.Timeout = 5;
             bool result = exec.Execute();
 
-            Assert.False(result);
-            Assert.Equal(expectedExitCode, exec.ExitCode);
+            // When a tooltask times out, it behaves the same as when it is cancelled and returns !Log.HasLoggedErrors
+            result.ShouldBeTrue();
+            exec.ExitCode.ShouldBe(expectedExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
-            Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
-
+            ((MockEngine)exec.BuildEngine).Warnings.ShouldBe(1);
             // ToolTask does not log an error on timeout.
-            Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
+            ((MockEngine)exec.BuildEngine).Errors.ShouldBe(0);
         }
 
         [Fact]
@@ -171,7 +171,8 @@ namespace Microsoft.Build.UnitTests
             exec.IgnoreExitCode = true;
             bool result = exec.Execute();
 
-            result.ShouldBeFalse();
+            // When a tooltask times out, it behaves the same as when it is cancelled and returns !Log.HasLoggedErrors
+            result.ShouldBeTrue();
             MockEngine mockEngine = (MockEngine)exec.BuildEngine;
             mockEngine.AssertLogContains("MSB5002");
             mockEngine.Warnings.ShouldBe(1);
