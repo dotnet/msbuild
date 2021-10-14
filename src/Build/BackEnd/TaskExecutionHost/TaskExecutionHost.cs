@@ -12,7 +12,6 @@ using System.Runtime.Remoting;
 #endif
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
