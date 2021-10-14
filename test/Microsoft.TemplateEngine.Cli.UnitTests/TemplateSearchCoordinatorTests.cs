@@ -467,7 +467,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                     { _fooTwoTemplate.Identity, fooTemplateHostData }
                 };
 
-                additionalData[CliTemplateSearchCoordinatorFactory.CliHostDataName] = cliHostData;
+                additionalData[CliHostSearchCacheData.DataName] = cliHostData;
             }
 
             TemplateDiscoveryMetadata discoveryMetadata = new TemplateDiscoveryMetadata(version, templateCache, packToTemplateMap, additionalData);
@@ -494,7 +494,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             Dictionary<string, object> additionalData = new Dictionary<string, object>()
             {
-                { CliTemplateSearchCoordinatorFactory.CliHostDataName, fooTemplateHostData }
+                { CliHostSearchCacheData.DataName, fooTemplateHostData }
             };
             List<ITemplateInfo> templateCache = new List<ITemplateInfo>();
 

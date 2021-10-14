@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         private static Func<TemplateSearchData, bool> IsNotHiddenBySearchFile =>
             (templateSearchData) =>
             {
-                if (templateSearchData.AdditionalData.TryGetValue(CliTemplateSearchCoordinatorFactory.CliHostDataName, out object? hostDataRaw)
+                if (templateSearchData.AdditionalData.TryGetValue(CliHostSearchCacheData.DataName, out object? hostDataRaw)
                     && hostDataRaw is HostSpecificTemplateData hostData)
                 {
                     return !hostData.IsHidden;
@@ -101,7 +101,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 Dictionary<string, HostSpecificTemplateData> hostSpecificData = new Dictionary<string, HostSpecificTemplateData>();
                 foreach (var templateData in templatePackageSearchData.Templates)
                 {
-                    if (templateData.AdditionalData.TryGetValue(CliTemplateSearchCoordinatorFactory.CliHostDataName, out object? hostDataRaw)
+                    if (templateData.AdditionalData.TryGetValue(CliHostSearchCacheData.DataName, out object? hostDataRaw)
                         && hostDataRaw is HostSpecificTemplateData hostData)
                     {
                         hostSpecificData[((ITemplateInfo)templateData).Identity] = hostData;
