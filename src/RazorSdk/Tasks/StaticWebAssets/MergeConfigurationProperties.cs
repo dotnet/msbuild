@@ -123,7 +123,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 }
                 else
                 {
-                    Log.LogMessage("Rejected project reference '{0}' for configuration item '{1}' becasue paths don't match.", configurationFullPath, projectReferenceFullPath);
+                    Log.LogMessage("Rejected project reference '{0}' for configuration item '{1}' because paths don't match.", configurationFullPath, projectReferenceFullPath);
                 }
             }
 

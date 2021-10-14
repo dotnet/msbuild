@@ -43,9 +43,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         [Required]
         public bool CopySymbols { get; set; }
 
-        [Required]
-        public string BundledNETCoreAppPackageVersion { get; set; }
-
         [Output]
         public ITaskItem[] AssetCandidates { get; set; }
 
@@ -103,7 +100,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
                     {
                         var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
-                        var cacheBustedDotNetJSFileName = $"dotnet.{BundledNETCoreAppPackageVersion}.{itemHash}.js";
+                        var cacheBustedDotNetJSFileName = $"dotnet.{candidate.GetMetadata("NuGetPackageVersion")}.{itemHash}.js";
 
                         var originalFileFullPath = Path.GetFullPath(candidate.ItemSpec);
                         var originalFileDirectory = Path.GetDirectoryName(originalFileFullPath);
