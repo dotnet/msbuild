@@ -127,7 +127,10 @@ namespace Microsoft.Build.Construction
             // XML guarantees exactly one root element
             XmlElementWithLocation element = _document.DocumentElement as XmlElementWithLocation;
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject(element != null, ElementLocation.Create(_document.FullPath), "NoRootProjectElement", XMakeElements.project);
+            if (element is null)
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create(_document.FullPath), "NoRootProjectElement", XMakeElements.project);
+            }
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.Name != XMakeElements.visualStudioProject, element.Location, "ProjectUpgradeNeeded", _project.FullPath);
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.LocalName == XMakeElements.project, element.Location, "UnrecognizedElement", element.Name);
 
