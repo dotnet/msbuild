@@ -2761,7 +2761,7 @@ namespace Microsoft.Build.Execution
 
             Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
                 this,
-                null, // TODO?
+                null,
                 xml,
                 projectLoadSettings ?? buildParameters.ProjectLoadSettings, /* Use override ProjectLoadSettings if specified */
                 buildParameters.MaxNodeCount,

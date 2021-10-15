@@ -7,8 +7,8 @@ using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.Evaluation
 {
