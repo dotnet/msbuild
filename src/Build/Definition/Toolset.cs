@@ -967,7 +967,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (_expander == null)
                 {
-                    _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_propertyBag);
+                    _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_propertyBag, FileSystems.Default);
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

@@ -311,11 +311,11 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties to use.
         /// Properties may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties)
+        internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem)
         {
             _properties = properties;
             _usedUninitializedProperties = new UsedUninitializedProperties();
-            _fileSystem = FileSystems.Default;
+            _fileSystem = fileSystem;
         }
 
         /// <summary>
@@ -334,8 +334,8 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties and items to use.
         /// Either or both may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items)
-            : this(properties)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IFileSystem fileSystem)
+            : this(properties, fileSystem)
         {
             _items = items;
         }
@@ -354,8 +354,8 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties, items, and/or metadata to use.
         /// Any or all may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata)
-            : this(properties, items)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
+            : this(properties, items, fileSystem)
         {
             _metadata = metadata;
         }
