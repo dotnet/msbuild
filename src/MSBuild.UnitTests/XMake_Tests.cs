@@ -64,14 +64,14 @@ namespace Microsoft.Build.UnitTests
 
             var arguments = new List<string> {
                 "-p:a=b",
-                "--p:c=d"
+                "--p:maxcpucount=8"
             };
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
             parameters[0].ShouldBe("a=b");
-            parameters[1].ShouldBe("c=d");
+            parameters[1].ShouldBe("maxcpucount=8");
         }
 
         [Fact]
