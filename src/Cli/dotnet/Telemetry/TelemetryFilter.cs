@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             string topLevelCommandName,
             Dictionary<string, double> measurements = null)
         {
-            if (parseResult.IsDotnetBuiltInCommand() && parseResult.HasOption("--verbosity"))
+            if (parseResult.IsDotnetBuiltInCommand() && parseResult.HasOption(CommonOptions.VerbosityOption))
             {
                 result.Add(new ApplicationInsightsEntryFormat(
                     "sublevelparser/command",

@@ -15,7 +15,15 @@ namespace Microsoft.DotNet.Cli
     {
         public static void ShowHelp(this ParseResult parseResult)
         {
-            DotnetHelpBuilder.Instance.Value.Write(parseResult.CommandResult.Command, Console.Out);
+            //throw new Exception(String.Join(" ", parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray()) + " "
+            //    + parseResult.CommandResult.Command + " " + string.Join(" ", HelpDescriptionCustomizations.Keys) + " " +
+            //    //string.Join(" ", HelpDescriptionCustomizations.First(c => c.Key.Name.Contains("runtime")).Value.Keys));
+            //    HelpDescriptionCustomizations.Keys.Count());
+
+            Parser.Instance.Parse(parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray()).Invoke();
+
+            //DotnetHelpBuilder.Instance.Value.Write(parseResult.CommandResult.Command, Console.Out, 
+            //    Parser.Instance.Parse(parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray()));
         }
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
@@ -32,11 +40,6 @@ namespace Microsoft.DotNet.Cli
                                              parseResult.Errors.Select(e => e.Message)), 
                         parseResult: parseResult);
                 }
-            }
-            else if (parseResult.HasOption("--help"))
-            {
-                parseResult.ShowHelp();
-                throw new HelpException(string.Empty);
             }
         }
 
@@ -117,17 +120,20 @@ namespace Microsoft.DotNet.Cli
         }
 
         public static bool BothArchAndOsOptionsSpecified(this ParseResult parseResult) =>
-            parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) && 
-            parseResult.HasOption(CommonOptions.OperatingSystemOption.Aliases.First());
+            (parseResult.HasOption(CommonOptions.ArchitectureOption) ||
+            parseResult.HasOption(CommonOptions.LongFormArchitectureOption)) && 
+            parseResult.HasOption(CommonOptions.OperatingSystemOption);
 
         internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
         {
             return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
                 parseResult.GetValueForOption(RunCommandParser.RuntimeOption) :
-                parseResult.HasOption(CommonOptions.OperatingSystemOption.Aliases.First()) || parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) ?
+                parseResult.HasOption(CommonOptions.OperatingSystemOption) ||
+                parseResult.HasOption(CommonOptions.ArchitectureOption) ||
+                parseResult.HasOption(CommonOptions.LongFormArchitectureOption) ?
                 CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
-                    parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption.Aliases.First()),
-                    parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First())) :
+                    parseResult.GetValueForOption(CommonOptions.OperatingSystemOption),
+                    CommonOptions.ArchOptionValue(parseResult)) :
                 null;
         }
 

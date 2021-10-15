@@ -150,11 +150,11 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoLogoOption);
             command.AddOption(ConfigurationOption);
             command.AddOption(FrameworkOption);
-            command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription, withShortOption: false));
+            command.AddOption(CommonOptions.LongFormRuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(CommonOptions.VerbosityOption);
-            command.AddOption(CommonOptions.ArchitectureOption(false));
+            command.AddOption(CommonOptions.LongFormArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
 
             command.Handler = CommandHandler.Create<ParseResult>(TestCommand.Run);

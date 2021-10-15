@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SkipOptimizationOption);
             command.AddOption(SkipSymbolsOption);
             command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
-            command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
+            command.AddOption(CommonOptions.RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(CommonOptions.VerbosityOption);
 			command.AddOption(CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription));
 

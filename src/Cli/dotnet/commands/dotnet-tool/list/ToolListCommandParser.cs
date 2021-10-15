@@ -12,11 +12,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolListCommandParser
     {
-        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
+        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption;
 
-        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
+        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption;
 
-        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
+        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption;
 
         private static readonly Command Command = ConstructCommand();
 
@@ -29,9 +29,9 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new Command("list", LocalizableStrings.CommandDescription);
 
-            command.AddOption(GlobalOption);
-            command.AddOption(LocalOption);
-            command.AddOption(ToolPathOption);
+            command.AddOption(GlobalOption.WithHelpDescription(command, LocalizableStrings.GlobalOptionDescription));
+            command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
+            command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
 
             CommandHandler.Create<ParseResult>((parseResult) => new ToolRestoreCommand(parseResult).Execute());
 

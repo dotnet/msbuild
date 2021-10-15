@@ -32,9 +32,9 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 toolInstallGlobalOrToolPathCommand
                 ?? new ToolInstallGlobalOrToolPathCommand(_parseResult);
 
-            _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
-            _local = parseResult.ValueForOption<bool>(ToolAppliedOption.LocalOptionAlias);
-            _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
+            _global = parseResult.GetValueForOption(ToolAppliedOption.GlobalOption);
+            _local = parseResult.GetValueForOption(ToolAppliedOption.LocalOption);
+            _toolPath = parseResult.GetValueForOption(ToolAppliedOption.ToolPathOption);
             _framework = parseResult.GetValueForOption(ToolInstallCommandParser.FrameworkOption);
         }
 

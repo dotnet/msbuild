@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(SlnOrProjectArgument);
             command.AddOption(FrameworkOption);
-            command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
+            command.AddOption(CommonOptions.RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(ConfigurationOption);
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(CommonOptions.VerbosityOption);

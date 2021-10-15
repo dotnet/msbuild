@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 using System.Linq;
 
@@ -47,6 +48,20 @@ namespace Microsoft.DotNet.Cli
         public static Option<T> Hide<T>(this Option<T> option)
         {
             option.IsHidden = true;
+            return option;
+        }
+
+        public static Option<T> WithHelpDescription<T>(this Option<T> option, Command command, string helpText)
+        {
+            if (Parser.HelpDescriptionCustomizations.ContainsKey(option))
+            {
+                Parser.HelpDescriptionCustomizations[option].Add(command, helpText);
+            }
+            else
+            {
+                Parser.HelpDescriptionCustomizations.Add(option, new Dictionary<Command, string>() { { command, helpText } });
+            }
+
             return option;
         }
 

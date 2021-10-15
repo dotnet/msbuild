@@ -22,6 +22,14 @@ namespace Microsoft.DotNet.Cli
             Arity = ArgumentArity.ZeroOrMore
         };
 
+        public static readonly Option<IEnumerable<string>> SourceOption = new ForwardedOption<IEnumerable<string>>(
+            new string[] { "-s", "--source" },
+            LocalizableStrings.CmdSourceOptionDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.CmdSourceOption
+        }.ForwardAsSingle(o => $"-property:RestoreSources={string.Join("%3B", o)}")
+        .AllowSingleArgPerToken();
+
         private static Option[] FullRestoreOptions() => 
             ImplicitRestoreOptions(true, true, true, true).Concat(
                 new Option[] {
@@ -81,7 +89,7 @@ namespace Microsoft.DotNet.Cli
         private static Option[] ImplicitRestoreOptions(bool showHelp, bool useShortOptions, bool includeRuntimeOption, bool includeNoDependenciesOption)
         {
             var options = new Option[] {
-                new ForwardedOption<IEnumerable<string>>(
+                showHelp && useShortOptions ? SourceOption : new ForwardedOption<IEnumerable<string>>(
                     useShortOptions ? new string[] {"-s", "--source" }  : new string[] { "--source" },
                     showHelp ? LocalizableStrings.CmdSourceOptionDescription : string.Empty)
                 {
