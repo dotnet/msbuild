@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
 
-        public static readonly Option<string> RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
+        public static readonly Option<string> RuntimeOption = CommonOptions.RuntimeOption;
 
         public static readonly Option<string> FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
 
@@ -71,13 +71,13 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoSelfContainedOption);
             command.AddOption(NoLogoOption);
             command.AddOption(FrameworkOption);
-            command.AddOption(RuntimeOption);
+            command.AddOption(RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(ConfigurationOption);
             command.AddOption(CommonOptions.VersionSuffixOption);
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.VerbosityOption);
-            command.AddOption(CommonOptions.ArchitectureOption());
+            command.AddOption(CommonOptions.ArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
 
             command.Handler = CommandHandler.Create<ParseResult>(PublishCommand.Run);

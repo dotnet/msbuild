@@ -49,10 +49,17 @@ namespace Microsoft.DotNet.Cli
             }.ForwardAsSingle(o => $"-property:TargetFramework={o}")
             .AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
 
-        public static Option<string> RuntimeOption(string description, bool withShortOption = true) =>
+        public static Option<string> RuntimeOption =
             new ForwardedOption<string>(
-                withShortOption ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
-                description)
+                new string[] { "-r", "--runtime" })
+            {
+                ArgumentHelpName = CommonLocalizableStrings.RuntimeIdentifierArgumentName
+            }.ForwardAsMany(o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" })
+            .AddSuggestions(Suggest.RunTimesFromProjectFile());
+
+        public static Option<string> LongFormRuntimeOption =
+            new ForwardedOption<string>(
+                new string[] { "--runtime" })
             {
                 ArgumentHelpName = CommonLocalizableStrings.RuntimeIdentifierArgumentName
             }.ForwardAsMany(o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" })
@@ -101,11 +108,22 @@ namespace Microsoft.DotNet.Cli
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
-        public static Option<string> ArchitectureOption(bool includeShortVersion = true) =>
+        public static Option<string> ArchitectureOption =
             new ForwardedOption<string>(
-                includeShortVersion ? new string[] { "--arch", "-a" } : new string[] { "--arch" },
+                new string[] { "--arch", "-a" },
                 CommonLocalizableStrings.ArchitectureOptionDescription)
             .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
+
+        public static Option<string> LongFormArchitectureOption =
+            new ForwardedOption<string>(
+                new string[] { "--arch" },
+                CommonLocalizableStrings.ArchitectureOptionDescription)
+            .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
+
+        internal static string ArchOptionValue(ParseResult parseResult) =>
+            string.IsNullOrEmpty(parseResult.GetValueForOption(CommonOptions.ArchitectureOption)) ?
+                parseResult.GetValueForOption(CommonOptions.LongFormArchitectureOption) :
+                parseResult.GetValueForOption(CommonOptions.ArchitectureOption);
 
         public static Option<string> OperatingSystemOption =
             new ForwardedOption<string>(
@@ -151,7 +169,7 @@ namespace Microsoft.DotNet.Cli
 
         internal static IEnumerable<string> ResolveArchOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
         {
-            if (parseResult.HasOption(RuntimeOption(string.Empty).Aliases.First()))
+            if (parseResult.HasOption(RuntimeOption) || parseResult.HasOption(LongFormRuntimeOption))
             {
                 throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndArchOptions);
             }
@@ -162,21 +180,21 @@ namespace Microsoft.DotNet.Cli
                 return Array.Empty<string>();
             }
             
-            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption.Aliases.First()) || parseResult.HasOption(NoSelfContainedOption.Aliases.First());
+            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption) || parseResult.HasOption(NoSelfContainedOption);
             return ResolveRidShorthandOptions(null, arg, selfContainedSpecified);
         }
 
         internal static IEnumerable<string> ResolveOsOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
         {
-            if (parseResult.HasOption(RuntimeOption(string.Empty).Aliases.First()))
+            if (parseResult.HasOption(RuntimeOption) || parseResult.HasOption(LongFormRuntimeOption))
             {
                 throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndOsOptions);
             }
 
-            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption.Aliases.First()) || parseResult.HasOption(NoSelfContainedOption.Aliases.First());
+            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption) || parseResult.HasOption(NoSelfContainedOption);
             if (parseResult.BothArchAndOsOptionsSpecified())
             {
-                return ResolveRidShorthandOptions(arg, parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()), selfContainedSpecified);
+                return ResolveRidShorthandOptions(arg, ArchOptionValue(parseResult), selfContainedSpecified);
             }
 
             return ResolveRidShorthandOptions(arg, null, selfContainedSpecified);

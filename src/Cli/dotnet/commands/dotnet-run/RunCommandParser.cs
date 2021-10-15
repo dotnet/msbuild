@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
 
-        public static readonly Option<string> RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
+        public static readonly Option<string> RuntimeOption = CommonOptions.RuntimeOption;
 
         public static readonly Option<string> ProjectOption = new Option<string>("--project", LocalizableStrings.CommandOptionProjectDescription);
 
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddOption(ConfigurationOption);
             command.AddOption(FrameworkOption);
-            command.AddOption(RuntimeOption);
+            command.AddOption(RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(ProjectOption);
             command.AddOption(PropertyOption);
             command.AddOption(LaunchProfileOption);
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SelfContainedOption);
             command.AddOption(NoSelfContainedOption);
             command.AddOption(CommonOptions.VerbosityOption);
-            command.AddOption(CommonOptions.ArchitectureOption());
+            command.AddOption(CommonOptions.ArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
             command.TreatUnmatchedTokensAsErrors = false;
 

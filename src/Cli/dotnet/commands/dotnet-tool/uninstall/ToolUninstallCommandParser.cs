@@ -15,13 +15,13 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly Argument<string> PackageIdArgument = ToolInstallCommandParser.PackageIdArgument;
 
-        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
+        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption;
 
-        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
+        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption;
 
-        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
+        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption;
 
-        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
+        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption;
 
         private static readonly Command Command = ConstructCommand();
 
@@ -35,10 +35,10 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("uninstall", LocalizableStrings.CommandDescription);
 
             command.AddArgument(PackageIdArgument);
-            command.AddOption(GlobalOption);
-            command.AddOption(LocalOption);
-            command.AddOption(ToolPathOption);
-            command.AddOption(ToolManifestOption);
+            command.AddOption(GlobalOption.WithHelpDescription(command, LocalizableStrings.GlobalOptionDescription));
+            command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
+            command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
+            command.AddOption(ToolManifestOption.WithHelpDescription(command, LocalizableStrings.ManifestPathOptionDescription));
 
             command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolUninstallCommand(parseResult).Execute());
 

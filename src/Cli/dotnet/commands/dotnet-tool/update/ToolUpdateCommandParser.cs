@@ -14,11 +14,11 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly Argument<string> PackageIdArgument = ToolInstallCommandParser.PackageIdArgument;
 
-        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
+        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption;
 
-        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
+        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption;
 
-        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
+        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption;
 
         public static readonly Option<string> ConfigOption = ToolInstallCommandParser.ConfigOption;
 
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> VersionOption = ToolInstallCommandParser.VersionOption;
 
-        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
+        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption;
 
         public static readonly Option<bool> PrereleaseOption = ToolSearchCommandParser.PrereleaseOption;
 
@@ -46,14 +46,14 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("update", LocalizableStrings.CommandDescription);
 
             command.AddArgument(PackageIdArgument);
-            command.AddOption(GlobalOption);
-            command.AddOption(ToolPathOption);
-            command.AddOption(LocalOption);
+            command.AddOption(GlobalOption.WithHelpDescription(command, LocalizableStrings.GlobalOptionDescription));
+            command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
+            command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
             command.AddOption(ConfigOption);
             command.AddOption(AddSourceOption);
             command.AddOption(FrameworkOption);
             command.AddOption(VersionOption);
-            command.AddOption(ToolManifestOption);
+            command.AddOption(ToolManifestOption.WithHelpDescription(command, LocalizableStrings.ManifestPathOptionDescription));
             command.AddOption(PrereleaseOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);

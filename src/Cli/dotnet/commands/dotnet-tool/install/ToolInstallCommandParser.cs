@@ -45,6 +45,14 @@ namespace Microsoft.DotNet.Cli
         // Don't use the common options version as we don't want this to be a forwarded option
         public static readonly Option<string> ArchitectureOption = new Option<string>(new string[] { "--arch", "-a" }, CommonLocalizableStrings.ArchitectureOptionDescription);
 
+        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption;
+        
+        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption;
+
+        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption;
+        
+        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption;
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -57,12 +65,12 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("install", LocalizableStrings.CommandDescription);
 
             command.AddArgument(PackageIdArgument);
-            command.AddOption(ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription));
-            command.AddOption(ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription));
-            command.AddOption(ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName));
+            command.AddOption(GlobalOption.WithHelpDescription(command, LocalizableStrings.GlobalOptionDescription));
+            command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
+            command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
             command.AddOption(VersionOption);
             command.AddOption(ConfigOption);
-            command.AddOption(ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName));
+            command.AddOption(ToolManifestOption.WithHelpDescription(command, LocalizableStrings.ManifestPathOptionDescription));
             command.AddOption(AddSourceOption);
             command.AddOption(FrameworkOption);
             command.AddOption(PrereleaseOption);

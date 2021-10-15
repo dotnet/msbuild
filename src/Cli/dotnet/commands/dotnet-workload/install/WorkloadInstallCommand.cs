@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption));
-            _fromRollbackDefinition = parseResult.ValueForOption(WorkloadInstallCommandParser.FromRollbackFileOption);
+            _fromRollbackDefinition = parseResult.GetValueForOption(WorkloadInstallCommandParser.FromRollbackFileOption);
 
             var configOption = parseResult.GetValueForOption(WorkloadInstallCommandParser.ConfigOption);
             var sourceOption = parseResult.GetValueForOption(WorkloadInstallCommandParser.SourceOption);

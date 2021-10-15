@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string[]> AddSourceOption = ToolInstallCommandParser.AddSourceOption;
 
-        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
+        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption;
 
         public static readonly Option<VerbosityOptions> VerbosityOption = ToolInstallCommandParser.VerbosityOption;
 
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddOption(ConfigOption);
             command.AddOption(AddSourceOption);
-            command.AddOption(ToolManifestOption);
+            command.AddOption(ToolManifestOption.WithHelpDescription(command, LocalizableStrings.ManifestPathOptionDescription));
             command.AddOption(ToolCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);

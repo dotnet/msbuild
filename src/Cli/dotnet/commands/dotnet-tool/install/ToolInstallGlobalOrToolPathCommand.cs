@@ -61,9 +61,9 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _configFilePath = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
             _framework = parseResult.GetValueForOption(ToolInstallCommandParser.FrameworkOption);
             _source = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
-            _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
+            _global = parseResult.GetValueForOption(ToolAppliedOption.GlobalOption);
             _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolInstallCommandParser.VerbosityOption));
-            _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
+            _toolPath = parseResult.GetValueForOption(ToolAppliedOption.ToolPathOption);
             _architectureOption = parseResult.GetValueForOption(ToolInstallCommandParser.ArchitectureOption);
 
             _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;

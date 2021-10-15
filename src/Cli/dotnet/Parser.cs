@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,6 +24,8 @@ namespace Microsoft.DotNet.Cli
     public static class Parser
     {
         public static readonly RootCommand RootCommand = new RootCommand();
+
+        internal static Dictionary<Option, Dictionary<Command, string>> HelpDescriptionCustomizations = new Dictionary<Option, Dictionary<Command, string>>();
 
         public static readonly Command InstallSuccessCommand = InternalReportinstallsuccessCommandParser.GetCommand();
 
@@ -106,7 +110,7 @@ namespace Microsoft.DotNet.Cli
         public static System.CommandLine.Parsing.Parser Instance { get; } = new CommandLineBuilder(ConfigureCommandLine(RootCommand))
             .UseExceptionHandler(ExceptionHandler)
             .UseHelp()
-            .UseHelpBuilder(context => new DotnetHelpBuilder())
+            .UseHelpBuilder(context => DotnetHelpBuilder.Instance.Value)
             .UseLocalizationResources(new CommandLineValidationMessages())
             .UseParseDirective()
             .UseSuggestDirective()
@@ -152,7 +156,7 @@ namespace Microsoft.DotNet.Cli
 
         internal class DotnetHelpBuilder : HelpBuilder
         {
-            public DotnetHelpBuilder(int maxWidth = int.MaxValue) : base(LocalizationResources.Instance, maxWidth) { }
+            private DotnetHelpBuilder(int maxWidth = int.MaxValue) : base(LocalizationResources.Instance, maxWidth) { }
 
             public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => {
                 int windowWidth;
@@ -169,10 +173,32 @@ namespace Microsoft.DotNet.Cli
                 dotnetHelpBuilder.Customize(FormatCommandCommon.DiagnosticsOption, defaultValue: Tools.Format.LocalizableStrings.whichever_ids_are_listed_in_the_editorconfig_file);
                 dotnetHelpBuilder.Customize(FormatCommandCommon.IncludeOption, defaultValue: Tools.Format.LocalizableStrings.all_files_in_the_solution_or_project);
                 dotnetHelpBuilder.Customize(FormatCommandCommon.ExcludeOption, defaultValue: Tools.Format.LocalizableStrings.none);
+
+                SetHelpCustomizations(dotnetHelpBuilder);
+
                 return dotnetHelpBuilder;
             });
 
-            public override void Write(ICommand command, TextWriter writer)
+            private static void SetHelpCustomizations(HelpBuilder builder)
+            {
+                foreach (var option in HelpDescriptionCustomizations.Keys)
+                {
+                    Func<ParseResult, string> descriptionCallback = (ParseResult parseResult) =>
+                    {
+                        foreach (var (command, helpText) in HelpDescriptionCustomizations[option])
+                        {
+                            if (parseResult.CommandResult.Command.Equals(command))
+                            {
+                                return helpText;
+                            }
+                        }
+                        return null;
+                    };
+                    builder.Customize(option, description: descriptionCallback);
+                }
+            }
+
+            public override void Write(ICommand command, TextWriter writer, ParseResult parseResult)
             {
                 var helpArgs = new string[] { "--help" };
                 if (command.Equals(RootCommand))
@@ -208,7 +234,7 @@ namespace Microsoft.DotNet.Cli
                         AddPackageParser.CmdPackageArgument.Suggestions.Clear();
                     }
 
-                    base.Write(command, writer);
+                    base.Write(command, writer, parseResult);
                 }
             }
         }
