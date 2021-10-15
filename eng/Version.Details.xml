@@ -86,6 +86,7 @@
     <Dependency Name="dotnet-format" Version="6.0.251401">
       <Uri>https://github.com/dotnet/format</Uri>
       <Sha>3ec0d2e1ffc98b76dca28aa23326ba0a1425dd82</Sha>
+      <SourceBuildTarball RepoName="format" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.0.0-6.21514.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
