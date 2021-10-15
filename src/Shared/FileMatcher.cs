@@ -132,7 +132,7 @@ namespace Microsoft.Build.Shared
                                     directory,
                                     false));
                         IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
-                            ? allEntriesForPath.Where(o => IsMatch(Path.GetFileName(o), pattern))
+                            ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
                             : allEntriesForPath;
                         return stripProjectDirectory
                             ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToArray()
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Shared
                 {
                     return (ShouldEnforceMatching(pattern)
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
-                            .Where(o => IsMatch(Path.GetFileName(o), pattern))
+                            .Where(o => IsFileNameMatch(o, pattern))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern)
                         ).ToArray();
                 }
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Shared
                     files = fileSystem.EnumerateFiles(dir, filespec);
                     if (ShouldEnforceMatching(filespec))
                     {
-                        files = files.Where(o => IsMatch(Path.GetFileName(o), filespec));
+                        files = files.Where(o => IsFileNameMatch(o, filespec));
                     }
                 }
                 // If the Item is based on a relative path we need to strip
@@ -414,7 +414,7 @@ namespace Microsoft.Build.Shared
                     directories = fileSystem.EnumerateDirectories((path.Length == 0) ? s_thisDirectory : path, pattern);
                     if (ShouldEnforceMatching(pattern))
                     {
-                        directories = directories.Where(o => IsMatch(Path.GetFileName(o), pattern));
+                        directories = directories.Where(o => IsFileNameMatch(o, pattern));
                     }
                 }
 
@@ -956,7 +956,7 @@ namespace Microsoft.Build.Shared
                     for (int i = 0; i < excludeNextSteps.Length; i++)
                     {
                         if (excludeNextSteps[i].NeedsDirectoryRecursion &&
-                            (excludeNextSteps[i].DirectoryPattern == null || IsMatch(Path.GetFileName(subdir), excludeNextSteps[i].DirectoryPattern)))
+                            (excludeNextSteps[i].DirectoryPattern == null || IsFileNameMatch(subdir, excludeNextSteps[i].DirectoryPattern)))
                         {
                             RecursionState thisExcludeStep = searchesToExclude[i];
                             thisExcludeStep.BaseDirectory = subdir;
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.Shared
             }
             else if (recursionState.SearchData.Filespec != null)
             {
-                return IsMatch(Path.GetFileName(file), recursionState.SearchData.Filespec);
+                return IsFileNameMatch(file, recursionState.SearchData.Filespec);
             }
 
             // if no file-spec provided, match the file to the regular expression
@@ -1664,7 +1664,28 @@ namespace Microsoft.Build.Shared
             internal string wildcardDirectoryPart = string.Empty;
         }
 
-        // TODO: Remove this overload and fix callers to pass ReadOnlySpan<char>.
+        /// <summary>
+        /// A wildcard (* and ?) matching algorithm that tests whether the input path file name matches against the pattern.
+        /// </summary>
+        /// <param name="path">The path whose file name is matched against the pattern.</param>
+        /// <param name="pattern">The pattern.</param>
+        internal static bool IsFileNameMatch(string path, string pattern)
+        {
+            // Use a span-based Path.GetFileName if it is available.
+#if FEATURE_MSIOREDIST
+            return IsMatch(Microsoft.IO.Path.GetFileName(path.AsSpan()), pattern);
+#elif NETSTANDARD2_0
+            return IsMatch(Path.GetFileName(path), pattern);
+#else
+            return IsMatch(Path.GetFileName(path.AsSpan()), pattern);
+#endif
+        }
+
+        /// <summary>
+        /// A wildcard (* and ?) matching algorithm that tests whether the input string matches against the pattern.
+        /// </summary>
+        /// <param name="input">String which is matched against the pattern.</param>
+        /// <param name="pattern">Pattern against which string is matched.</param>
         internal static bool IsMatch(string input, string pattern)
         {
             return IsMatch(input.AsSpan(), pattern);

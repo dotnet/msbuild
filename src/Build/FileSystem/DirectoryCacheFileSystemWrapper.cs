@@ -8,6 +8,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#endif
+
 namespace Microsoft.Build.FileSystem
 {
     internal class DirectoryCacheFileSystemWrapper : IFileSystem
@@ -81,8 +85,7 @@ namespace Microsoft.Build.FileSystem
             {
                 return FileMatcher.IsAllFilesWildcard(searchPattern) || FileMatcher.IsMatch(fileName, searchPattern);
             };
-            // TODO: Don't create a new string and use Path.Join when it becomes available.
-            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Combine(path, fileName.ToString());
+            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Join(path.AsSpan(), fileName);
 
             IEnumerable<string> directories = includeDirectories
                 ? _directoryCache.EnumerateDirectories(path, searchPattern, predicate, transform)
