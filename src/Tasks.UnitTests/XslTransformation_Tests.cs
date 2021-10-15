@@ -13,6 +13,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Xsl;
 using System.Xml;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -386,7 +387,7 @@ namespace Microsoft.Build.UnitTests
         /// Setting correct "Parameter" parameters for Xsl.
         /// </summary>
         [Fact]
-        public void XsltParamatersCorrect()
+        public void XsltParametersCorrect()
         {
             string dir;
             TaskItem[] xmlPaths;
@@ -775,6 +776,39 @@ namespace Microsoft.Build.UnitTests
                 {
                     Assert.Contains("MSB3701", e.Message);
                 }
+            }
+
+            CleanUp(dir);
+        }
+
+        /// <summary>
+        /// The files are not kept locked by the task
+        /// </summary>
+        [Fact]
+        public void InputFilesDontLock()
+        {
+            string dir;
+            TaskItem[] xmlPaths;
+            TaskItem xslPath;
+            TaskItem[] outputPaths;
+            MockEngine engine;
+            Prepare(out dir, out xmlPaths, out xslPath, out _, out outputPaths, out _, out _, out engine);
+
+            // Test with files
+            {
+                XslTransformation t = new XslTransformation();
+                t.BuildEngine = engine;
+                t.XmlInputPaths = xmlPaths;
+                t.XslInputPath = xslPath;
+                t.OutputPaths = outputPaths;
+
+                t.Execute().ShouldBeTrue();
+                string xmlInputPath = xmlPaths[0].ItemSpec;
+                File.Delete(xmlInputPath); // this should succeed (file not locked by task)
+                File.Exists(xmlInputPath).ShouldBeFalse();
+                string xslInputPath = xslPath.ItemSpec;
+                File.Delete(xslInputPath); // this should succeed (file not locked by task)
+                File.Exists(xslInputPath).ShouldBeFalse();
             }
 
             CleanUp(dir);
