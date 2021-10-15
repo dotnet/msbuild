@@ -454,6 +454,18 @@ namespace Microsoft.Build.Eventing
             WriteEvent(61, fileItemSpec, wasUpToDate);
         }
 
+        [Event(70, Keywords = Keywords.All)]
+        public void GetLastWriteFileUtcTimeStart(string file)
+        {
+            WriteEvent(70, file);
+        }
+
+        [Event(71, Keywords = Keywords.All)]
+        public void GetLastWriteFileUtcTimeStop(string file, bool cacheHit, bool exists)
+        {
+            WriteEvent(71, file, cacheHit, exists);
+        }
+
         #endregion
     }
 }
