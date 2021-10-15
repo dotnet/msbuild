@@ -93,6 +93,10 @@
       <Sha>df45061e218c9b5813c5531bc06fb238a23e30f6</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis" Version="4.0.0-6.21514.4">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>df45061e218c9b5813c5531bc06fb238a23e30f6</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.CodeAnalysis.CSharp" Version="4.0.0-6.21514.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>df45061e218c9b5813c5531bc06fb238a23e30f6</Sha>
