@@ -1788,7 +1788,8 @@ namespace Microsoft.Build.Evaluation
         /// project, specific for a given evaluation ID.
         /// </summary>
         /// <param name="evaluationId">The evaluation ID for which the cache is requested.</param>
-        /// <returns></returns>
+        /// <returns>An <see cref="IDirectoryCache"/> implementation, or null if this project has no <see cref="IDirectoryCacheFactory"/>
+        /// associated with it or it returned null.</returns>
         internal IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId)
         {
             return _directoryCacheFactory?.GetDirectoryCacheForEvaluation(evaluationId);

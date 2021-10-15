@@ -101,35 +101,17 @@ namespace Microsoft.Build.FileSystem
 
         #region IFileSystem pass-through implementation
 
-        public FileAttributes GetAttributes(string path)
-        {
-            return _fileSystem.GetAttributes(path);
-        }
+        public FileAttributes GetAttributes(string path) => _fileSystem.GetAttributes(path);
 
-        public DateTime GetLastWriteTimeUtc(string path)
-        {
-            return _fileSystem.GetLastWriteTimeUtc(path);
-        }
+        public DateTime GetLastWriteTimeUtc(string path) => _fileSystem.GetLastWriteTimeUtc(path);
 
-        public TextReader ReadFile(string path)
-        {
-            return _fileSystem.ReadFile(path);
-        }
+        public TextReader ReadFile(string path) => _fileSystem.ReadFile(path);
 
-        public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share)
-        {
-            return _fileSystem.GetFileStream(path, mode, access, share);
-        }
+        public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => _fileSystem.GetFileStream(path, mode, access, share);
 
-        public string ReadFileAllText(string path)
-        {
-            return _fileSystem.ReadFileAllText(path);
-        }
+        public string ReadFileAllText(string path) => _fileSystem.ReadFileAllText(path);
 
-        public byte[] ReadFileAllBytes(string path)
-        {
-            return _fileSystem.ReadFileAllBytes(path);
-        }
+        public byte[] ReadFileAllBytes(string path) => _fileSystem.ReadFileAllBytes(path);
 
         #endregion
     }

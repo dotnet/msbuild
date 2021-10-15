@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 
-using Microsoft.Build.Evaluation;
-
 namespace Microsoft.Build.FileSystem
 {
     /// <summary>
