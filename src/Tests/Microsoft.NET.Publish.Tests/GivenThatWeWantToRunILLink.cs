@@ -464,7 +464,6 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
             testProject.AdditionalProperties["EnableTrimAnalyzer"] = "true";
-            testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
             testProject.AdditionalProperties["EnableNETAnalyzers"] = "false";
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 

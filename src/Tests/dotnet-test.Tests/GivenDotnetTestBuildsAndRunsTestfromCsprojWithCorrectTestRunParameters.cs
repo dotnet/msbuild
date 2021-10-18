@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.1", "VSTestTestRunParameters.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "VSTestTestRunParameters.dll");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)

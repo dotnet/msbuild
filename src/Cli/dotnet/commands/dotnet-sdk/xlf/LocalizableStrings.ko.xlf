@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AppFullName">
         <source>.NET SDK Command</source>
-        <target state="needs-review-translation">.NET 정리 명령</target>
+        <target state="translated">.NET SDK 명령</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Manage .NET SDK installation.</source>
-        <target state="needs-review-translation">이전에 생성된 빌드 출력을 정리하는 명령입니다.</target>
+        <target state="translated">.NET SDK 설치를 관리합니다.</target>
         <note />
       </trans-unit>
     </body>

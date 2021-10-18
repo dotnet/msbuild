@@ -139,8 +139,8 @@ namespace Microsoft.NET.Publish.Tests
             var args = new string[]
             {
                 "/p:SelfContained=true",
-                "/p:TargetFramework=netcoreapp3.1",
-                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid("netcoreapp3.1")}"
+                $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework}",
+                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework)}"
             };
 
             new RestoreCommand(testAsset, "main").Execute(args);

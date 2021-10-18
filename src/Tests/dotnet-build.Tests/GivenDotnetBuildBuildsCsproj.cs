@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputDll = Path.Combine(testInstance.Path, "bin", configuration, "netcoreapp3.1", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testInstance.Path, "bin", configuration, ToolsetInfo.CurrentTargetFramework, $"{testAppName}.dll");
 
             var outputRunCommand = new DotnetCommand(Log);
 
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputDll = Directory.EnumerateFiles(
-                Path.Combine(rootPath, "bin", configuration, "netcoreapp3.1"), "*.dll",
+                Path.Combine(rootPath, "bin", configuration, ToolsetInfo.CurrentTargetFramework), "*.dll",
                 SearchOption.TopDirectoryOnly)
                 .Single();
 

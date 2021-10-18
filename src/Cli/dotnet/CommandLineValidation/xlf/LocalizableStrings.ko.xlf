@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="ResponseFileNotFound">
         <source>Response file not found '{0}'</source>
-        <target state="translated">지시 파일을 찾을 수 없음: '{0}'</target>
+        <target state="translated">'{0}'에서 지시 파일을 찾을 수 없음</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">

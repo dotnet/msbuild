@@ -4,37 +4,37 @@
     <body>
       <trans-unit id="ConcreteWorkloadHasNoDescription">
         <source>Workload definition '{0}' is a concrete dev workload but has no description</source>
-        <target state="new">Workload definition '{0}' is a concrete dev workload but has no description</target>
+        <target state="translated">워크로드 정의 '{0}'이(가) 구체적인 개발 워크로드이지만 설명이 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictingWorkloadDefinition">
         <source>Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
-        <target state="new">Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</target>
+        <target state="translated">매니페스트 '{1}' [{2}]의 워크로드 정의 '{0}'이(가) 매니페스트 '{3}' [{4}]와(과) 충돌합니다</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictingWorkloadPack">
         <source>Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
-        <target state="new">Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</target>
+        <target state="translated">매니페스트 '{1}' [{2}]의 워크로드 팩 '{0}'이(가) 매니페스트 '{3}' [{4}]와(과) 충돌합니다</target>
         <note />
       </trans-unit>
       <trans-unit id="CyclicWorkloadRedirect">
         <source>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</source>
-        <target state="new">Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</target>
+        <target state="translated">매니페스트 '{1}' [{2}]의 순환 워크로드 리디렉션 '{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateKeyAtOffset">
         <source>Duplicate key '{0}' at offset {1}</source>
-        <target state="new">Duplicate key '{0}' at offset {1}</target>
+        <target state="translated">오프셋 {1}에 중복 키 '{0}'이(가) 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateManifestID">
         <source>Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</source>
-        <target state="new">Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</target>
+        <target state="translated">매니페스트 공급자 {0}이(가) 기존 매니페스트 [{3}]과(와) 충돌하는 중복 매니페스트 ID '{1}' [{2}]을(를) 반환했습니다</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedBoolAtOffset">
         <source>Expected boolean value at offset {0}</source>
-        <target state="new">Expected boolean value at offset {0}</target>
+        <target state="translated">오프셋 {0}에 부울 값이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedIntegerAtOffset">
@@ -44,77 +44,77 @@
       </trans-unit>
       <trans-unit id="ExpectedStringAtOffset">
         <source>Expected string value at offset {0}</source>
-        <target state="new">Expected string value at offset {0}</target>
+        <target state="translated">오프셋 {0}에 문자열 값이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedTokenAtOffset">
         <source>Expected {0} token at offset {1}</source>
-        <target state="new">Expected {0} token at offset {1}</target>
+        <target state="translated">오프셋 {1}에 {0} 토큰이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncompleteDocument">
         <source>Document ended prematurely</source>
-        <target state="new">Document ended prematurely</target>
+        <target state="translated">문서가 중간에 끝났습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
-        <target state="new">Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</target>
+        <target state="translated">매니페스트 '{1}' [{2}]에 필요한 워크로드 매니페스트 종속성 '{0}'을(를) 찾지 못했습니다</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestDependencyVersionTooLow">
         <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
-        <target state="new">Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</target>
+        <target state="translated">워크로드 매니페스트 종속성 '{0}' 버전 '{1}'이(가) '{3}' [{4}]에 필요한 버전 '{2}'보다 낮습니다</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
-        <target state="new">Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</target>
+        <target state="translated">'{2}' [{3}] 매니페스트에서 워크로드 '{1}'에 의해 확장된 워크로드 '{0}'을(를) 찾을 수 없습니다</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingOrInvalidManifestVersion">
         <source>Missing or invalid manifest version</source>
-        <target state="new">Missing or invalid manifest version</target>
+        <target state="translated">매니페스트 버전이 없거나 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingWorkloadPackKind">
         <source>Missing kind for workload pack '{0}'</source>
-        <target state="new">Missing kind for workload pack '{0}'</target>
+        <target state="translated">워크로드 팩 '{0}'에 대한 종류가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingWorkloadPackVersion">
         <source>Missing version for workload pack '{0}'</source>
-        <target state="new">Missing version for workload pack '{0}'</target>
+        <target state="translated">워크로드 팩 '{0}'에 대한 버전이 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RedirectWorkloadHasOtherKeys">
         <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
-        <target state="new">Redirect workload '{0}' has keys other than 'redirect-to'</target>
+        <target state="translated">리디렉션 워크로드 '{0}'에 'redirect-to' 이외의 다른 키가 있습니다</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
-        <target state="new">Unexpected token '{0}' at offset {1}</target>
+        <target state="translated">오프셋 {1}에 예기치 않은 토큰 '{0}'이(가) 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownKeyAtOffset">
         <source>Unknown key '{0}' at offset {1}</source>
-        <target state="new">Unknown key '{0}' at offset {1}</target>
+        <target state="translated">오프셋 {1}에 알 수 없는 키 '{0}'이(가) 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownWorkloadDefinitionKind">
         <source>Unknown workload definition kind '{0}' at offset {1}</source>
-        <target state="new">Unknown workload definition kind '{0}' at offset {1}</target>
+        <target state="translated">오프셋 {1}에 알 수 없는 워크로드 정의 종류 '{0}'이(가) 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownWorkloadPackKind">
         <source>Unknown workload pack kind '{0}' at offset {1}</source>
-        <target state="new">Unknown workload pack kind '{0}' at offset {1}</target>
+        <target state="translated">오프셋 {1}에 알 수 없는 워크로드 팩 종류 '{0}'이(가) 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
-        <target state="new">Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</target>
+        <target state="translated">매니페스트 '{2}' [{3}]의 워크로드 리디렉션 '{1}'에 대한 확인되지 않는 대상 '{0}'</target>
         <note />
       </trans-unit>
     </body>

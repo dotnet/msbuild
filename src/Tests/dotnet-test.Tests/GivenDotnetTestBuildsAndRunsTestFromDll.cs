@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testRoot, "bin", configuration, "netcoreapp3.1", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testRoot, "bin", configuration, ToolsetInfo.CurrentTargetFramework, $"{testAppName}.dll");
 
             // Call vstest
             var result = new DotnetTestCommand(Log)
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testRoot, "bin", configuration, "netcoreapp3.1", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testRoot, "bin", configuration, ToolsetInfo.CurrentTargetFramework, $"{testAppName}.dll");
 
             // Call dotnet test + dll
             var result = new DotnetTestCommand(Log)

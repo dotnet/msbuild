@@ -4,47 +4,42 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The workload ID(s) to uninstall.</source>
-        <target state="needs-review-translation">Идентификатор пакета NuGet удаляемого инструмента.</target>
+        <target state="translated">Идентификаторы удаляемой рабочей нагрузки.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall one or more workloads.</source>
-        <target state="needs-review-translation">Удаление глобального или локального средства.</target>
+        <target state="translated">Удалите одну или несколько рабочих нагрузок.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>WORKLOAD_ID</source>
-        <target state="needs-review-translation">PACKAGE_ID</target>
+        <target state="translated">WORKLOAD_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
         <source>Removing workload installation record for {0}...</source>
-        <target state="new">Removing workload installation record for {0}...</target>
+        <target state="translated">Идет удаление записи установки рабочей нагрузки для {0}…</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one workload ID to uninstall.</source>
-        <target state="needs-review-translation">Укажите один идентификатор пакета удаляемого инструмента.</target>
+        <target state="translated">Укажите один идентификатор удаляемой рабочей нагрузки.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Successfully uninstalled workload(s): {0}</source>
-        <target state="new">Successfully uninstalled workload(s): {0}</target>
+        <target state="translated">Рабочие нагрузки {0} удалены.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>Couldn't find workload ID(s): {0}</source>
-        <target state="needs-review-translation">Не удалось найти средство с идентификатором пакета "{0}". 
-
-Средства удалены с помощью идентификатора пакета, который может отличаться 
-от имени средства, используемого при его вызове. Имена средств 
-и соответствующие идентификаторы пакетов для установленных средств можно найти с помощью команды
-"dotnet workload list".</target>
+        <target state="translated">Не удалось найти идентификаторы рабочей нагрузки: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUninstallFailed">
         <source>Workload uninstallation failed: {0}</source>
-        <target state="new">Workload uninstallation failed: {0}</target>
+        <target state="translated">Сбой удаления рабочей нагрузки: {0}</target>
         <note />
       </trans-unit>
     </body>

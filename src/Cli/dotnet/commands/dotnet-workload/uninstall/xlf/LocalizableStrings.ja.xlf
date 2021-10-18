@@ -4,47 +4,42 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The workload ID(s) to uninstall.</source>
-        <target state="needs-review-translation">アンインストールするツールの NuGet パッケージ ID。</target>
+        <target state="translated">アンインストールするワークロード ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall one or more workloads.</source>
-        <target state="needs-review-translation">グローバル ツールまたはローカル ツールをアンインストールします。</target>
+        <target state="translated">1 つ以上のワークロードをアンインストールします。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>WORKLOAD_ID</source>
-        <target state="needs-review-translation">PACKAGE_ID</target>
+        <target state="translated">WORKLOAD_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
         <source>Removing workload installation record for {0}...</source>
-        <target state="new">Removing workload installation record for {0}...</target>
+        <target state="translated">{0} のワークロード インストール レコードを削除しています...</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one workload ID to uninstall.</source>
-        <target state="needs-review-translation">アンインストールするツール パッケージの ID を 1 つ指定してください。</target>
+        <target state="translated">アンインストールするワークロード ID を 1 つ指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Successfully uninstalled workload(s): {0}</source>
-        <target state="new">Successfully uninstalled workload(s): {0}</target>
+        <target state="translated">ワークロード {0} が正常にアンインストールされました</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>Couldn't find workload ID(s): {0}</source>
-        <target state="needs-review-translation">パッケージ Id が ' {0} ' のツールが見つかりませんでした。
-
-ツールは、異なるパッケージ Id を使用してアンインストールされます
-ツールを呼び出すときに使用するツール名。ツール名が見つかります
-と、コマンドを使用してインストールされたツールの対応するパッケージ Id
-' dotnet workload list '。</target>
+        <target state="translated">ワークロード ID が見つかりませんでした: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUninstallFailed">
         <source>Workload uninstallation failed: {0}</source>
-        <target state="new">Workload uninstallation failed: {0}</target>
+        <target state="translated">ワークロード {0} のアンインストールに失敗しました</target>
         <note />
       </trans-unit>
     </body>

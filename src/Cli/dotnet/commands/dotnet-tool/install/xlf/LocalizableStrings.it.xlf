@@ -16,7 +16,7 @@ Lo strumento '{1}' (versione '{2}') è stato installato.</target>
       </trans-unit>
       <trans-unit id="InvalidRuntimeIdentifier">
         <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
-        <target state="new">The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</target>
+        <target state="translated">L'identificatore di runtime {0} non è valido. Gli identificatori di runtime validi sono: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -75,7 +75,7 @@ Se si vuole creare un manifesto, usare `dotnet new tool-manifest`, in genere nel
       </trans-unit>
       <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
         <source>The --prerelease and --version options are not supported in the same command</source>
-        <target state="new">The --prerelease and --version options are not supported in the same command</target>
+        <target state="translated">Le opzioni --prerelease e --version non sono supportate nello stesso comando</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">

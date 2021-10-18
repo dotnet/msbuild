@@ -9,17 +9,17 @@
       </trans-unit>
       <trans-unit id="ConflictingWorkloadDefinition">
         <source>Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
-        <target state="new">Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</target>
+        <target state="translated">清单“{0}”[{1}] 中的工作负载定义“{2}”与清单“{3}”[{4}] 冲突</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictingWorkloadPack">
         <source>Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
-        <target state="new">Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</target>
+        <target state="translated">清单“{0}”[{1}] 中的工作负载包“{2}”与清单“{3}”[{4}] 冲突</target>
         <note />
       </trans-unit>
       <trans-unit id="CyclicWorkloadRedirect">
         <source>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</source>
-        <target state="new">Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</target>
+        <target state="translated">循环工作负载重定向清单“{0}”中的“{1}”[{2}]</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateKeyAtOffset">
@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DuplicateManifestID">
         <source>Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</source>
-        <target state="new">Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</target>
+        <target state="translated">清单提供程序 {0} 返回了与现有清单[{1}]冲突的重复清单 ID“{2}”[{3}]</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedBoolAtOffset">
@@ -59,17 +59,17 @@
       </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
-        <target state="new">Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</target>
+        <target state="translated">未找到清单“{1}”[{2}] 所需的工作负载清单依赖项“{0}”</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestDependencyVersionTooLow">
         <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
-        <target state="new">Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</target>
+        <target state="translated">工作负荷清单依赖项“{0}”版本“{1}”低于清单“{2}”所需的版本“{3}”[{4}]</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
-        <target state="new">Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</target>
+        <target state="translated">无法找到由清单“{2}”[{3}] 中的工作负载“{1}”扩展的工作负载“{0}”</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingOrInvalidManifestVersion">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="RedirectWorkloadHasOtherKeys">
         <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
-        <target state="new">Redirect workload '{0}' has keys other than 'redirect-to'</target>
+        <target state="translated">重定向工作负荷“{0}”具有“重定向到”以外的键</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
@@ -114,7 +114,7 @@
       </trans-unit>
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
-        <target state="new">Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</target>
+        <target state="translated">工作负载未解析的目标“{0}”重定向到清单“{2}”[{3}] 中的“{1}”</target>
         <note />
       </trans-unit>
     </body>

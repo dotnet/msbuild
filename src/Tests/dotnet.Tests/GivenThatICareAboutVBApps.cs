@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tests
                 testInstance.Path,
                 "bin",
                 configuration,
-                "netcoreapp3.1",
+                ToolsetInfo.CurrentTargetFramework,
                 "publish",
                 "VBTestApp.dll");
 

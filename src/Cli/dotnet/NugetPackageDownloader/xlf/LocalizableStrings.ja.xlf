@@ -4,37 +4,37 @@
     <body>
       <trans-unit id="DownloadVersionFailed">
         <source>Downloading {0} version {1} failed.</source>
-        <target state="new">Downloading {0} version {1} failed.</target>
+        <target state="translated">{0} バージョン {1} のダウンロードに失敗しました。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToLoadNuGetSource">
         <source>Failed to load NuGet source {0}</source>
-        <target state="new">Failed to load NuGet source {0}</target>
+        <target state="translated">NuGet ソース {0} の読み込みに失敗しました</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToLoadNuGetSourceSourceIsNotValid">
         <source>Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</source>
-        <target state="new">Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</target>
+        <target state="translated">NuGet ソース {0} の読み込みに失敗しました: このソースが有効ではありません。今後の処理ではスキップされます。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToValidatePackageSigning">
         <source>Failed to validate package signing.</source>
-        <target state="new">Failed to validate package signing.</target>
+        <target state="translated">パッケージ署名を検証できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="IsNotFoundInNuGetFeeds">
         <source>{0} is not found in NuGet feeds {1}".</source>
-        <target state="new">{0} is not found in NuGet feeds {1}".</target>
+        <target state="translated">{0} が NuGet フィード {1}" に見つかりません。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
         <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
-        <target state="new">Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</target>
+        <target state="translated">NuGet パッケージの署名の検証をスキップします。現在の .NET SDK は、ファースト パーティによって署名されていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">
         <source>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</source>
-        <target state="new">Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</target>
+        <target state="translated">NuGet パッケージ署名の検証をスキップします。NuGet 署名の検証は、Linux または macOS https://aka.ms/workloadskippackagevalidation では使用できません。</target>
         <note />
       </trans-unit>
     </body>

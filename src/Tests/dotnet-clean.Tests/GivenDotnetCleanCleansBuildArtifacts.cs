@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli.Clean.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputFolder = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", configuration, "netcoreapp3.1", "win7-x64"));
+            var outputFolder = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "win7-x64"));
 
             outputFolder.Should().NotBeEmpty();
 
