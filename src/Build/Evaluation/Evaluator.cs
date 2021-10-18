@@ -252,6 +252,14 @@ namespace Microsoft.Build.Evaluation
             // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
             _interactive = interactive || String.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("NuGetInteractive")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
 
+            var nuGetRoot = _data.Properties.GetProperty("NuGetPackageRoot")?.EvaluatedValue;
+            var nuGetFolders = _data.Properties.GetProperty("NuGetPackageFolders")?.EvaluatedValue;
+
+            if (!string.IsNullOrWhiteSpace(nuGetRoot) || !string.IsNullOrWhiteSpace(nuGetFolders))
+            {
+                ;
+            }
+
             // The last modified project is the project itself unless its an in-memory project
             if (projectRootElement.FullPath != null)
             {

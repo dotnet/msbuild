@@ -1144,6 +1144,9 @@ namespace Microsoft.Build.BackEnd
             //
             ConfigureWarningsAsErrorsAndMessages();
 
+            // Make sure nuget folders are known in order to be able to skip up to date check in them
+            ConfigureKnownNuGetFolders();
+
             // See comment on Microsoft.Build.Internal.Utilities.GenerateToolsVersionToUse
             _requestEntry.RequestConfiguration.RetrieveFromCache();
             if (_requestEntry.RequestConfiguration.Project.UsingDifferentToolsVersionFromProjectFile)
@@ -1352,6 +1355,16 @@ namespace Microsoft.Build.BackEnd
                 {
                     loggingService.AddWarningsAsMessages(buildEventContext, warningsAsMessages);
                 }
+            }
+        }
+
+        private void ConfigureKnownNuGetFolders()
+        {
+            ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
+            if (project != null)
+            {
+                string nuGetFolders = project.GetPropertyValue("NuGetPackageFolders")?.Trim();
+                NativeMethodsShared.RegisterKnownNuGetFolders(nuGetFolders);
             }
         }
 

@@ -2,16 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+#if !CLR2COMPATIBILITY
+using System.Collections.Concurrent;
+#endif
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Reflection;
+using Microsoft.Build.Framework;
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Eventing;
 #endif
@@ -607,19 +610,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static int _maxPath;
 
-        private static readonly ProjectFileClassifier FilesImmutabilityClassifier;
-        private static readonly Dictionary<string, DateTime> ImmutableFilesTimestampCache = new(StringComparer.OrdinalIgnoreCase);
-        private static readonly object FilesImmutabilityLock = new object();
+#if !CLR2COMPATIBILITY
+        private static readonly ConcurrentDictionary<string, DateTime> s_immutableFilesTimestampCache = new(StringComparer.OrdinalIgnoreCase);
+#endif
 
         private static bool IsMaxPathSet { get; set; }
 
         private static readonly object MaxPathLock = new object();
-
-        static NativeMethodsShared()
-        {
-            FilesImmutabilityClassifier = new ProjectFileClassifier();
-            FilesImmutabilityClassifier.NuGetPackageFolders = @"C:\Users\rokon\.nuget;E:\NugetCache";
-        }
 
         private static void SetMaxPath()
         {
@@ -1054,6 +1051,13 @@ namespace Microsoft.Build.Shared
             return null;
         }
 
+        internal static void RegisterKnownNuGetFolders(string nuGetFolders)
+        {
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+            FileClassifier.Shared.RegisterNuGetPackageFolders(nuGetFolders);
+#endif
+        }
+
         /// <summary>
         /// Get the last write time of the fullpath to the file.
         /// </summary>
@@ -1069,7 +1073,6 @@ namespace Microsoft.Build.Shared
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
             MSBuildEventSource.Log.GetLastWriteFileUtcTimeStart(fullPath);
             bool cacheHit = false;
-#endif
             DateTime modifiedTime = DateTime.MinValue;
             try
             {
@@ -1078,18 +1081,13 @@ namespace Microsoft.Build.Shared
                     return LastWriteFileUtcTime(fullPath);
                 }
 
-                bool isModifiable = !FilesImmutabilityClassifier.IsNonModifiable(fullPath);
+                bool isModifiable = !FileClassifier.Shared.IsNonModifiable(fullPath);
                 if (!isModifiable)
                 {
-                    lock (FilesImmutabilityLock)
+                    if (s_immutableFilesTimestampCache.TryGetValue(fullPath, out DateTime modifiedAt))
                     {
-                        if (ImmutableFilesTimestampCache.TryGetValue(fullPath, out DateTime modifiedAt))
-                        {
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                            cacheHit = true;
-#endif
-                            return modifiedAt;
-                        }
+                        cacheHit = true;
+                        return modifiedAt;
                     }
                 }
 
@@ -1097,20 +1095,18 @@ namespace Microsoft.Build.Shared
 
                 if (!isModifiable && modifiedTime != DateTime.MinValue)
                 {
-                    lock (FilesImmutabilityLock)
-                    {
-                        ImmutableFilesTimestampCache[fullPath] = modifiedTime;
-                    }
+                    s_immutableFilesTimestampCache[fullPath] = modifiedTime;
                 }
 
                 return modifiedTime;
             }
             finally
             {
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                MSBuildEventSource.Log.GetLastWriteFileUtcTimeStop(fullPath, cacheHit, modifiedTime != DateTime.MinValue);
-#endif 
+               MSBuildEventSource.Log.GetLastWriteFileUtcTimeStop(fullPath, cacheHit, cacheHit || modifiedTime != DateTime.MinValue);
             }
+#else
+            return LastWriteFileUtcTime(fullPath);
+#endif
 
             DateTime LastWriteFileUtcTime(string path)
             {
@@ -1766,160 +1762,6 @@ namespace Microsoft.Build.Shared
             return GetFileAttributesEx(path, 0, ref data);
         }
 
-        /// <summary>
-        /// Attempts to classify project files for various purposes such as safety and performance.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The term "project files" refers to the root project file (e.g. <c>MyProject.csproj</c>) and
-        /// any other <c>.props</c> and <c>.targets</c> files it imports.
-        /// </para>
-        /// <para>
-        /// Classifications provided are:
-        /// <list type="number">
-        ///   <item>
-        ///     <see cref="IsNonUserEditable"/> which indicates the file is not intended to be edited by the
-        ///     user. It may be generated, or ship as part of Visual Studio, MSBuild, a NuGet package, etc.
-        ///   </item>
-        ///   <item>
-        ///     <see cref="IsNonModifiable"/> which indicates the file is not expected to change over time,
-        ///     other than when it is first created. This is a subset of non-user-editable files and
-        ///     generally excludes generated files which can be regenerated in response to user actions.
-        ///   </item>
-        /// </list>
-        /// </para>
-        /// </remarks>
-        private sealed class ProjectFileClassifier
-        {
-            const StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
-
-            /// <summary>
-            /// Single, static instance of an array that contains a semi-colon ';', which is used to split strings.
-            /// </summary>
-            private static readonly char[] SemicolonDelimiter = new char[] { ';' };
-
-            private readonly string _programFiles86;
-            private readonly string _programFiles64;
-            private readonly string _vsInstallationDirectory;
-
-#if CLR2COMPATIBILITY
-            private string[] _nuGetPackageFolders = new string[0];
-#else
-            private string[] _nuGetPackageFolders = Array.Empty<string>();
-#endif
-
-            private string _nuGetPackageFoldersString;
-            private string _projectExtensionsPath;
-
-            /// <summary>
-            /// Gets and sets the <c>MSBuildProjectExtensionsPath</c> property value for this project.
-            /// Project files under this folder are considered non-modifiable.
-            /// </summary>
-            /// <remarks>
-            /// This value is only needed for <see cref="IsNonUserEditable"/>. Files under this path
-            /// are changed over time by tooling, so do not satisfy <see cref="IsNonModifiable"/>.
-            /// </remarks>
-            /// <remarks>
-            /// Example value: <c>"C:\repos\MySolution\MyProject\obj\"</c>
-            /// </remarks>
-            public string ProjectExtensionsPath
-            {
-                get => _projectExtensionsPath;
-                set
-                {
-                    _projectExtensionsPath = value;
-                    EnsureTrailingSlash(ref _projectExtensionsPath);
-                }
-            }
-
-            /// <summary>
-            /// Gets and sets the paths found in the <c>NuGetPackageFolders</c> property value for this project.
-            /// Project files under any of these folders are considered non-modifiable.
-            /// </summary>
-            /// <remarks>
-            /// This value is used by both <see cref="IsNonUserEditable"/> and <see cref="IsNonModifiable"/>.
-            /// Files in the NuGet package cache are not expected to change over time, once they are created.
-            /// </remarks>
-            /// <remarks>
-            /// Example value: <c>"C:\Users\myusername\.nuget\;D:\LocalNuGetCache\"</c>
-            /// </remarks>
-            public string NuGetPackageFolders
-            {
-                set
-                {
-                    if (!string.Equals(_nuGetPackageFoldersString, value, PathComparison))
-                    {
-                        _nuGetPackageFoldersString = value;
-                        _nuGetPackageFolders = value.Split(SemicolonDelimiter, StringSplitOptions.RemoveEmptyEntries);
-                    }
-                }
-            }
-
-            public ProjectFileClassifier()
-            {
-                _programFiles64 = Environment.GetEnvironmentVariable("ProgramW6432");
-                _programFiles86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-
-                _vsInstallationDirectory = GetVSInstallationDirectory();
-
-                EnsureTrailingSlash(ref _programFiles86);
-                EnsureTrailingSlash(ref _programFiles64);
-                EnsureTrailingSlash(ref _vsInstallationDirectory);
-
-                return;
-
-                static string GetVSInstallationDirectory()
-                {
-                    string dir = Environment.GetEnvironmentVariable("VSAPPIDDIR");
-
-                    // The path provided is not the installation root, but rather the location of devenv.exe.
-                    // __VSSPROPID.VSSPROPID_InstallDirectory has the same value.
-                    // Failing a better way to obtain the installation root, remove that suffix.
-                    // Obviously this is brittle against changes to the relative path of devenv.exe, however that seems
-                    // unlikely and should be easy to work around if ever needed.
-                    const string DevEnvExeRelativePath = "Common7\\IDE\\";
-
-                    if (dir?.EndsWith(DevEnvExeRelativePath, PathComparison) == true)
-                    {
-                        dir = dir.Substring(0, dir.Length - DevEnvExeRelativePath.Length);
-                    }
-
-                    return dir;
-                }
-            }
-
-            private static void EnsureTrailingSlash(ref string path)
-            {
-                if (path is not null)
-                {
-                    path = FileUtilities.EnsureTrailingSlash(path);
-                }
-            }
-
-            /// <summary>
-            /// Gets whether this file is not intended to be edited by the user.
-            /// </summary>
-            /// <param name="filePath">The path to the file to test.</param>
-            /// <returns><see langword="true"/> if the file is non-user-editable, otherwise <see langword="false"/>.</returns>
-            public bool IsNonUserEditable(string filePath)
-            {
-                return IsNonModifiable(filePath)
-                       || (ProjectExtensionsPath != null && filePath.StartsWith(ProjectExtensionsPath, PathComparison));
-            }
-
-            /// <summary>
-            /// Gets whether a file is expected to not be modified in place on disk once it has been created.
-            /// </summary>
-            /// <param name="filePath">The path to the file to test.</param>
-            /// <returns><see langword="true"/> if the file is non-modifiable, otherwise <see langword="false"/>.</returns>
-            public bool IsNonModifiable(string filePath)
-            {
-                return (_programFiles64 != null && filePath.StartsWith(_programFiles64, PathComparison))
-                       || filePath.StartsWith(_programFiles86, PathComparison)
-                       || _nuGetPackageFolders.Any(nugetFolder => filePath.StartsWith(nugetFolder, PathComparison))
-                       || (_vsInstallationDirectory != null && filePath.StartsWith(_vsInstallationDirectory, PathComparison));
-            }
-        }
 #endregion
     }
 }
