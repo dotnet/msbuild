@@ -949,7 +949,7 @@ namespace Microsoft.Build.BackEnd
 
                         taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
                     }
-                    else
+                    else if (!(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested))
                     {
                         taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
                             "TaskReturnedFalseButDidNotLogError",
