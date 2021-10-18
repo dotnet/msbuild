@@ -610,10 +610,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static int _maxPath;
 
-#if !CLR2COMPATIBILITY
-        private static readonly ConcurrentDictionary<string, DateTime> s_immutableFilesTimestampCache = new(StringComparer.OrdinalIgnoreCase);
-#endif
-
         private static bool IsMaxPathSet { get; set; }
 
         private static readonly object MaxPathLock = new object();
@@ -1084,7 +1080,7 @@ namespace Microsoft.Build.Shared
                 bool isModifiable = !FileClassifier.Shared.IsNonModifiable(fullPath);
                 if (!isModifiable)
                 {
-                    if (s_immutableFilesTimestampCache.TryGetValue(fullPath, out DateTime modifiedAt))
+                    if (ImmutableFilesTimestampCache.Shared.TryGetValue(fullPath, out DateTime modifiedAt))
                     {
                         cacheHit = true;
                         return modifiedAt;
@@ -1095,7 +1091,7 @@ namespace Microsoft.Build.Shared
 
                 if (!isModifiable && modifiedTime != DateTime.MinValue)
                 {
-                    s_immutableFilesTimestampCache[fullPath] = modifiedTime;
+                    ImmutableFilesTimestampCache.Shared.TryAdd(fullPath, modifiedTime);
                 }
 
                 return modifiedTime;

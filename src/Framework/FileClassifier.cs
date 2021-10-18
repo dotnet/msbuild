@@ -6,71 +6,34 @@ using System.Linq;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Attempts to classify project files for various purposes such as safety and performance.
+    ///     Attempts to classify project files for various purposes such as safety and performance.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// The term "project files" refers to the root project file (e.g. <c>MyProject.csproj</c>) and
-    /// any other <c>.props</c> and <c>.targets</c> files it imports.
-    /// </para>
-    /// <para>
-    /// Classifications provided are:
-    /// <list type="number">
-    ///   <item>
-    ///     <see cref="IsNonModifiable"/> which indicates the file is not expected to change over time,
-    ///     other than when it is first created. This is a subset of non-user-editable files and
-    ///     generally excludes generated files which can be regenerated in response to user actions.
-    ///   </item>
-    /// </list>
-    /// </para>
+    ///     <para>
+    ///         The term "project files" refers to the root project file (e.g. <c>MyProject.csproj</c>) and
+    ///         any other <c>.props</c> and <c>.targets</c> files it imports.
+    ///     </para>
+    ///     <para>
+    ///         Classifications provided are:
+    ///         <list type="number">
+    ///             <item>
+    ///                 <see cref="IsNonModifiable" /> which indicates the file is not expected to change over time,
+    ///                 other than when it is first created. This is a subset of non-user-editable files and
+    ///                 generally excludes generated files which can be regenerated in response to user actions.
+    ///             </item>
+    ///         </list>
+    ///     </para>
     /// </remarks>
     internal sealed class FileClassifier
     {
-        /// <summary>
-        /// Shared singleton instance 
-        /// </summary>
-        public static FileClassifier Shared { get; } = new();
-
-        const StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
+        private const StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
 
         /// <summary>
-        /// Single, static instance of an array that contains a semi-colon ';', which is used to split strings.
+        ///     Single, static instance of an array that contains a semi-colon ';', which is used to split strings.
         /// </summary>
-        private static readonly char[] s_semicolonDelimiter = { ';' };
+        private static readonly char[] s_semicolonDelimiter = {';'};
 
         private readonly ConcurrentDictionary<string, string> _knownImmutableDirectory = new(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Sets the paths found in the <c>NuGetPackageFolders</c> property value for this project.
-        /// Project files under any of these folders are considered non-modifiable.
-        /// </summary>
-        /// <remarks>
-        /// This value is used by <see cref="IsNonModifiable"/>.
-        /// Files in the NuGet package cache are not expected to change over time, once they are created.
-        /// </remarks>
-        /// <remarks>
-        /// Example value: <c>"C:\Users\myusername\.nuget\;D:\LocalNuGetCache\"</c>
-        /// </remarks>
-        public void RegisterNuGetPackageFolders(string nuGetPackageFolders)
-        {
-            if (!string.IsNullOrEmpty(nuGetPackageFolders))
-            {
-                string[] folders = nuGetPackageFolders.Split(s_semicolonDelimiter, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string folder in folders)
-                {
-                    RegisterImmutableDirectory(folder);
-                }
-            }
-        }
-
-        private void RegisterImmutableDirectory(string directory)
-        {
-            if (!string.IsNullOrEmpty(directory))
-            {
-                string d = EnsureTrailingSlash(directory);
-                _knownImmutableDirectory.TryAdd(d, d);
-            }
-        }
 
         public FileClassifier()
         {
@@ -101,6 +64,43 @@ namespace Microsoft.Build.Framework
             }
         }
 
+        /// <summary>
+        ///     Shared singleton instance
+        /// </summary>
+        public static FileClassifier Shared { get; } = new();
+
+        /// <summary>
+        ///     Sets the paths found in the <c>NuGetPackageFolders</c> property value for this project.
+        ///     Project files under any of these folders are considered non-modifiable.
+        /// </summary>
+        /// <remarks>
+        ///     This value is used by <see cref="IsNonModifiable" />.
+        ///     Files in the NuGet package cache are not expected to change over time, once they are created.
+        /// </remarks>
+        /// <remarks>
+        ///     Example value: <c>"C:\Users\myusername\.nuget\;D:\LocalNuGetCache\"</c>
+        /// </remarks>
+        public void RegisterNuGetPackageFolders(string nuGetPackageFolders)
+        {
+            if (!string.IsNullOrEmpty(nuGetPackageFolders))
+            {
+                string[] folders = nuGetPackageFolders.Split(s_semicolonDelimiter, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string folder in folders)
+                {
+                    RegisterImmutableDirectory(folder);
+                }
+            }
+        }
+
+        private void RegisterImmutableDirectory(string directory)
+        {
+            if (!string.IsNullOrEmpty(directory))
+            {
+                string d = EnsureTrailingSlash(directory);
+                _knownImmutableDirectory.TryAdd(d, d);
+            }
+        }
+
         private static string EnsureTrailingSlash(string fileSpec)
         {
             if (fileSpec?.Length >= 1)
@@ -116,13 +116,24 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Gets whether a file is expected to not be modified in place on disk once it has been created.
+        ///     Gets whether a file is expected to not be modified in place on disk once it has been created.
         /// </summary>
         /// <param name="filePath">The path to the file to test.</param>
-        /// <returns><see langword="true"/> if the file is non-modifiable, otherwise <see langword="false"/>.</returns>
-        public bool IsNonModifiable(string filePath)
-        {
-            return _knownImmutableDirectory.Any(folder => filePath.StartsWith(folder.Key, PathComparison));
-        }
+        /// <returns><see langword="true" /> if the file is non-modifiable, otherwise <see langword="false" />.</returns>
+        public bool IsNonModifiable(string filePath) => _knownImmutableDirectory.Any(folder => filePath.StartsWith(folder.Key, PathComparison));
+    }
+
+    internal sealed class ImmutableFilesTimestampCache
+    {
+        private readonly ConcurrentDictionary<string, DateTime> _cache = new(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        ///     Shared singleton instance
+        /// </summary>
+        public static ImmutableFilesTimestampCache Shared { get; } = new();
+
+        public bool TryGetValue(string fullPath, out DateTime lastModified) => _cache.TryGetValue(fullPath, out lastModified);
+
+        public bool TryAdd(string fullPath, DateTime lastModified) => _cache.TryAdd(fullPath, lastModified);
     }
 }
