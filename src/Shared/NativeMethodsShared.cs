@@ -12,9 +12,6 @@ using System.Text;
 using System.Threading;
 using System.Reflection;
 using Microsoft.Build.Framework;
-#if !CLR2COMPATIBILITY //TODO: delete afrer imutable op-to-date checks not user ETLs anymore
-using Microsoft.Build.Eventing;
-#endif
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 
@@ -1057,39 +1054,28 @@ namespace Microsoft.Build.Shared
         internal static DateTime GetLastWriteFileUtcTime(string fullPath)
         {
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-            MSBuildEventSource.Log.GetLastWriteFileUtcTimeStart(fullPath); //TODO: delete ETLs after measured and tested
-            bool cacheHit = false;
-            DateTime modifiedTime = DateTime.MinValue;
-            try
+            if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
             {
-                if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
-                {
-                    return LastWriteFileUtcTime(fullPath);
-                }
-
-                bool isModifiable = !FileClassifier.Shared.IsNonModifiable(fullPath);
-                if (!isModifiable)
-                {
-                    if (ImmutableFilesTimestampCache.Shared.TryGetValue(fullPath, out DateTime modifiedAt))
-                    {
-                        cacheHit = true;
-                        return modifiedAt;
-                    }
-                }
-
-                modifiedTime = LastWriteFileUtcTime(fullPath);
-
-                if (!isModifiable && modifiedTime != DateTime.MinValue)
-                {
-                    ImmutableFilesTimestampCache.Shared.TryAdd(fullPath, modifiedTime);
-                }
-
-                return modifiedTime;
+                return LastWriteFileUtcTime(fullPath);
             }
-            finally
+
+            bool isModifiable = !FileClassifier.Shared.IsNonModifiable(fullPath);
+            if (!isModifiable)
             {
-               MSBuildEventSource.Log.GetLastWriteFileUtcTimeStop(fullPath, cacheHit, cacheHit || modifiedTime != DateTime.MinValue);
+                if (ImmutableFilesTimestampCache.Shared.TryGetValue(fullPath, out DateTime modifiedAt))
+                {
+                    return modifiedAt;
+                }
             }
+
+            DateTime modifiedTime = LastWriteFileUtcTime(fullPath);
+
+            if (!isModifiable && modifiedTime != DateTime.MinValue)
+            {
+                ImmutableFilesTimestampCache.Shared.TryAdd(fullPath, modifiedTime);
+            }
+
+            return modifiedTime;
 #else
             return LastWriteFileUtcTime(fullPath);
 #endif
