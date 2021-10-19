@@ -277,8 +277,9 @@ namespace Microsoft.DotNet.Installer.Windows
         /// </summary>
         /// <param name="productCode">The product code of the MSI to uninstall.</param>
         /// <param name="logFile">The full path of the log file.</param>
+        /// <param name="ignoreDependencies">Controls whether dependency checks should be ignored when uninstalling.</param>
         /// <returns>An error code indicating the result of the operation.</returns>
-        protected uint UninstallMsi(string productCode, string logFile)
+        protected uint UninstallMsi(string productCode, string logFile, bool ignoreDependencies = false)
         {
             Elevate();
 
@@ -287,7 +288,8 @@ namespace Microsoft.DotNet.Installer.Windows
                 ConfigureInstall(logFile);
                 string installProperties = InstallProperties.Create(InstallProperties.SystemComponent,
                     InstallProperties.FastInstall, InstallProperties.SuppressReboot,
-                    InstallProperties.RemoveAll);
+                    InstallProperties.RemoveAll,
+                    ignoreDependencies ? InstallProperties.IgnoreDependencies : null);
                 return WindowsInstaller.ConfigureProduct(productCode, WindowsInstaller.INSTALLLEVEL_DEFAULT, InstallState.ABSENT,
                     installProperties);
             }

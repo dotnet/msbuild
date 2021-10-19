@@ -187,9 +187,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 TransactionalAction.Run(
                     action: () =>
                     {
+                        bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
+
                         foreach (var manifest in manifestsToUpdate)
                         {
-                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand, offlineCache);
+                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand, offlineCache, rollback);
                         }
 
                         _workloadResolver.RefreshWorkloadManifests();
