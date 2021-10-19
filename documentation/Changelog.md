@@ -6,26 +6,56 @@ This version of MSBuild shipped with Visual Studio 2022 version 17.0.0 and .NET 
 
 ### What's new
 
+* MSBuild now reports its version as `17` and uses Visual Studio 2022 versions of tasks where appropriate.
 * MSBuild now targets .NET Framework 4.7.2 and .NET 6.0.
 * 64-bit MSBuild is now used for builds from Visual Studio.
+* Binary logs are smaller and have more information.
+* `MSBuildCopyContentTransitively` is now on by default, ensuring consistency in output folders on incremental builds.
 
 ### Detailed release notes
 
 #### Added
 
 * Intrinsic tasks now log their location (#6397). Thanks, @KirillOsenkov!
+* `TargetSkippedEventArgs` now has `TargetSkipReason` and `OriginalBuildEventContext` (#6402, #6577). Thanks, @KirillOsenkov!
+* `TaskStarted` events now log line and column (#6399). Thanks, @KirillOsenkov!
 
 #### Changed
 
-*
+* The on-disk format of serialized caches has changed (#6350, #6324, #6490).
+* MSBuild is now [signed with a new certificate](https://github.com/dotnet/announcements/issues/184) (#6448).
+* `BuildParameters.DisableInprocNode` now applies to more processes (#6400).
+* `VCTargetsPath` now defaults to `v170` (#6550).
+* MSBuild no longer logs `Building with tools version "Current"` (#6627). Thanks, @KirillOsenkov!
+* Text loggers now log properties and items at the end of evaluation (#6535).
+* `MSBuildCopyContentTransitively` is now on by default, ensuring consistency in output folders on incremental builds (#6622).
+* MSBuild on .NET 6 has improved task-assembly-reference fallback behavior (#6558).
+* MSBuild features gated on the 16.8 changewave are now nonconfigurable (#6634).
+* The deprecated import of `$(CoreCrossTargetingTargetsPath)` was removed (#6668). Thanks, @Nirmal4G!
 
 #### Fixed
 
-*
+* Solution builds should work when using the secret environment variable `MSBUILDNOINPROCNODE` (#6385).
+* Solution extensions can now use `BeforeTargets="ValidateSolutionConfiguration"` (#6454).
+* Performance improvements (#6529, #6556, #6598, #6632, #6669, #6671, #6666, #6678, )
+* Single-file ClickOnce publish includes file association icons (#6578).
+* Improved robustness in error handling of libraries without resources (#6546).
+* Fixed missing information in `Project`'s `DebuggerDisplay` (#6650).
+* `ResolveAssemblyReferences` output paths are now output in normalized form (#6533).
+* Improved handling of satellite assemblies in ClickOnce (#6665).
 
 #### Infrastructure
 
 * This repo now builds with Arcade 6.0 (#6143).
+* Use newer Ubuntu versions for Linux CI builds (#6488).
+* MSBuild now uses [Arcade-powered source build](https://github.com/dotnet/source-build/tree/ba0b33e9f96354b8d07317c3cdf406ce666921f8/Documentation/planning/arcade-powered-source-build) (#6387).
+* Improved repo issue templates and automation (#6557).
+* Whitespace cleanup (#6565).
+* This repo no longer needs to double-specify the SDK version (#6596).
+* Simplify references to `TargetFramework` using new intrinsics (#5799).
+* Reference the `Microsoft.DotNet.XUnitExtensions` package from Arcade instead of our fork (#6638).
+* Use [`BannedApiAnalyzers`](https://www.nuget.org/packages/Microsoft.CodeAnalysis.BannedApiAnalyzers/) (#6675).
+*
 
 #### Documentation
 
@@ -35,88 +65,6 @@ This version of MSBuild shipped with Visual Studio 2022 version 17.0.0 and .NET 
 
 |sha | Author | subject | parents|
 | --- | --- | --- | --- |
-1560b6ce8 | sujitnayak <sujit_n@Hotmail.com> | Fix registry lookup for signtool location to look in the 32 bit registry (#6463) | d6abd6dce
-f7b42c2b1 | Roman Konecny <rokonecn@microsoft.com> | Moves build into scale sets pool (#6471) | 97ba42a39
-239b07818 | Roman Konecny <rokonecn@microsoft.com> | Build out of proc sln file using MSBUILDNOINPROCNODE (#6385) | f7b42c2b1
-20d31f0bd | Forgind <Forgind@users.noreply.github.com> | Remove BinaryFormatter from StateFileBase (#6350) | 239b07818
-9d419252d | Forgind <Forgind@users.noreply.github.com> | Remove BinaryFormatter from GetSDKReferenceFiles (#6324) | 20d31f0bd
-c8d4b38e7 | Forgind <Forgind@users.noreply.github.com> | Add [Serializable] to PortableLibraryFiles and other similar classes (#6490) | 9d419252d
-37dde82ae | Forgind <Forgind@users.noreply.github.com> | Update ubuntu version (#6488) | c8d4b38e7
-2af95547e | Roman Konecny <rokonecn@microsoft.com> | Fix deploy script for .net 6.0 (#6495) | 37dde82ae
-836e64c07 | Rainer Sigwald <raines@microsoft.com> | Add solution-validation targets as hook points (#6454) | 2af95547e
-ec2363803 | Mihai Codoban <micodoba@microsoft.com> | Improve vs debugging (#6398) | 836e64c07
-0ebf5f317 | Kirill Osenkov <KirillOsenkov@users.noreply.github.com> | Add TargetSkipReason and OriginalBuildEventContext to TargetSkippedEventArgs (#6402) | 8861fa05a
-ffa1a0029 | Kirill Osenkov <KirillOsenkov@users.noreply.github.com> | Log TaskStarted line and column (#6399) | 0ebf5f317
-f4533349f | Ladi Prosek <laprosek@microsoft.com> | Make MSBuildFileSystemBase non-abstract to remove versioning and usability constraints (#6475) | 4f30e789b
-ea93ae1f3 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Official Builds With Custom OptProf 'Just Work' (#6411) | f4533349f
-b18e3fff8 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/arcade (#6478) | ea93ae1f3
-27e100128 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/roslyn (#6479) | b18e3fff8
-4d6df8274 | Michael Simons <msimons@microsoft.com> | Onboarding to ArPow (arcade-powered source-build) (#6387) | 27e100128
-f9c4fd3b3 | Forgind <Forgind@users.noreply.github.com> | Merge pull request #6476 from dotnet-maestro-bot/merge/vs16.11-to-main | 4d6df8274 b39672771
-bf95687fc | Mihai Codoban <micodoba@microsoft.com> | Merge branch 'main' into merge/vs16.11-to-main | 2be2ece3e f9c4fd3b3
-dbb80eeb8 | Forgind <Forgind@users.noreply.github.com> | Update src/Build/BackEnd/Components/ProjectCache/ProjectCacheService.cs | bf95687fc
-018bed83d | Matt Mitchell <mmitche@microsoft.com> | Use dotnet certificate (#6448) | f9c4fd3b3
-2d6a999af | Forgind <Forgind@users.noreply.github.com> | Merge pull request #6506 from dotnet-maestro-bot/merge/vs16.11-to-main | 018bed83d dbb80eeb8
-813f854be | Rainer Sigwald <raines@microsoft.com> | Move RichCodeNav to its own job (#6505) | 2d6a999af
-46b723ba9 | Michael Simons <msimons@microsoft.com> | Add SourceBuildManagedOnly to SourceBuild.props (#6507) | 813f854be
-206d7ae3e | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/arcade (#6516) | 46b723ba9
-285e4dc29 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/roslyn (#6517) | 206d7ae3e
-a5ea6d2ca | Mihai Codoban <micodoba@microsoft.com> | Scheduler should honor BuildParameters.DisableInprocNode (#6400) | 285e4dc29
-f3d77bee4 | Forgind <Forgind@users.noreply.github.com> | Merge pull request #6512 from dotnet-maestro-bot/merge/vs16.11-to-main | a5ea6d2ca 5e37cc992
-7769511ab | Rainer Sigwald <raines@microsoft.com> | Merge pull request #6523 from dotnet-maestro-bot/merge/vs16.11-to-main | f3d77bee4 f1675f834
-e3f9ddee8 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/arcade (#6519) | 7769511ab
-85cc97f90 | Rainer Sigwald <raines@microsoft.com> | Use GetToolsDirectory32 explicitly for NuGet imports (#6540) | 1560b6ce8
-c039320f0 | Rainer Sigwald <raines@microsoft.com> | Merge pull request #6541 from rainersigwald/update-p1-with-16.10-fixes | 85cc97f90 69c952c5d
-420c91c69 | Rainer Sigwald <raines@microsoft.com> | Merge remote-tracking branch 'upstream/vs16.10' into vs17.0 | c039320f0 857e5a733
-0d37e8293 | Rainer Sigwald <raines@microsoft.com> | Merge 'upstream/vs16.11' to 'main' | 18a8ddcb5 8f0313c11
-519b3381f | Rainer Sigwald <raines@microsoft.com> | Merge remote-tracking branch 'upstream/vs17.0' | 0d37e8293 420c91c69
-fa26d7acf | Rainer Sigwald <raines@microsoft.com> | Switch VCTargetsPath to v170 (#6550) | 519b3381f
-702dfb503 | Kirill Osenkov <github@osenkov.com> | Opt test out of LogPropertiesAndItemsAfterEvaluation | aa78fc6cb
-55be3a53a | Kirill Osenkov <github@osenkov.com> | Skip NullMetadataOnLegacyOutputItems_InlineTask | 702dfb503
-264a79731 | Kirill Osenkov <github@osenkov.com> | Skip TestItemsWithUnexpandableMetadata | 55be3a53a
-c81383696 | Kirill Osenkov <github@osenkov.com> | Console logger support for IncludeEvaluationPropertiesAndItems | 264a79731
-d3de9804e | Nirmal Guru <Nirmal4G@gmail.com> | Remove unnecessary files | 5de4459e5
-f30fcce7f | Nirmal Guru <Nirmal4G@gmail.com> | Clean-up whitespace everywhere else | d3de9804e
-6fb143968 | Sujit Nayak <sujitn@microsoft.com> | Ensure file association icons files get published as loose files in Single-File publish for ClickOnce | aa78fc6cb
-10112a092 | Jimmy Lewis <jimmy.lewis@live.com> | Bind to 17.0 version of Workflow build tasks for Dev17 (#6545) | aa78fc6cb
-44b2a3096 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Issue templates apply needs-triage (#6557) | 10112a092
-ad3e7d04a | Arun Chander <arkalyan@microsoft.com> | Revert "Add more params to the evaluation pass stops" (#6559) | 44b2a3096
-c68f2e9af | Rainer Sigwald <raines@microsoft.com> | Get DependencyModel from the LKG SDK (#6548) | ad3e7d04a
-f4b792be9 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/arcade (#6552) | c68f2e9af
-c86ab7273 | AR-May <67507805+AR-May@users.noreply.github.com> | Remove unnecessary list allocations (#6529) | f4b792be9
-c579afe9c | Rainer Sigwald <raines@microsoft.com> | Revert "[main] Update dependencies from dotnet/arcade (#6552)" (#6584) | c86ab7273
-ad0ea36eb | Rainer Sigwald <raines@microsoft.com> | Merge branch 'vs16.11' into 'main' | c579afe9c eb30e0569
-4945f056c | Kirill Osenkov <KirillOsenkov@users.noreply.github.com> | Infer target skip reason from older binlogs (#6577) | ad0ea36eb
-dec13b16c | Rainer Sigwald <raines@microsoft.com> | Merge pull request #6565 from Nirmal4G:hotfix/core-sdk-prep/cleanup-whitespace | 4945f056c f30fcce7f
-8ba4b51b9 | Rainer Sigwald <raines@microsoft.com> | Extremely verbose logging for CancelledBuild (#6590) | dec13b16c
-2c37803a9 | Rainer Sigwald <raines@microsoft.com> | Update build badge links (#6589) | 8ba4b51b9
-2013004e9 | Rainer Sigwald <raines@microsoft.com> | Extract SDK version from global.json in Versions.props (#6596) | 2c37803a9
-52c41519f | sujitnayak <sujitn@microsoft.com> | Merge pull request #6578 from NikolaMilosavljevic/users/sujitn/fileassoc | bbeb70136 6fb143968
-67ba2dfd7 | AR-May <67507805+AR-May@users.noreply.github.com> | Merge pull request #6591 from dotnet-maestro-bot/merge/vs16.11-to-main | 52c41519f 2eb4b8616
-9fc3fa52b | Ladi Prosek <laprosek@microsoft.com> | Make InterningBinaryReader pool buffers (#6556) | 67ba2dfd7
-e9593e841 | Sam Harwell <sam.harwell@microsoft.com> | Use List<string> for excludes (#6598) | 9fc3fa52b
-1b7661f36 | Forgind <Forgind@users.noreply.github.com> | Catch ArgumentException as well as BadImageFormatException when failing because of libraries without resources (#6546) | e9593e841
-4f7de9afc | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Check TargetFramework Using Intrinsic Function (#5799) | 1b7661f36
-78f0280bd | AR-May <67507805+AR-May@users.noreply.github.com> | Merge pull request #6535 from dotnet/dev/kirillo/loggers | 4f7de9afc c81383696
-cdc5faeda | Kirill Osenkov <KirillOsenkov@users.noreply.github.com> | Don't log Building with tools version "Current". (#6627) | 78f0280bd
-e618fde01 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Default to transitively copying content items (#6622) | cdc5faeda
-86368d3e8 | Kirill Osenkov <KirillOsenkov@users.noreply.github.com> | Fix [DebuggerDisplay] for Project (#6650) | e618fde01
-d150e93ff | Ladi Prosek <laprosek@microsoft.com> | Don't compile globbing regexes on .NET Framework (#6632) | 86368d3e8
-d26cfbe43 | Rainer Sigwald <raines@microsoft.com> | Stop checking .ni.dll/exe on Core | d150e93ff
-415cd4250 | Rainer Sigwald <raines@microsoft.com> | Use extension in Next-to-MSBuild fallback (#6558) | d150e93ff
-1d845f302 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | ChangeWave 16.8 Becomes Default Behavior (#6634) | 415cd4250
-dfd2be739 | Rainer Sigwald <raines@microsoft.com> | Switch to Microsoft.DotNet.XUnitExtensions (#6638) | 1d845f302
-2e79f4146 | Ladi Prosek <laprosek@microsoft.com> | Revert "Ignore comments and whitespace when parsing read-only XML files (#6232)" (#6669) | dfd2be739
-169888020 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/arcade (#6585) | 2e79f4146
-98dd7fad9 | David Kean <davkean@microsoft.com> | Avoid string allocation while searching for a char (#6671) | 169888020
-bc71365d8 | Ladi Prosek <laprosek@microsoft.com> | NGEN all System dependencies with ngenApplications=MSBuild.exe (#6666) | 98dd7fad9
-fa6868b11 | Ladi Prosek <laprosek@microsoft.com> | Disable TP semaphore spinning for MSBuild processes (#6678) | bc71365d8
-3e71818f4 | Forgind <Forgind@users.noreply.github.com> | Normalize RAR output paths (#6533) | fa6868b11
-30afd7b06 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/roslyn (#6630) | 3e71818f4
-1034dbf51 | sujitnayak <sujitn@microsoft.com> | VS 1449000: Fix handling of satellite assemblies in ClickOnce (#6665) | 30afd7b06
-fd234772e | Nirmal Guru <Nirmal4G@gmail.com> | Remove import using 'CoreCrossTargetingTargetsPath' property (#6668) | 1034dbf51
-78f6ef3dd | Rainer Sigwald <raines@microsoft.com> | Introduce BannedApiAnalyzers #6675 | fd234772e
-18ca1779d | Ladi Prosek <laprosek@microsoft.com> | Merge branch 'rainersigwald-banalyzer' | fd234772e 78f6ef3dd
 eac68aa8b | Johan Laanstra <jlaanstra1221@outlook.com> | Do not run analyzers for XamlPreCompile. (#6676) | 18ca1779d
 6dba77a45 | Rainer Sigwald <raines@microsoft.com> | Move ref assembly to the obj folder (#6560) | eac68aa8b
 9e576281e | Ladi Prosek <laprosek@microsoft.com> | Absolutize ref assembly path (#6695) | 6dba77a45
