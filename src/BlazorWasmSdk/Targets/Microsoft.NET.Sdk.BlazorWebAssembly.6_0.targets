@@ -72,7 +72,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DisableAutoWasmBuildApp>true</DisableAutoWasmBuildApp>
     <DisableAutoWasmPublishApp>true</DisableAutoWasmPublishApp>
     <EnableDefaultWasmAssembliesToBundle>false</EnableDefaultWasmAssembliesToBundle>
-    <WasmNestedPublishAppDependsOn>ComputeFilesToPublish;_GatherWasmFilesToPublish;$(WasmNestedPublishAppDependsOn)</WasmNestedPublishAppDependsOn>
+    <WasmNestedPublishAppDependsOn>_GatherWasmFilesToPublish;$(WasmNestedPublishAppDependsOn)</WasmNestedPublishAppDependsOn>
+    <BlazorEnableCompression Condition="'$(WasmBuildingForNestedPublish)' == 'true'">false</BlazorEnableCompression>
+    <_WasmNestedPublishAppPreTarget>ComputeFilesToPublish</_WasmNestedPublishAppPreTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -93,14 +95,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       $(StaticWebAssetsPrepareForRunDependsOn)
     </StaticWebAssetsPrepareForRunDependsOn>
 
-    <ResolvePublishStaticWebAssetsDependsOn>
+    <ResolvePublishStaticWebAssetsDependsOn Condition="'$(WasmBuildingForNestedPublish)' != 'true'">
       $(ResolvePublishStaticWebAssetsDependsOn);
       ProcessPublishFilesForBlazor;
       ComputeBlazorExtensions;
       _AddPublishBlazorBootJsonToStaticWebAssets;
     </ResolvePublishStaticWebAssetsDependsOn>
 
-    <GenerateStaticWebAssetsPublishManifestDependsOn>
+    <GenerateStaticWebAssetsPublishManifestDependsOn Condition="'$(WasmBuildingForNestedPublish)' != 'true'">
       $(GenerateStaticWebAssetsPublishManifestDependsOn);
       GeneratePublishBlazorBootJson;
     </GenerateStaticWebAssetsPublishManifestDependsOn>
