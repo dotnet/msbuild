@@ -11,6 +11,7 @@ This version of MSBuild shipped with Visual Studio 2022 version 17.0.0 and .NET 
 * 64-bit MSBuild is now used for builds from Visual Studio.
 * Binary logs are smaller and have more information.
 * `MSBuildCopyContentTransitively` is now on by default, ensuring consistency in output folders on incremental builds.
+* The method `GetType()` can no longer be called in property functions.
 
 ### Detailed release notes
 
@@ -19,30 +20,62 @@ This version of MSBuild shipped with Visual Studio 2022 version 17.0.0 and .NET 
 * Intrinsic tasks now log their location (#6397). Thanks, @KirillOsenkov!
 * `TargetSkippedEventArgs` now has `TargetSkipReason` and `OriginalBuildEventContext` (#6402, #6577). Thanks, @KirillOsenkov!
 * `TaskStarted` events now log line and column (#6399). Thanks, @KirillOsenkov!
+* ETW trace events for PerformDependencyAnalysis (#6658), WriteLinesToFile (#6670), CopyUpToDate (#6661).
+* If the environment variable `MSBuildDebugEngine` is set, MSBuild will create binary logs for all operations to `MSBUILDDEBUGPATH` regardless of how it is called (#6639, #6792).
+* `ProjectReference`s can now negotiate `Platform` (#6655, #6724, #6889).
+* Tasks can now call `TaskLoggingHelper.LogsMessagesOfImportance` to determine if any attached logger would preserve a log message before constructing it (to save time in the not-being-logged case) (#6381, #6737).
+* Support referencing assemblies with generic attributes (#6735). Thanks, @davidwrighton!
+* XSD-based MSBuild IntelliSense now supports `ImplicitUsings` and `Using` items (#6755), `InternalsVisibleTo` (#6778), Windows Forms properties (#6860), `DebugType` (#6849), and `SatelliteResourceLanguages` (#6861). Thanks, @pranavkm, @DamianEdwards, @RussKie, and @drewnoakes!
+* Tasks can now call `TaskLoggingHelper.IsTaskInputLoggingEnabled` and avoid redundant logging of inputs (#6803).
+* Support extracting resource namespace from C# source that uses file-scoped namespaces (#6881).
 
 #### Changed
 
-* The on-disk format of serialized caches has changed (#6350, #6324, #6490).
+* The on-disk format of serialized caches has changed (#6350, #6324, #6490, #6674).
 * MSBuild is now [signed with a new certificate](https://github.com/dotnet/announcements/issues/184) (#6448).
 * `BuildParameters.DisableInprocNode` now applies to more processes (#6400).
 * `VCTargetsPath` now defaults to `v170` (#6550).
 * MSBuild no longer logs `Building with tools version "Current"` (#6627). Thanks, @KirillOsenkov!
 * Text loggers now log properties and items at the end of evaluation (#6535).
-* `MSBuildCopyContentTransitively` is now on by default, ensuring consistency in output folders on incremental builds (#6622).
+* `MSBuildCopyContentTransitively` is now on by default, ensuring consistency in output folders on incremental builds (#6622, #6703).
 * MSBuild on .NET 6 has improved task-assembly-reference fallback behavior (#6558).
 * MSBuild features gated on the 16.8 changewave are now nonconfigurable (#6634).
 * The deprecated import of `$(CoreCrossTargetingTargetsPath)` was removed (#6668). Thanks, @Nirmal4G!
+* Improved error message for `MSB4213` (#6640).
+* The method `GetType()` can no longer be called in property functions (#6769).
+* MSBuild is now fully NGENed by Visual Studio setup (#6764).
+* MSBuild (and Visual Studio) now reference `System.Text.Json` 5.0.2 (#6784). Thanks, @JakeRadMSFT!
+* Default to SHA2 digest for ClickOnce manifest when certificate signing algorithm is sha256/384/512 (#6882).
 
 #### Fixed
 
 * Solution builds should work when using the secret environment variable `MSBUILDNOINPROCNODE` (#6385).
 * Solution extensions can now use `BeforeTargets="ValidateSolutionConfiguration"` (#6454).
-* Performance improvements (#6529, #6556, #6598, #6632, #6669, #6671, #6666, #6678, )
+* Performance improvements (#6529, #6556, #6598, #6632, #6669, #6671, #6666, #6678, #6680, #6705, #6595, #6716, #6786, #6816, #6832, #6845).
 * Single-file ClickOnce publish includes file association icons (#6578).
 * Improved robustness in error handling of libraries without resources (#6546).
 * Fixed missing information in `Project`'s `DebuggerDisplay` (#6650).
 * `ResolveAssemblyReferences` output paths are now output in normalized form (#6533).
 * Improved handling of satellite assemblies in ClickOnce (#6665).
+* Roslyn code analyzers are no longer run during XAML precompilation (#6676). Thanks, @jlaanstra!
+* 64-bit API callers no longer need to set `MSBUILD_EXE_PATH` (#6683, #6746).
+* `EvaluateStop` ETW events are now automatically correlated with `EvaluateStart` (#6725).
+* Evaluation time is included in text performance traces (#6725).
+* Add PackageDescription to `Microsoft.NET.StringTools` (#6740).
+* Fixed deadlock between `ExecuteSubmission` and `LoggingService` (#6717).
+* Narrowed conditions where MSBuild would blame NuGet for SDK resolution problems (#6742).
+* `CombineTargetFrameworkInfoProperties` no longer fails on portable framework names (#6699).
+* Avoid needless builds of `GenerateBindingRedirects` (#6726).
+* The solution configuration is now passed to experimental cache plugins (#6738).
+* Clearer errors when SDK resolvers throw exceptions (#6763).
+* Improved errors from `InternableString.ExpensiveConvertToString` (#6798).
+* Binding redirects for all `System.*` assemblies updated (#6830).
+* Fixed deadlock between `BuildManager` and `LoggingService` (#6837).
+* Log message arguments for warnings and errors (#6804). Thanks, @KirillOsenkov!
+* Use static CoreClrAssemblyLoader for SDK resolvers (#6864). Thanks, @marcin-krystianc!
+* Avoid break caused by fix and workaround for AL path colliding (#6884).
+* Support private-use area Unicode characters in paths passed to `XslTransformation` (#6863, #6946). Thanks, @lanfeust69!
+* Use the correct .NET host when called from a .NET 6.0 application (#6890).
 
 #### Infrastructure
 
@@ -55,124 +88,16 @@ This version of MSBuild shipped with Visual Studio 2022 version 17.0.0 and .NET 
 * Simplify references to `TargetFramework` using new intrinsics (#5799).
 * Reference the `Microsoft.DotNet.XUnitExtensions` package from Arcade instead of our fork (#6638).
 * Use [`BannedApiAnalyzers`](https://www.nuget.org/packages/Microsoft.CodeAnalysis.BannedApiAnalyzers/) (#6675).
-*
+* Enable analyzers for the MSBuild repo with rules similar to `dotnet/runtime` (#5656). Thanks, @elachlan!
+* Improved internal OptProf training scenarios (#6758).
+* Delete Unreachable code (#6805). Thanks, @KirillOsenkov!
+* Upgrade System.Net.Http package version used in tests (#6879).
 
 #### Documentation
 
-
-
-#### Uncategorized
-
-|sha | Author | subject | parents|
-| --- | --- | --- | --- |
-eac68aa8b | Johan Laanstra <jlaanstra1221@outlook.com> | Do not run analyzers for XamlPreCompile. (#6676) | 18ca1779d
-6dba77a45 | Rainer Sigwald <raines@microsoft.com> | Move ref assembly to the obj folder (#6560) | eac68aa8b
-9e576281e | Ladi Prosek <laprosek@microsoft.com> | Absolutize ref assembly path (#6695) | 6dba77a45
-ef21d4144 | Forgind <Forgind@users.noreply.github.com> | Move version check earlier (#6674) | 9e576281e
-65e44d936 | AR-May <67507805+AR-May@users.noreply.github.com> | Fix lock contention in ProjectRootElementCache.Get (#6680) | ef21d4144
-80dae434a | Forgind <Forgind@users.noreply.github.com> | Add ETW trace for PerformDependencyAnalysis (#6658) | 65e44d936
-cdb5077c4 | Mihai Codoban <micodoba@microsoft.com> | Improve debugging experience: add global switch MSBuildDebugEngine; Inject binary logger from BuildManager; print static graph as .dot file (#6639) | 80dae434a
-b6d179cb9 | Roman Konecny <rokonecn@microsoft.com> | Using ArrayPool for buffers in InterningBinaryReader (#6705) | cdb5077c4
-48ffc9831 | Roman Konecny <rokonecn@microsoft.com> | Fix deploy script for 64bits and net6 (#6706) | b6d179cb9
-02a3a62df | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Skip Updating CopyComplete Marker When Not Necessary (#6698) | 48ffc9831
-ab9e65468 | Rainer Sigwald <raines@microsoft.com> | Only look for .dll assemblies on Core | d26cfbe43
-f4645e659 | Rainer Sigwald <raines@microsoft.com> | Avoid regex in GetVsRootFromMSBuildAssembly | d150e93ff
-8711a30a1 | Rainer Sigwald <raines@microsoft.com> | Identify 64-bit MSBuildToolsPath from 64-bit app | f4645e659
-e020ff120 | Rainer Sigwald <raines@microsoft.com> | Treat unit tests as 32-bit | 8711a30a1
-9070345c0 | Rainer Sigwald <raines@microsoft.com> | Remove FindOlderVisualStudioEnvironmentByEnvironmentVariable() | e020ff120
-255b4d02b | Rainer Sigwald <raines@microsoft.com> | Avoid recomputing path to MSBuild.exe under VS | 9070345c0
-9f91131a3 | Ladi Prosek <laprosek@microsoft.com> | Merge pull request #6663 from rainersigwald/no-ni-on-core | 257996173 ab9e65468
-d592862ed | Ladi Prosek <laprosek@microsoft.com> | Merge pull request #6683 from rainersigwald/64-bit-environment | 9f91131a3 255b4d02b
-4bb26f3a9 | Rainer Sigwald <raines@microsoft.com> | Revert "Absolutize ref assembly path (#6695)" | 02a3a62df
-cad7e7b33 | Rainer Sigwald <raines@microsoft.com> | Revert "Move ref assembly to the obj folder (#6560)" | 4bb26f3a9
-cf722dbe1 | Marc Paine <marcpop@microsoft.com> | Merge pull request #6718 from rainersigwald/revert-ref-asm-move | 02a3a62df cad7e7b33
-9128adb8f | Rainer Sigwald <raines@microsoft.com> | Merge pull request #6720 from dotnet-maestro-bot/merge/vs17.0-to-main | d592862ed cf722dbe1
-b6e7d6051 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | ProjectReferences Negotiate SetPlatform Metadata (#6655) | 9128adb8f
-a66a243f7 | Sam Harwell <Sam.Harwell@microsoft.com> | Use default XlfLanguages | b6e7d6051
-f1cd160db | Sam Harwell <Sam.Harwell@microsoft.com> | Add reference to Microsoft.CodeAnalysis.Collections (source package) | a66a243f7
-c85cd99ad | Sam Harwell <Sam.Harwell@microsoft.com> | Use ImmutableSegmentedList<T> where appropriate | f1cd160db
-b7eb19b9a | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Update description about transitive copying | b6e7d6051
-aaac00a34 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/arcade (#6711) | b7eb19b9a
-2a85d84f6 | Forgind <Forgind@users.noreply.github.com> | Use SDK precomputed cache | aaac00a34
-1b4b5fb96 | Roman Konecny <rokonecn@microsoft.com> | Remove xml declaration from Tools.csproj (#6729) | 2a85d84f6
-24eea8eb3 | dotnet-maestro-bot <dotnet-maestro-bot@microsoft.com> | [automated] Merge branch 'vs16.11' => 'main' (#6626) | 1b4b5fb96
-49d582fb7 | Ladi Prosek <laprosek@microsoft.com> | Optimize logging by moving message importance checks earlier (#6381) | 24eea8eb3
-4f8d57b40 | Ladi Prosek <laprosek@microsoft.com> | Unbreak non-PR CI builds (#6737) | 49d582fb7
-682bfcaf3 | Rainer Sigwald <raines@microsoft.com> | Miscellaneous event tweaks (#6725) | 4f8d57b40
-8c92d4c19 | Lachlan Ennis <2433737+elachlan@users.noreply.github.com> | implement analyzers from runtime (#5656) | 682bfcaf3
-9596593cc | Ladi Prosek <laprosek@microsoft.com> | Add PackageDescription to Microsoft.NET.StringTools (#6740) | 8c92d4c19
-df9547e89 | Forgind <Forgind@users.noreply.github.com> | Add up-to-date ETW for WriteLinesToFile (#6670) | 9596593cc
-b9424d916 | Mihai Codoban <micodoba@microsoft.com> | Specify project info in affinity missmatch error (#6640) | df9547e89
-6bc1e0e22 | Roman Konecny <rokonecn@microsoft.com> | Deadlock at ExecuteSubmission vs LoggingService (#6717) | b9424d916
-19b2630d2 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Fix Misleading NuGet SDK Resolver Error Message #6742 | 6bc1e0e22
-6ca861613 | David Wrighton <davidwr@microsoft.com> | Remove depenency on MemberRef Parent of a custom attribute constructor being a TypeReference (#6735) | 19b2630d2
-b0bb46ab8 | Rainer Sigwald <raines@microsoft.com> | Recalculate MSBuild path from VS Root (#6746) | 6ca861613
-62c6327ac | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | SetPlatform Negotiation: Allow MSBuild `GetTargetFrameworks` call when `SetTargetFramework` already set (#6724) | b0bb46ab8
-c24b4e696 | Rainer Sigwald <raines@microsoft.com> | Nix manual XSD updates (#6759) | 62c6327ac
-9c14af563 | Pranav K <prkrishn@hotmail.com> | Update XSD to include details about ImplicitUsings and Using items (#6755) | c24b4e696
-cb3144483 | Ladi Prosek <laprosek@microsoft.com> | Add .NET Core solution open to OptProf training scenarios (#6758) | 9c14af563
-b92bd7092 | Rainer Sigwald <raines@microsoft.com> | Delete manual Markdown ToCs (#6760) | cb3144483
-00166ebca | Forgind <Forgind@users.noreply.github.com> | Update schema for combining TargetFramework info to allow for invalid xml names such as including '+' (#6699) | b92bd7092
-d01fb229e | Forgind <Forgind@users.noreply.github.com> | Add CopyUpToDate ETW (#6661) | 00166ebca
-c88325c78 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Generate cache file for SuggestedBindingRedirects (#6726) | d01fb229e
-ff10b9f15 | Sam Harwell <Sam.Harwell@microsoft.com> | Merge remote-tracking branch 'dotnet/main' into roslyn-collections | c85cd99ad c88325c78
-46d8f9b0b | Rainer Sigwald <raines@microsoft.com> | 16.11 release note update (#6586) | c88325c78
-be92f497b | Andy Gerlicher <angerlic@microsoft.com> | Block Execution of GetType() in Evaluation | c88325c78
-9fbd47fae | Andy Gerlicher <angerlic@microsoft.com> | Avoid using GetType in a unit test | be92f497b
-aac64bbab | Forgind <Forgind@users.noreply.github.com> | Merge pull request #6595 from sharwell/roslyn-collections | 46d8f9b0b ff10b9f15
-6806583ea | Ladi Prosek <laprosek@microsoft.com> | Optimize item Remove operations (#6716) | aac64bbab
-dcaef41b0 | Forgind <Forgind@users.noreply.github.com> | Merge pull request #6769 from AndyGerlicher/reject-gettype-property | 6806583ea 9fbd47fae
-2a7dadfc6 | Mihai Codoban <micodoba@microsoft.com> | Propagate solution configuration information to project cache plugins (#6738) | dcaef41b0
-16307632a | Damian Edwards <damian@damianedwards.com> | Add InternalsVisibleTo to common types schema (#6778) | 2a7dadfc6
-414393fc1 | Ladi Prosek <laprosek@microsoft.com> | Switch to full NGEN (#6764) | 16307632a
-d816e47df | Mihai Codoban <micodoba@microsoft.com> | Only set debug path when MSBuildDebugEngine is set (#6792) | 414393fc1
-e65d1aeab | Rainer Sigwald <raines@microsoft.com> | Merge branch 'vs16.11' | d816e47df bba284cf4
-bd6797fc8 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from nuget/nuget.client (#6651) | e65d1aeab
-f6cf11856 | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/roslyn (#6722) | bd6797fc8
-596f08dcf | Jake <31937616+JakeRadMSFT@users.noreply.github.com> | Update System.Text.Json to 5.0.2 (#6784) | f6cf11856
-864047de1 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Fail Builds Fast When SDKResolvers Throw Exceptions (#6763) | 596f08dcf
-e923c2b80 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Update loc update branch (#6808) | 864047de1
-74e9935a4 | Saint Wesonga <sawesong@microsoft.com> | Define stand-in optional workloads targets (#6813) | d816e47df
-8d665eea8 | dotnet bot <dotnet-bot@dotnetfoundation.org> | Localized file check-in by OneLocBuild Task (#6809) | e923c2b80
-5e0b0ea21 | Gordon Hogenson <ghogen@microsoft.com> | Doc comments: fix validation issues in docs build (#6744) | 8d665eea8
-f9e7e8ed4 | Ladi Prosek <laprosek@microsoft.com> | Add invariant check to InternableString.ExpensiveConvertToString (#6798) | 8c7337fc3
-2fab8f47f | dotnet bot <dotnet-bot@dotnetfoundation.org> | Localized file check-in by OneLocBuild Task (#6824) | f9e7e8ed4
-11ae61937 | Rainer Sigwald <raines@microsoft.com> | Increase ProjectRootElementCache MRU cache (#6786) | 2fab8f47f
-1a1f20e49 | Rainer Sigwald <raines@microsoft.com> | Merge pull request #6815 from vs17.0 | 2c5510013 74e9935a4
-c82d55e9b | Rainer Sigwald <raines@microsoft.com> | Merge remote-tracking branch 'upstream/vs16.11' into main | 1a1f20e49 9f91d117e
-a9594b978 | Kirill Osenkov <KirillOsenkov@users.noreply.github.com> | Delete dead code (#6805) | c82d55e9b
-8f208e609 | Rainer Sigwald <raines@microsoft.com> | Binding redirect Tasks.Extensions 4.2.0.1 (#6830) | a9594b978
-e3e141ff0 | Ladi Prosek <laprosek@microsoft.com> | Expose LogTaskInputs to tasks (#6803) | 8f208e609
-4ceb3f8e2 | Ladi Prosek <laprosek@microsoft.com> | Optimize InternableString.GetHashCode (#6816) | e3e141ff0
-ea1d6d99a | Roman Konecny <rokonecn@microsoft.com> | Process-wide caching of ToolsetConfigurationSection (#6832) | 4ceb3f8e2
-d231437ce | Ladi Prosek <laprosek@microsoft.com> | Further optimize InternableString.GetHashCode by eliminating a ref (#6845) | ea1d6d99a
-6eb3976d9 | Roman Konecny <rokonecn@microsoft.com> | Fix deadlock in BuildManager vs LoggingService (#6837) | d231437ce
-6cf35b8de | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/arcade (#6843) | 6eb3976d9
-c5eef1eb2 | Kirill Osenkov <KirillOsenkov@users.noreply.github.com> | Log message arguments for warnings and errors (#6804) | f566ba17a
-cb055d28f | dotnet-maestro[bot] <42748379+dotnet-maestro[bot]@users.noreply.github.com> | [main] Update dependencies from dotnet/roslyn (#6865) | c5eef1eb2
-57f14a7b1 | Marcin Krystianc <marcin.krystianc@gmail.com> | Use static CoreClrAssemblyLoader for SDK resolvers (#6864) | cb055d28f
-9b5ccf07e | Igor Velikorossov <RussKie@users.noreply.github.com> | Add new Windows Forms specific props (#6860) | 57f14a7b1
-2f1e9cad5 | Saint Wesonga <sawesong@microsoft.com> | Revert "Define stand-in optional workloads targets (#6813)" (#6872) | 9b5ccf07e
-bc68c0d7e | Sujit Nayak <sujitn@exchange.microsoft.com> | 6732: Default to sha2 digest for clickonce manifest when certificate signing algorithm is sha256/384/512 | 2f1e9cad5
-8f9d79e07 | Sujit Nayak <sujitn@exchange.microsoft.com> | add comment | bc68c0d7e
-d9d1d59cb | Sujit Nayak <sujitn@exchange.microsoft.com> | fix comment | 8f9d79e07
-0d31bff6c | AR-May <67507805+AR-May@users.noreply.github.com> | Upgrade System.Net.Http package version (#6879) | 2f1e9cad5
-a08f6bda8 | Drew Noakes <git@drewnoakes.com> | Add enumeration values for DebugType in XSD (#6849) | 0d31bff6c
-9f83c725f | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Add SatelliteResourceLanguages property to common types schema (#6861) | a08f6bda8
-c144bfc46 | sujitnayak <sujitn@microsoft.com> | Merge pull request #6882 from sujitnayak/main | 9f83c725f d9d1d59cb
-c8300d6da | Rainer Sigwald <raines@microsoft.com> | Deploy-MSBuild shouldn't deploy en resources (#6888) | c144bfc46
-c62750d64 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Avoid appending x64 to AL path if x64 is already appended (#6884) | c8300d6da
-e123a0c1f | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Add labels documentation (#6873) | c62750d64
-3a1e456fe | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | SetPlatform: Use Platform Instead Of PlatformTarget (#6889) | e123a0c1f
-9881f461f | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Enable File Scoped Namespaces For Resources (#6881) | 3a1e456fe
-ceb2a05a0 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Initialize XmlReaders using StreamReaders (#6863) | 9881f461f
-5805e3469 | Ben Villalobos <4691428+BenVillalobos@users.noreply.github.com> | Delete intermediate sourcebuild package (#6898) | ceb2a05a0
-bbcce1dff | Forgind <Forgind@users.noreply.github.com> | MSBuildLocator: Find dotnet.exe when out-of-proc (#6890) | 5805e3469
-6873d6956 | Rainer Sigwald <raines@microsoft.com> | Merge branch 'vs16.11' into 'vs17.0' | bbcce1dff f32259642
-b26f1a2df | Rainer Sigwald <raines@microsoft.com> | C++ CodeAnalysis assemblies to v17 (#6953) | 6873d6956
-d66a44095 | Jean-Jacques Lafay <jeanjacques.lafay@gmail.com> | Fix files kept in use in XslTransformation (#6946) | b26f1a2df
-
-
+* Use GitHub-generated Markdown tables of contents (#6760).
+* Fixed validation issues in docs build (#6744).
+* Descriptions of labels in use in this repo (#6873)
 
 ## MSBuild 16.11.0
 
