@@ -24,7 +24,7 @@ namespace Microsoft.Build.Framework
     ///         </list>
     ///     </para>
     /// </remarks>
-    internal sealed class FileClassifier
+    internal class FileClassifier     
     {
         private const StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
 
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Framework
     ///         Cache is add only. It does not updates already existing cached items.
     ///     </remarks>
     /// </summary>
-    internal sealed class ImmutableFilesTimestampCache
+    internal class ImmutableFilesTimestampCache
     {
         private readonly ConcurrentDictionary<string, DateTime> _cache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -151,7 +151,6 @@ namespace Microsoft.Build.Framework
         ///     Shared singleton instance
         /// </summary>
         public static ImmutableFilesTimestampCache Shared { get; } = new();
-
 
         /// <summary>
         ///     Try get 'Last Write File Utc' time of particular file.
