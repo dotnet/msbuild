@@ -61,7 +61,10 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
 
-        public static readonly Option<string> FromRollbackFileOption = WorkloadUpdateCommandParser.FromRollbackFileOption;
+        public static readonly Option<string> FromRollbackFileOption = new Option<string>("--from-rollback-file", Microsoft.DotNet.Workloads.Workload.Update.LocalizableStrings.FromRollbackDefinitionOptionDescription)
+        {
+            IsHidden = true
+        };
 
         public static Command GetCommand()
         {
