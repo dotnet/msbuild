@@ -3,20 +3,22 @@
 
 #nullable enable
 
-namespace Microsoft.TemplateEngine.Cli.CommandParsing
+namespace Microsoft.TemplateEngine.Cli.Commands
 {
+    //TODO: consider refactoring based on command definition
+
     /// <summary>
     /// Use these extensions to get examples of dotnet new commands.
     /// </summary>
-    internal static class INewCommandInputExtensions
+    internal static class CommandExamples
     {
-        internal static string InstallCommandExample(this INewCommandInput command, bool withVersion = false,  string packageID = "", string version = "")
+        internal static string InstallCommandExample(string commandName, bool withVersion = false,  string packageID = "", string version = "")
         {
             if (string.IsNullOrWhiteSpace(packageID))
             {
                 return withVersion
-                    ? $"dotnet {command.CommandName} --install <PACKAGE_ID>::<VERSION>"
-                    : $"dotnet {command.CommandName} --install <PACKAGE_ID>";
+                    ? $"dotnet {commandName} --install <PACKAGE_ID>::<VERSION>"
+                    : $"dotnet {commandName} --install <PACKAGE_ID>";
             }
 
             if (string.IsNullOrWhiteSpace(version))
@@ -25,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 {
                     packageID = $"'{packageID}'";
                 }
-                return $"dotnet {command.CommandName} --install {packageID}";
+                return $"dotnet {commandName} --install {packageID}";
             }
             else
             {
@@ -34,21 +36,21 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 {
                     packageAndVersion = $"'{packageAndVersion}'";
                 }
-                return $"dotnet {command.CommandName} --install {packageAndVersion}";
+                return $"dotnet {commandName} --install {packageAndVersion}";
             }
         }
 
-        internal static string UpdateApplyCommandExample(this INewCommandInput command)
+        internal static string UpdateApplyCommandExample(string commandName)
         {
-            return $"dotnet {command.CommandName} --update-apply";
+            return $"dotnet {commandName} --update-apply";
         }
 
-        internal static string ListCommandExample(this INewCommandInput command)
+        internal static string ListCommandExample(string commandName)
         {
-            return $"dotnet {command.CommandName} --list";
+            return $"dotnet {commandName} --list";
         }
 
-        internal static string SearchCommandExample(this INewCommandInput command, string? templateName = null, IEnumerable<string>? additionalArgs = null, bool usePlaceholder = false)
+        internal static string SearchCommandExample(string commandName, string? templateName = null, IEnumerable<string>? additionalArgs = null, bool usePlaceholder = false)
         {
             if (usePlaceholder)
             {
@@ -58,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             {
                 throw new ArgumentException($"{nameof(templateName)} should not be empty when {nameof(usePlaceholder)} is false and no additional arguments is given.", nameof(templateName));
             }
-            string commandStr = $"dotnet {command.CommandName}";
+            string commandStr = $"dotnet {commandName}";
             if (!string.IsNullOrWhiteSpace(templateName))
             {
                 if (templateName?.Any(char.IsWhiteSpace) ?? false)
@@ -76,45 +78,45 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return commandStr;
         }
 
-        internal static string UninstallCommandExample(this INewCommandInput command, string packageId = "", bool noArgs = false)
+        internal static string UninstallCommandExample(string commandName, string packageId = "", bool noArgs = false)
         {
             if (noArgs)
             {
-                return $"dotnet {command.CommandName} --uninstall";
+                return $"dotnet {commandName} --uninstall";
             }
 
             if (string.IsNullOrWhiteSpace(packageId))
             {
-                return $"dotnet {command.CommandName} --uninstall <PACKAGE_ID>";
+                return $"dotnet {commandName} --uninstall <PACKAGE_ID>";
             }
 
             if (packageId.Any(char.IsWhiteSpace))
             {
                 packageId = $"'{packageId}'";
             }
-            return $"dotnet {command.CommandName} --uninstall {packageId}";
+            return $"dotnet {commandName} --uninstall {packageId}";
         }
 
-        internal static string InstantiateTemplateExample (this INewCommandInput command, string templateName)
+        internal static string InstantiateTemplateExample (string commandName, string templateName)
         {
             if (templateName.Any(char.IsWhiteSpace))
             {
                 templateName = $"'{templateName}'";
             }
-            return $"dotnet {command.CommandName} {templateName}";
+            return $"dotnet {commandName} {templateName}";
         }
 
-        internal static string HelpCommandExample(this INewCommandInput command, string? templateName = null, string? language = null)
+        internal static string HelpCommandExample(string commandName, string? templateName = null, string? language = null)
         {
             if (string.IsNullOrWhiteSpace(templateName))
             {
-                return $"dotnet {command.CommandName} -h";
+                return $"dotnet {commandName} -h";
             }
             if (templateName.Any(char.IsWhiteSpace))
             {
                 templateName = $"'{templateName}'";
             }
-            string commandStr = $"dotnet {command.CommandName} {templateName} -h";
+            string commandStr = $"dotnet {commandName} {templateName} -h";
             if (!string.IsNullOrWhiteSpace(language))
             {
                 commandStr += $" --language {language}";
@@ -122,9 +124,9 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return commandStr;
         }
 
-        internal static string New3CommandExample(this INewCommandInput command)
+        internal static string New3CommandExample(string commandName)
         {
-            return $"dotnet {command.CommandName}";
+            return $"dotnet {commandName}";
         }
     }
 }

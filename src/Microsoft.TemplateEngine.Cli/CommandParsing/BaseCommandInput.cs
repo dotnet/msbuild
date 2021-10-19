@@ -4,6 +4,7 @@
 #nullable enable
 
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.TemplateEngine.Cli.Commands;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
@@ -263,7 +264,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 else
                 {
                     Reporter.Error.WriteLine(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters);
-                    Reporter.Error.WriteCommand(this.HelpCommandExample());
+                    Reporter.Error.WriteCommand(CommandExamples.HelpCommandExample(this.CommandName));
                 }
             }
             return !hasError;

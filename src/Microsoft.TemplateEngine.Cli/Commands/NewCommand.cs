@@ -30,9 +30,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             LegacyInstallCommand legacyInstall = new LegacyInstallCommand(this, host, telemetryLogger, callbacks);
             this.Add(legacyInstall);
             this.Add(new InstallCommand(legacyInstall, host, telemetryLogger, callbacks));
+            this.Add(new LegacyUninstallCommand(host, telemetryLogger, callbacks));
+            this.Add(new UninstallCommand(host, telemetryLogger, callbacks));
+
             //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new SearchCommand(host, telemetryLogger, callbacks);
-            //yield return (host, telemetryLogger, callbacks) => new UninstallCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new UpdateCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new AliasCommand(host, telemetryLogger, callbacks);
         }

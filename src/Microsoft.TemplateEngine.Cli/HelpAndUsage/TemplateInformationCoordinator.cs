@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -67,10 +68,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     Reporter.Error.WriteLine();
 
                     Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
-                    Reporter.Error.WriteCommand(commandInput.ListCommandExample());
+                    Reporter.Error.WriteCommand(CommandExamples.ListCommandExample(commandInput.CommandName));
 
                     Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
-                    Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName));
+                    Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, commandInput.TemplateName));
                     Reporter.Error.WriteLine();
                     return Task.FromResult(NewCommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousLanguageChoice:
@@ -267,11 +268,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
                 if (string.IsNullOrWhiteSpace(commandInput.TemplateName))
                 {
-                    Reporter.Error.WriteCommand(commandInput.SearchCommandExample(usePlaceholder: true));
+                    Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, usePlaceholder: true));
                 }
                 else
                 {
-                    Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName));
+                    Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, commandInput.TemplateName));
                 }
                 Reporter.Error.WriteLine();
                 return NewCommandStatus.NotFound;
@@ -292,26 +293,26 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             Reporter.Output.WriteLine(string.Format(
                 LocalizableStrings.TemplateInformationCoordinator_DotnetNew_Description,
-                commandInput.New3CommandExample()));
+                CommandExamples.New3CommandExample(commandInput.CommandName)));
             Reporter.Output.WriteLine();
 
             Reporter.Output.WriteLine(string.Format(
               LocalizableStrings.TemplateInformationCoordinator_DotnetNew_TemplatesHeader,
-              commandInput.New3CommandExample()));
+              CommandExamples.New3CommandExample(commandInput.CommandName)));
             DisplayTemplateList(curatedTemplates, _defaultTabularOutputSettings);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
-            Reporter.Output.WriteCommand(commandInput.InstantiateTemplateExample("console"));
+            Reporter.Output.WriteCommand(CommandExamples.InstantiateTemplateExample(commandInput.CommandName, "console"));
             Reporter.Output.WriteLine();
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint);
-            Reporter.Output.WriteCommand(commandInput.HelpCommandExample("console"));
+            Reporter.Output.WriteCommand(CommandExamples.HelpCommandExample(commandInput.CommandName, "console"));
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ListTemplatesHint);
-            Reporter.Output.WriteCommand(commandInput.ListCommandExample());
+            Reporter.Output.WriteCommand(CommandExamples.ListCommandExample(commandInput.CommandName));
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint);
-            Reporter.Output.WriteCommand(commandInput.SearchCommandExample("web"));
+            Reporter.Output.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, "web"));
 
             Reporter.Output.WriteLine();
 
@@ -338,7 +339,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (templateGroupMatchInfo.GroupInfo.ShortNames.Any())
             {
                 Reporter.Error.WriteLine(LocalizableStrings.InvalidParameterTemplateHint);
-                Reporter.Error.WriteCommand(commandInput.HelpCommandExample(templateGroupMatchInfo.GroupInfo.ShortNames[0]));
+                Reporter.Error.WriteCommand(CommandExamples.HelpCommandExample(commandInput.CommandName, templateGroupMatchInfo.GroupInfo.ShortNames[0]));
             }
             return NewCommandStatus.InvalidParamValues;
         }
@@ -379,7 +380,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 string supportedLanguagesStr = string.Join(", ", supportedLanguages);
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint, supportedLanguagesStr));
                 Reporter.Output.WriteCommand(
-                    commandInput.HelpCommandExample(resolutionResult.UnambiguousTemplateGroup.ShortNames[0], supportedLanguages.First()));
+                    CommandExamples.HelpCommandExample(commandInput.CommandName, resolutionResult.UnambiguousTemplateGroup.ShortNames[0], supportedLanguages.First()));
                 Reporter.Output.WriteLine();
             }
         }

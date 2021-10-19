@@ -26,79 +26,17 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly TemplateInformationCoordinator _templateInformationCoordinator;
-        private string _defaultLanguage;
 
         internal TemplatePackageCoordinator(
             ITelemetryLogger telemetryLogger,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            TemplateInformationCoordinator templateInformationCoordinator,
-            string? defaultLanguage = null)
+            TemplateInformationCoordinator templateInformationCoordinator)
         {
             _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _engineEnvironmentSettings = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
             _templateInformationCoordinator = templateInformationCoordinator ?? throw new ArgumentNullException(nameof(templateInformationCoordinator));
-            if (string.IsNullOrWhiteSpace(defaultLanguage))
-            {
-                defaultLanguage = string.Empty;
-            }
-
-            _defaultLanguage = defaultLanguage;
-        }
-
-        /// <summary>
-        /// Checks if <paramref name="commandInput"/> has instructions for template packages.
-        /// </summary>
-        /// <param name="commandInput">the command input to check.</param>
-        /// <returns></returns>
-        internal static bool IsTemplatePackageManipulationFlow(INewCommandInput commandInput)
-        {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
-
-            if (commandInput.CheckForUpdates || commandInput.ApplyUpdates)
-            {
-                return true;
-            }
-            if (commandInput.ToUninstallList != null)
-            {
-                return true;
-            }
-            if (commandInput.ToInstallList != null && commandInput.ToInstallList.Count > 0 && commandInput.ToInstallList[0] != null)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Processes template packages according to <paramref name="commandInput"/>.
-        /// </summary>
-        /// <param name="commandInput">the command input with instructions to process.</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        [Obsolete]
-        internal Task<NewCommandStatus> ProcessAsync(INewCommandInput commandInput, CancellationToken cancellationToken = default)
-        {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (commandInput.ToUninstallList != null)
-            {
-                return EnterUninstallFlowAsync(commandInput, cancellationToken);
-            }
-
-            if (commandInput.CheckForUpdates || commandInput.ApplyUpdates)
-            {
-                InitializeNuGetCredentialService(commandInput);
-                return EnterUpdateFlowAsync(commandInput, cancellationToken);
-            }
-            if (commandInput.ToInstallList != null && commandInput.ToInstallList.Count > 0 && commandInput.ToInstallList[0] != null)
-            {
-                InitializeNuGetCredentialService(commandInput);
-                return EnterInstallFlowAsync(commandInput, cancellationToken);
-            }
-            throw new NotSupportedException($"The operation is not supported, command: {commandInput}.");
         }
 
         /// <summary>
@@ -154,7 +92,8 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAvailable, displayString));
 
                     Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
-                    Reporter.Output.WriteCommand(commandInput.InstallCommandExample(
+                    Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(
+                        commandInput.CommandName,
                         packageID: versionCheckResult.TemplatePackage.Identifier,
                         version: versionCheckResult.LatestVersion));
                 }
@@ -180,14 +119,6 @@ namespace Microsoft.TemplateEngine.Cli
                         LocalizableStrings.TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError,
                         ex.ToString()));
             }
-        }
-
-        [Obsolete]
-        private Task<NewCommandStatus> EnterInstallFlowAsync(INewCommandInput args, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(NewCommandStatus.Cancelled);
-
-            //return EnterInstallFlowAsync(new InstallCommandArgs(args), cancellationToken);
         }
 
         /// <summary>
@@ -337,21 +268,23 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Uninstall the template package(s) flow (--uninstall, -u).
         /// </summary>
-        private async Task<NewCommandStatus> EnterUninstallFlowAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
+#pragma warning disable SA1202 // Elements should be ordered by access
+        internal async Task<NewCommandStatus> EnterUninstallFlowAsync(UninstallCommandArgs args, CancellationToken cancellationToken)
+#pragma warning restore SA1202 // Elements should be ordered by access
         {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+            _ = args ?? throw new ArgumentNullException(nameof(args));
             cancellationToken.ThrowIfCancellationRequested();
 
             NewCommandStatus result = NewCommandStatus.Success;
-            if (commandInput.ToUninstallList == null || commandInput.ToUninstallList.Count <= 0 || commandInput.ToUninstallList[0] == null)
+            if (args.TemplatePackages == null || args.TemplatePackages.Count <= 0)
             {
                 //display all installed template packages
-                await DisplayInstalledTemplatePackages(commandInput, cancellationToken).ConfigureAwait(false);
+                await DisplayInstalledTemplatePackagesAsync(args, cancellationToken).ConfigureAwait(false);
                 return result;
             }
 
             Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>> sourcesToUninstall;
-            (result, sourcesToUninstall) = await DetermineSourcesToUninstall(commandInput, cancellationToken).ConfigureAwait(false);
+            (result, sourcesToUninstall) = await DetermineSourcesToUninstallAsync(args, cancellationToken).ConfigureAwait(false);
 
             foreach (KeyValuePair<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>> providerSourcesToUninstall in sourcesToUninstall)
             {
@@ -375,17 +308,17 @@ namespace Microsoft.TemplateEngine.Cli
             return result;
         }
 
-        private async Task<(NewCommandStatus, Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>)> DetermineSourcesToUninstall(INewCommandInput commandInput, CancellationToken cancellationToken)
+        private async Task<(NewCommandStatus, Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>)> DetermineSourcesToUninstallAsync(UninstallCommandArgs commandArgs, CancellationToken cancellationToken)
         {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
-            _ = commandInput.ToUninstallList ?? throw new ArgumentNullException(nameof(commandInput.ToUninstallList));
+            _ = commandArgs ?? throw new ArgumentNullException(nameof(commandArgs));
+            _ = commandArgs.TemplatePackages ?? throw new ArgumentNullException(nameof(commandArgs.TemplatePackages));
             cancellationToken.ThrowIfCancellationRequested();
 
             NewCommandStatus result = NewCommandStatus.Success;
             IReadOnlyList<IManagedTemplatePackage> templatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
 
             List<string> parsedIdentifiers = new List<string>();
-            foreach (string entry in commandInput.ToUninstallList)
+            foreach (string entry in commandArgs.TemplatePackages)
             {
                 parsedIdentifiers.AddRange(InstallRequestPathResolution.ExpandMaskedPath(entry, _engineEnvironmentSettings));
             }
@@ -442,20 +375,20 @@ namespace Microsoft.TemplateEngine.Cli
                                       templateGroupsCount).Indent());
                         }
                         Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader);
-                        Reporter.Error.WriteCommand(commandInput.UninstallCommandExample(managedPackages?.First().Identifier ?? ""));
+                        Reporter.Error.WriteCommand(CommandExamples.UninstallCommandExample(commandArgs.CommandName, managedPackages?.First().Identifier ?? ""));
                         //TODO:
                         //Reporter.Error.WriteLine($"To list the templates installed in a package, use dotnet new3 <new option> <package name>.");
                     }
                     else
                     {
                         Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader);
-                        Reporter.Error.WriteCommand(commandInput.UninstallCommandExample(noArgs: true));
+                        Reporter.Error.WriteCommand(CommandExamples.UninstallCommandExample(commandArgs.CommandName, noArgs: true));
                     }
                 }
                 else
                 {
                     Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader);
-                    Reporter.Error.WriteCommand(commandInput.UninstallCommandExample(noArgs: true));
+                    Reporter.Error.WriteCommand(CommandExamples.UninstallCommandExample(commandArgs.CommandName, noArgs: true));
                 }
                 Reporter.Error.WriteLine();
             }
@@ -525,14 +458,15 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine();
 
                 Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
-                Reporter.Output.WriteCommand(commandInput.InstallCommandExample(withVersion: true));
+                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandInput.CommandName, withVersion: true));
                 Reporter.Output.WriteCommand(
-                    commandInput.InstallCommandExample(
+                    CommandExamples.InstallCommandExample(
+                        commandInput.CommandName,
                         packageID: displayableResults.First().Identifier,
                         version: displayableResults.First().LatestVersion));
                 Reporter.Output.WriteLine();
                 Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader);
-                Reporter.Output.WriteCommand(commandInput.UpdateApplyCommandExample());
+                Reporter.Output.WriteCommand(CommandExamples.UpdateApplyCommandExample(commandInput.CommandName));
                 Reporter.Output.WriteLine();
             }
 
@@ -547,9 +481,9 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private async Task DisplayInstalledTemplatePackages(INewCommandInput commandInput, CancellationToken cancellationToken)
+        private async Task DisplayInstalledTemplatePackagesAsync(GlobalArgs args, CancellationToken cancellationToken)
         {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+            _ = args ?? throw new ArgumentNullException(nameof(args));
             cancellationToken.ThrowIfCancellationRequested();
 
             IEnumerable<IManagedTemplatePackage> managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
@@ -601,7 +535,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 // uninstall command:
                 Reporter.Output.WriteLine($"{LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint}".Indent(level: 2));
-                Reporter.Output.WriteCommand(commandInput.UninstallCommandExample(managedSource.Identifier), indentLevel: 2);
+                Reporter.Output.WriteCommand(CommandExamples.UninstallCommandExample(args.CommandName, managedSource.Identifier), indentLevel: 2);
 
                 Reporter.Output.WriteLine();
             }

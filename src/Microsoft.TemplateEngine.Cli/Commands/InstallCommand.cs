@@ -92,8 +92,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 TelemetryLogger,
                 environmentSettings,
                 templatePackageManager,
-                templateInformationCoordinator,
-                environmentSettings.GetDefaultLanguage());
+                templateInformationCoordinator);
 
             //TODO: we need to await, otherwise templatePackageManager will be disposed.
             return await templatePackageCoordinator.EnterInstallFlowAsync(args, context.GetCancellationToken()).ConfigureAwait(false);

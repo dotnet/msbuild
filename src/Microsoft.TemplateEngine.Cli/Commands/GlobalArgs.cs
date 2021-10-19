@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             DebugRebuildCache = parseResult.GetValueForOption(command.DebugRebuildCacheOption);
             DebugShowConfig = parseResult.GetValueForOption(command.DebugShowConfigOption);
             //TODO: check if it gets the command name correctly.
-            CommandName = parseResult.CommandResult.Command.Name;
+            CommandName = GetNewCommandName(parseResult);
             ParseResult = parseResult;
         }
 
@@ -37,5 +37,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal bool DebugShowConfig { get; private set; }
 
         internal string? DebugCustomSettingsLocation { get; private set; }
+
+        private string GetNewCommandName(ParseResult parseResult)
+        {
+            var command = parseResult.CommandResult.Command;
+
+            while (command != null && command is not NewCommand)
+            {
+                command = (parseResult.CommandResult.Parent as CommandResult)?.Command;
+            }
+            return command?.Name ?? string.Empty;
+        }
     }
 }

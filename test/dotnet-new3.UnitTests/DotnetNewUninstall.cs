@@ -21,14 +21,17 @@ namespace Dotnet_new3.IntegrationTests
             _log = log;
         }
 
-        [Fact]
-        public void CanListInstalledSources_Folder()
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("--uninstall")]
+        [InlineData("uninstall")]
+        public void CanListInstalledSources_Folder(string commandName)
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
             string testTemplate = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -40,8 +43,11 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining($"         dotnet new3 --uninstall {testTemplate}");
         }
 
-        [Fact]
-        public void CanListInstalledSources_NuGet()
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("--uninstall")]
+        [InlineData("uninstall")]
+        public void CanListInstalledSources_NuGet(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
@@ -56,7 +62,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("web")
                 .And.HaveStdOutContaining("blazorwasm");
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -71,11 +77,13 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("         dotnet new3 --uninstall Microsoft.DotNet.Web.ProjectTemplates.5.0");
         }
 
-        [Fact]
-        public void CanListInstalledSources_WhenNothingIsInstalled()
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("uninstall")]
+        public void CanListInstalledSources_WhenNothingIsInstalled(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -86,14 +94,17 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOut($"Currently installed items:{Environment.NewLine}(No Items)");
         }
 
-        [Fact]
-        public void CanUninstall_Folder()
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("uninstall")]
+        [InlineData("--uninstall")]
+        public void CanUninstall_Folder(string commandName)
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
             string templateLocation = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -104,7 +115,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining($"TemplateResolution{Path.DirectorySeparatorChar}DifferentLanguagesGroup{Path.DirectorySeparatorChar}BasicFSharp")
                 .And.HaveStdOutMatching($"^\\s*dotnet new3 --uninstall .*TemplateResolution{Regex.Escape(Path.DirectorySeparatorChar.ToString())}DifferentLanguagesGroup{Regex.Escape(Path.DirectorySeparatorChar.ToString())}BasicFSharp$", RegexOptions.Multiline);
 
-            new DotnetNewCommand(_log, "-u", templateLocation)
+            new DotnetNewCommand(_log, commandName, templateLocation)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -114,7 +125,7 @@ namespace Dotnet_new3.IntegrationTests
                 .NotHaveStdErr()
                 .And.HaveStdOut($"Success: {templateLocation} was uninstalled.");
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -127,8 +138,11 @@ namespace Dotnet_new3.IntegrationTests
             Assert.True(Directory.Exists(templateLocation));
         }
 
-        [Fact]
-        public void CanUninstall_NuGet()
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("uninstall")]
+        [InlineData("--uninstall")]
+        public void CanUninstall_NuGet(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
@@ -143,7 +157,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("web")
                 .And.HaveStdOutContaining("blazorwasm");
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -158,7 +172,7 @@ namespace Dotnet_new3.IntegrationTests
 
             Assert.True(File.Exists(Path.Combine(home, "packages", "Microsoft.DotNet.Web.ProjectTemplates.5.0.5.0.0.nupkg")));
 
-            new DotnetNewCommand(_log, "-u", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -168,7 +182,7 @@ namespace Dotnet_new3.IntegrationTests
                 .NotHaveStdErr()
                 .And.HaveStdOut($"Success: Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0 was uninstalled.");
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -182,7 +196,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public void CanUninstallSeveralSources()
+        public void CanUninstallSeveralSources_LegacySyntax()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -228,10 +242,58 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public void CannotUninstallUnknownPackage()
+        public void CanUninstallSeveralSources()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string basicFSharp = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
+            string basicVB = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, home);
+
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
+                .WithCustomHive(home).WithDebug()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr()
+                .And.HaveStdOutContaining("web")
+                .And.HaveStdOutContaining("blazorwasm")
+                .And.HaveStdOutContaining("console")
+                .And.HaveStdOutContaining("classlib");
+
+            new DotnetNewCommand(_log, "uninstall", "Microsoft.DotNet.Common.ProjectTemplates.5.0", basicFSharp)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr()
+                .And.HaveStdOutMatching($"^Success: Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+ was uninstalled\\.\\s*$", RegexOptions.Multiline)
+                .And.HaveStdOutContaining($"Success: {basicFSharp} was uninstalled.");
+
+            new DotnetNewCommand(_log, "uninstall")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr()
+                .And.HaveStdOutContaining("Microsoft.DotNet.Web.ProjectTemplates.5.0")
+                .And.HaveStdOutContaining(basicVB)
+                .And.NotHaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0")
+                .And.NotHaveStdOutContaining(basicFSharp);
+        }
+
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("uninstall")]
+        public void CannotUninstallUnknownPackage(string commandName)
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -243,7 +305,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("web")
                 .And.HaveStdOutContaining("blazorwasm");
 
-            new DotnetNewCommand(_log, "-u", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -253,11 +315,13 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("   dotnet new3 --uninstall");
         }
 
-        [Fact]
-        public void CannotUninstallByTemplateName()
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("uninstall")]
+        public void CannotUninstallByTemplateName(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -266,7 +330,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetNewCommand(_log, "-u", "console")
+            new DotnetNewCommand(_log, commandName, "console")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -279,11 +343,13 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("   dotnet new3 --uninstall Microsoft.DotNet.Common.ProjectTemplates.5.0");
         }
 
-        [Fact]
-        public void CannotUninstallByTemplateName_ShowsAllPackages()
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("uninstall")]
+        public void CannotUninstallByTemplateName_ShowsAllPackages(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -292,7 +358,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.3.1::5.0.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.3.1::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -301,7 +367,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetNewCommand(_log, "-u", "console")
+            new DotnetNewCommand(_log, commandName, "console")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -314,15 +380,17 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("   dotnet new3 --uninstall Microsoft.DotNet.Common.ProjectTemplates.");
         }
 
-        [Fact]
-        public void CanExpandWhenUninstall()
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("uninstall")]
+        public void CanExpandWhenUninstall(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             string testTemplateLocation = Path.Combine("..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates");
             string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
             string pattern = testTemplateLocation + Path.DirectorySeparatorChar + "*";
 
-            new DotnetNewCommand(_log, "-i", pattern)
+            new DotnetNewCommand(_log, "install", pattern)
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .Execute()
                 .Should().ExitWith(0)
@@ -337,7 +405,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("basic")
                 .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .Execute()
                 .Should().ExitWith(0)
@@ -347,7 +415,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateResolution"))
                 .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateWithSourceName"));
 
-            new DotnetNewCommand(_log, "-u", pattern)
+            new DotnetNewCommand(_log, commandName, pattern)
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .Execute()
                 .Should().ExitWith(0)
@@ -356,7 +424,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateResolution"))
                 .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateWithSourceName"));
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .Execute()
                 .Should().ExitWith(0)

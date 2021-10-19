@@ -6,6 +6,7 @@
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -95,9 +96,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             {
                 string packageIdToShow = EvaluatePackageToShow(searchResults);
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_InstallHelp, commandInput.CommandName));
-                Reporter.Output.WriteCommand(commandInput.InstallCommandExample());
+                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandInput.CommandName));
                 Reporter.Output.WriteLine(LocalizableStrings.Generic_ExampleHeader);
-                Reporter.Output.WriteCommand(commandInput.InstallCommandExample(packageID: packageIdToShow));
+                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandInput.CommandName, packageID: packageIdToShow));
                 return NewCommandStatus.Success;
             }
             return NewCommandStatus.NotFound;
@@ -182,9 +183,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_NoTemplateName.Red().Bold());
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchHelp, string.Join(", ", SupportedFilters.Select(f => $"'{f.Name}'"))));
                 Reporter.Error.WriteLine(LocalizableStrings.Generic_ExamplesHeader);
-                Reporter.Error.WriteCommand(commandInput.SearchCommandExample(usePlaceholder: true));
-                Reporter.Error.WriteCommand(commandInput.SearchCommandExample(additionalArgs: new[] { "--author", "Microsoft" }));
-                Reporter.Error.WriteCommand(commandInput.SearchCommandExample(usePlaceholder: true, additionalArgs: new[] { "--author", "Microsoft" }));
+                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, usePlaceholder: true));
+                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, additionalArgs: new[] { "--author", "Microsoft" }));
+                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, usePlaceholder: true, additionalArgs: new[] { "--author", "Microsoft" }));
                 return false;
             }
 
