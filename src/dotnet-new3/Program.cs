@@ -26,9 +26,9 @@ namespace Dotnet_new3
             Command new3Command = new New3Command();
             ParseResult preParseResult = new3Command.Parse(args);
 
-            DefaultTemplateEngineHost host = CreateHost(preParseResult.ValueForOption(New3Command.DebugDisableBuiltInTemplatesOption));
-            ITelemetryLogger telemetryLogger = new TelemetryLogger(null, preParseResult.ValueForOption(New3Command.DebugEmitTelemetryOption));
-            string[] remainingArgs = preParseResult.ValueForArgument(New3Command.RemainingTokensArgument) ?? Array.Empty<string>();
+            DefaultTemplateEngineHost host = CreateHost(preParseResult.GetValueForOption(New3Command.DebugDisableBuiltInTemplatesOption));
+            ITelemetryLogger telemetryLogger = new TelemetryLogger(null, preParseResult.GetValueForOption(New3Command.DebugEmitTelemetryOption));
+            string[] remainingArgs = preParseResult.GetValueForArgument(New3Command.RemainingTokensArgument) ?? Array.Empty<string>();
 
             return NewCommandFactory.Create(new3Command.Name, host, telemetryLogger, new NewCommandCallbacks()).Invoke(remainingArgs);
         }

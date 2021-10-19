@@ -6,6 +6,7 @@
 using System.CommandLine;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
+using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -92,8 +93,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 if (args.HelpRequested)
                 {
-                    HelpResult helpResult = new HelpResult();
-                    helpResult.Apply(context);
+                    context.HelpBuilder.Write(context.ParseResult.CommandResult.Command, StandardStreamWriter.Create(context.Console.Out));
                     return NewCommandStatus.Success;
                 }
                 //show curated list

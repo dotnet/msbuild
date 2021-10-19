@@ -17,14 +17,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public TemplateGroupArgs(ITemplateInfo template, ParseResult parseResult, Dictionary<string, Option> templateSpecificOptions)
         {
-            Name = parseResult.ValueForOption(_nameOption);
-            OutputPath = parseResult.ValueForOption(_outputOption);
+            Name = parseResult.GetValueForOption(_nameOption);
+            OutputPath = parseResult.GetValueForOption(_outputOption);
             foreach (var opt in templateSpecificOptions)
             {
-                TemplateSpecificOptions[opt.Key] = parseResult.ValueForOption(opt.Value)?.ToString();
+                TemplateSpecificOptions[opt.Key] = parseResult.GetValueForOption(opt.Value)?.ToString();
             }
             Template = template;
-            HelpRequested = parseResult.ValueForOption(_helpOption);
+            HelpRequested = parseResult.GetValueForOption(_helpOption);
         }
 
         public Dictionary<string, string?> TemplateSpecificOptions { get; } = new();

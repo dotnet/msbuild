@@ -11,9 +11,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public NewCommandArgs(NewCommand command, ParseResult parseResult) : base(command, parseResult)
         {
-            Arguments = parseResult.ValueForArgument(command.RemainingArguments);
-            ShortName = parseResult.ValueForArgument(command.ShortNameArgument);
-            HelpRequested = parseResult.ValueForOption(command.HelpOption);
+            Arguments = parseResult.GetValueForArgument(command.RemainingArguments);
+            ShortName = parseResult.GetValueForArgument(command.ShortNameArgument);
+            HelpRequested = parseResult.GetValueForOption(command.HelpOption);
         }
 
         internal string? ShortName { get; }

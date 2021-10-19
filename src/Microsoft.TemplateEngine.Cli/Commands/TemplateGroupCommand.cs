@@ -4,6 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
+using System.CommandLine.IO;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -33,8 +34,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (templateGroupArgs.HelpRequested)
             {
-                HelpResult helpResult = new HelpResult();
-                helpResult.Apply(context);
+                context.HelpBuilder.Write(context.ParseResult.CommandResult.Command, StandardStreamWriter.Create(context.Console.Out));
                 return 0;
             }
 

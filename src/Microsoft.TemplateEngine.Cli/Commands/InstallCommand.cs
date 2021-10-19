@@ -120,9 +120,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public InstallCommandArgs(BaseInstallCommand installCommand, ParseResult parseResult) : base(installCommand, parseResult)
         {
-            TemplatePackages = parseResult.ValueForArgument(installCommand.NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
-            Interactive = parseResult.ValueForOption(installCommand.InteractiveOption);
-            AdditionalSources = parseResult.ValueForOption(installCommand.AddSourceOption);
+            TemplatePackages = parseResult.GetValueForArgument(installCommand.NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
+            Interactive = parseResult.GetValueForOption(installCommand.InteractiveOption);
+            AdditionalSources = parseResult.GetValueForOption(installCommand.AddSourceOption);
         }
 
         public IReadOnlyList<string> TemplatePackages { get; }

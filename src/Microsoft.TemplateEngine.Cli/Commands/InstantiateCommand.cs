@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public InstantiateCommandArgs(InstantiateCommand command, ParseResult parseResult) : base(command, parseResult)
         {
-            OutputPath = parseResult.ValueForOption(OutputPathOption);
+            OutputPath = parseResult.GetValueForOption(OutputPathOption);
         }
 
         public string? OutputPath { get; }
