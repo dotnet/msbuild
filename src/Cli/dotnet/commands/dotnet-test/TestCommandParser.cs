@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli
             ArgumentHelpName = LocalizableStrings.CmdTestCaseFilterExpression
         }.ForwardAsSingle(o => $"-property:VSTestTestCaseFilter={o}");
 
-        public static readonly Option<IEnumerable<string>> AdapterOption = new ForwardedOption<IEnumerable<string>>(new string[] { "-a", "--test-adapter-path" }, LocalizableStrings.CmdTestAdapterPathDescription)
+        public static readonly Option<IEnumerable<string>> AdapterOption = new ForwardedOption<IEnumerable<string>>(new string[] { "--test-adapter-path" }, LocalizableStrings.CmdTestAdapterPathDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdTestAdapterPath
         }.ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Select(CommandDirectoryContext.GetFullPath))}\"")
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.CmdNoBuildDescription)
             .ForwardAs("-property:VSTestNoBuild=true");
 
-        public static readonly Option<string> ResultsOption = new ForwardedOption<string>(new string[] { "-r", "--results-directory" }, LocalizableStrings.CmdResultsDirectoryDescription)
+        public static readonly Option<string> ResultsOption = new ForwardedOption<string>(new string[] { "--results-directory" }, LocalizableStrings.CmdResultsDirectoryDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdPathToResultsDirectory
         }.ForwardAsSingle(o => $"-property:VSTestResultsDirectory={CommandDirectoryContext.GetFullPath(o)}");
