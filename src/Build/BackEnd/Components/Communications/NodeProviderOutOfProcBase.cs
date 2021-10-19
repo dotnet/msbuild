@@ -27,7 +27,6 @@ using Microsoft.Build.Utilities;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using Task = System.Threading.Tasks.Task;
-using DotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 
@@ -434,9 +433,9 @@ namespace Microsoft.Build.BackEnd
 
             // Repeat the executable name as the first token of the command line because the command line
             // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = msbuildLocation + " " + commandLineArgs;
+            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
 
-            BackendNativeMethods.STARTUP_INFO startInfo = new BackendNativeMethods.STARTUP_INFO();
+            BackendNativeMethods.STARTUP_INFO startInfo = new();
             startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
 
             // Null out the process handles so that the parent process does not wait for the child process
@@ -466,11 +465,6 @@ namespace Microsoft.Build.BackEnd
                 creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
             }
 
-            BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
-            BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
-            processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-            threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-
             CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
 
             string exeName = msbuildLocation;
@@ -481,7 +475,6 @@ namespace Microsoft.Build.BackEnd
             {
                 // Run the child process with the same host as the currently-running process.
                 exeName = GetCurrentHost();
-                commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
             }
 #endif
 
@@ -526,14 +519,15 @@ namespace Microsoft.Build.BackEnd
             else
             {
 #if RUNTIME_TYPE_NETCORE
-                if (NativeMethodsShared.IsWindows)
-                {
-                    // Repeat the executable name in the args to suit CreateProcess
-                    commandLineArgs = "\"" + exeName + "\" " + commandLineArgs;
-                }
+                // Repeat the executable name in the args to suit CreateProcess
+                commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
 #endif
 
-                BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
+                BackendNativeMethods.PROCESS_INFORMATION processInfo = new();
+                BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new();
+                BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new();
+                processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
+                threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
                 bool result = BackendNativeMethods.CreateProcess
                     (
@@ -596,9 +590,18 @@ namespace Microsoft.Build.BackEnd
 #if RUNTIME_TYPE_NETCORE || MONO
             if (CurrentHost == null)
             {
-                using (Process currentProcess = Process.GetCurrentProcess())
+                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, 2),
+                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
+                if (File.Exists(dotnetExe))
                 {
-                    CurrentHost = currentProcess.MainModule.FileName;
+                    CurrentHost = dotnetExe;
+                }
+                else
+                {
+                    using (Process currentProcess = Process.GetCurrentProcess())
+                    {
+                        CurrentHost = currentProcess.MainModule.FileName;
+                    }
                 }
             }
 
