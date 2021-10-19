@@ -392,7 +392,7 @@ namespace Microsoft.Build.CommandLine
                 if (!initializeOnly)
                 {
                     string friendlyCounterType = GetFriendlyCounterType(counter.CounterType, counter.CounterName);
-                    
+
                     // At least some (such as % in GC; maybe all) "%" counters are already multiplied by 100. So we don't do that here.
 
                     // Show decimal places if meaningful
@@ -570,6 +570,8 @@ namespace Microsoft.Build.CommandLine
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
+
+                //while (!Debugger.IsAttached) Thread.Sleep(100);
 
                 GatherAllSwitches(
                     commandLine,
@@ -1669,6 +1671,12 @@ namespace Microsoft.Build.CommandLine
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
             commandLineSwitches.Append(switchesFromAutoResponseFile);    // lowest precedence
             commandLineSwitches.Append(switchesNotFromAutoResponseFile);
+
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
+            {
+                shouldRecurse = false;
+                return;
+            }
 
             // figure out what project we are building
             var projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
