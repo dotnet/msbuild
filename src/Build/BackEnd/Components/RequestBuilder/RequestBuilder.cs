@@ -1364,7 +1364,7 @@ namespace Microsoft.Build.BackEnd
             if (project != null)
             {
                 string nuGetFolders = project.GetPropertyValue("NuGetPackageFolders")?.Trim();
-                NativeMethodsShared.RegisterKnownNuGetFolders(nuGetFolders);
+                FileClassifier.Shared.RegisterNuGetPackageFolders(nuGetFolders);
             }
         }
 

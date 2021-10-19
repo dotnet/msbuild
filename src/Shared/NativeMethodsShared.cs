@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-#if !CLR2COMPATIBILITY
-using System.Collections.Concurrent;
-#endif
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -15,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Reflection;
 using Microsoft.Build.Framework;
-#if !CLR2COMPATIBILITY
+#if !CLR2COMPATIBILITY //TODO: delete afrer imutable op-to-date checks not user ETLs anymore
 using Microsoft.Build.Eventing;
 #endif
 using Microsoft.Win32;
@@ -1047,13 +1044,6 @@ namespace Microsoft.Build.Shared
             return null;
         }
 
-        internal static void RegisterKnownNuGetFolders(string nuGetFolders)
-        {
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-            FileClassifier.Shared.RegisterNuGetPackageFolders(nuGetFolders);
-#endif
-        }
-
         /// <summary>
         /// Get the last write time of the fullpath to the file.
         /// </summary>
@@ -1067,12 +1057,12 @@ namespace Microsoft.Build.Shared
         internal static DateTime GetLastWriteFileUtcTime(string fullPath)
         {
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-            MSBuildEventSource.Log.GetLastWriteFileUtcTimeStart(fullPath);
+            MSBuildEventSource.Log.GetLastWriteFileUtcTimeStart(fullPath); //TODO: delete ETLs after measured and tested
             bool cacheHit = false;
             DateTime modifiedTime = DateTime.MinValue;
             try
             {
-                if (Environment.GetEnvironmentVariable("MSBUILDCACHEIMMUTABLEFILESLASTMODIFIED") != "1")
+                if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
                 {
                     return LastWriteFileUtcTime(fullPath);
                 }

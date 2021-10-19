@@ -35,6 +35,20 @@ namespace Microsoft.Build.Framework
 
         private readonly ConcurrentDictionary<string, string> _knownImmutableDirectory = new(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        ///     Creates default FileClassifier which following immutable folders:
+        ///     Classifications provided are:
+        ///     <list type="number">
+        ///         <item>Program Files</item>
+        ///         <item>Program Files (x86)</item>
+        ///         <item>Default .nuget cache location</item>
+        ///         <item>Visual Studio installation root</item>
+        ///     </list>
+        /// </summary>
+        /// <remarks>
+        ///     Individual projects NuGet folders are added during project build by calling
+        ///     <see cref="RegisterNuGetPackageFolders" />
+        /// </remarks>
         public FileClassifier()
         {
             RegisterImmutableDirectory(Environment.GetEnvironmentVariable("ProgramW6432"));
@@ -70,7 +84,7 @@ namespace Microsoft.Build.Framework
         public static FileClassifier Shared { get; } = new();
 
         /// <summary>
-        ///     Sets the paths found in the <c>NuGetPackageFolders</c> property value for this project.
+        ///     Try add paths found in the <c>NuGetPackageFolders</c> property value for a project into set of known immutable paths.
         ///     Project files under any of these folders are considered non-modifiable.
         /// </summary>
         /// <remarks>
@@ -123,6 +137,12 @@ namespace Microsoft.Build.Framework
         public bool IsNonModifiable(string filePath) => _knownImmutableDirectory.Any(folder => filePath.StartsWith(folder.Key, PathComparison));
     }
 
+    /// <summary>
+    ///     Caching 'Last Write File Utc' times for Immutable files <see cref="FileClassifier" />.
+    ///     <remarks>
+    ///         Cache is add only. It does not updates already existing cached items.
+    ///     </remarks>
+    /// </summary>
     internal sealed class ImmutableFilesTimestampCache
     {
         private readonly ConcurrentDictionary<string, DateTime> _cache = new(StringComparer.OrdinalIgnoreCase);
@@ -132,8 +152,16 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public static ImmutableFilesTimestampCache Shared { get; } = new();
 
+
+        /// <summary>
+        ///     Try get 'Last Write File Utc' time of particular file.
+        /// </summary>
+        /// <returns><see langword="true" /> if record exists</returns>
         public bool TryGetValue(string fullPath, out DateTime lastModified) => _cache.TryGetValue(fullPath, out lastModified);
 
-        public bool TryAdd(string fullPath, DateTime lastModified) => _cache.TryAdd(fullPath, lastModified);
+        /// <summary>
+        ///     Try Add 'Last Write File Utc' time of particular file into cache.
+        /// </summary>
+        public void TryAdd(string fullPath, DateTime lastModified) => _cache.TryAdd(fullPath, lastModified);
     }
 }
