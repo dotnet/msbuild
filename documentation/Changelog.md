@@ -97,7 +97,7 @@ This version of MSBuild shipped with Visual Studio 2022 version 17.0.0 and .NET 
 
 * Use GitHub-generated Markdown tables of contents (#6760).
 * Fixed validation issues in docs build (#6744).
-* Descriptions of labels in use in this repo (#6873)
+* Descriptions of labels in use in this repo (#6873).
 
 ## MSBuild 16.11.0
 
