@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -3665,6 +3665,14 @@ namespace Microsoft.Build.Evaluation
                         else if (TryGetArgs(args, out arg0, out StringComparison arg1))
                         {
                             returnVal = text.LastIndexOf(arg0, arg1);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.LastIndexOfAny), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.LastIndexOfAny(arg0.ToCharArray());
                             return true;
                         }
                     }

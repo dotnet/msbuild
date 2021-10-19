@@ -3980,6 +3980,12 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionStringLastIndexOfAny()
+        {
+            TestPropertyFunction("$(prop.LastIndexOfAny('xy'))", "prop", "x-x-y-y-y-z", "8");
+        }
+
+        [Fact]
         public void PropertyFunctionStringCopy()
         {
             string propertyFunction = @"$([System.String]::Copy($(X)).LastIndexOf(
