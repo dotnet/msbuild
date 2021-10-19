@@ -24,7 +24,7 @@ namespace Microsoft.Build.Framework
     ///         </list>
     ///     </para>
     /// </remarks>
-    internal class FileClassifier     
+    internal class FileClassifier
     {
         private const StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
 
@@ -32,6 +32,11 @@ namespace Microsoft.Build.Framework
         ///     Single, static instance of an array that contains a semi-colon ';', which is used to split strings.
         /// </summary>
         private static readonly char[] s_semicolonDelimiter = {';'};
+
+        /// <summary>
+        ///     Singe, static <see cref="Lazy{T}"/> instance of shared file FileClassifier for <see cref="Shared"/> member.
+        /// </summary>
+        private static readonly Lazy<FileClassifier> s_sharedInstance = new(() => new FileClassifier());
 
         private readonly ConcurrentDictionary<string, string> _knownImmutableDirectory = new(StringComparer.OrdinalIgnoreCase);
 
@@ -79,12 +84,13 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        ///     Shared singleton instance
+        ///     Shared singleton instance.
         /// </summary>
-        public static FileClassifier Shared { get; } = new();
+        public static FileClassifier Shared => s_sharedInstance.Value;
 
         /// <summary>
-        ///     Try add paths found in the <c>NuGetPackageFolders</c> property value for a project into set of known immutable paths.
+        ///     Try add paths found in the <c>NuGetPackageFolders</c> property value for a project into set of known immutable
+        ///     paths.
         ///     Project files under any of these folders are considered non-modifiable.
         /// </summary>
         /// <remarks>
