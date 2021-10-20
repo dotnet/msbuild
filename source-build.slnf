@@ -5,7 +5,6 @@
       "src\\BlazorWasmSdk\\Tasks\\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.csproj",
       "src\\BlazorWasmSdk\\Tool\\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj",
       "src\\BuiltInTools\\BrowserRefresh\\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj",
-      "src\\BuiltInTools\\DotNetDeltaApplier\\Microsoft.Extensions.DotNetDeltaApplier.csproj",
       "src\\BuiltInTools\\DotNetWatchTasks\\DotNetWatchTasks.csproj",
       "src\\BuiltInTools\\dotnet-watch\\dotnet-watch.csproj",
       "src\\Cli\\Microsoft.DotNet.Cli.Sln.Internal\\Microsoft.DotNet.Cli.Sln.Internal.csproj",
