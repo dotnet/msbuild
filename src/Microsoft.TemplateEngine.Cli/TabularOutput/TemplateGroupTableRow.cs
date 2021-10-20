@@ -3,7 +3,7 @@
 
 #nullable enable
 
-namespace Microsoft.TemplateEngine.Cli.TableOutput
+namespace Microsoft.TemplateEngine.Cli.TabularOutput
 {
     /// <summary>
     /// Represents a table row for template group display.

@@ -24,10 +24,13 @@ namespace Dotnet_new3.IntegrationTests
             _messageSink = diagnosisFixture.DiagnosticSink;
         }
 
-        [Fact]
-        public void CanInstallRemoteNuGetPackage()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("--install")]
+        [InlineData("install")]
+        public void CanInstallRemoteNuGetPackage(string commandName)
         {
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -42,38 +45,22 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("blazorwasm");
         }
 
-        [Fact]
-        public void CanInstallRemoteNuGetPackage_V2()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void CanInstallRemoteNuGetPackage_LatestVariations(string commandName)
         {
-            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
-                .WithCustomHive()
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And
-                .NotHaveStdErr()
-                .And.NotHaveStdOutContaining("Determining projects to restore...")
-                .And.HaveStdOutContaining("The following template packages will be installed:")
-                .And.HaveStdOutMatching($"Success: Microsoft\\.DotNet\\.Web\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+ installed the following templates:")
-                .And.HaveStdOutContaining("web")
-                .And.HaveStdOutContaining("blazorwasm");
-        }
-
-        [Fact]
-        public void CanInstallRemoteNuGetPackage_LatestVariations()
-        {
-            var command1 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
+            var command1 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
-            var command2 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::")
+            var command2 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
-            var command3 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::*")
+            var command3 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::*")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
@@ -95,10 +82,12 @@ namespace Dotnet_new3.IntegrationTests
             Assert.True(command1.StdOut.Equals(command3.StdOut));
         }
 
-        [Fact]
-        public void CanInstallRemoteNuGetPackageWithVersion()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void CanInstallRemoteNuGetPackageWithVersion(string commandName)
         {
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
+            new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -117,7 +106,7 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public void CanInstallRemoteNuGetPackageWithPrereleaseVersion()
         {
-            new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates::0.6.37-beta", "--nuget-source", "https://api.nuget.org/v3/index.json")
+            new DotnetNewCommand(_log, "-i", "Microsoft.Azure.WebJobs.ProjectTemplates::4.0.1844-preview1", "--nuget-source", "https://api.nuget.org/v3/index.json")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -126,15 +115,17 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr()
                 .And.HaveStdOutContaining("The following template packages will be installed:")
-                .And.HaveStdOutMatching($"Success: Take.Blip.Client.Templates::0.6.37-beta installed the following templates:")
-                .And.HaveStdOutContaining("blip-console");
+                .And.HaveStdOutMatching($"Success: Microsoft.Azure.WebJobs.ProjectTemplates::4.0.1844-preview1 installed the following templates:")
+                .And.HaveStdOutContaining("func");
         }
 
-        [Fact]
-        public void CanInstallRemoteNuGetPackageWithNuGetSource()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void CanInstallRemoteNuGetPackageWithNuGetSource(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates", "--nuget-source", "https://api.nuget.org/v3/index.json")
+            new DotnetNewCommand(_log, commandName, "Take.Blip.Client.Templates", "--nuget-source", "https://api.nuget.org/v3/index.json")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -146,7 +137,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching($"Success: Take\\.Blip\\.Client\\.Templates::([\\d\\.a-z-])+ installed the following templates:")
                 .And.HaveStdOutContaining("blip-console");
 
-            new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates", "--add-source", "https://api.nuget.org/v3/index.json")
+            new DotnetNewCommand(_log, commandName, "Take.Blip.Client.Templates", "--add-source", "https://api.nuget.org/v3/index.json")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -159,13 +150,16 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("blip-console");
         }
 
-        [Fact]
-        public void CanInstallLocalNuGetPackage()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("--install")]
+        [InlineData("install")]
+        public void CanInstallLocalNuGetPackage(string commandName)
         {
             using var packageManager = new PackageManager();
             string packageLocation = packageManager.PackTestTemplatesNuGetPackage();
 
-            new DotnetNewCommand(_log, "-i", packageLocation)
+            new DotnetNewCommand(_log, commandName, packageLocation)
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -177,10 +171,12 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
         }
 
-        [Fact]
-        public void CanPrintDebugOutputWhenInstalling()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void CanPrintDebugOutputWhenInstalling(string commandName)
         {
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0")
                 .WithCustomHive().WithDebug()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -197,11 +193,14 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching("\\[\\d{4}\\-\\d{2}\\-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{1,3}\\] " + Regex.Escape("[Debug] [Microsoft.TemplateEngine.Edge.Installers.NuGet.NuGetInstaller] => [Execute]: Microsoft.DotNet.Web.ProjectTemplates.5.0 is identified as the downloadable NuGet package."));
         }
 
-        [Fact]
-        public void CanInstallLocalFolder()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("--install")]
+        [InlineData("install")]
+        public void CanInstallLocalFolder(string commandName)
         {
             string basicFSharp = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
-            new DotnetNewCommand(_log, "-i", basicFSharp)
+            new DotnetNewCommand(_log, commandName, basicFSharp)
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -214,12 +213,14 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("basic");
         }
 
-        [Fact]
-        public void PrintOnlyNewlyInstalledTemplates()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void PrintOnlyNewlyInstalledTemplates(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                .WithCustomHive(home)
                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                .Execute()
@@ -230,7 +231,7 @@ namespace Dotnet_new3.IntegrationTests
                .And.HaveStdOutContaining("console")
                .And.HaveStdOutContaining("Console App");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -243,12 +244,14 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdOutContaining("console");
         }
 
-        [Fact]
-        public void CannotInstallUnknownRemotePackage()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void CannotInstallUnknownRemotePackage(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
-            new DotnetNewCommand(_log, "-i", "BlaBlaBla")
+            new DotnetNewCommand(_log, commandName, "BlaBlaBla")
                .WithCustomHive(home)
                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                .Execute()
@@ -256,12 +259,14 @@ namespace Dotnet_new3.IntegrationTests
                .And.HaveStdErrContaining("BlaBlaBla could not be installed, the package does not exist");
         }
 
-        [Fact]
-        public void CannotInstallRemotePackageWithIncorrectVersion()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void CannotInstallRemotePackageWithIncorrectVersion(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::16.0.0")
+            new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0::16.0.0")
                .WithCustomHive(home)
                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                .Execute()
@@ -277,6 +282,29 @@ namespace Dotnet_new3.IntegrationTests
             string basicVB = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicVB");
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "-i", basicFSharp, "-i", basicVB)
+                .WithCustomHive(home).WithDebug()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr()
+                .And.NotHaveStdOutContaining("Determining projects to restore...")
+                .And.HaveStdOutContaining("web")
+                .And.HaveStdOutContaining("blazorwasm")
+                .And.HaveStdOutContaining("console")
+                .And.HaveStdOutContaining("classlib")
+                .And.HaveStdOutContaining("basic");
+        }
+
+        [Fact]
+        public void CanInstallSeveralSources_V2()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            string basicFSharp = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
+            string basicVB = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicVB");
+
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ProjectTemplates.5.0",  "Microsoft.DotNet.Common.ProjectTemplates.5.0", basicFSharp, basicVB)
                 .WithCustomHive(home).WithDebug()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -339,12 +367,14 @@ namespace Dotnet_new3.IntegrationTests
                  .And.HaveStdErrContaining($"{basicFSharp} is already installed");
         }
 
-        [Fact]
-        public void CanUpdateSameSource_NuGet()
+        [Theory]
+        [InlineData("-i", "-u")]
+        [InlineData("install", "uninstall")]
+        public void CanUpdateSameSource_NuGet(string installCommandName, string uninstallCommandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+            new DotnetNewCommand(_log, installCommandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -355,7 +385,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("console")
                 .And.HaveStdOutContaining("classlib");
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, uninstallCommandName)
                  .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                  .Execute()
@@ -367,7 +397,7 @@ namespace Dotnet_new3.IntegrationTests
 
             Assert.True(File.Exists(Path.Combine(home, "packages", "Microsoft.DotNet.Common.ProjectTemplates.5.0.5.0.0.nupkg")));
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.1")
+            new DotnetNewCommand(_log, installCommandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.1")
                  .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                  .Execute()
@@ -381,7 +411,7 @@ namespace Dotnet_new3.IntegrationTests
                  .And.HaveStdOutContaining("console")
                  .And.HaveStdOutContaining("classlib");
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, uninstallCommandName)
                  .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                  .Execute()
@@ -395,8 +425,10 @@ namespace Dotnet_new3.IntegrationTests
             Assert.True(File.Exists(Path.Combine(home, "packages", "Microsoft.DotNet.Common.ProjectTemplates.5.0.5.0.1.nupkg")));
         }
 
-        [Fact]
-        public async Task InstallingSamePackageFromRemoteUpdatesLocal()
+        [Theory]
+        [InlineData("-i", "-u")]
+        [InlineData("install", "uninstall")]
+        public async Task InstallingSamePackageFromRemoteUpdatesLocal(string installCommandName, string uninstallCommandName)
         {
             _messageSink.OnMessage(new DiagnosticMessage($"{nameof(InstallingSamePackageFromRemoteUpdatesLocal)} started."));
             var home = TestUtils.CreateTemporaryFolder("Home");
@@ -409,7 +441,7 @@ namespace Dotnet_new3.IntegrationTests
 
             _messageSink.OnMessage(new DiagnosticMessage($"{nameof(InstallingSamePackageFromRemoteUpdatesLocal)}: Microsoft.DotNet.Common.ProjectTemplates.5.0 is downloaded to {packageLocation}.)"));
 
-            new DotnetNewCommand(_log, "-i", packageLocation)
+            new DotnetNewCommand(_log, installCommandName, packageLocation)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -419,7 +451,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("console")
                 .And.HaveStdOutContaining("classlib");
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, uninstallCommandName)
                  .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                  .Execute()
@@ -430,7 +462,7 @@ namespace Dotnet_new3.IntegrationTests
                  .And.HaveStdOutContaining("Version:")
                  .And.NotHaveStdOutContaining("Version: 5.0.0");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+            new DotnetNewCommand(_log, installCommandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -444,7 +476,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("console")
                 .And.HaveStdOutContaining("classlib");
 
-            new DotnetNewCommand(_log, "-u")
+            new DotnetNewCommand(_log, uninstallCommandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -457,15 +489,17 @@ namespace Dotnet_new3.IntegrationTests
             _messageSink.OnMessage(new DiagnosticMessage($"{nameof(InstallingSamePackageFromRemoteUpdatesLocal)} finished."));
         }
 
-        [Fact]
-        public void CanExpandWhenInstall()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void CanExpandWhenInstall(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             string testTemplateLocation = Path.Combine("..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates");
             string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
             string pattern = testTemplateLocation + Path.DirectorySeparatorChar + "*";
 
-            new DotnetNewCommand(_log, "-i", pattern)
+            new DotnetNewCommand(_log, commandName, pattern)
                 .WithCustomHive(home)
                 .Execute()
                 .Should().ExitWith(0)
@@ -481,12 +515,14 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
         }
 
-        [Fact]
-        public void CannotInstallInvalidPackage()
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void CannotInstallInvalidPackage(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             string codebase = typeof(Program).GetTypeInfo().Assembly.Location;
-            new DotnetNewCommand(_log, "-i", codebase)
+            new DotnetNewCommand(_log, commandName, codebase)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()

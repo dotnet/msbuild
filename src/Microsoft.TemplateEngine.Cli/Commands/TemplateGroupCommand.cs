@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using Microsoft.TemplateEngine.Abstractions;
@@ -34,7 +33,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (templateGroupArgs.HelpRequested)
             {
-                context.HelpBuilder.Write(context.ParseResult.CommandResult.Command, StandardStreamWriter.Create(context.Console.Out));
+                context.HelpBuilder.Write(
+                    context.ParseResult.CommandResult.Command,
+                    StandardStreamWriter.Create(context.Console.Out),
+                    context.ParseResult);
                 return 0;
             }
 

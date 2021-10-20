@@ -7,20 +7,47 @@ using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
+using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.TestHelper
 {
-    internal class TestHost : ITemplateEngineHost
+    public class TestHost : ITemplateEngineHost
     {
-        public TestHost([CallerMemberName] string hostIdentifier = "", string version = "1.0.0")
+        private IPhysicalFileSystem _fileSystem;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly ILogger _logger;
+        private readonly string _hostIdentifier;
+        private readonly string _version;
+        private IReadOnlyList<(Type, IIdentifiedComponent)> _builtIns;
+        private IReadOnlyList<string> _fallbackNames;
+
+        internal TestHost(
+            [CallerMemberName] string hostIdentifier = "",
+            string version = "1.0.0",
+            bool loadDefaultGenerator = true,
+            IReadOnlyList<(Type, IIdentifiedComponent)>? additionalComponents = null,
+            IPhysicalFileSystem? fileSystem = null,
+            IReadOnlyList<string>? fallbackNames = null)
         {
-            HostIdentifier = string.IsNullOrWhiteSpace(hostIdentifier) ? "TestRunner" : hostIdentifier;
-            Version = string.IsNullOrWhiteSpace(version) ? "1.0.0" : version;
-            BuiltInComponents = new List<(Type, IIdentifiedComponent)>();
+            _hostIdentifier = string.IsNullOrWhiteSpace(hostIdentifier) ? "TestRunner" : hostIdentifier;
+            _version = string.IsNullOrWhiteSpace(version) ? "1.0.0" : version;
+
+            var builtIns = new List<(Type, IIdentifiedComponent)>();
+            if (additionalComponents != null)
+            {
+                builtIns.AddRange(additionalComponents);
+            }
+            builtIns.AddRange(Edge.Components.AllComponents);
+            if (loadDefaultGenerator)
+            {
+                builtIns.AddRange(Orchestrator.RunnableProjects.Components.AllComponents);
+            }
+
+            _builtIns = builtIns;
             HostParamDefaults = new Dictionary<string, string>();
-            FileSystem = new PhysicalFileSystem();
-            LoggerFactory =
+            _fileSystem = fileSystem ?? new PhysicalFileSystem();
+            _loggerFactory =
                 Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
                     builder
                         .SetMinimumLevel(LogLevel.Trace)
@@ -30,33 +57,45 @@ namespace Microsoft.TemplateEngine.TestHelper
                             options.TimestampFormat = "[yyyy-MM-dd HH:mm:ss.fff] ";
                             options.IncludeScopes = true;
                         }));
-            Logger = LoggerFactory.CreateLogger("Test Host");
+            _logger = _loggerFactory.CreateLogger("Test Host");
+            _fallbackNames = fallbackNames ?? new[] { "dotnetcli" };
         }
 
-        public Dictionary<string, string> HostParamDefaults { get; set; }
+        internal Dictionary<string, string> HostParamDefaults { get; set; } = new Dictionary<string, string>();
 
-        public IPhysicalFileSystem FileSystem { get; set; }
+        IPhysicalFileSystem ITemplateEngineHost.FileSystem => _fileSystem;
 
-        public string HostIdentifier { get; }
+        string ITemplateEngineHost.HostIdentifier => _hostIdentifier;
 
-        public IReadOnlyList<string> FallbackHostTemplateConfigNames { get; set; } = new List<string>();
+        IReadOnlyList<string> ITemplateEngineHost.FallbackHostTemplateConfigNames => _fallbackNames;
 
-        public string Version { get; }
+        string ITemplateEngineHost.Version => _version;
 
-        public IReadOnlyList<(Type, IIdentifiedComponent)> BuiltInComponents { get; set; }
+        IReadOnlyList<(Type, IIdentifiedComponent)> ITemplateEngineHost.BuiltInComponents => _builtIns;
 
-        public ILogger Logger { get; private set; }
+        ILogger ITemplateEngineHost.Logger => _logger;
 
-        public ILoggerFactory LoggerFactory { get; private set; }
+        ILoggerFactory ITemplateEngineHost.LoggerFactory => _loggerFactory;
 
-        public bool TryGetHostParamDefault(string paramName, out string? value)
+        public static ITemplateEngineHost GetVirtualHost(
+            [CallerMemberName] string hostIdentifier = "",
+            IEnvironment? environment = null,
+            IReadOnlyList<(Type, IIdentifiedComponent)>? additionalComponents = null)
+        {
+            ITemplateEngineHost host = new TestHost(hostIdentifier: hostIdentifier, additionalComponents: additionalComponents);
+            environment = environment ?? new DefaultEnvironment();
+            host.VirtualizeDirectory(new DefaultPathInfo(environment, host).GlobalSettingsDir);
+            return host;
+        }
+
+        bool ITemplateEngineHost.TryGetHostParamDefault(string paramName, out string? value)
         {
             return HostParamDefaults.TryGetValue(paramName, out value);
         }
 
-        public void VirtualizeDirectory(string path)
+        void ITemplateEngineHost.VirtualizeDirectory(string path)
         {
-            FileSystem = new InMemoryFileSystem(path, FileSystem);
+            _fileSystem = new InMemoryFileSystem(path, _fileSystem);
         }
 
         [Obsolete]

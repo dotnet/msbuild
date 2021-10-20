@@ -7,7 +7,7 @@ using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Cli.TableOutput;
+using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
@@ -24,6 +24,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly string? _defaultLanguage;
 
+        private readonly ITabularOutputSettings _defaultTabularOutputSettings;
+
         internal TemplateInformationCoordinator(
             IEngineEnvironmentSettings engineEnvironmentSettings,
             TemplatePackageManager templatePackageManager,
@@ -39,6 +41,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             _hostSpecificDataLoader = hostSpecificDataLoader ?? throw new ArgumentNullException(nameof(hostSpecificDataLoader));
             _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _defaultLanguage = defaultLanguage;
+
+            _defaultTabularOutputSettings = new CliTabularOutputSettings(engineEnvironmentSettings.Environment);
         }
 
         /// <summary>
@@ -71,12 +75,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     return Task.FromResult(NewCommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousLanguageChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
-                    DisplayTemplateList(resolutionResult.TemplateGroups, commandInput, useErrorOutput: true);
+                    DisplayTemplateList(resolutionResult.TemplateGroups, _defaultTabularOutputSettings, useErrorOutput: true);
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousLanguageHint.Bold().Red());
                     return Task.FromResult(NewCommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousTemplateGroupChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
-                    DisplayTemplateList(resolutionResult.TemplateGroups, commandInput, useErrorOutput: true);
+                    DisplayTemplateList(resolutionResult.TemplateGroups, _defaultTabularOutputSettings, useErrorOutput: true);
                     //TODO: https://github.com/dotnet/templating/issues/3275
                     //revise error handling: this message is not the best CTA
                     //Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHint.Bold().Red());
@@ -122,15 +126,16 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// </summary>
         internal void DisplayTemplateList(
             IEnumerable<TemplateGroup> templateGroups,
-            INewCommandInput commandInput,
+            ITabularOutputSettings helpFormatterSettings,
+            string? selectedLanguage = null,
             bool useErrorOutput = false)
         {
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(
                 templateGroups,
-                commandInput.Language,
+                selectedLanguage,
                 _defaultLanguage,
                 _engineEnvironmentSettings.Environment);
-            DisplayTemplateList(groupsForDisplay, commandInput, useErrorOutput);
+            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, useErrorOutput);
         }
 
         /// <summary>
@@ -147,15 +152,16 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// </summary>
         internal void DisplayTemplateList(
             IEnumerable<ITemplateInfo> templates,
-            INewCommandInput commandInput,
+            ITabularOutputSettings helpFormatterSettings,
+            string? selectedLanguage = null,
             bool useErrorOutput = false)
         {
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(
                 templates,
-                commandInput.Language,
+                selectedLanguage,
                 _defaultLanguage,
                 _engineEnvironmentSettings.Environment);
-            DisplayTemplateList(groupsForDisplay, commandInput, useErrorOutput);
+            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, useErrorOutput);
         }
 
         internal void ShowUsageHelp(INewCommandInput commandInput)
@@ -233,7 +239,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         LocalizableStrings.TemplatesFoundMatchingInputParameters,
                         GetInputParametersString(resolutionResult.Resolver.Filters, commandInput, appliedParameterMatches)));
                 Reporter.Output.WriteLine();
-                DisplayTemplateList(resolutionResult.TemplateGroupsWithMatchingTemplateInfoAndParameters, commandInput);
+                DisplayTemplateList(resolutionResult.TemplateGroupsWithMatchingTemplateInfoAndParameters, _defaultTabularOutputSettings, selectedLanguage: commandInput.Language);
                 return NewCommandStatus.Success;
             }
             else
@@ -292,7 +298,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Output.WriteLine(string.Format(
               LocalizableStrings.TemplateInformationCoordinator_DotnetNew_TemplatesHeader,
               commandInput.New3CommandExample()));
-            DisplayTemplateList(curatedTemplates, commandInput);
+            DisplayTemplateList(curatedTemplates, _defaultTabularOutputSettings);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
             Reporter.Output.WriteCommand(commandInput.InstantiateTemplateExample("console"));
@@ -430,15 +436,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 });
             }
 
-            HelpFormatter<AmbiguousTemplateDetails> formatter =
-                HelpFormatter
+            TabularOutput<AmbiguousTemplateDetails> formatter =
+                TabularOutput.TabularOutput
                     .For(
-                        _engineEnvironmentSettings,
-                        commandInput,
-                        ambiguousTemplateDetails,
-                        columnPadding: 2,
-                        headerSeparator: '-',
-                        blankLineBetweenRows: false)
+                        _defaultTabularOutputSettings,
+                        ambiguousTemplateDetails)
                     .DefineColumn(t => t.TemplateIdentity, out object identityColumn, LocalizableStrings.ColumnNameIdentity, showAlways: true)
                     .DefineColumn(t => t.TemplateName, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
                     .DefineColumn(t => string.Join(",", t.TemplateShortNames), LocalizableStrings.ColumnNameShortName, showAlways: true)
@@ -466,18 +468,14 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         private void DisplayTemplateList(
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay,
-            INewCommandInput commandInput,
+            ITabularOutputSettings tabularOutputSettings,
             bool useErrorOutput = false)
         {
-            HelpFormatter<TemplateGroupTableRow> formatter =
-                HelpFormatter
+            TabularOutput<TemplateGroupTableRow> formatter =
+                TabularOutput.TabularOutput
                     .For(
-                        _engineEnvironmentSettings,
-                        commandInput,
-                        groupsForDisplay,
-                        columnPadding: 2,
-                        headerSeparator: '-',
-                        blankLineBetweenRows: false)
+                        tabularOutputSettings,
+                        groupsForDisplay)
                     .DefineColumn(t => t.Name, out object nameColumn, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
                     .DefineColumn(t => t.ShortNames, LocalizableStrings.ColumnNameShortName, showAlways: true)
                     .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.ColumnNameLanguage, BaseCommandInput.LanguageColumnFilter, defaultColumn: true)

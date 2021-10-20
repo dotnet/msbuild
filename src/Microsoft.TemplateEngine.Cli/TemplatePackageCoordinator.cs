@@ -10,7 +10,7 @@ using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.NuGet;
-using Microsoft.TemplateEngine.Cli.TableOutput;
+using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 using NuGet.Credentials;
@@ -266,8 +266,7 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<InstallResult> installResults = await managedSourceProvider.InstallAsync(installRequests, cancellationToken).ConfigureAwait(false);
             foreach (InstallResult result in installResults)
             {
-                //TODO: convert to using args
-                //await DisplayInstallResultAsync(commandInput, result.InstallRequest.DisplayName, result, cancellationToken).ConfigureAwait(false);
+                await DisplayInstallResultAsync(result.InstallRequest.DisplayName, result, cancellationToken).ConfigureAwait(false);
                 if (!result.Success)
                 {
                     resultStatus = NewCommandStatus.CreateFailed;
@@ -322,7 +321,7 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             success = NewCommandStatus.CreateFailed;
                         }
-                        await DisplayInstallResultAsync(commandInput, updateResult.UpdateRequest.TemplatePackage.DisplayName, updateResult, cancellationToken).ConfigureAwait(false);
+                        await DisplayInstallResultAsync(updateResult.UpdateRequest.TemplatePackage.DisplayName, updateResult, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -512,15 +511,12 @@ namespace Microsoft.TemplateEngine.Cli
                 IEnumerable<(string Identifier, string CurrentVersion, string LatestVersion)> displayableResults = versionCheckResults
                     .Where(result => result.Success && !result.IsLatestVersion)
                     .Select(result => (result.TemplatePackage.Identifier, result.TemplatePackage.Version, result.LatestVersion));
+
                 var formatter =
-                   HelpFormatter
+                   TabularOutput.TabularOutput
                        .For(
-                           _engineEnvironmentSettings,
-                           commandInput,
-                           displayableResults,
-                           columnPadding: 2,
-                           headerSeparator: '-',
-                           blankLineBetweenRows: false)
+                           new CliTabularOutputSettings(_engineEnvironmentSettings.Environment),
+                           displayableResults)
                        .DefineColumn(r => r.Identifier, out object packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
                        .DefineColumn(r => r.CurrentVersion, LocalizableStrings.ColumnNameCurrentVersion, showAlways: true)
                        .DefineColumn(r => r.LatestVersion, LocalizableStrings.ColumnNameLatestVersion, showAlways: true)
@@ -611,9 +607,8 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private async Task DisplayInstallResultAsync(INewCommandInput commandInput, string packageToInstall, InstallerOperationResult result, CancellationToken cancellationToken)
+        private async Task DisplayInstallResultAsync(string packageToInstall, InstallerOperationResult result, CancellationToken cancellationToken)
         {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             if (string.IsNullOrWhiteSpace(packageToInstall))
             {
                 throw new ArgumentException(nameof(packageToInstall));
@@ -630,7 +625,7 @@ namespace Microsoft.TemplateEngine.Cli
                         string.Format(
                             LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
                             result.TemplatePackage.DisplayName));
-                    _templateInformationCoordinator.DisplayTemplateList(templates, commandInput);
+                    _templateInformationCoordinator.DisplayTemplateList(templates, new CliTabularOutputSettings(_engineEnvironmentSettings.Environment));
                 }
                 else
                 {

@@ -6,7 +6,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Cli.TableOutput;
+using Microsoft.TemplateEngine.Cli.TabularOutput;
 
 namespace Microsoft.TemplateEngine.Cli.Alias
 {
@@ -117,14 +117,10 @@ namespace Microsoft.TemplateEngine.Cli.Alias
                 Reporter.Output.WriteLine(LocalizableStrings.AliasShowAllAliasesHeader);
             }
 
-            HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>> formatter =
-                new HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>>(
-                    environment,
-                    commandInput,
-                    aliasesToShow,
-                    columnPadding: 2,
-                    headerSeparator: '-',
-                    blankLineBetweenRows: false)
+            TabularOutput<KeyValuePair<string, IReadOnlyList<string>>> formatter =
+                new TabularOutput<KeyValuePair<string, IReadOnlyList<string>>>(
+                    new CliTabularOutputSettings(environment.Environment),
+                    aliasesToShow)
                 .DefineColumn(t => t.Key, LocalizableStrings.AliasName, showAlways: true)
                 .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue, showAlways: true);
 

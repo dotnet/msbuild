@@ -7,7 +7,7 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Utils;
 
-namespace Microsoft.TemplateEngine.Cli.TableOutput
+namespace Microsoft.TemplateEngine.Cli.TabularOutput
 {
     internal static class TemplateGroupDisplay
     {

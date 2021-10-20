@@ -6,7 +6,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -17,26 +16,37 @@ namespace Microsoft.TemplateEngine.TestHelper
 {
     public class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
     {
-        public static List<(Type, IIdentifiedComponent)> Components { get; } = new() { (typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackagesProviderFactory()) };
+        public static List<(Type, IIdentifiedComponent)> GetComponents(bool includeTestTemplates = true)
+        {
+            return new() { (typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackagesProviderFactory(includeTestTemplates)) };
+        }
 
         public static readonly Guid FactoryId = new Guid("{B9EE7CC5-D3AD-4982-94A4-CDF9E1C7FFCA}");
+        private readonly bool _includeTestTemplates;
 
         public string DisplayName => "new3 BuiltIn";
 
         public Guid Id => FactoryId;
 
+        private BuiltInTemplatePackagesProviderFactory(bool includeTestTemplates = true)
+        {
+            _includeTestTemplates = includeTestTemplates;
+        }
+
         public ITemplatePackageProvider CreateProvider(IEngineEnvironmentSettings settings)
         {
-            return new BuiltInTemplatePackagesProvider(this, settings);
+            return new BuiltInTemplatePackagesProvider(this, settings, _includeTestTemplates);
         }
 
         private class BuiltInTemplatePackagesProvider : ITemplatePackageProvider
         {
             private readonly IEngineEnvironmentSettings _settings;
+            private readonly bool _includeTestTemplates;
 
-            public BuiltInTemplatePackagesProvider(BuiltInTemplatePackagesProviderFactory factory, IEngineEnvironmentSettings settings)
+            public BuiltInTemplatePackagesProvider(BuiltInTemplatePackagesProviderFactory factory, IEngineEnvironmentSettings settings, bool includeTestTemplates = true)
             {
                 _settings = settings;
+                _includeTestTemplates = includeTestTemplates;
                 Factory = factory;
             }
 
@@ -63,11 +73,15 @@ namespace Microsoft.TemplateEngine.TestHelper
                     _settings.Host.Logger.LogDebug("Couldn't the setup package location, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.");
                     return Task.FromResult((IReadOnlyList<ITemplatePackage>)templatePackages);
                 }
-                string[] locations = new[]
+                List<string> locations = new List<string>()
                 {
                     Path.Combine(repoRoot, "template_feed"),
-                    Path.Combine(repoRoot, "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates")
                 };
+
+                if (_includeTestTemplates)
+                {
+                    locations.Add(Path.Combine(repoRoot, "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates"));
+                }
 
                 foreach (string location in locations)
                 {

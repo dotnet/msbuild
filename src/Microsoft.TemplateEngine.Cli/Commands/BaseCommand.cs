@@ -141,6 +141,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return GetSuggestions(args, environmentSettings, textToMatch);
         }
 
+        protected static string? ValidateOptionUsageInParent(CommandResult symbolResult, Option option)
+        {
+            OptionResult? optionResult = symbolResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == option) as OptionResult;
+            if (optionResult != null)
+            {
+                return $"Option '{optionResult.Token?.Value}' should be used after '{symbolResult.Symbol.Name}'.";
+            }
+            return null;
+        }
+
         protected virtual IEnumerable<string> GetSuggestions(TArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
         {
             return base.GetSuggestions(args.ParseResult, textToMatch);

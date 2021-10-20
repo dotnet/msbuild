@@ -7,7 +7,7 @@ using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Cli.TableOutput;
+using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Utils;
 using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
@@ -103,7 +103,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             if (filteredParams.Any())
             {
-                HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(environmentSettings, commandInput, filteredParams, 2, null, true);
+                TabularOutput<ITemplateParameter> formatter = new TabularOutput<ITemplateParameter>(
+                    new CliTabularOutputSettings(environmentSettings.Environment, headerSeparator: null, blankLineBetweenRows: true),
+                    filteredParams);
 
                 formatter.DefineColumn(
                     param =>

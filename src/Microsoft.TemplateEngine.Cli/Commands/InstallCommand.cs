@@ -25,17 +25,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 NewCommandCallbacks callbacks)
             : base(host, logger, callbacks, "install")
         {
-            AddValidator(ValidateLegacyUsage);
             _legacyInstallCommand = legacyInstallCommand;
-        }
-
-        private string? ValidateLegacyUsage(CommandResult symbolResult)
-        {
-            //if (symbolResult.Parent!.Children.Any((a)=> a // _legacyInstallCommand.InteractiveOption))
-            //{
-            //    return "We are doomed!";
-            //}
-            return null;
+            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, _legacyInstallCommand.InteractiveOption));
+            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, _legacyInstallCommand.AddSourceOption));
         }
     }
 
@@ -47,17 +39,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.IsHidden = true;
             this.AddAlias("-i");
             AddSourceOption.AddAlias("--nuget-source");
+
+            //the user should use --nuget-source A --nuget-source B to specify multiple options
+            AddSourceOption.AllowMultipleArgumentsPerToken = false;
             AddSourceOption.IsHidden = true;
             InteractiveOption.IsHidden = true;
 
             newCommand.AddOption(AddSourceOption);
             newCommand.AddOption(InteractiveOption);
-        }
-
-        public void AddOptionsToNewCommand(Command rootCommand)
-        {
-            rootCommand.Add(AddSourceOption);
-            rootCommand.Add(InteractiveOption);
         }
     }
 
@@ -82,14 +71,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Description = "When downloading enable NuGet interactive."
         };
 
-        internal Option<IReadOnlyList<string>> AddSourceOption { get; } = new(new[] { "--add-source" })
+        internal Option<IReadOnlyList<string>> AddSourceOption { get; } = new(new[] { "--add-source", "--nuget-source" })
         {
             Description = "Add NuGet source when looking for package.",
             AllowMultipleArgumentsPerToken = true,
-            IsHidden = true
         };
 
-        protected override Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected override async Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplateInformationCoordinator templateInformationCoordinator = new TemplateInformationCoordinator(
@@ -107,7 +95,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 templateInformationCoordinator,
                 environmentSettings.GetDefaultLanguage());
 
-            return templatePackageCoordinator.EnterInstallFlowAsync(args, context.GetCancellationToken());
+            //TODO: we need to await, otherwise templatePackageManager will be disposed.
+            return await templatePackageCoordinator.EnterInstallFlowAsync(args, context.GetCancellationToken()).ConfigureAwait(false);
         }
 
         protected override InstallCommandArgs ParseContext(ParseResult parseResult)
@@ -120,7 +109,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public InstallCommandArgs(BaseInstallCommand installCommand, ParseResult parseResult) : base(installCommand, parseResult)
         {
-            TemplatePackages = parseResult.GetValueForArgument(installCommand.NameArgument) ?? throw new Exception("This shouldn't happen, we set ArgumentArity(1)...");
+            TemplatePackages = parseResult.GetValueForArgument(installCommand.NameArgument)
+                ?? throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(installCommand.NameArgument)}", nameof(parseResult));
+
+            //workaround for --install source1 --install source2 case
+            if (installCommand is LegacyInstallCommand && installCommand.Aliases.Any(alias => TemplatePackages.Contains(alias)))
+            {
+                TemplatePackages = TemplatePackages.Where(package => !installCommand.Aliases.Contains(package)).ToList();
+            }
+
+            if (!TemplatePackages.Any())
+            {
+                throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(installCommand.NameArgument)}", nameof(parseResult));
+            }
+
             Interactive = parseResult.GetValueForOption(installCommand.InteractiveOption);
             AdditionalSources = parseResult.GetValueForOption(installCommand.AddSourceOption);
         }

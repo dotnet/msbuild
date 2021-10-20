@@ -4,7 +4,6 @@
 #nullable enable
 
 using System.CommandLine;
-using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.CommandLine.Parsing;
@@ -55,20 +54,25 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             var templates = templatePackageManager.GetTemplatesAsync(CancellationToken.None).Result;
 
+            //TODO: implement correct logic
             if (!string.IsNullOrEmpty(args.ShortName))
             {
-                var template = templates.FirstOrDefault(template => template.ShortNameList.Contains(args.ShortName));
+                var matchingTemplates = templates.Where(template => template.ShortNameList.Contains(args.ShortName));
+                HashSet<string> distinctSuggestions = new HashSet<string>();
 
-                if (template != null)
+                foreach (var template in matchingTemplates)
                 {
                     var templateGroupCommand = new TemplateGroupCommand(this, environmentSettings, template);
                     var parsed = templateGroupCommand.Parse(args.Arguments ?? Array.Empty<string>());
                     foreach (var suggestion in templateGroupCommand.GetSuggestions(parsed, textToMatch))
                     {
-                        yield return suggestion;
+                        if (distinctSuggestions.Add(suggestion))
+                        {
+                            yield return suggestion;
+                        }
                     }
-                    yield break;
                 }
+                yield break;
             }
             else
             {
@@ -93,7 +97,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 if (args.HelpRequested)
                 {
-                    context.HelpBuilder.Write(context.ParseResult.CommandResult.Command, StandardStreamWriter.Create(context.Console.Out));
+                    context.HelpBuilder.Write(
+                        context.ParseResult.CommandResult.Command,
+                        StandardStreamWriter.Create(context.Console.Out),
+                        context.ParseResult);
+
                     return NewCommandStatus.Success;
                 }
                 //show curated list

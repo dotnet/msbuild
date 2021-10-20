@@ -39,12 +39,12 @@ namespace Microsoft.TemplateEngine.TestHelper
                 builtIns.AddRange(Orchestrator.RunnableProjects.Components.AllComponents);
             }
 
-            ITemplateEngineHost host = new TestHost(hostIdentifier: string.IsNullOrWhiteSpace(hostIdentifier) ? "TestRunner" : hostIdentifier)
-            {
-                BuiltInComponents = builtIns,
-                FileSystem = new MonitoredFileSystem(new PhysicalFileSystem()),
-                FallbackHostTemplateConfigNames = new[] { "dotnetcli" }
-            };
+            ITemplateEngineHost host = new TestHost(
+                hostIdentifier: hostIdentifier,
+                additionalComponents: additionalComponents,
+                fileSystem: new MonitoredFileSystem(new PhysicalFileSystem()),
+                fallbackNames: new[] { "dotnetcli" });
+
             CultureInfo.CurrentUICulture = new CultureInfo(locale);
             EngineEnvironmentSettings engineEnvironmentSettings;
             if (virtualize)

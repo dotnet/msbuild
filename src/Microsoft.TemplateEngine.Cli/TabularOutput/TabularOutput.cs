@@ -2,53 +2,42 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text;
-using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Wcwidth;
 
-namespace Microsoft.TemplateEngine.Cli.TableOutput
+namespace Microsoft.TemplateEngine.Cli.TabularOutput
 {
-    internal class HelpFormatter
+    internal class TabularOutput
     {
-        internal static HelpFormatter<T> For<T>(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IEnumerable<T> rows, int columnPadding, char? headerSeparator = null, bool blankLineBetweenRows = false)
+        internal static TabularOutput<T> For<T>(ITabularOutputSettings settings, IEnumerable<T> rows)
         {
-            return new HelpFormatter<T>(environmentSettings, commandInput, rows, columnPadding, headerSeparator, blankLineBetweenRows);
+            return new TabularOutput<T>(settings, rows);
         }
     }
 
-    internal class HelpFormatter<T>
+    internal class TabularOutput<T>
     {
-        private const string ShrinkReplacement = "...";
-        private readonly bool _blankLineBetweenRows;
-        private readonly int _columnPadding;
         private readonly List<ColumnDefinition> _columns = new List<ColumnDefinition>();
-        private readonly char? _headerSeparator;
         private readonly IEnumerable<T> _rowDataItems;
         private readonly List<Tuple<int, bool, IComparer<string>>> _ordering = new List<Tuple<int, bool, IComparer<string>>>();
-        private readonly IEngineEnvironmentSettings _environmentSettings;
-        private readonly INewCommandInput _commandInput;
+        private readonly ITabularOutputSettings _settings;
 
-        internal HelpFormatter(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IEnumerable<T> rows, int columnPadding, char? headerSeparator, bool blankLineBetweenRows)
+        internal TabularOutput(ITabularOutputSettings settings, IEnumerable<T> rows)
         {
             _rowDataItems = rows ?? Enumerable.Empty<T>();
-            _columnPadding = columnPadding;
-            _headerSeparator = headerSeparator;
-            _blankLineBetweenRows = blankLineBetweenRows;
-            _environmentSettings = environmentSettings;
-            _commandInput = commandInput;
+            _settings = settings;
         }
 
-        internal HelpFormatter<T> DefineColumn(Func<T, string> binder, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
+        internal TabularOutput<T> DefineColumn(Func<T, string> binder, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
         {
             return DefineColumn(binder, out object c, header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn, rightAlign);
         }
 
-        internal HelpFormatter<T> DefineColumn(Func<T, string> binder, out object column, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
+        internal TabularOutput<T> DefineColumn(Func<T, string> binder, out object column, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
         {
             column = null;
-            if ((_commandInput.Columns.Count == 0 && defaultColumn) || showAlways || (!string.IsNullOrWhiteSpace(columnName) && _commandInput.Columns.Contains(columnName)) || _commandInput.ShowAllColumns)
+            if ((_settings.ColumnsToDisplay.Count == 0 && defaultColumn) || showAlways || (!string.IsNullOrWhiteSpace(columnName) && _settings.ColumnsToDisplay.Contains(columnName)) || _settings.DisplayAllColumns)
             {
-                ColumnDefinition c = new ColumnDefinition(_environmentSettings, header, binder, shrinkIfNeeded: shrinkIfNeeded, minWidth: minWidth, rightAlign: rightAlign);
+                ColumnDefinition c = new ColumnDefinition(_settings, header, binder, shrinkIfNeeded: shrinkIfNeeded, minWidth: minWidth, rightAlign: rightAlign);
                 _columns.Add(c);
                 column = c;
             }
@@ -64,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
             int headerLines = 0;
             for (int i = 0; i < _columns.Count; ++i)
             {
-                header[i] = new TextWrapper(_environmentSettings, _columns[i].Header, _columns[i].MaxWidth);
+                header[i] = new TextWrapper(_columns[i].Header, _columns[i].MaxWidth, _settings.NewLine, _settings.ShrinkReplacement);
                 headerLines = Math.Max(headerLines, header[i].LineCount);
                 columnWidthLookup[i] = header[i].MaxWidth;
             }
@@ -98,7 +87,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
                         header[i].AppendTextWithPadding(b, j, _columns[i].CalculatedWidth, _columns[i].RightAlign);
                         if (i != _columns.Count - 1)
                         {
-                            b.Append(' ', _columnPadding);
+                            b.Append(' ', _settings.ColumnPadding);
                         }
                     }
                     b.AppendLine();
@@ -106,15 +95,15 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
             }
 
             // Render header separator, if set
-            if (_headerSeparator.HasValue)
+            if (_settings.HeaderSeparator.HasValue)
             {
                 for (int i = 0; i < _columns.Count; ++i)
                 {
-                    b.Append(new string(_headerSeparator.Value, _columns[i].CalculatedWidth));
+                    b.Append(new string(_settings.HeaderSeparator.Value, _columns[i].CalculatedWidth));
 
                     if (i < _columns.Count - 1)
                     {
-                        b.Append(new string(' ', _columnPadding));
+                        b.Append(new string(' ', _settings.ColumnPadding));
                     }
                 }
 
@@ -164,13 +153,13 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
                         rowToRender[columnIndex].AppendTextWithPadding(b, lineWithinRow, _columns[columnIndex].CalculatedWidth, _columns[columnIndex].RightAlign);
                         if (columnIndex != _columns.Count - 1)
                         {
-                            b.Append(' ', _columnPadding);
+                            b.Append(' ', _settings.ColumnPadding);
                         }
                     }
                     b.AppendLine();
                 }
 
-                if (_blankLineBetweenRows)
+                if (_settings.BlankLineBetweenRows)
                 {
                     b.AppendLine();
                 }
@@ -181,7 +170,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
             return b.ToString();
         }
 
-        internal HelpFormatter<T> OrderBy(object columnToken, IComparer<string> comparer = null)
+        internal TabularOutput<T> OrderBy(object columnToken, IComparer<string> comparer = null)
         {
             comparer = comparer ?? StringComparer.Ordinal;
             int index = _columns.IndexOf(columnToken as ColumnDefinition);
@@ -195,7 +184,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
             return this;
         }
 
-        internal HelpFormatter<T> OrderByDescending(object columnToken, IComparer<string> comparer = null)
+        internal TabularOutput<T> OrderByDescending(object columnToken, IComparer<string> comparer = null)
         {
             comparer = comparer ?? StringComparer.Ordinal;
             int index = _columns.IndexOf(columnToken as ColumnDefinition);
@@ -229,8 +218,8 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
 
         private void CalculateColumnWidth(IReadOnlyDictionary<int, int> columnWidthLookup)
         {
-            int maxAllowedGridWidth = _environmentSettings.Environment.ConsoleBufferWidth;
-            int totalPaddingWidth = _columnPadding * (_columns.Count - 1);
+            int maxAllowedGridWidth = _settings.ConsoleBufferWidth;
+            int totalPaddingWidth = _settings.ColumnPadding * (_columns.Count - 1);
             int maxRowWidth = columnWidthLookup.Sum(column => column.Value) + totalPaddingWidth;
 
             //set identified needed width as the starting point
@@ -308,16 +297,16 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
         private class ColumnDefinition
         {
             private readonly Func<T, string> _binder;
-            private readonly IEngineEnvironmentSettings _environmentSettings;
+            private readonly ITabularOutputSettings _settings;
 
-            internal ColumnDefinition(IEngineEnvironmentSettings environmentSettings, string header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
+            internal ColumnDefinition(ITabularOutputSettings settings, string header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
             {
                 Header = header;
                 MaxWidth = maxWidth > 0 ? maxWidth : int.MaxValue;
                 _binder = binder;
-                _environmentSettings = environmentSettings;
                 ShrinkIfNeeded = shrinkIfNeeded;
-                MinWidth = minWidth + ShrinkReplacement.Length; //we need to add required width for shrink replacement
+                _settings = settings;
+                MinWidth = minWidth + _settings.ShrinkReplacement.Length; //we need to add required width for shrink replacement
                 RightAlign = rightAlign;
             }
 
@@ -335,15 +324,16 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
 
             internal TextWrapper GetCell(T value)
             {
-                return new TextWrapper(_environmentSettings, _binder(value), MaxWidth);
+                return new TextWrapper(_binder(value), MaxWidth, _settings.NewLine, _settings.ShrinkReplacement);
             }
         }
 
         private class TextWrapper
         {
             private readonly IReadOnlyList<string> _lines;
+            private readonly string _shrinkReplacement;
 
-            internal TextWrapper(IEngineEnvironmentSettings environmentSettings, string text, int maxWidth)
+            internal TextWrapper(string text, int maxWidth, string newLine, string shrinkReplacement)
             {
                 List<string> lines = new List<string>();
                 int position = 0;
@@ -353,14 +343,14 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
                 {
                     while (position < text.Length)
                     {
-                        int newlineIndex = text.IndexOf(environmentSettings.Environment.NewLine, position, StringComparison.Ordinal);
+                        int newlineIndex = text.IndexOf(newLine, position, StringComparison.Ordinal);
 
                         if (newlineIndex > -1)
                         {
                             if (text.Substring(position, newlineIndex - position).GetUnicodeLength() <= maxWidth)
                             {
                                 lines.Add(text.Substring(position, newlineIndex - position).TrimEnd());
-                                position = newlineIndex + environmentSettings.Environment.NewLine.Length;
+                                position = newlineIndex + newLine.Length;
                             }
                             else
                             {
@@ -379,6 +369,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
                 _lines = lines;
                 MaxWidth = realMaxWidth;
                 RawText = text;
+                _shrinkReplacement = shrinkReplacement;
             }
 
             internal int LineCount => _lines.Count;
@@ -429,6 +420,17 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
                     lines.Add(text.Substring(position, properMax) + '-');
                     position += properMax;
                 }
+            }
+
+            private string ShrinkTextToLength(string text, int maxLength)
+            {
+                if (text.Length <= maxLength)
+                {
+                    // The text is short enough, so return it
+                    return text;
+                }
+                // If the text is too long, shorten it enough to allow room for the ellipsis, then add the ellipsis
+                return text.Substring(0, Math.Max(0, maxLength - _shrinkReplacement.Length)) + _shrinkReplacement;
             }
         }
     }
