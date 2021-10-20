@@ -688,7 +688,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                expectedCmdPath = new[] { "/bin/sh", "/usr/bin/sh" };
+                expectedCmdPath = new[] { "/bin/sh".ToUpperInvariant(), "/usr/bin/sh".ToUpperInvariant() };
                 shellName = "sh";
             }
 
