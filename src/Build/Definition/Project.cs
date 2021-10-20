@@ -267,7 +267,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
             ProjectCollection = projectCollection;
-            var defaultImplementation = new ProjectImpl(this, xml, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            var defaultImplementation = new ProjectImpl(this, xml, globalProperties, toolsVersion, subToolsetVersion, loadSettings);
             implementationInternal = (IProjectLinkInternal)defaultImplementation;
             implementation = defaultImplementation;
 
@@ -1857,8 +1857,7 @@ namespace Microsoft.Build.Evaluation
             /// <param name="toolsVersion">Tools version to evaluate with. May be null.</param>
             /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
             /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
-            /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required.</param>
-            public ProjectImpl(Project owner, ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+            public ProjectImpl(Project owner, ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
                 ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
