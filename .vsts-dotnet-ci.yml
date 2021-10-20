@@ -7,7 +7,7 @@ jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
   displayName: "Windows Full"
   pool:
-    name: NetCore1ESPool-Svc-Public
+    name: NetCore1ESPool-Public
     demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Open
   steps:
   - task: BatchScript@1
@@ -54,7 +54,7 @@ jobs:
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
   pool:
-    name: NetCore1ESPool-Svc-Public
+    name: NetCore1ESPool-Public
     demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Open
   steps:
   - task: BatchScript@1
@@ -102,7 +102,7 @@ jobs:
 - job: FullReleaseOnWindows
   displayName: "Windows Full Release (no bootstrap)"
   pool:
-    name: NetCore1ESPool-Svc-Public
+    name: NetCore1ESPool-Public
     demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Open
   steps:
   - task: BatchScript@1
@@ -150,7 +150,7 @@ jobs:
 - job: RichCodeNavIndex
   displayName: "Windows Code Indexing"
   pool:
-    name: NetCore1ESPool-Svc-Public
+    name: NetCore1ESPool-Public
     demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Open
   steps:
   - task: BatchScript@1
@@ -167,7 +167,7 @@ jobs:
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   pool:
-    name: NetCore1ESPool-Svc-Public
+    name: NetCore1ESPool-Public
     demands: ImageOverride -equals Build.Ubuntu.1804.Amd64.Open
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
