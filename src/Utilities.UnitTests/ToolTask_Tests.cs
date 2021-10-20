@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests
             string shellName;
             if (NativeMethodsShared.IsWindows)
             {
-                expectedCmdPath = new[] { Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System).ToLower(), "cmd.exe") };
+                expectedCmdPath = new[] { Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe").ToUpperInvariant() };
                 shellName = "cmd.exe";
             }
             else
@@ -692,7 +692,7 @@ namespace Microsoft.Build.UnitTests
                 shellName = "sh";
             }
 
-            string cmdPath = ToolTask.FindOnPath(shellName).ToLower();
+            string cmdPath = ToolTask.FindOnPath(shellName).ToUpperInvariant();
 
             cmdPath.ShouldBeOneOf(expectedCmdPath);
         }
