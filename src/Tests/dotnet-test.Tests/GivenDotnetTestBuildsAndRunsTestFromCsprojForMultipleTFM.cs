@@ -35,12 +35,12 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             var runtime = EnvironmentInfo.GetCompatibleRid();
 
-            new DotnetRestoreCommand(Log, "-r", runtime)
+            new DotnetRestoreCommand(Log, "--results-directory", runtime)
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
                 .Should().Pass();
 
-            var result = new DotnetTestCommand(Log, "-r", runtime)
+            var result = new DotnetTestCommand(Log, "--results-directory", runtime)
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute(ConsoleLoggerOutputNormal);
 
