@@ -8,7 +8,7 @@ jobs:
   displayName: "Windows Full"
   pool:
     name: NetCore1ESPool-Public
-    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Open
+    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2022.Pre.Open
   steps:
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
@@ -55,7 +55,7 @@ jobs:
   displayName: "Windows Core"
   pool:
     name: NetCore1ESPool-Public
-    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Open
+    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2022.Pre.Open
   steps:
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
@@ -103,7 +103,7 @@ jobs:
   displayName: "Windows Full Release (no bootstrap)"
   pool:
     name: NetCore1ESPool-Public
-    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Open
+    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2022.Pre.Open
   steps:
   - task: BatchScript@1
     displayName: cibuild.cmd
@@ -151,7 +151,7 @@ jobs:
   displayName: "Windows Code Indexing"
   pool:
     name: NetCore1ESPool-Public
-    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Open
+    demands: ImageOverride -equals Build.Windows.10.Amd64.VS2022.Pre.Open
   steps:
   - task: BatchScript@1
     displayName: build.cmd
