@@ -1,3 +1,7 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#nullable enable
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -63,20 +67,20 @@ namespace Microsoft.Build.Framework
 
             return;
 
-            static string GetVSInstallationDirectory()
+            static string? GetVSInstallationDirectory()
             {
-                string dir = Environment.GetEnvironmentVariable("VSAPPIDDIR");
+                string? dir = Environment.GetEnvironmentVariable("VSAPPIDDIR");
 
                 // The path provided is not the installation root, but rather the location of devenv.exe.
                 // __VSSPROPID.VSSPROPID_InstallDirectory has the same value.
                 // Failing a better way to obtain the installation root, remove that suffix.
                 // Obviously this is brittle against changes to the relative path of devenv.exe, however that seems
                 // unlikely and should be easy to work around if ever needed.
-                const string DevEnvExeRelativePath = "Common7\\IDE\\";
+                const string devEnvExeRelativePath = "Common7\\IDE\\";
 
-                if (dir?.EndsWith(DevEnvExeRelativePath, PathComparison) == true)
+                if (dir?.EndsWith(devEnvExeRelativePath, PathComparison) == true)
                 {
-                    dir = dir.Substring(0, dir.Length - DevEnvExeRelativePath.Length);
+                    dir = dir.Substring(0, dir.Length - devEnvExeRelativePath.Length);
                 }
 
                 return dir;
@@ -112,9 +116,9 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        private void RegisterImmutableDirectory(string directory)
+        private void RegisterImmutableDirectory(string? directory)
         {
-            if (!string.IsNullOrEmpty(directory))
+            if (directory?.Length > 0)
             {
                 string d = EnsureTrailingSlash(directory);
                 _knownImmutableDirectory.TryAdd(d, d);
@@ -123,7 +127,7 @@ namespace Microsoft.Build.Framework
 
         private static string EnsureTrailingSlash(string fileSpec)
         {
-            if (fileSpec?.Length >= 1)
+            if (fileSpec.Length >= 1)
             {
                 char lastChar = fileSpec[fileSpec.Length - 1];
                 if (lastChar != Path.DirectorySeparatorChar && lastChar != Path.AltDirectorySeparatorChar)
@@ -141,32 +145,5 @@ namespace Microsoft.Build.Framework
         /// <param name="filePath">The path to the file to test.</param>
         /// <returns><see langword="true" /> if the file is non-modifiable, otherwise <see langword="false" />.</returns>
         public bool IsNonModifiable(string filePath) => _knownImmutableDirectory.Any(folder => filePath.StartsWith(folder.Key, PathComparison));
-    }
-
-    /// <summary>
-    ///     Caching 'Last Write File Utc' times for Immutable files <see cref="FileClassifier" />.
-    ///     <remarks>
-    ///         Cache is add only. It does not updates already existing cached items.
-    ///     </remarks>
-    /// </summary>
-    internal class ImmutableFilesTimestampCache
-    {
-        private readonly ConcurrentDictionary<string, DateTime> _cache = new(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        ///     Shared singleton instance
-        /// </summary>
-        public static ImmutableFilesTimestampCache Shared { get; } = new();
-
-        /// <summary>
-        ///     Try get 'Last Write File Utc' time of particular file.
-        /// </summary>
-        /// <returns><see langword="true" /> if record exists</returns>
-        public bool TryGetValue(string fullPath, out DateTime lastModified) => _cache.TryGetValue(fullPath, out lastModified);
-
-        /// <summary>
-        ///     Try Add 'Last Write File Utc' time of particular file into cache.
-        /// </summary>
-        public void TryAdd(string fullPath, DateTime lastModified) => _cache.TryAdd(fullPath, lastModified);
     }
 }

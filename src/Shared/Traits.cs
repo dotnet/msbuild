@@ -148,7 +148,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Disables skipping full up to date check for immutable files. See FileClassifier class.
         /// </summary>
-        public readonly bool AlwaysDoImmutableFilesUpToDateCheck = Environment.GetEnvironmentVariable("MSBuildAlwaysDoImmutableFilesUpToDateCheck") == "1";
+        public readonly bool AlwaysDoImmutableFilesUpToDateCheck = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHEMODIFICATIONTIME") == "1";
 
         /// <summary>
         /// Emit events for project imports.
