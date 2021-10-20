@@ -261,11 +261,11 @@
     </Dependency>
     <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>547cafd885b92adc6c9ca2de29548c7ccebd0a07</Sha>
+      <Sha>c750b5a665adb75b528a93d844f238bd1360a91a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.3-beta1.21519.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.3-beta1.21519.5">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>547cafd885b92adc6c9ca2de29548c7ccebd0a07</Sha>
+      <Sha>c750b5a665adb75b528a93d844f238bd1360a91a</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="System.CommandLine" Version="2.0.0-beta1.21473.1">
