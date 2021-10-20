@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using System.CommandLine.Parsing;
+using System.CommandLine.Suggestions;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -49,21 +50,25 @@ namespace Microsoft.DotNet.Cli
             }.ForwardAsSingle(o => $"-property:TargetFramework={o}")
             .AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
 
-        public static Option<string> RuntimeOption =
+        private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
+        private static Func<string, IEnumerable<string>> RuntimeArgFunc = o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };
+        private static SuggestDelegate RuntimeSuggestions = Suggest.RunTimesFromProjectFile();
+        
+        public static Option<string> RuntimeOption = 
             new ForwardedOption<string>(
                 new string[] { "-r", "--runtime" })
             {
-                ArgumentHelpName = CommonLocalizableStrings.RuntimeIdentifierArgumentName
-            }.ForwardAsMany(o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" })
-            .AddSuggestions(Suggest.RunTimesFromProjectFile());
+                ArgumentHelpName = RuntimeArgName
+            }.ForwardAsMany(RuntimeArgFunc)
+            .AddSuggestions(RuntimeSuggestions);
 
         public static Option<string> LongFormRuntimeOption =
             new ForwardedOption<string>(
                 new string[] { "--runtime" })
             {
-                ArgumentHelpName = CommonLocalizableStrings.RuntimeIdentifierArgumentName
-            }.ForwardAsMany(o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" })
-            .AddSuggestions(Suggest.RunTimesFromProjectFile());
+                ArgumentHelpName = RuntimeArgName
+            }.ForwardAsMany(RuntimeArgFunc)
+            .AddSuggestions(RuntimeSuggestions);
 
         public static Option<bool> CurrentRuntimeOption(string description) =>
             new ForwardedOption<bool>("--use-current-runtime", description)

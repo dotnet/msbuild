@@ -15,15 +15,7 @@ namespace Microsoft.DotNet.Cli
     {
         public static void ShowHelp(this ParseResult parseResult)
         {
-            //throw new Exception(String.Join(" ", parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray()) + " "
-            //    + parseResult.CommandResult.Command + " " + string.Join(" ", HelpDescriptionCustomizations.Keys) + " " +
-            //    //string.Join(" ", HelpDescriptionCustomizations.First(c => c.Key.Name.Contains("runtime")).Value.Keys));
-            //    HelpDescriptionCustomizations.Keys.Count());
-
             Parser.Instance.Parse(parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray()).Invoke();
-
-            //DotnetHelpBuilder.Instance.Value.Write(parseResult.CommandResult.Command, Console.Out, 
-            //    Parser.Instance.Parse(parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray()));
         }
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)

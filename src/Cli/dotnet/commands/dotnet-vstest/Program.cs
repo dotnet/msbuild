@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tools.VSTest
 
             if (parseResult.HasOption(CommonOptions.TestLoggerOption))
             {
-                // Format test logger option
+                // System command line might have mutated the options, reformat test logger option so vstest recognizes it
                 var loggerValue = parseResult.GetValueForOption(CommonOptions.TestLoggerOption);
                 args = args.Where(a => !a.Equals(loggerValue) && !CommonOptions.TestLoggerOption.Aliases.Contains(a));
                 args = args.Prepend($"{CommonOptions.TestLoggerOption.Aliases.First()}:{loggerValue}");
