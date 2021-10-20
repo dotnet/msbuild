@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
@@ -17,19 +19,20 @@ namespace Microsoft.Build.Framework.UnitTests
         [Fact]
         public void IsNonModifiable_EvaluatesModifiability()
         {
-            FileClassifier classifier = new FileClassifier();
+            FileClassifier classifier = new();
 
-            classifier.RegisterNuGetPackageFolders("X:\\Test1;X:\\Test2");
+            var volume = NativeMethodsShared.IsWindows ? @"X:\" : "/home/usr";
+            classifier.RegisterNuGetPackageFolders($"{Path.Combine(volume,"Test1")};{Path.Combine(volume, "Test2")}");
 
-            classifier.IsNonModifiable("X:\\Test1\\File.ext").ShouldBeTrue();
-            classifier.IsNonModifiable("X:\\Test2\\File.ext").ShouldBeTrue();
-            classifier.IsNonModifiable("X:\\Test3\\File.ext").ShouldBeFalse();
+            classifier.IsNonModifiable(Path.Combine(volume, "Test1", "File.ext")).ShouldBeTrue();
+            classifier.IsNonModifiable(Path.Combine(volume, "Test2", "File.ext")).ShouldBeTrue();
+            classifier.IsNonModifiable(Path.Combine(volume, "Test3", "File.ext")).ShouldBeFalse();
         }
 
         [Fact]
         public void IsNonModifiable_DoesntThrowWhenPackageFoldersAreNotRegistered()
         {
-            FileClassifier classifier = new FileClassifier();
+            FileClassifier classifier = new();
 
             classifier.IsNonModifiable("X:\\Test3\\File.ext").ShouldBeFalse();
         }
