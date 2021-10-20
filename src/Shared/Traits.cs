@@ -146,7 +146,7 @@ namespace Microsoft.Build.Utilities
         public readonly bool AlwaysEvaluateDangerousGlobs = Environment.GetEnvironmentVariable("MSBuildAlwaysEvaluateDangerousGlobs") == "1";
 
         /// <summary>
-        /// Disables skipping full drive/filesystem globs that are behind a false condition.
+        /// Disables skipping full up to date check for immutable files. See FileClassifier class.
         /// </summary>
         public readonly bool AlwaysDoImmutableFilesUpToDateCheck = Environment.GetEnvironmentVariable("MSBuildAlwaysDoImmutableFilesUpToDateCheck") == "1";
 
