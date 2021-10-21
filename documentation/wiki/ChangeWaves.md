@@ -8,7 +8,7 @@ Opt-out is a better approach for us because we'd likely get limited feedback whe
 The opt-out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
 
 ## When do they become permanent?
-A wave of features is set to "rotate out" (i.e. become standard functionality) two bands after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionalty when wave 17.0 is introduced.
+A wave of features is set to "rotate out" (i.e. become standard functionality) two bands after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
 
 ## MSBuildDisableFeaturesFromVersion Values & Outcomes
 | `MSBuildDisableFeaturesFromVersion` Value                         | Result        | Receive Warning? |

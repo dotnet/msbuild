@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -14,6 +14,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -303,6 +304,11 @@ namespace Microsoft.Build.Evaluation
         private readonly IFileSystem _fileSystem;
 
         /// <summary>
+        /// Non-null if the expander was constructed for evaluation.
+        /// </summary>
+        internal EvaluationContext EvaluationContext { get; }
+
+        /// <summary>
         /// Creates an expander passing it some properties to use.
         /// Properties may be null.
         /// </summary>
@@ -314,11 +320,33 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Creates an expander passing it some properties to use and the evaluation context.
+        /// Properties may be null.
+        /// </summary>
+        internal Expander(IPropertyProvider<P> properties, EvaluationContext evaluationContext)
+        {
+            _properties = properties;
+            _usedUninitializedProperties = new UsedUninitializedProperties();
+            _fileSystem = evaluationContext.FileSystem;
+            EvaluationContext = evaluationContext;
+        }
+
+        /// <summary>
         /// Creates an expander passing it some properties and items to use.
         /// Either or both may be null.
         /// </summary>
         internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IFileSystem fileSystem)
             : this(properties, fileSystem)
+        {
+            _items = items;
+        }
+
+        /// <summary>
+        /// Creates an expander passing it some properties and items to use, and the evaluation context.
+        /// Either or both may be null.
+        /// </summary>
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, EvaluationContext evaluationContext)
+            : this(properties, evaluationContext)
         {
             _items = items;
         }
@@ -2218,7 +2246,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             foreach (
                                 var resultantItem in
-                                EngineFileUtilities.Default.GetFileListEscaped(
+                                EngineFileUtilities.GetFileListEscaped(
                                     item.ProjectDirectory,
                                     item.EvaluatedIncludeEscaped,
                                     forceEvaluate: true))
@@ -3667,6 +3695,14 @@ namespace Microsoft.Build.Evaluation
                         else if (TryGetArgs(args, out arg0, out StringComparison arg1))
                         {
                             returnVal = text.LastIndexOf(arg0, arg1);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.LastIndexOfAny), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.LastIndexOfAny(arg0.ToCharArray());
                             return true;
                         }
                     }
