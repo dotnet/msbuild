@@ -1054,13 +1054,13 @@ namespace Microsoft.Build.Shared
         internal static DateTime GetLastWriteFileUtcTime(string fullPath)
         {
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-            if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
+            if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
             {
                 return LastWriteFileUtcTime(fullPath);
             }
 
-            bool isModifiable = !FileClassifier.Shared.IsNonModifiable(fullPath);
-            if (!isModifiable)
+            bool isNonModifiable = FileClassifier.Shared.IsNonModifiable(fullPath);
+            if (isNonModifiable)
             {
                 if (ImmutableFilesTimestampCache.Shared.TryGetValue(fullPath, out DateTime modifiedAt))
                 {
@@ -1070,7 +1070,7 @@ namespace Microsoft.Build.Shared
 
             DateTime modifiedTime = LastWriteFileUtcTime(fullPath);
 
-            if (!isModifiable && modifiedTime != DateTime.MinValue)
+            if (isNonModifiable && modifiedTime != DateTime.MinValue)
             {
                 ImmutableFilesTimestampCache.Shared.TryAdd(fullPath, modifiedTime);
             }
