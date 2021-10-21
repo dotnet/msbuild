@@ -95,7 +95,7 @@ namespace Microsoft.Build.Internal
                             }
                             if (_throwForInvalidNodeTypes)
                             {
-                                ThrowProjectInvalidChildElement(child.Name, _element.Name, _element.Location);
+                                ThrowProjectInvalidChildElement(child.Name, _element.Name, _element);
                             }
                             break;
                     }

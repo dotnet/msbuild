@@ -85,7 +85,7 @@ namespace Microsoft.Build.Shared
         /// <remarks>
         /// Note that our restrictions are more stringent than the XML Standard's restrictions.
         /// </remarks>
-        internal static void VerifyThrowProjectValidElementName(string name, IElementLocation location)
+        internal static void VerifyThrowProjectValidElementName(string name, IInternalLocation location)
         {
             ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
             int firstInvalidCharLocation = LocateFirstInvalidElementNameCharacter(name);
@@ -110,7 +110,7 @@ namespace Microsoft.Build.Shared
 
             if (-1 != firstInvalidCharLocation)
             {
-                ProjectErrorUtilities.ThrowInvalidProject(element.Location, "NameInvalid", name, name[firstInvalidCharLocation]);
+                ProjectErrorUtilities.ThrowInvalidProject(element, "NameInvalid", name, name[firstInvalidCharLocation]);
             }
         }
 
@@ -142,10 +142,14 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static int LocateFirstInvalidElementNameCharacter(string name)
         {
+            // Create span to avoid the get_Char() func call.
+            var span = name.AsSpan();
+            var len = name.Length;
+
             // Check the first character.
             // Try capital letters first.
             // Optimize slightly for success.
-            if (!IsValidInitialElementNameCharacter(name[0]))
+            if (!IsValidInitialElementNameCharacter(span[0]))
             {
                 return 0;
             }
@@ -153,9 +157,9 @@ namespace Microsoft.Build.Shared
             // Check subsequent characters.
             // Try lower case letters first.
             // Optimize slightly for success.
-            for (int i = 1; i < name.Length; i++)
+            for (int i = 1; i < len; i++)
             {
-                if (!IsValidSubsequentElementNameCharacter(name[i]))
+                if (!IsValidSubsequentElementNameCharacter(span[i]))
                 {
                     return i;
                 }

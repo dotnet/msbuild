@@ -464,7 +464,7 @@ namespace Microsoft.Build.Construction
 
                 //  Make sure we're not trying to add multiple attributes with the same name
                 ProjectErrorUtilities.VerifyThrowInvalidProject(!XmlElement.HasAttribute(child.XmlElement.Name),
-                    XmlElement.Location, "InvalidChildElementDueToDuplication", child.XmlElement.Name, ElementName);
+                    XmlElement, "InvalidChildElementDueToDuplication", child.XmlElement.Name, ElementName);
 
                 SetElementAsAttributeValue(child);
             }

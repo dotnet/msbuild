@@ -38,7 +38,7 @@ namespace Microsoft.Build.Internal
         {
             foreach (var child in GetVerifyThrowProjectChildElements(element))
             {
-                ThrowProjectInvalidChildElement(child.Name, element.Name, element.Location);
+                ThrowProjectInvalidChildElement(child.Name, element.Name, element);
             }
         }
 
@@ -48,13 +48,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void ThrowProjectInvalidChildElementDueToDuplicate(XmlElementWithLocation child)
         {
-            ProjectErrorUtilities.ThrowInvalidProject(child.Location, "InvalidChildElementDueToDuplication", child.Name, child.ParentNode.Name);
+            ProjectErrorUtilities.ThrowInvalidProject(child, "InvalidChildElementDueToDuplication", child.Name, child.ParentNode.Name);
         }
 
         /// <summary>
         /// Throw an invalid project exception indicating that the child is not valid beneath the element
         /// </summary>
-        internal static void ThrowProjectInvalidChildElement(string name, string parentName, ElementLocation location)
+        internal static void ThrowProjectInvalidChildElement(string name, string parentName, IInternalLocation location)
         {
             ProjectErrorUtilities.ThrowInvalidProject(location, "UnrecognizedChildElement", name, parentName);
         }
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Internal
             ProjectErrorUtilities.VerifyThrowInvalidProject
             (
                 attribute == null || attribute.Value.Length > 0,
-                attribute?.Location,
+                attribute == null ? ElementLocation.EmptyLocation : attribute,
                 "InvalidAttributeValue",
                 String.Empty,
                 attributeName,
@@ -130,7 +130,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void VerifyThrowProjectRequiredAttribute(XmlElementWithLocation element, string attributeName)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject(element.GetAttribute(attributeName).Length > 0, element.Location, "MissingRequiredAttribute", attributeName, element.Name);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(element.GetAttribute(attributeName).Length > 0, element, "MissingRequiredAttribute", attributeName, element.Name);
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void ThrowProjectInvalidAttribute(XmlAttributeWithLocation attribute)
         {
-            ProjectErrorUtilities.ThrowInvalidProject(attribute.Location, "UnrecognizedAttribute", attribute.Name, attribute.OwnerElement.Name);
+            ProjectErrorUtilities.ThrowInvalidProject(attribute, "UnrecognizedAttribute", attribute.Name, attribute.OwnerElement.Name);
         }
 
         /// <summary>

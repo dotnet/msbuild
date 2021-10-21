@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -463,7 +464,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Validates the given set of parameters, logging the appropriate errors as necessary. 
         /// </summary>
-        private static void VerifyThrowIdentityParametersValid(IDictionary<string, string> identityParameters, IElementLocation errorLocation, string taskName, string runtimeName, string architectureName)
+        private static void VerifyThrowIdentityParametersValid(IDictionary<string, string> identityParameters, IInternalLocation errorLocation, string taskName, string runtimeName, string architectureName)
         {
             // validate the task factory parameters
             if (identityParameters?.Count > 0)

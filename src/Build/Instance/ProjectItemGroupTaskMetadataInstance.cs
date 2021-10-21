@@ -14,7 +14,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_name} Value={_value} Condition={_condition}")]
-    public class ProjectItemGroupTaskMetadataInstance : ITranslatable
+    public class ProjectItemGroupTaskMetadataInstance : IPublicLocation, IInternalLocation, ITranslatable
     {
         /// <summary>
         /// Name of the metadatum
@@ -122,6 +122,8 @@ namespace Microsoft.Build.Execution
             get
             { return _conditionLocation; }
         }
+
+        IElementLocation ILocation<IElementLocation>.Location => Location;
 
         /// <summary>
         /// Deep clone

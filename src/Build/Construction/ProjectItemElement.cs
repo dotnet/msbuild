@@ -394,7 +394,7 @@ namespace Microsoft.Build.Construction
 
             if (expressAsAttribute)
             {
-                ProjectMetadataElement.ValidateValidMetadataAsAttributeName(name, ElementName, Location);
+                ProjectMetadataElement.ValidateValidMetadataAsAttributeName(name, ElementName, this);
             }
 
             ProjectMetadataElement metadata = ContainingProject.CreateMetadataElement(name);

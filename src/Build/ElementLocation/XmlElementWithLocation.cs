@@ -5,6 +5,7 @@ using System;
 using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Build.Construction
     /// C# doesn't currently allow covariance in method overloading, only on delegates.
     /// The caller must bravely downcast.
     /// </remarks>
-    internal class XmlElementWithLocation : XmlElement, IXmlLineInfo, ILinkedXml
+    internal class XmlElementWithLocation : XmlElement, IPublicLocation, IInternalLocation, IXmlLineInfo, ILinkedXml
     {
         /// <summary>
         /// Line, column, file information
@@ -86,7 +87,7 @@ namespace Microsoft.Build.Construction
         /// even if it wasn't loaded from disk, or has been edited since. That's because we set that
         /// path on our XmlDocumentWithLocation wrapper class.
         /// </remarks>
-        internal ElementLocation Location
+        public ElementLocation Location
         {
             get
             {
@@ -100,6 +101,8 @@ namespace Microsoft.Build.Construction
                 return _elementLocation;
             }
         }
+
+        IElementLocation ILocation<IElementLocation>.Location => Location;
 
         /// <summary>
         /// Whether location is available.

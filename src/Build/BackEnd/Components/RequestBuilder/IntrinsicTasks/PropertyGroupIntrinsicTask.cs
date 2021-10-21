@@ -50,7 +50,8 @@ namespace Microsoft.Build.BackEnd
                     // Find all the metadata references in order to create buckets
                     List<string> parameterValues = new List<string>();
                     GetBatchableValuesFromProperty(parameterValues, property);
-                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, property.Location);
+                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, property);
+                    var propertyLocation = property.ConditionLocation;
 
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
@@ -62,7 +63,7 @@ namespace Microsoft.Build.BackEnd
                             bucket.Expander,
                             ExpanderOptions.ExpandAll,
                             Project.Directory,
-                            property.ConditionLocation,
+                            propertyLocation,
                             LoggingContext.LoggingService,
                             LoggingContext.BuildEventContext,
                             FileSystems.Default);
@@ -74,12 +75,12 @@ namespace Microsoft.Build.BackEnd
                             ProjectErrorUtilities.VerifyThrowInvalidProject
                                 (
                                 !ReservedPropertyNames.IsReservedProperty(property.Name),
-                                property.Location,
+                                property,
                                 "CannotModifyReservedProperty",
                                 property.Name
                                 );
 
-                            string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
+                            string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property);
 
                             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents)
                             {

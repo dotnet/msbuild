@@ -7,12 +7,12 @@ using System.IO;
 using System.Linq;
 
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 
 namespace Microsoft.Build.BackEnd
@@ -391,8 +391,10 @@ namespace Microsoft.Build.BackEnd
         {
             // break down the input/output specifications along the standard separator, after expanding all embedded properties
             // and item metadata
-            var targetInputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetInputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.InputsLocation);
-            var targetOutputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetOutputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, _targetToAnalyze.OutputsLocation);
+            var inputLocation = _targetToAnalyze.InputsLocation;
+            var outputLocation = _targetToAnalyze.OutputsLocation;
+            var targetInputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetInputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, inputLocation);
+            var targetOutputs = bucket.Expander.ExpandIntoStringListLeaveEscaped(TargetOutputSpecification, ExpanderOptions.ExpandPropertiesAndMetadata, outputLocation);
 
             itemVectorTransformsInTargetInputs = new ItemVectorPartitionCollection(MSBuildNameIgnoreCaseComparer.Default);
 
@@ -406,7 +408,7 @@ namespace Microsoft.Build.BackEnd
                 out itemVectorsInTargetInputs,
                 itemVectorTransformsInTargetInputs,
                 out discreteItemsInTargetInputs,
-                _targetToAnalyze.InputsLocation);
+                inputLocation);
 
             // figure out which of the outputs are:
             // 1) item vectors (with or without transforms)
@@ -417,7 +419,7 @@ namespace Microsoft.Build.BackEnd
                 out itemVectorsInTargetOutputs,
                 null /* don't want transforms separated */,
                 out discreteItemsInTargetOutputs,
-                _targetToAnalyze.OutputsLocation);
+                outputLocation);
 
             // list out all the output item-specs
             targetOutputItemSpecs = GetItemSpecsFromItemVectors(itemVectorsInTargetOutputs);
@@ -785,7 +787,7 @@ namespace Microsoft.Build.BackEnd
             out ItemVectorPartitionCollection itemVectors,
             ItemVectorPartitionCollection itemVectorTransforms,
             out Dictionary<string, string> discreteItems,
-            ElementLocation elementLocation
+            IInternalLocation elementLocation
         )
         {
             itemVectors = new ItemVectorPartitionCollection(MSBuildNameIgnoreCaseComparer.Default);

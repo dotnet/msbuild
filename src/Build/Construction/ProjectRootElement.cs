@@ -1900,7 +1900,7 @@ namespace Microsoft.Build.Construction
             return nodes;
         }
 
-        private static IEnumerable<SdkReference> ParseSdks(string sdks, IElementLocation sdkLocation)
+        private static IEnumerable<SdkReference> ParseSdks(string sdks, IInternalLocation sdkLocation)
         {
             foreach (string sdk in sdks.Split(MSBuildConstants.SemicolonChar).Select(i => i.Trim()))
             {

@@ -4,13 +4,14 @@
 using System;
 using System.Xml;
 using System.Diagnostics;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
 {
     /// <summary>
     /// Derivation of XmlAttribute to implement IXmlLineInfo
     /// </summary>
-    internal class XmlAttributeWithLocation : XmlAttribute, IXmlLineInfo
+    internal class XmlAttributeWithLocation :  XmlAttribute, IPublicLocation, IInternalLocation, IXmlLineInfo
     {
         /// <summary>
         /// Line, column, file information
@@ -66,7 +67,7 @@ namespace Microsoft.Build.Construction
         /// even if it wasn't loaded from disk, or has been edited since. That's because we set that
         /// path on our XmlDocumentWithLocation wrapper class.
         /// </remarks>
-        internal ElementLocation Location
+        public ElementLocation Location
         {
             get
             {
@@ -80,6 +81,8 @@ namespace Microsoft.Build.Construction
                 return _elementLocation;
             }
         }
+
+        IElementLocation ILocation<IElementLocation>.Location => Location;
 
         /// <summary>
         /// Whether location is available.

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -141,7 +142,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         ///     The xml attribute where this itemspec comes from
         /// </summary>
-        public IElementLocation ItemSpecLocation { get; }
+        public IInternalLocation ItemSpecLocation { get; }
 
         /// <param name="itemSpec">The string containing item syntax</param>
         /// <param name="expander">Expects the expander to have a default item factory set</param>
@@ -151,7 +152,7 @@ namespace Microsoft.Build.Evaluation
         public ItemSpec(
             string itemSpec,
             Expander<P, I> expander,
-            IElementLocation itemSpecLocation,
+            IInternalLocation itemSpecLocation,
             string projectDirectory,
             bool expandProperties = true)
         {
@@ -162,7 +163,7 @@ namespace Microsoft.Build.Evaluation
             Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
         }
 
-        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
+        private List<ItemSpecFragment> BuildItemFragments(IInternalLocation itemSpecLocation, string projectDirectory, bool expandProperties)
         {
             //  Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
@@ -247,7 +248,7 @@ namespace Microsoft.Build.Evaluation
 
         private ItemExpressionFragment ProcessItemExpression(
             string expression,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string projectDirectory,
             out bool isItemListExpression)
         {

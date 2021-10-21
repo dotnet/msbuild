@@ -74,6 +74,8 @@ namespace Microsoft.Build.Construction
             get { return registryPath; }
         }
 
+        public IElementLocation Location => this;
+
         #region INodePacketTranslatable Members
 
         /// <summary>

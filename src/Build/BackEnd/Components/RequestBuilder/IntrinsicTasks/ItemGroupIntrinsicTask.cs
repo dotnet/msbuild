@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Collections;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -15,6 +14,7 @@ using Microsoft.Build.Shared.FileSystem;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
+using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -50,6 +50,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The lookup used for evaluation and as a destination for these items.</param>
         internal override void ExecuteTask(Lookup lookup)
         {
+            var location = _taskInstance.Location;
             foreach (ProjectItemGroupTaskItemInstance child in _taskInstance.Items)
             {
                 List<ItemBucket> buckets = null;
@@ -58,7 +59,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     List<string> parameterValues = new List<string>();
                     GetBatchableValuesFromBuildItemGroupChild(parameterValues, child);
-                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location);
+                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, location);
 
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
@@ -177,14 +178,14 @@ namespace Microsoft.Build.BackEnd
                     bucket.Expander,
                     ExpanderOptions.ExpandAll,
                     Project.Directory,
-                    metadataInstance.Location,
+                    metadataInstance,
                     LoggingContext.LoggingService,
                     LoggingContext.BuildEventContext,
                     FileSystems.Default);
 
                 if (condition)
                 {
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location);
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance);
 
                     // This both stores the metadata so we can add it to all the items we just created later, and 
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
@@ -322,7 +323,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (condition)
                 {
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location);
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance);
                     metadataToSet[metadataInstance.Name] = Lookup.MetadataModification.CreateFromNewValue(evaluatedValue);
                 }
             }
@@ -515,7 +516,7 @@ namespace Microsoft.Build.BackEnd
             (
             ICollection<ProjectItemInstance> items,
             string specification,
-            ElementLocation specificationLocation,
+            IInternalLocation specificationLocation,
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander
             )
         {

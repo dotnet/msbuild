@@ -306,7 +306,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 List<string> taskParameterValues = CreateListOfParameterValues();
-                buckets = BatchingEngine.PrepareBatchingBuckets(taskParameterValues, lookup, _targetChildInstance.Location);
+                buckets = BatchingEngine.PrepareBatchingBuckets(taskParameterValues, lookup, _targetChildInstance);
 
                 Dictionary<string, string> lookupHash = null;
 
@@ -645,7 +645,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters))
             {
-                ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
+                ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance, "TaskDeclarationOrUsageError", _taskNode.Name);
             }
 
             try
@@ -740,7 +740,7 @@ namespace Microsoft.Build.BackEnd
             if (!taskExecutionHost.SetTaskParameters(_taskNode.ParametersForBuild))
             {
                 // The task cannot be initialized.
-                ProjectErrorUtilities.VerifyThrowInvalidProject(false, _targetChildInstance.Location, "TaskParametersError", _taskNode.Name, String.Empty);
+                ProjectErrorUtilities.VerifyThrowInvalidProject(false, _targetChildInstance, "TaskParametersError", _taskNode.Name, String.Empty);
             }
             else
             {
@@ -866,7 +866,7 @@ namespace Microsoft.Build.BackEnd
                     else if (type == typeof(CircularDependencyException))
                     {
                         _continueOnError = ContinueOnError.ErrorAndStop;
-                        ProjectErrorUtilities.ThrowInvalidProject(taskLoggingContext.Task.Location, "CircularDependency", taskLoggingContext.TargetLoggingContext.Target.Name);
+                        ProjectErrorUtilities.ThrowInvalidProject(taskLoggingContext.Task, "CircularDependency", taskLoggingContext.TargetLoggingContext.Target.Name);
                     }
                     else if (type == typeof(InvalidProjectFileException))
                     {
@@ -1084,14 +1084,15 @@ namespace Microsoft.Build.BackEnd
                     if (taskOutputItemInstance != null)
                     {
                         // expand all embedded properties, item metadata and item vectors in the item type name
+                        var itemTypeLocation = taskOutputItemInstance.ItemTypeLocation;
                         outputTargetIsItem = true;
-                        outputTargetName = bucket.Expander.ExpandIntoStringAndUnescape(taskOutputItemInstance.ItemType, ExpanderOptions.ExpandAll, taskOutputItemInstance.ItemTypeLocation);
+                        outputTargetName = bucket.Expander.ExpandIntoStringAndUnescape(taskOutputItemInstance.ItemType, ExpanderOptions.ExpandAll, itemTypeLocation);
                         taskParameterName = taskOutputItemInstance.TaskParameter;
 
                         ProjectErrorUtilities.VerifyThrowInvalidProject
                         (
                             outputTargetName.Length > 0,
-                            taskOutputItemInstance.ItemTypeLocation,
+                            itemTypeLocation,
                             "InvalidEvaluatedAttributeValue",
                             outputTargetName,
                             taskOutputItemInstance.ItemType,
@@ -1105,13 +1106,14 @@ namespace Microsoft.Build.BackEnd
                         outputTargetIsItem = false;
 
                         // expand all embedded properties, item metadata and item vectors in the property name
-                        outputTargetName = bucket.Expander.ExpandIntoStringAndUnescape(taskOutputPropertyInstance.PropertyName, ExpanderOptions.ExpandAll, taskOutputPropertyInstance.PropertyNameLocation);
+                        var propertyNameLocation = taskOutputPropertyInstance.PropertyNameLocation;
+                        outputTargetName = bucket.Expander.ExpandIntoStringAndUnescape(taskOutputPropertyInstance.PropertyName, ExpanderOptions.ExpandAll, propertyNameLocation);
                         taskParameterName = taskOutputPropertyInstance.TaskParameter;
 
                         ProjectErrorUtilities.VerifyThrowInvalidProject
                         (
                             outputTargetName.Length > 0,
-                            taskOutputPropertyInstance.PropertyNameLocation,
+                            propertyNameLocation,
                             "InvalidEvaluatedAttributeValue",
                             outputTargetName,
                             taskOutputPropertyInstance.PropertyName,
@@ -1121,12 +1123,13 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     string unexpandedTaskParameterName = taskParameterName;
-                    taskParameterName = bucket.Expander.ExpandIntoStringAndUnescape(taskParameterName, ExpanderOptions.ExpandAll, taskOutputSpecification.TaskParameterLocation);
+                    var taskParaLocation = taskOutputSpecification.TaskParameterLocation;
+                    taskParameterName = bucket.Expander.ExpandIntoStringAndUnescape(taskParameterName, ExpanderOptions.ExpandAll, taskParaLocation);
 
                     ProjectErrorUtilities.VerifyThrowInvalidProject
                     (
                         taskParameterName.Length > 0,
-                        taskOutputSpecification.TaskParameterLocation,
+                        taskParaLocation,
                         "InvalidEvaluatedAttributeValue",
                         taskParameterName,
                         unexpandedTaskParameterName,
@@ -1184,14 +1187,15 @@ namespace Microsoft.Build.BackEnd
                 ProjectTaskOutputItemInstance taskItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
                 if (taskItemInstance != null)
                 {
+                    var taskParaLocation = taskItemInstance.TaskParameterLocation;
                     // This is an output item.
                     // Expand only with properties first, so that expressions like Include="@(foo)" will transfer the metadata of the "foo" items as well, not just their item specs.
-                    var outputItemSpecs = bucket.Expander.ExpandIntoStringListLeaveEscaped(taskParameterAttribute, ExpanderOptions.ExpandPropertiesAndMetadata, taskItemInstance.TaskParameterLocation);
+                    var outputItemSpecs = bucket.Expander.ExpandIntoStringListLeaveEscaped(taskParameterAttribute, ExpanderOptions.ExpandPropertiesAndMetadata, taskParaLocation);
                     ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(_buildRequestEntry.RequestConfiguration.Project, itemName);
 
                     foreach (string outputItemSpec in outputItemSpecs)
                     {
-                        ICollection<ProjectItemInstance> items = bucket.Expander.ExpandIntoItemsLeaveEscaped(outputItemSpec, itemFactory, ExpanderOptions.ExpandItems, taskItemInstance.TaskParameterLocation);
+                        ICollection<ProjectItemInstance> items = bucket.Expander.ExpandIntoItemsLeaveEscaped(outputItemSpec, itemFactory, ExpanderOptions.ExpandItems, taskParaLocation);
 
                         lookup.AddNewItemsOfItemType(itemName, items);
                     }
@@ -1201,11 +1205,12 @@ namespace Microsoft.Build.BackEnd
                     // This is an output property.
                     ProjectTaskOutputPropertyInstance taskPropertyInstance = (ProjectTaskOutputPropertyInstance)taskOutputSpecification;
 
-                    string taskParameterValue = bucket.Expander.ExpandIntoStringAndUnescape(taskParameterAttribute, ExpanderOptions.ExpandAll, taskPropertyInstance.TaskParameterLocation);
+                    var taskPropertyLocation = taskPropertyInstance.TaskParameterLocation;
+                    string taskParameterValue = bucket.Expander.ExpandIntoStringAndUnescape(taskParameterAttribute, ExpanderOptions.ExpandAll, taskPropertyLocation);
 
                     if (!String.IsNullOrEmpty(taskParameterValue))
                     {
-                        lookup.SetProperty(ProjectPropertyInstance.Create(propertyName, taskParameterValue, taskPropertyInstance.TaskParameterLocation, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                        lookup.SetProperty(ProjectPropertyInstance.Create(propertyName, taskParameterValue, taskPropertyLocation, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
                     }
                 }
             }

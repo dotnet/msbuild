@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 
 using Microsoft.Build.Collections;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -80,7 +80,7 @@ namespace Microsoft.Build.BackEnd
         (
             List<string> batchableObjectParameters,
             Lookup lookup,
-            ElementLocation elementLocation
+            IInternalLocation elementLocation
         )
         {
             return PrepareBatchingBuckets(batchableObjectParameters, lookup, null, elementLocation);
@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd
             List<string> batchableObjectParameters,
             Lookup lookup,
             string implicitBatchableItemType,
-            ElementLocation elementLocation
+            IInternalLocation elementLocation
         )
         {
             if (batchableObjectParameters == null)
@@ -204,7 +204,7 @@ namespace Microsoft.Build.BackEnd
                                                                                 // Value is [struct MetadataReference]
             HashSet<string> consumedItemReferenceNames,
             Lookup lookup,
-            ElementLocation elementLocation
+            IInternalLocation elementLocation
         )
         {
             // The keys in this hashtable are the names of the items that we will batch on.
@@ -299,7 +299,7 @@ namespace Microsoft.Build.BackEnd
             Lookup lookup,
             Dictionary<string, ICollection<ProjectItemInstance>> itemListsToBeBatched,
             Dictionary<string, MetadataReference> consumedMetadataReferences,
-            ElementLocation elementLocation
+            IInternalLocation elementLocation
         )
         {
             ErrorUtilities.VerifyThrow(itemListsToBeBatched.Count > 0, "Need item types consumed by the batchable object.");
@@ -382,7 +382,7 @@ namespace Microsoft.Build.BackEnd
         (
             ProjectItemInstance item,
             Dictionary<string, MetadataReference> consumedMetadataReferences,
-            ElementLocation elementLocation
+            IInternalLocation elementLocation
         )
         {
             var itemMetadataValues = new Dictionary<string, string>(consumedMetadataReferences.Count, MSBuildNameIgnoreCaseComparer.Default);

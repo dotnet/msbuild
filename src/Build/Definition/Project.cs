@@ -2717,7 +2717,7 @@ namespace Microsoft.Build.Evaluation
             // TODO: cache result?
             private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
             {
-                ProvenanceResult SingleItemSpecProvenance(string itemSpec, IElementLocation elementLocation, Operation operation)
+                ProvenanceResult SingleItemSpecProvenance(string itemSpec, IInternalLocation elementLocation, Operation operation)
                 {
                     if (elementLocation != null && !string.IsNullOrEmpty(itemSpec))
                     {

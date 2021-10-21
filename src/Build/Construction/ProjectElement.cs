@@ -15,7 +15,7 @@ namespace Microsoft.Build.Construction
     /// <summary>
     /// Abstract base class for MSBuild construction object model elements. 
     /// </summary>
-    public abstract class ProjectElement : IProjectElement, ILinkableObject
+    public abstract class ProjectElement : IPublicLocation, IInternalLocation, IProjectElement, ILinkableObject
     {
         /// <summary>
         /// Parent container object.
@@ -50,7 +50,6 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowArgumentNull(link, nameof(link));
 
             _xmlSource = link;
-            _xmlSource_Link = _xmlSource.Link;
         }
 
         /// <summary>
@@ -63,7 +62,6 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowArgumentNull(containingProject, nameof(containingProject));
 
             _xmlSource = (XmlElementWithLocation)xmlElement;
-            _xmlSource_Link = _xmlSource.Link;
             _parent = parent;
             ContainingProject = containingProject;
         }
@@ -90,7 +88,7 @@ namespace Microsoft.Build.Construction
                     _expressedAsAttribute = value;
                     Parent?.AddToXml(this);
                     MarkDirty("Set express as attribute: {0}", value.ToString());
-                }
+                }                
             }
         }
 
@@ -210,7 +208,7 @@ namespace Microsoft.Build.Construction
         public ProjectElement PreviousSibling
         {
             [DebuggerStepThrough]
-            get => Link != null ? Link.PreviousSibling : _previousSibling;
+            get => Link != null? Link.PreviousSibling : _previousSibling;
             [DebuggerStepThrough]
             internal set => _previousSibling = value;
         }
@@ -291,16 +289,17 @@ namespace Microsoft.Build.Construction
         /// In the case of an unsaved edit, the location only
         /// contains the path to the file that the element originates from.
         /// </summary>
-        public ElementLocation Location => _xmlSource_Link != null ? _xmlSource_Link.Location : XmlElement.Location;
+        public ElementLocation Location => Link != null ? Link.Location :  XmlElement.Location;
 
         /// <inheritdoc/>
-        public string ElementName => Link != null ? Link.ElementName : XmlElement.Name;
+        public string ElementName => Link != null? Link.ElementName : XmlElement.Name;
 
         // Using ILinkedXml to share single field for either Linked (external) and local (XML backed) nodes.
         private ILinkedXml _xmlSource;
-        private ProjectElementLink _xmlSource_Link;
 
-        internal ProjectElementLink Link => _xmlSource_Link;
+        internal ProjectElementLink Link => _xmlSource?.Link;
+
+        IElementLocation ILocation<IElementLocation>.Location => Location;
 
         /// <summary>
         /// <see cref="ILinkableObject.Link"/>
@@ -332,7 +331,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return (XmlDocumentWithLocation)XmlElement?.OwnerDocument;
+                return (XmlDocumentWithLocation) XmlElement?.OwnerDocument;
             }
         }
 
@@ -431,7 +430,6 @@ namespace Microsoft.Build.Construction
         internal void SetProjectRootElementFromParser(XmlElementWithLocation xmlElement, ProjectRootElement projectRootElement)
         {
             _xmlSource = xmlElement;
-            _xmlSource_Link = _xmlSource.Link;
             ContainingProject = projectRootElement;
         }
 
@@ -466,7 +464,6 @@ namespace Microsoft.Build.Construction
             }
 
             _xmlSource = newElement;
-            _xmlSource_Link = _xmlSource.Link;
             MarkDirty("Replace element {0}", newElement.Name);
         }
 
@@ -536,12 +533,12 @@ namespace Microsoft.Build.Construction
 
         internal ElementLocation GetAttributeLocation(string attributeName)
         {
-            return Link != null ? Link.GetAttributeLocation(attributeName) : XmlElement.GetAttributeLocation(attributeName);
+            return _xmlSource?.Link?.GetAttributeLocation(attributeName) ?? XmlElement.GetAttributeLocation(attributeName);
         }
 
         internal string GetAttributeValue(string attributeName, bool nullIfNotExists = false)
         {
-            return Link != null ? Link.GetAttributeValue(attributeName, nullIfNotExists) :
+            return _xmlSource?.Link?.GetAttributeValue(attributeName, nullIfNotExists) ??
                 ProjectXmlUtilities.GetAttributeValue(XmlElement, attributeName, nullIfNotExists);
         }
 

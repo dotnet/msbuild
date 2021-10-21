@@ -202,7 +202,7 @@ namespace Microsoft.Build.Execution
         /// an invalid project file exception.
         /// Creates mutable object.
         /// </summary>
-        internal static ProjectPropertyInstance Create(string name, string escapedValue, ElementLocation location)
+        internal static ProjectPropertyInstance Create(string name, string escapedValue, IInternalLocation location)
         {
             return Create(name, escapedValue, false, location, isImmutable: false);
         }
@@ -211,7 +211,7 @@ namespace Microsoft.Build.Execution
         /// Called during project build time to create a property.  Reserved properties will cause
         /// an invalid project file exception.
         /// </summary>
-        internal static ProjectPropertyInstance Create(string name, string escapedValue, ElementLocation location, bool isImmutable)
+        internal static ProjectPropertyInstance Create(string name, string escapedValue, IInternalLocation location, bool isImmutable)
         {
             return Create(name, escapedValue, false, location, isImmutable);
         }
@@ -288,7 +288,7 @@ namespace Microsoft.Build.Execution
         /// as it should never be needed for any subsequent messages, and is just extra bulk.
         /// Inherits mutability from project if any.
         /// </summary>
-        private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, ElementLocation location, bool isImmutable)
+        private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, IInternalLocation location, bool isImmutable)
         {
             // Does not check immutability as this is only called during build (which is already protected) or evaluation
             ErrorUtilities.VerifyThrowArgumentNull(escapedValue, nameof(escapedValue));

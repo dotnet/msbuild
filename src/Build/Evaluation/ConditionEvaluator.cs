@@ -15,6 +15,7 @@ namespace Microsoft.Build.Evaluation
     using ElementLocation = Microsoft.Build.Construction.ElementLocation;
     using Microsoft.Build.Shared;
     using Microsoft.Build.Shared.FileSystem;
+    using Microsoft.Build.Construction;
 
     internal static class ConditionEvaluator
     {
@@ -175,7 +176,7 @@ namespace Microsoft.Build.Evaluation
             Expander<P, I> expander,
             ExpanderOptions expanderOptions,
             string evaluationDirectory,
-            ElementLocation elementLocation,
+            IInternalLocation location,
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
@@ -190,7 +191,7 @@ namespace Microsoft.Build.Evaluation
                 expanderOptions,
                 null /* do not collect conditioned properties */,
                 evaluationDirectory,
-                elementLocation,
+                location,
                 loggingServices,
                 buildEventContext,
                 fileSystem,
@@ -212,7 +213,7 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions expanderOptions,
             Dictionary<string, List<string>> conditionedPropertiesTable,
             string evaluationDirectory,
-            ElementLocation elementLocation,
+            IInternalLocation elementLocation,
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
@@ -337,7 +338,7 @@ namespace Microsoft.Build.Evaluation
 
             string EvaluationDirectory { get; }
 
-            ElementLocation ElementLocation { get; }
+            IInternalLocation ElementLocation { get; }
 
             /// <summary>
             ///     Table of conditioned properties and their values.
@@ -390,7 +391,7 @@ namespace Microsoft.Build.Evaluation
 
             public string EvaluationDirectory { get; }
 
-            public ElementLocation ElementLocation { get; }
+            public IInternalLocation ElementLocation { get; }
 
             public IFileSystem FileSystem { get; }
 
@@ -414,7 +415,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions expanderOptions,
                 Dictionary<string, List<string>> conditionedPropertiesInProject,
                 string evaluationDirectory,
-                ElementLocation elementLocation,
+                IInternalLocation element,
                 IFileSystem fileSystem,
                 ProjectRootElementCacheBase projectRootElementCache = null
                 )
@@ -422,14 +423,14 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
                 ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
                 ErrorUtilities.VerifyThrowArgumentNull(evaluationDirectory, nameof(evaluationDirectory));
-                ErrorUtilities.VerifyThrowArgumentNull(elementLocation, nameof(elementLocation));
+                ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
 
                 Condition = condition;
                 _expander = expander;
                 _expanderOptions = expanderOptions;
                 ConditionedPropertiesInProject = conditionedPropertiesInProject; // May be null
                 EvaluationDirectory = evaluationDirectory;
-                ElementLocation = elementLocation;
+                ElementLocation = element;
                 LoadedProjectsCache = projectRootElementCache;
                 FileSystem = fileSystem;
             }

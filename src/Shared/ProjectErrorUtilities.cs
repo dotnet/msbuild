@@ -12,6 +12,7 @@
  * 
  * 
  ******************************************************************************/
+using Microsoft.Build.Construction;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.Shared
@@ -37,7 +38,7 @@ namespace Microsoft.Build.Shared
         internal static void VerifyThrowInvalidProject
         (
             bool condition,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName
         )
         {
@@ -52,7 +53,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg0"></param>
         internal static void ThrowInvalidProject<T1>
         (
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0
         )
@@ -70,7 +71,7 @@ namespace Microsoft.Build.Shared
         internal static void VerifyThrowInvalidProject<T1>
         (
             bool condition,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0
         )
@@ -87,7 +88,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1"></param>
         internal static void ThrowInvalidProject<T1, T2>
         (
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0,
             T2 arg1
@@ -106,7 +107,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg2"></param>
         internal static void ThrowInvalidProject<T1, T2, T3>
         (
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0,
             T2 arg1,
@@ -127,7 +128,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg3"></param>
         internal static void ThrowInvalidProject<T1, T2, T3, T4>
         (
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0,
             T2 arg1,
@@ -146,7 +147,7 @@ namespace Microsoft.Build.Shared
         /// <param name="args"></param>
         internal static void ThrowInvalidProject
         (
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             params object[] args
         )
@@ -165,7 +166,7 @@ namespace Microsoft.Build.Shared
         internal static void VerifyThrowInvalidProject<T1, T2>
         (
             bool condition,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0,
             T2 arg1
@@ -186,7 +187,7 @@ namespace Microsoft.Build.Shared
         internal static void VerifyThrowInvalidProject<T1, T2, T3>
         (
             bool condition,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0,
             T2 arg1,
@@ -209,7 +210,7 @@ namespace Microsoft.Build.Shared
         internal static void VerifyThrowInvalidProject<T1, T2, T3, T4>
         (
             bool condition,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0,
             T2 arg1,
@@ -234,7 +235,7 @@ namespace Microsoft.Build.Shared
         (
             bool condition,
             string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName
         )
         {
@@ -259,7 +260,7 @@ namespace Microsoft.Build.Shared
         (
             bool condition,
             string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0
         )
@@ -287,7 +288,7 @@ namespace Microsoft.Build.Shared
         (
             bool condition,
             string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0,
             T2 arg1
@@ -317,7 +318,7 @@ namespace Microsoft.Build.Shared
         (
             bool condition,
             string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0,
             T2 arg1,
@@ -349,7 +350,7 @@ namespace Microsoft.Build.Shared
         (
             bool condition,
             string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             T1 arg0,
             T2 arg1,
@@ -382,7 +383,7 @@ namespace Microsoft.Build.Shared
         private static void ThrowInvalidProject
         (
             string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
+            IInternalLocation elementLocation,
             string resourceName,
             params object[] args
         )
@@ -406,8 +407,8 @@ namespace Microsoft.Build.Shared
             string errorCode;
             string helpKeyword;
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, args);
-
-            throw new InvalidProjectFileException(elementLocation.File, elementLocation.Line, elementLocation.Column, 0 /* Unknown end line */, 0 /* Unknown end column */, message, errorSubCategory, errorCode, helpKeyword);
+            var location = elementLocation.Location;
+            throw new InvalidProjectFileException(location.File, location.Line, location.Column, 0 /* Unknown end line */, 0 /* Unknown end column */, message, errorSubCategory, errorCode, helpKeyword);
         }
     }
 }

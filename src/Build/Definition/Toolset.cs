@@ -1065,7 +1065,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             ProjectErrorUtilities.ThrowInvalidProject
                                 (
-                                elementXml.Location,
+                                elementXml,
                                 "UnrecognizedElement",
                                 elementXml.XmlElement.Name
                                 );

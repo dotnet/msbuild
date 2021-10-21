@@ -72,9 +72,9 @@ namespace Microsoft.Build.Evaluation
 
         /// <nodoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IDisposable TrackCondition(IElementLocation location, string condition)
+        public IDisposable TrackCondition(IInternalLocation element, string condition)
         {
-            return _shouldTrackElements ? new EvaluationFrame(this, CurrentLocation.WithFileLineAndCondition(location.File, location.Line, condition)) : null;
+            return _shouldTrackElements ? new EvaluationFrame(this, CurrentLocation.WithFileLineAndCondition(element.Location.File, element.Location.Line, condition)) : null;
         }
 
         /// <summary>

@@ -363,7 +363,7 @@ namespace Microsoft.Build.Execution
             catch (ArgumentException ex)
             {
                 // Invalid chars in AssemblyFile path
-                ProjectErrorUtilities.ThrowInvalidProject(projectUsingTaskXml.Location, "InvalidAttributeValueWithException", assemblyFile, XMakeAttributes.assemblyFile, XMakeElements.usingTask, ex.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(projectUsingTaskXml, "InvalidAttributeValueWithException", assemblyFile, XMakeAttributes.assemblyFile, XMakeElements.usingTask, ex.Message);
             }
 
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord parameterGroupAndTaskElementRecord = null;

@@ -116,7 +116,7 @@ namespace Microsoft.Build.Construction
                 nestingDepth++;
 
                 // This should really be an OM error, with no error number. But it's so obscure, it's not worth a new string.
-                ProjectErrorUtilities.VerifyThrowInvalidProject(nestingDepth <= ProjectParser.MaximumChooseNesting, immediateParent.Location, "ChooseOverflow", ProjectParser.MaximumChooseNesting);
+                ProjectErrorUtilities.VerifyThrowInvalidProject(nestingDepth <= ProjectParser.MaximumChooseNesting, immediateParent, "ChooseOverflow", ProjectParser.MaximumChooseNesting);
             }
         }
 

@@ -824,7 +824,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation))
                     {
-                        XmlUtilities.VerifyThrowProjectValidElementName(propertyName, currentProjectOrImport.Location);
+                        XmlUtilities.VerifyThrowProjectValidElementName(propertyName, currentProjectOrImport);
                         _data.GlobalPropertiesToTreatAsLocal.Add(propertyName);
                     }
                 }
@@ -1273,21 +1273,21 @@ namespace Microsoft.Build.Evaluation
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
-                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
+                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement);
 
                 // If we are going to set a property to a value other than null or empty we need to check to see if it has been used
                 // during evaluation.
                 if (evaluatedValue.Length > 0 && _expander.WarnForUninitializedProperties)
                 {
                     // Is the property we are currently setting in the list of properties which have been used but not initialized
-                    IElementLocation elementWhichUsedProperty;
+                    IInternalLocation elementWhichUsedProperty;
                     bool isPropertyInList = _expander.UsedUninitializedProperties.Properties.TryGetValue(propertyElement.Name, out elementWhichUsedProperty);
 
                     if (isPropertyInList)
                     {
                         // Once we are going to warn for a property once, remove it from the list so we do not add it again.
                         _expander.UsedUninitializedProperties.Properties.Remove(propertyElement.Name);
-                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(propertyElement.Location), "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
+                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(propertyElement.Location), "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.Location.LocationString);
                     }
                 }
 
@@ -1384,7 +1384,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (EvaluateCondition(metadataElement, ExpanderOptions.ExpandPropertiesAndMetadata, ParserOptions.AllowPropertiesAndCustomMetadata))
                     {
-                        string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, ExpanderOptions.ExpandPropertiesAndCustomMetadata, itemDefinitionElement.Location);
+                        string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, ExpanderOptions.ExpandPropertiesAndCustomMetadata, itemDefinitionElement);
 
                         M predecessor = itemDefinition.GetMetadata(metadataElement.Name);
 
@@ -1752,7 +1752,7 @@ namespace Microsoft.Build.Evaluation
                         if (mode == SdkReferencePropertyExpansionMode.DefaultExpand)
                             mode = SdkReferencePropertyExpansionMode.ExpandUnescape;
 
-                        static string EvaluateProperty(string value, IElementLocation location,
+                        static string EvaluateProperty(string value, IInternalLocation location,
                             Expander<P, I> expander, SdkReferencePropertyExpansionMode mode)
                         {
                             if (value == null)
@@ -1774,12 +1774,10 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
 
-                        IElementLocation sdkReferenceOrigin = importElement.SdkLocation;
-
                         sdkReference = new SdkReference(
-                            EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode),
-                            EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode),
-                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode)
+                            EvaluateProperty(sdkReference.Name, importElement, _expander, mode),
+                            EvaluateProperty(sdkReference.Version, importElement, _expander, mode),
+                            EvaluateProperty(sdkReference.MinimumVersion, importElement, _expander, mode)
                         );
                     }
                 }
@@ -1793,7 +1791,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // We throw using e.Message because e.Message already contains the stack trace
                     // https://github.com/dotnet/msbuild/pull/6763
-                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e.Message);
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement, "SDKResolverCriticalFailure", e.Message);
                 }
 
                 if (!sdkResult.Success)
@@ -1820,7 +1818,7 @@ namespace Microsoft.Build.Evaluation
                         return;
                     }
 
-                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", sdkReference.ToString());
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement, "CouldNotResolveSdk", sdkReference.ToString());
                 }
 
                 if (sdkResult.Path == null)
@@ -1961,7 +1959,7 @@ namespace Microsoft.Build.Evaluation
             imports = new List<ProjectRootElement>();
 
             string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
-            ElementLocation importLocationInProject = importElement.Location;
+            // ElementLocation importLocationInProject = importElement.Location;
 
             if (String.IsNullOrWhiteSpace(importExpressionEscaped))
             {
@@ -1989,7 +1987,7 @@ namespace Microsoft.Build.Evaluation
                     return LoadImportsResult.ImportExpressionResolvedToNothing;
                 }
 
-                ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValue", String.Empty, XMakeAttributes.project, XMakeElements.import);
+                ProjectErrorUtilities.ThrowInvalidProject(importElement, "InvalidAttributeValue", String.Empty, XMakeAttributes.project, XMakeElements.import);
             }
 
             bool atleastOneImportIgnored = false;
@@ -2013,7 +2011,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(importExpressionEscapedItem), XMakeAttributes.project, XMakeElements.import, ex.Message);
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(importExpressionEscapedItem), XMakeAttributes.project, XMakeElements.import, ex.Message);
                 }
 
                 if (importFilesEscaped.Length == 0)
@@ -2058,14 +2056,14 @@ namespace Microsoft.Build.Evaluation
                     }
                     catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValueWithException", importFileUnescaped, XMakeAttributes.project, XMakeElements.import, ex.Message);
+                        ProjectErrorUtilities.ThrowInvalidProject(importElement, "InvalidAttributeValueWithException", importFileUnescaped, XMakeAttributes.project, XMakeElements.import, ex.Message);
                     }
 
                     // If a file is included twice, or there is a cycle of imports, we ignore all but the first import
                     // and issue a warning to that effect.
                     if (String.Equals(_projectRootElement.FullPath, importFileUnescaped, StringComparison.OrdinalIgnoreCase) /* We are trying to import ourselves */)
                     {
-                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "SelfImport", importFileUnescaped);
+                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importElement.Location), "SelfImport", importFileUnescaped);
                         atleastOneImportIgnored = true;
 
                         continue;
@@ -2082,12 +2080,12 @@ namespace Microsoft.Build.Evaluation
                             // Get the full path of the MSBuild file that has this import.
                             string importedBy = importElement.ContainingProject.FullPath ?? String.Empty;
 
-                            _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "ImportIntroducesCircularity", importFileUnescaped, importedBy);
+                            _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importElement.Location), "ImportIntroducesCircularity", importFileUnescaped, importedBy);
 
                             // Throw exception if the project load settings requires us to stop the evaluation of a project when circular imports are detected.
                             if ((_loadSettings & ProjectLoadSettings.RejectCircularImports) != 0)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportIntroducesCircularity", importFileUnescaped, importedBy);
+                                ProjectErrorUtilities.ThrowInvalidProject(importElement, "ImportIntroducesCircularity", importFileUnescaped, importedBy);
                             }
 
                             // Ignore this import and no more further processing on it.
@@ -2109,7 +2107,7 @@ namespace Microsoft.Build.Evaluation
                             parenthesizedProjectLocation = "[" + _projectRootElement.FullPath + "]";
                         }
                         // TODO: Detect if the duplicate import came from an SDK attribute
-                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
+                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importElement.Location), "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
                         duplicateImport = true;
                     }
 
@@ -2227,7 +2225,7 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
-                            ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound",
+                            ProjectErrorUtilities.ThrowInvalidProject(importElement, "ImportedProjectNotFound",
                                                                       importFileUnescaped, importExpressionEscaped);
                         }
                         else
@@ -2280,7 +2278,7 @@ namespace Microsoft.Build.Evaluation
                             if (ex.InnerException != null)
                             {
                                 // Otherwise a more generic message, still pointing to the location of the import tag
-                                ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidImportedProjectFile",
+                                ProjectErrorUtilities.ThrowInvalidProject(importElement, "InvalidImportedProjectFile",
                                     importFileUnescaped, ex.InnerException.Message);
                             }
 
@@ -2374,8 +2372,8 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-            ElementLocation location = element.ConditionLocation;
-            using (_evaluationProfiler.TrackCondition(location, condition))
+            IInternalLocation location = element.ConditionLocation;
+            using (_evaluationProfiler.TrackCondition(element, condition))
             {
                 bool result = ConditionEvaluator.EvaluateCondition
                     (
@@ -2384,7 +2382,7 @@ namespace Microsoft.Build.Evaluation
                     _expander,
                     expanderOptions,
                     GetCurrentDirectoryForConditionEvaluation(element),
-                    location,
+                    element,
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem
@@ -2414,8 +2412,7 @@ namespace Microsoft.Build.Evaluation
                 return EvaluateCondition(element, condition, expanderOptions, parserOptions);
             }
 
-            ElementLocation location = element.ConditionLocation;
-            using (_evaluationProfiler.TrackCondition(location, condition))
+            using (_evaluationProfiler.TrackCondition(element, condition))
             {
                 bool result = ConditionEvaluator.EvaluateConditionCollectingConditionedProperties
                     (
@@ -2425,7 +2422,7 @@ namespace Microsoft.Build.Evaluation
                     expanderOptions,
                     _data.ConditionedProperties,
                     GetCurrentDirectoryForConditionEvaluation(element),
-                    location,
+                    element,
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,
@@ -2507,7 +2504,7 @@ namespace Microsoft.Build.Evaluation
                 stringifiedListOfSearchPaths,
                 configLocation);
 #else
-            ProjectErrorUtilities.ThrowInvalidProject(importElement.ProjectLocation, "ImportedProjectFromExtensionsPathNotFound",
+            ProjectErrorUtilities.ThrowInvalidProject(importElement, "ImportedProjectFromExtensionsPathNotFound",
                                                         importExpandedWithDefaultPath,
                                                         relativeProjectPath,
                                                         searchPathMatch.MsBuildPropertyFormat,

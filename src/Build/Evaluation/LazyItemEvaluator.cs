@@ -14,7 +14,6 @@ using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -84,8 +83,8 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
             MSBuildEventSource.Log.EvaluateConditionStart(condition);
-
-            using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
+            var conditionLocation = element.ConditionLocation;
+            using (lazyEvaluator._evaluationProfiler.TrackCondition(conditionLocation, condition))
             {
                 bool result = ConditionEvaluator.EvaluateCondition
                     (
@@ -94,7 +93,7 @@ namespace Microsoft.Build.Evaluation
                     expander,
                     expanderOptions,
                     GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
-                    element.ConditionLocation,
+                    element,
                     lazyEvaluator._loggingContext.LoggingService,
                     lazyEvaluator._loggingContext.BuildEventContext,
                     lazyEvaluator.FileSystem
@@ -619,7 +618,7 @@ namespace Microsoft.Build.Evaluation
             return new RemoveOperation(operationBuilder, this);
         }
 
-        private void ProcessItemSpec(string rootDirectory, string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
+        private void ProcessItemSpec(string rootDirectory, string itemSpec, IInternalLocation itemSpecLocation, OperationBuilder builder)
         {
             builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory);
 
@@ -646,7 +645,7 @@ namespace Microsoft.Build.Evaluation
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Value,
                     expanderOptions,
-                    metadatumElement.Location);
+                    metadatumElement);
 
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Condition,
@@ -672,7 +671,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private void AddItemReferences(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation)
+        private void AddItemReferences(string expression, OperationBuilder operationBuilder, IInternalLocation elementLocation)
         {
             if (expression.Length == 0)
             {
