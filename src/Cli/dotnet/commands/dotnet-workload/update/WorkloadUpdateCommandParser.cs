@@ -37,10 +37,7 @@ namespace Microsoft.DotNet.Cli
             IsHidden = true
         };
 
-        public static readonly Option<string> FromRollbackFileOption = new Option<string>("--from-rollback-file", LocalizableStrings.FromRollbackDefinitionOptionDescription)
-        {
-            IsHidden = true
-        };
+        public static readonly Option<string> FromRollbackFileOption = WorkloadInstallCommandParser.FromRollbackFileOption;
 
         public static Command GetCommand()
         {

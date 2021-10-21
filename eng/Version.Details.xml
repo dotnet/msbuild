@@ -88,6 +88,10 @@
       <Sha>3891545250f577bc2f9b937ec7910cbe94452ad0</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis" Version="4.0.0-6.21519.19">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>3a0930fe6990248c848db2f1e323d7dd2052005b</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.CodeAnalysis.CSharp" Version="4.0.0-6.21520.14">
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>3891545250f577bc2f9b937ec7910cbe94452ad0</Sha>
@@ -257,7 +261,7 @@
     </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build" Version="0.1.0-alpha.1.21475.1">
       <Uri>https://github.com/dotnet/source-build</Uri>
-      <Sha>a0b571f88fe49c8ab83787442f96244bb3dcb5f6</Sha>
+      <Sha>10d0f7e94aa45889155c312f51cfc01bf326b853</Sha>
       <SourceBuild RepoName="source-build" ManagedOnly="true" />
     </Dependency>
   </ProductDependencies>
