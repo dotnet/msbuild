@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -25,15 +24,12 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
         {
-            HotReloadEventSource.Log.HotReloadStart(HotReloadEventSource.StartType.StaticHandler);
             if (!file.IsStaticFile || context.BrowserRefreshServer is null)
             {
-                HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.StaticHandler);
                 return false;
             }
             _reporter.Verbose($"Handling file change event for static content {file.FilePath}.");
             await HandleBrowserRefresh(context.BrowserRefreshServer, file, cancellationToken);
-            HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.StaticHandler);
             _reporter.Output("Hot reload of static file succeeded.");
             return true;
         }

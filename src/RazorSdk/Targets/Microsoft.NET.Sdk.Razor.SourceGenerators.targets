@@ -61,16 +61,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RazorAdditionalFile Include="@(RazorComponentWithTargetPath)" />
       <!-- Ignore .cshtml files if RazorCompileOnBuild=false -->
       <_RazorAdditionalFile Include="@(RazorGenerateWithTargetPath)" Condition="'$(RazorCompileOnBuild)' != 'false'" />
-
-      <!-- Workaround for O# bug where it modifies the root path on Windows-->
-      <_RazorOmnisharpWorkAround Include="$([System.String]::Copy('%(_RazorAdditionalFile.RootDir)').ToLower())%(Directory)%(FileName)%(Extension)"
-        TargetPath="%(_RazorAdditionalFile.TargetPath)"
-        GeneratedOutputFullPath="%(_RazorAdditionalFile.GeneratedOutputFullPath)"
-        CssScope="%(_RazorAdditionalFile.CssScope)"
-        Condition="$([MSBuild]::IsOSPlatform(`Windows`))" />
-
-      <_RazorAdditionalFile Remove="@(_RazorAdditionalFile)" Condition="$([MSBuild]::IsOSPlatform(`Windows`))" />
-      <_RazorAdditionalFile Include="@(_RazorOmnisharpWorkAround)" Condition="$([MSBuild]::IsOSPlatform(`Windows`))" />
     </ItemGroup>
 
     <ItemGroup Condition="@(_RazorAdditionalFile->WithMetadataValue('Extension', '.cshtml')->Count()) > 0" >

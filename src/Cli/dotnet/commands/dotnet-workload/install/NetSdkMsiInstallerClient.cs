@@ -273,8 +273,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out IEnumerable<string> relatedProducts);
 
                 // If we've detected a downgrade, it's possible we might be doing a rollback after the manifests were updated,
-                // but another error occurred. In this case we need to try and uninstall the upgrade and the install the lower
-                // version of the MSI.
+                // but another error occurred. In this case we need to try and uninstall the upgrade and then install the lower
+                // version of the MSI. The downgrade can also be a deliberate rollback.
                 if (plannedAction == InstallAction.Downgrade && isRollback && state == DetectState.Absent)
                 {
                     Log?.LogMessage($"Rolling back manifest update.");
@@ -282,16 +282,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     // The provider keys for manifest packages are stable across feature bands so we retain dependents during upgrades.
                     DependencyProvider depProvider = new DependencyProvider(msi.Manifest.ProviderKeyName);
 
-                    // Let's try and remove the SDK dependency. If anything's left then this is a shared installation, e.g.
-                    // the manifest was already installed by VS, we triggered a CLI installation, but because the package was
-                    // present, we simply added a dependent against it.
+                    // Try and remove the SDK dependency, but ignore any remaining dependencies since
+                    // we want to force the removal of the old version. The remaining dependencies and the provider
+                    // key won't be removed.
                     UpdateDependent(InstallRequestType.RemoveDependent, msi.Manifest.ProviderKeyName, _dependent);
-
-                    if (depProvider.Dependents.Any())
-                    {
-                        Log?.LogMessage($"Cannot remove manifest, other dependents remain: {string.Join(", ", depProvider.Dependents)}.");
-                        return;
-                    }
 
                     // Since we don't have records for manifests, we need to try and retrieve the ProductCode of
                     // the newer MSI that's installed that we want to remove using its dependency provider.
@@ -317,7 +311,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     }
 
                     string logFile = GetMsiLogName(productCode, InstallAction.Uninstall);
-                    uint error = UninstallMsi(productCode, logFile);
+                    uint error = UninstallMsi(productCode, logFile, ignoreDependencies: true);
 
                     ExitOnError(error, "Failed to uninstall manifest package.");
 

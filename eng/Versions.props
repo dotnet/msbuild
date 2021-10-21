@@ -123,7 +123,7 @@
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
     <MicrosoftNetCompilersToolsetPackageVersion>4.0.0-6.21520.14</MicrosoftNetCompilersToolsetPackageVersion>
-    <MicrosoftCodeAnalysisPackageVersion>4.0.0-4.final</MicrosoftCodeAnalysisPackageVersion>
+    <MicrosoftCodeAnalysisPackageVersion>4.0.0-6.21519.19</MicrosoftCodeAnalysisPackageVersion>
     <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0-6.21520.14</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>4.0.0-6.21520.14</MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>
     <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>4.0.0-6.21520.14</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>

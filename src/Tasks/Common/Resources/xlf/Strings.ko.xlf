@@ -562,7 +562,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
         <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="new">NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</target>
+        <target state="translated">NETSDK1182: Visual Studio 2019에서 .NET 6.0을 대상으로 지정하는 것은 지원되지 않습니다.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
