@@ -9,10 +9,10 @@ namespace Microsoft.Build.Framework
 {
     /// <summary>
     ///     Caching 'Last Write File Utc' times for Immutable files <see cref="FileClassifier" />.
-    ///     <remarks>
-    ///         Cache is add only. It does not updates already existing cached items.
-    ///     </remarks>
     /// </summary>
+    /// <remarks>
+    ///     Cache is add only. It does not updates already existing cached items.
+    /// </remarks>
     internal class ImmutableFilesTimestampCache
     {
         private readonly ConcurrentDictionary<string, DateTime> _cache = new(StringComparer.OrdinalIgnoreCase);

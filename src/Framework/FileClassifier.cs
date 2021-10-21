@@ -4,8 +4,9 @@
 #nullable enable
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.Framework
 {
@@ -13,6 +14,7 @@ namespace Microsoft.Build.Framework
     ///     Attempts to classify project files for various purposes such as safety and performance.
     /// </summary>
     /// <remarks>
+    ///     Callers of this class are responsible to respect current OS path string comparison.
     ///     <para>
     ///         The term "project files" refers to the root project file (e.g. <c>MyProject.csproj</c>) and
     ///         any other <c>.props</c> and <c>.targets</c> files it imports.
@@ -30,7 +32,13 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     internal class FileClassifier
     {
-        private const StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
+        /// <summary>
+        ///     StringComparison used for comparing paths on current OS.
+        /// </summary>
+        /// <remarks>
+        ///     TODO: Replace RuntimeInformation.IsOSPlatform(OSPlatform.Linux) by NativeMethodsShared.OSUsesCaseSensitivePaths once it is moved out from Shared
+        /// </remarks>
+        private static readonly StringComparison PathComparison = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
         /// <summary>
         ///     Single, static instance of an array that contains a semi-colon ';', which is used to split strings.
@@ -42,7 +50,19 @@ namespace Microsoft.Build.Framework
         /// </summary>
         private static readonly Lazy<FileClassifier> s_sharedInstance = new(() => new FileClassifier());
 
-        private readonly ConcurrentDictionary<string, string> _knownImmutableDirectory = new(StringComparer.OrdinalIgnoreCase);
+        /// <summary>
+        ///     Serves purpose of thread safe set of known immutable directories.
+        /// </summary>
+        /// <remarks>
+        ///     Although <see cref="ConcurrentDictionary{TKey,TValue}"></see> is not memory wise optimal solution, int this particular case it does no matter
+        ///     as much as expected size of this set is ~5 and in very extreme cases less then 100.
+        /// </remarks>
+        private readonly ConcurrentDictionary<string, string> _knownImmutableDirectories = new();
+
+        /// <summary>
+        ///     Copy on write snapshot of <see cref="_knownImmutableDirectories"/>.
+        /// </summary>
+        private IReadOnlyList<string> _knownImmutableDirectoriesSnapshot = Array.Empty<string>();
 
         /// <summary>
         ///     Creates default FileClassifier which following immutable folders:
@@ -121,7 +141,11 @@ namespace Microsoft.Build.Framework
             if (directory?.Length > 0)
             {
                 string d = EnsureTrailingSlash(directory);
-                _knownImmutableDirectory.TryAdd(d, d);
+
+                if (_knownImmutableDirectories.TryAdd(d, d))
+                {
+                    _knownImmutableDirectoriesSnapshot = new List<string>(_knownImmutableDirectories.Values);
+                }
             }
         }
 
@@ -144,6 +168,19 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="filePath">The path to the file to test.</param>
         /// <returns><see langword="true" /> if the file is non-modifiable, otherwise <see langword="false" />.</returns>
-        public bool IsNonModifiable(string filePath) => _knownImmutableDirectory.Any(folder => filePath.StartsWith(folder.Key, PathComparison));
+        public bool IsNonModifiable(string filePath)
+        {
+            // In order to have allocation-less iteration we can not use nor foreach neither linq.Any.
+            // We shall copy reference of _knownImmutableDirectoriesSnapshot into local variable as otherwise
+            // it could be changed during for loop enumeration by other thread.
+            IReadOnlyList<string> immutableDirectories = _knownImmutableDirectoriesSnapshot;
+            for (int i = 0; i < immutableDirectories.Count; i++)
+            {
+                if (filePath.StartsWith(immutableDirectories[i], PathComparison))
+                    return true;
+            }
+
+            return false;
+        }
     }
 }
