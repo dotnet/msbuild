@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var dependencyDir = Path.Combine(testAsset, "Dependency");
 
             using var app = new WatchableApp(projectDir, _logger);
-            await app.StartWatcherAsync();
+            await app.StartWatcherAsync(arguments: new[] { "wait" });
 
             var fileToChange = Path.Combine(dependencyDir, "Foo.cs");
             var programCs = File.ReadAllText(fileToChange);
