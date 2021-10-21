@@ -122,8 +122,8 @@
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
     <MicrosoftNetCompilersToolsetPackageVersion>4.0.0-6.21520.14</MicrosoftNetCompilersToolsetPackageVersion>
     <MicrosoftCodeAnalysisPackageVersion>4.0.0-6.21520.14</MicrosoftCodeAnalysisPackageVersion>
-    <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0-6.21520.14</MicrosoftCodeAnalysisCSharpPackageVersion>
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.0.0-6.21520.14</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.0.0</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
