@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Equal(2, count);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/23854")]
         public async Task RunsWithNoRestoreOnOrdinaryFileChanges()
         {
             var testAsset = _testAssetsManager.CopyTestAsset(AppName)
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/23854")]
         public async Task RunsWithRestoreIfCsprojChanges()
         {
             var testAsset = _testAssetsManager.CopyTestAsset(AppName)
@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             app.DotnetWatchArgs.Add("--verbose");
 
             await app.StartWatcherAsync(arguments: new[] { "wait" });
-            var source = Path.Combine(app.SourceDirectory, "WatchKitchenSink.csproj");
+            var source = Path.Combine(app.SourceDirectory, "KitchenSink.csproj");
             const string messagePrefix = "watch : Running dotnet with the following arguments: run";
 
             // Verify that the first run does not use --no-restore
