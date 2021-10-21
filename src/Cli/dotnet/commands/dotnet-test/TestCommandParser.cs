@@ -49,7 +49,8 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<IEnumerable<string>> LoggerOption = new ForwardedOption<IEnumerable<string>>(new string[] { "-l", "--logger" }, LocalizableStrings.CmdLoggerDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdLoggerOption
-        }.ForwardAsSingle(o => {
+        }.ForwardAsSingle(o =>
+        {
             var loggersString = string.Join(";", GetSemiColonEscapedArgs(o));
 
             return $"-property:VSTestLogger=\"{loggersString}\"";
@@ -92,7 +93,7 @@ namespace Microsoft.DotNet.Cli
             .ForwardAsMany(o => new[] { "-property:VSTestBlameCrash=true", $"-property:VSTestBlameCrashDumpType={o}" });
 
         public static readonly Option<string> BlameCrashAlwaysOption = new ForwardedOption<string>("--blame-crash-collect-always", LocalizableStrings.CmdBlameCrashCollectAlwaysDescription)
-            .ForwardAsMany(o => new[] {"-property:VSTestBlameCrash=true", "-property:VSTestBlameCrashCollectAlways=true"});
+            .ForwardAsMany(o => new[] { "-property:VSTestBlameCrash=true", "-property:VSTestBlameCrashCollectAlways=true" });
 
         public static readonly Option<bool> BlameHangOption = new ForwardedOption<bool>("--blame-hang", LocalizableStrings.CmdBlameHangDescription)
             .ForwardAs("-property:VSTestBlameHang=true");
