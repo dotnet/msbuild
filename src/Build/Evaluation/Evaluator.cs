@@ -144,6 +144,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly int _submissionId;
 
+        /// <summary>
+        /// The evaluation context to use.
+        /// </summary>
         private readonly EvaluationContext _evaluationContext;
 
         /// <summary>

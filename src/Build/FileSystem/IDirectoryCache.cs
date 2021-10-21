@@ -12,6 +12,8 @@ namespace Microsoft.Build.FileSystem
     /// </summary>
     /// <remarks>
     /// Unlike <see cref="MSBuildFileSystemBase"/>, file enumeration returns file/directory names, not full paths.
+    /// The host uses <see cref="Definition.ProjectOptions.DirectoryCacheFactory"/> to specify the directory cache
+    /// factory per project.
     /// </remarks>
     public interface IDirectoryCacheFactory
     {
@@ -43,20 +45,20 @@ namespace Microsoft.Build.FileSystem
         /// <summary>
         /// Returns <code>true</code> if the given path points to an existing file on disk.
         /// </summary>
-        /// <param name="path">A normalized path.</param>
+        /// <param name="path">A full and normalized path.</param>
         bool FileExists(string path);
 
         /// <summary>
         /// Returns <code>true</code> if the given path points to an existing directory on disk.
         /// </summary>
-        /// <param name="path">A normalized path.</param>
+        /// <param name="path">A full and normalized path.</param>
         bool DirectoryExists(string path);
 
         /// <summary>
         /// Enumerates files in the given directory only (non-recursively).
         /// </summary>
         /// <typeparam name="TResult">The desired return type.</typeparam>
-        /// <param name="path">The directory to enumerate.</param>
+        /// <param name="path">The directory to enumerate, specified as a full normalized path.</param>
         /// <param name="pattern">A search pattern supported by the platform which is guaranteed to return a superset of relevant files.</param>
         /// <param name="predicate">A predicate to test whether a file should be included.</param>
         /// <param name="transform">A transform from <code>ReadOnlySpan&lt;char&gt;</code> to <typeparamref name="TResult"/>.</param>
@@ -72,7 +74,7 @@ namespace Microsoft.Build.FileSystem
         /// Enumerates subdirectories in the given directory only (non-recursively).
         /// </summary>
         /// <typeparam name="TResult">The desired return type.</typeparam>
-        /// <param name="path">The directory to enumerate.</param>
+        /// <param name="path">The directory to enumerate, specified as a full normalized path.</param>
         /// <param name="pattern">A search pattern supported by the platform which is guaranteed to return a superset of relevant directories.</param>
         /// <param name="predicate">A predicate to test whether a directory should be included.</param>
         /// <param name="transform">A transform from <code>ReadOnlySpan&lt;char&gt;</code> to <typeparamref name="TResult"/>.</param>
