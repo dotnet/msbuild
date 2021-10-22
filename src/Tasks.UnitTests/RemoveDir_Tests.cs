@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeTrue();
 
-                list.Count.ShouldBe(t.RemovedDirectories.Length);
+                t.RemovedDirectories.Length.ShouldBe(list.Count);
 
                 for (int i = 0; i < 20; i++)
                 {
