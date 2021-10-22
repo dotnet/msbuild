@@ -236,18 +236,13 @@ namespace Microsoft.Build.Internal
             return file => matchers.Any(m => m.Value.IsMatch(file));
         }
 
-        internal class IOCache
+        internal sealed class IOCache
         {
             private readonly Lazy<ConcurrentDictionary<string, bool>> existenceCache = new Lazy<ConcurrentDictionary<string, bool>>(() => new ConcurrentDictionary<string, bool>(), true);
 
-            public virtual bool DirectoryExists(string directory)
+            public bool DirectoryExists(string directory)
             {
-                return existenceCache.Value.GetOrAdd(directory, Directory.Exists);
-            }
-
-            public virtual bool FileExists(string file)
-            {
-                return existenceCache.Value.GetOrAdd(file, File.Exists);
+                return existenceCache.Value.GetOrAdd(directory, directory => Directory.Exists(directory));
             }
         }
     }
