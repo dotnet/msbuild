@@ -131,6 +131,7 @@ stages:
               _BuildConfig: Release
               _PublishArgs: ''
               _SignType: test
+              _Test: -test
 
     - template: /eng/build.yml
       parameters:
@@ -147,6 +148,7 @@ stages:
               _BuildConfig: Release
               _PublishArgs: ''
               _SignType: test
+              _Test: -test
 
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/common/templates/job/publish-build-assets.yml
