@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             using var app = new WatchableApp(testAsset, _logger);
 
             app.UsePollingWatcher = usePollingWatcher;
-            await app.StartWatcherAsync(arguments: new[] { "wait" });
+            await app.StartWatcherAsync().TimeoutAfter(DefaultTimeout);
 
             var types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
             Assert.Equal(2, types);
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             using var app = new WatchableApp(testAsset, _logger);
 
-            await app.StartWatcherAsync(arguments: new[] { "wait" });
+            await app.StartWatcherAsync().TimeoutAfter(DefaultTimeout);
 
             var types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
             Assert.Equal(2, types);
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             using var app = new WatchableApp(testAsset, _logger);
 
-            await app.StartWatcherAsync(arguments: new[] { "wait" });
+            await app.StartWatcherAsync().TimeoutAfter(DefaultTimeout);
 
             var types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
             Assert.Equal(2, types);
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             using var app = new WatchableApp(testAsset, _logger);
 
-            await app.StartWatcherAsync(arguments: new[] { "wait" });
+            await app.StartWatcherAsync().TimeoutAfter(DefaultTimeout);
 
             var oldFile = Path.Combine(app.SourceDirectory, "include", "Foo.cs");
             var newFile = Path.Combine(app.SourceDirectory, "include", "Foo_new.cs");
