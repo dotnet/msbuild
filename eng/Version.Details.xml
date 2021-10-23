@@ -101,9 +101,17 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>df45061e218c9b5813c5531bc06fb238a23e30f6</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp.Features" Version="4.0.0-6.21519.19">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>3a0930fe6990248c848db2f1e323d7dd2052005b</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0">
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>df45061e218c9b5813c5531bc06fb238a23e30f6</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.0.0-6.21519.19">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>3a0930fe6990248c848db2f1e323d7dd2052005b</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="6.0.0-rtm.21523.4">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
