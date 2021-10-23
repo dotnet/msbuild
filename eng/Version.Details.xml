@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.100-rtm.21523.1">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.100-rtm.21523.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>bf13f8f528e8670d8b5be19abf6ef2baa22aeeef</Sha>
+      <Sha>7d941613047c847c87dc8d243a54fd1a45a47de7</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.100">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>bf13f8f528e8670d8b5be19abf6ef2baa22aeeef</Sha>
+      <Sha>7d941613047c847c87dc8d243a54fd1a45a47de7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.100">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>bf13f8f528e8670d8b5be19abf6ef2baa22aeeef</Sha>
+      <Sha>7d941613047c847c87dc8d243a54fd1a45a47de7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.100">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>bf13f8f528e8670d8b5be19abf6ef2baa22aeeef</Sha>
+      <Sha>7d941613047c847c87dc8d243a54fd1a45a47de7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.100">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>bf13f8f528e8670d8b5be19abf6ef2baa22aeeef</Sha>
+      <Sha>7d941613047c847c87dc8d243a54fd1a45a47de7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.100">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>bf13f8f528e8670d8b5be19abf6ef2baa22aeeef</Sha>
+      <Sha>7d941613047c847c87dc8d243a54fd1a45a47de7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Common.ProjectTemplates.6.0" Version="6.0.100">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>bf13f8f528e8670d8b5be19abf6ef2baa22aeeef</Sha>
+      <Sha>7d941613047c847c87dc8d243a54fd1a45a47de7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="6.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
