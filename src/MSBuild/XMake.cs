@@ -573,11 +573,12 @@ namespace Microsoft.Build.CommandLine
 
                 //while (!Debugger.IsAttached) Thread.Sleep(100);
 
+                var shouldRecurse = false;
                 GatherAllSwitches(
                     commandLine,
                     out var switchesFromAutoResponseFile,
                     out var switchesNotFromAutoResponseFile,
-                    out var shouldRecurse
+                    ref shouldRecurse
                     );
 
                 if (ProcessCommandLineSwitches(
@@ -1625,7 +1626,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             out CommandLineSwitches switchesFromAutoResponseFile,
             out CommandLineSwitches switchesNotFromAutoResponseFile,
-            out bool shouldRecurse)
+            ref bool shouldRecurse)
         {
 #if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
@@ -1661,11 +1662,11 @@ namespace Microsoft.Build.CommandLine
             if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
             {
                 GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile);
-                GatherDirectoryBuildRspSwitches(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, out shouldRecurse);
+                GatherDirectoryBuildRspSwitches(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, ref shouldRecurse);
             }
         }
 
-        static void GatherDirectoryBuildRspSwitches(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, out bool shouldRecurse)
+        static void GatherDirectoryBuildRspSwitches(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, ref bool shouldRecurse)
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
             commandLineSwitches.Append(switchesFromAutoResponseFile);    // lowest precedence
@@ -1675,29 +1676,29 @@ namespace Microsoft.Build.CommandLine
                 || commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode)
                 || commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version])
             {
-                shouldRecurse = false;
                 return;
             }
             commandLineSwitches.ThrowErrors();
 
             // figure out what project we are building
-            var projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+            var projectFile = ProcessProjectSwitch(
+                commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
+                commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
+                Directory.GetFiles);
 
             string projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
 
             // gather any switches from the first Directory.Build.rsp found in the project directory or above
             string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
 
-            var found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
+            shouldRecurse = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
 
             // Don't look for more response files if it's only in the same place we already looked (next to the exe)
             if (!string.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
             {
                 // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
+                shouldRecurse |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
             }
-
-            shouldRecurse = found;
         }
 
         /// <summary>
