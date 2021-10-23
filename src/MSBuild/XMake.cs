@@ -1673,7 +1673,8 @@ namespace Microsoft.Build.CommandLine
             commandLineSwitches.Append(switchesNotFromAutoResponseFile);
 
             if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help]
-                || commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
+                || commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode)
+                || commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version])
             {
                 shouldRecurse = false;
                 return;
