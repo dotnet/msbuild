@@ -52,7 +52,7 @@ namespace Microsoft.Extensions.HotReload
         {
             // We need to execute MetadataUpdateHandlers in a well-defined order. For v1, the strategy that is used is to topologically
             // sort assemblies so that handlers in a dependency are executed before the dependent (e.g. the reflection cache action
-            // in System.Private.CoreLib is executed before System.Text.Json clears it's own cache.)
+            // in System.Private.CoreLib is executed before System.Text.Json clears its own cache.)
             // This would ensure that caches and updates more lower in the application stack are up to date
             // before ones higher in the stack are recomputed.
             var sortedAssemblies = TopologicalSort(AppDomain.CurrentDomain.GetAssemblies());
