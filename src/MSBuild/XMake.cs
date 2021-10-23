@@ -1672,11 +1672,13 @@ namespace Microsoft.Build.CommandLine
             commandLineSwitches.Append(switchesFromAutoResponseFile);    // lowest precedence
             commandLineSwitches.Append(switchesNotFromAutoResponseFile);
 
-            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
+            if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help]
+                || commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
             {
                 shouldRecurse = false;
                 return;
             }
+            commandLineSwitches.ThrowErrors();
 
             // figure out what project we are building
             var projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
