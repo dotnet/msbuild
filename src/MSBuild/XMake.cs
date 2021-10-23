@@ -1661,9 +1661,8 @@ namespace Microsoft.Build.CommandLine
             if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
             {
                 GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile);
+                GatherDirectoryBuildRspSwitches(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, out shouldRecurse);
             }
-
-            GatherDirectoryBuildRspSwitches(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, out shouldRecurse);
         }
 
         static void GatherDirectoryBuildRspSwitches(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, out bool shouldRecurse)
