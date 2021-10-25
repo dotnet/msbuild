@@ -82,7 +82,6 @@ jobs:
               -buildSourcesDirectory $(Build.SourcesDirectory)
               -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
               $(_Test)
-              -windows
         displayName: Run Tests in Helix and non Helix in parallel
         condition: succeededOrFailed()
         env:
@@ -107,7 +106,6 @@ jobs:
               -buildSourcesDirectory $(Build.SourcesDirectory)
               -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
               $(_Test)
-              -windows
         displayName: Run Tests in Helix and non Helix in parallel
         condition: succeededOrFailed()
         env:
@@ -137,12 +135,12 @@ jobs:
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
-      - powershell: eng/runHelixAndNonHelixInParallel.ps1
+      - powershell: eng/runHelixAndNonHelixInParallelNonWindows.ps1
                 -configuration $(_BuildConfig)
                 -buildSourcesDirectory $(Build.SourcesDirectory)
                 -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
+                -officialBuildIdArgs BuildIdArgs:$(_OfficialBuildIdArgs)
                 $(_Test)
-                -officialBuildIdArgs $(_OfficialBuildIdArgs)
         displayName: Run Tests in Helix and non Helix in parallel
         condition: succeededOrFailed()
         env:
