@@ -15,7 +15,6 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="FxCopExclusions\Microsoft.Build.Conversion.Suppressions.cs" />
     <Compile Include="OldVSProjectFileReader.cs" />
     <Compile Include="ProjectFileConverter.cs" />
 

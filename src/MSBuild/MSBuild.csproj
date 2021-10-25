@@ -61,9 +61,6 @@
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\AssemblyNameComparer.cs">
       <Link>AssemblyNameComparer.cs</Link>
     </Compile>
@@ -184,9 +181,6 @@
     </Compile>
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Compile Include="DistributedLoggerRecord.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FxCopExclusions\MsBuild.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="InitializationException.cs">

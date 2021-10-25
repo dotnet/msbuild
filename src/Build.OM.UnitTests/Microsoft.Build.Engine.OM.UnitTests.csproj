@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -46,9 +46,6 @@
     </Compile>
     <Compile Include="..\Shared\EncodingUtilities.cs">
       <Link>EncodingUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

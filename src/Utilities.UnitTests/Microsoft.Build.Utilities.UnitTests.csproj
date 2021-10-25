@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs" />
     <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />

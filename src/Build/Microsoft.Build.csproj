@@ -67,9 +67,6 @@
     <Compile Include="..\Shared\EncodingStringWriter.cs">
       <Link>SharedUtilities\EncodingStringWriter.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\AssemblyNameComparer.cs">
       <Link>SharedUtilities\AssemblyNameComparer.cs</Link>
     </Compile>
@@ -781,9 +778,6 @@
     </Compile>
     <Compile Include="..\Shared\XmlUtilities.cs">
       <Link>SharedUtilities\XmlUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FxCopExclusions\Microsoft.Build.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
