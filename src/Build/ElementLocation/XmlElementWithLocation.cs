@@ -18,7 +18,7 @@ namespace Microsoft.Build.Construction
     /// C# doesn't currently allow covariance in method overloading, only on delegates.
     /// The caller must bravely downcast.
     /// </remarks>
-    internal class XmlElementWithLocation : XmlElement, IPublicLocation, IInternalLocation, IXmlLineInfo, ILinkedXml
+    internal class XmlElementWithLocation : XmlElement, IInternalLocation, IXmlLineInfo, ILinkedXml
     {
         /// <summary>
         /// Line, column, file information
@@ -102,7 +102,7 @@ namespace Microsoft.Build.Construction
             }
         }
 
-        IElementLocation ILocation<IElementLocation>.Location => Location;
+        IElementLocation IInternalLocation.Location => Location;
 
         /// <summary>
         /// Whether location is available.

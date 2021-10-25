@@ -15,7 +15,7 @@ namespace Microsoft.Build.Construction
     /// <summary>
     /// Abstract base class for MSBuild construction object model elements. 
     /// </summary>
-    public abstract class ProjectElement : IPublicLocation, IInternalLocation, IProjectElement, ILinkableObject
+    public abstract class ProjectElement : IInternalLocation, IProjectElement, ILinkableObject
     {
         /// <summary>
         /// Parent container object.
@@ -299,7 +299,7 @@ namespace Microsoft.Build.Construction
 
         internal ProjectElementLink Link => _xmlSource?.Link;
 
-        IElementLocation ILocation<IElementLocation>.Location => Location;
+        IElementLocation IInternalLocation.Location => Location;
 
         /// <summary>
         /// <see cref="ILinkableObject.Link"/>
@@ -533,12 +533,12 @@ namespace Microsoft.Build.Construction
 
         internal ElementLocation GetAttributeLocation(string attributeName)
         {
-            return _xmlSource?.Link?.GetAttributeLocation(attributeName) ?? XmlElement.GetAttributeLocation(attributeName);
+            return Link != null ? Link.GetAttributeLocation(attributeName) : XmlElement.GetAttributeLocation(attributeName);
         }
 
         internal string GetAttributeValue(string attributeName, bool nullIfNotExists = false)
         {
-            return _xmlSource?.Link?.GetAttributeValue(attributeName, nullIfNotExists) ??
+            return Link != null ? Link.GetAttributeValue(attributeName, nullIfNotExists) :
                 ProjectXmlUtilities.GetAttributeValue(XmlElement, attributeName, nullIfNotExists);
         }
 

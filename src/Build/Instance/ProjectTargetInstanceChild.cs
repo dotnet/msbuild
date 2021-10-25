@@ -12,7 +12,7 @@ namespace Microsoft.Build.Execution
     /// Type for ProjectTaskInstance and ProjectPropertyGroupTaskInstance and ProjectItemGroupTaskInstance
     /// allowing them to be used in a single collection of target children
     /// </summary>
-    public abstract class ProjectTargetInstanceChild : IPublicLocation, IInternalLocation, ITranslatable
+    public abstract class ProjectTargetInstanceChild : IInternalLocation, ITranslatable
     {
         /// <summary>
         /// Condition on the element
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public abstract ElementLocation ConditionLocation { get; }
 
-        IElementLocation ILocation<IElementLocation>.Location => Location;
+        IElementLocation IInternalLocation.Location => Location;
 
         void ITranslatable.Translate(ITranslator translator)
         {

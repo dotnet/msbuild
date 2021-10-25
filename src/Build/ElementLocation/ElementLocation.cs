@@ -18,7 +18,7 @@ namespace Microsoft.Build.Construction
     /// DO NOT make these objects any larger. There are huge numbers of them and they are transmitted between nodes.
     /// </remarks>
     [Serializable]
-    public abstract class ElementLocation : IElementLocation, IPublicLocation, ITranslatable, IImmutable
+    public abstract class ElementLocation : IElementLocation, ITranslatable, IImmutable
     {
         /// <summary>
         /// The singleton empty element location.
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Construction
 
         public ElementLocation Location => this;
 
-        IElementLocation ILocation<IElementLocation>.Location => this;
+        IElementLocation IInternalLocation.Location => this;
 
         /// <summary>
         /// Get reasonable hash code.
@@ -376,21 +376,9 @@ namespace Microsoft.Build.Construction
         }
     }
 
-
-
     // internal interface
-    internal interface ILocation<T>
+    internal interface IInternalLocation
     {
-        public T Location { get; }
-    }
-
-    // public interface
-    internal interface IPublicLocation : ILocation<ElementLocation>
-    {
-    }
-
-    // internal interface
-    internal interface IInternalLocation : ILocation<IElementLocation>
-    {
+        public IElementLocation Location { get; }
     }
 }

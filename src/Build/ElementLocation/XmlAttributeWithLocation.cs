@@ -11,7 +11,7 @@ namespace Microsoft.Build.Construction
     /// <summary>
     /// Derivation of XmlAttribute to implement IXmlLineInfo
     /// </summary>
-    internal class XmlAttributeWithLocation :  XmlAttribute, IPublicLocation, IInternalLocation, IXmlLineInfo
+    internal class XmlAttributeWithLocation :  XmlAttribute, IInternalLocation, IXmlLineInfo
     {
         /// <summary>
         /// Line, column, file information
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Construction
             }
         }
 
-        IElementLocation ILocation<IElementLocation>.Location => Location;
+        IElementLocation IInternalLocation.Location => Location;
 
         /// <summary>
         /// Whether location is available.

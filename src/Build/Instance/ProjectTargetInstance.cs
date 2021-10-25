@@ -20,7 +20,7 @@ namespace Microsoft.Build.Execution
     /// This is an immutable class.
     /// </remarks>
     [DebuggerDisplay("Name={_name} Count={_children.Count} Condition={_condition} Inputs={_inputs} Outputs={_outputs} DependsOnTargets={_dependsOnTargets} BeforeTargets={_beforeTargets} AfterTargets={_afterTargets}")]
-    public sealed class ProjectTargetInstance : IPublicLocation, IInternalLocation, IImmutable, IKeyed, ITranslatable
+    public sealed class ProjectTargetInstance : IInternalLocation, IImmutable, IKeyed, ITranslatable
     {
         /// <summary>
         /// Name of the target
@@ -460,7 +460,7 @@ namespace Microsoft.Build.Execution
             { return _parentProjectSupportsReturnsAttribute; }
         }
 
-        IElementLocation ILocation<IElementLocation>.Location => Location;
+        IElementLocation IInternalLocation.Location => Location;
 
         /// <summary>
         /// Creates a ProjectTargetElement representing this instance.  Attaches it to the specified root element.

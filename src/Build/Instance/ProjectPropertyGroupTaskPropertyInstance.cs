@@ -14,7 +14,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_name}={Value} Condition={_condition}")]
-    public class ProjectPropertyGroupTaskPropertyInstance : IPublicLocation, IInternalLocation, ITranslatable
+    public class ProjectPropertyGroupTaskPropertyInstance : IInternalLocation, ITranslatable
     {
         /// <summary>
         /// Name of the property
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Execution
             get { return _conditionLocation; }
         }
 
-        IElementLocation ILocation<IElementLocation>.Location => Location;
+        IElementLocation IInternalLocation.Location => Location;
 
         /// <summary>
         /// Deep clone
