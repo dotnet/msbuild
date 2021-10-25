@@ -142,14 +142,10 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static int LocateFirstInvalidElementNameCharacter(string name)
         {
-            // Create span to avoid the get_Char() func call.
-            var span = name.AsSpan();
-            var len = name.Length;
-
             // Check the first character.
             // Try capital letters first.
             // Optimize slightly for success.
-            if (!IsValidInitialElementNameCharacter(span[0]))
+            if (!IsValidInitialElementNameCharacter(name[0]))
             {
                 return 0;
             }
@@ -157,9 +153,9 @@ namespace Microsoft.Build.Shared
             // Check subsequent characters.
             // Try lower case letters first.
             // Optimize slightly for success.
-            for (int i = 1; i < len; i++)
+            for (int i = 1; i < name.Length; i++)
             {
-                if (!IsValidSubsequentElementNameCharacter(span[i]))
+                if (!IsValidSubsequentElementNameCharacter(name[i]))
                 {
                     return i;
                 }
