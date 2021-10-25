@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli.Remove.Reference.Tests
   Remove a project-to-project reference from the project.
 
 Usage:
-  dotnet [options] remove <PROJECT> reference <PROJECT_PATH>...
+  dotnet remove <PROJECT> reference <PROJECT_PATH>... [options]
 
 Arguments:
   <PROJECT>         The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
@@ -38,7 +38,7 @@ Options:
       .NET Remove Command
     
     Usage:
-      dotnet [options] remove <PROJECT> [command]
+      dotnet remove <PROJECT> [command] [options]
     
     Arguments:
       <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
