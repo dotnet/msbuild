@@ -83,8 +83,6 @@ namespace Microsoft.Build.Construction
             get { return s_emptyElementLocation; }
         }
 
-        public ElementLocation Location => this;
-
         IElementLocation IInternalLocation.Location => this;
 
         /// <summary>

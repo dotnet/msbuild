@@ -17,7 +17,6 @@ namespace Microsoft.Build.Construction
         public abstract int Column { get; }
         public abstract string File { get; }
         public abstract int Line { get; }
-        public Microsoft.Build.Construction.ElementLocation Location { get { throw null; } }
         public string LocationString { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
