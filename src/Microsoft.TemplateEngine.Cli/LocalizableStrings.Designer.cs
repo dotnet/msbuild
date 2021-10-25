@@ -979,15 +979,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication)..
-        /// </summary>
-        internal static string InteractiveHelp {
-            get {
-                return ResourceManager.GetString("InteractiveHelp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error: Invalid option(s):.
         /// </summary>
         internal static string InvalidCommandOptions {
@@ -1150,15 +1141,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies a NuGet source to use during install..
-        /// </summary>
-        internal static string NuGetSourceHelp {
-            get {
-                return ResourceManager.GetString("NuGetSourceHelp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error during synchronization with the Optional SDK Workloads..
         /// </summary>
         internal static string OptionalWorkloadsSyncFailed {
@@ -1173,6 +1155,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string OptionDescriptionAuthorFilter {
             get {
                 return ResourceManager.GetString("OptionDescriptionAuthorFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only check for updates and display the template packages to be updated without applying update..
+        /// </summary>
+        internal static string OptionDescriptionCheckOnly {
+            get {
+                return ResourceManager.GetString("OptionDescriptionCheckOnly", resourceCulture);
             }
         }
         
@@ -1196,11 +1187,29 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allows the command to stop and wait for user input or action (for example to complete authentication)..
+        /// </summary>
+        internal static string OptionDescriptionInteractive {
+            get {
+                return ResourceManager.GetString("OptionDescriptionInteractive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Disables checking for the template package updates when instantiating a template..
         /// </summary>
         internal static string OptionDescriptionNoUpdateCheck {
             get {
                 return ResourceManager.GetString("OptionDescriptionNoUpdateCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifies a NuGet source to use during install..
+        /// </summary>
+        internal static string OptionDescriptionNuGetSource {
+            get {
+                return ResourceManager.GetString("OptionDescriptionNuGetSource", resourceCulture);
             }
         }
         

@@ -27,16 +27,23 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.TreatUnmatchedTokensAsErrors = true;
 
             this.Add(new InstantiateCommand(host, telemetryLogger, callbacks));
-            LegacyInstallCommand legacyInstall = new LegacyInstallCommand(this, host, telemetryLogger, callbacks);
-            this.Add(legacyInstall);
-            this.Add(new InstallCommand(legacyInstall, host, telemetryLogger, callbacks));
+            this.Add(new LegacyInstallCommand(this, host, telemetryLogger, callbacks));
+            this.Add(new InstallCommand(this, host, telemetryLogger, callbacks));
             this.Add(new LegacyUninstallCommand(host, telemetryLogger, callbacks));
             this.Add(new UninstallCommand(host, telemetryLogger, callbacks));
+
+            this.Add(new LegacyUpdateCheckCommand(this, host, telemetryLogger, callbacks));
+            this.Add(new LegacyUpdateApplyCommand(this, host, telemetryLogger, callbacks));
+            this.Add(new UpdateCommand(this, host, telemetryLogger, callbacks));
 
             //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new SearchCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new UpdateCommand(host, telemetryLogger, callbacks);
             //yield return (host, telemetryLogger, callbacks) => new AliasCommand(host, telemetryLogger, callbacks);
+
+            //legacy options
+            this.AddOption(InteractiveOption);
+            this.AddOption(AddSourceOption);
         }
 
         internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
@@ -50,6 +57,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         };
 
         internal Option<bool> HelpOption { get; } = new Option<bool>(new string[] { "-h", "--help", "-?" });
+
+        #region Legacy Options
+
+        internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.GetInteractiveOption().AsHidden();
+
+        internal virtual Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.GetAddSourceOption().AsHidden().DisableAllowMultipleArgumentsPerToken();
+
+        #endregion
 
         protected override IEnumerable<string> GetSuggestions(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
         {

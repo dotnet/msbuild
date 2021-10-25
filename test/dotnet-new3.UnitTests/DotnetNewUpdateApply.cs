@@ -20,11 +20,13 @@ namespace Dotnet_new3.IntegrationTests
             _log = log;
         }
 
-        [Fact]
-        public void CanApplyUpdates()
+        [Theory]
+        [InlineData("--update-apply")]
+        [InlineData("update")]
+        public void CanApplyUpdates(string testCase)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -36,7 +38,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("console")
                 .And.HaveStdOutContaining("classlib");
 
-            new DotnetNewCommand(_log, "--update-check")
+            new DotnetNewCommand(_log, "update", "--check-only")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -51,7 +53,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("   dotnet new3 --install <PACKAGE_ID>::<VERSION>")
                 .And.HaveStdOutMatching("   dotnet new3 --install Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+");
 
-            new DotnetNewCommand(_log, "--update-apply")
+            new DotnetNewCommand(_log, testCase)
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -67,13 +69,15 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Console App");
         }
 
-        [Fact]
-        public void DoesNotApplyUpdatesWhenAllTemplatesAreUpToDate()
+        [Theory]
+        [InlineData("--update-apply")]
+        [InlineData("update")]
+        public void DoesNotApplyUpdatesWhenAllTemplatesAreUpToDate(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
             string templateLocation = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -85,7 +89,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("console")
                 .And.HaveStdOutContaining("classlib");
 
-            new DotnetNewCommand(_log, "--update-apply")
+            new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()

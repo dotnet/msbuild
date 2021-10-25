@@ -525,11 +525,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">安裝來源或範本套件。</target>
         <note />
       </trans-unit>
-      <trans-unit id="InteractiveHelp">
-        <source>Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">允許內部 dotnet restore 命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
         <target state="translated">錯誤: 選項無效:</target>
@@ -620,14 +615,14 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">找不到符合的範本: {0}。</target>
         <note />
       </trans-unit>
-      <trans-unit id="NuGetSourceHelp">
-        <source>Specifies a NuGet source to use during install.</source>
-        <target state="translated">指定安裝期間使用的 NuGet 來源。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
         <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
         <target state="translated">根據範本作者篩選範本。僅適用於 --search 或 --list | -l 選項。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionCheckOnly">
+        <source>Only check for updates and display the template packages to be updated without applying update.</source>
+        <target state="new">Only check for updates and display the template packages to be updated without applying update.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumns">
@@ -642,9 +637,19 @@ The supported columns are: language, tags, author, type.</source>
         <target state="translated">在 --list 和 --search 輸出中顯示所有欄。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionInteractive">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
         <target state="translated">停用在具現化範本時檢查範本套件更新。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionNuGetSource">
+        <source>Specifies a NuGet source to use during install.</source>
+        <target state="new">Specifies a NuGet source to use during install.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">

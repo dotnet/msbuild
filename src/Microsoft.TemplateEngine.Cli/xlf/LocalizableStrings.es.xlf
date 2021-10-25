@@ -525,11 +525,6 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <target state="translated">Instala un paquete de origen o de plantilla.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InteractiveHelp">
-        <source>Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">Permite que el comando interno dotnet restore se detenga y espere la entrada o acción del usuario (por ejemplo, para completar la autenticación).</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
         <target state="translated">Error: Opción u opciones no válidas:</target>
@@ -620,14 +615,14 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <target state="translated">No se encontró ninguna plantilla que coincida con: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="NuGetSourceHelp">
-        <source>Specifies a NuGet source to use during install.</source>
-        <target state="translated">Especifica un origen de NuGet para usarlo durante la instalación.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
         <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
         <target state="translated">Filtra las plantillas en función del autor de la plantilla. Aplicable solo con las opciones--search o --list | -l.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionCheckOnly">
+        <source>Only check for updates and display the template packages to be updated without applying update.</source>
+        <target state="new">Only check for updates and display the template packages to be updated without applying update.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumns">
@@ -642,9 +637,19 @@ Las columnas admitidas son: idioma, etiquetas, autor y tipo.</target>
         <target state="translated">Muestra todas las columnas en los resultados de --list y --search.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionInteractive">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
         <target state="translated">Deshabilita la comprobación de las actualizaciones del paquete de plantillas al crear una plantilla de forma instantánea.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionNuGetSource">
+        <source>Specifies a NuGet source to use during install.</source>
+        <target state="new">Specifies a NuGet source to use during install.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">

@@ -16,45 +16,38 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class InstallCommand : BaseInstallCommand
     {
-        private readonly LegacyInstallCommand _legacyInstallCommand;
-
         public InstallCommand(
-                LegacyInstallCommand legacyInstallCommand,
+                NewCommand parentCommand,
                 ITemplateEngineHost host,
                 ITelemetryLogger logger,
                 NewCommandCallbacks callbacks)
-            : base(host, logger, callbacks, "install")
+            : base(parentCommand, host, logger, callbacks, "install")
         {
-            _legacyInstallCommand = legacyInstallCommand;
-            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, _legacyInstallCommand.InteractiveOption));
-            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, _legacyInstallCommand.AddSourceOption));
+            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, parentCommand.InteractiveOption));
+            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, parentCommand.AddSourceOption));
         }
     }
 
     internal class LegacyInstallCommand : BaseInstallCommand
     {
         public LegacyInstallCommand(NewCommand newCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
-            : base(host, logger, callbacks, "--install")
+            : base(newCommand, host, logger, callbacks, "--install")
         {
             this.IsHidden = true;
             this.AddAlias("-i");
-            AddSourceOption.AddAlias("--nuget-source");
-
-            //the user should use --nuget-source A --nuget-source B to specify multiple options
-            AddSourceOption.AllowMultipleArgumentsPerToken = false;
-            AddSourceOption.IsHidden = true;
-            InteractiveOption.IsHidden = true;
-
-            newCommand.AddOption(AddSourceOption);
-            newCommand.AddOption(InteractiveOption);
         }
+
+        internal override Option<bool> InteractiveOption => ParentCommand.InteractiveOption;
+
+        internal override Option<IReadOnlyList<string>> AddSourceOption => ParentCommand.AddSourceOption;
     }
 
     internal abstract class BaseInstallCommand : BaseCommand<InstallCommandArgs>
     {
-        internal BaseInstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName)
+        internal BaseInstallCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName)
             : base(host, logger, callbacks, commandName)
         {
+            ParentCommand = parentCommand;
             this.AddArgument(NameArgument);
             this.AddOption(InteractiveOption);
             this.AddOption(AddSourceOption);
@@ -66,16 +59,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(1, 99)
         };
 
-        internal Option<bool> InteractiveOption { get; } = new("--interactive")
-        {
-            Description = "When downloading enable NuGet interactive."
-        };
+        internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.GetInteractiveOption();
 
-        internal Option<IReadOnlyList<string>> AddSourceOption { get; } = new(new[] { "--add-source", "--nuget-source" })
-        {
-            Description = "Add NuGet source when looking for package.",
-            AllowMultipleArgumentsPerToken = true,
-        };
+        internal virtual Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.GetAddSourceOption();
+
+        protected NewCommand ParentCommand { get; }
 
         protected override async Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {

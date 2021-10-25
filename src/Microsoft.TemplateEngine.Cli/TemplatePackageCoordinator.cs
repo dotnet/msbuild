@@ -209,12 +209,12 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Update the template package(s) flow (--update-check and --update-apply).
         /// </summary>
-        private async Task<NewCommandStatus> EnterUpdateFlowAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
+        internal async Task<NewCommandStatus> EnterUpdateFlowAsync(UpdateCommandArgs commandArgs, CancellationToken cancellationToken)
         {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+            _ = commandArgs ?? throw new ArgumentNullException(nameof(commandArgs));
             cancellationToken.ThrowIfCancellationRequested();
 
-            bool applyUpdates = commandInput.ApplyUpdates;
+            bool applyUpdates = !commandArgs.CheckOnly;
             bool allTemplatesUpToDate = true;
             NewCommandStatus success = NewCommandStatus.Success;
             var managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
@@ -223,7 +223,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 var provider = packagesGrouping.Key;
                 IReadOnlyList<CheckUpdateResult> checkUpdateResults = await provider.GetLatestVersionsAsync(packagesGrouping, cancellationToken).ConfigureAwait(false);
-                DisplayUpdateCheckResults(checkUpdateResults, commandInput, showUpdates: !applyUpdates);
+                DisplayUpdateCheckResults(checkUpdateResults, commandArgs.CommandName, showUpdates: !applyUpdates);
                 if (checkUpdateResults.Any(result => !result.Success))
                 {
                     success = NewCommandStatus.CreateFailed;
@@ -432,10 +432,9 @@ namespace Microsoft.TemplateEngine.Cli
             });
         }
 
-        private void DisplayUpdateCheckResults(IEnumerable<CheckUpdateResult> versionCheckResults, INewCommandInput commandInput, bool showUpdates = true)
+        private void DisplayUpdateCheckResults(IEnumerable<CheckUpdateResult> versionCheckResults, string commandName, bool showUpdates = true)
         {
             _ = versionCheckResults ?? throw new ArgumentNullException(nameof(versionCheckResults));
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
 
             //handle success
             if (versionCheckResults.Any(result => result.Success && !result.IsLatestVersion) && showUpdates)
@@ -458,15 +457,15 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine();
 
                 Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
-                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandInput.CommandName, withVersion: true));
+                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandName, withVersion: true));
                 Reporter.Output.WriteCommand(
                     CommandExamples.InstallCommandExample(
-                        commandInput.CommandName,
+                        commandName,
                         packageID: displayableResults.First().Identifier,
                         version: displayableResults.First().LatestVersion));
                 Reporter.Output.WriteLine();
                 Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader);
-                Reporter.Output.WriteCommand(CommandExamples.UpdateApplyCommandExample(commandInput.CommandName));
+                Reporter.Output.WriteCommand(CommandExamples.UpdateApplyCommandExample(commandName));
                 Reporter.Output.WriteLine();
             }
 

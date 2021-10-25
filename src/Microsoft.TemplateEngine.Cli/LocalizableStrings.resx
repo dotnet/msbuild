@@ -450,7 +450,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="Authoring_AmbiguousChoiceParameterValue" xml:space="preserve">
     <value>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</value>
   </data>
-  <data name="NuGetSourceHelp" xml:space="preserve">
+  <data name="OptionDescriptionNuGetSource" xml:space="preserve">
     <value>Specifies a NuGet source to use during install.</value>
   </data>
   <data name="DefaultIfOptionWithoutValue" xml:space="preserve">
@@ -498,8 +498,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="UpdateCheckCommandHelp" xml:space="preserve">
     <value>Check the currently installed template packages for updates.</value>
   </data>
-  <data name="InteractiveHelp" xml:space="preserve">
-    <value>Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</value>
+  <data name="OptionDescriptionInteractive" xml:space="preserve">
+    <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
   </data>
   <data name="TemplatesNotValidGivenTheSpecifiedFilter" xml:space="preserve">
     <value>{0} template(s) partially matched, but failed on {1}.</value>
@@ -765,5 +765,8 @@ The supported columns are: language, tags, author, type.</value>
   <data name="HostSpecificDataLoader_Warning_FailedToReadFromFile" xml:space="preserve">
     <value>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</value>
     <comment>{0} - template short name, {1} - file path to host data.</comment>
+  </data>
+  <data name="OptionDescriptionCheckOnly" xml:space="preserve">
+    <value>Only check for updates and display the template packages to be updated without applying update.</value>
   </data>
 </root>

@@ -161,8 +161,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Theory]
         [InlineData("new --install source --add-source my-custom-source1 --add-source my-custom-source2")]
         [InlineData("new --add-source my-custom-source1 --add-source my-custom-source2 --install source")]
-        //TODO: this test case is now failing - to be discussed.
-        //[InlineData("new --add-source my-custom-source1 --install source --add-source my-custom-source2")]
+        [InlineData("new --add-source my-custom-source1 --install source --add-source my-custom-source2")]
         public void Install_Legacy_CanParseAddSourceOption_MultipleEntries(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));

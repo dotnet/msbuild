@@ -20,11 +20,14 @@ namespace Dotnet_new3.IntegrationTests
             _log = log;
         }
 
-        [Fact]
-        public void CanCheckForUpdate()
+        [Theory]
+        [InlineData("--update-check")]
+        [InlineData("update --check-only")]
+        [InlineData("update --dry-run")]
+        public void CanCheckForUpdate(string testCase)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -36,7 +39,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("console")
                 .And.HaveStdOutContaining("classlib");
 
-            new DotnetNewCommand(_log, "--update-check")
+            new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -52,13 +55,16 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching("   dotnet new3 --install Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+");
         }
 
-        [Fact]
-        public void DoesNotShowUpdatesWhenAllTemplatesAreUpToDate()
+        [Theory]
+        [InlineData("--update-check")]
+        [InlineData("update --check-only")]
+        [InlineData("update --dry-run")]
+        public void DoesNotShowUpdatesWhenAllTemplatesAreUpToDate(string testCase)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
             Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -70,7 +76,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("console")
                 .And.HaveStdOutContaining("classlib");
 
-            new DotnetNewCommand(_log, "--update-check")
+            new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -85,7 +91,7 @@ namespace Dotnet_new3.IntegrationTests
         public void PrintInfoOnUpdateOnCreation()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -115,7 +121,7 @@ namespace Dotnet_new3.IntegrationTests
         public void DoesNotPrintUpdateInfoOnCreation_WhenNoUpdateCheckOption()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -158,7 +164,7 @@ namespace Dotnet_new3.IntegrationTests
         public void DoesNotPrintUpdateInfoOnCreation_WhenLatestVersionIsInstalled()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
