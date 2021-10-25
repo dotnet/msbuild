@@ -940,7 +940,6 @@ namespace Microsoft.Build.BackEnd
                 IBuildEngine be = host.TaskInstance.BuildEngine;
                 if (taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors && (be is TaskHost th ? th.BuildRequestsSucceeded : false) && (be is IBuildEngine7 be7 ? !be7.AllowFailureWithoutError : true))
                 {
-
                     if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
                         taskLoggingContext.LogWarning(null,
