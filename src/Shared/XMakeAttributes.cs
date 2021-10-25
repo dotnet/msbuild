@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Shared
 {
@@ -76,6 +77,7 @@ namespace Microsoft.Build.Shared
             internal const string clr2 = "CLR2";
             internal const string clr4 = "CLR4";
             internal const string currentRuntime = "CurrentRuntime";
+            internal const string net = "NET";
             internal const string any = "*";
         }
 
@@ -99,7 +101,7 @@ namespace Microsoft.Build.Shared
 
         private static readonly HashSet<string> KnownBatchingTargetAttributes = new HashSet<string> { name, condition, dependsOnTargets, beforeTargets, afterTargets };
 
-        private static readonly HashSet<string> ValidMSBuildRuntimeValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildRuntimeValues.clr2, MSBuildRuntimeValues.clr4, MSBuildRuntimeValues.currentRuntime, MSBuildRuntimeValues.any };
+        private static readonly HashSet<string> ValidMSBuildRuntimeValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildRuntimeValues.clr2, MSBuildRuntimeValues.clr4, MSBuildRuntimeValues.currentRuntime, MSBuildRuntimeValues.net, MSBuildRuntimeValues.any };
 
         private static readonly HashSet<string> ValidMSBuildArchitectureValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildArchitectureValues.x86, MSBuildArchitectureValues.x64, MSBuildArchitectureValues.currentArchitecture, MSBuildArchitectureValues.any };
 
@@ -320,8 +322,8 @@ namespace Microsoft.Build.Shared
                 MSBuildRuntimeValues.any.Equals(runtime, StringComparison.OrdinalIgnoreCase) ||
                 MSBuildRuntimeValues.currentRuntime.Equals(runtime, StringComparison.OrdinalIgnoreCase))
             {
-                // Default to CLR4.
-                return MSBuildRuntimeValues.clr4;
+                // Default to current.
+                return GetCurrentMSBuildRuntime();
             }
             else
             {
@@ -424,6 +426,19 @@ namespace Microsoft.Build.Shared
             string currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
             return currentArchitecture;
         }
+
+        /// <summary>
+        /// Returns the MSBuildRuntime value corresponding to the current process' runtime. 
+        /// </summary>
+        internal static string GetCurrentMSBuildRuntime()
+        {
+#if NET40_OR_GREATER
+            return MSBuildRuntimeValues.clr4;
+#else
+            return MSBuildRuntimeValues.net;
+#endif
+        }
+
 
         /// <summary>
         /// Given an MSBuildArchitecture value that may be non-explicit -- e.g. "CurrentArchitecture" or "Any" --
