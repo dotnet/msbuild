@@ -87,7 +87,7 @@ namespace Microsoft.Build.Construction
         /// even if it wasn't loaded from disk, or has been edited since. That's because we set that
         /// path on our XmlDocumentWithLocation wrapper class.
         /// </remarks>
-        public ElementLocation Location
+        internal ElementLocation Location
         {
             get
             {

@@ -11,7 +11,7 @@ namespace Microsoft.Build.Construction
     /// <summary>
     /// Derivation of XmlAttribute to implement IXmlLineInfo
     /// </summary>
-    internal class XmlAttributeWithLocation :  XmlAttribute, IInternalLocation, IXmlLineInfo
+    internal class XmlAttributeWithLocation : XmlAttribute, IInternalLocation, IXmlLineInfo
     {
         /// <summary>
         /// Line, column, file information
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Construction
         /// even if it wasn't loaded from disk, or has been edited since. That's because we set that
         /// path on our XmlDocumentWithLocation wrapper class.
         /// </remarks>
-        public ElementLocation Location
+        internal ElementLocation Location
         {
             get
             {
