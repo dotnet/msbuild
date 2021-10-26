@@ -8,7 +8,6 @@ using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -97,7 +96,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
                 environmentSettings,
                 templatePackageManager,
-                new TemplateCreator(environmentSettings),
                 new HostSpecificDataLoader(environmentSettings),
                 TelemetryLogger);
 

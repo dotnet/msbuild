@@ -10,7 +10,6 @@ using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -18,7 +17,6 @@ namespace Microsoft.TemplateEngine.Cli
     {
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
         private readonly TemplatePackageManager _templatePackageManager;
-        private readonly TemplateCreator _templateCreator;
         private readonly IHostSpecificDataLoader _hostSpecificDataLoader;
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly string? _defaultLanguage;
@@ -26,14 +24,12 @@ namespace Microsoft.TemplateEngine.Cli
         internal TemplateListCoordinator(
             IEngineEnvironmentSettings engineEnvironmentSettings,
             TemplatePackageManager templatePackageManager,
-            TemplateCreator templateCreator,
             IHostSpecificDataLoader hostSpecificDataLoader,
             ITelemetryLogger telemetryLogger)
 
         {
             _engineEnvironmentSettings = engineEnvironmentSettings ?? throw new ArgumentNullException(nameof(engineEnvironmentSettings));
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
-            _templateCreator = templateCreator ?? throw new ArgumentNullException(nameof(templateCreator));
             _hostSpecificDataLoader = hostSpecificDataLoader ?? throw new ArgumentNullException(nameof(hostSpecificDataLoader));
             _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _defaultLanguage = engineEnvironmentSettings.GetDefaultLanguage();
@@ -108,6 +104,49 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
+        /// <summary>
+        /// Handles display for dotnet new command without parameters.
+        /// </summary>
+        /// <param name="args">command arguments.</param>
+        /// <param name="cancellationToken">cancellation token.</param>
+        /// <returns></returns>
+        internal async Task<NewCommandStatus> DisplayCommandDescriptionAsync(
+            GlobalArgs args,
+            CancellationToken cancellationToken)
+        {
+            IEnumerable<ITemplateInfo> curatedTemplates = await GetCuratedListAsync(cancellationToken).ConfigureAwait(false);
+
+            Reporter.Output.WriteLine(string.Format(
+                LocalizableStrings.TemplateInformationCoordinator_DotnetNew_Description,
+                CommandExamples.New3CommandExample(args.CommandName)));
+            Reporter.Output.WriteLine();
+
+            Reporter.Output.WriteLine(string.Format(
+              LocalizableStrings.TemplateInformationCoordinator_DotnetNew_TemplatesHeader,
+              CommandExamples.New3CommandExample(args.CommandName)));
+            TemplateGroupDisplay.DisplayTemplateList(
+                _engineEnvironmentSettings,
+                curatedTemplates,
+                new TabularOutputSettings(_engineEnvironmentSettings.Environment));
+
+            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
+            Reporter.Output.WriteCommand(CommandExamples.InstantiateTemplateExample(args.CommandName, "console"));
+            Reporter.Output.WriteLine();
+
+            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint);
+            Reporter.Output.WriteCommand(CommandExamples.HelpCommandExample(args.CommandName, "console"));
+
+            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ListTemplatesHint);
+            Reporter.Output.WriteCommand(CommandExamples.ListCommandExample(args.CommandName));
+
+            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint);
+            Reporter.Output.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, "web"));
+
+            Reporter.Output.WriteLine();
+
+            return NewCommandStatus.Success;
+        }
+
         private static string GetInputParametersString(ListCommandArgs args/*, IReadOnlyDictionary<string, string?>? templateParameters = null*/)
         {
             string separator = ", ";
@@ -154,6 +193,25 @@ namespace Microsoft.TemplateEngine.Cli
                 inputParameters.Append(string.Join(separator, appliedFilters/*.Concat(appliedTemplateParameters)*/));
             }
             return inputParameters.ToString();
+        }
+
+        /// <summary>
+        /// Displays curated list of templates for dotnet new command.
+        /// </summary>
+        private async Task<IEnumerable<ITemplateInfo>> GetCuratedListAsync(CancellationToken cancellationToken)
+        {
+            string[] curatedGroupIdentityList = new[]
+            {
+                "Microsoft.Common.Library", //classlib
+                "Microsoft.Common.Console", //console
+                "Microsoft.Common.WPF", //wpf
+                "Microsoft.Common.WinForms", //winforms
+                "Microsoft.Web.Blazor.Wasm", //blazorwasm
+                "Microsoft.Web.RazorPages" //webapp
+            };
+
+            IReadOnlyList<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            return templates.Where(t => curatedGroupIdentityList.Contains(t.GroupIdentity, StringComparer.OrdinalIgnoreCase));
         }
     }
 }

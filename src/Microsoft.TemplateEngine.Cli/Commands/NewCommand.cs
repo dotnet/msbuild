@@ -77,7 +77,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(0, 999)
         };
 
-        internal Option<bool> HelpOption { get; } = new Option<bool>(new string[] { "-h", "--help", "-?" });
+        internal Option<bool> HelpOption { get; } = new Option<bool>(new string[] { "-h", "--help", "-?" })
+        {
+            IsHidden = true,
+        };
 
         #region Legacy Options
         internal Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption().AsHidden();
@@ -168,22 +171,30 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected override async Task<NewCommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
-            if (string.IsNullOrWhiteSpace(args.ShortName))
+            if (string.IsNullOrWhiteSpace(args.ShortName) && args.HelpRequested)
             {
-                if (args.HelpRequested)
-                {
-                    context.HelpBuilder.Write(
-                        context.ParseResult.CommandResult.Command,
-                        StandardStreamWriter.Create(context.Console.Out),
-                        context.ParseResult);
+                context.HelpBuilder.Write(
+                    context.ParseResult.CommandResult.Command,
+                    StandardStreamWriter.Create(context.Console.Out),
+                    context.ParseResult);
 
-                    return NewCommandStatus.Success;
-                }
-                //show curated list
                 return NewCommandStatus.Success;
             }
 
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
+
+            if (string.IsNullOrWhiteSpace(args.ShortName))
+            {
+                TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
+                    environmentSettings,
+                    templatePackageManager,
+                    new HostSpecificDataLoader(environmentSettings),
+                    TelemetryLogger);
+
+                //TODO: we need to await, otherwise templatePackageManager will be disposed.
+                return await templateListCoordinator.DisplayCommandDescriptionAsync(args, default).ConfigureAwait(false);
+            }
+
             var templates = await templatePackageManager.GetTemplatesAsync(context.GetCancellationToken()).ConfigureAwait(false);
             var template = templates.FirstOrDefault(template => template.ShortNameList.Contains(args.ShortName));
 

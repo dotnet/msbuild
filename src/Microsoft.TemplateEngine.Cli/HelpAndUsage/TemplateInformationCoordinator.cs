@@ -167,46 +167,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         /// <summary>
-        /// Handles display for dotnet new command without parameters.
-        /// </summary>
-        /// <param name="commandInput">user command input.</param>
-        /// <param name="cancellationToken">cancellation token.</param>
-        /// <returns></returns>
-        internal async Task<NewCommandStatus> DisplayCommandDescriptionAsync(
-            INewCommandInput commandInput,
-            CancellationToken cancellationToken)
-        {
-            IEnumerable<ITemplateInfo> curatedTemplates = await GetCuratedListAsync(commandInput, cancellationToken).ConfigureAwait(false);
-
-            Reporter.Output.WriteLine(string.Format(
-                LocalizableStrings.TemplateInformationCoordinator_DotnetNew_Description,
-                CommandExamples.New3CommandExample(commandInput.CommandName)));
-            Reporter.Output.WriteLine();
-
-            Reporter.Output.WriteLine(string.Format(
-              LocalizableStrings.TemplateInformationCoordinator_DotnetNew_TemplatesHeader,
-              CommandExamples.New3CommandExample(commandInput.CommandName)));
-            TemplateGroupDisplay.DisplayTemplateList(_engineEnvironmentSettings, curatedTemplates, _defaultTabularOutputSettings);
-
-            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
-            Reporter.Output.WriteCommand(CommandExamples.InstantiateTemplateExample(commandInput.CommandName, "console"));
-            Reporter.Output.WriteLine();
-
-            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint);
-            Reporter.Output.WriteCommand(CommandExamples.HelpCommandExample(commandInput.CommandName, "console"));
-
-            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ListTemplatesHint);
-            Reporter.Output.WriteCommand(CommandExamples.ListCommandExample(commandInput.CommandName));
-
-            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint);
-            Reporter.Output.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, "web"));
-
-            Reporter.Output.WriteLine();
-
-            return NewCommandStatus.Success;
-        }
-
-        /// <summary>
         /// Displays the help in case <paramref name="commandInput"/> contains invalid parameters for resolved <paramref name="templateGroupMatchInfo"/>.
         /// </summary>
         /// <param name="templateGroupMatchInfo">the template group to use based on the command input.</param>
@@ -270,25 +230,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     CommandExamples.HelpCommandExample(commandInput.CommandName, resolutionResult.UnambiguousTemplateGroup.ShortNames[0], supportedLanguages.First()));
                 Reporter.Output.WriteLine();
             }
-        }
-
-        /// <summary>
-        /// Displays curated list of templates for dotnet new command.
-        /// </summary>
-        private async Task<IEnumerable<ITemplateInfo>> GetCuratedListAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
-        {
-            string[] curatedGroupIdentityList = new[]
-            {
-                "Microsoft.Common.Library", //classlib
-                "Microsoft.Common.Console", //console
-                "Microsoft.Common.WPF", //wpf
-                "Microsoft.Common.WinForms", //winforms
-                "Microsoft.Web.Blazor.Server", //blazorserver
-                "Microsoft.Web.RazorPages" //webapp
-            };
-
-            IReadOnlyList<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
-            return templates.Where(t => curatedGroupIdentityList.Contains(t.GroupIdentity, StringComparer.OrdinalIgnoreCase));
         }
 
         /// <summary>
