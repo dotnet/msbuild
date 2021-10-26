@@ -32,14 +32,16 @@ namespace Microsoft.DotNet.ShellShim
             _packageSourceLocation = packageSourceLocation;
         }
 
-        public async Task<string> ResolveAppHostSourceDirectoryAsync(string archOption, string targetFramework)
+        public async Task<string> ResolveAppHostSourceDirectoryAsync(string archOption, NuGetFramework targetFramework)
         {
             string rid;
             var validRids = new string[] { "win-x64", "win-arm64", "osx-x64", "osx-arm64" };
             if (string.IsNullOrEmpty(archOption))
             {
-                if (!string.IsNullOrEmpty(targetFramework) && new NuGetFramework(targetFramework).Version < new Version("6.0")
-                    && (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()) && !RuntimeInformation.ProcessArchitecture.Equals(Architecture.X64))
+                if (targetFramework != null &&
+                    ((targetFramework.Version < new Version("6.0") && OperatingSystem.IsMacOS()) ||
+                    (targetFramework.Version < new Version("5.0") && OperatingSystem.IsWindows())
+                    && !RuntimeInformation.ProcessArchitecture.Equals(Architecture.X64)))
                 {
                     rid = OperatingSystem.IsWindows() ? "win-x64" : "osx-x64";
                 }
