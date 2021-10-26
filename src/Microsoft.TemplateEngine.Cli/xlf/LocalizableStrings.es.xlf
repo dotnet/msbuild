@@ -391,6 +391,16 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <target state="translated">El comando se ejecutó correctamente.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Commands_Validator_WrongArgumentPosition">
+        <source>Invalid command syntax: argument '{0}' should be used after '{1}'.</source>
+        <target state="new">Invalid command syntax: argument '{0}' should be used after '{1}'.</target>
+        <note>{0} - argument value, {1} - command name (list, search. etc.).</note>
+      </trans-unit>
+      <trans-unit id="Commands_Validator_WrongOptionPosition">
+        <source>Invalid command syntax: option '{0}' should be used after '{1}'.</source>
+        <target state="new">Invalid command syntax: option '{0}' should be used after '{1}'.</target>
+        <note>{0} - option name, {1} - command name (list, search. etc.).</note>
+      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Valor configurado: {0}</target>
@@ -560,11 +570,6 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <target state="translated">Sintaxis de comando no válida: utilice "{0}" en su lugar.</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
-      <trans-unit id="LanguageParameter">
-        <source>Filters templates based on language and specifies the language of the template to create.</source>
-        <target state="translated">Filtra plantillas en función del idioma y especifica el idioma de la plantilla que se va a crear.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run:</source>
         <target state="translated">Para mostrar la lista de plantillas instaladas, ejecute:</target>
@@ -620,6 +625,11 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <target state="translated">Filtra las plantillas en función del autor de la plantilla. Aplicable solo con las opciones--search o --list | -l.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionBaseline">
+        <source>Filters the templates based on baseline defined in the template.</source>
+        <target state="new">Filters the templates based on baseline defined in the template.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionCheckOnly">
         <source>Only check for updates and display the template packages to be updated without applying update.</source>
         <target state="new">Only check for updates and display the template packages to be updated without applying update.</target>
@@ -640,6 +650,11 @@ Las columnas admitidas son: idioma, etiquetas, autor y tipo.</target>
       <trans-unit id="OptionDescriptionInteractive">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionLanguageFilter">
+        <source>Filters templates based on language and specifies the language of the template to create.</source>
+        <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
@@ -665,6 +680,11 @@ Las columnas admitidas son: idioma, etiquetas, autor y tipo.</target>
       <trans-unit id="OptionDescriptionTagFilter">
         <source>Filters the templates based on the tag. Applies to --search and --list.</source>
         <target state="translated">Filtra las plantillas en función de la etiqueta. Se aplica a --search y --list.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionTypeFilter">
+        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
+        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -795,11 +815,6 @@ Las columnas admitidas son: idioma, etiquetas, autor y tipo.</target>
       <trans-unit id="ShowsAllTemplates">
         <source>Shows all templates.</source>
         <target state="translated">Muestra todas las plantillas.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShowsFilteredTemplates">
-        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="translated">Filtra las plantillas en función de los tipos disponibles. Los valores predefinidos son "proyecto" y "elemento".</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches">

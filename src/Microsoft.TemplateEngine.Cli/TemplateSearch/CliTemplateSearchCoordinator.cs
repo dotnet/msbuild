@@ -3,11 +3,11 @@
 
 #nullable enable
 
+using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.Commands;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateSearch.Common;
@@ -17,48 +17,42 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal static class CliTemplateSearchCoordinator
     {
-        private static IReadOnlyList<FilterOption> _supportedFilters = new[]
-        {
-            SupportedFilterOptions.AuthorFilter,
-            SupportedFilterOptions.BaselineFilter,
-            SupportedFilterOptions.LanguageFilter,
-            SupportedFilterOptions.TypeFilter,
-            SupportedFilterOptions.TagFilter,
-            SupportedFilterOptions.PackageFilter
-        };
-
-        internal static IReadOnlyList<FilterOption> SupportedFilters => _supportedFilters;
-
         /// <summary>
         /// Executes searching for the templates in configured remote sources.
         /// Performs validation for the commands, search for the templates in configured remote source, displays the results in table format.
         /// </summary>
         /// <param name="environmentSettings">environment settings.</param>
         /// <param name="templatePackageManager"></param>
-        /// <param name="commandInput">new command data.</param>
+        /// <param name="commandArgs">new command data.</param>
         /// <param name="defaultLanguage">default language for the host.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns><see cref="NewCommandStatus.Success"/> when the templates were found and displayed;
         /// <see cref="NewCommandStatus.Cancelled"/> when the command validation fails;
         /// <see cref="NewCommandStatus.NotFound"/> when no templates found based on the filter criteria.
         /// </returns>
-        internal static async Task<NewCommandStatus> SearchForTemplateMatchesAsync(IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, INewCommandInput commandInput, string? defaultLanguage)
+        internal static async Task<NewCommandStatus> SearchForTemplateMatchesAsync(
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            SearchCommandArgs commandArgs,
+            string? defaultLanguage,
+            CancellationToken cancellationToken)
         {
-            if (!ValidateCommandInput(commandInput))
+            if (!ValidateCommandInput(commandArgs))
             {
                 return NewCommandStatus.InvalidParamValues;
             }
 
             Reporter.Output.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchInProgress);
             IReadOnlyList<IManagedTemplatePackage> templatePackages =
-                await templatePackageManager.GetManagedTemplatePackagesAsync(force: false, cancellationToken: default).ConfigureAwait(false);
+                await templatePackageManager.GetManagedTemplatePackagesAsync(force: false, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(environmentSettings);
             CliSearchFiltersFactory searchFiltersFactory = new CliSearchFiltersFactory(templatePackages);
 
             IReadOnlyList<SearchResult>? searchResults = await searchCoordinator.SearchAsync(
-                searchFiltersFactory.GetPackFilter(commandInput),
-                CliSearchFiltersFactory.GetMatchingTemplatesFilter(commandInput),
-                default).ConfigureAwait(false);
+                searchFiltersFactory.GetPackFilter(commandArgs),
+                CliSearchFiltersFactory.GetMatchingTemplatesFilter(commandArgs),
+                cancellationToken).ConfigureAwait(false);
 
             if (!searchResults.Any())
             {
@@ -78,16 +72,17 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_MatchesFromSource, result.Provider.Factory.DisplayName));
                 if (result.SearchHits.Any())
                 {
-                    DisplayResultsForPack(result.SearchHits, environmentSettings, commandInput, defaultLanguage);
+                    DisplayResultsForPack(result.SearchHits, environmentSettings, commandArgs, defaultLanguage);
                 }
                 else
                 {
-                    IReadOnlyDictionary<string, string?>? appliedParameterMatches = TemplateCommandInput.GetTemplateParametersFromCommand(commandInput);
+                    //TODO: implement it for template options matching
+                    //IReadOnlyDictionary<string, string?>? appliedParameterMatches = TemplateCommandInput.GetTemplateParametersFromCommand(commandArgs);
                     // No templates found matching the following input parameter(s): {0}.
                     Reporter.Error.WriteLine(
                         string.Format(
                             LocalizableStrings.NoTemplatesMatchingInputParameters,
-                            TemplateInformationCoordinator.GetInputParametersString(SupportedFilters, commandInput, appliedParameterMatches))
+                            GetInputParametersString(commandArgs))
                         .Bold().Red());
                 }
             }
@@ -95,10 +90,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             if (searchResults.Where(r => r.Success).SelectMany(r => r.SearchHits).Any())
             {
                 string packageIdToShow = EvaluatePackageToShow(searchResults);
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_InstallHelp, commandInput.CommandName));
-                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandInput.CommandName));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_InstallHelp, commandArgs.CommandName));
+                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandArgs.CommandName));
                 Reporter.Output.WriteLine(LocalizableStrings.Generic_ExampleHeader);
-                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandInput.CommandName, packageID: packageIdToShow));
+                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandArgs.CommandName, packageID: packageIdToShow));
                 return NewCommandStatus.Success;
             }
             return NewCommandStatus.NotFound;
@@ -128,22 +123,22 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         private static void DisplayResultsForPack(
             IReadOnlyList<(ITemplatePackageInfo PackageInfo, IReadOnlyList<ITemplateInfo> MatchedTemplates)> results,
             IEngineEnvironmentSettings environmentSettings,
-            INewCommandInput commandInput,
+            SearchCommandArgs commandArgs,
             string? defaultLanguage)
         {
-            IReadOnlyDictionary<string, string?>? appliedParameterMatches = TemplateCommandInput.GetTemplateParametersFromCommand(commandInput);
+            //TODO: implement it for template options matching
+            //IReadOnlyDictionary<string, string?>? appliedParameterMatches = TemplateCommandInput.GetTemplateParametersFromCommand(commandArgs);
             Reporter.Output.WriteLine(
                 string.Format(
                     LocalizableStrings.TemplatesFoundMatchingInputParameters,
-                    TemplateInformationCoordinator.GetInputParametersString(SupportedFilters, commandInput, appliedParameterMatches)));
+                    GetInputParametersString(commandArgs)));
             Reporter.Output.WriteLine();
-
-            IReadOnlyCollection<SearchResultTableRow> data = GetSearchResultsForDisplay(results, commandInput.Language, defaultLanguage, environmentSettings.Environment);
+            IReadOnlyCollection<SearchResultTableRow> data = GetSearchResultsForDisplay(results, commandArgs.Language, defaultLanguage, environmentSettings.Environment);
 
             TabularOutput<SearchResultTableRow> formatter =
                 TabularOutput.TabularOutput
                     .For(
-                        new CliTabularOutputSettings(environmentSettings.Environment),
+                        new CliTabularOutputSettings(environmentSettings.Environment, commandArgs),
                         data
                           .OrderByDescending(d => d.TotalDownloads, SearchResultTableRow.TotalDownloadsComparer)
                           .ThenBy(d => d.TemplateGroupInfo.Name, StringComparer.CurrentCultureIgnoreCase))
@@ -161,7 +156,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
         private static IReadOnlyCollection<SearchResultTableRow> GetSearchResultsForDisplay(
             IReadOnlyList<(ITemplatePackageInfo PackageInfo, IReadOnlyList<ITemplateInfo> MatchedTemplates)> results,
-            string language,
+            string? language,
             string? defaultLanguage,
             IEnvironment environment)
         {
@@ -176,26 +171,55 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             return templateGroupsForDisplay;
         }
 
-        private static bool ValidateCommandInput(INewCommandInput commandInput)
+        private static bool ValidateCommandInput(SearchCommandArgs commandArgs)
         {
-            if (string.IsNullOrWhiteSpace(commandInput.SearchNameCriteria) && SupportedFilters.All(filter => !filter.IsFilterSet(commandInput)) && !commandInput.RemainingParameters.Any())
+            if (string.IsNullOrWhiteSpace(commandArgs.SearchNameCriteria) && !commandArgs.AppliedFilters.Any())
+            //TODO: implement it for template options matching
+            // && !commandInput.RemainingParameters.Any())
             {
                 Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_NoTemplateName.Red().Bold());
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchHelp, string.Join(", ", SupportedFilters.Select(f => $"'{f.Name}'"))));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchHelp, string.Join(", ", SearchCommand.SupportedFilters.Select(f => $"'{f.OptionFactory().Aliases.First()}'"))));
                 Reporter.Error.WriteLine(LocalizableStrings.Generic_ExamplesHeader);
-                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, usePlaceholder: true));
-                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, additionalArgs: new[] { "--author", "Microsoft" }));
-                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, usePlaceholder: true, additionalArgs: new[] { "--author", "Microsoft" }));
+                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandArgs.CommandName, usePlaceholder: true));
+                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandArgs.CommandName, additionalArgs: new[] { "--author", "Microsoft" }));
+                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandArgs.CommandName, usePlaceholder: true, additionalArgs: new[] { "--author", "Microsoft" }));
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(commandInput.SearchNameCriteria) && commandInput.SearchNameCriteria.Length < 2)
+            if (!string.IsNullOrWhiteSpace(commandArgs.SearchNameCriteria) && commandArgs.SearchNameCriteria.Length < 2)
             {
                 Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort.Bold().Red());
                 return false;
             }
 
             return true;
+        }
+
+        private static string GetInputParametersString(SearchCommandArgs commandArgs/*, IReadOnlyDictionary<string, string?>? templateParameters = null*/)
+        {
+            string separator = ", ";
+            IEnumerable<string> appliedFilters = commandArgs.AppliedFilters
+                .Select(filter => $"{commandArgs.GetFilterToken(filter)}='{commandArgs.GetFilterValue(filter)}'");
+
+            //TODO: implement it for template options matching
+            //IEnumerable<string> appliedTemplateParameters = templateParameters?
+            //       .Select(param => string.IsNullOrWhiteSpace(param.Value) ? param.Key : $"{param.Key}='{param.Value}'") ?? Array.Empty<string>();
+
+            StringBuilder inputParameters = new StringBuilder();
+            string? mainCriteria = commandArgs.SearchNameCriteria;
+            if (!string.IsNullOrWhiteSpace(mainCriteria))
+            {
+                inputParameters.Append($"'{mainCriteria}'");
+                if (appliedFilters.Any()/* || appliedTemplateParameters.Any()*/)
+                {
+                    inputParameters.Append(separator);
+                }
+            }
+            if (appliedFilters/*.Concat(appliedTemplateParameters)*/.Any())
+            {
+                inputParameters.Append(string.Join(separator, appliedFilters/*.Concat(appliedTemplateParameters)*/));
+            }
+            return inputParameters.ToString();
         }
 
         /// <summary>

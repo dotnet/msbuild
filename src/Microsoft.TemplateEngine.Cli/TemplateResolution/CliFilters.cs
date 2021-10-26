@@ -87,6 +87,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             };
         }
 
+        internal static Func<ITemplateInfo, IEnumerable<MatchInfo>>? EmptyTemplateParameterFilter() => (templateInfo) => Array.Empty<MatchInfo>();
+
         /// <summary>
         /// Filters <see cref="TemplateGroup"/> by language.
         /// </summary>

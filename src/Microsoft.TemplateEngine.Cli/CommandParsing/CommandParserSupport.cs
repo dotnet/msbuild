@@ -59,10 +59,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("-u|--uninstall", LocalizableStrings.UninstallHelp, Accept.ZeroOrMoreArguments()),
                     Create.Option("--interactive", LocalizableStrings.OptionDescriptionInteractive, Accept.NoArguments()),
                     Create.Option("--nuget-source|--add-source", LocalizableStrings.OptionDescriptionNuGetSource, Accept.OneOrMoreArguments()),
-                    Create.Option("--type", LocalizableStrings.ShowsFilteredTemplates, Accept.ExactlyOneArgument()),
+                    Create.Option("--type", LocalizableStrings.OptionDescriptionTypeFilter, Accept.ExactlyOneArgument()),
                     Create.Option("--dry-run", LocalizableStrings.DryRunDescription, Accept.NoArguments()),
                     Create.Option("--force", LocalizableStrings.ForcesTemplateCreation, Accept.NoArguments()),
-                    Create.Option("-lang|--language", LocalizableStrings.LanguageParameter, Accept.ExactlyOneArgument()),
+                    Create.Option("-lang|--language", LocalizableStrings.OptionDescriptionLanguageFilter, Accept.ExactlyOneArgument()),
                     Create.Option("--update-check", LocalizableStrings.UpdateCheckCommandHelp, Accept.NoArguments()),
                     Create.Option("--update-apply", LocalizableStrings.UpdateApplyCommandHelp, Accept.NoArguments()),
                     Create.Option(

@@ -59,9 +59,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(1, 99)
         };
 
-        internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.GetInteractiveOption();
+        internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
 
-        internal virtual Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.GetAddSourceOption();
+        internal virtual Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
 
         protected NewCommand ParentCommand { get; }
 

@@ -4,6 +4,7 @@
 #nullable enable
 
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.Commands;
 
 namespace Microsoft.TemplateEngine.Cli.TabularOutput
 {
@@ -31,6 +32,9 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             ConsoleBufferWidth = environment.ConsoleBufferWidth;
             NewLine = environment.NewLine;
         }
+
+        internal CliTabularOutputSettings(IEnvironment environment, ITabularOutputArgs args)
+            : this(environment, columnsToDisplay: args.ColumnsToDisplay, displayAllColumns: args.DisplayAllColumns) { }
 
         public bool DisplayAllColumns { get; }
 

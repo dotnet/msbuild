@@ -391,6 +391,16 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">命令成功。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Commands_Validator_WrongArgumentPosition">
+        <source>Invalid command syntax: argument '{0}' should be used after '{1}'.</source>
+        <target state="new">Invalid command syntax: argument '{0}' should be used after '{1}'.</target>
+        <note>{0} - argument value, {1} - command name (list, search. etc.).</note>
+      </trans-unit>
+      <trans-unit id="Commands_Validator_WrongOptionPosition">
+        <source>Invalid command syntax: option '{0}' should be used after '{1}'.</source>
+        <target state="new">Invalid command syntax: option '{0}' should be used after '{1}'.</target>
+        <note>{0} - option name, {1} - command name (list, search. etc.).</note>
+      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">設定值: {0}</target>
@@ -560,11 +570,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">命令語法無效: 請改為使用 '{0}'。</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
-      <trans-unit id="LanguageParameter">
-        <source>Filters templates based on language and specifies the language of the template to create.</source>
-        <target state="translated">根據語言篩選範本，並指定要建立之範本的語言。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run:</source>
         <target state="translated">若要列出已安裝的範本，請執行:</target>
@@ -620,6 +625,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">根據範本作者篩選範本。僅適用於 --search 或 --list | -l 選項。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionBaseline">
+        <source>Filters the templates based on baseline defined in the template.</source>
+        <target state="new">Filters the templates based on baseline defined in the template.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionCheckOnly">
         <source>Only check for updates and display the template packages to be updated without applying update.</source>
         <target state="new">Only check for updates and display the template packages to be updated without applying update.</target>
@@ -640,6 +650,11 @@ The supported columns are: language, tags, author, type.</source>
       <trans-unit id="OptionDescriptionInteractive">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionLanguageFilter">
+        <source>Filters templates based on language and specifies the language of the template to create.</source>
+        <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
@@ -665,6 +680,11 @@ The supported columns are: language, tags, author, type.</source>
       <trans-unit id="OptionDescriptionTagFilter">
         <source>Filters the templates based on the tag. Applies to --search and --list.</source>
         <target state="translated">根據標記篩選範本。適用於 --search 和 --list。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionTypeFilter">
+        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
+        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -795,11 +815,6 @@ The supported columns are: language, tags, author, type.</source>
       <trans-unit id="ShowsAllTemplates">
         <source>Shows all templates.</source>
         <target state="translated">顯示所有範本。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShowsFilteredTemplates">
-        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="translated">根據可用的類型篩選範本。預先定義的值為 "project" 和 "item"。</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches">

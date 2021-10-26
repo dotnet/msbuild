@@ -490,7 +490,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
 #pragma warning disable SA1202 // Elements should be ordered by access
-        internal static string GetInputParametersString(IEnumerable<FilterOption> supportedFilters, INewCommandInput commandInput, IReadOnlyDictionary<string, string?>? templateParameters = null)
+        internal static string GetInputParametersString(IEnumerable<CommandParsing.FilterOption> supportedFilters, INewCommandInput commandInput, IReadOnlyDictionary<string, string?>? templateParameters = null)
 #pragma warning restore SA1202 // Elements should be ordered by access
         {
             string separator = ", ";
@@ -531,7 +531,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             string separator = ", ";
 
             IEnumerable<string> appliedFilters = templateResolutionResult.Resolver.Filters
-                    .OfType<TemplateFilterOption>()
+                    .OfType<CommandParsing.TemplateFilterOption>()
                     .Where(filter => filter.IsFilterSet(commandInput) && filter.MismatchCriteria(templateResolutionResult))
                     .Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'");
 

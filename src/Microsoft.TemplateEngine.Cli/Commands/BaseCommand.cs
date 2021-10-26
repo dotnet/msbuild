@@ -141,12 +141,24 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return GetSuggestions(args, environmentSettings, textToMatch);
         }
 
-        protected static string? ValidateOptionUsageInParent(CommandResult symbolResult, Option option)
+        protected static string? ValidateOptionUsageInParent(CommandResult commandResult, Option option)
         {
-            OptionResult? optionResult = symbolResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == option) as OptionResult;
+            OptionResult? optionResult = commandResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == option) as OptionResult;
             if (optionResult != null)
             {
-                return $"Option '{optionResult.Token?.Value}' should be used after '{symbolResult.Symbol.Name}'.";
+                //Invalid command syntax: option '{0}' should be used after '{1}'.
+                return string.Format(LocalizableStrings.Commands_Validator_WrongOptionPosition, optionResult.Token?.Value, commandResult.Symbol.Name);
+            }
+            return null;
+        }
+
+        protected static string? ValidateArgumentUsageInParent(CommandResult commandResult, Argument argument)
+        {
+            var newCommandArgument = commandResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == argument) as ArgumentResult;
+            if (newCommandArgument != null)
+            {
+                //Invalid command syntax: argument '{0}' should be used after '{1}'.
+                return string.Format(LocalizableStrings.Commands_Validator_WrongArgumentPosition, newCommandArgument.Tokens[0].Value, commandResult.Symbol.Name);
             }
             return null;
         }
@@ -171,6 +183,32 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
 
         protected abstract TArgs ParseContext(ParseResult parseResult);
+
+        protected virtual Option GetFilterOption(FilterOptionDefinition def)
+        {
+            return def.OptionFactory();
+        }
+
+        protected IReadOnlyDictionary<FilterOptionDefinition, Option> SetupFilterOptions(IReadOnlyList<FilterOptionDefinition> filtersToSetup)
+        {
+            Dictionary<FilterOptionDefinition, Option> options = new Dictionary<FilterOptionDefinition, Option>();
+            foreach (var filterDef in filtersToSetup)
+            {
+                var newOption = GetFilterOption(filterDef);
+                this.AddOption(newOption);
+                options[filterDef] = newOption;
+            }
+            return options;
+        }
+
+        /// <summary>
+        /// Adds the tabular output settings options for the command from <paramref name="command"/>.
+        /// </summary>
+        protected void SetupTabularOutputOptions(ITabularOutputCommand command)
+        {
+            this.AddOption(command.ColumnsAllOption);
+            this.AddOption(command.ColumnsOption);
+        }
 
         private static async Task<AsyncMutex?> EnsureEntryMutex(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken token)
         {

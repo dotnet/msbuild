@@ -6,7 +6,7 @@
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateSearch.Common;
 
@@ -48,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 return existingPackVersion != templatePackageSearchData.Version;
             };
 
-        internal static Func<TemplatePackageSearchData, IReadOnlyList<ITemplateInfo>> GetMatchingTemplatesFilter (INewCommandInput commandInput)
+        internal static Func<TemplatePackageSearchData, IReadOnlyList<ITemplateInfo>> GetMatchingTemplatesFilter (SearchCommandArgs commandArgs)
         {
             return (templatePackageSearchData) =>
             {
@@ -57,13 +57,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(templates);
                 IEnumerable<Func<TemplateGroup, MatchInfo?>> groupFilters = new[]
                 {
-                    CliFilters.NameTemplateGroupFilter(commandInput.SearchNameCriteria)
+                    CliFilters.NameTemplateGroupFilter(commandArgs.SearchNameCriteria)
                 };
 
                 IEnumerable<Func<ITemplateInfo, MatchInfo?>> templateFilters =
-                    CliTemplateSearchCoordinator.SupportedFilters
-                        .OfType<TemplateFilterOption>()
-                        .Select(filter => filter.TemplateMatchFilter(commandInput));
+                    commandArgs.AppliedFilters
+                        .OfType<TemplateFilterOptionDefinition>()
+                        .Select(filter => filter.TemplateMatchFilter(commandArgs.GetFilterValue(filter)));
 
                 IEnumerable<TemplateGroupMatchInfo> matchInformation =
                     templateGroups.Select(
@@ -72,7 +72,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                                 group,
                                 groupFilters,
                                 templateFilters,
-                                CliFilters.ListTemplateParameterFilter(hostDataLoader, commandInput)));
+                                //TODO: implement it for template options matching, for now the filter just returns empty collection.
+                                CliFilters.EmptyTemplateParameterFilter()));
+
                 return matchInformation
                     .Where(group => group.IsGroupAndTemplateInfoAndParametersMatch)
                     .SelectMany(group => group.TemplatesWithMatchingParameters)
@@ -80,15 +82,14 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             };
         }
 
-        internal Func<TemplatePackageSearchData, bool> GetPackFilter(INewCommandInput commandInput)
+        internal Func<TemplatePackageSearchData, bool> GetPackFilter(SearchCommandArgs commandArgs)
         {
             return templatePackageSearchData =>
             {
                 return AlreadyInstalledFilter(templatePackageSearchData)
-                && CliTemplateSearchCoordinator.SupportedFilters
-                        .OfType<PackageFilterOption>()
-                        .Select(filter => filter.PackageMatchFilter)
-                        .All(packFilter => packFilter(commandInput)(templatePackageSearchData));
+                && commandArgs.AppliedFilters
+                        .OfType<PackageFilterOptionDefinition>()
+                        .All(filter => filter.PackageMatchFilter(commandArgs.GetFilterValue(filter))(templatePackageSearchData));
             };
         }
 

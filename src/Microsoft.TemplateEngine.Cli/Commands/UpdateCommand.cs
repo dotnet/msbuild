@@ -70,9 +70,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(AddSourceOption);
         }
 
-        internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.GetInteractiveOption();
+        internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
 
-        internal virtual Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.GetAddSourceOption();
+        internal virtual Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
 
         protected NewCommand ParentCommand { get; }
 

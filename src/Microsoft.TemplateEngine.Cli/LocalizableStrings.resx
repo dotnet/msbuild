@@ -184,7 +184,7 @@
   <data name="ColumnNameLanguage" xml:space="preserve">
     <value>Language</value>
   </data>
-  <data name="LanguageParameter" xml:space="preserve">
+  <data name="OptionDescriptionLanguageFilter" xml:space="preserve">
     <value>Filters templates based on language and specifies the language of the template to create.</value>
   </data>
   <data name="ListsTemplates" xml:space="preserve">
@@ -232,7 +232,7 @@
   <data name="ShowsAllTemplates" xml:space="preserve">
     <value>Shows all templates.</value>
   </data>
-  <data name="ShowsFilteredTemplates" xml:space="preserve">
+  <data name="OptionDescriptionTypeFilter" xml:space="preserve">
     <value>Filters templates based on available types. Predefined values are "project" and "item".</value>
   </data>
   <data name="ColumnNameTags" xml:space="preserve">
@@ -766,7 +766,18 @@ The supported columns are: language, tags, author, type.</value>
     <value>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</value>
     <comment>{0} - template short name, {1} - file path to host data.</comment>
   </data>
+  <data name="OptionDescriptionBaseline" xml:space="preserve">
+    <value>Filters the templates based on baseline defined in the template.</value>
+  </data>
   <data name="OptionDescriptionCheckOnly" xml:space="preserve">
     <value>Only check for updates and display the template packages to be updated without applying update.</value>
+  </data>
+  <data name="Commands_Validator_WrongArgumentPosition" xml:space="preserve">
+    <value>Invalid command syntax: argument '{0}' should be used after '{1}'.</value>
+    <comment>{0} - argument value, {1} - command name (list, search. etc.).</comment>
+  </data>
+  <data name="Commands_Validator_WrongOptionPosition" xml:space="preserve">
+    <value>Invalid command syntax: option '{0}' should be used after '{1}'.</value>
+    <comment>{0} - option name, {1} - command name (list, search. etc.).</comment>
   </data>
 </root>

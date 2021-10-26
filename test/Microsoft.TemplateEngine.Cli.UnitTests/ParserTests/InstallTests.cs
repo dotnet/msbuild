@@ -188,7 +188,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
             Assert.NotEmpty(parseResult.Errors);
             Assert.Single(parseResult.Errors);
-            Assert.Contains($"Option '{expectedOptionName}' should be used after 'install'.", parseResult.Errors.Select(error => error.Message));
+            Assert.Contains($"Invalid command syntax: option '{expectedOptionName}' should be used after 'install'.", parseResult.Errors.Select(error => error.Message));
         }
 
     }

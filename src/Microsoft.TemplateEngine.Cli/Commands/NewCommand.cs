@@ -14,6 +14,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class NewCommand : BaseCommand<NewCommandArgs>
     {
+        private static readonly IReadOnlyList<FilterOptionDefinition> LegacyFilterDefinitions = new List<FilterOptionDefinition>()
+        {
+            FilterOptionDefinition.AuthorFilter,
+            FilterOptionDefinition.BaselineFilter,
+            FilterOptionDefinition.LanguageFilter,
+            FilterOptionDefinition.TypeFilter,
+            FilterOptionDefinition.TagFilter,
+            FilterOptionDefinition.PackageFilter
+        };
+
         private readonly string _commandName;
 
         internal NewCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks) : base(host, telemetryLogger, callbacks, commandName, LocalizableStrings.CommandDescription)
@@ -23,6 +33,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
             this.AddOption(HelpOption);
+
+            //legacy options
+            Dictionary<FilterOptionDefinition, Option> options = new Dictionary<FilterOptionDefinition, Option>();
+            foreach (var filterDef in LegacyFilterDefinitions)
+            {
+                options[filterDef] = filterDef.OptionFactory().AsHidden();
+                this.AddOption(options[filterDef]);
+            }
+            LegacyFilters = options;
+
+            this.AddOption(InteractiveOption);
+            this.AddOption(AddSourceOption);
+            this.AddOption(ColumnsAllOption);
+            this.AddOption(ColumnsOption);
 
             this.TreatUnmatchedTokensAsErrors = true;
 
@@ -36,14 +60,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.Add(new LegacyUpdateApplyCommand(this, host, telemetryLogger, callbacks));
             this.Add(new UpdateCommand(this, host, telemetryLogger, callbacks));
 
-            //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);
-            //yield return (host, telemetryLogger, callbacks) => new SearchCommand(host, telemetryLogger, callbacks);
-            //yield return (host, telemetryLogger, callbacks) => new UpdateCommand(host, telemetryLogger, callbacks);
-            //yield return (host, telemetryLogger, callbacks) => new AliasCommand(host, telemetryLogger, callbacks);
+            this.Add(new SearchCommand(this, host, telemetryLogger, callbacks));
+            this.Add(new LegacySearchCommand(this, host, telemetryLogger, callbacks));
 
-            //legacy options
-            this.AddOption(InteractiveOption);
-            this.AddOption(AddSourceOption);
+            //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);
+            //yield return (host, telemetryLogger, callbacks) => new AliasCommand(host, telemetryLogger, callbacks);
         }
 
         internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
@@ -59,11 +80,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal Option<bool> HelpOption { get; } = new Option<bool>(new string[] { "-h", "--help", "-?" });
 
         #region Legacy Options
+        internal Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption().AsHidden();
 
-        internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.GetInteractiveOption().AsHidden();
+        internal Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption().AsHidden().DisableAllowMultipleArgumentsPerToken();
 
-        internal virtual Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.GetAddSourceOption().AsHidden().DisableAllowMultipleArgumentsPerToken();
+        internal Option<bool> ColumnsAllOption { get; } = SharedOptionsFactory.CreateColumnsAllOption().AsHidden();
 
+        internal Option<IReadOnlyList<string>> ColumnsOption { get; } = SharedOptionsFactory.CreateColumnsOption().AsHidden().DisableAllowMultipleArgumentsPerToken();
+
+        internal IReadOnlyDictionary<FilterOptionDefinition, Option> LegacyFilters { get; }
         #endregion
 
         protected override IEnumerable<string> GetSuggestions(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
