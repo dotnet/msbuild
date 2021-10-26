@@ -181,10 +181,10 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
-            if ((runtimeA.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) && runtimeB.Equals(MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase)) ||
-                (runtimeA.Equals(MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) && runtimeB.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase)))
+            if ((runtimeA.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) && runtimeB.Equals(GetCurrentMSBuildRuntime(), StringComparison.OrdinalIgnoreCase)) ||
+                (runtimeA.Equals(GetCurrentMSBuildRuntime(), StringComparison.OrdinalIgnoreCase) && runtimeB.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase)))
             {
-                // CLR4 is the current runtime, so this is also a match. 
+                // Matches the current runtime, so match.
                 return true;
             }
 
@@ -218,13 +218,15 @@ namespace Microsoft.Build.Shared
                 runtimeB = MSBuildRuntimeValues.any;
             }
 
+            string actualCurrentRuntime = GetCurrentMSBuildRuntime();
+
             // if they're equal, then there's no problem -- just return the equivalent runtime.  
             if (runtimeA.Equals(runtimeB, StringComparison.OrdinalIgnoreCase))
             {
                 if (runtimeA.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) ||
                     runtimeA.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase))
                 {
-                    mergedRuntime = MSBuildRuntimeValues.clr4;
+                    mergedRuntime = actualCurrentRuntime;
                 }
                 else
                 {
@@ -234,21 +236,22 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
-            // if both A and B are one of CLR4, don't care, or current, then the end result will be CLR4 no matter what.  
+            // if both A and B are one of actual-current-runtime, don't care or current,
+            // then the end result will be current-runtime no matter what.  
             if (
                 (
-                 runtimeA.Equals(MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ||
+                 runtimeA.Equals(actualCurrentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeA.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeA.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase)
                 ) &&
                 (
-                 runtimeB.Equals(MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ||
+                 runtimeB.Equals(actualCurrentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeB.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeB.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase)
                 )
                )
             {
-                mergedRuntime = MSBuildRuntimeValues.clr4;
+                mergedRuntime = actualCurrentRuntime;
                 return true;
             }
 
