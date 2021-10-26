@@ -38,46 +38,29 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            bool isLeftNum = LeftChild.CanNumericEvaluate(state);
-            bool isLeftVersion = LeftChild.CanVersionEvaluate(state);
-            bool isRightNum = RightChild.CanNumericEvaluate(state);
-            bool isRightVersion = RightChild.CanVersionEvaluate(state);
-            bool isNumeric = isLeftNum && isRightNum;
-            bool isVersion = isLeftVersion && isRightVersion;
-            bool isValidComparison = isNumeric || isVersion || (isLeftNum && isRightVersion) || (isLeftVersion && isRightNum);
+            bool isLeftNum = LeftChild.TryNumericEvaluate(state, out double leftNum);
+            bool isLeftVersion = LeftChild.TryVersionEvaluate(state, out Version leftVersion);
+            bool isRightNum = RightChild.TryNumericEvaluate(state, out double rightNum);
+            bool isRightVersion = RightChild.TryVersionEvaluate(state, out Version rightVersion);
 
             ProjectErrorUtilities.VerifyThrowInvalidProject
-                (isValidComparison,
+                ((isLeftNum || isLeftVersion) && (isRightNum || isRightVersion),
                  state.ElementLocation,
                 "ComparisonOnNonNumericExpression",
                  state.Condition,
                  /* helpfully display unexpanded token and expanded result in error message */
-                 LeftChild.CanNumericEvaluate(state) ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state),
-                 LeftChild.CanNumericEvaluate(state) ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state));
+                 isLeftNum ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state),
+                 isLeftNum ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state));
 
-            // If the values identify as numeric, make that comparison instead of the Version comparison since numeric has a stricter definition
-            if (isNumeric)
+            return (isLeftNum, isLeftVersion, isRightNum, isRightVersion) switch
             {
-                return Compare(LeftChild.NumericEvaluate(state), RightChild.NumericEvaluate(state));
-            }
-            else if (isVersion)
-            {
-                return Compare(LeftChild.VersionEvaluate(state), RightChild.VersionEvaluate(state));
-            }
+                (true, _, true, _) => Compare(leftNum, rightNum),
+                (_, true, _, true) => Compare(leftVersion, rightVersion),
+                (true, _, _, true) => Compare(leftNum, rightVersion),
+                (_, true, true, _) => Compare(leftVersion, rightNum),
 
-            // If the numbers are of a mixed type, call that specific Compare method
-            if (isLeftNum && isRightVersion)
-            {
-                return Compare(LeftChild.NumericEvaluate(state), RightChild.VersionEvaluate(state));
-            }
-            else if (isLeftVersion && isRightNum)
-            {
-                return Compare(LeftChild.VersionEvaluate(state), RightChild.NumericEvaluate(state));
-            }
-
-            // Throw error here as this code should be unreachable
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-            return false;
+                _ => false
+            };
         }
     }
 }
