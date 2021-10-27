@@ -29,7 +29,7 @@ namespace Microsoft.Build.Shared
             params object[] args
         )
         {
-            VerifyThrowInvalidProjectFile(false, null, projectFile, resourceName, args);
+            ThrowInvalidProjectFile(null, projectFile, resourceName, args);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Microsoft.Build.Shared
             params object[] args
         )
         {
-            VerifyThrowInvalidProjectFile(false, errorSubCategoryResourceName, projectFile, null, resourceName, args);
+            ThrowInvalidProjectFile(errorSubCategoryResourceName, projectFile, null, resourceName, args);
         }
 
         /// <summary>

@@ -246,7 +246,7 @@ namespace Microsoft.Build.Shared
                 case FileSystemEntity.Directories: return GetAccessibleDirectories(fileSystem, path, pattern);
                 case FileSystemEntity.FilesAndDirectories: return GetAccessibleFilesAndDirectories(fileSystem,path, pattern);
                 default:
-                    ErrorUtilities.VerifyThrow(false, "Unexpected filesystem entity type.");
+                    ErrorUtilities.ThrowInternalError("Unexpected filesystem entity type.");
                     break;
             }
             return Array.Empty<string>();

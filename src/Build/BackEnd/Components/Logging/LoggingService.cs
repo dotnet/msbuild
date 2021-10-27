@@ -1417,7 +1417,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                ErrorUtilities.VerifyThrow(false, "Unknown logging item in queue:" + loggingEvent.GetType().FullName);
+                ErrorUtilities.ThrowInternalError("Unknown logging item in queue:" + loggingEvent.GetType().FullName);
             }
 
             if (buildEventArgs is BuildWarningEventArgs warningEvent)

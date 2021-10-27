@@ -1429,7 +1429,7 @@ namespace Microsoft.Build.Utilities
                         }
 
                     default:
-                        ErrorUtilities.VerifyThrow(false, "Impossible canonical part.");
+                        ErrorUtilities.ThrowInternalError("Impossible canonical part.");
                         break;
                 }
             }
