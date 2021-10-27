@@ -702,7 +702,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                ErrorUtilities.VerifyThrow(false, "Unexpected frame type.");
+                ErrorUtilities.ThrowInternalError("Unexpected frame type.");
                 return null;
             }
         }
@@ -752,7 +752,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         break;
 
                     default:
-                        ErrorUtilities.VerifyThrow(false, "Unexpected frame type.");
+                        ErrorUtilities.ThrowInternalError("Unexpected frame type.");
                         break;
                 }
             }

@@ -54,7 +54,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrow(false, "AssemblyFolder.AddFoldersFromRegistryKey expected a known hive.");
+                    ErrorUtilities.ThrowInternalError("AssemblyFolder.AddFoldersFromRegistryKey expected a known hive.");
                 }
 
                 if (baseKey != null)

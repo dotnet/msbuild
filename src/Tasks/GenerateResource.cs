@@ -4146,7 +4146,7 @@ namespace Microsoft.Build.Tasks
 
                 if (result == null && throwOnError)
                 {
-                    ErrorUtilities.VerifyThrowArgument(false, "GenerateResource.CouldNotLoadType", name);
+                    ErrorUtilities.ThrowArgument("GenerateResource.CouldNotLoadType", name);
                 }
 
                 _cachedTypes[name] = result;

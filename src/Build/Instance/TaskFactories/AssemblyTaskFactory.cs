@@ -282,7 +282,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // Exception thrown by the called code itself
                 // Log the stack, so the task vendor can fix their code
-                ProjectErrorUtilities.VerifyThrowInvalidProject(false, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, Environment.NewLine + e.InnerException.ToString());
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, Environment.NewLine + e.InnerException.ToString());
             }
             catch (ReflectionTypeLoadException e)
             {
@@ -295,12 +295,12 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                ProjectErrorUtilities.VerifyThrowInvalidProject(false, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
             catch (ArgumentNullException e)
             {
                 // taskName may be null
-                ProjectErrorUtilities.VerifyThrowInvalidProject(false, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
@@ -309,7 +309,7 @@ namespace Microsoft.Build.BackEnd
                     throw;
                 }
 
-                ProjectErrorUtilities.VerifyThrowInvalidProject(false, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
 
             return _loadedType;
