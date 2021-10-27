@@ -53,8 +53,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.Add(new InstantiateCommand(host, telemetryLogger, callbacks));
             this.Add(new LegacyInstallCommand(this, host, telemetryLogger, callbacks));
             this.Add(new InstallCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new LegacyUninstallCommand(host, telemetryLogger, callbacks));
-            this.Add(new UninstallCommand(host, telemetryLogger, callbacks));
+            this.Add(new LegacyUninstallCommand(this, host, telemetryLogger, callbacks));
+            this.Add(new UninstallCommand(this, host, telemetryLogger, callbacks));
 
             this.Add(new LegacyUpdateCheckCommand(this, host, telemetryLogger, callbacks));
             this.Add(new LegacyUpdateApplyCommand(this, host, telemetryLogger, callbacks));
@@ -89,7 +89,40 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal Option<IReadOnlyList<string>> ColumnsOption { get; } = SharedOptionsFactory.CreateColumnsOption().AsHidden().DisableAllowMultipleArgumentsPerToken();
 
         internal IReadOnlyDictionary<FilterOptionDefinition, Option> LegacyFilters { get; }
+
+        internal void AddNoLegacyUsageValidators(Command command, params Symbol[] except)
+        {
+            IEnumerable<Option> optionsToVerify = LegacyFilters.Values.Concat(new Option[] { ColumnsAllOption, ColumnsOption, InteractiveOption, AddSourceOption });
+            IEnumerable<Argument> argumentsToVerify = new Argument[] { ShortNameArgument, RemainingArguments };
+
+            foreach (Option option in optionsToVerify)
+            {
+                if (!except.Contains(option))
+                {
+                    command.AddValidator(symbolResult => ValidateOptionUsage(symbolResult, option));
+                }
+            }
+
+            foreach (Argument argument in argumentsToVerify)
+            {
+                if (!except.Contains(argument))
+                {
+                    command.AddValidator(symbolResult => ValidateArgumentUsage(symbolResult, argument));
+                }
+            }
+        }
+
         #endregion
+
+        internal string? ValidateShortNameArgumentIsNotUsed(CommandResult commandResult)
+        {
+            return ValidateArgumentUsage(commandResult, ShortNameArgument);
+        }
+
+        internal string? ValidateArgumentsAreNotUsed(CommandResult commandResult)
+        {
+            return ValidateArgumentUsage(commandResult, ShortNameArgument, RemainingArguments);
+        }
 
         protected override IEnumerable<string> GetSuggestions(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
         {
@@ -176,5 +209,53 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
 
+        private static string? ValidateOptionUsage(CommandResult commandResult, Option option)
+        {
+            OptionResult? optionResult = commandResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == option) as OptionResult;
+            if (optionResult != null)
+            {
+                List<string> wrongTokens = new List<string>();
+                if (!string.IsNullOrWhiteSpace(optionResult.Token?.Value))
+                {
+                    wrongTokens.Add($"'{optionResult.Token.Value}'");
+                }
+                foreach (var token in optionResult.Tokens)
+                {
+                    if (!string.IsNullOrWhiteSpace(token?.Value))
+                    {
+                        wrongTokens.Add($"'{token.Value}'");
+                    }
+                }
+                //Unrecognized command or argument(s): {0}
+                return string.Format(LocalizableStrings.Commands_Validator_WrongTokens, string.Join(",", wrongTokens));
+            }
+            return null;
+        }
+
+        private static string? ValidateArgumentUsage(CommandResult commandResult, params Argument[] arguments)
+        {
+            List<string> wrongTokens = new List<string>();
+            foreach (Argument argument in arguments)
+            {
+                var newCommandArgument = commandResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == argument) as ArgumentResult;
+                if (newCommandArgument == null)
+                {
+                    continue;
+                }
+                foreach (var token in newCommandArgument.Tokens)
+                {
+                    if (!string.IsNullOrWhiteSpace(token?.Value))
+                    {
+                        wrongTokens.Add($"'{token.Value}'");
+                    }
+                }
+            }
+            if (wrongTokens.Any())
+            {
+                //Unrecognized command or argument(s): {0}
+                return string.Format(LocalizableStrings.Commands_Validator_WrongTokens, string.Join(",", wrongTokens));
+            }
+            return null;
+        }
     }
 }

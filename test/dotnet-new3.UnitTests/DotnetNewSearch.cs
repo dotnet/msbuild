@@ -748,38 +748,31 @@ Examples:
         [Theory]
         [InlineData("--search foo --columns-all bar", "bar", "foo")]
         [InlineData("--search foo bar", "bar", "foo")]
-        [InlineData("foo --search --columns-all --framework net6.0 bar", "bar|net6.0", "foo|--framework")]
-        [InlineData("foo --search --columns-all -other-param --framework net6.0 bar", "bar|net6.0|--framework", "foo|-other-param")]
+        [InlineData("foo --search --columns-all --framework net6.0 bar", "bar|net6.0|foo", "--framework")]
+        [InlineData("foo --search --columns-all -other-param --framework net6.0 bar", "bar|net6.0|--framework|foo", "-other-param")]
         [InlineData("search foo --columns-all bar", "bar", "foo")]
+        [InlineData("foo --search bar", "foo", "bar")]
+        [InlineData("foo --search bar --language F#", "foo", "bar")]
+        [InlineData("foo --search --columns-all bar", "foo", "bar")]
+        [InlineData("foo search bar", "foo", "bar")]
         public void CannotSearchOnParseError(string command, string invalidArguments, string validArguments)
         {
             var commandResult = new DotnetNewCommand(_log, command.Split())
              .WithCustomHive(_sharedHome.HomeDirectory)
              .Execute();
 
-            foreach (string argumentName in invalidArguments.Split('|'))
+            commandResult.Should().Fail();
+            foreach (string arg in invalidArguments.Split('|'))
             {
-                commandResult.Should().Fail()
-                     .And.HaveStdErrContaining($"Unrecognized command or argument '{argumentName}'");
+                commandResult.Should().HaveStdErrMatching($"Unrecognized command or (argument\\(s\\)\\:|argument) '{arg}'");
             }
 
-            foreach (string argumentName in validArguments.Split('|'))
+            foreach (string arg in validArguments.Split('|'))
             {
-                commandResult.Should().NotHaveStdErrContaining($"Unrecognized command or argument '{argumentName}'");
+                commandResult.Should()
+                    .NotHaveStdErrContaining($"Unrecognized command or argument '{arg}'")
+                    .And.NotHaveStdErrContaining($"Unrecognized command or argument(s): '{arg}'");
             }
-        }
-
-        [Theory]
-        [InlineData("foo --search bar", "foo")]
-        [InlineData("foo --search bar --language F#", "foo")]
-        [InlineData("foo --search --columns-all bar", "foo")]
-        public void CannotSearchOnParseError_MisplacedArgument(string command, string misplacedArgument)
-        {
-            var commandResult = new DotnetNewCommand(_log, command.Split())
-             .WithCustomHive(_sharedHome.HomeDirectory)
-             .Execute();
-
-            commandResult.Should().Fail().And.HaveStdErrContaining($"Invalid command syntax: argument '{misplacedArgument}' should be used after '--search'.");
         }
 
         private static bool AllRowsContain(List<List<string>> tableOutput, string[] columnsNames, string value)

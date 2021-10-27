@@ -20,18 +20,19 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 NewCommandCallbacks callbacks)
             : base(parentCommand, host, logger, callbacks, "install")
         {
-            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, parentCommand.InteractiveOption));
-            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, parentCommand.AddSourceOption));
+            parentCommand.AddNoLegacyUsageValidators(this);
         }
     }
 
     internal class LegacyInstallCommand : BaseInstallCommand
     {
-        public LegacyInstallCommand(NewCommand newCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
-            : base(newCommand, host, logger, callbacks, "--install")
+        public LegacyInstallCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
+            : base(parentCommand, host, logger, callbacks, "--install")
         {
             this.IsHidden = true;
             this.AddAlias("-i");
+
+            parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });
         }
 
         internal override Option<bool> InteractiveOption => ParentCommand.InteractiveOption;

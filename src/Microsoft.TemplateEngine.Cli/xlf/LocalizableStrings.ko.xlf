@@ -391,15 +391,10 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">명령이 성공했습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Commands_Validator_WrongArgumentPosition">
-        <source>Invalid command syntax: argument '{0}' should be used after '{1}'.</source>
-        <target state="new">Invalid command syntax: argument '{0}' should be used after '{1}'.</target>
-        <note>{0} - argument value, {1} - command name (list, search. etc.).</note>
-      </trans-unit>
-      <trans-unit id="Commands_Validator_WrongOptionPosition">
-        <source>Invalid command syntax: option '{0}' should be used after '{1}'.</source>
-        <target state="new">Invalid command syntax: option '{0}' should be used after '{1}'.</target>
-        <note>{0} - option name, {1} - command name (list, search. etc.).</note>
+      <trans-unit id="Commands_Validator_WrongTokens">
+        <source>Unrecognized command or argument(s): {0}</source>
+        <target state="new">Unrecognized command or argument(s): {0}</target>
+        <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
       </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>

@@ -13,19 +13,30 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class UninstallCommand : BaseUninstallCommand
     {
-        public UninstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
+        public UninstallCommand(
+            NewCommand parentCommand,
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks)
             : base(host, logger, callbacks, "uninstall")
         {
+            parentCommand.AddNoLegacyUsageValidators(this);
         }
     }
 
     internal class LegacyUninstallCommand : BaseUninstallCommand
     {
-        public LegacyUninstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
+        public LegacyUninstallCommand(
+            NewCommand parentCommand,
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks)
             : base(host, logger, callbacks, "--uninstall")
         {
             this.IsHidden = true;
             this.AddAlias("-u");
+
+            parentCommand.AddNoLegacyUsageValidators(this);
         }
     }
 

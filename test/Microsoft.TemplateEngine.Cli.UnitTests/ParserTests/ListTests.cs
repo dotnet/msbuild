@@ -157,7 +157,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse("new smth list");
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal("Invalid command syntax: argument 'smth' should be used after 'list'.", parseResult.Errors.First().Message);
+            Assert.Equal("Unrecognized command or argument(s): 'smth'", parseResult.Errors.First().Message);
         }
 
         [Theory]
@@ -174,7 +174,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse(command);
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal($"Invalid command syntax: option '{expectedFilter}' should be used after 'list'.", parseResult.Errors.First().Message);
+            Assert.Equal($"Unrecognized command or argument(s): '{expectedFilter}','filter-value'", parseResult.Errors.First().Message);
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse("new smth --list smth-else");
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal("Invalid command syntax: argument 'smth' should be used after '--list'.", parseResult.Errors.First().Message);
+            Assert.Equal("Unrecognized command or argument(s): 'smth'", parseResult.Errors.First().Message);
         }
 
         [Theory]
@@ -242,6 +242,29 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
             Assert.NotEmpty(parseResult.Errors);
             Assert.Contains("Argument 'c1' not recognized. Must be one of:", parseResult.Errors.First().Message);
+        }
+
+        [Theory]
+        [InlineData("new --interactive list source", "'--interactive'")]
+        [InlineData("new --interactive --list source", "'--interactive'")]
+        [InlineData("new foo bar --list source", "'foo'|'bar'")]
+        [InlineData("new foo bar list source", "'foo'|'bar'")]
+        public void List_HandleParseErrors(string command, string expectedInvalidTokens)
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse(command);
+            var errorMessages = parseResult.Errors.Select(error => error.Message);
+
+            var expectedInvalidTokenSets = expectedInvalidTokens.Split("|");
+
+            Assert.NotEmpty(parseResult.Errors);
+            Assert.Equal(expectedInvalidTokenSets.Length, parseResult.Errors.Count);
+            foreach (var tokenSet in expectedInvalidTokenSets)
+            {
+                Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}"));
+            }
         }
     }
 }

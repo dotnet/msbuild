@@ -177,18 +177,28 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
         [Theory]
-        [InlineData("--add-source my-custom-source", "--add-source")]
-        [InlineData("--interactive", "--interactive")]
-        public void Install_CanReturnParseError_OnLegacyOptionMisplacement(string optionSyntax, string expectedOptionName)
+        [InlineData("new --add-source my-custom-source install source", "'--add-source','my-custom-source'")]
+        [InlineData("new --interactive install source", "'--interactive'")]
+        [InlineData("new --language F# --install source", "'--language','F#'")]
+        [InlineData("new --language F# install source", "'--language','F#'")]
+        [InlineData("new source1 source2 source3 --install source", "'source1'|'source2','source3'")]
+        [InlineData("new source1 --install source", "'source1'")]
+        public void Install_CanReturnParseError(string command, string expectedInvalidTokens)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
 
-            var parseResult = myCommand.Parse($"new {optionSyntax} install source");
+            var parseResult = myCommand.Parse(command);
+            var errorMessages = parseResult.Errors.Select(error => error.Message);
+
+            var expectedInvalidTokenSets = expectedInvalidTokens.Split("|");
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Single(parseResult.Errors);
-            Assert.Contains($"Invalid command syntax: option '{expectedOptionName}' should be used after 'install'.", parseResult.Errors.Select(error => error.Message));
+            Assert.Equal(expectedInvalidTokenSets.Length, parseResult.Errors.Count);
+            foreach (var tokenSet in expectedInvalidTokenSets)
+            {
+                Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}"));
+            }
         }
 
     }

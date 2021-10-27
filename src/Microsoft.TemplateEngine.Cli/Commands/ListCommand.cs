@@ -21,27 +21,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 NewCommandCallbacks callbacks)
             : base(parentCommand, host, logger, callbacks, "list")
         {
-            foreach (KeyValuePair<FilterOptionDefinition, Option> legacyOption in parentCommand.LegacyFilters)
-            {
-                if (SupportedFilters.Contains(legacyOption.Key))
-                {
-                    AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, legacyOption.Value));
-                }
-            }
-            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, parentCommand.ColumnsAllOption));
-            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, parentCommand.ColumnsOption));
-            AddValidator(symbolResult => ValidateArgumentUsageInParent(symbolResult, parentCommand.ShortNameArgument));
+            parentCommand.AddNoLegacyUsageValidators(this);
         }
     }
 
     internal class LegacyListCommand : BaseListCommand
     {
-        public LegacyListCommand(NewCommand newCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
-            : base(newCommand, host, logger, callbacks, "--list")
+        public LegacyListCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
+            : base(parentCommand, host, logger, callbacks, "--list")
         {
             this.IsHidden = true;
             this.AddAlias("-l");
-            AddValidator(ValidateParentCommandArgumentIsNotUsed);
+            AddValidator(ValidateParentCommandArguments);
+
+            parentCommand.AddNoLegacyUsageValidators(this, except: Filters.Values.Concat(new Symbol[] { ColumnsAllOption, ColumnsOption, parentCommand.ShortNameArgument }).ToArray());
         }
 
         public override Option<bool> ColumnsAllOption => ParentCommand.ColumnsAllOption;
@@ -53,20 +46,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return ParentCommand.LegacyFilters[def];
         }
 
-        private string? ValidateParentCommandArgumentIsNotUsed(SymbolResult symbolResult)
+        private string? ValidateParentCommandArguments(CommandResult commandResult)
         {
-            CommandResult commandResult = symbolResult as CommandResult ?? throw new Exception("Validator should be used with command");
             var nameArgumentResult = commandResult.Children.FirstOrDefault(symbol => symbol.Symbol == this.NameArgument);
             if (nameArgumentResult == null)
             {
                 return null;
             }
-            var newCommandArgument = commandResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == ParentCommand.ShortNameArgument) as ArgumentResult;
-            if (newCommandArgument != null)
-            {
-                return $"Invalid command syntax: argument '{newCommandArgument.Tokens[0].Value}' should be used after '{symbolResult.Symbol.Name}'.";
-            }
-            return null;
+            return ParentCommand.ValidateShortNameArgumentIsNotUsed(commandResult);
         }
     }
 

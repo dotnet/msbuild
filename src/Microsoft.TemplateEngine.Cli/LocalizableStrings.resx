@@ -772,12 +772,8 @@ The supported columns are: language, tags, author, type.</value>
   <data name="OptionDescriptionCheckOnly" xml:space="preserve">
     <value>Only check for updates and display the template packages to be updated without applying update.</value>
   </data>
-  <data name="Commands_Validator_WrongArgumentPosition" xml:space="preserve">
-    <value>Invalid command syntax: argument '{0}' should be used after '{1}'.</value>
-    <comment>{0} - argument value, {1} - command name (list, search. etc.).</comment>
-  </data>
-  <data name="Commands_Validator_WrongOptionPosition" xml:space="preserve">
-    <value>Invalid command syntax: option '{0}' should be used after '{1}'.</value>
-    <comment>{0} - option name, {1} - command name (list, search. etc.).</comment>
+  <data name="Commands_Validator_WrongTokens" xml:space="preserve">
+    <value>Unrecognized command or argument(s): {0}</value>
+    <comment>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</comment>
   </data>
 </root>

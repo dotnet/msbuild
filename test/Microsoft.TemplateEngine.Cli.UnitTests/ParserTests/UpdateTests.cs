@@ -155,5 +155,30 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.Contains("my-custom-source2", args.AdditionalSources);
         }
 
+        [Theory]
+        [InlineData("new --add-source my-custom-source update source", "'--add-source','my-custom-source'|'source'")]
+        [InlineData("new --interactive update source", "'--interactive'|'source'")]
+        [InlineData("new --language F# --update-check", "'--language','F#'")]
+        [InlineData("new --language F# --update-apply", "'--language','F#'")]
+        [InlineData("new --language F# update", "'--language','F#'")]
+        [InlineData("new source1 source2 source3 --update-apply source", "'source1'|'source2','source3'|'source'")]
+        [InlineData("new source1 --update-apply source", "'source1'|'source'")]
+        public void Update_CanReturnParseError(string command, string expectedInvalidTokens)
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse(command);
+            var errorMessages = parseResult.Errors.Select(error => error.Message);
+
+            var expectedInvalidTokenSets = expectedInvalidTokens.Split("|");
+
+            Assert.NotEmpty(parseResult.Errors);
+            Assert.Equal(expectedInvalidTokenSets.Length, parseResult.Errors.Count);
+            foreach (var tokenSet in expectedInvalidTokenSets)
+            {
+                Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}"));
+            }
+        }
     }
 }

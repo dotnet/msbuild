@@ -141,28 +141,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return GetSuggestions(args, environmentSettings, textToMatch);
         }
 
-        protected static string? ValidateOptionUsageInParent(CommandResult commandResult, Option option)
-        {
-            OptionResult? optionResult = commandResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == option) as OptionResult;
-            if (optionResult != null)
-            {
-                //Invalid command syntax: option '{0}' should be used after '{1}'.
-                return string.Format(LocalizableStrings.Commands_Validator_WrongOptionPosition, optionResult.Token?.Value, commandResult.Symbol.Name);
-            }
-            return null;
-        }
-
-        protected static string? ValidateArgumentUsageInParent(CommandResult commandResult, Argument argument)
-        {
-            var newCommandArgument = commandResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == argument) as ArgumentResult;
-            if (newCommandArgument != null)
-            {
-                //Invalid command syntax: argument '{0}' should be used after '{1}'.
-                return string.Format(LocalizableStrings.Commands_Validator_WrongArgumentPosition, newCommandArgument.Tokens[0].Value, commandResult.Symbol.Name);
-            }
-            return null;
-        }
-
         protected virtual IEnumerable<string> GetSuggestions(TArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
         {
             return base.GetSuggestions(args.ParseResult, textToMatch);

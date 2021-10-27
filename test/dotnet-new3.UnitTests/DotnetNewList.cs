@@ -617,46 +617,34 @@ Worker Service                                worker         [C#],F#     Common/
         }
 
         [Theory]
-        [InlineData("--list foo --columns-all bar", "bar", null, "foo")]
-        [InlineData("list foo --columns-all bar", "bar", null, "foo", "list")]
-        [InlineData("-l foo --columns-all bar", "bar", null, "foo", "-l")]
-        [InlineData("--list foo bar", "bar", null, "foo")]
-        [InlineData("list foo bar", "bar", null, "foo", "list")]
-        [InlineData("foo --list bar", null, "foo", "bar")]
-        [InlineData("foo list bar", null, "foo", "bar", "list")]
-        [InlineData("foo --list bar --language F#", null, "foo", "bar")]
-        [InlineData("foo --list --columns-all bar", null, "foo", "bar")]
-        [InlineData("foo --list --columns-all --framework net6.0 bar", "bar|net6.0", "foo", "--framework")]
-        [InlineData("foo --list --columns-all -other-param --framework net6.0 bar", "bar|--framework|net6.0", "foo", "-other-param")]
-        public void CannotShowListOnParseError(string command, string? invalidArguments, string? misplacedArguments, string? validArguments, string expectedCommand = "--list")
+        [InlineData("--list foo --columns-all bar", "bar", "foo")]
+        [InlineData("list foo --columns-all bar", "bar", "foo")]
+        [InlineData("-l foo --columns-all bar", "bar", "foo")]
+        [InlineData("--list foo bar", "bar", "foo")]
+        [InlineData("list foo bar", "bar", "foo")]
+        [InlineData("foo --list bar", "foo", "bar")]
+        [InlineData("foo list bar", "foo", "bar")]
+        [InlineData("foo --list bar --language F#", "foo", "bar")]
+        [InlineData("foo --list --columns-all bar", "foo", "bar")]
+        [InlineData("foo --list --columns-all --framework net6.0 bar", "bar|net6.0|foo", "--framework")]
+        [InlineData("foo --list --columns-all -other-param --framework net6.0 bar", "bar|--framework|net6.0|foo", "-other-param")]
+        public void CannotShowListOnParseError(string command, string invalidArguments, string validArguments)
         {
             var commandResult = new DotnetNewCommand(_log, command.Split())
              .WithCustomHive(_sharedHome.HomeDirectory)
              .Execute();
 
             commandResult.Should().Fail();
-            if (invalidArguments != null)
+            foreach (string arg in invalidArguments.Split('|'))
             {
-                foreach (string arg in invalidArguments.Split('|'))
-                {
-                    commandResult.Should().HaveStdErrContaining($"Unrecognized command or argument '{arg}'");
-                }
+                commandResult.Should().HaveStdErrMatching($"Unrecognized command or (argument\\(s\\)\\:|argument) '{arg}'");
             }
 
-            if (validArguments != null)
+            foreach (string arg in validArguments.Split('|'))
             {
-                foreach (string arg in validArguments.Split('|'))
-                {
-                    commandResult.Should().NotHaveStdErrContaining($"Unrecognized command or argument '{arg}'");
-                }
-            }
-
-            if (misplacedArguments != null)
-            {
-                foreach (string arg in misplacedArguments.Split('|'))
-                {
-                    commandResult.Should().HaveStdErrContaining($"Invalid command syntax: argument '{arg}' should be used after '{expectedCommand}'.");
-                }
+                commandResult.Should()
+                    .NotHaveStdErrContaining($"Unrecognized command or argument '{arg}'")
+                    .And.NotHaveStdErrContaining($"Unrecognized command or argument(s): '{arg}'");
             }
         }
     }

@@ -14,15 +14,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal class UpdateCommand : BaseUpdateCommand
     {
         public UpdateCommand(
-                NewCommand newCommand,
+                NewCommand parentCommand,
                 ITemplateEngineHost host,
                 ITelemetryLogger logger,
                 NewCommandCallbacks callbacks)
-            : base(newCommand, host, logger, callbacks, "update")
+            : base(parentCommand, host, logger, callbacks, "update")
         {
-            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, newCommand.InteractiveOption));
-            AddValidator(symbolResult => ValidateOptionUsageInParent(symbolResult, newCommand.AddSourceOption));
-
+            parentCommand.AddNoLegacyUsageValidators(this);
             this.AddOption(CheckOnlyOption);
         }
 
@@ -34,10 +32,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class LegacyUpdateApplyCommand : BaseUpdateCommand
     {
-        public LegacyUpdateApplyCommand(NewCommand newCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
-            : base(newCommand, host, logger, callbacks, "--update-apply")
+        public LegacyUpdateApplyCommand(
+            NewCommand parentCommand,
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks)
+            : base(parentCommand, host, logger, callbacks, "--update-apply")
         {
             this.IsHidden = true;
+            parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });
         }
 
         internal override Option<bool> InteractiveOption => ParentCommand.InteractiveOption;
@@ -47,10 +50,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class LegacyUpdateCheckCommand : BaseUpdateCommand
     {
-        public LegacyUpdateCheckCommand(NewCommand newCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
-            : base(newCommand, host, logger, callbacks, "--update-check")
+        public LegacyUpdateCheckCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
+            : base(parentCommand, host, logger, callbacks, "--update-check")
         {
             this.IsHidden = true;
+            parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });
         }
 
         internal override Option<bool> InteractiveOption => ParentCommand.InteractiveOption;
