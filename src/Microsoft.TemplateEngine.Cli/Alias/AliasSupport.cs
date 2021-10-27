@@ -119,7 +119,7 @@ namespace Microsoft.TemplateEngine.Cli.Alias
 
             TabularOutput<KeyValuePair<string, IReadOnlyList<string>>> formatter =
                 new TabularOutput<KeyValuePair<string, IReadOnlyList<string>>>(
-                    new CliTabularOutputSettings(environment.Environment),
+                    new TabularOutputSettings(environment.Environment),
                     aliasesToShow)
                 .DefineColumn(t => t.Key, LocalizableStrings.AliasName, showAlways: true)
                 .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue, showAlways: true);

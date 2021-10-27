@@ -82,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             FilterOptionDefinition.PackageFilter
         };
 
-        internal BaseSearchCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName, LocalizableStrings.SearchTemplatesCommand)
+        internal BaseSearchCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName, LocalizableStrings.OptionDescriptionSearch)
         {
             ParentCommand = parentCommand;
             Filters = SetupFilterOptions(SupportedFilters);

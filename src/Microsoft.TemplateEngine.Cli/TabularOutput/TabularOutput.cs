@@ -8,7 +8,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
 {
     internal class TabularOutput
     {
-        internal static TabularOutput<T> For<T>(ITabularOutputSettings settings, IEnumerable<T> rows)
+        internal static TabularOutput<T> For<T>(TabularOutputSettings settings, IEnumerable<T> rows)
         {
             return new TabularOutput<T>(settings, rows);
         }
@@ -19,9 +19,9 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         private readonly List<ColumnDefinition> _columns = new List<ColumnDefinition>();
         private readonly IEnumerable<T> _rowDataItems;
         private readonly List<Tuple<int, bool, IComparer<string>>> _ordering = new List<Tuple<int, bool, IComparer<string>>>();
-        private readonly ITabularOutputSettings _settings;
+        private readonly TabularOutputSettings _settings;
 
-        internal TabularOutput(ITabularOutputSettings settings, IEnumerable<T> rows)
+        internal TabularOutput(TabularOutputSettings settings, IEnumerable<T> rows)
         {
             _rowDataItems = rows ?? Enumerable.Empty<T>();
             _settings = settings;
@@ -297,9 +297,9 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         private class ColumnDefinition
         {
             private readonly Func<T, string> _binder;
-            private readonly ITabularOutputSettings _settings;
+            private readonly TabularOutputSettings _settings;
 
-            internal ColumnDefinition(ITabularOutputSettings settings, string header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
+            internal ColumnDefinition(TabularOutputSettings settings, string header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
             {
                 Header = header;
                 MaxWidth = maxWidth > 0 ? maxWidth : int.MaxValue;

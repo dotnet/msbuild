@@ -13,7 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     /// <summary>
     /// Resolves the templates to be used for 'dotnet new &lt;template short name&gt; [--dry run]'>.
     /// </summary>
-    internal class InstantiateTemplateResolver : BaseTemplateResolver
+    internal class InstantiateTemplateResolver : BaseTemplateResolver<INewCommandInput>
     {
         private static IReadOnlyList<FilterOption> _supportedFilters = new[]
         {

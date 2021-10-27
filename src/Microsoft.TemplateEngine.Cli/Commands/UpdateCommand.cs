@@ -7,10 +7,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.Extensions;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -63,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class BaseUpdateCommand : BaseCommand<UpdateCommandArgs>
     {
-        internal BaseUpdateCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName)
+        internal BaseUpdateCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName, LocalizableStrings.UpdateApplyCommandHelp)
         {
             ParentCommand = parentCommand;
             this.AddOption(InteractiveOption);
@@ -79,19 +76,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override async Task<NewCommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            TemplateInformationCoordinator templateInformationCoordinator = new TemplateInformationCoordinator(
-                environmentSettings,
-                templatePackageManager,
-                new TemplateCreator(environmentSettings),
-                new HostSpecificDataLoader(environmentSettings),
-                TelemetryLogger,
-                environmentSettings.GetDefaultLanguage());
-
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
                 TelemetryLogger,
                 environmentSettings,
-                templatePackageManager,
-                templateInformationCoordinator);
+                templatePackageManager);
 
             //TODO: we need to await, otherwise templatePackageManager will be disposed.
             return await templatePackageCoordinator.EnterUpdateFlowAsync(args, context.GetCancellationToken()).ConfigureAwait(false);

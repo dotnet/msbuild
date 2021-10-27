@@ -8,9 +8,9 @@ using Microsoft.TemplateEngine.Cli.Commands;
 
 namespace Microsoft.TemplateEngine.Cli.TabularOutput
 {
-    internal class CliTabularOutputSettings : ITabularOutputSettings
+    internal class TabularOutputSettings
     {
-        internal CliTabularOutputSettings(
+        internal TabularOutputSettings(
             IEnvironment environment,
             IReadOnlyList<string>? columnsToDisplay = null,
             bool displayAllColumns = false,
@@ -33,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             NewLine = environment.NewLine;
         }
 
-        internal CliTabularOutputSettings(IEnvironment environment, ITabularOutputArgs args)
+        internal TabularOutputSettings(IEnvironment environment, ITabularOutputArgs args)
             : this(environment, columnsToDisplay: args.ColumnsToDisplay, displayAllColumns: args.DisplayAllColumns) { }
 
         public bool DisplayAllColumns { get; }
@@ -51,5 +51,13 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         public string NewLine { get; }
 
         public string ShrinkReplacement => "...";
+
+        internal static class ColumnNames
+        {
+            internal const string Author = "author";
+            internal const string Language = "language";
+            internal const string Tags = "tags";
+            internal const string Type = "type";
+        }
     }
 }

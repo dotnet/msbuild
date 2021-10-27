@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using Microsoft.TemplateEngine.Cli.TabularOutput;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -99,7 +100,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 Description = LocalizableStrings.OptionDescriptionColumns,
                 AllowMultipleArgumentsPerToken = true,
             };
-            option.FromAmong("tags", "language", "type", "author");
+            option.FromAmong(
+                TabularOutputSettings.ColumnNames.Author,
+                TabularOutputSettings.ColumnNames.Language,
+                TabularOutputSettings.ColumnNames.Type,
+                TabularOutputSettings.ColumnNames.Tags);
             return option;
         }
 

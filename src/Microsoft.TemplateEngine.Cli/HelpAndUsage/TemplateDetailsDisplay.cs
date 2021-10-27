@@ -104,7 +104,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (filteredParams.Any())
             {
                 TabularOutput<ITemplateParameter> formatter = new TabularOutput<ITemplateParameter>(
-                    new CliTabularOutputSettings(environmentSettings.Environment, headerSeparator: null, blankLineBetweenRows: true),
+                    new TabularOutputSettings(environmentSettings.Environment, headerSeparator: null, blankLineBetweenRows: true),
                     filteredParams);
 
                 formatter.DefineColumn(

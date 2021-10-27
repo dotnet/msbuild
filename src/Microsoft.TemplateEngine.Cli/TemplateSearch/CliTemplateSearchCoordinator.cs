@@ -138,7 +138,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             TabularOutput<SearchResultTableRow> formatter =
                 TabularOutput.TabularOutput
                     .For(
-                        new CliTabularOutputSettings(environmentSettings.Environment, commandArgs),
+                        new TabularOutputSettings(environmentSettings.Environment, commandArgs),
                         data
                           .OrderByDescending(d => d.TotalDownloads, SearchResultTableRow.TotalDownloadsComparer)
                           .ThenBy(d => d.TemplateGroupInfo.Name, StringComparer.CurrentCultureIgnoreCase))

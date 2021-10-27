@@ -3,11 +3,14 @@
 
 #nullable enable
 
+using System.CommandLine;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
 using Microsoft.TemplateEngine.Mocks;
+using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
@@ -23,9 +26,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo("console2", name: "Long name for Console App #2", identity: "Console.App2")
             };
 
-            INewCommandInput userInputs = new MockNewCommandInput("console2").WithListOption();
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list console2"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
 
             Assert.True(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.NotNull(matchResult.UnambiguousTemplateGroup);
@@ -41,10 +46,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App"));
             templatesToSearch.Add(new MockTemplateInfo("console2", name: "Long name for Console App #2", identity: "Console.App2"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console").WithListOption();
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list console"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
 
             Assert.True(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Null(matchResult.UnambiguousTemplateGroup);
@@ -61,10 +67,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
             templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L3", groupIdentity: "Console.App.Test").WithTag("language", "L3"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console").WithListOption();
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list console"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
 
             Assert.True(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(1, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
@@ -83,10 +90,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             templatesToSearch.Add(new MockTemplateInfo("classlib", name: "Long name for Class Library App", identity: "Class.Library.L1", groupIdentity: "Class.Library.Test").WithTag("language", "L1"));
             templatesToSearch.Add(new MockTemplateInfo("classlib", name: "Long name for Class Library App", identity: "Class.Library.L2", groupIdentity: "Class.Library.Test").WithTag("language", "L2"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("c").WithListOption();
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list c"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
 
             Assert.True(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(2, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
@@ -101,9 +109,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
             templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console").WithListOption();
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: "L1", default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list console"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
 
             Assert.True(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.NotNull(matchResult.UnambiguousTemplateGroup);
@@ -120,9 +130,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
             templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console", "L2").WithListOption();
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: "L1", default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list console --language L2"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
 
             Assert.True(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.NotNull(matchResult.UnambiguousTemplateGroup);
@@ -140,9 +152,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                   .WithTag("type", "project")
                   .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console", "L2").WithListOption();
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list console --language L2"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
 
             Assert.False(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(0, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
@@ -164,9 +178,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                        .WithTag("type", "project")
                        .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console", type: "item").WithListOption();
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list console --type item"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
 
             Assert.False(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(0, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
@@ -188,10 +204,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                        .WithTag("type", "project")
                        .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console").WithListOption().WithCommandOption("--baseline", "core");
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list console --baseline core"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
+
             Assert.False(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(0, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
             Assert.Equal(1, matchResult.TemplateGroups.Count());
@@ -212,10 +230,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                        .WithTag("type", "project")
                        .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console", "L2", "item").WithListOption().WithCommandOption("--baseline", "core");
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                GetListCommandArgsFor("new list console --language L2 --type item --baseline core"),
+                defaultLanguage: null,
+                default).ConfigureAwait(false);
+
             Assert.False(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(0, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
             Assert.Equal(1, matchResult.TemplateGroups.Count());
@@ -236,10 +256,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                        .WithTag("type", "project")
                        .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("zzzzz", "L1", "project").WithListOption().WithCommandOption("--baseline", "app");
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     GetListCommandArgsFor("new list zzzzz --language L1 --type project --baseline app"),
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
+
             Assert.False(matchResult.HasTemplateGroupMatches);
             Assert.False(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(0, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
@@ -265,7 +287,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             INewCommandInput userInputs = new MockNewCommandInput().WithListOption().WithCommandOption("--tag", "Common");
 
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     GetListCommandArgsFor("new list --tag Common"),
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
+
             Assert.True(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(1, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
             Assert.Equal(1, matchResult.TemplateGroupsWithMatchingTemplateInfo.Single().Templates.Count);
@@ -292,10 +318,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                   .WithClassifications("Common", "Test")
                   .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("Test").WithListOption();
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     GetListCommandArgsFor("new list Test"),
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
+
             Assert.True(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(1, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
             Assert.Equal(1, matchResult.TemplateGroupsWithMatchingTemplateInfo.Single().Templates.Count);
@@ -323,10 +351,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                   .WithClassifications("Common", "Test", "Console")
                   .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("Console").WithListOption();
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     GetListCommandArgsFor("new list Console"),
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
+
             Assert.True(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(1, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
             Assert.Equal(1, matchResult.TemplateGroupsWithMatchingTemplateInfo.Single().Templates.Count);
@@ -348,14 +378,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                    .WithClassifications("Common", "Test")
                    .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-                .WithListOption()
-                .WithCommandOption("--tag", "Common")
-                .WithCommandOption("--language", "L2")
-                .WithCommandOption("--type", "item");
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     GetListCommandArgsFor("new list --language L2 --type item --tag Common"),
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
+
             Assert.False(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(0, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
             Assert.True(matchResult.HasTemplateGroupMatches);
@@ -386,10 +414,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                    .WithClassifications("Common", "Test")
                    .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console").WithListOption().WithCommandOption("--author", commandAuthor);
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     GetListCommandArgsFor($"new list console --author {commandAuthor}"),
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
 
             if (matchExpected)
             {
@@ -439,10 +468,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                    .WithClassifications(templateTagsArray)
                    .WithBaselineInfo("app", "standard"));
 
-            MockNewCommandInput userInputs = new MockNewCommandInput("console").WithListOption().WithCommandOption("--tag", commandTag);
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     GetListCommandArgsFor($"new list console --tag {commandTag}"),
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
 
             if (matchExpected)
             {
@@ -475,10 +505,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                     .WithClassifications("Common", "Test"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("console", type: "item").WithListOption();
-
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
-            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(userInputs, defaultLanguage: null, default).ConfigureAwait(false);
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     GetListCommandArgsFor("new list console --type item"),
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
+
             Assert.False(matchResult.HasTemplateGroupWithTemplateInfoMatches);
             Assert.Equal(0, matchResult.TemplateGroupsWithMatchingTemplateInfo.Count());
             Assert.True(matchResult.HasTemplateGroupMatches);
@@ -487,6 +519,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.True(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
+        }
+
+        private static ListCommandArgs GetListCommandArgsFor(string commandInput)
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse(commandInput);
+            return new ListCommandArgs((ListCommand)parseResult.CommandResult.Command, parseResult);
         }
     }
 }

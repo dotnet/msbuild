@@ -8,7 +8,6 @@ using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.Commands;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.NuGet;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -25,18 +24,15 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
         private readonly TemplatePackageManager _templatePackageManager;
-        private readonly TemplateInformationCoordinator _templateInformationCoordinator;
 
         internal TemplatePackageCoordinator(
             ITelemetryLogger telemetryLogger,
             IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager,
-            TemplateInformationCoordinator templateInformationCoordinator)
+            TemplatePackageManager templatePackageManager)
         {
             _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _engineEnvironmentSettings = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
-            _templateInformationCoordinator = templateInformationCoordinator ?? throw new ArgumentNullException(nameof(templateInformationCoordinator));
         }
 
         /// <summary>
@@ -447,7 +443,7 @@ namespace Microsoft.TemplateEngine.Cli
                 var formatter =
                    TabularOutput.TabularOutput
                        .For(
-                           new CliTabularOutputSettings(_engineEnvironmentSettings.Environment),
+                           new TabularOutputSettings(_engineEnvironmentSettings.Environment),
                            displayableResults)
                        .DefineColumn(r => r.Identifier, out object packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
                        .DefineColumn(r => r.CurrentVersion, LocalizableStrings.ColumnNameCurrentVersion, showAlways: true)
@@ -558,7 +554,7 @@ namespace Microsoft.TemplateEngine.Cli
                         string.Format(
                             LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
                             result.TemplatePackage.DisplayName));
-                    _templateInformationCoordinator.DisplayTemplateList(templates, new CliTabularOutputSettings(_engineEnvironmentSettings.Environment));
+                    TemplateGroupDisplay.DisplayTemplateList(_engineEnvironmentSettings, templates, new TabularOutputSettings(_engineEnvironmentSettings.Environment));
                 }
                 else
                 {

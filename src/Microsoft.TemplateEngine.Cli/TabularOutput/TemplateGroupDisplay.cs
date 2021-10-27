@@ -4,6 +4,8 @@
 #nullable enable
 
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.Commands;
+using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Utils;
 
@@ -11,6 +13,60 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
 {
     internal static class TemplateGroupDisplay
     {
+        /// <summary>
+        /// Displays the list of templates in a table, one row per template group.
+        ///
+        /// The columns displayed are as follows:
+        /// Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
+        /// (There is no check that the info doesn't vary.)
+        /// - Template Name
+        /// - Short Name: displays the all available short names for the group.
+        /// - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
+        /// - Tags
+        /// The columns can be configured via the command args, see <see cref="ITabularOutputArgs"/>/>.
+        /// </summary>
+        internal static void DisplayTemplateList(
+            IEngineEnvironmentSettings engineEnvironmentSettings,
+            IEnumerable<TemplateGroup> templateGroups,
+            TabularOutputSettings helpFormatterSettings,
+            string? selectedLanguage = null,
+            bool useErrorOutput = false)
+        {
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = GetTemplateGroupsForListDisplay(
+                templateGroups,
+                selectedLanguage,
+                engineEnvironmentSettings.GetDefaultLanguage(),
+                engineEnvironmentSettings.Environment);
+            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, useErrorOutput);
+        }
+
+        /// <summary>
+        /// Displays the list of templates in a table, one row per template group.
+        ///
+        /// The columns displayed are as follows:
+        /// Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
+        /// (There is no check that the info doesn't vary.)
+        /// - Template Name
+        /// - Short Name: displays the all available short names for the group.
+        /// - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
+        /// - Tags
+        /// The columns can be configured via the command args, see <see cref="ITabularOutputArgs"/>/>.
+        /// </summary>
+        internal static void DisplayTemplateList(
+            IEngineEnvironmentSettings engineEnvironmentSettings,
+            IEnumerable<ITemplateInfo> templates,
+            TabularOutputSettings helpFormatterSettings,
+            string? selectedLanguage = null,
+            bool useErrorOutput = false)
+        {
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = GetTemplateGroupsForListDisplay(
+                templates,
+                selectedLanguage,
+                engineEnvironmentSettings.GetDefaultLanguage(),
+                engineEnvironmentSettings.Environment);
+            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, useErrorOutput);
+        }
+
         /// <summary>
         /// Generates the list of template groups for table display.
         /// Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't. (There is no check that the info doesn't vary.)
@@ -69,7 +125,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         /// <param name="defaultLanguage">default language.</param>
         /// <param name="environment"><see cref="IEnvironment"/> settings to use.</param>
         /// <returns></returns>
-        internal static IReadOnlyList<TemplateGroupTableRow> GetTemplateGroupsForListDisplay(
+        private static IReadOnlyList<TemplateGroupTableRow> GetTemplateGroupsForListDisplay(
             IEnumerable<TemplateGroup> templateGroupList,
             string? language,
             string? defaultLanguage,
@@ -91,6 +147,28 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                 templateGroupsForDisplay.Add(groupDisplayInfo);
             }
             return templateGroupsForDisplay;
+        }
+
+        private static void DisplayTemplateList(
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay,
+            TabularOutputSettings tabularOutputSettings,
+            bool useErrorOutput = false)
+        {
+            TabularOutput<TemplateGroupTableRow> formatter =
+                TabularOutput
+                    .For(
+                        tabularOutputSettings,
+                        groupsForDisplay)
+                    .DefineColumn(t => t.Name, out object nameColumn, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
+                    .DefineColumn(t => t.ShortNames, LocalizableStrings.ColumnNameShortName, showAlways: true)
+                    .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.ColumnNameLanguage, TabularOutputSettings.ColumnNames.Language, defaultColumn: true)
+                    .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, TabularOutputSettings.ColumnNames.Type, defaultColumn: false)
+                    .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, TabularOutputSettings.ColumnNames.Tags, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
+                    .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.ColumnNameTags, TabularOutputSettings.ColumnNames.Author, defaultColumn: true)
+                    .OrderBy(nameColumn, StringComparer.OrdinalIgnoreCase);
+
+            Reporter reporter = useErrorOutput ? Reporter.Error : Reporter.Output;
+            reporter.WriteLine(formatter.Layout());
         }
 
         private static IOrderedEnumerable<IGrouping<string, ITemplateInfo>> GetAuthorBasedGroups(IEnumerable<ITemplateInfo> templateGroup)

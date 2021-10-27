@@ -63,8 +63,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.Add(new SearchCommand(this, host, telemetryLogger, callbacks));
             this.Add(new LegacySearchCommand(this, host, telemetryLogger, callbacks));
 
-            //yield return (host, telemetryLogger, callbacks) => new ListCommand(host, telemetryLogger, callbacks);
-            //yield return (host, telemetryLogger, callbacks) => new AliasCommand(host, telemetryLogger, callbacks);
+            this.Add(new ListCommand(this, host, telemetryLogger, callbacks));
+            this.Add(new LegacyListCommand(this, host, telemetryLogger, callbacks));
         }
 
         internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")

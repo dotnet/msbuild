@@ -7,10 +7,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.Extensions;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -34,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class BaseUninstallCommand : BaseCommand<UninstallCommandArgs>
     {
-        internal BaseUninstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName)
+        internal BaseUninstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName, LocalizableStrings.UninstallHelp)
         {
             this.AddArgument(NameArgument);
         }
@@ -48,19 +45,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override async Task<NewCommandStatus> ExecuteAsync(UninstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            TemplateInformationCoordinator templateInformationCoordinator = new TemplateInformationCoordinator(
-                environmentSettings,
-                templatePackageManager,
-                new TemplateCreator(environmentSettings),
-                new HostSpecificDataLoader(environmentSettings),
-                TelemetryLogger,
-                environmentSettings.GetDefaultLanguage());
-
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
                 TelemetryLogger,
                 environmentSettings,
-                templatePackageManager,
-                templateInformationCoordinator);
+                templatePackageManager);
 
             return await templatePackageCoordinator.EnterUninstallFlowAsync(args, context.GetCancellationToken()).ConfigureAwait(false);
         }

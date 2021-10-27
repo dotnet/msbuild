@@ -10,6 +10,17 @@ using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 {
+    internal abstract class BaseTemplateResolver<T> : BaseTemplateResolver
+    {
+        internal BaseTemplateResolver(TemplatePackageManager templatePackageManager, IHostSpecificDataLoader hostSpecificDataLoader)
+            : base(templatePackageManager, hostSpecificDataLoader) { }
+
+        internal BaseTemplateResolver(IEnumerable<ITemplateInfo> templateList, IHostSpecificDataLoader hostSpecificDataLoader)
+            : base(templateList, hostSpecificDataLoader) { }
+
+        internal abstract Task<TemplateResolutionResult> ResolveTemplatesAsync(T args, string? defaultLanguage, CancellationToken cancellationToken);
+    }
+
     internal abstract class BaseTemplateResolver
     {
         private readonly IReadOnlyList<ITemplateInfo>? _templateList;
@@ -27,11 +38,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             HostSpecificDataLoader = hostSpecificDataLoader ?? throw new ArgumentNullException(nameof(hostSpecificDataLoader));
         }
 
+        //TODO: this property is no longer needed and will be removed
         internal abstract IEnumerable<FilterOption> Filters { get; }
 
         protected IHostSpecificDataLoader HostSpecificDataLoader { get; }
-
-        internal abstract Task<TemplateResolutionResult> ResolveTemplatesAsync(INewCommandInput commandInput, string? defaultLanguage, CancellationToken cancellationToken);
 
         protected async Task<IEnumerable<TemplateGroup>> GetTemplateGroupsAsync(CancellationToken cancellationToken)
         {

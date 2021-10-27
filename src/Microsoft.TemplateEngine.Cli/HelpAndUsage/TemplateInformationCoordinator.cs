@@ -16,6 +16,7 @@ using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
+    //TODO: this class is all-mighty and is being removed
     internal class TemplateInformationCoordinator
     {
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
@@ -25,7 +26,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly string? _defaultLanguage;
 
-        private readonly ITabularOutputSettings _defaultTabularOutputSettings;
+        private readonly TabularOutputSettings _defaultTabularOutputSettings;
 
         internal TemplateInformationCoordinator(
             IEngineEnvironmentSettings engineEnvironmentSettings,
@@ -43,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _defaultLanguage = defaultLanguage;
 
-            _defaultTabularOutputSettings = new CliTabularOutputSettings(engineEnvironmentSettings.Environment);
+            _defaultTabularOutputSettings = new TabularOutputSettings(engineEnvironmentSettings.Environment);
         }
 
         /// <summary>
@@ -76,12 +77,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     return Task.FromResult(NewCommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousLanguageChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
-                    DisplayTemplateList(resolutionResult.TemplateGroups, _defaultTabularOutputSettings, useErrorOutput: true);
+                    TemplateGroupDisplay.DisplayTemplateList(_engineEnvironmentSettings, resolutionResult.TemplateGroups, _defaultTabularOutputSettings, useErrorOutput: true);
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousLanguageHint.Bold().Red());
                     return Task.FromResult(NewCommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousTemplateGroupChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
-                    DisplayTemplateList(resolutionResult.TemplateGroups, _defaultTabularOutputSettings, useErrorOutput: true);
+                    TemplateGroupDisplay.DisplayTemplateList(_engineEnvironmentSettings, resolutionResult.TemplateGroups, _defaultTabularOutputSettings, useErrorOutput: true);
                     //TODO: https://github.com/dotnet/templating/issues/3275
                     //revise error handling: this message is not the best CTA
                     //Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHint.Bold().Red());
@@ -111,58 +112,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         commandInput));
             }
             return Task.FromResult(NewCommandStatus.CreateFailed);
-        }
-
-        /// <summary>
-        /// Displays the list of templates in a table, one row per template group.
-        ///
-        /// The columns displayed are as follows:
-        /// Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
-        /// (There is no check that the info doesn't vary.)
-        /// - Template Name
-        /// - Short Name: displays the all available short names for the group.
-        /// - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
-        /// - Tags
-        /// The columns can be configured in <see cref="INewCommandInput.Columns"/> and <see cref="INewCommandInput.ShowAllColumns"/>.
-        /// </summary>
-        internal void DisplayTemplateList(
-            IEnumerable<TemplateGroup> templateGroups,
-            ITabularOutputSettings helpFormatterSettings,
-            string? selectedLanguage = null,
-            bool useErrorOutput = false)
-        {
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(
-                templateGroups,
-                selectedLanguage,
-                _defaultLanguage,
-                _engineEnvironmentSettings.Environment);
-            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, useErrorOutput);
-        }
-
-        /// <summary>
-        /// Displays the list of templates in a table, one row per template group.
-        ///
-        /// The columns displayed are as follows:
-        /// Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
-        /// (There is no check that the info doesn't vary.)
-        /// - Template Name
-        /// - Short Name: displays the all available short names for the group.
-        /// - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
-        /// - Tags
-        /// The columns can be configured in <see cref="INewCommandInput.Columns"/> and <see cref="INewCommandInput.ShowAllColumns"/>.
-        /// </summary>
-        internal void DisplayTemplateList(
-            IEnumerable<ITemplateInfo> templates,
-            ITabularOutputSettings helpFormatterSettings,
-            string? selectedLanguage = null,
-            bool useErrorOutput = false)
-        {
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(
-                templates,
-                selectedLanguage,
-                _defaultLanguage,
-                _engineEnvironmentSettings.Environment);
-            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, useErrorOutput);
         }
 
         internal void ShowUsageHelp(INewCommandInput commandInput)
@@ -218,68 +167,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         /// <summary>
-        /// Handles template list display (dotnet new3 --list).
-        /// </summary>
-        /// <param name="commandInput">user command input.</param>
-        /// <param name="cancellationToken">cancellation token.</param>
-        /// <returns></returns>
-        internal async Task<NewCommandStatus> DisplayTemplateGroupListAsync(
-            INewCommandInput commandInput,
-            CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            ListTemplateResolver resolver = new ListTemplateResolver(_templatePackageManager, _hostSpecificDataLoader);
-            TemplateResolutionResult resolutionResult = await resolver.ResolveTemplatesAsync(commandInput, _defaultLanguage, cancellationToken).ConfigureAwait(false);
-
-            IReadOnlyDictionary<string, string?>? appliedParameterMatches = resolutionResult.GetAllMatchedParametersList();
-            if (resolutionResult.TemplateGroupsWithMatchingTemplateInfoAndParameters.Any())
-            {
-                Reporter.Output.WriteLine(
-                    string.Format(
-                        LocalizableStrings.TemplatesFoundMatchingInputParameters,
-                        GetInputParametersString(resolutionResult.Resolver.Filters, commandInput, appliedParameterMatches)));
-                Reporter.Output.WriteLine();
-                DisplayTemplateList(resolutionResult.TemplateGroupsWithMatchingTemplateInfoAndParameters, _defaultTabularOutputSettings, selectedLanguage: commandInput.Language);
-                return NewCommandStatus.Success;
-            }
-            else
-            {
-                // No templates found matching the following input parameter(s): {0}.
-                Reporter.Error.WriteLine(
-                    string.Format(
-                        LocalizableStrings.NoTemplatesMatchingInputParameters,
-                        GetInputParametersString(ListTemplateResolver.SupportedFilters, commandInput, appliedParameterMatches))
-                    .Bold().Red());
-
-                if (resolutionResult.HasTemplateGroupMatches)
-                {
-                    // {0} template(s) partially matched, but failed on {1}.
-                    Reporter.Error.WriteLine(
-                        string.Format(
-                            LocalizableStrings.TemplatesNotValidGivenTheSpecifiedFilter,
-                            resolutionResult.TemplateGroups.Count(),
-                            GetPartialMatchReason(resolutionResult, commandInput, appliedParameterMatches))
-                        .Bold().Red());
-                }
-
-                Reporter.Error.WriteLine();
-                // To search for the templates on NuGet.org, run:
-                Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
-                if (string.IsNullOrWhiteSpace(commandInput.TemplateName))
-                {
-                    Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, usePlaceholder: true));
-                }
-                else
-                {
-                    Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandInput.CommandName, commandInput.TemplateName));
-                }
-                Reporter.Error.WriteLine();
-                return NewCommandStatus.NotFound;
-            }
-        }
-
-        /// <summary>
         /// Handles display for dotnet new command without parameters.
         /// </summary>
         /// <param name="commandInput">user command input.</param>
@@ -299,7 +186,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Output.WriteLine(string.Format(
               LocalizableStrings.TemplateInformationCoordinator_DotnetNew_TemplatesHeader,
               CommandExamples.New3CommandExample(commandInput.CommandName)));
-            DisplayTemplateList(curatedTemplates, _defaultTabularOutputSettings);
+            TemplateGroupDisplay.DisplayTemplateList(_engineEnvironmentSettings, curatedTemplates, _defaultTabularOutputSettings);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
             Reporter.Output.WriteCommand(CommandExamples.InstantiateTemplateExample(commandInput.CommandName, "console"));
@@ -467,28 +354,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return NewCommandStatus.NotFound;
         }
 
-        private void DisplayTemplateList(
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay,
-            ITabularOutputSettings tabularOutputSettings,
-            bool useErrorOutput = false)
-        {
-            TabularOutput<TemplateGroupTableRow> formatter =
-                TabularOutput.TabularOutput
-                    .For(
-                        tabularOutputSettings,
-                        groupsForDisplay)
-                    .DefineColumn(t => t.Name, out object nameColumn, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
-                    .DefineColumn(t => t.ShortNames, LocalizableStrings.ColumnNameShortName, showAlways: true)
-                    .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.ColumnNameLanguage, BaseCommandInput.LanguageColumnFilter, defaultColumn: true)
-                    .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, BaseCommandInput.TypeColumnFilter, defaultColumn: false)
-                    .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, BaseCommandInput.AuthorColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
-                    .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.ColumnNameTags, BaseCommandInput.TagsColumnFilter, defaultColumn: true)
-                    .OrderBy(nameColumn, StringComparer.CurrentCultureIgnoreCase);
-
-            Reporter reporter = useErrorOutput ? Reporter.Error : Reporter.Output;
-            reporter.WriteLine(formatter.Layout());
-        }
-
 #pragma warning disable SA1202 // Elements should be ordered by access
         internal static string GetInputParametersString(IEnumerable<CommandParsing.FilterOption> supportedFilters, INewCommandInput commandInput, IReadOnlyDictionary<string, string?>? templateParameters = null)
 #pragma warning restore SA1202 // Elements should be ordered by access
@@ -519,28 +384,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     inputParameters.Append(separator);
                 }
             }
-            if (appliedFilters.Concat(appliedTemplateParameters).Any())
-            {
-                inputParameters.Append(string.Join(separator, appliedFilters.Concat(appliedTemplateParameters)));
-            }
-            return inputParameters.ToString();
-        }
-
-        private static string GetPartialMatchReason(TemplateResolutionResult templateResolutionResult, INewCommandInput commandInput, IReadOnlyDictionary<string, string?>? templateParameters = null)
-        {
-            string separator = ", ";
-
-            IEnumerable<string> appliedFilters = templateResolutionResult.Resolver.Filters
-                    .OfType<CommandParsing.TemplateFilterOption>()
-                    .Where(filter => filter.IsFilterSet(commandInput) && filter.MismatchCriteria(templateResolutionResult))
-                    .Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'");
-
-            IEnumerable<string> appliedTemplateParameters = templateParameters?
-                   .Where(parameter =>
-                        templateResolutionResult.IsParameterMismatchReason(parameter.Key))
-                   .Select(param => string.IsNullOrWhiteSpace(param.Value) ? param.Key : $"{param.Key}='{param.Value}'") ?? Array.Empty<string>();
-
-            StringBuilder inputParameters = new StringBuilder();
             if (appliedFilters.Concat(appliedTemplateParameters).Any())
             {
                 inputParameters.Append(string.Join(separator, appliedFilters.Concat(appliedTemplateParameters)));
