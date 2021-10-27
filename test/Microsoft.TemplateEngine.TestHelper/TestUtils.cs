@@ -77,7 +77,7 @@ $@"<?xml version=""1.0"" encoding=""utf-8""?>
             {
                 throw new DirectoryNotFoundException(
                     "Source directory does not exist or could not be found: "
-                    + sourceDirName);
+                    + dir.FullName);
             }
 
             DirectoryInfo[] dirs = dir.GetDirectories();
