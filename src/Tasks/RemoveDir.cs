@@ -44,8 +44,6 @@ namespace Microsoft.Build.Tasks
         //-----------------------------------------------------------------------------------
         public override bool Execute()
         {
-            // Delete each directory
-            bool overallSuccess = true;
             // Our record of the directories that were removed
             var removedDirectoriesList = new List<ITaskItem>();
 
@@ -73,12 +71,6 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    // The current directory was not removed successfully
-                    if (!currentSuccess)
-                    {
-                        overallSuccess = false;
-                    }
-
                     // We successfully removed the directory, so add the removed directory to our record
                     if (currentSuccess)
                     {
@@ -97,7 +89,7 @@ namespace Microsoft.Build.Tasks
             }
             // convert the list of deleted files into an array of ITaskItems
             RemovedDirectories = removedDirectoriesList.ToArray();
-            return overallSuccess;
+            return !Log.HasLoggedErrors;
         }
 
         // Core implementation of directory removal
