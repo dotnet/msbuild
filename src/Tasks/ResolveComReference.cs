@@ -1040,7 +1040,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                ErrorUtilities.VerifyThrow(false, "Unknown wrapper type!");
+                ErrorUtilities.ThrowInternalError("Unknown wrapper type!");
             }
             referenceInfo.resolvedWrapper = wrapperInfo;
 

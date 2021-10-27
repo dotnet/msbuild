@@ -1133,9 +1133,8 @@ namespace Microsoft.Build.Construction
                 {
                     if (!_solutionFile.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                     {
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                        ProjectFileErrorUtilities.ThrowInvalidProjectFile
                             (
-                            false,
                             "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(traversalProject.FullPath),
                             "SolutionParseProjectDepNotFoundError",
@@ -1206,9 +1205,8 @@ namespace Microsoft.Build.Construction
             if (project.ProjectType == SolutionProjectType.WebProject)
             {
 #if !FEATURE_ASPNET_COMPILER
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile
                     (
-                    false,
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(_solutionFile.FullPath),
                     "AspNetCompiler.UnsupportedMSBuildVersion",
@@ -1295,9 +1293,8 @@ namespace Microsoft.Build.Construction
             {
                 if (!_solutionFile.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                 {
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile
                         (
-                        false,
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(traversalProject.FullPath),
                         "SolutionParseProjectDepNotFoundError",
@@ -1557,9 +1554,8 @@ namespace Microsoft.Build.Construction
             }
             if (!isDotNetFramework)
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile
                     (
-                    false,
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(_solutionFile.FullPath),
                     "AspNetCompiler.InvalidTargetFrameworkMonikerNotDotNET",
