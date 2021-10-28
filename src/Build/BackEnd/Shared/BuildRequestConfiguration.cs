@@ -16,6 +16,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared.FileSystem;
 
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#else
+using Path = System.IO.Path;
+#endif
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -290,7 +296,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!_isTraversalProject.HasValue)
                 {
-                    if (String.Equals(Path.GetFileName(ProjectFullPath), "dirs.proj", StringComparison.OrdinalIgnoreCase))
+                    if (MemoryExtensions.Equals(Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj".AsSpan(), StringComparison.OrdinalIgnoreCase))
                     {
                         // dirs.proj are assumed to be traversals
                         _isTraversalProject = true;

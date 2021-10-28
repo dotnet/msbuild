@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -17,6 +16,12 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Utilities;
+
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#else
+using Path = System.IO.Path;
+#endif
 
 namespace Microsoft.Build.Graph
 {
@@ -503,8 +508,11 @@ namespace Microsoft.Build.Graph
             {
                 var nodeId = GetNodeId(node);
 
+#if FEATURE_MSIOREDIST
                 var nodeName = Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath);
-
+#else
+                var nodeName = Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath.AsSpan());
+#endif
                 var globalPropertiesString = string.Join(
                     "<br/>",
                     node.ProjectInstance.GlobalProperties.OrderBy(kvp => kvp.Key)
@@ -512,7 +520,9 @@ namespace Microsoft.Build.Graph
 
                 var targetListString = GetTargetListString(node);
 
-                sb.AppendLine($"\t{nodeId} [label=<{nodeName}<br/>({targetListString})<br/>{globalPropertiesString}>]");
+                sb.Append($"\t{nodeId} [label=<");
+                sb.Append(nodeName);
+                sb.AppendLine($"<br/>({targetListString})<br/>{globalPropertiesString}>]");
 
                 foreach (var reference in node.ProjectReferences)
                 {

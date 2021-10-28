@@ -16,6 +16,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#else
+using Path = System.IO.Path;
+#endif
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -482,7 +488,11 @@ namespace Microsoft.Build.Utilities
             // look for it in the path
             if (pathToTool != null)
             {
+#if NETSTANDARD2_0
                 bool isOnlyFileName = Path.GetFileName(pathToTool).Length == pathToTool.Length;
+#else
+                bool isOnlyFileName = Path.GetFileName(pathToTool.AsSpan()).Length == pathToTool.AsSpan().Length;
+#endif
                 if (!isOnlyFileName)
                 {
                     bool isExistingFile = FileSystems.Default.FileExists(pathToTool);

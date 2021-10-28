@@ -30,6 +30,12 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#else
+using Path = System.IO.Path;
+#endif
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -253,8 +259,8 @@ namespace Microsoft.Build.BackEnd
                 // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                 // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
                 // nodes because we should never be able to connect in this case.
-                string taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost);
-                if (Path.GetFileNameWithoutExtension(msbuildLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
+                var taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost.AsSpan());
+                if (MemoryExtensions.Equals(Path.GetFileNameWithoutExtension(msbuildLocation.AsSpan()), taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
                 {
                     if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
                     {
