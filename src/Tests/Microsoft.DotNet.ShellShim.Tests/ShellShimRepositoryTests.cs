@@ -413,7 +413,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             var tempDir = _testAssetsManager.CreateTestDirectory(identifier: tfm).Path;
             var templateFinder = new ShellShimTemplateFinder(new MockNuGetPackageDownloader(), new DirectoryPath(tempDir), null);
             var path = templateFinder.ResolveAppHostSourceDirectoryAsync(null, NuGetFramework.Parse(tfm), Architecture.Arm64).Result;
-            path.Should().Contain(tfm.Equals("net5.0") ? $"win-{RuntimeInformation.ProcessArchitecture.ToString()}" : "AppHostTemplate");
+            path.Should().Contain(tfm.Equals("net5.0") ? "AppHostTemplate" : "win-x64");
         }
 
         private static void MakeNameConflictingCommand(string pathToPlaceShim, string shellCommandName)
