@@ -72,7 +72,7 @@ namespace Microsoft.Build.Construction
             {
                 // Caching the element location object saves significant memory
                 XmlDocumentWithLocation ownerDocumentWithLocation = (XmlDocumentWithLocation)OwnerDocument;
-                if (!String.Equals(_elementLocation.File, ownerDocumentWithLocation.FullPath, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(ownerDocumentWithLocation.FullPath) && !String.Equals(_elementLocation.File, ownerDocumentWithLocation.FullPath, StringComparison.OrdinalIgnoreCase))
                 {
                     _elementLocation = ElementLocation.Create(ownerDocumentWithLocation.FullPath, _elementLocation.Line, _elementLocation.Column);
                 }
