@@ -139,7 +139,7 @@ jobs:
                 -configuration $(_BuildConfig)
                 -buildSourcesDirectory $(Build.SourcesDirectory)
                 -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
-                -officialBuildIdArgs BuildIdArgs:$(_OfficialBuildIdArgs)
+                -officialBuildIdArgs "$(_OfficialBuildIdArgs)"
                 $(_Test)
         displayName: Run Tests in Helix and non Helix in parallel
         condition: succeededOrFailed()
