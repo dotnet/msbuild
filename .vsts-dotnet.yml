@@ -42,17 +42,17 @@ stages:
   displayName: Build
 
   jobs:
-  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/vs16.11') }}: # should track next-release's active dev branch
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}: # should track next-release's active dev branch
     - template: /eng/common/templates/job/onelocbuild.yml
       parameters:
         LclSource: lclFilesfromPackage
         LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
         MirrorRepo: 'msbuild'
-        MirrorBranch: 'vs16.11' # should match condition above
+        MirrorBranch: 'main' # should match condition above
 
   - job: Windows_NT
     pool:
-      name: VSEngSS-MicroBuild2019
+      name: VSEngSS-MicroBuild2019-1ES
       demands:
       - agent.os -equals Windows_NT
 

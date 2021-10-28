@@ -265,6 +265,15 @@ namespace Microsoft.NET.StringTools
                         }
                     }
                 }
+
+                // The invariant that Length is the sum of span lengths is critical in this unsafe method.
+                // Violating it may lead to memory corruption and, since this code tends to run under a lock,
+                // to hangs caused by the lock getting orphaned. Attempt to detect that and throw now, 
+                // before the corruption causes further problems.
+                if (destPtr != resultPtr + Length)
+                {
+                    throw new InvalidOperationException($"Length of {Length} does not match the sum of span lengths of {destPtr - resultPtr}.");
+                }
             }
             return result;
         }
@@ -299,18 +308,23 @@ namespace Microsoft.NET.StringTools
         }
 
         /// <summary>
-        /// Implements the simple yet very decently performing djb2 hash function (xor version).
+        /// Implements the simple yet very decently performing djb2-like hash function (xor version) as inspired by
+        /// https://github.com/dotnet/runtime/blob/6262ae8e6a33abac569ab6086cdccc470c810ea4/src/libraries/System.Private.CoreLib/src/System/String.Comparison.cs#L810-L840
         /// </summary>
         /// <returns>A stable hashcode of the string represented by this instance.</returns>
+        /// <remarks>
+        /// Unlike the BCL method, this implementation works only on two characters at a time to cut on the complexity with
+        /// characters that feed into the same operation but straddle multiple spans. Note that it must return the same value for
+        /// a given string regardless of how it's split into spans (e.g. { "AB" } and { "A", "B" } have the same hash code).
+        /// </remarks>
         public override unsafe int GetHashCode()
         {
-            int hashCode = 5381;
+            uint hash = (5381 << 16) + 5381;
+            bool hashedOddNumberOfCharacters = false;
+
             fixed (char* charPtr = _inlineSpan)
             {
-                for (int i = 0; i < _inlineSpan.Length; i++)
-                {
-                    hashCode = unchecked(hashCode * 33 ^ charPtr[i]);
-                }
+                hash = GetHashCodeHelper(charPtr, _inlineSpan.Length, hash, ref hashedOddNumberOfCharacters);
             }
             if (_spans != null)
             {
@@ -318,14 +332,68 @@ namespace Microsoft.NET.StringTools
                 {
                     fixed (char* charPtr = span.Span)
                     {
-                        for (int i = 0; i < span.Length; i++)
-                        {
-                            hashCode = unchecked(hashCode * 33 ^ charPtr[i]);
-                        }
+                        hash = GetHashCodeHelper(charPtr, span.Length, hash, ref hashedOddNumberOfCharacters);
                     }
                 }
             }
-            return hashCode;
+            return (int)(hash);
+        }
+
+        /// <summary>
+        /// Hashes a memory block specified by a pointer and length.
+        /// </summary>
+        /// <param name="charPtr">Pointer to the first character.</param>
+        /// <param name="length">Number of characters at <paramref name="charPtr"/>.</param>
+        /// <param name="hash">The running hash code.</param>
+        /// <param name="hashedOddNumberOfCharacters">True if the incoming <paramref name="hash"/> was calculated from an odd number of characters.</param>
+        /// <returns>The updated running hash code (not passed as a ref parameter to play nicely with JIT optimizations).</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe uint GetHashCodeHelper(char* charPtr, int length, uint hash, ref bool hashedOddNumberOfCharacters)
+        {
+            if (hashedOddNumberOfCharacters && length > 0)
+            {
+                // If the number of characters hashed so far is odd, the first character of the current block completes
+                // the calculation done with the last character of the previous block.
+                hash ^= BitConverter.IsLittleEndian ? ((uint)*charPtr << 16) : *charPtr;
+                length--;
+                charPtr++;
+                hashedOddNumberOfCharacters = false;
+            }
+
+            // The loop hashes two characters at a time.
+            uint* ptr = (uint*)charPtr;
+            while (length >= 2)
+            {
+                length -= 2;
+                hash = (RotateLeft(hash, 5) + hash) ^ *ptr;
+                ptr += 1;
+            }
+
+            if (length > 0)
+            {
+                hash = (RotateLeft(hash, 5) + hash) ^ (BitConverter.IsLittleEndian ? *((char*)ptr) : ((uint)*((char*)ptr) << 16));
+                hashedOddNumberOfCharacters = true;
+            }
+
+            return hash;
+        }
+
+        /// <summary>
+        /// Rotates an integer by the specified number of bits.
+        /// </summary>
+        /// <param name="value">The value to rotate.</param>
+        /// <param name="offset">The number of bits.</param>
+        /// <returns>The rotated value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static uint RotateLeft(uint value, int offset)
+        {
+#if NETCOREAPP
+            return System.Numerics.BitOperations.RotateLeft(value, offset);
+#else
+            // Copied from System\Numerics\BitOperations.cs in dotnet/runtime as the routine is not available on .NET Framework.
+            // The JIT recognized the pattern and generates efficient code, e.g. the rol instruction on x86/x64.
+            return (value << offset) | (value >> (32 - offset));
+#endif
         }
     }
 }

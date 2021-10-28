@@ -392,6 +392,7 @@ namespace Microsoft.Build.Utilities
         protected Microsoft.Build.Framework.IBuildEngine BuildEngine { get { throw null; } }
         public bool HasLoggedErrors { get { throw null; } }
         public string HelpKeywordPrefix { get { throw null; } set { } }
+        public bool IsTaskInputLoggingEnabled { get { throw null; } }
         protected string TaskName { get { throw null; } }
         public System.Resources.ResourceManager TaskResources { get { throw null; } set { } }
         public string ExtractMessageCode(string message, out string messageWithoutCodePrefix) { throw null; }

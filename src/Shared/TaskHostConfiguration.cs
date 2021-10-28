@@ -79,6 +79,11 @@ namespace Microsoft.Build.BackEnd
         private string _taskLocation;
 
         /// <summary>
+        /// Whether task inputs are logged.
+        /// </summary>
+        private bool _isTaskInputLoggingEnabled;
+
+        /// <summary>
         /// The set of parameters to apply to the task prior to execution.  
         /// </summary>
         private Dictionary<string, TaskParameter> _taskParameters;
@@ -105,6 +110,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="continueOnError">Flag to continue with the build after a the task failed</param>
         /// <param name="taskName">Name of the task.</param>
         /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
+        /// <param name="isTaskInputLoggingEnabled">Whether task inputs are logged.</param>
         /// <param name="taskParameters">Parameters to apply to the task.</param>
         /// <param name="globalParameters">global properties for the current project.</param>
         /// <param name="warningsAsErrors">Warning codes to be treated as errors for the current project.</param>
@@ -124,6 +130,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="continueOnError">Flag to continue with the build after a the task failed</param>
         /// <param name="taskName">Name of the task.</param>
         /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
+        /// <param name="isTaskInputLoggingEnabled">Whether task inputs are logged.</param>
         /// <param name="taskParameters">Parameters to apply to the task.</param>
         /// <param name="globalParameters">global properties for the current project.</param>
         /// <param name="warningsAsErrors">Warning codes to be logged as errors for the current project.</param>
@@ -145,6 +152,7 @@ namespace Microsoft.Build.BackEnd
                 bool continueOnError,
                 string taskName,
                 string taskLocation,
+                bool isTaskInputLoggingEnabled,
                 IDictionary<string, object> taskParameters,
                 Dictionary<string, string> globalParameters,
                 ICollection<string> warningsAsErrors,
@@ -178,6 +186,7 @@ namespace Microsoft.Build.BackEnd
             _continueOnError = continueOnError;
             _taskName = taskName;
             _taskLocation = taskLocation;
+            _isTaskInputLoggingEnabled = isTaskInputLoggingEnabled;
             _warningsAsErrors = warningsAsErrors;
             _warningsAsMessages = warningsAsMessages;
 
@@ -325,6 +334,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Returns <see langword="true"/> if the build is configured to log all task inputs.
+        /// </summary>
+        public bool IsTaskInputLoggingEnabled
+        {
+            [DebuggerStepThrough]
+            get
+            { return _isTaskInputLoggingEnabled; }
+        }
+
+        /// <summary>
         /// Parameters to set on the instantiated task prior to execution. 
         /// </summary>
         public Dictionary<string, TaskParameter> TaskParameters
@@ -391,6 +410,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectFileOfTask);
             translator.Translate(ref _taskName);
             translator.Translate(ref _taskLocation);
+            translator.Translate(ref _isTaskInputLoggingEnabled);
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);
             translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);

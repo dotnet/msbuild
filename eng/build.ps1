@@ -158,9 +158,13 @@ function Check-EditedFiles() {
 
 function Check-RequiredVersionBumps() {
   # Log VSTS errors for missing required version bumps
-  if ($env:SYSTEM_PULLREQUEST_TARGETBRANCH) {
+  $targetBranch = $env:SYSTEM_PULLREQUEST_TARGETBRANCH
+  if ($targetBranch) {
+    # Some PRs specify the bare target branch (most commonly "main"), some prefix it with "refs/heads/".
+    # The following statement normalizes both to a revision spec that git understands.
+    $targetBranch = "refs/remotes/origin/" + ($targetBranch -replace "^refs/heads/", "")
     $versionLineChanged = $false
-    git --no-pager diff --unified --no-color --exit-code -w origin/$env:SYSTEM_PULLREQUEST_TARGETBRANCH HEAD src\Framework\EngineServices.cs `
+    git --no-pager diff --unified --no-color --exit-code -w $targetBranch HEAD src\Framework\EngineServices.cs `
       | Select-String -Pattern "int Version =" | ForEach-Object -process { $versionLineChanged = $true }
     if (($LASTEXITCODE -ne 0) -and (-not $versionLineChanged)) {
       throw "##vso[task.logissue type=error] Detected changes in Framework\EngineServices.cs without a version bump.  " +

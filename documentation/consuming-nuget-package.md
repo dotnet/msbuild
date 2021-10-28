@@ -30,7 +30,7 @@ The items in this namespace are MSBuild tasks that have been developed by the MS
 [Csc](https://msdn.microsoft.com/en-us/library/microsoft.build.tasks.csc.aspx), and [Exec](https://msdn.microsoft.com/en-us/library/microsoft.build.tasks.exec.aspx).
 
 Most developers do not need to reference this package unless they want to extend a stock MSBuild task with custom functionality.  Alternatively, we recommend that MSBuild task developers reference the 
-`Microsoft.Build.Utilites.Core` package and implement the abstract class [Task](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities.task.aspx) or
+`Microsoft.Build.Utilities.Core` package and implement the abstract class [Task](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities.task.aspx) or
 [ToolTask](https://msdn.microsoft.com/en-us/library/microsoft.build.utilities.tooltask.aspx).
 
 ## Microsoft.Build

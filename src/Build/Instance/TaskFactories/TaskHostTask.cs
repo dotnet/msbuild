@@ -268,6 +268,7 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
                         AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
+                        _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
                         _taskLoggingContext.GetWarningsAsErrors(),

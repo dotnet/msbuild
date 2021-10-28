@@ -1,5 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+namespace Microsoft.Build.BackEnd.SdkResolution
+{
+    public partial class SdkResolverException : System.Exception
+    {
+        public SdkResolverException(string resourceName, Microsoft.Build.Framework.SdkResolver resolver, Microsoft.Build.Framework.SdkReference sdk, System.Exception innerException, params string[] args) { }
+        public Microsoft.Build.Framework.SdkResolver Resolver { get { throw null; } }
+        public Microsoft.Build.Framework.SdkReference Sdk { get { throw null; } }
+    }
+}
 namespace Microsoft.Build.Construction
 {
     public abstract partial class ElementLocation
@@ -489,6 +498,7 @@ namespace Microsoft.Build.Definition
     public partial class ProjectOptions
     {
         public ProjectOptions() { }
+        public Microsoft.Build.FileSystem.IDirectoryCacheFactory DirectoryCacheFactory { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.Context.EvaluationContext EvaluationContext { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ProjectLoadSettings LoadSettings { get { throw null; } set { } }
@@ -1495,6 +1505,19 @@ namespace Microsoft.Build.Experimental.ProjectCache
 }
 namespace Microsoft.Build.FileSystem
 {
+    public delegate bool FindPredicate(ref System.ReadOnlySpan<char> fileName);
+    public delegate TResult FindTransform<TResult>(ref System.ReadOnlySpan<char> fileName);
+    public partial interface IDirectoryCache
+    {
+        bool DirectoryExists(string path);
+        System.Collections.Generic.IEnumerable<TResult> EnumerateDirectories<TResult>(string path, string pattern, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
+        System.Collections.Generic.IEnumerable<TResult> EnumerateFiles<TResult>(string path, string pattern, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
+        bool FileExists(string path);
+    }
+    public partial interface IDirectoryCacheFactory
+    {
+        Microsoft.Build.FileSystem.IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId);
+    }
     public abstract partial class MSBuildFileSystemBase
     {
         protected MSBuildFileSystemBase() { }

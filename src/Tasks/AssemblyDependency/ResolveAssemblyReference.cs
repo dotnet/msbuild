@@ -1418,7 +1418,7 @@ namespace Microsoft.Build.Tasks
         private void LogInputs()
         {
             MessageImportance importance = MessageImportance.Low;
-            if (Traits.Instance.EscapeHatches.LogTaskInputs || Silent || !Log.LogsMessagesOfImportance(importance))
+            if (Silent || Log.IsTaskInputLoggingEnabled || !Log.LogsMessagesOfImportance(importance))
             {
                 // the inputs will be logged automatically anyway, avoid duplication in the logs
                 return;

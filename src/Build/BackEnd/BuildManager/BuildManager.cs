@@ -286,7 +286,7 @@ namespace Microsoft.Build.Execution
 
             _projectStartedEventHandler = OnProjectStarted;
             _projectFinishedEventHandler = OnProjectFinished;
-            _loggingThreadExceptionEventHandler = OnThreadException;
+            _loggingThreadExceptionEventHandler = OnLoggingThreadException;
             _legacyThreadingData = new LegacyThreadingData();
             _instantiationTimeUtc = DateTime.UtcNow;
         }
@@ -830,10 +830,15 @@ namespace Microsoft.Build.Execution
                 ShutdownConnectedNodes(false /* normal termination */);
                 _noNodesActiveEvent.WaitOne();
 
-                // Wait for all of the actions in the work queue to drain.  Wait() could throw here if there was an unhandled exception
-                // in the work queue, but the top level exception handler there should catch everything and have forwarded it to the
+                // Wait for all of the actions in the work queue to drain.
+                // _workQueue.Completion.Wait() could throw here if there was an unhandled exception in the work queue,
+                // but the top level exception handler there should catch everything and have forwarded it to the
                 // OnThreadException method in this class already.
                 _workQueue.Complete();
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+                {
+                    _workQueue.Completion.Wait();
+                }
 
                 // Stop the graph scheduling thread(s)
                 _graphSchedulingCancellationSource?.Cancel();
@@ -2796,7 +2801,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Handler for thread exceptions (logging thread, communications thread).  This handler will only get called if the exception did not previously
+        /// Handler for thread exceptions. This handler will only get called if the exception did not previously
         /// get handled by a node exception handlers (for instance because the build is complete for the node.)  In this case we
         /// get the exception and will put it into the OverallBuildResult so that the host can see what happened.
         /// </summary>
@@ -2854,21 +2859,48 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Handler for LoggingService thread exceptions.
+        /// </summary>
+        private void OnLoggingThreadException(Exception e)
+        {
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            {
+                _workQueue.Post(() => OnThreadException(e));
+            }
+            else
+            {
+                OnThreadException(e);
+            }
+        }
+
+        /// <summary>
         /// Raised when a project finished logging message has been processed.
         /// </summary>
         private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
-            lock (_syncLock)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
             {
-                if (_projectStartedEvents.TryGetValue(e.BuildEventContext.SubmissionId, out var originalArgs))
+                _workQueue.Post(() => OnProjectFinishedBody(e));
+            }
+            else
+            {
+                OnProjectFinishedBody(e);
+            }
+
+            void OnProjectFinishedBody(ProjectFinishedEventArgs e)
+            {
+                lock (_syncLock)
                 {
-                    if (originalArgs.BuildEventContext.Equals(e.BuildEventContext))
+                    if (_projectStartedEvents.TryGetValue(e.BuildEventContext.SubmissionId, out var originalArgs))
                     {
-                        _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
-                        if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
+                        if (originalArgs.BuildEventContext.Equals(e.BuildEventContext))
                         {
-                            submission.CompleteLogging();
-                            CheckSubmissionCompletenessAndRemove(submission);
+                            _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
+                            if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
+                            {
+                                submission.CompleteLogging();
+                                CheckSubmissionCompletenessAndRemove(submission);
+                            }
                         }
                     }
                 }
@@ -2880,11 +2912,23 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            lock (_syncLock)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
             {
-                if (!_projectStartedEvents.ContainsKey(e.BuildEventContext.SubmissionId))
+                _workQueue.Post(() => OnProjectStartedBody(e));
+            }
+            else
+            {
+                OnProjectStartedBody(e);
+            }
+
+            void OnProjectStartedBody(ProjectStartedEventArgs e)
+            {
+                lock (_syncLock)
                 {
-                    _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
+                    if (!_projectStartedEvents.ContainsKey(e.BuildEventContext.SubmissionId))
+                    {
+                        _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
+                    }
                 }
             }
         }
