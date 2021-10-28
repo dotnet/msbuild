@@ -1610,7 +1610,7 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="InstallFrom" _locComment="" -->Web, Unc, or Disk</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="AnalysisLevel" substitutionGroup="msb:Property"/>
+    <xs:element name="AnalysisLevel" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="AnalysisLevel" _locComment="" -->Customizes the set of rules that are enabled by default.</xs:documentation>
       </xs:annotation>
