@@ -11,12 +11,6 @@ using Microsoft.Win32;
 
 using Microsoft.Build.Shared.FileSystem;
 
-#if FEATURE_MSIOREDIST
-using Path = Microsoft.IO.Path;
-#else
-using Path = System.IO.Path;
-#endif
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -787,13 +781,8 @@ namespace Microsoft.Build.Shared
 
             // If the current runtime starts with correct prefix, then this is the runtime we want to use.
             // However, only if we're requesting current architecture -- otherwise, the base path may be different, so we'll need to look it up.
-#if NETSTANDARD2_0
-            var leaf = Path.GetFileName(currentRuntimePath);
+            string leaf = Path.GetFileName(currentRuntimePath);
             if (leaf.StartsWith(prefix, StringComparison.Ordinal) && architecture == DotNetFrameworkArchitecture.Current)
-#else
-            var leaf = Path.GetFileName(currentRuntimePath.AsSpan());
-            if (leaf.StartsWith(prefix.AsSpan(), StringComparison.Ordinal) && architecture == DotNetFrameworkArchitecture.Current)
-#endif
             {
                 return currentRuntimePath;
             }

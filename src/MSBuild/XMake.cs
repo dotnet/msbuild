@@ -40,12 +40,6 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 
-#if FEATURE_MSIOREDIST
-using Path = Microsoft.IO.Path;
-#else
-using Path = System.IO.Path;
-#endif
-
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
@@ -2840,12 +2834,10 @@ namespace Microsoft.Build.CommandLine
                 if (actualProjectFiles.Count == 1 && actualSolutionFiles.Count == 1)
                 {
                     // Grab the name of both project and solution without extensions
-                    var solutionName = Path.GetFileNameWithoutExtension(actualSolutionFiles[0].AsSpan());
-                    var projectName = Path.GetFileNameWithoutExtension(actualProjectFiles[0].AsSpan());
+                    string solutionName = Path.GetFileNameWithoutExtension(actualSolutionFiles[0]);
+                    string projectName = Path.GetFileNameWithoutExtension(actualProjectFiles[0]);
                     // Compare the names and error if they are not identical
-                    InitializationException.VerifyThrow(
-                        MemoryExtensions.Equals(solutionName, projectName, StringComparison.OrdinalIgnoreCase),
-                        projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
+                    InitializationException.VerifyThrow(string.Equals(solutionName, projectName, StringComparison.OrdinalIgnoreCase), projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                     projectFile = actualSolutionFiles[0];
                 }
                 // If there is more than one solution file in the current directory we have no idea which one to use

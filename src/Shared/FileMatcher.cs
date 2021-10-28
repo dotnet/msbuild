@@ -13,12 +13,6 @@ using System.Threading.Tasks;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
-#if FEATURE_MSIOREDIST
-using Path = Microsoft.IO.Path;
-#else
-using Path = System.IO.Path;
-#endif
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -1678,7 +1672,9 @@ namespace Microsoft.Build.Shared
         internal static bool IsFileNameMatch(string path, string pattern)
         {
             // Use a span-based Path.GetFileName if it is available.
-#if NETSTANDARD2_0
+#if FEATURE_MSIOREDIST
+            return IsMatch(Microsoft.IO.Path.GetFileName(path.AsSpan()), pattern);
+#elif NETSTANDARD2_0
             return IsMatch(Path.GetFileName(path), pattern);
 #else
             return IsMatch(Path.GetFileName(path.AsSpan()), pattern);
