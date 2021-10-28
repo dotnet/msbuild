@@ -1164,9 +1164,11 @@ elementFormDefault="qualified">
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
-          <xs:enumeration value="Default" />
-          <xs:enumeration value="AllEnabledByDefault" />
-          <xs:enumeration value="AllDisabledByDefault" />
+          <xs:enumeration value="none" />
+          <xs:enumeration value="default" />
+          <xs:enumeration value="minimum" />
+          <xs:enumeration value="recommended" />
+          <xs:enumeration value="all" />
         </xs:restriction>
       </xs:simpleType>
     </xs:element>
@@ -1608,7 +1610,32 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="InstallFrom" _locComment="" -->Web, Unc, or Disk</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="AnalysisLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AnalysisLevel" substitutionGroup="msb:Property"/>
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AnalysisLevel" _locComment="" -->Customizes the set of rules that are enabled by default.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="none" />
+          <xs:enumeration value="latest" />
+          <xs:enumeration value="latest-minimum" />
+          <xs:enumeration value="latest-recommended" />
+          <xs:enumeration value="latest-all" />
+          <xs:enumeration value="preview" />
+          <xs:enumeration value="preview-minimum" />
+          <xs:enumeration value="preview-recommended" />
+          <xs:enumeration value="preview-all" />
+          <xs:enumeration value="5.0" />
+          <xs:enumeration value="5.0-minimum" />
+          <xs:enumeration value="5.0-recommended" />
+          <xs:enumeration value="5.0-all" />
+          <xs:enumeration value="6.0" />
+          <xs:enumeration value="6.0-minimum" />
+          <xs:enumeration value="6.0-recommended" />
+          <xs:enumeration value="6.0-all" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
     <xs:element name="InstallUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="IsCodeSharingProject" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="IsPackable" type="msb:boolean" substitutionGroup="msb:Property">
