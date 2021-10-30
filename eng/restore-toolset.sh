@@ -57,7 +57,7 @@ function CreateBuildEnvScript {
   mkdir -p $artifacts_dir
   scriptPath="$artifacts_dir/sdk-build-env.sh"
   scriptContents="
-#!/bin/bash
+#!/usr/bin/env bash
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 export DOTNET_ROOT=$DOTNET_INSTALL_DIR
