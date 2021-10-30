@@ -8,6 +8,7 @@
 
 # Resources
  * [MSBuild Resources](MSBuild-Resources.md)
+ * [MSBuild Overview](MSBuild-overview.md)
  * [MSBuild Tips & Tricks](MSBuild-Tips-&-Tricks.md)
  * [Binary log](Binary-Log.md)
  * [Providing Binary Logs for investigation](Providing-Binary-Logs.md)
