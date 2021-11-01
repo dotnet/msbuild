@@ -19,14 +19,14 @@ namespace Microsoft.Build.Evaluation
         internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
             ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (LeftChild.CanBoolEvaluate(state),
+                    (LeftChild.TryBoolEvaluate(state, out bool leftBool),
                      state.ElementLocation,
                      "ExpressionDoesNotEvaluateToBoolean",
                      LeftChild.GetUnexpandedValue(state),
                      LeftChild.GetExpandedValue(state),
                      state.Condition);
 
-            if (!LeftChild.BoolEvaluate(state))
+            if (!leftBool)
             {
                 // Short circuit
                 return false;
@@ -34,14 +34,14 @@ namespace Microsoft.Build.Evaluation
             else
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (RightChild.CanBoolEvaluate(state),
+                    (RightChild.TryBoolEvaluate(state, out bool rightBool),
                      state.ElementLocation,
                      "ExpressionDoesNotEvaluateToBoolean",
                      RightChild.GetUnexpandedValue(state),
                      RightChild.GetExpandedValue(state),
                      state.Condition);
 
-                return RightChild.BoolEvaluate(state);
+                return rightBool;
             }
         }
 

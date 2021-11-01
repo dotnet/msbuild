@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
@@ -29,60 +28,35 @@ namespace Microsoft.Build.Evaluation
             _expandable = expandable;
         }
 
-        /// <summary>
-        /// Evaluate as boolean
-        /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
         {
-            return ConversionUtilities.ConvertStringToBool(GetExpandedValue(state));
+            return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state), out result);
         }
 
-        /// <summary>
-        /// Evaluate as numeric
-        /// </summary>
-        internal override double NumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
         {
             if (ShouldBeTreatedAsVisualStudioVersion(state))
             {
-                return ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
-            }
-
-            return ConversionUtilities.ConvertDecimalOrHexToDouble(GetExpandedValue(state));
-        }
-
-        internal override Version VersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
-            {
-                return Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
-            }
-
-            return Version.Parse(GetExpandedValue(state));
-        }
-
-        internal override bool CanBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            return ConversionUtilities.CanConvertStringToBool(GetExpandedValue(state));
-        }
-
-        internal override bool CanNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
-            {
+                result = ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
                 return true;
             }
-
-            return ConversionUtilities.ValidDecimalOrHexNumber(GetExpandedValue(state));
+            else
+            {
+                return ConversionUtilities.TryConvertDecimalOrHexToDouble(GetExpandedValue(state), out result);
+            }
         }
 
-        internal override bool CanVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
         {
             if (ShouldBeTreatedAsVisualStudioVersion(state))
             {
+                result = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
                 return true;
             }
-
-            return Version.TryParse(GetExpandedValue(state), out _);
+            else
+            {
+                return Version.TryParse(GetExpandedValue(state), out result);
+            }
         }
 
         /// <summary>
@@ -98,6 +72,25 @@ namespace Microsoft.Build.Evaluation
             {
                 if (_expandable)
                 {
+                    switch (_value.Length)
+                    {
+                        case 0:
+                            _cachedExpandedValue = String.Empty;
+                            return true;
+                        // If the length is 1 or 2, it can't possibly be a property, item, or metadata, and it isn't empty.
+                        case 1:
+                        case 2:
+                            _cachedExpandedValue = _value;
+                            return false;
+                        default:
+                            if (_value[1] != '(' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@') || _value[_value.Length - 1] != ')')
+                            {
+                                // This isn't just a property, item, or metadata value, and it isn't empty.
+                                return false;
+                            }
+                            break;
+                    }
+
                     string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
 
                     if (expandBreakEarly == null)
