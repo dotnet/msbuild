@@ -76,12 +76,23 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <remarks>
         ///     Individual projects NuGet folders are added during project build by calling
-        ///     <see cref="RegisterNuGetPackageFolders" />
+        ///     <see cref="RegisterImmutableDirectories" />
         /// </remarks>
         public FileClassifier()
         {
-            RegisterImmutableDirectory(Environment.GetEnvironmentVariable("ProgramW6432"));
-            RegisterImmutableDirectory(Environment.GetEnvironmentVariable("ProgramFiles(x86)"));
+            string? programFiles32 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+            string? programFiles64 = Environment.GetEnvironmentVariable("ProgramW6432");
+
+            if (!string.IsNullOrEmpty(programFiles32))
+            {
+                RegisterImmutableDirectory(Path.Combine(programFiles32, "Reference Assemblies", "Microsoft"));
+                RegisterImmutableDirectory(Path.Combine(programFiles32, "dotnet"));
+            }
+            if (!string.IsNullOrEmpty(programFiles64))
+            {
+                RegisterImmutableDirectory(Path.Combine(programFiles64, "Reference Assemblies", "Microsoft"));
+                RegisterImmutableDirectory(Path.Combine(programFiles64, "dotnet"));
+            }
             RegisterImmutableDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"));
             RegisterImmutableDirectory(GetVSInstallationDirectory());
 
@@ -113,8 +124,7 @@ namespace Microsoft.Build.Framework
         public static FileClassifier Shared => s_sharedInstance.Value;
 
         /// <summary>
-        ///     Try add paths found in the <c>NuGetPackageFolders</c> property value for a project into set of known immutable
-        ///     paths.
+        ///     Try add paths found into set of known immutable paths.
         ///     Project files under any of these folders are considered non-modifiable.
         /// </summary>
         /// <remarks>
@@ -124,9 +134,9 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         ///     Example value: <c>"C:\Users\myusername\.nuget\;D:\LocalNuGetCache\"</c>
         /// </remarks>
-        public void RegisterNuGetPackageFolders(string nuGetPackageFolders)
+        public void RegisterImmutableDirectories(string? nuGetPackageFolders)
         {
-            if (!string.IsNullOrEmpty(nuGetPackageFolders))
+            if (nuGetPackageFolders?.Length > 0)
             {
                 string[] folders = nuGetPackageFolders.Split(s_semicolonDelimiter, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string folder in folders)

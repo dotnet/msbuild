@@ -1144,8 +1144,8 @@ namespace Microsoft.Build.BackEnd
             //
             ConfigureWarningsAsErrorsAndMessages();
 
-            // Make sure nuget folders are known in order to be able to skip up to date check in them
-            ConfigureKnownNuGetFolders();
+            // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
+            ConfigureKnownImmutableFolders();
 
             // See comment on Microsoft.Build.Internal.Utilities.GenerateToolsVersionToUse
             _requestEntry.RequestConfiguration.RetrieveFromCache();
@@ -1358,13 +1358,21 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private void ConfigureKnownNuGetFolders()
+        private void ConfigureKnownImmutableFolders()
         {
             ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
             if (project != null)
             {
-                string nuGetFolders = project.GetPropertyValue("NuGetPackageFolders")?.Trim();
-                FileClassifier.Shared.RegisterNuGetPackageFolders(nuGetFolders);
+                //example: C:\Users\USER_NAME\.nuget\;C:\Program Files\dotnet\sdk\NuGetFallbackFolder
+                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("NuGetPackageFolders")?.Trim());
+                // example: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
+                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("MSBuildFrameworkToolsPath32")?.Trim());
+                // example:  C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
+                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("MSBuildFrameworkToolsPath64")?.Trim());
+                // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
+                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("FrameworkPathOverride")?.Trim());
+                // example: C:\Program Files\dotnet\
+                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("NetCoreRoot")?.Trim());
             }
         }
 
