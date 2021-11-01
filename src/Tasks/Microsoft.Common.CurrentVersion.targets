@@ -575,33 +575,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TargetPlatformRegistryBase Condition="'$(TargetPlatformRegistryBase)' == ''">Software\Microsoft\Microsoft SDKs\$(TargetPlatformIdentifier)</TargetPlatformRegistryBase>
     <AssemblyFoldersConfigFile Condition="'$(AssemblyFoldersConfigFile)' == ''">$([MSBuild]::GetToolsDirectory32())\AssemblyFolders.config</AssemblyFoldersConfigFile>
     <AssemblyFoldersConfigFileSearchPath Condition="Exists('$(AssemblyFoldersConfigFile)')">{AssemblyFoldersFromConfig:$(AssemblyFoldersConfigFile),$(TargetFrameworkVersion)};</AssemblyFoldersConfigFileSearchPath>
-    <!--
-        The SearchPaths property is set to find assemblies in the following order:
-
-            (1) Files from current project - indicated by {CandidateAssemblyFiles}
-            (2) $(ReferencePath) - the reference path property, which comes from the .USER file.
-            (3) The hintpath from the referenced item itself, indicated by {HintPathFromItem}.
-            (4) The directory of MSBuild's "target" runtime from GetFrameworkPath.
-                The "target" runtime folder is the folder of the runtime that MSBuild is a part of.
-            (5) Registered assembly folders, indicated by {Registry:*,*,*}
-            (6) Assembly folders from AssemblyFolders.config file (provided by Visual Studio Dev15+).
-            (7) Legacy registered assembly folders, indicated by {AssemblyFolders}
-            (8) Resolve to the GAC.
-            (9) Treat the reference's Include as if it were a real file name.
-            (10) Look in the application's output folder (like bin\debug)
-        -->
-    <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == ''">
-      {CandidateAssemblyFiles};
-      $(ReferencePath);
-      {HintPathFromItem};
-      {TargetFrameworkDirectory};
-      $(AssemblyFoldersConfigFileSearchPath)
-      {Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)};
-      {AssemblyFolders};
-      {GAC};
-      {RawFileName};
-      $(OutDir)
-    </AssemblySearchPaths>
 
     <!--
         These are the extensions that assembly reference resolution will consider for resolution.
@@ -632,6 +605,34 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         For example :   Full;Complete;AllThere
         -->
     <FullReferenceAssemblyNames Condition="'$(FullReferenceAssemblyNames)' == ''">Full</FullReferenceAssemblyNames>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(AssemblySearchPaths) == ''">
+    <!--
+        The SearchPaths property is set to find assemblies in the following order:
+
+            (1) Files from current project - indicated by {CandidateAssemblyFiles}
+            (2) $(ReferencePath) - the reference path property, which comes from the .USER file.
+            (3) The hintpath from the referenced item itself, indicated by {HintPathFromItem}.
+            (4) The directory of MSBuild's "target" runtime from GetFrameworkPath.
+                The "target" runtime folder is the folder of the runtime that MSBuild is a part of.
+            (5) Registered assembly folders, indicated by {Registry:*,*,*}
+            (6) Assembly folders from AssemblyFolders.config file (provided by Visual Studio Dev15+).
+            (7) Legacy registered assembly folders, indicated by {AssemblyFolders}
+            (8) Resolve to the GAC.
+            (9) Treat the reference's Include as if it were a real file name.
+            (10) Look in the application's output folder (like bin\debug)
+        -->
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseCandidateAssemblyFiles) != 'false'">{CandidateAssemblyFiles}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseReferencePath) != 'false'">$(AssemblySearchPaths);$(ReferencePath)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseHintPathFromItem) != 'false'">$(AssemblySearchPaths);{HintPathFromItem}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseTargetFrameworkDirectory) != 'false'">$(AssemblySearchPaths);{TargetFrameworkDirectory}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseAssemblyFoldersConfigFileSearchPath) != 'false'">$(AssemblySearchPaths);$(AssemblyFoldersConfigFileSearchPath)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseRegistry) != 'false'">$(AssemblySearchPaths);{Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseAssemblyFolders) != 'false'">$(AssemblySearchPaths);{AssemblyFolders}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseGAC) != 'false'">$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseRawFileName) != 'false'">$(AssemblySearchPaths);{RawFileName}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="$(AssemblySearchPathUseOutDir) != 'false'">$(AssemblySearchPaths);$(OutDir)</AssemblySearchPaths>
   </PropertyGroup>
 
   <!-- ContinueOnError takes 3 values:  WarnAndContinue (true), ErrorAndStop (false), and ErrorAndContinue.
