@@ -354,8 +354,6 @@ namespace Microsoft.Build.Framework
     }
     public partial class LazyFormattedBuildEventArgs : Microsoft.Build.Framework.BuildEventArgs
     {
-        [System.NonSerializedAttribute]
-        protected object locker;
         protected LazyFormattedBuildEventArgs() { }
         public LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName) { }
         public LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
