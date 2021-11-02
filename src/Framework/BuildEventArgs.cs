@@ -181,7 +181,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into</param>
         /// <param name="messageToWrite">The message to write to the stream.</param>
-        private protected void WriteToStream(BinaryWriter writer, string messageToWrite)
+        private protected void WriteToStreamWithExplicitMessage(BinaryWriter writer, string messageToWrite)
         {
             writer.WriteOptionalString(messageToWrite);
             writer.WriteOptionalString(helpKeyword);
@@ -197,7 +197,7 @@ namespace Microsoft.Build.Framework
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into</param>
         internal virtual void WriteToStream(BinaryWriter writer)
         {
-            WriteToStream(writer, message);
+            WriteToStreamWithExplicitMessage(writer, message);
         }
 
         /// <summary>
