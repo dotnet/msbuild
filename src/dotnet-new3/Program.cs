@@ -24,13 +24,15 @@ namespace Dotnet_new3
         public static int Main(string[] args)
         {
             Command new3Command = new New3Command();
-            ParseResult preParseResult = new3Command.Parse(args);
+            ParseResult preParseResult = ParserFactory.CreateParser(new3Command).Parse(args);
 
             DefaultTemplateEngineHost host = CreateHost(preParseResult.GetValueForOption(New3Command.DebugDisableBuiltInTemplatesOption));
             ITelemetryLogger telemetryLogger = new TelemetryLogger(null, preParseResult.GetValueForOption(New3Command.DebugEmitTelemetryOption));
             string[] remainingArgs = preParseResult.GetValueForArgument(New3Command.RemainingTokensArgument) ?? Array.Empty<string>();
 
-            return NewCommandFactory.Create(new3Command.Name, host, telemetryLogger, new NewCommandCallbacks()).Invoke(remainingArgs);
+            Command newCommand = NewCommandFactory.Create(new3Command.Name, host, telemetryLogger, new NewCommandCallbacks());
+
+            return ParserFactory.CreateParser(newCommand).Parse(remainingArgs).Invoke();
         }
 
         private static DefaultTemplateEngineHost CreateHost(bool disableSdkTemplates)
