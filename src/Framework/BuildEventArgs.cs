@@ -143,7 +143,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         protected internal string RawMessage
         {
-            get => message;
+            get => FormattedMessage;
             set => message = value;
         }
 
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Framework
         /// Like <see cref="RawMessage"/> but returns a formatted message string if available.
         /// Used for serialization.
         /// </summary>
-        private protected virtual string RawFormattedMessage
+        private protected virtual string FormattedMessage
         {
             get => message;
         }
@@ -197,7 +197,7 @@ namespace Microsoft.Build.Framework
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into</param>
         internal virtual void WriteToStream(BinaryWriter writer)
         {
-            WriteToStreamWithExplicitMessage(writer, message);
+            WriteToStreamWithExplicitMessage(writer, RawMessage);
         }
 
         /// <summary>

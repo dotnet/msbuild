@@ -29,9 +29,9 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Exposes the formatted message string to serializers.
         /// </summary>
-        private protected override string RawFormattedMessage
+        private protected override string FormattedMessage
         {
-            get => (argumentsOrFormattedMessage is string formattedMessage) ? formattedMessage : base.RawFormattedMessage;
+            get => (argumentsOrFormattedMessage is string formattedMessage) ? formattedMessage : base.FormattedMessage;
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Microsoft.Build.Framework
             object argsOrMessage = argumentsOrFormattedMessage;
             if (argsOrMessage is object[] arguments && arguments.Length > 0)
             {
-                base.WriteToStream(writer);
+                base.WriteToStreamWithExplicitMessage(writer, base.Message);
                 writer.Write(arguments.Length);
 
                 foreach (object argument in arguments)
@@ -142,7 +142,7 @@ namespace Microsoft.Build.Framework
             }
             else
             {
-                base.WriteToStreamWithExplicitMessage(writer, (argsOrMessage is string formattedMessage) ? formattedMessage : RawMessage);
+                base.WriteToStreamWithExplicitMessage(writer, (argsOrMessage is string formattedMessage) ? formattedMessage : base.Message);
                 writer.Write(-1);
             }
 
