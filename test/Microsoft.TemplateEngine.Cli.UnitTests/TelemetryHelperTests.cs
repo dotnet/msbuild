@@ -78,8 +78,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal("foo", canonical);
         }
 
-        [Fact(DisplayName = nameof(UniqueStartsWithValueResolvesCanonicalValueTest))]
-        public void UniqueStartsWithValueResolvesCanonicalValueTest()
+        [Fact]
+        public void UniqueStartsWithValueDoNotResolvesCanonicalValueTest()
         {
             ITemplateParameter param = new TemplateParameter(
                 name: "TestName",
@@ -95,7 +95,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
             string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "f");
-            Assert.Equal("foo", canonical);
+            Assert.Null(canonical);
         }
 
         [Fact(DisplayName = nameof(AmbiguousStartsWithValueHasNullCanonicalValueTest))]
@@ -127,7 +127,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 name: "TestName",
                 type: "parameter",
                 datatype: "choice",
-                choices: new Dictionary<string, ParameterChoice>()
+                choices: new Dictionary<string, ParameterChoice>(StringComparer.OrdinalIgnoreCase)
                 {
                     { "foo", new ParameterChoice("Foo", "Foo value") },
                     { "bar", new ParameterChoice("Bar", "Bar value") }
@@ -137,7 +137,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
             string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "FOO");
-            Assert.Equal("foo", canonical);
+            Assert.Equal("FOO", canonical);
         }
 
         [Fact(DisplayName = nameof(ChoiceValueCaseDifferencesContributeToAmbiguousMatchTest))]
