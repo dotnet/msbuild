@@ -6,7 +6,6 @@
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.NuGet;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
@@ -39,20 +38,12 @@ namespace Microsoft.TemplateEngine.Cli
         /// Checks if there is an update for the package containing the <paramref name="template"/>.
         /// </summary>
         /// <param name="template">template to check the update for.</param>
-        /// <param name="commandInput"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Task for checking the update or null when check for update is not possible.</returns>
-        internal async Task<CheckUpdateResult?> CheckUpdateForTemplate(ITemplateInfo template, INewCommandInput commandInput, CancellationToken cancellationToken = default)
+        internal async Task<CheckUpdateResult?> CheckUpdateForTemplate(ITemplateInfo template, CancellationToken cancellationToken = default)
         {
             _ = template ?? throw new ArgumentNullException(nameof(template));
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
-
-            if (commandInput.NoUpdateCheck)
-            {
-                Reporter.Verbose.WriteLine("The check for update is skipped by user.");
-                return null;
-            }
 
             ITemplatePackage templatePackage;
             try
@@ -70,15 +61,13 @@ namespace Microsoft.TemplateEngine.Cli
                 //update is not supported - built-in or optional workload source
                 return null;
             }
-
-            InitializeNuGetCredentialService(commandInput);
+            InitializeNuGetCredentialService(interactive: false);
             return (await managedTemplatePackage.ManagedProvider.GetLatestVersionsAsync(new[] { managedTemplatePackage }, cancellationToken).ConfigureAwait(false)).Single();
         }
 
-        internal void DisplayUpdateCheckResult(CheckUpdateResult versionCheckResult, INewCommandInput commandInput)
+        internal void DisplayUpdateCheckResult(CheckUpdateResult versionCheckResult, string commandName)
         {
             _ = versionCheckResult ?? throw new ArgumentNullException(nameof(versionCheckResult));
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
 
             if (versionCheckResult.Success)
             {
@@ -89,7 +78,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                     Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
                     Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(
-                        commandInput.CommandName,
+                        commandName,
                         packageID: versionCheckResult.TemplatePackage.Identifier,
                         version: versionCheckResult.LatestVersion));
                 }
@@ -100,29 +89,10 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private static void InitializeNuGetCredentialService(INewCommandInput commandInput)
-        {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
-
-            try
-            {
-                DefaultCredentialServiceUtility.SetupDefaultCredentialService(new CliNuGetLogger(), !commandInput.IsInteractiveFlagSpecified);
-            }
-            catch (Exception ex)
-            {
-                Reporter.Verbose.WriteLine(
-                    string.Format(
-                        LocalizableStrings.TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError,
-                        ex.ToString()));
-            }
-        }
-
         /// <summary>
         /// Install the template package(s) flow (--install, -i).
         /// </summary>
-#pragma warning disable SA1202 // Elements should be ordered by access
         internal async Task<NewCommandStatus> EnterInstallFlowAsync(InstallCommandArgs args, CancellationToken cancellationToken)
-#pragma warning restore SA1202 // Elements should be ordered by access
         {
             _ = args ?? throw new ArgumentNullException(nameof(args));
             _ = args.TemplatePackages ?? throw new ArgumentNullException(nameof(args.TemplatePackages));
@@ -131,6 +101,7 @@ namespace Microsoft.TemplateEngine.Cli
                 throw new ArgumentException($"{nameof(args.TemplatePackages)} should have at least one item to continue.", nameof(args.TemplatePackages));
             }
             cancellationToken.ThrowIfCancellationRequested();
+            InitializeNuGetCredentialService(args.Interactive);
 
             NewCommandStatus resultStatus = NewCommandStatus.Success;
             _telemetryLogger.TrackEvent(args.CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, args.TemplatePackages.Count.ToString() } });
@@ -209,6 +180,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             _ = commandArgs ?? throw new ArgumentNullException(nameof(commandArgs));
             cancellationToken.ThrowIfCancellationRequested();
+            InitializeNuGetCredentialService(commandArgs.Interactive);
 
             bool applyUpdates = !commandArgs.CheckOnly;
             bool allTemplatesUpToDate = true;
@@ -264,9 +236,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Uninstall the template package(s) flow (--uninstall, -u).
         /// </summary>
-#pragma warning disable SA1202 // Elements should be ordered by access
         internal async Task<NewCommandStatus> EnterUninstallFlowAsync(UninstallCommandArgs args, CancellationToken cancellationToken)
-#pragma warning restore SA1202 // Elements should be ordered by access
         {
             _ = args ?? throw new ArgumentNullException(nameof(args));
             cancellationToken.ThrowIfCancellationRequested();
@@ -302,6 +272,21 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
             return result;
+        }
+
+        private static void InitializeNuGetCredentialService(bool interactive)
+        {
+            try
+            {
+                DefaultCredentialServiceUtility.SetupDefaultCredentialService(new CliNuGetLogger(), !interactive);
+            }
+            catch (Exception ex)
+            {
+                Reporter.Verbose.WriteLine(
+                    string.Format(
+                        LocalizableStrings.TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError,
+                        ex.ToString()));
+            }
         }
 
         private async Task<(NewCommandStatus, Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>)> DetermineSourcesToUninstallAsync(UninstallCommandArgs commandArgs, CancellationToken cancellationToken)
