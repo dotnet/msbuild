@@ -86,12 +86,10 @@ namespace Microsoft.Build.Framework
             if (!string.IsNullOrEmpty(programFiles32))
             {
                 RegisterImmutableDirectory(Path.Combine(programFiles32, "Reference Assemblies", "Microsoft"));
-                RegisterImmutableDirectory(Path.Combine(programFiles32, "dotnet"));
             }
             if (!string.IsNullOrEmpty(programFiles64))
             {
                 RegisterImmutableDirectory(Path.Combine(programFiles64, "Reference Assemblies", "Microsoft"));
-                RegisterImmutableDirectory(Path.Combine(programFiles64, "dotnet"));
             }
             RegisterImmutableDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"));
             RegisterImmutableDirectory(GetVSInstallationDirectory());
