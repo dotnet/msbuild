@@ -5,9 +5,9 @@ using System;
 using Microsoft.Deployment.DotNet.Releases;
 
 #nullable disable
-namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
+namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    internal struct SdkFeatureBand : IEquatable<SdkFeatureBand>, IComparable<SdkFeatureBand>
+    public struct SdkFeatureBand : IEquatable<SdkFeatureBand>, IComparable<SdkFeatureBand>
     {
         private ReleaseVersion _featureBand;
 
@@ -16,7 +16,19 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
         public SdkFeatureBand(ReleaseVersion version)
         {
             var fullVersion = version ?? throw new ArgumentNullException(nameof(version));
-            _featureBand = new ReleaseVersion(fullVersion.Major, fullVersion.Minor, fullVersion.SdkFeatureBand);
+            if (string.IsNullOrEmpty(version.Prerelease) || version.Prerelease.Contains("dev"))
+            {
+                _featureBand = new ReleaseVersion(fullVersion.Major, fullVersion.Minor, fullVersion.SdkFeatureBand);
+            }
+            else
+            {
+                // Treat preview versions as their own feature bands
+                var prereleaseComponents = fullVersion.Prerelease.Split('.');
+                var formattedPrerelease = prereleaseComponents.Length > 1 ? 
+                    $"{prereleaseComponents[0]}.{prereleaseComponents[1]}"
+                    : prereleaseComponents[0];
+                _featureBand = new ReleaseVersion(fullVersion.Major, fullVersion.Minor, fullVersion.SdkFeatureBand, formattedPrerelease);
+            }
         }
 
         public bool Equals(SdkFeatureBand other)
