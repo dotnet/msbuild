@@ -379,6 +379,7 @@ namespace Microsoft.Build.Execution
             Dictionary<string, string> taskFactoryParameters = null;
             string runtime = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Runtime, expanderOptions, projectUsingTaskXml.RuntimeLocation);
             string architecture = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Architecture, expanderOptions, projectUsingTaskXml.ArchitectureLocation);
+            string overrideUsingTask = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Override, expanderOptions, projectUsingTaskXml.OverrideLocation);
 
             if ((runtime != String.Empty) || (architecture != String.Empty))
             {
@@ -386,6 +387,12 @@ namespace Microsoft.Build.Execution
 
                 taskFactoryParameters.Add(XMakeAttributes.runtime, runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime);
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
+            }
+
+            if (overrideUsingTask.Equals("true", StringComparison.OrdinalIgnoreCase))
+            {
+                taskFactoryParameters ??= CreateTaskFactoryParametersDictionary();
+                taskFactoryParameters.Add(XMakeAttributes.overrideUsingTask, overrideUsingTask);
             }
 
             taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord);
