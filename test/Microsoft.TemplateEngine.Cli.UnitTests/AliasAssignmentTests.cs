@@ -1,9 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Utils;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
@@ -44,246 +42,163 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(LongNameOverrideTakesPrecendence))]
         public void LongNameOverrideTakesPrecendence()
         {
-            IReadOnlyList<string> paramNameList = new List<string>()
+            IReadOnlyList<CliTemplateParameter> paramList = new List<CliTemplateParameter>()
             {
-                "foo",
-                "bar",
+                new CliTemplateParameter("foo"),
+                new CliTemplateParameter("bar", longNameOverrides: new[] { "foo" })
             };
-            IReadOnlyList<ITemplateParameter> parameters = ParameterNamesToParametersTransform(paramNameList);
 
-            IDictionary<string, string> longNameOverrides = new Dictionary<string, string>()
-            {
-                { "bar", "foo" } // bar explicitly wants foo for its long form
-            };
-            IDictionary<string, string> shortNameOverrides = new Dictionary<string, string>();
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases).ToDictionary(r => r.Parameter.Name, r => r);
 
-            AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameters, longNameOverrides, shortNameOverrides, InitiallyTakenAliases);
-
-            Assert.Equal("--param:foo", assignmentCoordinator.LongNameAssignments["foo"]);
-            Assert.Equal("-f", assignmentCoordinator.ShortNameAssignments["foo"]);
-            Assert.Equal("--foo", assignmentCoordinator.LongNameAssignments["bar"]);
-            Assert.Equal("-fo", assignmentCoordinator.ShortNameAssignments["bar"]); // the short name is based on the long name override if it exists
-            Assert.Empty(assignmentCoordinator.InvalidParams);
+            Assert.Contains("--param:foo", result["foo"].Aliases);
+            Assert.Contains("-f", result["foo"].Aliases);
+            Assert.Contains("--foo", result["bar"].Aliases);
+            Assert.Contains("-fo", result["bar"].Aliases); // the short name is based on the long name override if it exists
+            Assert.DoesNotContain(result, r => r.Value.Errors.Any());
         }
 
         [Fact(DisplayName = nameof(ShortNameOverrideTakesPrecedence))]
         public void ShortNameOverrideTakesPrecedence()
         {
-            IReadOnlyList<string> paramNameList = new List<string>()
+            IReadOnlyList<CliTemplateParameter> paramList = new List<CliTemplateParameter>()
             {
-                "foo",
-                "bar",
-            };
-            IReadOnlyList<ITemplateParameter> parameters = ParameterNamesToParametersTransform(paramNameList);
-
-            IDictionary<string, string> longNameOverrides = new Dictionary<string, string>();
-            IDictionary<string, string> shortNameOverrides = new Dictionary<string, string>()
-            {
-                { "bar", "f" } // bar explicitly wants f for its short form
+                new CliTemplateParameter("foo"),
+                new CliTemplateParameter("bar", shortNameOverrides: new[] { "f" })
             };
 
-            AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameters, longNameOverrides, shortNameOverrides, InitiallyTakenAliases);
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases).ToDictionary(r => r.Parameter.Name, r => r);
 
-            Assert.Equal("--foo", assignmentCoordinator.LongNameAssignments["foo"]);
-            Assert.Equal("-fo", assignmentCoordinator.ShortNameAssignments["foo"]);
-            Assert.Equal("--bar", assignmentCoordinator.LongNameAssignments["bar"]);
-            Assert.Equal("-f", assignmentCoordinator.ShortNameAssignments["bar"]);
-            Assert.Empty(assignmentCoordinator.InvalidParams);
+            Assert.Contains("--foo", result["foo"].Aliases);
+            Assert.Contains("-fo", result["foo"].Aliases);
+            Assert.Contains("--bar", result["bar"].Aliases);
+            Assert.Contains("-f", result["bar"].Aliases);
+            Assert.DoesNotContain(result, r => r.Value.Errors.Any());
         }
 
         [Fact(DisplayName = nameof(ShortNameExcludedWithEmptyStringOverride))]
         public void ShortNameExcludedWithEmptyStringOverride()
         {
-            IReadOnlyList<string> paramNameList = new List<string>()
+            IReadOnlyList<CliTemplateParameter> paramList = new List<CliTemplateParameter>()
             {
-                "foo",
-                "bar",
+                new CliTemplateParameter("foo"),
+                new CliTemplateParameter("bar", shortNameOverrides: new[] { "" })
             };
-            IReadOnlyList<ITemplateParameter> parameters = ParameterNamesToParametersTransform(paramNameList);
+  
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases).ToDictionary(r => r.Parameter.Name, r => r);
 
-            IDictionary<string, string> longNameOverrides = new Dictionary<string, string>();
-            IDictionary<string, string> shortNameOverrides = new Dictionary<string, string>()
-            {
-                { "bar", "" } // bar explicitly wants f for its short form
-            };
-
-            AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameters, longNameOverrides, shortNameOverrides, InitiallyTakenAliases);
-
-            Assert.Equal("--foo", assignmentCoordinator.LongNameAssignments["foo"]);
-            Assert.Equal("-f", assignmentCoordinator.ShortNameAssignments["foo"]);
-            Assert.Equal("--bar", assignmentCoordinator.LongNameAssignments["bar"]);
-            Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("bar", out string placeholder));
-            Assert.Empty(assignmentCoordinator.InvalidParams);
+            Assert.Contains("--foo", result["foo"].Aliases);
+            Assert.Contains("-f", result["foo"].Aliases);
+            Assert.Contains("--bar", result["bar"].Aliases);
+            Assert.Single(result["bar"].Aliases);
+            Assert.DoesNotContain(result, r => r.Value.Errors.Any());
         }
 
         [Fact(DisplayName = nameof(ParameterNameCannotContainColon))]
         public void ParameterNameCannotContainColon()
         {
-            IReadOnlyList<string> paramNameList = new List<string>()
+            IReadOnlyList<CliTemplateParameter> paramList = new List<CliTemplateParameter>()
             {
-                "foo:bar",
+                new CliTemplateParameter("foo:bar"),
             };
-            IReadOnlyList<ITemplateParameter> parameters = ParameterNamesToParametersTransform(paramNameList);
 
-            IDictionary<string, string> longNameOverrides = new Dictionary<string, string>();
-            IDictionary<string, string> shortNameOverrides = new Dictionary<string, string>();
-
-            AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameters, longNameOverrides, shortNameOverrides, InitiallyTakenAliases);
-
-            Assert.Equal(0, assignmentCoordinator.LongNameAssignments.Count);
-            Assert.Equal(0, assignmentCoordinator.ShortNameAssignments.Count);
-            Assert.Single(assignmentCoordinator.InvalidParams);
-            Assert.Contains("foo:bar", assignmentCoordinator.InvalidParams);
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases).ToDictionary(r => r.Parameter.Name, r => r);
+            Assert.Empty(result["foo:bar"].Aliases);
+            Assert.Single(result["foo:bar"].Errors);
+            Assert.Contains("Parameter name 'foo:bar' contains colon, which is forbidden.", result["foo:bar"].Errors);
         }
 
         [Fact(DisplayName = nameof(ShortNameGetPrependedPColonIfNeeded))]
         public void ShortNameGetPrependedPColonIfNeeded()
         {
-            IReadOnlyList<string> paramNameList = new List<string>()
+            IReadOnlyList<CliTemplateParameter> paramList = new List<CliTemplateParameter>()
             {
-                "bar",
-                "f"
-            };
-            IReadOnlyList<ITemplateParameter> parameters = ParameterNamesToParametersTransform(paramNameList);
-
-            IDictionary<string, string> longNameOverrides = new Dictionary<string, string>();
-            IDictionary<string, string> shortNameOverrides = new Dictionary<string, string>()
-            {
-                { "bar", "f" }
+                new CliTemplateParameter("bar", shortNameOverrides: new [] { "f" }),
+                new CliTemplateParameter("f")
             };
 
-            AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameters, longNameOverrides, shortNameOverrides, InitiallyTakenAliases);
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases).ToDictionary(r => r.Parameter.Name, r => r);
 
-            Assert.Equal("--bar", assignmentCoordinator.LongNameAssignments["bar"]);
-            Assert.Equal("-f", assignmentCoordinator.ShortNameAssignments["bar"]);
-            Assert.Equal("--f", assignmentCoordinator.LongNameAssignments["f"]);
-            Assert.Equal("-p:f", assignmentCoordinator.ShortNameAssignments["f"]);
+            Assert.Contains("--bar", result["bar"].Aliases);
+            Assert.Contains("-f", result["bar"].Aliases);
+            Assert.Contains("--f", result["f"].Aliases);
+            Assert.Contains("-p:f", result["f"].Aliases);
+            Assert.DoesNotContain(result, r => r.Value.Errors.Any());
         }
 
         // This reflects the MVC 2.0 tempalte as of May 24, 2017
         [Fact(DisplayName = nameof(CheckAliasAssignmentsMvc20))]
         public void CheckAliasAssignmentsMvc20()
         {
-            IReadOnlyList<string> paramNameList = new List<string>()
+            IReadOnlyList<CliTemplateParameter> paramList = new List<CliTemplateParameter>()
             {
-                "auth",
-                "AAdB2CInstance",
-                "SignUpSignInPolicyId",
-                "ResetPasswordPolicyId",
-                "EditProfilePolicyId",
-                "AADInstance",
-                "ClientId",
-                "Domain",
-                "TenantId",
-                "CallbackPath",
-                "OrgReadAccess",
-                "UserSecretsId",
-                "IncludeLaunchSettings",
-                "HttpsPort",
-                "KestrelPort",
-                "IISExpressPort",
-                "UseLocalDB",
-                "TargetFrameworkOverride",
-                "Framework",
-                "NoTools",
-                "skipRestore",
-            };
-            IReadOnlyList<ITemplateParameter> parameters = ParameterNamesToParametersTransform(paramNameList);
-
-            IDictionary<string, string> longNameOverrides = new Dictionary<string, string>()
-            {
-                { "TargetFrameworkOverride", "target-framework-override" },
-                { "UseLocalDB", "use-local-db" },
-                { "AADInstance", "aad-instance" },
-                { "AAdB2CInstance", "aad-b2c-instance" },
-                { "SignUpSignInPolicyId", "susi-policy-id" },
-                { "ResetPasswordPolicyId", "reset-password-policy-id" },
-                { "EditProfilePolicyId", "edit-profile-policy-id" },
-                { "OrgReadAccess", "org-read-access" },
-                { "ClientId", "client-id" },
-                { "CallbackPath", "callback-path" },
-                { "Domain", "domain" },
-                { "TenantId", "tenant-id" },
-                { "Framework", "framework" },
-                { "NoTools", "no-tools" },
-                { "skipRestore", "no-restore" },
+                new CliTemplateParameter("auth"),
+                new CliTemplateParameter("AAdB2CInstance", longNameOverrides: new [] { "aad-b2c-instance" }, shortNameOverrides: new [] { "" }),
+                new CliTemplateParameter("SignUpSignInPolicyId", longNameOverrides: new [] { "susi-policy-id" }, shortNameOverrides: new [] { "ssp" }),
+                new CliTemplateParameter("ResetPasswordPolicyId", longNameOverrides: new [] { "reset-password-policy-id" }, shortNameOverrides: new [] { "rp" }),
+                new CliTemplateParameter("EditProfilePolicyId", longNameOverrides: new [] { "edit-profile-policy-id" }, shortNameOverrides: new [] { "ep" }),
+                new CliTemplateParameter("AADInstance", longNameOverrides: new [] { "aad-instance" }, shortNameOverrides: new [] { "" } ),
+                new CliTemplateParameter("ClientId", longNameOverrides: new [] { "client-id" }, shortNameOverrides: new [] { "" }),
+                new CliTemplateParameter("Domain", longNameOverrides: new [] { "domain" }, shortNameOverrides: new [] { "" }),
+                new CliTemplateParameter("TenantId", longNameOverrides: new [] { "tenant-id" }, shortNameOverrides: new [] { "" }),
+                new CliTemplateParameter("CallbackPath", longNameOverrides: new [] { "callback-path" }, shortNameOverrides: new [] { "" }),
+                new CliTemplateParameter("OrgReadAccess", longNameOverrides: new [] { "org-read-access" }, shortNameOverrides: new [] { "r" }),
+                new CliTemplateParameter("UserSecretsId"),
+                new CliTemplateParameter("IncludeLaunchSettings"),
+                new CliTemplateParameter("HttpsPort"),
+                new CliTemplateParameter("KestrelPort"),
+                new CliTemplateParameter("IISExpressPort"),
+                new CliTemplateParameter("UseLocalDB", longNameOverrides: new [] { "use-local-db" }),
+                new CliTemplateParameter("TargetFrameworkOverride", longNameOverrides: new [] { "target-framework-override" }, shortNameOverrides: new [] { "" }),
+                new CliTemplateParameter("Framework", longNameOverrides: new [] { "framework" }),
+                new CliTemplateParameter("NoTools", longNameOverrides: new [] { "no-tools" }),
+                new CliTemplateParameter("skipRestore", longNameOverrides: new [] { "no-restore" }, shortNameOverrides: new [] { "" })
             };
 
-            IDictionary<string, string> shortNameOverrides = new Dictionary<string, string>()
-            {
-                { "TargetFrameworkOverride", "" },
-                { "AADInstance", "" },
-                { "AAdB2CInstance", "" },
-                { "SignUpSignInPolicyId", "ssp" },
-                { "ResetPasswordPolicyId", "rp" },
-                { "EditProfilePolicyId", "ep" },
-                { "OrgReadAccess", "r" },
-                { "ClientId", "" },
-                { "CallbackPath", "" },
-                { "Domain", "" },
-                { "TenantId", "" },
-                { "skipRestore", "" },
-            };
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases).ToDictionary(r => r.Parameter.Name, r => r);
 
-            AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameters, longNameOverrides, shortNameOverrides, InitiallyTakenAliases);
-
-            Assert.Equal("-au", assignmentCoordinator.ShortNameAssignments["auth"]);
-            Assert.Equal("--auth", assignmentCoordinator.LongNameAssignments["auth"]);
-            Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("AAdB2CInstance", out string placeholder));
-            Assert.Equal("--aad-b2c-instance", assignmentCoordinator.LongNameAssignments["AAdB2CInstance"]);
-            Assert.Equal("-ssp", assignmentCoordinator.ShortNameAssignments["SignUpSignInPolicyId"]);
-            Assert.Equal("--susi-policy-id", assignmentCoordinator.LongNameAssignments["SignUpSignInPolicyId"]);
-            Assert.Equal("-rp", assignmentCoordinator.ShortNameAssignments["ResetPasswordPolicyId"]);
-            Assert.Equal("--reset-password-policy-id", assignmentCoordinator.LongNameAssignments["ResetPasswordPolicyId"]);
-            Assert.Equal("-ep", assignmentCoordinator.ShortNameAssignments["EditProfilePolicyId"]);
-            Assert.Equal("--edit-profile-policy-id", assignmentCoordinator.LongNameAssignments["EditProfilePolicyId"]);
-            Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("AADInstance", out placeholder));
-            Assert.Equal("--aad-instance", assignmentCoordinator.LongNameAssignments["AADInstance"]);
-            Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("ClientId", out placeholder));
-            Assert.Equal("--client-id", assignmentCoordinator.LongNameAssignments["ClientId"]);
-            Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("Domain", out placeholder));
-            Assert.Equal("--domain", assignmentCoordinator.LongNameAssignments["Domain"]);
-            Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("TenantId", out placeholder));
-            Assert.Equal("--tenant-id", assignmentCoordinator.LongNameAssignments["TenantId"]);
-            Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("CallbackPath", out placeholder));
-            Assert.Equal("--callback-path", assignmentCoordinator.LongNameAssignments["CallbackPath"]);
-            Assert.Equal("-r", assignmentCoordinator.ShortNameAssignments["OrgReadAccess"]);
-            Assert.Equal("--org-read-access", assignmentCoordinator.LongNameAssignments["OrgReadAccess"]);
-            Assert.Equal("-U", assignmentCoordinator.ShortNameAssignments["UserSecretsId"]);
-            Assert.Equal("--UserSecretsId", assignmentCoordinator.LongNameAssignments["UserSecretsId"]);
-            Assert.Equal("-I", assignmentCoordinator.ShortNameAssignments["IncludeLaunchSettings"]);
-            Assert.Equal("--IncludeLaunchSettings", assignmentCoordinator.LongNameAssignments["IncludeLaunchSettings"]);
-            Assert.Equal("-H", assignmentCoordinator.ShortNameAssignments["HttpsPort"]);
-            Assert.Equal("--HttpsPort", assignmentCoordinator.LongNameAssignments["HttpsPort"]);
-            Assert.Equal("-K", assignmentCoordinator.ShortNameAssignments["KestrelPort"]);
-            Assert.Equal("--KestrelPort", assignmentCoordinator.LongNameAssignments["KestrelPort"]);
-            Assert.Equal("-II", assignmentCoordinator.ShortNameAssignments["IISExpressPort"]);
-            Assert.Equal("--IISExpressPort", assignmentCoordinator.LongNameAssignments["IISExpressPort"]);
-            Assert.Equal("-uld", assignmentCoordinator.ShortNameAssignments["UseLocalDB"]);
-            Assert.Equal("--use-local-db", assignmentCoordinator.LongNameAssignments["UseLocalDB"]);
-            Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("TargetFrameworkOverride", out placeholder));
-            Assert.Equal("--target-framework-override", assignmentCoordinator.LongNameAssignments["TargetFrameworkOverride"]);
-            Assert.Equal("-f", assignmentCoordinator.ShortNameAssignments["Framework"]);
-            Assert.Equal("--framework", assignmentCoordinator.LongNameAssignments["Framework"]);
-            Assert.Equal("-nt", assignmentCoordinator.ShortNameAssignments["NoTools"]);
-            Assert.Equal("--no-tools", assignmentCoordinator.LongNameAssignments["NoTools"]);
-            Assert.False(assignmentCoordinator.ShortNameAssignments.TryGetValue("SkipRestore", out placeholder));
-            Assert.Equal("--no-restore", assignmentCoordinator.LongNameAssignments["skipRestore"]);
-            Assert.Empty(assignmentCoordinator.InvalidParams);
-        }
-
-        // fills in enough of the parameter info for alias assignment
-        private static IReadOnlyList<ITemplateParameter> ParameterNamesToParametersTransform(IReadOnlyList<string> paramNameList)
-        {
-            List<ITemplateParameter> parameterList = new List<ITemplateParameter>();
-
-            foreach (string paramName in paramNameList)
-            {
-                ITemplateParameter parameter = new TemplateParameter(paramName, type: "parameter", datatype: "string", priority: TemplateParameterPriority.Required);
-                parameterList.Add(parameter);
-            }
-
-            return parameterList;
+            Assert.Contains("-au", result["auth"].Aliases);
+            Assert.Contains("--auth", result["auth"].Aliases);
+            Assert.Single(result["AAdB2CInstance"].Aliases);
+            Assert.Contains("--aad-b2c-instance", result["AAdB2CInstance"].Aliases);
+            Assert.Contains("-ssp", result["SignUpSignInPolicyId"].Aliases);
+            Assert.Contains("--susi-policy-id", result["SignUpSignInPolicyId"].Aliases);
+            Assert.Contains("-rp", result["ResetPasswordPolicyId"].Aliases);
+            Assert.Contains("--reset-password-policy-id", result["ResetPasswordPolicyId"].Aliases);
+            Assert.Contains("-ep", result["EditProfilePolicyId"].Aliases);
+            Assert.Contains("--edit-profile-policy-id", result["EditProfilePolicyId"].Aliases);
+            Assert.Single(result["AADInstance"].Aliases);
+            Assert.Contains("--aad-instance", result["AADInstance"].Aliases);
+            Assert.Single(result["ClientId"].Aliases);
+            Assert.Contains("--client-id", result["ClientId"].Aliases);
+            Assert.Single(result["Domain"].Aliases);
+            Assert.Contains("--domain", result["Domain"].Aliases);
+            Assert.Single(result["TenantId"].Aliases);
+            Assert.Contains("--tenant-id", result["TenantId"].Aliases);
+            Assert.Single(result["CallbackPath"].Aliases);
+            Assert.Contains("--callback-path", result["CallbackPath"].Aliases);
+            Assert.Contains("-r", result["OrgReadAccess"].Aliases);
+            Assert.Contains("--org-read-access", result["OrgReadAccess"].Aliases);
+            Assert.Contains("-U", result["UserSecretsId"].Aliases);
+            Assert.Contains("--UserSecretsId", result["UserSecretsId"].Aliases);
+            Assert.Contains("-I", result["IncludeLaunchSettings"].Aliases);
+            Assert.Contains("--IncludeLaunchSettings", result["IncludeLaunchSettings"].Aliases);
+            Assert.Contains("-H", result["HttpsPort"].Aliases);
+            Assert.Contains("--HttpsPort", result["HttpsPort"].Aliases);
+            Assert.Contains("-K", result["KestrelPort"].Aliases);
+            Assert.Contains("--KestrelPort", result["KestrelPort"].Aliases);
+            Assert.Contains("-II", result["IISExpressPort"].Aliases);
+            Assert.Contains("--IISExpressPort", result["IISExpressPort"].Aliases);
+            Assert.Contains("-uld", result["UseLocalDB"].Aliases);
+            Assert.Contains("--use-local-db", result["UseLocalDB"].Aliases);
+            Assert.Single(result["TargetFrameworkOverride"].Aliases);
+            Assert.Contains("--target-framework-override", result["TargetFrameworkOverride"].Aliases);
+            Assert.Contains("-f", result["Framework"].Aliases);
+            Assert.Contains("--framework", result["Framework"].Aliases);
+            Assert.Contains("-nt", result["NoTools"].Aliases);
+            Assert.Contains("--no-tools", result["NoTools"].Aliases);
+            Assert.Single(result["skipRestore"].Aliases);
+            Assert.Contains("--no-restore", result["skipRestore"].Aliases);
+            Assert.DoesNotContain(result, r => r.Value.Errors.Any());
         }
     }
 }
