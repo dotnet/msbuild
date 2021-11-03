@@ -350,7 +350,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            registry.PrioritizeArchitectureInUsingTasks = false;
 
             // Not in registry, so shouldn't match
             RetrieveAndValidateRegisteredTaskRecord
@@ -391,7 +390,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            registry.PrioritizeArchitectureInUsingTasks = false;
 
             // Not in registry, so shouldn't match
             RetrieveAndValidateRegisteredTaskRecord
@@ -434,7 +432,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            registry.PrioritizeArchitectureInUsingTasks = false;
 
             // Not in registry, so shouldn't match
             RetrieveAndValidateRegisteredTaskRecord
@@ -477,7 +474,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            registry.PrioritizeArchitectureInUsingTasks = false;
 
             // Not in registry, so shouldn't match
             RetrieveAndValidateRegisteredTaskRecord
@@ -520,7 +516,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            registry.PrioritizeArchitectureInUsingTasks = false;
 
             // no parameters - no match
             RetrieveAndValidateRegisteredTaskRecord
@@ -598,7 +593,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            registry.PrioritizeArchitectureInUsingTasks = false;
 
             // Runtime and architecture match the using task exactly, but since there is an additional parameter, it still
             // doesn't match when doing exact matching.
