@@ -46,7 +46,7 @@ namespace Microsoft.Build.Framework
         private static readonly char[] s_semicolonDelimiter = {';'};
 
         /// <summary>
-        ///     Singe, static <see cref="Lazy{T}"/> instance of shared file FileClassifier for <see cref="Shared"/> member.
+        ///     Single, static <see cref="Lazy{T}"/> instance of shared file FileClassifier for <see cref="Shared"/> member.
         /// </summary>
         private static readonly Lazy<FileClassifier> s_sharedInstance = new(() => new FileClassifier());
 

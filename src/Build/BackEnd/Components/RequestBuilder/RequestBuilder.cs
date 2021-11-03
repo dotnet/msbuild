@@ -1365,10 +1365,6 @@ namespace Microsoft.Build.BackEnd
             {
                 //example: C:\Users\USER_NAME\.nuget\;C:\Program Files\dotnet\sdk\NuGetFallbackFolder
                 FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("NuGetPackageFolders")?.Trim());
-                // example: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
-                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("MSBuildFrameworkToolsPath32")?.Trim());
-                // example:  C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
-                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("MSBuildFrameworkToolsPath64")?.Trim());
                 // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
                 FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("FrameworkPathOverride")?.Trim());
                 // example: C:\Program Files\dotnet\
