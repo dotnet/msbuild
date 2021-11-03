@@ -5,8 +5,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Framework
 {
@@ -92,28 +95,81 @@ namespace Microsoft.Build.Framework
                 RegisterImmutableDirectory(Path.Combine(programFiles64, "Reference Assemblies", "Microsoft"));
             }
             RegisterImmutableDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"));
-            RegisterImmutableDirectory(GetVSInstallationDirectory());
 
-            return;
+#if !RUNTIME_TYPE_NETCORE
+            RegisterImmutableDirectory(GetVSInstallationDirectory());
 
             static string? GetVSInstallationDirectory()
             {
                 string? dir = Environment.GetEnvironmentVariable("VSAPPIDDIR");
 
-                // The path provided is not the installation root, but rather the location of devenv.exe.
-                // __VSSPROPID.VSSPROPID_InstallDirectory has the same value.
-                // Failing a better way to obtain the installation root, remove that suffix.
-                // Obviously this is brittle against changes to the relative path of devenv.exe, however that seems
-                // unlikely and should be easy to work around if ever needed.
-                const string devEnvExeRelativePath = "Common7\\IDE\\";
-
-                if (dir?.EndsWith(devEnvExeRelativePath, PathComparison) == true)
+                if (dir != null)
                 {
-                    dir = dir.Substring(0, dir.Length - devEnvExeRelativePath.Length);
+                    // The path provided is not the installation root, but rather the location of devenv.exe.
+                    // __VSSPROPID.VSSPROPID_InstallDirectory has the same value.
+                    // Failing a better way to obtain the installation root, remove that suffix.
+                    // Obviously this is brittle against changes to the relative path of devenv.exe, however that seems
+                    // unlikely and should be easy to work around if ever needed.
+                    const string devEnvExeRelativePath = "Common7\\IDE\\";
+
+                    if (dir.EndsWith(devEnvExeRelativePath, PathComparison))
+                    {
+                        dir = dir.Substring(0, dir.Length - devEnvExeRelativePath.Length);
+
+                        return dir;
+                    }
                 }
 
-                return dir;
+                // TODO: Once BuildEnvironmentHelper makes it from Shared into Framework, rework the code bellow. Hint: implement GetVsRootFromMSBuildAssembly() in BuildEnvironmentHelper
+
+                // Seems like MSBuild did not run from VS but from CLI.
+                // Identify current process and run it
+                string processName = Process.GetCurrentProcess().MainModule.FileName;
+                string processFileName = Path.GetFileNameWithoutExtension(processName);
+
+                if (string.IsNullOrEmpty(processFileName))
+                {
+                    return null;
+                }
+
+                string[] msBuildProcess = { "MSBUILD", "MSBUILDTASKHOST" };
+                if (msBuildProcess.Any(s =>
+                    processFileName.Equals(s, StringComparison.OrdinalIgnoreCase)))
+                {
+                    // Check if we're in a VS installation
+                    if (Regex.IsMatch(processName, $@".*\\MSBuild\\Current\\Bin\\.*MSBuild(?:TaskHost)?\.exe", RegexOptions.IgnoreCase))
+                    {
+                        return GetVsRootFromMSBuildAssembly(processName);
+                    }
+                }
+
+                return null;
+
+                static string GetVsRootFromMSBuildAssembly(string msBuildAssembly)
+                {
+                    return GetFolderAbove(msBuildAssembly,
+                        Path.GetDirectoryName(msBuildAssembly)?.EndsWith(@"\amd64", StringComparison.OrdinalIgnoreCase) == true
+                            ? 5
+                            : 4);
+                }
+
+                static string GetFolderAbove(string path, int count = 1)
+                {
+                    if (count < 1)
+                        return path;
+
+                    var parent = Directory.GetParent(path);
+
+                    while (count > 1 && parent?.Parent != null)
+                    {
+                        parent = parent.Parent;
+                        count--;
+                    }
+
+                    return parent?.FullName ?? path;
+                }
             }
+#endif
         }
 
         /// <summary>
