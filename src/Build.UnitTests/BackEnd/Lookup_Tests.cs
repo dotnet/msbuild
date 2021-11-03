@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 

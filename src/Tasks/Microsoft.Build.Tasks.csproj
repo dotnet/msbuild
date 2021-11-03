@@ -180,8 +180,6 @@
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\InternalErrorException.cs">
-    </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

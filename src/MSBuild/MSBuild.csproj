@@ -115,7 +115,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs" />
-    <Compile Include="..\Shared\InternalErrorException.cs" />
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

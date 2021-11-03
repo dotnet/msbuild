@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;

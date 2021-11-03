@@ -16,7 +16,7 @@
     <RuntimeIdentifiers Condition="'$(DotNetBuildFromSource)' != 'true'">win7-x86;win7-x64</RuntimeIdentifiers>
 
     <EnableDefaultItems>false</EnableDefaultItems>
-    <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY;TASKHOST</DefineConstants>
+    <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY;TASKHOST;NO_FRAMEWORK_IVT</DefineConstants>
     <!-- Need pointers for getting environment block -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- It is vital that msbuildtaskhost.exe is allowed to use the full 4GB on 64 bit machines in order to help avoid

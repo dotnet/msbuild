@@ -725,9 +725,6 @@
     <Compile Include="..\Shared\IElementLocation.cs">
       <Link>SharedUtilities\IElementLocation.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\InternalErrorException.cs">
-      <Link>Errors\InternalErrorException.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\LoadedType.cs">
       <Link>SharedUtilities\LoadedType.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -10,7 +11,7 @@ using Xunit.Abstractions;
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
-    /// Tests for logging contexts. 
+    /// Tests for logging contexts.
     /// </summary>
     public class LoggingContext_Tests
     {

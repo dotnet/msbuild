@@ -57,9 +57,6 @@
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>FileUtilitiesRegex.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\InternalErrorException.cs">
-      <Link>InternalErrorException.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\NativeMethodsShared.cs">
       <Link>NativeMethodsShared.cs</Link>
     </Compile>

@@ -104,9 +104,6 @@
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>Shared\IConstrainedEqualityComparer.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\InternalErrorException.cs">
-      <Link>Shared\InternalErrorException.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\IKeyed.cs">
       <Link>Shared\IKeyed.cs</Link>
     </Compile>

@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 
+using Microsoft.Build.Framework;
+
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
 #else
