@@ -24,7 +24,7 @@ namespace Dotnet_new3
         public static int Main(string[] args)
         {
             Command new3Command = new New3Command();
-            ParseResult preParseResult = ParserFactory.CreateParser(new3Command).Parse(args);
+            ParseResult preParseResult = ParserFactory.CreateParser(new3Command, disableHelp: true).Parse(args);
 
             DefaultTemplateEngineHost host = CreateHost(preParseResult.GetValueForOption(New3Command.DebugDisableBuiltInTemplatesOption));
             ITelemetryLogger telemetryLogger = new TelemetryLogger(null, preParseResult.GetValueForOption(New3Command.DebugEmitTelemetryOption));

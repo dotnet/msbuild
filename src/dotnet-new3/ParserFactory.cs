@@ -11,17 +11,21 @@ namespace Dotnet_new3
 {
     internal static class ParserFactory
     {
-        internal static Parser CreateParser(Command command)
+        internal static Parser CreateParser(Command command, bool disableHelp = false)
         {
-            return new CommandLineBuilder(command)
+            var builder = new CommandLineBuilder(command)
             //.UseExceptionHandler(ExceptionHandler)
-            .UseHelp()
-            //.UseHelpBuilder(context => DotnetHelpBuilder.Instance.Value)
             //.UseLocalizationResources(new CommandLineValidationMessages())
             .UseParseDirective()
             .UseSuggestDirective()
-            .DisablePosixBinding()
-            .Build();
+            .DisablePosixBinding();
+
+            if (!disableHelp)
+            {
+                builder = builder.UseHelp();
+                //.UseHelpBuilder(context => DotnetHelpBuilder.Instance.Value)
+            }
+            return builder.Build();
         }
 
         private static CommandLineBuilder DisablePosixBinding(this CommandLineBuilder builder)
