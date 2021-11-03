@@ -147,47 +147,48 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             HashSet<string> initiallyTakenAliases = ArgsForBuiltInCommands;
 
             Dictionary<string, IReadOnlyList<string>> canonicalToVariantMap = new Dictionary<string, IReadOnlyList<string>>();
-            AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameterDefinitions, longNameOverrides, shortNameOverrides, initiallyTakenAliases);
+            throw new NotImplementedException();
+            //AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameterDefinitions, longNameOverrides, shortNameOverrides, initiallyTakenAliases);
 
-            if (assignmentCoordinator.InvalidParams.Count > 0)
-            {
-                string unusableDisplayList = string.Join(", ", assignmentCoordinator.InvalidParams);
-                throw new Exception($"Template is malformed. The following parameter names are invalid: {unusableDisplayList}");
-            }
+            //if (assignmentCoordinator.InvalidParams.Count > 0)
+            //{
+            //    string unusableDisplayList = string.Join(", ", assignmentCoordinator.InvalidParams);
+            //    throw new Exception($"Template is malformed. The following parameter names are invalid: {unusableDisplayList}");
+            //}
 
-            foreach (ITemplateParameter parameter in parameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit))
-            {
-                Option option;
-                IList<string> aliasesForParam = new List<string>();
+            //foreach (ITemplateParameter parameter in parameterDefinitions.Where(x => x.Priority != TemplateParameterPriority.Implicit))
+            //{
+            //    Option option;
+            //    IList<string> aliasesForParam = new List<string>();
 
-                if (assignmentCoordinator.LongNameAssignments.TryGetValue(parameter.Name, out string longVersion))
-                {
-                    aliasesForParam.Add(longVersion);
-                }
+            //    if (assignmentCoordinator.LongNameAssignments.TryGetValue(parameter.Name, out string longVersion))
+            //    {
+            //        aliasesForParam.Add(longVersion);
+            //    }
 
-                if (assignmentCoordinator.ShortNameAssignments.TryGetValue(parameter.Name, out string shortVersion))
-                {
-                    aliasesForParam.Add(shortVersion);
-                }
+            //    if (assignmentCoordinator.ShortNameAssignments.TryGetValue(parameter.Name, out string shortVersion))
+            //    {
+            //        aliasesForParam.Add(shortVersion);
+            //    }
 
-                if (!string.IsNullOrEmpty(parameter.DefaultIfOptionWithoutValue))
-                {
-                    // This switch can be provided with or without a value.
-                    // If the user doesn't specify a value, it gets the value of DefaultIfOptionWithoutValue
-                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Description, Accept.ZeroOrOneArgument());
-                }
-                else
-                {
-                    // User must provide a value if this switch is specified.
-                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Description, Accept.ExactlyOneArgument());
-                }
+            //    if (!string.IsNullOrEmpty(parameter.DefaultIfOptionWithoutValue))
+            //    {
+            //        // This switch can be provided with or without a value.
+            //        // If the user doesn't specify a value, it gets the value of DefaultIfOptionWithoutValue
+            //        option = Create.Option(string.Join("|", aliasesForParam), parameter.Description, Accept.ZeroOrOneArgument());
+            //    }
+            //    else
+            //    {
+            //        // User must provide a value if this switch is specified.
+            //        option = Create.Option(string.Join("|", aliasesForParam), parameter.Description, Accept.ExactlyOneArgument());
+            //    }
 
-                paramOptionList.Add(option);    // add the option
-                canonicalToVariantMap.Add(parameter.Name, aliasesForParam.ToList());   // map the template canonical name to its aliases.
-            }
+            //    paramOptionList.Add(option);    // add the option
+            //    canonicalToVariantMap.Add(parameter.Name, aliasesForParam.ToList());   // map the template canonical name to its aliases.
+            //}
 
-            templateParamMap = canonicalToVariantMap;
-            return GetNewCommandForTemplate(commandName, templateName, NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs, paramOptionList.ToArray());
+            //templateParamMap = canonicalToVariantMap;
+            //return GetNewCommandForTemplate(commandName, templateName, NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs, paramOptionList.ToArray());
         }
 
         internal static Command CreateNewCommandWithoutTemplateInfo(string commandName)

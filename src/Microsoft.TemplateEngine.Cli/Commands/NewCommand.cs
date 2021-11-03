@@ -65,6 +65,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             this.Add(new ListCommand(this, host, telemetryLogger, callbacks));
             this.Add(new LegacyListCommand(this, host, telemetryLogger, callbacks));
+
         }
 
         internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
@@ -132,41 +133,43 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             var templates = templatePackageManager.GetTemplatesAsync(CancellationToken.None).Result;
 
+            return Array.Empty<string>();
+
             //TODO: implement correct logic
-            if (!string.IsNullOrEmpty(args.ShortName))
-            {
-                var matchingTemplates = templates.Where(template => template.ShortNameList.Contains(args.ShortName));
-                HashSet<string> distinctSuggestions = new HashSet<string>();
+            //if (!string.IsNullOrEmpty(args.ShortName))
+            //{
+            //    var matchingTemplates = templates.Where(template => template.ShortNameList.Contains(args.ShortName));
+            //    HashSet<string> distinctSuggestions = new HashSet<string>();
 
-                foreach (var template in matchingTemplates)
-                {
-                    var templateGroupCommand = new TemplateGroupCommand(this, environmentSettings, template);
-                    var parsed = templateGroupCommand.Parse(args.Arguments ?? Array.Empty<string>());
-                    foreach (var suggestion in templateGroupCommand.GetSuggestions(parsed, textToMatch))
-                    {
-                        if (distinctSuggestions.Add(suggestion))
-                        {
-                            yield return suggestion;
-                        }
-                    }
-                }
-                yield break;
-            }
-            else
-            {
-                foreach (var template in templates)
-                {
-                    foreach (var suggestion in template.ShortNameList)
-                    {
-                        yield return suggestion;
-                    }
-                }
-            }
+            //    foreach (var template in matchingTemplates)
+            //    {
+            //        var templateGroupCommand = new TemplateGroupCommand(this, environmentSettings, template);
+            //        var parsed = templateGroupCommand.Parse(args.Arguments ?? Array.Empty<string>());
+            //        foreach (var suggestion in templateGroupCommand.GetSuggestions(parsed, textToMatch))
+            //        {
+            //            if (distinctSuggestions.Add(suggestion))
+            //            {
+            //                yield return suggestion;
+            //            }
+            //        }
+            //    }
+            //    yield break;
+            //}
+            //else
+            //{
+            //    foreach (var template in templates)
+            //    {
+            //        foreach (var suggestion in template.ShortNameList)
+            //        {
+            //            yield return suggestion;
+            //        }
+            //    }
+            //}
 
-            foreach (var suggestion in base.GetSuggestions(args, environmentSettings, textToMatch))
-            {
-                yield return suggestion;
-            }
+            //foreach (var suggestion in base.GetSuggestions(args, environmentSettings, textToMatch))
+            //{
+            //    yield return suggestion;
+            //}
         }
 
         protected override async Task<NewCommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
@@ -182,40 +185,40 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
 
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
+            var hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
 
             if (string.IsNullOrWhiteSpace(args.ShortName))
             {
                 TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
                     environmentSettings,
                     templatePackageManager,
-                    new HostSpecificDataLoader(environmentSettings),
+                    hostSpecificDataLoader,
                     TelemetryLogger);
 
-                //TODO: we need to await, otherwise templatePackageManager will be disposed.
                 return await templateListCoordinator.DisplayCommandDescriptionAsync(args, default).ConfigureAwait(false);
             }
 
             var templates = await templatePackageManager.GetTemplatesAsync(context.GetCancellationToken()).ConfigureAwait(false);
-            var template = templates.FirstOrDefault(template => template.ShortNameList.Contains(args.ShortName));
+            var templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
 
-            if (template == null)
+            //TODO: decide what to do if there are more than 1 group.
+            var selectedTemplateGroup = templateGroups.FirstOrDefault(template => template.ShortNames.Contains(args.ShortName));
+
+            if (selectedTemplateGroup == null)
             {
-                Reporter.Error.WriteLine($"Template {args.ShortName} doesn't exist.");
+                Reporter.Error.WriteLine(
+                    string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, args.ShortName).Bold().Red());
+                Reporter.Error.WriteLine();
+
+                Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
+                Reporter.Error.WriteCommand(CommandExamples.ListCommandExample(args.CommandName));
+
+                Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
+                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, args.ShortName));
+                Reporter.Error.WriteLine();
                 return NewCommandStatus.NotFound;
             }
-
-            //var dotnet = new Command("dotnet")
-            //{
-            //    TreatUnmatchedTokensAsErrors = false
-            //};
-            var newC = new Command(_commandName)
-            {
-                TreatUnmatchedTokensAsErrors = false
-            };
-            //dotnet.AddCommand(newC);
-            newC.AddCommand(new TemplateGroupCommand(this, environmentSettings, template));
-
-            return (NewCommandStatus)newC.Invoke(context.ParseResult.Tokens.Select(s => s.Value).ToArray());
+            return await HandleTemplateInstantationAsync(args, environmentSettings, templatePackageManager, selectedTemplateGroup).ConfigureAwait(false);
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
@@ -268,5 +271,52 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             return null;
         }
+
+        private async Task<NewCommandStatus> HandleTemplateInstantationAsync(
+            NewCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            TemplateGroup templateGroup)
+        {
+            foreach (IGrouping<int, CliTemplateInfo> templateGrouping in templateGroup.Templates.GroupBy(g => g.Precedence).OrderByDescending(g => g.Key))
+            {
+                HashSet<TemplateCommand> candidates = new HashSet<TemplateCommand>();
+                foreach (CliTemplateInfo template in templateGrouping)
+                {
+                    TemplateCommand command = new TemplateCommand(this, environmentSettings, templatePackageManager, templateGroup, template);
+                    Parser parser = TemplateParserFactory.CreateParser(command);
+                    ParseResult parseResult = parser.Parse(args.Arguments ?? Array.Empty<string>());
+                    if (!parseResult.Errors.Any())
+                    {
+                        candidates.Add(command);
+                    }
+                }
+                if (!candidates.Any())
+                {
+                    continue;
+                }
+                if (candidates.Count == 1)
+                {
+                    this.AddCommand(candidates.First());
+                    return (NewCommandStatus)await this.InvokeAsync(args.InitialTokens).ConfigureAwait(false);
+                }
+                return HandleAmbuguousResult();
+            }
+
+            //TODO: handle it better
+            Reporter.Error.WriteLine(
+                string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, args.ShortName).Bold().Red());
+            Reporter.Error.WriteLine();
+
+            Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
+            Reporter.Error.WriteCommand(CommandExamples.ListCommandExample(args.CommandName));
+
+            Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
+            Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, args.ShortName));
+            Reporter.Error.WriteLine();
+            return NewCommandStatus.NotFound;
+        }
+
+        private NewCommandStatus HandleAmbuguousResult() => throw new NotImplementedException();
     }
 }

@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             DebugReinit = parseResult.GetValueForOption(command.DebugReinitOption);
             DebugRebuildCache = parseResult.GetValueForOption(command.DebugRebuildCacheOption);
             DebugShowConfig = parseResult.GetValueForOption(command.DebugShowConfigOption);
-            CommandName = GetNewCommandName(parseResult);
+            CommandName = parseResult.GetNewCommandName();
             ParseResult = parseResult;
         }
 
@@ -42,15 +42,5 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return (parseResult.GetValueForOption(command.ColumnsAllOption), parseResult.GetValueForOption(command.ColumnsOption));
         }
 
-        private string GetNewCommandName(ParseResult parseResult)
-        {
-            var command = parseResult.CommandResult.Command;
-
-            while (command != null && command is not NewCommand)
-            {
-                command = (parseResult.CommandResult.Parent as CommandResult)?.Command;
-            }
-            return command?.Name ?? string.Empty;
-        }
     }
 }

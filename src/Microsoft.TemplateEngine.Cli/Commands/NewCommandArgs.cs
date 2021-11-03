@@ -14,6 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arguments = parseResult.GetValueForArgument(command.RemainingArguments);
             ShortName = parseResult.GetValueForArgument(command.ShortNameArgument);
             HelpRequested = parseResult.GetValueForOption(command.HelpOption);
+            InitialTokens = parseResult.Tokens.Select(t => t.Value).ToArray();
         }
 
         internal string? ShortName { get; }
@@ -21,5 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal string[]? Arguments { get; }
 
         internal bool HelpRequested { get; }
+
+        internal string[] InitialTokens { get; }
     }
 }
