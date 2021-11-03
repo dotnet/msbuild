@@ -56,10 +56,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             }
             else
             {
-                throw new Exception($"Both {nameof(_templateList)} and {nameof(_templatePackageManager)} cannot be null");
+                throw new Exception($"Both {nameof(_templateList)} and {nameof(_templatePackageManager)} cannot be null.");
             }
             templates = templates.Where(x => !x.IsHiddenByHostFile(HostSpecificDataLoader));
-            return TemplateGroup.FromTemplateList(templates);
+            return TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, HostSpecificDataLoader));
         }
 
     }

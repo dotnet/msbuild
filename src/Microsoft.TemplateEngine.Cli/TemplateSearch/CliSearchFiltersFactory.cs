@@ -54,7 +54,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             {
                 InMemoryHostSpecificDataLoader hostDataLoader = new InMemoryHostSpecificDataLoader(templatePackageSearchData);
                 IEnumerable<TemplateSearchData> templates = templatePackageSearchData.Templates.Where(template => IsNotHiddenBySearchFile(template));
-                IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(templates);
+                IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostDataLoader));
                 IEnumerable<Func<TemplateGroup, MatchInfo?>> groupFilters = new[]
                 {
                     CliFilters.NameTemplateGroupFilter(commandArgs.SearchNameCriteria)

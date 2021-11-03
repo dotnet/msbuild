@@ -6,7 +6,7 @@
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Utils;
 
-namespace Microsoft.TemplateEngine.Cli.TemplateResolution
+namespace Microsoft.TemplateEngine.Cli
 {
     /// <summary>
     /// The class represents template group. Templates in single group:<br/>
@@ -23,7 +23,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <param name="templates">the templates of the template group.</param>
         /// <exception cref="ArgumentNullException">when <paramref name="templates"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateInfo.GroupIdentity"/> defined.</exception>
-        internal TemplateGroup(IEnumerable<ITemplateInfo> templates)
+        internal TemplateGroup(IEnumerable<CliTemplateInfo> templates)
         {
             _ = templates ?? throw new ArgumentNullException(paramName: nameof(templates));
             if (!templates.Any())
@@ -74,12 +74,47 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         {
             get
             {
-                HashSet<string?> shortNames = new HashSet<string?>(StringComparer.OrdinalIgnoreCase);
+                HashSet<string?> language = new HashSet<string?>(StringComparer.OrdinalIgnoreCase);
                 foreach (ITemplateInfo template in Templates)
                 {
-                    shortNames.Add(template.GetLanguage());
+                    language.Add(template.GetLanguage());
                 }
-                return shortNames.ToList();
+                return language.ToList();
+            }
+        }
+
+        /// <summary>
+        /// Returns the list of types defined for templates in the group.
+        /// </summary>
+        internal IReadOnlyList<string?> Types
+        {
+            get
+            {
+                HashSet<string?> type = new HashSet<string?>(StringComparer.OrdinalIgnoreCase);
+                foreach (ITemplateInfo template in Templates)
+                {
+                    type.Add(template.GetTemplateType());
+                }
+                return type.ToList();
+            }
+        }
+
+        /// <summary>
+        /// Returns the list of baselines defined for templates in the group.
+        /// </summary>
+        internal IReadOnlyList<string> Baselines
+        {
+            get
+            {
+                HashSet<string> baselines = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (ITemplateInfo template in Templates)
+                {
+                    foreach (var baseline in template.BaselineInfo)
+                    {
+                        baselines.Add(baseline.Key);
+                    }
+                }
+                return baselines.ToList();
             }
         }
 
@@ -97,6 +132,19 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
+        /// Returns the description of template group
+        /// Template group name is the name of highest precedence template in the group.
+        /// If multiple templates have the maximum precedence, the name of first one is returned.
+        /// </summary>
+        internal string Description
+        {
+            get
+            {
+                return GetHighestPrecedenceTemplates().First().Description ?? string.Empty;
+            }
+        }
+
+        /// <summary>
         /// Returns true when <see cref="GroupIdentity"/> is not <c>null</c> or empty.
         /// </summary>
         internal bool HasGroupIdentity => !string.IsNullOrWhiteSpace(GroupIdentity);
@@ -109,9 +157,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// Returns the list of templates in the group.
         /// </summary>
-        internal IReadOnlyList<ITemplateInfo> Templates { get; private set; }
+        internal IReadOnlyList<CliTemplateInfo> Templates { get; private set; }
 
-        internal static IEnumerable<TemplateGroup> FromTemplateList (IEnumerable<ITemplateInfo> templates)
+        internal static IEnumerable<TemplateGroup> FromTemplateList (IEnumerable<CliTemplateInfo> templates)
         {
             return templates
               .GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase)
