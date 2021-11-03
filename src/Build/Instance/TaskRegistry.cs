@@ -389,13 +389,7 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
-            if (overrideUsingTask.Equals("true", StringComparison.OrdinalIgnoreCase))
-            {
-                taskFactoryParameters ??= CreateTaskFactoryParametersDictionary();
-                taskFactoryParameters.Add(XMakeAttributes.overrideUsingTask, overrideUsingTask);
-            }
-
-            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord);
+            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, overrideUsingTask.Equals("true", StringComparison.OrdinalIgnoreCase));
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
@@ -420,10 +414,10 @@ namespace Microsoft.Build.Execution
         )
         {
             TaskFactoryWrapper taskFactory = null;
-            bool retrievedFromCache;
-
+            bool retrievedFromCache = false;
+            
             // If there are no usingtask tags in the project don't bother caching or looking for tasks locally
-            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
+            RegisteredTaskRecord record = overriddenTasks.ContainsKey(taskName) ? overriddenTasks[taskName] : GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
 
             if (record != null)
             {
@@ -490,13 +484,6 @@ namespace Microsoft.Build.Execution
             // Try the current task registry
             if (taskRecord == null && _taskRegistrations?.Count > 0)
             {
-                // Does this task have an architecture-specific variation?
-                // Just use that!
-                if (PrioritizeArchitectureInUsingTasks && superImportantTasks.TryGetValue(taskIdentity.Name, out RegisteredTaskRecord rec))
-                {
-                    return rec;
-                }
-
                 if (exactMatchRequired)
                 {
                     if (_cachedTaskRecordsWithExactMatch != null && _cachedTaskRecordsWithExactMatch.TryGetValue(taskIdentity, out taskRecord))
@@ -653,13 +640,13 @@ namespace Microsoft.Build.Execution
 
         // Create another set containing architecture-specific task entries.
         // Then when we look for them, check if the name exists in that.
-        Dictionary<string, RegisteredTaskRecord> superImportantTasks = new Dictionary<string, RegisteredTaskRecord>();
+        Dictionary<string, RegisteredTaskRecord> overriddenTasks = new Dictionary<string, RegisteredTaskRecord>();
 
         /// <summary>
         /// Registers an evaluated using task tag for future
         /// consultation
         /// </summary>
-        private void RegisterTask(string taskName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord)
+        private void RegisterTask(string taskName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord, bool overrideTask = false)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, nameof(assemblyLoadInfo));
@@ -682,14 +669,9 @@ namespace Microsoft.Build.Execution
 
             RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
 
-            // When Runtime is defined (and Architecture isn't), Architecture will be set to `*` which shouldn't be prioritized.
-            if (taskFactoryParameters != null && taskFactoryParameters.TryGetValue("Architecture", out string s) && s != MSBuildConstants.CharactersForExpansion[0])
+            if (overrideTask)
             {
-                // First UsingTask wins
-                if (!superImportantTasks.ContainsKey(taskName))
-                {
-                    superImportantTasks[taskName] = newRecord;
-                }
+                overriddenTasks[taskName] = newRecord;
             }
 
             registeredTaskEntries.Add(newRecord);
