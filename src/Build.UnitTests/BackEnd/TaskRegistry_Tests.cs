@@ -621,7 +621,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrievedFromCache: true
                 );
         }
-        
+
         [Fact]
         public void OverriddenTask_AlwaysWins()
         {
@@ -698,7 +698,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
                 );
 
             // no parameters, fuzzy match
@@ -711,7 +711,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
                 );
         }
 
