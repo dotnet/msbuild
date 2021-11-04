@@ -861,15 +861,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Displays a summary of what would happen if the given command line were run if it would result in a template creation..
-        /// </summary>
-        internal static string DryRunDescription {
-            get {
-                return ResourceManager.GetString("DryRunDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to After expanding the extra args files, the command is:
         ///    dotnet {0}.
         /// </summary>
@@ -885,15 +876,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string FileActionsWouldHaveBeenTaken {
             get {
                 return ResourceManager.GetString("FileActionsWouldHaveBeenTaken", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Forces content to be generated even if it would change existing files..
-        /// </summary>
-        internal static string ForcesTemplateCreation {
-            get {
-                return ResourceManager.GetString("ForcesTemplateCreation", resourceCulture);
             }
         }
         
@@ -1096,15 +1078,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The name for the output being created. If no name is specified, the name of the output directory is used..
-        /// </summary>
-        internal static string NameOfOutput {
-            get {
-                return ResourceManager.GetString("NameOfOutput", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to (No Items).
         /// </summary>
         internal static string NoItems {
@@ -1146,6 +1119,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string OptionalWorkloadsSyncFailed {
             get {
                 return ResourceManager.GetString("OptionalWorkloadsSyncFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify if post action scripts should run..
+        /// </summary>
+        internal static string OptionDescriptionAllowScripts {
+            get {
+                return ResourceManager.GetString("OptionDescriptionAllowScripts", resourceCulture);
             }
         }
         
@@ -1196,6 +1178,24 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Displays a summary of what would happen if the given command line were run if it would result in a template creation..
+        /// </summary>
+        internal static string OptionDescriptionDryRun {
+            get {
+                return ResourceManager.GetString("OptionDescriptionDryRun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Forces content to be generated even if it would change existing files..
+        /// </summary>
+        internal static string OptionDescriptionForce {
+            get {
+                return ResourceManager.GetString("OptionDescriptionForce", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Allows the command to stop and wait for user input or action (for example to complete authentication)..
         /// </summary>
         internal static string OptionDescriptionInteractive {
@@ -1214,6 +1214,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The name for the output being created. If no name is specified, the name of the output directory is used..
+        /// </summary>
+        internal static string OptionDescriptionName {
+            get {
+                return ResourceManager.GetString("OptionDescriptionName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Disables checking for the template package updates when instantiating a template..
         /// </summary>
         internal static string OptionDescriptionNoUpdateCheck {
@@ -1228,6 +1237,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string OptionDescriptionNuGetSource {
             get {
                 return ResourceManager.GetString("OptionDescriptionNuGetSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location to place the generated output..
+        /// </summary>
+        internal static string OptionDescriptionOutput {
+            get {
+                return ResourceManager.GetString("OptionDescriptionOutput", resourceCulture);
             }
         }
         
@@ -1273,15 +1291,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string Options {
             get {
                 return ResourceManager.GetString("Options", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Location to place the generated output..
-        /// </summary>
-        internal static string OutputPath {
-            get {
-                return ResourceManager.GetString("OutputPath", resourceCulture);
             }
         }
         
@@ -1984,15 +1993,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string Version {
             get {
                 return ResourceManager.GetString("Version", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify if post action scripts should run..
-        /// </summary>
-        internal static string WhetherToAllowScriptsToRun {
-            get {
-                return ResourceManager.GetString("WhetherToAllowScriptsToRun", resourceCulture);
             }
         }
     }

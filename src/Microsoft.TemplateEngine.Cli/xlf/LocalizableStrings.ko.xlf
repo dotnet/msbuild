@@ -458,11 +458,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">이 명령에 대한 도움말을 표시합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DryRunDescription">
-        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="translated">템플릿이 생성될 경우 주어진 명령 줄이 실행되면 어떤 일이 발생하는지에 대한 요약을 표시합니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:
     dotnet {0}</source>
@@ -473,11 +468,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
         <target state="translated">파일 조치가 취해졌습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ForcesTemplateCreation">
-        <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="translated">기존 파일을 변경하더라도 콘텐츠를 강제로 생성합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generators">
@@ -590,11 +580,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">마운트 포인트 팩토리</target>
         <note />
       </trans-unit>
-      <trans-unit id="NameOfOutput">
-        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="translated">생성 중인 출력의 이름입니다. 이름을 지정하지 않으면 출력 디렉터리의 이름이 사용됩니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoItems">
         <source>(No Items)</source>
         <target state="translated">(항목 없음)</target>
@@ -613,6 +598,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">일치하는 템플릿이 없음:{0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionAllowScripts">
+        <source>Specify if post action scripts should run.</source>
+        <target state="new">Specify if post action scripts should run.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
@@ -642,6 +632,16 @@ The supported columns are: language, tags, author, type.</source>
         <target state="translated">--list 및 --search 출력의 모든 열을 표시합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionDryRun">
+        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
+        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionForce">
+        <source>Forces content to be generated even if it would change existing files.</source>
+        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionInteractive">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
@@ -652,6 +652,11 @@ The supported columns are: language, tags, author, type.</source>
         <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionName">
+        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
+        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
         <target state="translated">템플릿을 인스턴스화할 때 템플릿 패키지 업데이트 확인을 사용하지 않도록 설정합니다.</target>
@@ -660,6 +665,11 @@ The supported columns are: language, tags, author, type.</source>
       <trans-unit id="OptionDescriptionNuGetSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="new">Specifies a NuGet source to use during install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionOutput">
+        <source>Location to place the generated output.</source>
+        <target state="new">Location to place the generated output.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
@@ -690,11 +700,6 @@ The supported columns are: language, tags, author, type.</source>
       <trans-unit id="Options">
         <source>Options:</source>
         <target state="translated">옵션:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OutputPath">
-        <source>Location to place the generated output.</source>
-        <target state="translated">생성된 출력을 배치할 위치입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Overwrite">
@@ -1085,11 +1090,6 @@ The supported columns are: language, tags, author, type.</source>
       <trans-unit id="Version">
         <source>Version:</source>
         <target state="translated">버전:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WhetherToAllowScriptsToRun">
-        <source>Specify if post action scripts should run.</source>
-        <target state="translated">사후 조치 스크립트를 실행해야 하는지 여부를 지정하세요.</target>
         <note />
       </trans-unit>
     </body>

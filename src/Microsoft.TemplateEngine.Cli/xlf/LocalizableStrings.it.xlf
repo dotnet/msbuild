@@ -458,11 +458,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">Visualizza la guida per questo comando.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DryRunDescription">
-        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="translated">Visualizza un riepilogo di ciò che accadrebbe se la riga di comando specificata venisse eseguita se il risultato fosse la creazione di un modello.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:
     dotnet {0}</source>
@@ -473,11 +468,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
         <target state="translated">Le azioni file sarebbero state eseguite:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ForcesTemplateCreation">
-        <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="translated">Impone la generazione del contenuto anche se i file esistenti venissero modificati.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generators">
@@ -590,11 +580,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">Fabbriche punto di montaggio</target>
         <note />
       </trans-unit>
-      <trans-unit id="NameOfOutput">
-        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="translated">Nome dell'output da creare. Se non viene specificato alcun nome, verrà usato il nome della directory di output.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoItems">
         <source>(No Items)</source>
         <target state="translated">(Nessun elemento)</target>
@@ -613,6 +598,11 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">Nessun modello corrispondente trovato: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionAllowScripts">
+        <source>Specify if post action scripts should run.</source>
+        <target state="new">Specify if post action scripts should run.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
@@ -642,6 +632,16 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
         <target state="translated">Visualizza tutte le colonne in--list e --search output.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionDryRun">
+        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
+        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionForce">
+        <source>Forces content to be generated even if it would change existing files.</source>
+        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionInteractive">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
@@ -652,6 +652,11 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
         <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionName">
+        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
+        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
         <target state="translated">Disabilita il controllo degli aggiornamenti del pacchetto di modelli durante la creazione di un'istanza di un modello.</target>
@@ -660,6 +665,11 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
       <trans-unit id="OptionDescriptionNuGetSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="new">Specifies a NuGet source to use during install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionOutput">
+        <source>Location to place the generated output.</source>
+        <target state="new">Location to place the generated output.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
@@ -690,11 +700,6 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
       <trans-unit id="Options">
         <source>Options:</source>
         <target state="translated">Opzioni:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OutputPath">
-        <source>Location to place the generated output.</source>
-        <target state="translated">Percorso in cui inserire l'output generato.</target>
         <note />
       </trans-unit>
       <trans-unit id="Overwrite">
@@ -1085,11 +1090,6 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
       <trans-unit id="Version">
         <source>Version:</source>
         <target state="translated">Versione:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WhetherToAllowScriptsToRun">
-        <source>Specify if post action scripts should run.</source>
-        <target state="translated">Specificare se eseguire gli script post-azione.</target>
         <note />
       </trans-unit>
     </body>

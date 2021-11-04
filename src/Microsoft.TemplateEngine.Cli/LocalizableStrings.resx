@@ -166,7 +166,7 @@
   <data name="DisplaysHelp" xml:space="preserve">
     <value>Displays help for this command.</value>
   </data>
-  <data name="ForcesTemplateCreation" xml:space="preserve">
+  <data name="OptionDescriptionForce" xml:space="preserve">
     <value>Forces content to be generated even if it would change existing files.</value>
   </data>
   <data name="Generators" xml:space="preserve">
@@ -196,7 +196,7 @@
   <data name="MountPointFactories" xml:space="preserve">
     <value>Mount Point Factories</value>
   </data>
-  <data name="NameOfOutput" xml:space="preserve">
+  <data name="OptionDescriptionName" xml:space="preserve">
     <value>The name for the output being created. If no name is specified, the name of the output directory is used.</value>
   </data>
   <data name="NoItems" xml:space="preserve">
@@ -214,7 +214,7 @@
   <data name="Options" xml:space="preserve">
     <value>Options:</value>
   </data>
-  <data name="OutputPath" xml:space="preserve">
+  <data name="OptionDescriptionOutput" xml:space="preserve">
     <value>Location to place the generated output.</value>
   </data>
   <data name="Overwrite" xml:space="preserve">
@@ -289,7 +289,7 @@
   <data name="ProcessingPostActions" xml:space="preserve">
     <value>Processing post-creation actions...</value>
   </data>
-  <data name="WhetherToAllowScriptsToRun" xml:space="preserve">
+  <data name="OptionDescriptionAllowScripts" xml:space="preserve">
     <value>Specify if post action scripts should run.</value>
   </data>
   <data name="AllowScriptsNoChoice" xml:space="preserve">
@@ -456,7 +456,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="DefaultIfOptionWithoutValue" xml:space="preserve">
     <value>Default if option is provided without a value: {0}</value>
   </data>
-  <data name="DryRunDescription" xml:space="preserve">
+  <data name="OptionDescriptionDryRun" xml:space="preserve">
     <value>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</value>
   </data>
   <data name="ActionWouldHaveBeenTakenAutomatically" xml:space="preserve">

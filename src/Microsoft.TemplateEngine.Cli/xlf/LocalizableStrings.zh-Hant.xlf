@@ -458,11 +458,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">顯示此命令的協助。</target>
         <note />
       </trans-unit>
-      <trans-unit id="DryRunDescription">
-        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="translated">顯示如果執行所給予的命令列會導致範本建立，會發生什麼情況的摘要。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:
     dotnet {0}</source>
@@ -473,11 +468,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
         <target state="translated">應執行的檔案動作:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ForcesTemplateCreation">
-        <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="translated">強制產生內容，即使內容會變更現有的檔案。</target>
         <note />
       </trans-unit>
       <trans-unit id="Generators">
@@ -590,11 +580,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">裝載點處理站</target>
         <note />
       </trans-unit>
-      <trans-unit id="NameOfOutput">
-        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="translated">要建立的輸出名稱。如果未指定名稱，則使用輸出目錄的名稱。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoItems">
         <source>(No Items)</source>
         <target state="translated">(無任何項目)</target>
@@ -613,6 +598,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">找不到符合的範本: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionAllowScripts">
+        <source>Specify if post action scripts should run.</source>
+        <target state="new">Specify if post action scripts should run.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
@@ -642,6 +632,16 @@ The supported columns are: language, tags, author, type.</source>
         <target state="translated">在 --list 和 --search 輸出中顯示所有欄。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionDryRun">
+        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
+        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionForce">
+        <source>Forces content to be generated even if it would change existing files.</source>
+        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionInteractive">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
@@ -652,6 +652,11 @@ The supported columns are: language, tags, author, type.</source>
         <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionName">
+        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
+        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
         <target state="translated">停用在具現化範本時檢查範本套件更新。</target>
@@ -660,6 +665,11 @@ The supported columns are: language, tags, author, type.</source>
       <trans-unit id="OptionDescriptionNuGetSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="new">Specifies a NuGet source to use during install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionOutput">
+        <source>Location to place the generated output.</source>
+        <target state="new">Location to place the generated output.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
@@ -690,11 +700,6 @@ The supported columns are: language, tags, author, type.</source>
       <trans-unit id="Options">
         <source>Options:</source>
         <target state="translated">選項:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OutputPath">
-        <source>Location to place the generated output.</source>
-        <target state="translated">放置產生輸出的位置。</target>
         <note />
       </trans-unit>
       <trans-unit id="Overwrite">
@@ -1085,11 +1090,6 @@ The supported columns are: language, tags, author, type.</source>
       <trans-unit id="Version">
         <source>Version:</source>
         <target state="translated">版本:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WhetherToAllowScriptsToRun">
-        <source>Specify if post action scripts should run.</source>
-        <target state="translated">指定是否應執行動作後指令碼。</target>
         <note />
       </trans-unit>
     </body>

@@ -22,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (hasPostActionScriptRunner)
             {
                 ITemplateParameter allowScriptsParam = new TemplateParameter(
-                    description: LocalizableStrings.WhetherToAllowScriptsToRun,
+                    description: LocalizableStrings.OptionDescriptionAllowScripts,
                     name: "allow-scripts",
                     type: "parameter",
                     datatype: "choice",

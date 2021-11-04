@@ -94,25 +94,25 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal Option<string> OutputOption { get; } = new Option<string>(new string[] { "-o", "--output" })
         {
-            Description = LocalizableStrings.OutputPath,
+            Description = LocalizableStrings.OptionDescriptionOutput,
             Arity = new ArgumentArity(0, 1)
         };
 
         internal Option<string> NameOption { get; } = new Option<string>(new string[] { "-n", "--name" })
         {
-            Description = LocalizableStrings.NameOfOutput,
+            Description = LocalizableStrings.OptionDescriptionName,
             Arity = new ArgumentArity(0, 1)
         };
 
         internal Option<bool> DryRunOption { get; } = new Option<bool>("--dry-run")
         {
-            Description = LocalizableStrings.DryRunDescription,
+            Description = LocalizableStrings.OptionDescriptionDryRun,
             Arity = new ArgumentArity(0, 1)
         };
 
         internal Option<bool> ForceOption { get; } = new Option<bool>("--force")
         {
-            Description = LocalizableStrings.ForcesTemplateCreation,
+            Description = LocalizableStrings.OptionDescriptionForce,
             Arity = new ArgumentArity(0, 1)
         };
 
@@ -124,7 +124,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal Option<AllowRunScripts> AllowScriptsOption { get; } = new Option<AllowRunScripts>("--allow-scripts")
         {
-            Description = "TODO",
+            Description = LocalizableStrings.OptionDescriptionAllowScripts,
             IsHidden = true,
             Arity = new ArgumentArity(0, 1)
         };

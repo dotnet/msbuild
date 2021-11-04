@@ -458,11 +458,6 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <target state="translated">Zobrazí nápovědu k tomuto příkazu.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DryRunDescription">
-        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="translated">Zobrazí souhrn toho, co by se mohlo stát, kdyby se daný příkazový řádek spustil, pokud by to vedlo k vytvoření šablony.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:
     dotnet {0}</source>
@@ -473,11 +468,6 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
         <target state="translated">Akce souborů by se provedly:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ForcesTemplateCreation">
-        <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="translated">Vynutí vygenerování obsahu i v případě, že by došlo ke změně existujících souborů.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generators">
@@ -590,11 +580,6 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <target state="translated">Továrny bodů připojení</target>
         <note />
       </trans-unit>
-      <trans-unit id="NameOfOutput">
-        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="translated">Název vytvářeného výstupu. Pokud se žádný název nezadá, použije se název výstupního adresáře.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoItems">
         <source>(No Items)</source>
         <target state="translated">(Žádné položky)</target>
@@ -613,6 +598,11 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">Nenašly se žádné šablony, které by odpovídaly tomuto hledání: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionAllowScripts">
+        <source>Specify if post action scripts should run.</source>
+        <target state="new">Specify if post action scripts should run.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
@@ -642,6 +632,16 @@ Podporované sloupce: language, tags, author, type</target>
         <target state="translated">Zobrazí všechny sloupce ve výstupu --list a --search.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionDryRun">
+        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
+        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionForce">
+        <source>Forces content to be generated even if it would change existing files.</source>
+        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionInteractive">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
@@ -652,6 +652,11 @@ Podporované sloupce: language, tags, author, type</target>
         <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionName">
+        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
+        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
         <target state="translated">Zakáže kontrolu aktualizací balíčků šablony při vytváření instance šablony.</target>
@@ -660,6 +665,11 @@ Podporované sloupce: language, tags, author, type</target>
       <trans-unit id="OptionDescriptionNuGetSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="new">Specifies a NuGet source to use during install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionOutput">
+        <source>Location to place the generated output.</source>
+        <target state="new">Location to place the generated output.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
@@ -690,11 +700,6 @@ Podporované sloupce: language, tags, author, type</target>
       <trans-unit id="Options">
         <source>Options:</source>
         <target state="translated">Možnosti:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OutputPath">
-        <source>Location to place the generated output.</source>
-        <target state="translated">Umístění, do kterého se uloží vygenerovaný výstup</target>
         <note />
       </trans-unit>
       <trans-unit id="Overwrite">
@@ -1085,11 +1090,6 @@ Podporované sloupce: language, tags, author, type</target>
       <trans-unit id="Version">
         <source>Version:</source>
         <target state="translated">Verze:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WhetherToAllowScriptsToRun">
-        <source>Specify if post action scripts should run.</source>
-        <target state="translated">Zadejte, jestli se mají spouštět skripty akcí publikování.</target>
         <note />
       </trans-unit>
     </body>

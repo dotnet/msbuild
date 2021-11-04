@@ -458,11 +458,6 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Bu komutla ilgili yardımı görüntüler.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DryRunDescription">
-        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="translated">Verilen komut satırı bir şablon oluşturma eylemiyle sonuçlanacak durumdayken çalıştırılsaydı olacak şeylerin özetini görüntüler.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:
     dotnet {0}</source>
@@ -473,11 +468,6 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
         <target state="translated">Şu dosya eylemleri gerçekleştirilirdi:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ForcesTemplateCreation">
-        <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="translated">Mevcut dosyalar değiştirilecek olsaydı bile içerik oluşturmaya zorlar.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generators">
@@ -590,11 +580,6 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Bağlama Noktası Fabrikaları</target>
         <note />
       </trans-unit>
-      <trans-unit id="NameOfOutput">
-        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="translated">Oluşturulan çıkışın adı. Ad belirtilmezse, çıkış dizininin adı kullanılır.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoItems">
         <source>(No Items)</source>
         <target state="translated">(Öğe Yok)</target>
@@ -613,6 +598,11 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">Eşleşen şablon bulunamadı: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionAllowScripts">
+        <source>Specify if post action scripts should run.</source>
+        <target state="new">Specify if post action scripts should run.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
@@ -642,6 +632,16 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
         <target state="translated">Tüm sütunları “--list” ve “--search” çıkışında görüntüleyin.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionDryRun">
+        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
+        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionForce">
+        <source>Forces content to be generated even if it would change existing files.</source>
+        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionInteractive">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
@@ -652,6 +652,11 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
         <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionName">
+        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
+        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
         <target state="translated">Bir şablon örneği oluşturulurken şablon paketi güncelleştirmelerinin denetlenmesini devre dışı bırakır.</target>
@@ -660,6 +665,11 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
       <trans-unit id="OptionDescriptionNuGetSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="new">Specifies a NuGet source to use during install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionDescriptionOutput">
+        <source>Location to place the generated output.</source>
+        <target state="new">Location to place the generated output.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
@@ -690,11 +700,6 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
       <trans-unit id="Options">
         <source>Options:</source>
         <target state="translated">Seçenekler:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OutputPath">
-        <source>Location to place the generated output.</source>
-        <target state="translated">Oluşturulan çıkışın yerleştirileceği konum.</target>
         <note />
       </trans-unit>
       <trans-unit id="Overwrite">
@@ -1085,11 +1090,6 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
       <trans-unit id="Version">
         <source>Version:</source>
         <target state="translated">Sürüm:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WhetherToAllowScriptsToRun">
-        <source>Specify if post action scripts should run.</source>
-        <target state="translated">Eylem sonrası betiklerinin çalıştırılıp çalıştırılmayacağını belirtin.</target>
         <note />
       </trans-unit>
     </body>
