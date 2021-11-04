@@ -489,7 +489,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             bootJsonPath.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/25959")]
+        [Fact]
         public void Build_WithCustomOutputPath_Works()
         {
             var testAppName = "BlazorWasmWithLibrary";
