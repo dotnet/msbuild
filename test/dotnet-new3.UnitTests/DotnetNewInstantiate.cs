@@ -176,6 +176,30 @@ namespace Dotnet_new3.IntegrationTests
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
+            new DotnetNewCommand(_log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates21Path)
+                .WithCustomHive(home)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
+
+            new DotnetNewCommand(_log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates31Path)
+                .WithCustomHive(home)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
+
+            new DotnetNewCommand(_log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates50Path)
+                .WithCustomHive(home)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
+
             new DotnetNewCommand(_log, "console", "--fake")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)

@@ -170,9 +170,6 @@ Restore succeeded\.",
                 args.Add(framework);
             }
 
-            Helpers.InstallNuGetTemplate(TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates31Path, _log, workingDir, _fixture.HomeDirectory);
-            Helpers.InstallNuGetTemplate(TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates50Path, _log, workingDir, _fixture.HomeDirectory);
-
             new DotnetNewCommand(_log, args.ToArray())
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDir)
@@ -720,9 +717,8 @@ public class Class1
         [InlineData("CheckForOverflowUnderflow", null, "Console App", "console", null, null)]
         [InlineData("LangVersion", null, "Console App", "console", null, null)]
         [InlineData("TargetFramework", "net7.0", "Console App", "console", null, null)]
-        [InlineData("Nullable", null, "Console App", "console", null, "net5.0")]
-        [InlineData("Nullable", null, "Console App", "console", null, "netcoreapp3.1")]
-        [InlineData("Nullable", null, "Console App", "console", null, "netcoreapp2.1")]
+        [InlineData("Nullable", null, "Console Application", "console", null, "net5.0")]
+        [InlineData("Nullable", null, "Console Application", "console", null, "netcoreapp3.1")]
 
         [InlineData("Nullable", null, "Console App", "console", "F#", null)]
         [InlineData("CheckForOverflowUnderflow", null, "Console App", "console", "F#", null)]
@@ -808,19 +804,19 @@ public class Class1
         [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Class Library", "classlib", "VB", null)]
 
         //framework
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console App", "console", null, null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console App", "console", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console App", "console", "F#", null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class Library", "classlib", null, null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class Library", "classlib", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class Library", "classlib", "F#", null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", null, null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", "VB", null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", "F#", null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class library", "classlib", null, null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class library", "classlib", "VB", null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class library", "classlib", "F#", null)]
 
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console App", "console", null, null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console App", "console", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console App", "console", "F#", null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class Library", "classlib", null, null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class Library", "classlib", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class Library", "classlib", "F#", null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", null, null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", "VB", null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", "F#", null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class library", "classlib", null, null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class library", "classlib", "VB", null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class library", "classlib", "F#", null)]
         public void CanSetProperty(string propertyName, string? propertyValue, string argName, string argValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
         {
             string workingDir = TestUtils.CreateTemporaryFolder();

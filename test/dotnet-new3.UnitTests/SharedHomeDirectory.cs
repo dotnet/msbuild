@@ -74,6 +74,22 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr();
+
+            new DotnetNewCommand(Log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates31Path)
+                .WithCustomHive(HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
+
+            new DotnetNewCommand(Log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates50Path)
+                .WithCustomHive(HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
         }
     }
 }

@@ -12,7 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.3.1" Version="3.1.2" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.2.1" Version="5.0" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.3.1" Version="5.0" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.5.0" Version="5.0" GeneratePathProperty="true" />
   </ItemGroup>
 
@@ -23,6 +24,7 @@ namespace Dotnet_new3.IntegrationTests
 {
   class TemplatePackagesPaths
   {
+      public const string MicrosoftDotNetCommonProjectTemplates21Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_2_1)"%3B
       public const string MicrosoftDotNetCommonProjectTemplates31Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_3_1)"%3B
       public const string MicrosoftDotNetCommonProjectTemplates50Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_5_0)"%3B
   }

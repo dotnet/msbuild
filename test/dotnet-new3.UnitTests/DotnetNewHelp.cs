@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class DotnetNewHelp
+    public class DotnetNewHelp : IClassFixture<SharedHomeDirectory>
     {
         #region HelpConstants
         private const string HelpOutput =
@@ -47,16 +47,10 @@ Author: Microsoft
 Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
 Options:                                                                             
   -f|--framework  The target framework for the project.                              
-                      net6.0           - Target net6.0                               
+                      net7.0           - Target net7.0                               
                       net5.0           - Target net5.0                               
                       netcoreapp3.1    - Target netcoreapp3.1                        
-                      netcoreapp3.0    - Target netcoreapp3.0                        
-                      netcoreapp2.2    - Target netcoreapp2.2                        
-                      netcoreapp2.1    - Target netcoreapp2.1                        
-                      netcoreapp2.0    - Target netcoreapp2.0                        
-                      netcoreapp1.0    - Target netcoreapp1.0                        
-                      netcoreapp1.1    - Target netcoreapp1.1                        
-                  Default: net6.0                                                    
+                  Default: net7.0                                                    
 
   --langVersion   Sets the LangVersion property in the created project file          
                   text - Optional                                                    
@@ -75,25 +69,12 @@ Author: Microsoft
 Description: A project for creating a class library that targets .NET Standard or .NET Core
 Options:                                                                             
   -f|--framework  The target framework for the project.                              
-                      net6.0            - Target net6.0                              
+                      net7.0            - Target net7.0                              
                       netstandard2.1    - Target netstandard2.1                      
                       netstandard2.0    - Target netstandard2.0                      
                       net5.0            - Target net5.0                              
                       netcoreapp3.1     - Target netcoreapp3.1                       
-                      netcoreapp3.0     - Target netcoreapp3.0                       
-                      netcoreapp2.2     - Target netcoreapp2.2                       
-                      netcoreapp2.1     - Target netcoreapp2.1                       
-                      netcoreapp2.0     - Target netcoreapp2.0                       
-                      netcoreapp1.0     - Target netcoreapp1.0                       
-                      netcoreapp1.1     - Target netcoreapp1.1                       
-                      netstandard1.0    - Target netstandard1.0                      
-                      netstandard1.1    - Target netstandard1.1                      
-                      netstandard1.2    - Target netstandard1.2                      
-                      netstandard1.3    - Target netstandard1.3                      
-                      netstandard1.4    - Target netstandard1.4                      
-                      netstandard1.5    - Target netstandard1.5                      
-                      netstandard1.6    - Target netstandard1.6                      
-                  Default: net6.0                                                    
+                  Default: net7.0                                                    
 
   --langVersion   Sets the LangVersion property in the created project file          
                   text - Optional                                                    
@@ -108,20 +89,21 @@ To see help for other template languages (F#, VB), use --language option:
 
         #endregion
         private readonly ITestOutputHelper _log;
+        private readonly SharedHomeDirectory _fixture;
 
-        public DotnetNewHelp(ITestOutputHelper log)
+        public DotnetNewHelp(SharedHomeDirectory fixture, ITestOutputHelper log)
         {
+            _fixture = fixture;
             _log = log;
         }
 
         [Fact]
         public void CanShowHelp()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "--help")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -130,7 +112,7 @@ To see help for other template languages (F#, VB), use --language option:
                 .And.HaveStdOut(HelpOutput);
 
             new DotnetNewCommand(_log, "-h")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -142,11 +124,10 @@ To see help for other template languages (F#, VB), use --language option:
         [Fact]
         public void CanShowHelpForTemplate()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console", "--help")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -156,7 +137,7 @@ To see help for other template languages (F#, VB), use --language option:
                 .And.NotHaveStdOutContaining(HelpOutput);
 
             new DotnetNewCommand(_log, "classlib", "-h")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -169,11 +150,10 @@ To see help for other template languages (F#, VB), use --language option:
         [Fact]
         public void CannotShowHelpForTemplate_PartialNameMatch()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "class", "-h")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Fail()
@@ -189,11 +169,10 @@ To search for the templates on NuGet.org, run:
         [Fact]
         public void CannotShowHelpForTemplate_FullNameMatch()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "Console App", "-h")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Fail()
@@ -209,13 +188,12 @@ To search for the templates on NuGet.org, run:
         [Fact]
         public void CannotShowHelpForTemplate_WhenAmbiguousLanguageChoice()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, home);
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, _fixture.HomeDirectory);
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, _fixture.HomeDirectory);
 
             new DotnetNewCommand(_log, "basic", "--help")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -245,11 +223,10 @@ Options:
 To see help for other template languages (F#, VB), use --language option:
    dotnet new3 console -h --language F#";
 
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log, "console", "--help", "--framework", "net5.0")
-                .WithCustomHive(home)
+            new DotnetNewCommand(_log, "console", "--help", "--framework", "net7.0")
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Pass()
@@ -266,22 +243,15 @@ To see help for other template languages (F#, VB), use --language option:
 --framework 
    '' is not a valid value for --framework. The possible values are:
       net5.0          - Target net5.0
-      net6.0          - Target net6.0
-      netcoreapp1.0   - Target netcoreapp1.0
-      netcoreapp1.1   - Target netcoreapp1.1
-      netcoreapp2.0   - Target netcoreapp2.0
-      netcoreapp2.1   - Target netcoreapp2.1
-      netcoreapp2.2   - Target netcoreapp2.2
-      netcoreapp3.0   - Target netcoreapp3.0
+      net7.0          - Target net7.0
       netcoreapp3.1   - Target netcoreapp3.1
 
 For more information, run:
    dotnet new3 console -h";
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console", "--help", "--framework")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Fail()
@@ -300,11 +270,10 @@ For more information, run:
 For more information, run:
    dotnet new3 console -h";
 
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console", "--help", "--do-not-exist")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Fail()
@@ -321,16 +290,10 @@ Author: Microsoft
 Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
 Options:                                                                             
   -f|--framework  The target framework for the project.                              
-                      net6.0           - Target net6.0                               
+                      net7.0           - Target net7.0                               
                       net5.0           - Target net5.0                               
                       netcoreapp3.1    - Target netcoreapp3.1                        
-                      netcoreapp3.0    - Target netcoreapp3.0                        
-                      netcoreapp2.2    - Target netcoreapp2.2                        
-                      netcoreapp2.1    - Target netcoreapp2.1                        
-                      netcoreapp2.0    - Target netcoreapp2.0                        
-                      netcoreapp1.0    - Target netcoreapp1.0                        
-                      netcoreapp1.1    - Target netcoreapp1.1                        
-                  Default: net6.0                                                    
+                  Default: net7.0                                                    
 
   --langVersion   Sets the LangVersion property in the created project file          
                   text - Optional                                                    
@@ -344,11 +307,10 @@ Options:
 To see help for other template languages (F#, VB), use --language option:
    dotnet new3 console -h --language F#";
 
-        string home = TestUtils.CreateTemporaryFolder("Home");
         string workingDirectory = TestUtils.CreateTemporaryFolder();
 
         new DotnetNewCommand(_log, "console", "--help", "--langVersion", "8.0")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Pass()
@@ -366,16 +328,10 @@ Author: Microsoft
 Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
 Options:                                                                             
   -f|--framework  The target framework for the project.                              
-                      net6.0           - Target net6.0                               
+                      net7.0           - Target net7.0                               
                       net5.0           - Target net5.0                               
                       netcoreapp3.1    - Target netcoreapp3.1                        
-                      netcoreapp3.0    - Target netcoreapp3.0                        
-                      netcoreapp2.2    - Target netcoreapp2.2                        
-                      netcoreapp2.1    - Target netcoreapp2.1                        
-                      netcoreapp2.0    - Target netcoreapp2.0                        
-                      netcoreapp1.0    - Target netcoreapp1.0                        
-                      netcoreapp1.1    - Target netcoreapp1.1                        
-                  Default: net6.0                                                    
+                  Default: net7.0                                                    
 
   --no-restore    If specified, skips the automatic restore of the project on create.
                   bool - Optional                                                    
@@ -385,11 +341,10 @@ Options:
 To see help for other template languages (C#, VB), use --language option:
    dotnet new3 console -h --language C#";
 
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console", "--help", "--language", "F#")
-                    .WithCustomHive(home)
+                    .WithCustomHive(_fixture.HomeDirectory)
                     .WithWorkingDirectory(workingDirectory)
                     .Execute()
                     .Should().Pass()
@@ -401,11 +356,10 @@ To see help for other template languages (C#, VB), use --language option:
         [Fact]
         public void WontShowLanguageHintInCaseOfOneLang()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "globaljson", "--help")
-                    .WithCustomHive(home)
+                    .WithCustomHive(_fixture.HomeDirectory)
                     .WithWorkingDirectory(workingDirectory)
                     .Execute()
                     .Should().Pass()
@@ -421,11 +375,10 @@ To see help for other template languages (C#, VB), use --language option:
 --langVersion 
    '' is not a valid value for --langVersion.";
 
-            string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console", "--help", "--langVersion")
-                .WithCustomHive(home)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Fail()
