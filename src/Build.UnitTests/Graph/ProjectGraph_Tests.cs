@@ -194,7 +194,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     (projectPath, globalProperties, projectCollection) => null));
             }
         }
-        
+
         /// <summary>
         ///   1
         ///  / \
@@ -764,7 +764,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 var root1 = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: new Dictionary<string, string[]> {{"A", new[] {"B"}}}, defaultTargets: "A").Path;
                 var root2 = CreateProjectFile(env: env, projectNumber: 2, projectReferences: new[] {3}, projectReferenceTargets: new Dictionary<string, string[]> {{"B", new[] {"C"}}, {"X", new[] {"Y"}}}, defaultTargets: "X").Path;
                 CreateProjectFile(env: env, projectNumber: 3);
-                
+
 
                 var projectGraph = new ProjectGraph(new []{root1, root2});
                 projectGraph.ProjectNodes.Count.ShouldBe(3);
@@ -871,7 +871,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     extraContent: ProjectReferenceTargetsWithMultitargeting)
                     .Path;
                 CreateProjectFile(env, 2);
-                
+
                 var projectGraph = new ProjectGraph(root1);
 
                 var dot = projectGraph.ToDot();
@@ -911,8 +911,8 @@ namespace Microsoft.Build.Graph.UnitTests
                     projectReferenceTargets: null,
                     defaultTargets: null,
                     extraContent: singleTargetedSpec);
-                
-                
+
+
                 var projectGraph = new ProjectGraph(root1);
 
                 var dot = projectGraph.ToDot();
@@ -946,7 +946,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     projectReferenceTargets: null,
                     defaultTargets: null,
                     extraContent: OuterBuildSpecificationWithProjectReferenceTargets);
-                
+
                 var projectGraph = new ProjectGraph(root1);
 
                 var dot = projectGraph.ToDot();
@@ -1118,7 +1118,7 @@ $@"
                     projectReferenceTargets: null,
                     defaultTargets: null,
                     extraContent: OuterBuildSpecificationWithProjectReferenceTargets);
-                
+
                 var projectGraph = new ProjectGraph(new[] {root1, root2});
 
                 var dot = projectGraph.ToDot();
@@ -1556,7 +1556,7 @@ $@"
             var dot = graph.ToDot();
 
             graph.ProjectNodes.Count.ShouldBe(3);
-            
+
             var outerBuild = graph.GraphRoots.First();
 
             AssertOuterBuildAsRoot(outerBuild, graph);
@@ -2301,7 +2301,7 @@ $@"
 
             foreach (var inner1 in innerBuildsFor1)
             {
-                // Outer build targets are added to inner builds because 
+                // Outer build targets are added to inner builds because
                 targetLists[inner1].ShouldBe(new[] {"BuildForOuterBuild", "Build"});
             }
 

@@ -15,6 +15,7 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Shared
@@ -535,7 +536,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Get the exact physical core count on Windows
         /// Useful for getting the exact core count in 32 bits processes,
-        /// as Environment.ProcessorCount has a 32-core limit in that case. 
+        /// as Environment.ProcessorCount has a 32-core limit in that case.
         /// https://github.com/dotnet/runtime/blob/221ad5b728f93489655df290c1ea52956ad8f51c/src/libraries/System.Runtime.Extensions/src/System/Environment.Windows.cs#L171-L210
         /// </summary>
         private unsafe static int GetLogicalCoreCountOnWindows()
@@ -894,7 +895,7 @@ namespace Microsoft.Build.Shared
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
-        
+
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern bool GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP RelationshipType, IntPtr Buffer, ref uint ReturnedLength);
@@ -1069,7 +1070,7 @@ namespace Microsoft.Build.Shared
                     long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
                     fileModifiedTime = DateTime.FromFileTimeUtc(dt);
 
-                    // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp. 
+                    // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp.
                     if ((data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT && !Traits.Instance.EscapeHatches.UseSymlinkTimeInsteadOfTargetTime)
                     {
                         fileModifiedTime = GetContentLastWriteFileUtcTime(fullPath);

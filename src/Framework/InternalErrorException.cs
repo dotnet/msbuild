@@ -128,10 +128,6 @@ namespace Microsoft.Build.Framework
         }
         #endregion
 
-        // TODO: use BuildEnvironmentHelper.Instance.RunningTests once it's available in Framework.
-        //       Until then, the BuildEnvironment reaches into here:
-        internal static bool s_runningTests = false;
-
-        private static bool RunningTests() => s_runningTests;
+        private static bool RunningTests() => BuildEnvironmentState.s_runningTests;
     }
 }

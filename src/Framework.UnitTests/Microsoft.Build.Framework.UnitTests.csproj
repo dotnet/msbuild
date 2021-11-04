@@ -40,14 +40,11 @@
     <Compile Include="..\Shared\NativeMethodsShared.cs" />
     <Compile Include="..\Shared\EscapingUtilities.cs" />
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs" />
-    <Compile Include="..\Shared\AssemblyUtilities.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\ExceptionHandling.cs" />
-    <Compile Include="..\Shared\VisualStudioLocationHelper.cs" />
     <Compile Include="..\Shared\StringBuilderCache.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
     <Compile Include="..\Shared\UnitTests\AssemblyResources.cs" />
-    <Compile Include="..\Shared\Traits.cs" />
   </ItemGroup>
 
   <ItemGroup>

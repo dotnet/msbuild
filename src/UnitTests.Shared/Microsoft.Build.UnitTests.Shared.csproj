@@ -30,9 +30,6 @@
     <PackageReference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Shared\AssemblyUtilities.cs">
-      <Link>AssemblyUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
@@ -65,12 +62,6 @@
     </Compile>
     <Compile Include="..\Shared\StringBuilderCache.cs">
       <Link>StringBuilderCache.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Traits.cs">
-      <Link>Traits.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
-      <Link>VisualStudioLocationHelper.cs</Link>
     </Compile>
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="RunnerUtilities.cs" />

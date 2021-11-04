@@ -303,14 +303,14 @@ namespace Microsoft.Build.UnitTests
                     UseSymboliclinksIfPossible = UseSymbolicLinks,
                 };
 
-                // The file is read-only, so the retries will all fail. 
+                // The file is read-only, so the retries will all fail.
                 Assert.False(t.Execute());
 
-                // 3 warnings per retry, except the last one which has only two. 
+                // 3 warnings per retry, except the last one which has only two.
                 ((MockEngine)t.BuildEngine).AssertLogContains("MSB3026");
                 Assert.Equal(((t.Retries + 1) * 3) - 1, ((MockEngine)t.BuildEngine).Warnings);
 
-                // One error for "retrying failed", one error for "copy failed" 
+                // One error for "retrying failed", one error for "copy failed"
                 ((MockEngine)t.BuildEngine).AssertLogContains("MSB3027");
                 ((MockEngine)t.BuildEngine).AssertLogContains("MSB3021");
                 Assert.Equal(2, ((MockEngine)t.BuildEngine).Errors);
@@ -540,7 +540,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(sourceFile, "This is a source temp file.");
 
-                // run copy twice, so we test if we are able to overwrite previously copied (or linked) file 
+                // run copy twice, so we test if we are able to overwrite previously copied (or linked) file
                 for (var i = 0; i < 2; i++)
                 {
                     var engine = new MockEngine(_testOutputHelper);
@@ -2315,7 +2315,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
                     string linkError = String.Empty;
-                    NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError);
+                    Tasks.NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError);
                 }
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
        a .props file that prevents building the project from doing much of anything. -->
@@ -54,7 +54,7 @@
     <Compile Include="..\Framework\ITaskItem2.cs">
       <Link>ITaskItem2.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyUtilities.cs" />
+    <Compile Include="..\Framework\AssemblyUtilities.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
@@ -145,10 +145,10 @@
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs">
       <Link>TaskParameterTypeVerifier.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Traits.cs">
-      <Link>SharedTraits.cs</Link>
+    <Compile Include="..\Framework\Traits.cs">
+      <Link>FrameworkTraits.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
+    <Compile Include="..\Framework\VisualStudioLocationHelper.cs">
       <Link>VisualStudioLocationHelper.cs</Link>
     </Compile>
     <Compile Include="..\Shared\XMakeAttributes.cs">

@@ -111,18 +111,12 @@
     <Compile Include="..\Shared\NativeMethodsShared.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\AssemblyUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs" />
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\TempFileUtilities.cs">
       <Link>TempFileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
-      <Link>VisualStudioLocationHelper.cs</Link>
     </Compile>
     <Compile Include="..\Shared\XMakeAttributes.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -159,9 +153,6 @@
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\Traits.cs">
-      <Link>SharedTraits.cs</Link>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

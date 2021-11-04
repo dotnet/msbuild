@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A few simple tests for NodeLoggingContexts. 
+        /// A few simple tests for NodeLoggingContexts.
         /// </summary>
         [Fact]
         public void CreateValidNodeLoggingContexts()
@@ -48,9 +48,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that if an invalid node ID is passed to the NodeLoggingContext, it throws 
-        /// an exception -- this is to guarantee that if we're passing around invalid node IDs, 
-        /// we'll know about it.  
+        /// Verifies that if an invalid node ID is passed to the NodeLoggingContext, it throws
+        /// an exception -- this is to guarantee that if we're passing around invalid node IDs,
+        /// we'll know about it.
         /// </summary>
         [Fact]
         public void InvalidNodeIdOnNodeLoggingContext()
