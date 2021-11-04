@@ -39,8 +39,8 @@ namespace Microsoft.DotNet.ShellShim
             if (string.IsNullOrEmpty(archOption))
             {
                 if (targetFramework != null &&
-                    ((targetFramework.Version.Major < 6 && OperatingSystem.IsMacOS()) ||
-                    (targetFramework.Version.Major < 5 && OperatingSystem.IsWindows())
+                    (((targetFramework.Version.Major < 6 && OperatingSystem.IsMacOS()) ||
+                    (targetFramework.Version.Major < 5 && OperatingSystem.IsWindows()))
                     && !arch.Equals(Architecture.X64)))
                 {
                     rid = OperatingSystem.IsWindows() ? "win-x64" : "osx-x64";
