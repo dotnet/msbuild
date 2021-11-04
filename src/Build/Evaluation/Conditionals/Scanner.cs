@@ -5,6 +5,7 @@ using System.Globalization;
 using System;
 using System.Diagnostics;
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
@@ -18,7 +19,7 @@ namespace Microsoft.Build.Evaluation
     ///    do {
     ///      s.Advance();
     ///    while (s.IsNext(Token.EndOfInput));
-    /// 
+    ///
     ///  After Advance() is called, you can get the current token (s.CurrentToken),
     ///  check it's type (s.IsNext()), get the string for it (s.NextString()).
     /// </summary>
@@ -112,7 +113,7 @@ namespace Microsoft.Build.Evaluation
             return _errorPosition;
         }
 
-        // The string (usually a single character) we found unexpectedly. 
+        // The string (usually a single character) we found unexpectedly.
         // We might want to show it in the error message, to help the user spot the error.
         internal string UnexpectedlyFound
         {
@@ -265,7 +266,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Parses either the $(propertyname) syntax or the %(metadataname) syntax, 
+        /// Parses either the $(propertyname) syntax or the %(metadataname) syntax,
         /// and returns the parsed string beginning with the '$' or '%', and ending with the
         /// closing parenthesis.
         /// </summary>
@@ -552,7 +553,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Parse any part of the conditional expression that is quoted. It may contain a property, item, or 
+        /// Parse any part of the conditional expression that is quoted. It may contain a property, item, or
         /// metadata element that needs expansion during evaluation.
         /// </summary>
         private bool ParseQuotedString()

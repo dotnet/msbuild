@@ -39,6 +39,9 @@
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Framework\BuildEnvironmentState.cs">
+      <Link>BuildEnvironmentState.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\AssemblyNameComparer.cs">
       <Link>AssemblyNameComparer.cs</Link>
     </Compile>
@@ -96,7 +99,7 @@
       <Link>ITranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
-    <Compile Include="..\Shared\InternalErrorException.cs">
+    <Compile Include="..\Framework\InternalErrorException.cs">
       <Link>InternalErrorException.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InterningBinaryReader.cs">

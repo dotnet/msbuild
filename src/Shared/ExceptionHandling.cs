@@ -23,7 +23,6 @@ using System.Runtime.Serialization;
 using Microsoft.Build.Shared.Debugging;
 #endif
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Shared
 #endif

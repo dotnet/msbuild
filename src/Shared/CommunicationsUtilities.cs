@@ -14,7 +14,6 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
-using Microsoft.Build.Utilities;
 
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;

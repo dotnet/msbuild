@@ -3,6 +3,7 @@
 
 using Xunit;
 using Shouldly;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.UnitTests;
