@@ -74,25 +74,14 @@
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
   </ItemGroup>
 
-  <!-- GenAPI settings -->
-  <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
-    <!-- Disable reference assembly source when building for Mono, as some APIs are excluded when compiling for Mono -->
-    <GenerateReferenceAssemblySource>false</GenerateReferenceAssemblySource>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">
     <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
     <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
     <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">net</GenAPIShortFrameworkIdentifier>
     <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">netstandard</GenAPIShortFrameworkIdentifier>
     <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">netstandard</GenAPIShortFrameworkIdentifier>
     <GenAPIFolderPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\</GenAPIFolderPath>
-    <GenAPITargetPath>$(GenAPIFolderPath)$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
-    <PackageReference Include="Microsoft.DotNet.GenAPI" PrivateAssets="All" />
-  </ItemGroup>
 
   <ItemGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">
     <!-- Ensure API stability for shipping packages -->
