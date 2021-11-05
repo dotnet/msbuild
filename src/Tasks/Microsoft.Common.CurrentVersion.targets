@@ -1930,13 +1930,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                     GetTargetFrameworkProperties
 
-    Overrridden by cross-targeting projects to return the set of
-    properties (in the form "key1=value1;...keyN=valueN") needed
-    to build it with the best target for the referring project's
-    target framework.
-
-    The referring project's $(TargetFrameworkMoniker) is passed
-    in as $(ReferringTargetFramework)
+    OBSOLETE: present only for theoretical backward compatibility.
   -->
   <Target Name="GetTargetFrameworkProperties" />
 

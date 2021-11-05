@@ -280,7 +280,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                ErrorUtilities.VerifyThrow(false, "Unknown event args type.");
+                ErrorUtilities.ThrowInternalError("Unknown event args type.");
             }
         }
 

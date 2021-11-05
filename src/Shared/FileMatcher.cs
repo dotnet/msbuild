@@ -132,7 +132,7 @@ namespace Microsoft.Build.Shared
                                     directory,
                                     false));
                         IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
-                            ? allEntriesForPath.Where(o => IsMatch(Path.GetFileName(o), pattern))
+                            ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
                             : allEntriesForPath;
                         return stripProjectDirectory
                             ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToArray()
@@ -244,9 +244,9 @@ namespace Microsoft.Build.Shared
             {
                 case FileSystemEntity.Files: return GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory);
                 case FileSystemEntity.Directories: return GetAccessibleDirectories(fileSystem, path, pattern);
-                case FileSystemEntity.FilesAndDirectories: return GetAccessibleFilesAndDirectories(fileSystem,path, pattern);
+                case FileSystemEntity.FilesAndDirectories: return GetAccessibleFilesAndDirectories(fileSystem, path, pattern);
                 default:
-                    ErrorUtilities.VerifyThrow(false, "Unexpected filesystem entity type.");
+                    ErrorUtilities.ThrowInternalError("Unexpected filesystem entity type.");
                     break;
             }
             return Array.Empty<string>();
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Shared
                 {
                     return (ShouldEnforceMatching(pattern)
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
-                            .Where(o => IsMatch(Path.GetFileName(o), pattern))
+                            .Where(o => IsFileNameMatch(o, pattern))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern)
                         ).ToArray();
                 }
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Shared
                     files = fileSystem.EnumerateFiles(dir, filespec);
                     if (ShouldEnforceMatching(filespec))
                     {
-                        files = files.Where(o => IsMatch(Path.GetFileName(o), filespec));
+                        files = files.Where(o => IsFileNameMatch(o, filespec));
                     }
                 }
                 // If the Item is based on a relative path we need to strip
@@ -414,7 +414,7 @@ namespace Microsoft.Build.Shared
                     directories = fileSystem.EnumerateDirectories((path.Length == 0) ? s_thisDirectory : path, pattern);
                     if (ShouldEnforceMatching(pattern))
                     {
-                        directories = directories.Where(o => IsMatch(Path.GetFileName(o), pattern));
+                        directories = directories.Where(o => IsFileNameMatch(o, pattern));
                     }
                 }
 
@@ -956,7 +956,7 @@ namespace Microsoft.Build.Shared
                     for (int i = 0; i < excludeNextSteps.Length; i++)
                     {
                         if (excludeNextSteps[i].NeedsDirectoryRecursion &&
-                            (excludeNextSteps[i].DirectoryPattern == null || IsMatch(Path.GetFileName(subdir), excludeNextSteps[i].DirectoryPattern)))
+                            (excludeNextSteps[i].DirectoryPattern == null || IsFileNameMatch(subdir, excludeNextSteps[i].DirectoryPattern)))
                         {
                             RecursionState thisExcludeStep = searchesToExclude[i];
                             thisExcludeStep.BaseDirectory = subdir;
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.Shared
             }
             else if (recursionState.SearchData.Filespec != null)
             {
-                return IsMatch(Path.GetFileName(file), recursionState.SearchData.Filespec);
+                return IsFileNameMatch(file, recursionState.SearchData.Filespec);
             }
 
             // if no file-spec provided, match the file to the regular expression
@@ -1665,11 +1665,38 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// A wildcard (* and ?) matching algorithm that tests whether the input path file name matches against the pattern.
+        /// </summary>
+        /// <param name="path">The path whose file name is matched against the pattern.</param>
+        /// <param name="pattern">The pattern.</param>
+        internal static bool IsFileNameMatch(string path, string pattern)
+        {
+            // Use a span-based Path.GetFileName if it is available.
+#if FEATURE_MSIOREDIST
+            return IsMatch(Microsoft.IO.Path.GetFileName(path.AsSpan()), pattern);
+#elif NETSTANDARD2_0
+            return IsMatch(Path.GetFileName(path), pattern);
+#else
+            return IsMatch(Path.GetFileName(path.AsSpan()), pattern);
+#endif
+        }
+
+        /// <summary>
         /// A wildcard (* and ?) matching algorithm that tests whether the input string matches against the pattern.
         /// </summary>
         /// <param name="input">String which is matched against the pattern.</param>
         /// <param name="pattern">Pattern against which string is matched.</param>
         internal static bool IsMatch(string input, string pattern)
+        {
+            return IsMatch(input.AsSpan(), pattern);
+        }
+
+        /// <summary>
+        /// A wildcard (* and ?) matching algorithm that tests whether the input string matches against the pattern.
+        /// </summary>
+        /// <param name="input">String which is matched against the pattern.</param>
+        /// <param name="pattern">Pattern against which string is matched.</param>
+        internal static bool IsMatch(ReadOnlySpan<char> input, string pattern)
         {
             if (input == null)
             {
@@ -1705,9 +1732,12 @@ namespace Microsoft.Build.Shared
             // to using the string indexer. The iIndex and pIndex parameters are only used
             // when we have to compare two non ASCII characters. Using just string.Compare for
             // character comparison, would reduce the speed by approx. 5 times.
-            bool CompareIgnoreCase(char inputChar, char patternChar, int iIndex, int pIndex)
+            bool CompareIgnoreCase(ref ReadOnlySpan<char> input, int iIndex, int pIndex)
 #endif
             {
+                char inputChar = input[iIndex];
+                char patternChar = pattern[pIndex];
+
                 // We will mostly be comparing ASCII characters, check English letters first.
                 char inputCharLower = (char)(inputChar | 0x20);
                 if (inputCharLower >= 'a' && inputCharLower <= 'z')
@@ -1721,7 +1751,7 @@ namespace Microsoft.Build.Shared
                     // and a non ASCII character cannot have its lowercase/uppercase inside the ASCII table
                     return inputChar == patternChar;
                 }
-                return string.Compare(input, iIndex, pattern, pIndex, 1, StringComparison.OrdinalIgnoreCase) == 0;
+                return MemoryExtensions.Equals(input.Slice(iIndex, 1), pattern.AsSpan(pIndex, 1), StringComparison.OrdinalIgnoreCase);
             }
 #if MONO
             ; // The end of the CompareIgnoreCase anonymous function
@@ -1761,7 +1791,7 @@ namespace Microsoft.Build.Shared
                                     break;
                                 }
                                 // If the tail doesn't match, we can safely return e.g. ("aaa", "*b")
-                                if (!CompareIgnoreCase(input[inputTailIndex], pattern[patternTailIndex], patternTailIndex, inputTailIndex) &&
+                                if (!CompareIgnoreCase(ref input, inputTailIndex, patternTailIndex) &&
                                     pattern[patternTailIndex] != '?')
                                 {
                                     return false;
@@ -1781,7 +1811,7 @@ namespace Microsoft.Build.Shared
                         // The ? wildcard cannot be skipped as we will have a wrong result for e.g. ("aab" "*?b")
                         if (pattern[patternIndex] != '?')
                         {
-                            while (!CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex))
+                            while (!CompareIgnoreCase(ref input, inputIndex, patternIndex))
                             {
                                 // Return if there is no character that match e.g. ("aa", "*b")
                                 if (++inputIndex >= inputLength)
@@ -1796,7 +1826,7 @@ namespace Microsoft.Build.Shared
                     }
 
                     // If we have a match, step to the next character
-                    if (CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex) ||
+                    if (CompareIgnoreCase(ref input, inputIndex, patternIndex) ||
                         pattern[patternIndex] == '?')
                     {
                         patternIndex++;
@@ -2557,14 +2587,14 @@ namespace Microsoft.Build.Shared
         private static bool DirectoryEndsWithPattern(string directoryPath, string pattern)
         {
             int index = directoryPath.LastIndexOfAny(FileUtilities.Slashes);
-            return (index != -1 && IsMatch(directoryPath.Substring(index + 1), pattern));
+            return (index != -1 && IsMatch(directoryPath.AsSpan(index + 1), pattern));
         }
 
         /// <summary>
         /// Returns true if <paramref name="pattern"/> is <code>*</code> or <code>*.*</code>.
         /// </summary>
         /// <param name="pattern">The filename pattern to check.</param>
-        private static bool IsAllFilesWildcard(string pattern) => pattern?.Length switch
+        internal static bool IsAllFilesWildcard(string pattern) => pattern?.Length switch
         {
             1 => pattern[0] == '*',
             3 => pattern[0] == '*' && pattern[1] == '.' && pattern[2] == '*',

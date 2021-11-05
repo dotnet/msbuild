@@ -29,7 +29,7 @@ namespace Microsoft.Build.Shared
             params object[] args
         )
         {
-            VerifyThrowInvalidProjectFile(false, null, projectFile, resourceName, args);
+            ThrowInvalidProjectFile(null, projectFile, resourceName, args);
         }
 
         /// <summary>
@@ -157,16 +157,8 @@ namespace Microsoft.Build.Shared
 #endif
             if (!condition)
             {
-                string errorSubCategory = null;
-
-                if (errorSubCategoryResourceName != null)
-                {
-                    errorSubCategory = AssemblyResources.GetString(errorSubCategoryResourceName);
-                }
-
-                string errorCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, args);
+                string errorSubCategory = errorSubCategoryResourceName is null ? null : AssemblyResources.GetString(errorSubCategoryResourceName);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, resourceName, args);
 
                 throw new InvalidProjectFileException(projectFile.File, projectFile.Line, projectFile.Column, projectFile.EndLine, projectFile.EndColumn, message, errorSubCategory, errorCode, helpKeyword, innerException);
             }

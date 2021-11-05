@@ -902,7 +902,7 @@ namespace Microsoft.Build.Utilities
                             break;
 
                         default:
-                            ErrorUtilities.VerifyThrow(false, "Unknown tool notification.");
+                            ErrorUtilities.ThrowInternalError("Unknown tool notification.");
                             break;
                     }
                 }

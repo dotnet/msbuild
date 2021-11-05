@@ -1545,15 +1545,13 @@ namespace Microsoft.Build.CommandLine
         private static void VerifyThrowSupportedOS()
         {
 #if FEATURE_OSVERSION
-            if ((Environment.OSVersion.Platform == PlatformID.Win32S) ||        // Win32S
-                (Environment.OSVersion.Platform == PlatformID.Win32Windows) ||  // Windows 95, Windows 98, Windows ME
-                (Environment.OSVersion.Platform == PlatformID.WinCE) ||         // Windows CE
-                ((Environment.OSVersion.Platform == PlatformID.Win32NT) &&      // Windows NT 4.0 and earlier
-                (Environment.OSVersion.Version.Major <= 4)))
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT ||
+                Environment.OSVersion.Version.Major < 6 ||
+                (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor < 1)) // Windows 7 is minimum
             {
                 // If we're running on any of the unsupported OS's, fail immediately.  This way,
                 // we don't run into some obscure error down the line, totally confusing the user.
-                InitializationException.VerifyThrow(false, "UnsupportedOS");
+                InitializationException.Throw("UnsupportedOS", null, null, false);
             }
 #endif
         }
@@ -1706,8 +1704,8 @@ namespace Microsoft.Build.CommandLine
                             }
                             else
                             {
-                                switchName = unquotedCommandLineArg.Substring(switchIndicatorsLength, switchParameterIndicator - 1);
-                                switchParameters = ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, switchName, switchParameterIndicator);
+                                switchName = unquotedCommandLineArg.Substring(switchIndicatorsLength, switchParameterIndicator - switchIndicatorsLength);
+                                switchParameters = ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, switchName, switchParameterIndicator, switchIndicatorsLength);
                             }
                         }
 
@@ -1766,6 +1764,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="doubleQuotesRemovedFromArg"></param>
         /// <param name="switchName"></param>
         /// <param name="switchParameterIndicator"></param>
+        /// <param name="switchIndicatorsLength"></param>
         /// <returns>The given switch's parameters (with interesting quoting preserved).</returns>
         internal static string ExtractSwitchParameters
         (
@@ -1773,7 +1772,8 @@ namespace Microsoft.Build.CommandLine
             string unquotedCommandLineArg,
             int doubleQuotesRemovedFromArg,
             string switchName,
-            int switchParameterIndicator
+            int switchParameterIndicator,
+            int switchIndicatorsLength
         )
         {
 
@@ -1785,7 +1785,7 @@ namespace Microsoft.Build.CommandLine
             // check if there is any quoting in the name portion of the switch
             string unquotedSwitchIndicatorAndName = QuotingUtilities.Unquote(commandLineArg.Substring(0, quotedSwitchParameterIndicator), out var doubleQuotesRemovedFromSwitchIndicatorAndName);
 
-            ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(1),
+            ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(switchIndicatorsLength),
                 "The switch name extracted from either the partially or completely unquoted arg should be the same.");
 
             ErrorUtilities.VerifyThrow(doubleQuotesRemovedFromArg >= doubleQuotesRemovedFromSwitchIndicatorAndName,
@@ -2843,7 +2843,7 @@ namespace Microsoft.Build.CommandLine
                 // If there is more than one solution file in the current directory we have no idea which one to use
                 else if (actualSolutionFiles.Count > 1)
                 {
-                    InitializationException.VerifyThrow(false, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
+                    InitializationException.VerifyThrow(false, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory, false);
                 }
                 // If there is more than one project file in the current directory we may be able to figure it out
                 else if (actualProjectFiles.Count > 1)
@@ -2883,7 +2883,7 @@ namespace Microsoft.Build.CommandLine
                          actualSolutionFiles.Count== 0 &&
                          solutionFilterFiles.Count == 0)
                 {
-                    InitializationException.VerifyThrow(false, "MissingProjectError");
+                    InitializationException.Throw("MissingProjectError", null, null, false);
                 }
                 else
                 {

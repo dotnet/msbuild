@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 using System.Text;
-using error = Microsoft.Build.Shared.ErrorUtilities;
+using Error = Microsoft.Build.Shared.ErrorUtilities;
 
 namespace Microsoft.Build.Shared
 {
@@ -33,7 +33,7 @@ namespace Microsoft.Build.Shared
             else
             {
                 // Unsupported boolean representation.
-                error.VerifyThrowArgument(false, "Shared.CannotConvertStringToBool", parameterValue);
+                Error.ThrowArgument("Shared.CannotConvertStringToBool", parameterValue);
                 return false;
             }
         }
@@ -62,6 +62,21 @@ namespace Microsoft.Build.Shared
             }
 
             return sb.ToString();
+        }
+
+        internal static bool TryConvertStringToBool(string parameterValue, out bool boolValue)
+        {
+            boolValue = false;
+            if (ValidBooleanTrue(parameterValue))
+            {
+                boolValue = true;
+                return true;
+            }
+            else if (ValidBooleanFalse(parameterValue))
+            {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -123,30 +138,40 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static double ConvertDecimalOrHexToDouble(string number)
         {
-            if (ConversionUtilities.ValidDecimalNumber(number))
+            if (TryConvertDecimalOrHexToDouble(number, out double result))
             {
-                return ConversionUtilities.ConvertDecimalToDouble(number);
+                return result;
             }
-            else if (ConversionUtilities.ValidHexNumber(number))
+            Error.ThrowInternalError("Cannot numeric evaluate");
+            return 0.0D;
+        }
+
+        internal static bool TryConvertDecimalOrHexToDouble(string number, out double doubleValue)
+        {
+            if (ConversionUtilities.ValidDecimalNumber(number, out doubleValue))
             {
-                return ConversionUtilities.ConvertHexToDouble(number);
+                return true;
+            }
+            else if (ConversionUtilities.ValidHexNumber(number, out int hexValue))
+            {
+                doubleValue = (double)hexValue;
+                return true;
             }
             else
             {
-                ErrorUtilities.VerifyThrow(false, "Cannot numeric evaluate");
-                return 0.0D;
+                return false;
             }
         }
 
         /// <summary>
         /// Returns true if the string is a valid hex number, like "0xABC"
         /// </summary>
-        private static bool ValidHexNumber(string number)
+        private static bool ValidHexNumber(string number, out int value)
         {
             bool canConvert = false;
+            value = 0;
             if (number.Length >= 3 && number[0] == '0' && (number[1] == 'x' || number[1] == 'X'))
             {
-                int value;
                 canConvert = Int32.TryParse(number.Substring(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture.NumberFormat, out value);
             }
             return canConvert;
@@ -155,9 +180,8 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Returns true if the string is a valid decimal number, like "-123.456"
         /// </summary>
-        private static bool ValidDecimalNumber(string number)
+        private static bool ValidDecimalNumber(string number, out double value)
         {
-            double value;
             return Double.TryParse(number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out value) && !double.IsInfinity(value);
         }
 
@@ -166,7 +190,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool ValidDecimalOrHexNumber(string number)
         {
-            return ValidDecimalNumber(number) || ValidHexNumber(number);
+            return ValidDecimalNumber(number, out _) || ValidHexNumber(number, out _);
         }
     }
 }
