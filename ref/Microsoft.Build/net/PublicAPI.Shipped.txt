@@ -1758,8 +1758,6 @@ static Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.get 
 static Microsoft.Build.Evaluation.ProjectCollection.Unescape(string escapedString) -> string
 static Microsoft.Build.Evaluation.ProjectCollection.Version.get -> System.Version
 static Microsoft.Build.Execution.BuildManager.DefaultBuildManager.get -> Microsoft.Build.Execution.BuildManager
-static Microsoft.Build.Execution.BuildManager.WaitForDebugger.get -> bool
-static Microsoft.Build.Execution.BuildManager.WaitForDebugger.set -> void
 static Microsoft.Build.Execution.ProjectInstance.FromFile(string file, Microsoft.Build.Definition.ProjectOptions options) -> Microsoft.Build.Execution.ProjectInstance
 static Microsoft.Build.Execution.ProjectInstance.FromProjectRootElement(Microsoft.Build.Construction.ProjectRootElement rootElement, Microsoft.Build.Definition.ProjectOptions options) -> Microsoft.Build.Execution.ProjectInstance
 static Microsoft.Build.Execution.ProjectInstance.GetEvaluatedItemIncludeEscaped(Microsoft.Build.Execution.ProjectItemDefinitionInstance item) -> string
