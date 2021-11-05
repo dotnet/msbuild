@@ -22,5 +22,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>7324320f814152b72295946847ca72413507705a</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3">
+      <Uri>dotnet/roslyn-analyzers</Uri>
+      <Sha />
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>

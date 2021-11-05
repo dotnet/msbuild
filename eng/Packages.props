@@ -10,6 +10,7 @@
     <PackageReference Update="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftNetCompilersToolsetVersion)" />
     <PackageReference Update="Microsoft.CodeAnalysis.Collections" Version="4.0.0-4.21379.20" />
+    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)" />
     <PackageReference Update="Microsoft.CodeQuality.Analyzers" Version="3.3.0" PrivateAssets="all" />
     <PackageReference Update="Microsoft.DotNet.GenAPI" Version="2.1.0-prerelease-02404-02" />
     <PackageReference Update="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
