@@ -38,8 +38,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
-        <source>Disable the use of build servers.</source>
-        <target state="new">Disable the use of build servers.</target>
+        <source>Force the command to ignore any persistent build servers.</source>
+        <target state="new">Force the command to ignore any persistent build servers.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">
