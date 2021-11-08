@@ -65,7 +65,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         ///     Copy on write snapshot of <see cref="_knownImmutableDirectories"/>.
         /// </summary>
-        private IReadOnlyList<string> _knownImmutableDirectoriesSnapshot = Array.Empty<string>();
+        private volatile IReadOnlyList<string> _knownImmutableDirectoriesSnapshot = Array.Empty<string>();
 
         /// <summary>
         ///     Creates default FileClassifier which following immutable folders:
