@@ -16,7 +16,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public SdkFeatureBand(ReleaseVersion version)
         {
             var fullVersion = version ?? throw new ArgumentNullException(nameof(version));
-            if (string.IsNullOrEmpty(version.Prerelease) || version.Prerelease.Contains("dev"))
+            if (string.IsNullOrEmpty(version.Prerelease))
             {
                 _featureBand = new ReleaseVersion(fullVersion.Major, fullVersion.Minor, fullVersion.SdkFeatureBand);
             }
@@ -55,5 +55,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             return _featureBand.ToString();
         }
+
+        internal string ToStringWithoutPrerelease()
+        {
+            return new ReleaseVersion(_featureBand.Major, _featureBand.Minor, _featureBand.SdkFeatureBand).ToString();
+        }
+
+        public static bool operator >(SdkFeatureBand a, SdkFeatureBand b) => a.CompareTo(b) > 0;
+
+        public static bool operator <(SdkFeatureBand a, SdkFeatureBand b) => a.CompareTo(b) < 0;
     }
 }

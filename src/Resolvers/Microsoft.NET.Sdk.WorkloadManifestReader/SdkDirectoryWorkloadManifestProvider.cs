@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Workloads.Workload;
 
@@ -14,7 +13,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     public class SdkDirectoryWorkloadManifestProvider : IWorkloadManifestProvider
     {
         private readonly string _sdkRootPath;
-        private readonly string _sdkVersionBand;
+        private readonly SdkFeatureBand _sdkVersionBand;
         private readonly string [] _manifestDirectories;
         private static HashSet<string> _outdatedManifestIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "microsoft.net.workload.android", "microsoft.net.workload.blazorwebassembly", "microsoft.net.workload.ios",
             "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos" };
@@ -40,7 +39,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
 
             _sdkRootPath = sdkRootPath;
-            _sdkVersionBand = new SdkFeatureBand(sdkVersion).ToString();
+            _sdkVersionBand = new SdkFeatureBand(sdkVersion);
 
             var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, "IncludedWorkloadManifests.txt");
             if (File.Exists(knownManifestIdsFilePath))
@@ -48,9 +47,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 _knownManifestIds = File.ReadAllLines(knownManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)).ToHashSet();
             }
 
-            string? userManifestsDir = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand);
-            string dotnetManifestDir = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
-            if (userManifestsDir != null && WorkloadFileBasedInstall.IsUserLocal(_sdkRootPath, _sdkVersionBand) && Directory.Exists(userManifestsDir))
+            string? userManifestsDir = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand.ToString());
+            string dotnetManifestDir = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand.ToString());
+            if (userManifestsDir != null && WorkloadFileBasedInstall.IsUserLocal(_sdkRootPath, _sdkVersionBand.ToString()) && Directory.Exists(userManifestsDir))
             {
                 _manifestDirectories = new[] { userManifestsDir, dotnetManifestDir };
             }
@@ -65,7 +64,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 //  Append the SDK version band to each manifest root specified via the environment variable.  This allows the same
                 //  environment variable settings to be shared by multiple SDKs.
                 _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator)
-                    .Select(p => Path.Combine(p, _sdkVersionBand))
+                    .Select(p => Path.Combine(p, _sdkVersionBand.ToString()))
                     .Concat(_manifestDirectories).ToArray();
             }
         }
@@ -147,10 +146,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             var candidateFeatureBands = Directory.GetDirectories(Path.Combine(_sdkRootPath, "sdk-manifests"))
                 .Select(dir => Path.GetFileName(dir))
-                .Select(featureBand => new ReleaseVersion(featureBand))
-                .Where(featureBand => featureBand < new ReleaseVersion(_sdkVersionBand));
+                .Select(featureBand => new SdkFeatureBand(featureBand))
+                .Where(featureBand => featureBand < _sdkVersionBand || _sdkVersionBand.ToStringWithoutPrerelease().Equals(featureBand.ToString()));
             var matchingManifestFatureBands = candidateFeatureBands
                 .Where(featureBand => Directory.Exists(Path.Combine(_sdkRootPath, "sdk-manifests", featureBand.ToString(), manifestId)));
+
             if (matchingManifestFatureBands.Any())
             {
                 return Path.Combine(_sdkRootPath, "sdk-manifests", matchingManifestFatureBands.Max()!.ToString(), manifestId);
@@ -170,7 +170,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public string GetSdkFeatureBand()
         {
-            return _sdkVersionBand;
+            return _sdkVersionBand.ToString();
         }
     }
 }
