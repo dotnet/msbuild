@@ -17,20 +17,17 @@ namespace Microsoft.DotNet.PackageValidation
     /// </summary>
     public class BaselinePackageValidator
     {
-        private static HashSet<string> s_diagList = new HashSet<string>{ DiagnosticIds.TargetFrameworkDropped, DiagnosticIds.TargetFrameworkAndRidPairDropped }; 
         private readonly Package _baselinePackage;
         private readonly bool _runApiCompat;
-        private readonly DiagnosticBag<IDiagnostic> _diagnosticBag;
         private readonly ApiCompatRunner _apiCompatRunner;
         private readonly ICompatibilityLogger _log;
 
-        public BaselinePackageValidator(Package baselinePackage, string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, ICompatibilityLogger log, Dictionary<string, HashSet<string>> apiCompatReferences)
+        public BaselinePackageValidator(Package baselinePackage, bool runApiCompat, ICompatibilityLogger log, Dictionary<string, HashSet<string>> apiCompatReferences)
         {
             _baselinePackage = baselinePackage;
             _runApiCompat = runApiCompat;
             _log = log;
-            _apiCompatRunner = new(noWarn, ignoredDifferences, false, _log, apiCompatReferences);
-            _diagnosticBag = new(noWarn?.Split(';')?.Where(t => s_diagList.Contains(t)), ignoredDifferences);
+            _apiCompatRunner = new(enableStrictMode: false, _log, apiCompatReferences);
         }
 
         /// <summary>
@@ -48,14 +45,11 @@ namespace Microsoft.DotNet.PackageValidation
                 ContentItem latestCompileTimeAsset = package.FindBestCompileAssetForFramework(baselineTargetFramework);
                 if (latestCompileTimeAsset == null)
                 {
-                    if (!_diagnosticBag.Filter(DiagnosticIds.TargetFrameworkDropped, baselineTargetFramework.ToString()))
-                    {
-                        _log.LogError(
-                            new Suppression { DiagnosticId = DiagnosticIds.TargetFrameworkDropped, Target = baselineTargetFramework.ToString() },
-                            DiagnosticIds.TargetFrameworkDropped, 
-                            Resources.MissingTargetFramework, 
-                            baselineTargetFramework.ToString());
-                    }
+                    _log.LogError(
+                        new Suppression { DiagnosticId = DiagnosticIds.TargetFrameworkDropped, Target = baselineTargetFramework.ToString() },
+                        DiagnosticIds.TargetFrameworkDropped,
+                        Resources.MissingTargetFramework,
+                        baselineTargetFramework.ToString());
                 }
                 else if (_runApiCompat)
                 {
@@ -70,14 +64,11 @@ namespace Microsoft.DotNet.PackageValidation
                 ContentItem latestRuntimeAsset = package.FindBestRuntimeAssetForFramework(baselineTargetFramework);
                 if (latestRuntimeAsset == null)
                 {
-                    if (!_diagnosticBag.Filter(DiagnosticIds.TargetFrameworkDropped, baselineTargetFramework.ToString()))
-                    {
-                        _log.LogError(
-                            new Suppression { DiagnosticId = DiagnosticIds.TargetFrameworkDropped, Target = baselineTargetFramework.ToString() },
-                            DiagnosticIds.TargetFrameworkDropped, 
-                            Resources.MissingTargetFramework, 
-                            baselineTargetFramework.ToString());
-                    }
+                    _log.LogError(
+                        new Suppression { DiagnosticId = DiagnosticIds.TargetFrameworkDropped, Target = baselineTargetFramework.ToString() },
+                        DiagnosticIds.TargetFrameworkDropped,
+                        Resources.MissingTargetFramework,
+                        baselineTargetFramework.ToString());
                 }
                 else
                 {
@@ -96,15 +87,12 @@ namespace Microsoft.DotNet.PackageValidation
                 ContentItem latestRuntimeSpecificAsset = package.FindBestRuntimeAssetForFrameworkAndRuntime(baselineTargetFramework, baselineRid);
                 if (latestRuntimeSpecificAsset == null)
                 {
-                    if (!_diagnosticBag.Filter(DiagnosticIds.TargetFrameworkDropped, baselineTargetFramework.ToString() + "-" + baselineRid))
-                    {
-                        _log.LogError(
-                            new Suppression { DiagnosticId = DiagnosticIds.TargetFrameworkAndRidPairDropped, Target = baselineTargetFramework.ToString() + "-" + baselineRid },
-                            DiagnosticIds.TargetFrameworkAndRidPairDropped, 
-                            Resources.MissingTargetFrameworkAndRid, 
-                            baselineTargetFramework.ToString(), 
-                            baselineRid);
-                    }
+                    _log.LogError(
+                        new Suppression { DiagnosticId = DiagnosticIds.TargetFrameworkAndRidPairDropped, Target = baselineTargetFramework.ToString() + "-" + baselineRid },
+                        DiagnosticIds.TargetFrameworkAndRidPairDropped,
+                        Resources.MissingTargetFrameworkAndRid,
+                        baselineTargetFramework.ToString(),
+                        baselineRid);
                 }
                 else
                 {

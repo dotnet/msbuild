@@ -97,15 +97,15 @@ namespace Microsoft.DotNet.Compatibility
             }
 
             Package package = NupkgParser.CreatePackage(PackageTargetPath, runtimeGraph);
-            CompatibilityLogger logger = new(Log, CompatibilitySuppressionFilePath, GenerateCompatibilitySuppressionFile);
+            CompatibilityLogger logger = new(Log, CompatibilitySuppressionFilePath, GenerateCompatibilitySuppressionFile, NoWarn);
 
-            new CompatibleTfmValidator(NoWarn, null, RunApiCompat, EnableStrictModeForCompatibleTfms, logger, apiCompatReferences).Validate(package);
-            new CompatibleFrameworkInPackageValidator(NoWarn, null, EnableStrictModeForCompatibleFrameworksInPackage, logger, apiCompatReferences).Validate(package);
+            new CompatibleTfmValidator(RunApiCompat, EnableStrictModeForCompatibleTfms, logger, apiCompatReferences).Validate(package);
+            new CompatibleFrameworkInPackageValidator(EnableStrictModeForCompatibleFrameworksInPackage, logger, apiCompatReferences).Validate(package);
 
             if (!DisablePackageBaselineValidation && !string.IsNullOrEmpty(BaselinePackageTargetPath))
             {
                 Package baselinePackage = NupkgParser.CreatePackage(BaselinePackageTargetPath, runtimeGraph);
-                new BaselinePackageValidator(baselinePackage, NoWarn, null, RunApiCompat, logger, apiCompatReferences).Validate(package);
+                new BaselinePackageValidator(baselinePackage, RunApiCompat, logger, apiCompatReferences).Validate(package);
             }
 
             if (GenerateCompatibilitySuppressionFile)
