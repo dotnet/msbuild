@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Add.Reference.Tests
   Add a project-to-project reference to the project.
 
 Usage:
-  dotnet [options] add [<PROJECT>] reference <PROJECT_PATH>...
+  dotnet add [<PROJECT>] reference <PROJECT_PATH>... [options]
 
 Arguments:
   <PROJECT>         The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
@@ -40,7 +40,7 @@ Options:
   .NET Add Command
 
 Usage:
-  dotnet [options] add <PROJECT> [command]
+  dotnet add <PROJECT> [command] [options]
 
 Arguments:
   <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
