@@ -415,7 +415,7 @@ namespace Microsoft.Build.Execution
             bool retrievedFromCache = false;
             
             // If there are no usingtask tags in the project don't bother caching or looking for tasks locally
-            RegisteredTaskRecord record = overriddenTasks.ContainsKey(taskName) ? overriddenTasks[taskName] : GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
+            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
 
             if (record != null)
             {
@@ -471,6 +471,12 @@ namespace Microsoft.Build.Execution
             RegisteredTaskRecord taskRecord = null;
             retrievedFromCache = false;
             RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
+
+            // was this task overridden?
+            if (overriddenTasks.TryGetValue(taskName, out RegisteredTaskRecord rec))
+            {
+                return rec;
+            }
 
             // Try the override task registry first
             if (_toolset != null)
@@ -667,7 +673,7 @@ namespace Microsoft.Build.Execution
 
             RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
 
-            if (overrideTask)
+            if (overrideTask && !overriddenTasks.ContainsKey(taskName))
             {
                 overriddenTasks[taskName] = newRecord;
             }
