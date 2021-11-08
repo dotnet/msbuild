@@ -57,8 +57,8 @@ namespace Microsoft.Build.Framework
         ///     Serves purpose of thread safe set of known immutable directories.
         /// </summary>
         /// <remarks>
-        ///     Although <see cref="ConcurrentDictionary{TKey,TValue}"></see> is not memory wise optimal solution, int this particular case it does no matter
-        ///     as much as expected size of this set is ~5 and in very extreme cases less then 100.
+        ///     Although <see cref="ConcurrentDictionary{TKey,TValue}"></see> is not optimal memory-wise, in this particular case it does not matter
+        ///     much as the expected size of this set is ~5 and in very extreme cases less then 100.
         /// </remarks>
         private readonly ConcurrentDictionary<string, string> _knownImmutableDirectories = new();
 
