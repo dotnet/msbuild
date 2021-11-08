@@ -16,7 +16,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public SdkFeatureBand(ReleaseVersion version)
         {
             var fullVersion = version ?? throw new ArgumentNullException(nameof(version));
-            if (string.IsNullOrEmpty(version.Prerelease))
+            if (string.IsNullOrEmpty(version.Prerelease) || version.Prerelease.Contains("dev") || version.Prerelease.Contains("ci"))
             {
                 _featureBand = new ReleaseVersion(fullVersion.Major, fullVersion.Minor, fullVersion.SdkFeatureBand);
             }
