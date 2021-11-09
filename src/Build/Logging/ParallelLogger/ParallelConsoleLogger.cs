@@ -1385,17 +1385,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 else
                 {
-                    if (_alignMessages || adjustedPrefixWidth != 0)
-                    {
-                        WriteHandler(_consoleOutputAligner.AlignConsoleOutput(message, prefixAlreadyWritten, adjustedPrefixWidth));
-                    }
-                    else
-                    {
-                        // If we do not indent and/or align (wrap) we can simply write it as is.
-                        // This will always be true for FileLoggers
-                        WriteHandler(message);
-                        WriteHandler(Environment.NewLine);
-                    }
+                    WriteHandler(_consoleOutputAligner.AlignConsoleOutput(message, prefixAlreadyWritten, adjustedPrefixWidth));
                 }
             }
         }
