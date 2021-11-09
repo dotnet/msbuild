@@ -82,10 +82,9 @@ namespace Microsoft.Build.BackEnd.Logging
             int bufferWidthMinusNewLine = _bufferWidth - 1;
 
             bool bufferIsLargerThanPrefix = bufferWidthMinusNewLine > prefixWidth;
-            if (bufferIsLargerThanPrefix && _alignMessages)
             if (_alignMessages && bufferIsLargerThanPrefix && count > 0)
             {
-                // If the buffer is larger then the prefix information (timestamp and key) then reformat the messages.
+                // If the buffer is larger then the prefix information (timestamp and key) then reformat the messages
 
                 // Beginning index of string to be written
                 int index = 0;
@@ -94,7 +93,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     // Position of virtual console cursor.
                     // By simulating cursor position adjustment for tab characters '\t' we can compute
-                    // exact numbers of characters from source string to fit into Console.BufferWidth
+                    //   exact numbers of characters from source string to fit into Console.BufferWidth.
                     int cursor = 0;
 
                     // Write prefix if needed
@@ -105,7 +104,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // We have to adjust cursor position whether the prefix has been already written or we wrote/indented it ourselves
                     cursor += prefixWidth;
 
-                    // end index of string to be written (behind last character)
+                    // End index of string to be written (behind last character)
                     int endIndex = index;
                     while (cursor < bufferWidthMinusNewLine)
                     {
@@ -113,11 +112,11 @@ namespace Microsoft.Build.BackEnd.Logging
                         int nextTab = message.IndexOf('\t', start + endIndex, remainingCharsToEndOfBuffer);
                         if (nextTab >= 0)
                         {
-                            // position before tab
+                            // Position before tab
                             cursor += nextTab - (start + endIndex);
-                            // move to next tab position
+                            // Move to next tab position
                             cursor += ConsoleTabWidth - cursor % ConsoleTabWidth;
-                            // move end index after the '\t' in preparation for following IndexOf '\t'
+                            // Move end index after the '\t' in preparation for following IndexOf '\t'
                             endIndex += nextTab - (start + endIndex) + 1;
                         }
                         else
