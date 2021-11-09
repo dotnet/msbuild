@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Text;
 using System.Collections;
 using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -105,6 +103,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     _alignMessages = false;
                 }
             }
+
+            _consoleOutputAligner = new ConsoleOutputAligner(_bufferWidth, _alignMessages);
         }
 
         #endregion
@@ -1344,7 +1344,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 int adjustedPrefixWidth = _prefixWidth + prefixAdjustment;
 
-                if (Traits.Instance.EscapeHatches.DoNotOptimizeConsoleLogger)
+                if (Traits.Instance.EscapeHatches.DoNotOptimizeConsoleLogger || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
                 {
                     // The string may contain new lines, treat each new line as a different string to format and send to the console
                     string[] nonNullMessages = SplitStringOnNewLines(message);
@@ -1385,107 +1385,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 else
                 {
-                    // If we do not indent and/or wrap we can simply write it as is.
-                    // This will always be true for FileLoggers
-                    if (!_alignMessages && adjustedPrefixWidth == 0)
+                    if (_alignMessages || adjustedPrefixWidth != 0)
                     {
-                        WriteHandler(message);
-                        WriteHandler(Environment.NewLine);
+                        WriteHandler(_consoleOutputAligner.AlignConsoleOutput(message, prefixAlreadyWritten, adjustedPrefixWidth));
                     }
                     else
                     {
-                        int j = message.IndexOfAny(newLineChars);
-                        int i = 0;
-                        try
-                        {
-                            var sb = _stringBuilderForWriteMessage;
-                            sb.Length = 0;
-                            // The string contains new lines, treat each new line as a different string to format and send to the console
-                            while (j >= 0)
-                            {
-                                WriteLineOfMessage(sb, adjustedPrefixWidth, message, i, j - i);
-                                i = j + (message[j] == '\r' ? 2 : 1);
-                                j = i < message.Length ? message.IndexOfAny(newLineChars, i) : -1;
-                            }
-
-                            WriteLineOfMessage(sb, adjustedPrefixWidth, message, i, message.Length - i);
-                            WriteHandler(sb.ToString());
-                        }
-                        finally
-                        {
-                            // prepare for reuse
-                            _stringBuilderForWriteMessage.Length = 0;
-                        }
-                    }
-
-                    void WriteLineOfMessage(StringBuilder sb, int adjustedPrefixWidth, string nonNullMessage, int start, int count)
-                    {
-                        int bufferWidthMinusNewLine = _bufferWidth - 1;
-
-                        // If the buffer is larger then the prefix information (timestamp and key) then reformat the messages. 
-                        // If there is not enough room just print the message out and let the console do the formatting
-                        bool bufferIsLargerThanPrefix = bufferWidthMinusNewLine > adjustedPrefixWidth;
-                        bool messageAndPrefixTooLargeForBuffer = (nonNullMessage.Length + adjustedPrefixWidth) > bufferWidthMinusNewLine;
-                        if (bufferIsLargerThanPrefix && messageAndPrefixTooLargeForBuffer && _alignMessages)
-                        {
-                            // If the message and the prefix are too large for one line in the console, split the string to fit
-
-                            // Beginning index of string to be written
-                            int index = 0;
-                            int tabWidth = consoleTab.Length;
-                            // Loop until all the string has been sent to the console
-                            while (index < count)
-                            {
-                                // Position of virtual console cursor
-                                // By simulating cursor position adjustment for tab characters '\t' we can compute
-                                // exact numbers of characters from source string to fit into Console.BufferWidth
-                                int cursor = 0;
-
-                                // Write prefix if needed
-                                if ((!prefixAlreadyWritten || index > 0) && adjustedPrefixWidth > 0)
-                                {
-                                    sb.Append(' ', adjustedPrefixWidth);
-                                    cursor += adjustedPrefixWidth;
-                                }
-
-                                // end index of string to be written (behind last character)
-                                int endIndex = index;
-                                while (cursor < bufferWidthMinusNewLine)
-                                {
-                                    int remainingCharsToEndOfBuffer = Math.Min(bufferWidthMinusNewLine - cursor, count - endIndex);
-                                    int nextTab = message.IndexOf('\t', start + endIndex, remainingCharsToEndOfBuffer);
-                                    if (nextTab >= 0)
-                                    {
-                                        // position before tab
-                                        cursor += nextTab - (start + endIndex);
-                                        // move to next tab position
-                                        cursor += tabWidth - (nextTab % tabWidth);
-
-                                        // move end index after the '\t' in preparation for following IndexOf '\t'
-                                        endIndex += nextTab - (start + endIndex) + 1;
-                                    }
-                                    else
-                                    {
-                                        endIndex += remainingCharsToEndOfBuffer;
-                                        break;
-                                    }
-                                }
-
-                                sb.Append(nonNullMessage, start + index, endIndex - index);
-                                sb.AppendLine();
-
-                                index = endIndex;
-                            }
-                        }
-                        else
-                        {
-                            // Let the console do the formatting
-                            if (!prefixAlreadyWritten)
-                                sb.Append(' ', adjustedPrefixWidth);
-
-                            sb.Append(nonNullMessage, start, count);
-                            sb.AppendLine();
-                        }
+                        // If we do not indent and/or align (wrap) we can simply write it as is.
+                        // This will always be true for FileLoggers
+                        WriteHandler(message);
+                        WriteHandler(Environment.NewLine);
                     }
                 }
             }
@@ -1870,10 +1779,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private BuildEventContext _lastDisplayedBuildEventContext;
         private int _bufferWidth = -1;
         private readonly object _lockObject = new Object();
-        /// <summary>
-        /// Used exclusively by <see cref="WriteMessageAligned(string,bool,int)"/>
-        /// </summary>
-        private readonly StringBuilder _stringBuilderForWriteMessage = new StringBuilder(1024);
         private int _prefixWidth = 0;
         private ProjectFullKey _lastProjectFullKey = new ProjectFullKey(-1, -1);
         private bool _alignMessages;
@@ -1891,6 +1796,8 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool _hasBuildStarted;
         private bool? _showCommandLine;
         private bool _showTimeStamp;
+        private ConsoleOutputAligner _consoleOutputAligner;
+
         #endregion
     }
 }

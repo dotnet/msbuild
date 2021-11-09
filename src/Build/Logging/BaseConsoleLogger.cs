@@ -1171,8 +1171,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <remarks>Currently we're not supporting "\r".</remarks>
         internal static readonly string[] newLines = { "\r\n", "\n" };
 
-        internal static readonly char[] newLineChars = { '\r', '\n' };
-
         /// <summary>
         /// Visual separator for projects. Line length was picked arbitrarily.
         /// </summary>
