@@ -83,6 +83,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             bool bufferIsLargerThanPrefix = bufferWidthMinusNewLine > prefixWidth;
             if (bufferIsLargerThanPrefix && _alignMessages)
+            if (_alignMessages && bufferIsLargerThanPrefix && count > 0)
             {
                 // If the buffer is larger then the prefix information (timestamp and key) then reformat the messages.
 
