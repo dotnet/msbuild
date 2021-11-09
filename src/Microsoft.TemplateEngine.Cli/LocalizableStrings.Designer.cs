@@ -716,6 +716,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Instantiates a template with given short name..
+        /// </summary>
+        internal static string CommandDescriptionCreate {
+            get {
+                return ResourceManager.GetString("CommandDescriptionCreate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Command failed..
         /// </summary>
         internal static string CommandFailed {

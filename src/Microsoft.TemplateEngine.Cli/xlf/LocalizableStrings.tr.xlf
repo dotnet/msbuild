@@ -376,6 +376,11 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="needs-review-translation">.NET Core CLI için Şablon Örneği Oluşturma Komutları</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandDescriptionCreate">
+        <source>Instantiates a template with given short name.</source>
+        <target state="new">Instantiates a template with given short name.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
         <target state="translated">Komut başarısız oldu.</target>

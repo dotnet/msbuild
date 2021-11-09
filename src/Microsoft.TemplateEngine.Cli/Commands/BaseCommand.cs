@@ -17,9 +17,23 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal abstract class BaseCommand : Command
     {
-        protected BaseCommand(string name, string? description = null) : base(name, description)
+        private readonly ITemplateEngineHost _host;
+
+        protected BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string name, string? description = null) : base(name, description)
         {
+            _host = host;
+            TelemetryLogger = logger;
+            Callbacks = callbacks;
+            this.AddOption(DebugCustomSettingsLocationOption);
+            this.AddOption(DebugVirtualizeSettingsOption);
+            this.AddOption(DebugAttachOption);
+            this.AddOption(DebugReinitOption);
+            this.AddOption(DebugRebuildCacheOption);
+            this.AddOption(DebugShowConfigOption);
         }
+
+        protected BaseCommand(BaseCommand baseCommand, string name, string? description = null)
+             : this(baseCommand._host, baseCommand.TelemetryLogger, baseCommand.Callbacks, name, description) { }
 
         internal Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive", "Sets custom settings location")
         {
@@ -50,37 +64,59 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             IsHidden = true
         };
-    }
-
-    internal abstract class BaseCommand<TArgs> : BaseCommand, ICommandHandler where TArgs : GlobalArgs
-    {
-        private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
-        private readonly ITemplateEngineHost _host;
-
-        internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string name, string? description = null)
-            : base(name, description)
-        {
-            _host = host;
-            TelemetryLogger = logger;
-            Callbacks = callbacks;
-            this.Handler = this;
-
-            this.AddOption(DebugCustomSettingsLocationOption);
-            this.AddOption(DebugVirtualizeSettingsOption);
-            this.AddOption(DebugAttachOption);
-            this.AddOption(DebugReinitOption);
-            this.AddOption(DebugRebuildCacheOption);
-            this.AddOption(DebugShowConfigOption);
-        }
 
         internal ITelemetryLogger TelemetryLogger { get; }
 
         internal NewCommandCallbacks Callbacks { get; }
 
+        protected IEngineEnvironmentSettings CreateEnvironmentSettings(GlobalArgs args, ParseResult parseResult)
+        {
+            //reparse to get output option if present
+            //it's kept private so it is not reused for any other purpose except initializing host
+            //for template instantiaton it has to be reparsed
+            string? outputPath = ParseOutputOption(parseResult);
+            IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
+                new CliTemplateEngineHost(_host, outputPath),
+                settingsLocation: args.DebugCustomSettingsLocation,
+                virtualizeSettings: args.DebugVirtualizeSettings,
+                environment: new CliEnvironment());
+            return environmentSettings;
+        }
+
+        private static string? ParseOutputOption(ParseResult commandParseResult)
+        {
+            Option<string> outputOption = SharedOptionsFactory.CreateOutputOption();
+            Command helperCommand = new Command("parse-output")
+            {
+                outputOption
+            };
+
+            ParseResult reparseResult = ParserFactory
+                .CreateParser(helperCommand)
+                .Parse(commandParseResult.Tokens.Select(t => t.Value).ToArray());
+
+            return reparseResult.GetValueForOption<string>(outputOption);
+        }
+
+    }
+
+    internal abstract class BaseCommand<TArgs> : BaseCommand, ICommandHandler where TArgs : GlobalArgs
+    {
+        private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
+
+        internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string name, string? description = null)
+            : base(host, logger, callbacks, name, description)
+        {
+            this.Handler = this;
+        }
+
+        //command called via this constructor is not invokable
+        internal BaseCommand(BaseCommand parent, string name, string? description = null) : base(parent, name, description) { }
+
         public async Task<int> InvokeAsync(InvocationContext context)
         {
             TArgs args = ParseContext(context.ParseResult);
-            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args);
+            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
 
             CancellationToken cancellationToken = context.GetCancellationToken();
 
@@ -137,25 +173,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return base.GetSuggestions(parseResult, textToMatch);
             }
             TArgs args = ParseContext(parseResult);
-            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args);
+            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, parseResult);
             return GetSuggestions(args, environmentSettings, textToMatch);
         }
 
         protected virtual IEnumerable<string> GetSuggestions(TArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
         {
             return base.GetSuggestions(args.ParseResult, textToMatch);
-        }
-
-        protected IEngineEnvironmentSettings CreateEnvironmentSettings(TArgs args)
-        {
-            string? outputPath = (args as InstantiateCommandArgs)?.OutputPath;
-
-            IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
-                new CliTemplateEngineHost(_host, outputPath),
-                settingsLocation: args.DebugCustomSettingsLocation,
-                virtualizeSettings: args.DebugVirtualizeSettings,
-                environment: new CliEnvironment());
-            return environmentSettings;
         }
 
         protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);

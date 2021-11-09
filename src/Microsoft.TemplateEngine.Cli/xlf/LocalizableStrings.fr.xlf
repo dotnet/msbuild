@@ -376,6 +376,11 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
         <target state="needs-review-translation">Commandes d’instanciation du modèle pour CLI .NET Core</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandDescriptionCreate">
+        <source>Instantiates a template with given short name.</source>
+        <target state="new">Instantiates a template with given short name.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
         <target state="translated">Échec de la commande.</target>

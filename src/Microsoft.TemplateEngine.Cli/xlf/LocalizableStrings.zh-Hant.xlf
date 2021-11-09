@@ -376,6 +376,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="needs-review-translation">.NET Core CLI 的範本具現化命令</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandDescriptionCreate">
+        <source>Instantiates a template with given short name.</source>
+        <target state="new">Instantiates a template with given short name.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
         <target state="translated">命令失敗。</target>

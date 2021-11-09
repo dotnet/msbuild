@@ -9,14 +9,21 @@ using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal static class TemplateParserFactory
+    internal static class ParserFactory
     {
-        internal static Parser CreateParser(Command command)
+        internal static Parser CreateTemplateParser(Command command)
         {
             return new CommandLineBuilder(command)
             .UseHelp()
             .UseParseDirective()
             .UseSuggestDirective()
+            .DisablePosixBinding()
+            .Build();
+        }
+
+        internal static Parser CreateParser(Command command)
+        {
+            return new CommandLineBuilder(command)
             .DisablePosixBinding()
             .Build();
         }

@@ -776,4 +776,7 @@ The supported columns are: language, tags, author, type.</value>
     <value>Unrecognized command or argument(s): {0}</value>
     <comment>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</comment>
   </data>
+  <data name="CommandDescriptionCreate" xml:space="preserve">
+    <value>Instantiates a template with given short name.</value>
+  </data>
 </root>

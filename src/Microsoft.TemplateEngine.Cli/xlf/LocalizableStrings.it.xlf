@@ -376,6 +376,11 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="needs-review-translation">Comandi di creazione di istanze dei modelli per interfaccia della riga di comando di .NET Core</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandDescriptionCreate">
+        <source>Instantiates a template with given short name.</source>
+        <target state="new">Instantiates a template with given short name.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
         <target state="translated">Comando non riuscito.</target>

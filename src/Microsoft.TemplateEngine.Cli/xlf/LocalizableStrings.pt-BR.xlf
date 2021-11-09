@@ -376,6 +376,11 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
         <target state="needs-review-translation">Comandos de Instanciação de Modelo para CLI do .NET Core</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandDescriptionCreate">
+        <source>Instantiates a template with given short name.</source>
+        <target state="new">Instantiates a template with given short name.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
         <target state="translated">Falha no comando.</target>

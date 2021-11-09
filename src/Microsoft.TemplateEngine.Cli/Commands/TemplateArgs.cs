@@ -13,7 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private readonly TemplateCommand _command;
         private Dictionary<string, OptionResult> _templateOptions = new Dictionary<string, OptionResult>();
 
-        public TemplateArgs(TemplateCommand command, CliTemplateInfo template, ParseResult parseResult)
+        public TemplateArgs(TemplateCommand command, ParseResult parseResult)
         {
             _parseResult = parseResult ?? throw new ArgumentNullException(nameof(parseResult));
             _command = command ?? throw new ArgumentNullException(nameof(command));
@@ -45,7 +45,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     _templateOptions[opt.Key] = result;
                 }
             }
-            Template = template ?? throw new ArgumentNullException(nameof(template));
+            Template = command.Template;
             NewCommandName = parseResult.GetNewCommandName();
         }
 

@@ -16,13 +16,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
-
-            var parseResult = myCommand.Parse("new console --framework net5.0");
-            NewCommandArgs args = new NewCommandArgs(myCommand, parseResult);
+            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
+            var parseResult = instantiateCommand.Parse("new console --framework net5.0");
+            InstantiateCommandArgs args = new InstantiateCommandArgs(instantiateCommand, parseResult);
 
             Assert.Equal("console", args.ShortName);
-            Assert.Contains("--framework", args.Arguments);
-            Assert.Contains("net5.0", args.Arguments);
+            Assert.Contains("--framework", args.RemainingArguments);
+            Assert.Contains("net5.0", args.RemainingArguments);
         }
 
         [Fact]

@@ -108,6 +108,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return option;
         }
 
+        internal static Option<string> CreateOutputOption()
+        {
+            return new Option<string>(new string[] { "-o", "--output" })
+            {
+                Description = LocalizableStrings.OptionDescriptionOutput,
+                IsRequired = false,
+                Arity = new ArgumentArity(1, 1)
+            };
+        }
+
         internal static IReadOnlyList<string> ParseCommaSeparatedValues(ArgumentResult result)
         {
             List<string> values = new List<string>();
