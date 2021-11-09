@@ -1535,6 +1535,8 @@ namespace Microsoft.Build.UnitTests
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
+            EventSourceSink es = new EventSourceSink();
+            cl2.Initialize(es);
             cl2.Parameters = "ShowEnvironment";
             cl2.ParseParameters();
 
