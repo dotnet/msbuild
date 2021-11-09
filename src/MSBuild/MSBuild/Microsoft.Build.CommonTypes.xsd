@@ -738,6 +738,16 @@ elementFormDefault="qualified">
                             <xs:documentation><!-- _locID_text="Compile_Include" _locComment="" -->Semi-colon separated list of source files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
                     </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -795,6 +805,16 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="EmbeddedResource_Include" _locComment="" -->Semi-colon separated list of resource files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
+                    </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
                     </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
@@ -867,6 +887,16 @@ elementFormDefault="qualified">
                             <xs:documentation><!-- _locID_text="Content_Include" _locComment="" -->Semi-colon separated list of content files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
                     </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -914,6 +944,16 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="Page_Include" _locComment="" -->Semi-colon separated list of XAML files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
+                    </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
                     </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
@@ -963,6 +1003,16 @@ elementFormDefault="qualified">
                             <xs:documentation><!-- _locID_text="Resource_Include" _locComment="" -->Semi-colon separated list of files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
                     </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -1005,6 +1055,16 @@ elementFormDefault="qualified">
                             </xs:element>
                         </xs:choice>
                     </xs:sequence>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
