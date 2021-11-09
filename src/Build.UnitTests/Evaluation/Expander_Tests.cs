@@ -1874,19 +1874,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Trait("Category", "mono-osx-failing")]
         public void TestGetPathToReferenceAssembliesAsFunction()
         {
-            if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45) == null)
+            if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48) == null)
             {
                 // if there aren't any reference assemblies installed on the machine in the first place, of course
                 // we're not going to find them. :)
                 return;
             }
 
-            string content = @"
+            string content = $@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 
                     <PropertyGroup>
                         <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <TargetFrameworkProfile></TargetFrameworkProfile>
                         <TargetFrameworkMoniker>$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)</TargetFrameworkMoniker>
                     </PropertyGroup>
