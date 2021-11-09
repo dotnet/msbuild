@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Cli
                 {
                     ArgumentHelpName = LocalizableStrings.CmdSourceOption,
                     IsHidden = !showHelp
-                }.ForwardAsSingle(o => $"-property:RestoreSources={string.Join("%3B", o)}")
+                }.ForwardAsSingle(o => $"-property:RestoreSources={string.Join("%3B", o)}") // '%3B' corresponds to ';'
                 .AllowSingleArgPerToken(),
                 new ForwardedOption<string>(
                     "--packages",
