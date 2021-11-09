@@ -14,24 +14,31 @@ namespace Microsoft.Build.Framework
     public class LazyFormattedBuildEventArgs : BuildEventArgs
     {
         /// <summary>
+        /// Stores the original unformatted message.
+        /// </summary>
+        private string unformattedMessage;
+
+        /// <summary>
         /// Stores the message arguments.
         /// </summary>
-        private volatile object argumentsOrFormattedMessage;
+        private object[] arguments;
 
         /// <summary>
         /// Exposes the underlying arguments field to serializers.
         /// </summary>
         internal object[] RawArguments
         {
-            get => (argumentsOrFormattedMessage is object[] arguments) ? arguments : null;
+            // Return null if we already formatted the message.
+            get => base.Message == null ? arguments : null;
+            set => arguments = value;
         }
 
         /// <summary>
-        /// Exposes the formatted message string to serializers.
+        /// Exposes the unformatted message string to serializers.
         /// </summary>
-        private protected override string FormattedMessage
+        private protected override string UnformattedMessage
         {
-            get => (argumentsOrFormattedMessage is string formattedMessage) ? formattedMessage : base.FormattedMessage;
+            get => unformattedMessage;
         }
 
         /// <summary>
@@ -77,9 +84,10 @@ namespace Microsoft.Build.Framework
             DateTime eventTimestamp,
             params object[] messageArgs
         )
-            : base(message, helpKeyword, senderName, eventTimestamp)
+            : base(null, helpKeyword, senderName, eventTimestamp)
         {
-            argumentsOrFormattedMessage = messageArgs;
+            unformattedMessage = message;
+            arguments = messageArgs;
             originalCultureName = CultureInfo.CurrentCulture.Name;
             originalCultureInfo = CultureInfo.CurrentCulture;
         }
@@ -99,25 +107,20 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                object argsOrMessage = argumentsOrFormattedMessage;
-                if (argsOrMessage is string formattedMessage)
+                if (base.Message == null)
                 {
-                    return formattedMessage;
-                }
-
-                if (argsOrMessage is object[] arguments && arguments.Length > 0)
-                {
-                    if (originalCultureInfo == null)
+                    if (arguments?.Length > 0)
                     {
-                        originalCultureInfo = new CultureInfo(originalCultureName);
-                    }
+                        if (originalCultureInfo == null)
+                        {
+                            originalCultureInfo = new CultureInfo(originalCultureName);
+                        }
 
-                    formattedMessage = FormatString(originalCultureInfo, base.Message, arguments);
-                    argumentsOrFormattedMessage = formattedMessage;
-                    return formattedMessage;
+                        base.Message = FormatString(originalCultureInfo, unformattedMessage, arguments);
+                    }
                 }
 
-                return base.Message;
+                return RawMessage;
             }
         }
 
@@ -127,23 +130,31 @@ namespace Microsoft.Build.Framework
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into.</param>
         internal override void WriteToStream(BinaryWriter writer)
         {
-            object argsOrMessage = argumentsOrFormattedMessage;
-            if (argsOrMessage is object[] arguments && arguments.Length > 0)
+            string formattedMessage = base.Message;
+            if (formattedMessage != null)
             {
-                base.WriteToStreamWithExplicitMessage(writer, base.Message);
-                writer.Write(arguments.Length);
-
-                foreach (object argument in arguments)
-                {
-                    // Arguments may be ints, etc, so explicitly convert
-                    // Convert.ToString returns String.Empty when it cannot convert, rather than throwing
-                    writer.Write(Convert.ToString(argument, CultureInfo.CurrentCulture));
-                }
+                // We've already formatted the message, write it to the stream and omit arguments.
+                base.WriteToStreamWithExplicitMessage(writer, formattedMessage);
+                writer.Write(-1);
             }
             else
             {
-                base.WriteToStreamWithExplicitMessage(writer, (argsOrMessage is string formattedMessage) ? formattedMessage : base.Message);
-                writer.Write(-1);
+                base.WriteToStreamWithExplicitMessage(writer, unformattedMessage);
+                if (arguments?.Length > 0)
+                {
+                    writer.Write(arguments.Length);
+
+                    foreach (object argument in arguments)
+                    {
+                        // Arguments may be ints, etc, so explicitly convert
+                        // Convert.ToString returns String.Empty when it cannot convert, rather than throwing
+                        writer.Write(Convert.ToString(argument, CultureInfo.CurrentCulture));
+                    }
+                }
+                else
+                {
+                    writer.Write(-1);
+                }
             }
 
             writer.Write(originalCultureName);
@@ -165,6 +176,9 @@ namespace Microsoft.Build.Framework
 
                 if (numArguments >= 0)
                 {
+                    unformattedMessage = RawMessage;
+                    RawMessage = null;
+
                     messageArgs = new string[numArguments];
 
                     for (int numRead = 0; numRead < numArguments; numRead++)
@@ -172,8 +186,12 @@ namespace Microsoft.Build.Framework
                         messageArgs[numRead] = reader.ReadString();
                     }
                 }
+                else
+                {
+                    unformattedMessage = null;
+                }
 
-                argumentsOrFormattedMessage = messageArgs;
+                arguments = messageArgs;
 
                 originalCultureName = reader.ReadString();
             }

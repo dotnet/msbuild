@@ -143,17 +143,17 @@ namespace Microsoft.Build.Framework
         /// </summary>
         protected internal string RawMessage
         {
-            get => FormattedMessage;
+            get => message ?? UnformattedMessage;
             set => message = value;
         }
 
         /// <summary>
-        /// Like <see cref="RawMessage"/> but returns a formatted message string if available.
+        /// Like <see cref="RawMessage"/> but returns the unformatted message string if it's stored separately.
         /// Used for serialization.
         /// </summary>
-        private protected virtual string FormattedMessage
+        private protected virtual string UnformattedMessage
         {
-            get => message;
+            get => null;
         }
 
         /// <summary>
