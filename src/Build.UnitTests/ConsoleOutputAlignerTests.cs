@@ -165,6 +165,25 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("a\nb")]
+        [InlineData("a\r\nb")]
+        [InlineData("a\nb\r\n")]
+        [InlineData("a\nb\n")]
+        [InlineData("\r\na\nb")]
+        [InlineData("\na\nb")]
+        [InlineData("\na\r\nb\nc")]
+        [InlineData("\r\na\nb\r\nc")]
+        public void ShortMultiLineWithMixedNewLines_NewLinesReplacedByActualEnvironmentNewLines(string input)
+        {
+            string expected = input.Replace("\r", "").Replace("\n", Environment.NewLine) + Environment.NewLine;
+            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true);
+
+            string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 0);
+
+            output.ShouldBe(expected);
+        }
+
+        [Theory]
         [InlineData("", "a\n12345", "a\n123\n45\n")]
         [InlineData("", "12345\na\n54321", "123\n45\na\n543\n21\n")]
         [InlineData(" ", "12345\na\n54321", "12\n 34\n 5\n a\n 54\n 32\n 1\n")]
