@@ -20,7 +20,8 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_generates_worker_implicit_usings_and_builds_successfully()
         {
-            var testProject = CreateTestProject();
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var testProject = CreateTestProject(tfm);
             testProject.AdditionalProperties["ImplicitUsings"] = "enable";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var globalUsingsFileName = $"{testAsset.TestProject.Name}.GlobalUsings.g.cs";
@@ -31,7 +32,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetIntermediateDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputDirectory = buildCommand.GetIntermediateDirectory(tfm);
 
             outputDirectory.Should().HaveFile(globalUsingsFileName);
 
@@ -54,7 +55,8 @@ global using global::System.Threading.Tasks;
         [Fact]
         public void It_can_disable_worker_usings()
         {
-            var testProject = CreateTestProject();
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var testProject = CreateTestProject(tfm);
             testProject.AdditionalProperties["ImplicitUsings"] = "disable";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var globalUsingsFileName = $"{testAsset.TestProject.Name}.GlobalUsings.g..cs";
@@ -65,12 +67,12 @@ global using global::System.Threading.Tasks;
                 .Should()
                 .Fail();
 
-            var outputDirectory = buildCommand.GetIntermediateDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputDirectory = buildCommand.GetIntermediateDirectory(tfm);
 
             outputDirectory.Should().NotHaveFile(globalUsingsFileName);
         }
 
-        private TestProject CreateTestProject(string tfm = ToolsetInfo.CurrentTargetFramework)
+        private TestProject CreateTestProject(string tfm)
         {
             var testProject = new TestProject
             {
