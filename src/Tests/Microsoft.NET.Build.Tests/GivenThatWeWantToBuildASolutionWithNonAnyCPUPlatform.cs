@@ -30,14 +30,16 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            buildCommand.GetOutputDirectory("netcoreapp1.1", Path.Combine("x64", "Debug"))
+            buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, Path.Combine("x64", "Debug"))
                 .Should()
                 .OnlyHaveFiles(new[] {
-                    "x64SolutionBuild.runtimeconfig.dev.json",
                     "x64SolutionBuild.runtimeconfig.json",
                     "x64SolutionBuild.deps.json",
                     "x64SolutionBuild.dll",
-                    "x64SolutionBuild.pdb"
+                    "x64SolutionBuild.pdb",
+                    "x64SolutionBuild.pdb",
+                    "ref/x64SolutionBuild.dll",
+                    $"x64SolutionBuild{EnvironmentInfo.ExecutableExtension}"
                 });
         }
     }
