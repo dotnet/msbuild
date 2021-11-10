@@ -1406,7 +1406,7 @@
     <value>Considered "{0}", which was not found in the GAC.</value>
   </data>
   <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-    <value>Considered "{0}", which existed but didn't have a valid identity. This may not be an assembly.</value>
+    <value>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</value>
   </data>
   <data name="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
     <value>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</value>
