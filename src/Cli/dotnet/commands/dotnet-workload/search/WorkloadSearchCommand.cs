@@ -7,6 +7,7 @@ using System.IO;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.Linq;
 using Microsoft.DotNet.Workloads.Workload.Install;
@@ -26,15 +27,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             ParseResult result,
             IReporter reporter = null,
             IWorkloadResolver workloadResolver = null,
-            string version = null) : base(result)
+            string version = null,
+            string userProfileDir = null) : base(result)
         {
             _reporter = reporter ?? Reporter.Output;
-            _verbosity = result.ValueForOption<VerbosityOptions>(WorkloadSearchCommandParser.VerbosityOption);
-            _workloadIdStub = result.ValueForArgument<string>(WorkloadSearchCommandParser.WorkloadIdStubArgument);
+            _verbosity = result.GetValueForOption(WorkloadSearchCommandParser.VerbosityOption);
+            _workloadIdStub = result.GetValueForArgument(WorkloadSearchCommandParser.WorkloadIdStubArgument);
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(result.ValueForOption<string>(WorkloadSearchCommandParser.VersionOption), version, dotnetPath);
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
+            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(result.GetValueForOption(WorkloadSearchCommandParser.VersionOption), version, dotnetPath, userProfileDir);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
         }
 
         public override int Execute()
@@ -44,7 +47,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
 
             if (!string.IsNullOrEmpty(_workloadIdStub))
             {
-                availableWorkloads = availableWorkloads.Where(workload => workload.Id.ToString().Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase));
+                availableWorkloads = availableWorkloads
+                    .Where(workload => workload.Id.ToString().Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase) || (workload.Description?.Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase) ?? false));
             }
 
             var table = new PrintableTable<WorkloadResolver.WorkloadInfo>();

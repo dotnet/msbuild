@@ -61,7 +61,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Added, "F:CompatTests.First.ReportMissingField"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Added, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.String)"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Theory]
@@ -202,7 +202,7 @@ namespace CompatTests
                     new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Added, "M:CompatTests.First.set_InternalProperty(System.Int32)"),
                 };
 
-                Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+                Assert.Equal(expected, differences);
             }
             else
             {
@@ -247,7 +247,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Added, "M:CompatTests.First.MissingMethodLeft(System.String,System.String)"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]

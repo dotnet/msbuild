@@ -173,7 +173,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             return new NullResolutionResult();
         }
 
-        public ResolutionResult Resolve(string sdkReferenceName, string dotnetRootPath, string sdkVersion)
+        public ResolutionResult Resolve(string sdkReferenceName, string dotnetRootPath, string sdkVersion, string userProfileDir)
         {
             if (!_enabled)
             {
@@ -188,8 +188,8 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                     _cachedState.DotnetRootPath != dotnetRootPath ||
                     _cachedState.SdkVersion != sdkVersion)
                 {
-                    var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
-                    var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetRootPath, sdkVersion);
+                    var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion, userProfileDir);
+                    var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetRootPath, sdkVersion, userProfileDir);
 
                     _cachedState = new CachedState()
                     {

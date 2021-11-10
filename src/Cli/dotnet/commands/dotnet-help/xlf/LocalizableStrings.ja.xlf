@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="FormatDefinition">
         <source>Apply style preferences to a project or solution.</source>
-        <target state="new">Apply style preferences to a project or solution.</target>
+        <target state="translated">プロジェクトやソリューションにスタイルのユーザー設定を適用します。</target>
         <note />
       </trans-unit>
       <trans-unit id="RollForwardDefinition">
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SdkDefinition">
         <source>Manage .NET SDK installation.</source>
-        <target state="new">Manage .NET SDK installation.</target>
+        <target state="translated">.NET SDK のインストールを管理します。</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -267,11 +267,6 @@
         <target state="translated">開発証明書を作成し、管理します。</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server キャッシュ コマンドライン ツール。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">開発ユーザーのシークレットを管理します。</target>
@@ -300,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">F# Interactive を開始するか、F# スクリプトを実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">オプションのワークロードを管理します。</target>
         <note />
       </trans-unit>
     </body>

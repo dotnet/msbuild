@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="FormatDefinition">
         <source>Apply style preferences to a project or solution.</source>
-        <target state="new">Apply style preferences to a project or solution.</target>
+        <target state="translated">Applicare le preferenze di stile a un progetto o una soluzione.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollForwardDefinition">
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SdkDefinition">
         <source>Manage .NET SDK installation.</source>
-        <target state="new">Manage .NET SDK installation.</target>
+        <target state="translated">Gestisce l'installazione di .NET SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -267,11 +267,6 @@
         <target state="translated">Consente di creare e gestire i certificati di sviluppo.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Strumenti da riga di comando della cache di SQL Server.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Consente di gestire i segreti degli utenti di sviluppo.</target>
@@ -300,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">Avvia F# Interactive/esegue script F#.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">Gestire i carichi di lavoro facoltativi.</target>
         <note />
       </trans-unit>
     </body>

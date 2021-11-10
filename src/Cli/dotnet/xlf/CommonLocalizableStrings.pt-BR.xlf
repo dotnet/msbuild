@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="ArchitectureOptionDescription">
         <source>The target architecture.</source>
-        <target state="new">The target architecture.</target>
+        <target state="translated">A arquitetura de destino.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
         <source>Resolving the current runtime identifier failed.</source>
-        <target state="new">Resolving the current runtime identifier failed.</target>
+        <target state="translated">Falha ao resolver o identificador de tempo de execução atual.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotSpecifyBothRuntimeAndArchOptions">
         <source>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</source>
-        <target state="new">Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</target>
+        <target state="translated">Não há suporte para especificar as opções '-r |--runtime ' e '-a |--arch '.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotSpecifyBothRuntimeAndOsOptions">
         <source>Specifying both the `-r|--runtime` and `-os` options is not supported.</source>
-        <target state="new">Specifying both the `-r|--runtime` and `-os` options is not supported.</target>
+        <target state="translated">Não há suporte para especificar as opções '-r |--runtime ' e '-a |--os '.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
@@ -35,6 +35,11 @@
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">Não foi possível encontrar nenhum projeto em ‘{0}’.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableBuildServersOptionDescription">
+        <source>Force the command to ignore any persistent build servers.</source>
+        <target state="new">Force the command to ignore any persistent build servers.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">
@@ -97,7 +102,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="FrameworkDependentOptionDescription">
         <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
-        <target state="new">Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</target>
+        <target state="translated">Publique o seu aplicativo como um aplicativo dependente de estrutura. Um runtime do .NET compatível precisa ser instalado no computador de destino para executar o aplicativo.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
@@ -107,7 +112,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
         <source>The target operating system.</source>
-        <target state="new">The target operating system.</target>
+        <target state="translated">O sistema operacional de destino.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -167,14 +172,14 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
-        <target state="new">The '--self-contained' and '--no-self-contained' options cannot be used together.</target>
+        <target state="translated">As opções '--auto--contidas ' e '--não-independentes ' não podem ser usadas juntas.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</target>
+        <target state="translated">Publique o runtime do .NET com seu aplicativo para que ele não precise estar instalado no computador de destino.
+O padrão é 'true' se um identificador de runtime for especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTargetFramework)</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>test.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>

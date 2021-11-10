@@ -44,6 +44,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             if (leftBaseType == null)
                 return;
 
+            if (leftBaseType.TypeKind == TypeKind.Error && Settings.WithReferences)
+            {
+                AddAssemblyLoadError(differences, leftBaseType);
+            }
+
             while (rightBaseType != null)
             {
                 // If we found the immediate left base type on right we can assume
@@ -51,6 +56,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 // when validating the type which it's base type was actually removed.
                 if (Settings.SymbolComparer.Equals(leftBaseType, rightBaseType))
                     return;
+
+                if (rightBaseType.TypeKind == TypeKind.Error && Settings.WithReferences)
+                {
+                    AddAssemblyLoadError(differences, rightBaseType);
+                }
 
                 rightBaseType = rightBaseType.BaseType;
             }
@@ -68,6 +78,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             foreach (ITypeSymbol leftInterface in left.GetAllBaseInterfaces())
             {
+                if (leftInterface.TypeKind == TypeKind.Error && Settings.WithReferences)
+                {
+                    AddAssemblyLoadError(differences, leftInterface);
+                }
+
                 // Ignore non visible interfaces based on the run settings
                 // If TypeKind == Error it means the Roslyn couldn't resolve it,
                 // so we are running with a missing assembly reference to where that typeref is defined.
@@ -85,6 +100,23 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     return;
                 }
             }
+
+            foreach (ITypeSymbol rightInterface in rightInterfaces)
+            {
+                if (rightInterface.TypeKind == TypeKind.Error && Settings.WithReferences)
+                {
+                    AddAssemblyLoadError(differences, rightInterface);
+                }
+            }
+        }
+
+        private void AddAssemblyLoadError(IList<CompatDifference> differences, ITypeSymbol type)
+        {
+            differences.Add(new CompatDifference(
+                                    DiagnosticIds.AssemblyReferenceNotFound,
+                                    string.Format(Resources.MatchingAssemblyNotFound, $"{type.ContainingAssembly.Name}.dll"),
+                                    DifferenceType.Changed,
+                                    string.Empty));
         }
     }
 }

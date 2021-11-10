@@ -4,32 +4,32 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Search for available workloads.</source>
-        <target state="needs-review-translation">Vypíše globálně nebo místně nainstalované nástroje.</target>
+        <target state="translated">Vyhledávejte dostupné úlohy.</target>
         <note />
       </trans-unit>
       <trans-unit id="DescriptionColumnName">
         <source>Description</source>
-        <target state="new">Description</target>
+        <target state="translated">Popis</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformColumnName">
         <source>Platforms</source>
-        <target state="new">Platforms</target>
+        <target state="translated">Platformy</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdColumnName">
         <source>Workload ID</source>
-        <target state="new">Workload ID</target>
+        <target state="translated">ID úlohy</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentDescription">
-        <source>The text to search for in the IDs of available workloads.</source>
-        <target state="new">The text to search for in the IDs of available workloads.</target>
+        <source>The text to search for in the IDs and descriptions of available workloads.</source>
+        <target state="translated">Text, který se má vyhledávat v ID a popisech dostupných úloh.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentName">
         <source>SEARCH_STRING</source>
-        <target state="new">SEARCH_STRING</target>
+        <target state="translated">SEARCH_STRING</target>
         <note />
       </trans-unit>
     </body>

@@ -56,6 +56,35 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         }
 
         [Fact]
+        public void MergesProjectConfigurationWithProjectReference_UsesOSCasingForMatching()
+        {
+            var errorMessages = new List<string>();
+            var buildEngine = new Mock<IBuildEngine>();
+            buildEngine.Setup(e => e.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
+                .Callback<BuildErrorEventArgs>(args => errorMessages.Add(args.Message));
+
+            var referenceProjectFile = Path.Combine("..", "reference", "myRcl.csproj");
+            var task = new MergeConfigurationProperties
+            {
+                BuildEngine = buildEngine.Object,
+                CandidateConfigurations = new[] { CreateCandidateProjectConfiguration(Path.GetFullPath(referenceProjectFile)) },
+                ProjectReferences = new[] 
+                {
+                    CreateProjectReference(
+                        project: Path.Combine("..", "myRCL", "myRcl.csproj"),
+                        msBuildSourceProjectFile: Path.GetFullPath(referenceProjectFile).ToUpperInvariant(),
+                        undefineProperties: Path.Combine(";TargetFramework;RuntimeIdentifier"))
+                }
+            };
+
+            // Act
+            var result = task.Execute();
+
+            // Assert
+            result.Should().Be(OperatingSystem.IsWindows());
+        }
+
+        [Fact]
         public void FailswhenProjectReferenceNotFound()
         {
             var errorMessages = new List<string>();

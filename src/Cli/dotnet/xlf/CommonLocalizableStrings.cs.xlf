@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="ArchitectureOptionDescription">
         <source>The target architecture.</source>
-        <target state="new">The target architecture.</target>
+        <target state="translated">Cílová architektura</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
         <source>Resolving the current runtime identifier failed.</source>
-        <target state="new">Resolving the current runtime identifier failed.</target>
+        <target state="translated">Nepovedlo se vyřešit aktuální identifikátor modulu runtime.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotSpecifyBothRuntimeAndArchOptions">
         <source>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</source>
-        <target state="new">Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</target>
+        <target state="translated">Zadání možností -r|--runtime a -a|--arch zároveň se nepodporuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotSpecifyBothRuntimeAndOsOptions">
         <source>Specifying both the `-r|--runtime` and `-os` options is not supported.</source>
-        <target state="new">Specifying both the `-r|--runtime` and `-os` options is not supported.</target>
+        <target state="translated">Zadání možností -r|--runtime a -os zároveň se nepodporuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
@@ -35,6 +35,11 @@
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">V {0} se nenašel žádný projekt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableBuildServersOptionDescription">
+        <source>Force the command to ignore any persistent build servers.</source>
+        <target state="new">Force the command to ignore any persistent build servers.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">
@@ -97,7 +102,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="FrameworkDependentOptionDescription">
         <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
-        <target state="new">Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</target>
+        <target state="translated">Publikujte svoji aplikaci jako aplikaci závislou na architektuře. Aby bylo možné vaši aplikaci spustit, musí být na cílovém počítači nainstalovaný kompatibilní modul runtime .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
@@ -107,7 +112,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
         <source>The target operating system.</source>
-        <target state="new">The target operating system.</target>
+        <target state="translated">Cílový operační systém</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -167,14 +172,14 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
-        <target state="new">The '--self-contained' and '--no-self-contained' options cannot be used together.</target>
+        <target state="translated">Možnosti --self-contained a --no-self-contained nelze použít společně.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</target>
+        <target state="translated">Publikujte se svou aplikací modul runtime pro .NET, aby ho nebylo nutné instalovat na cílovém počítači.
+Pokud se zadá identifikátor modulu runtime, výchozí hodnota je true.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">

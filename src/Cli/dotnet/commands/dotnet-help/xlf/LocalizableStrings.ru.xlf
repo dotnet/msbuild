@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="FormatDefinition">
         <source>Apply style preferences to a project or solution.</source>
-        <target state="new">Apply style preferences to a project or solution.</target>
+        <target state="translated">Применение настроек стилей к проекту или решению.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollForwardDefinition">
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SdkDefinition">
         <source>Manage .NET SDK installation.</source>
-        <target state="new">Manage .NET SDK installation.</target>
+        <target state="translated">Управление установкой пакета SDK .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -267,11 +267,6 @@
         <target state="translated">Создание сертификатов разработки и управление ими.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Инструменты командной строки кэша SQL Server.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Управление развертыванием секретов пользователей.</target>
@@ -300,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">Запуск F# Interactive / выполнение скриптов F#.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">Управление необязательными рабочими нагрузками.</target>
         <note />
       </trans-unit>
     </body>

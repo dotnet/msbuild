@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="FormatDefinition">
         <source>Apply style preferences to a project or solution.</source>
-        <target state="new">Apply style preferences to a project or solution.</target>
+        <target state="translated">프로젝트 또는 솔루션에 스타일 기본 설정을 적용합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollForwardDefinition">
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SdkDefinition">
         <source>Manage .NET SDK installation.</source>
-        <target state="new">Manage .NET SDK installation.</target>
+        <target state="translated">.NET SDK 설치를 관리합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -267,11 +267,6 @@
         <target state="translated">개발 인증서를 만들고 관리합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server 캐시 명령줄 도구입니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">개발 사용자 비밀을 관리합니다.</target>
@@ -300,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">F# Interactive를 시작하고 F# 스크립트를 실행합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">선택적 워크로드를 관리합니다.</target>
         <note />
       </trans-unit>
     </body>

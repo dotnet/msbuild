@@ -33,6 +33,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private readonly ILogger _verboseLogger;
         private readonly DirectoryPath _packageInstallDir;
         private readonly RestoreActionConfig _restoreActionConfig;
+        private readonly Func<IEnumerable<Task>> _retryTimer;
 
         /// <summary>
         /// Reporter would output to the console regardless
@@ -40,11 +41,15 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private readonly IReporter _reporter;
         private readonly IFirstPartyNuGetPackageSigningVerifier _firstPartyNuGetPackageSigningVerifier;
         private bool _validationMessagesDisplayed = false;
+        private IDictionary<PackageSource, SourceRepository> _sourceRepositories;
 
         public NuGetPackageDownloader(DirectoryPath packageInstallDir,
             IFilePermissionSetter filePermissionSetter = null,
             IFirstPartyNuGetPackageSigningVerifier firstPartyNuGetPackageSigningVerifier = null,
-            ILogger verboseLogger = null, IReporter reporter = null, RestoreActionConfig restoreActionConfig = null)
+            ILogger verboseLogger = null,
+            IReporter reporter = null,
+            RestoreActionConfig restoreActionConfig = null,
+            Func<IEnumerable<Task>> timer = null)
         {
             _packageInstallDir = packageInstallDir;
             _reporter = reporter ?? Reporter.Output;
@@ -54,6 +59,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                                                          tempDirectory: packageInstallDir, logger: _verboseLogger);
             _filePermissionSetter = filePermissionSetter ?? new FilePermissionSetter();
             _restoreActionConfig = restoreActionConfig ?? new RestoreActionConfig();
+            _retryTimer = timer;
+            _sourceRepositories = new Dictionary<PackageSource, SourceRepository>();
 
             _cacheSettings = new SourceCacheContext
             {
@@ -61,6 +68,9 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 DirectDownload = true,
                 IgnoreFailedSources = _restoreActionConfig.IgnoreFailedSources,
             };
+
+            DefaultCredentialServiceUtility.SetupDefaultCredentialService(new NuGetConsoleLogger(),
+                !_restoreActionConfig.Interactive);
         }
 
         public async Task<string> DownloadPackageAsync(PackageId packageId,
@@ -71,17 +81,11 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         {
             CancellationToken cancellationToken = CancellationToken.None;
 
-            if (_restoreActionConfig.Interactive)
-            {
-                DefaultCredentialServiceUtility.SetupDefaultCredentialService(_verboseLogger,
-                    _restoreActionConfig.Interactive);
-            }
-
             (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion,
                 packageSourceLocation, includePreview);
 
             FindPackageByIdResource resource = null;
-            SourceRepository repository = Repository.Factory.GetCoreV3(source);
+            SourceRepository repository = GetSourceRepository(source);
 
             resource = await repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken)
                 .ConfigureAwait(false);
@@ -101,13 +105,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
             using FileStream destinationStream = File.Create(nupkgPath);
-            bool success = await resource.CopyNupkgToStreamAsync(
+            bool success = await ExponentialRetry.ExecuteWithRetryOnFailure(async () => await resource.CopyNupkgToStreamAsync(
                 packageId.ToString(),
                 resolvedPackageVersion,
                 destinationStream,
                 _cacheSettings,
                 _verboseLogger,
-                cancellationToken);
+                cancellationToken));
             destinationStream.Close();
 
             if (!success)
@@ -165,7 +169,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         {
             (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion, packageSourceLocation, includePreview);
 
-            SourceRepository repository = Repository.Factory.GetCoreV3(source);
+            SourceRepository repository = GetSourceRepository(source);
 
             ServiceIndexResourceV3 serviceIndexResource = repository.GetResourceAsync<ServiceIndexResourceV3>().Result;
             IReadOnlyList<Uri> packageBaseAddress =
@@ -546,7 +550,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             try
             {
-                SourceRepository repository = Repository.Factory.GetCoreV3(source);
+                SourceRepository repository = GetSourceRepository(source);
                 PackageMetadataResource resource = await repository
                     .GetResourceAsync<PackageMetadataResource>(cancellationToken).ConfigureAwait(false);
 
@@ -579,6 +583,16 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 includePreview, cancellationToken).ConfigureAwait(false);
 
             return packageMetadata.Identity.Version;
+        }
+
+        private SourceRepository GetSourceRepository(PackageSource source)
+        {
+            if (!_sourceRepositories.ContainsKey(source))
+            {
+                _sourceRepositories.Add(source, Repository.Factory.GetCoreV3(source));
+            }
+
+            return _sourceRepositories[source];
         }
     }
 }

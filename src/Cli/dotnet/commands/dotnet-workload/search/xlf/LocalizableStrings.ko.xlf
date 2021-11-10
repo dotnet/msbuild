@@ -4,32 +4,32 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Search for available workloads.</source>
-        <target state="needs-review-translation">전역으로 또는 로컬로 설치된 도구를 나열합니다.</target>
+        <target state="translated">사용 가능한 워크로드를 검색합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DescriptionColumnName">
         <source>Description</source>
-        <target state="new">Description</target>
+        <target state="translated">설명</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformColumnName">
         <source>Platforms</source>
-        <target state="new">Platforms</target>
+        <target state="translated">플랫폼</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdColumnName">
         <source>Workload ID</source>
-        <target state="new">Workload ID</target>
+        <target state="translated">워크로드 ID</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentDescription">
-        <source>The text to search for in the IDs of available workloads.</source>
-        <target state="new">The text to search for in the IDs of available workloads.</target>
+        <source>The text to search for in the IDs and descriptions of available workloads.</source>
+        <target state="translated">ID에서 검색할 텍스트 및 사용 가능한 워크로드에 대한 설명입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentName">
         <source>SEARCH_STRING</source>
-        <target state="new">SEARCH_STRING</target>
+        <target state="translated">SEARCH_STRING</target>
         <note />
       </trans-unit>
     </body>

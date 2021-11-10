@@ -27,6 +27,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_publishes_projects_with_simple_dependencies()
         {
+            string targetFramework = ToolsetInfo.CurrentTargetFramework;
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset("SimpleDependencies")
                 .WithSource();
@@ -37,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory();
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
 
             publishDirectory.Should().OnlyHaveFiles(new[] {
                 "SimpleDependencies.dll",
@@ -45,11 +46,10 @@ namespace Microsoft.NET.Publish.Tests
                 "SimpleDependencies.deps.json",
                 "SimpleDependencies.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
-                "System.Runtime.Serialization.Primitives.dll",
-                "System.Collections.NonGeneric.dll",
+                $"SimpleDependencies{EnvironmentInfo.ExecutableExtension}"
             });
 
-            string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies");
+            string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies", targetFramework);
 
             TestCommand runAppCommand = new DotnetCommand(Log,  appPath, "one", "two" );
 
@@ -220,7 +220,7 @@ namespace Microsoft.NET.Publish.Tests
 
             publishResult.Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: "netcoreapp2.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework);
 
             if (expectAppDocPublished)
             {

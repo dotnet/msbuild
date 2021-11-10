@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
 
             CompatDifference difference = new(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First");
 
-            Assert.Contains(difference, differences, CompatDifferenceComparer.Default);
+            Assert.Contains(difference, differences);
         }
 
         [Theory]
@@ -85,7 +85,7 @@ namespace CompatTests
                      new CompatDifference(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First")
                 };
 
-                Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+                Assert.Equal(expected, differences);
             }
 
         }
@@ -230,7 +230,7 @@ namespace CompatTests
 
             CompatDifference difference = new(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First");
 
-            Assert.Contains(difference, differences, CompatDifferenceComparer.Default);
+            Assert.Contains(difference, differences);
             Assert.True(differences[0].Message.IndexOf("left") < differences[0].Message.IndexOf("right"));
         }
 

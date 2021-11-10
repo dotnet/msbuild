@@ -50,7 +50,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <Compile Include="$(GeneratedGlobalUsingsFile)" />
-      <FileWrites Include="$(GeneratedGlobalUsingsFile)" />
+      <!-- Performing a clean and waiting without a build results in build warnings in VS due to all the missing namespaces, so we'll avoid recording it in FileWrites -->
     </ItemGroup>
   </Target>
 

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.NET.Sdk.Localization;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
@@ -19,13 +20,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos" };
         private readonly HashSet<string>? _knownManifestIds;
 
-        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
-            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable)
+        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir)
+            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir)
         {
 
         }
 
-        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable)
+        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable, string? userProfileDir)
         {
             if (string.IsNullOrWhiteSpace(sdkVersion))
             {
@@ -60,7 +61,16 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 _knownManifestIds = File.ReadAllLines(knownManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)).ToHashSet();
             }
 
-            var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
+            string? userManifestsDir = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand);
+            string dotnetManifestDir = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
+            if (userManifestsDir != null && WorkloadFileBasedInstall.IsUserLocal(_sdkRootPath, _sdkVersionBand) && Directory.Exists(userManifestsDir))
+            {
+                _manifestDirectories = new[] { userManifestsDir, dotnetManifestDir };
+            }
+            else
+            {
+                _manifestDirectories = new[] { dotnetManifestDir };
+            }
 
             var manifestDirectoryEnvironmentVariable = getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS);
             if (manifestDirectoryEnvironmentVariable != null)
@@ -69,21 +79,23 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 //  environment variable settings to be shared by multiple SDKs.
                 _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator)
                     .Select(p => Path.Combine(p, _sdkVersionBand))
-                    .Append(manifestDirectory).ToArray();
-            }
-            else
-            {
-                _manifestDirectories = new[] { manifestDirectory };
+                    .Concat(_manifestDirectories).ToArray();
             }
         }
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream)> GetManifests()
+        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)> GetManifests()
         {
             foreach (var workloadManifestDirectory in GetManifestDirectories())
             {
-                var workloadManifest = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
+                var workloadManifestPath = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
                 var id = Path.GetFileName(workloadManifestDirectory);
-                yield return (id, workloadManifest, () => File.OpenRead(workloadManifest));
+
+                yield return (
+                    id,
+                    workloadManifestPath,
+                    () => File.OpenRead(workloadManifestPath),
+                    () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(workloadManifestPath)
+                );
             }
         }
 
@@ -134,7 +146,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 foreach (var missingManifestId in missingManifestIds)
                 {
                     var manifestDir = FallbackForMissingManifest(missingManifestId);
-                    manifestIdsToDirectories.Add(missingManifestId, manifestDir);
+                    if (!string.IsNullOrEmpty(manifestDir))
+                    {
+                        manifestIdsToDirectories.Add(missingManifestId, manifestDir);
+                    }
                 }
             }
 

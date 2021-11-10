@@ -4,22 +4,27 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Repair workload installations.</source>
-        <target state="needs-review-translation">Установка глобального или локального средства. Локальные средства добавляются в манифест и восстанавливаются.</target>
+        <target state="translated">Восстановление установок рабочей нагрузки.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoWorkloadsToRepair">
+        <source>No workloads are installed, nothing to repair. Run `dotnet workload search` to find workloads to install.</source>
+        <target state="translated">Рабочие нагрузки не установлены, не нужно ничего восстанавливать. Запустите "Поиск рабочей нагрузки DotNet", чтобы найти рабочие нагрузки для установки.</target>
         <note />
       </trans-unit>
       <trans-unit id="RepairSucceeded">
         <source>Successfully repaired workloads: {0}</source>
-        <target state="new">Successfully repaired workloads: {0}</target>
+        <target state="translated">Рабочие нагрузки исправлены: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RepairingWorkloads">
         <source>Repairing workload installation for workloads: {0}</source>
-        <target state="new">Repairing workload installation for workloads: {0}</target>
+        <target state="translated">Исправление установки рабочей нагрузки для рабочих нагрузок: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadRepairFailed">
         <source>Workload repair failed: {0}</source>
-        <target state="new">Workload repair failed: {0}</target>
+        <target state="translated">Сбой исправления рабочей нагрузки: {0}</target>
         <note />
       </trans-unit>
     </body>

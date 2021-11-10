@@ -4,12 +4,22 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Install or work with workloads that extend the .NET experience.</source>
-        <target state="new">Install or work with workloads that extend the .NET experience.</target>
+        <target state="translated">Consente di installare o usare carichi di lavoro che estendono l'esperienza .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmscriptenDescription">
+        <source>Emscripten SDK compiler tooling</source>
+        <target state="translated">Strumenti del compilatore Emscripten SDK</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
         <source>.NET Install Command</source>
-        <target state="new">.NET Install Command</target>
+        <target state="translated">Comando di installazione .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WasmToolsDescription">
+        <source>.NET WebAssembly build tools</source>
+        <target state="translated">Strumenti di compilazione WebAssembly .NET</target>
         <note />
       </trans-unit>
     </body>

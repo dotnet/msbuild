@@ -56,7 +56,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "F:CompatTests.First.ReportMissingField"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -104,38 +104,6 @@ namespace CompatTests
         }
 
         [Fact]
-        public static void NoDifferencesWithNoWarn()
-        {
-            string leftSyntax = @"
-namespace CompatTests
-{
-  public class First
-  {
-    public void MissingMember() { }
-    public int MissingProperty { get; }
-    public int MissingField;
-  }
-}
-";
-
-            string rightSyntax = @"
-namespace CompatTests
-{
-  public class First
-  {
-  }
-}
-";
-
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
-            differ.NoWarn = DiagnosticIds.MemberMustExist;
-            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
-            Assert.Empty(differences);
-        }
-
-        [Fact]
         public static void MultipleOverridesAreReported()
         {
             string leftSyntax = @"
@@ -175,7 +143,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.String)"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Theory]
@@ -226,7 +194,7 @@ namespace CompatTests
                     new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.set_InternalProperty(System.Int32)"),
                 };
 
-                Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+                Assert.Equal(expected, differences);
             }
             else
             {
@@ -332,7 +300,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.MyRefMethod(System.String@)"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -519,7 +487,7 @@ namespace CompatTests
             new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.#ctor")
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
     }
 }

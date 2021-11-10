@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="AppHostSigningFailed">
         <source>NETSDK1177: Failed to sign apphost with error code {1}: {0}</source>
-        <target state="new">NETSDK1177: Failed to sign apphost with error code {1}: {0}</target>
+        <target state="translated">NETSDK1177: falha ao assinar appHost com o código de erro {1}: {0}</target>
         <note>{StrBegin="NETSDK1177: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
@@ -219,12 +219,12 @@
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequires60">
         <source>NETSDK1167: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
-        <target state="new">NETSDK1167: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
+        <target state="translated">NETSDK1167: a compactação em um único pacote de arquivos só é compatível ao publicar em .NET6 ou superior.</target>
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
         <source>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="new">NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
+        <target state="translated">NETSDK1174: A compressão em um único pacote de arquivos só é suportada quando se publica uma aplicação autocontida.</target>
         <note>{StrBegin="NETSDK1174: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
@@ -266,7 +266,7 @@
       </trans-unit>
       <trans-unit id="CouldNotGetPackVersionFromWorkloadManifests">
         <source>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</source>
-        <target state="new">NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</target>
+        <target state="translated">NETSDK1181: erro ao obter a versão do pacote: o pacote '{0}' não estava presente nos manifestos de carga de trabalho.</target>
         <note>{StrBegin="NETSDK1181: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
@@ -281,7 +281,7 @@
       </trans-unit>
       <trans-unit id="Crossgen2MissingRequiredMetadata">
         <source>NETSDK1158: Required '{0}' metadata missing on Crossgen2Tool item.</source>
-        <target state="new">NETSDK1158: Required '{0}' metadata missing on Crossgen2Tool item.</target>
+        <target state="translated">NETSDK1158: metadados '{0}' obrigatórios ausentes no item Crossgen2Tool.</target>
         <note>{StrBegin="NETSDK1158: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen2RequiresSelfContained">
@@ -291,42 +291,42 @@
       </trans-unit>
       <trans-unit id="Crossgen2ToolExecutableNotFound">
         <source>NETSDK1155: Crossgen2Tool executable '{0}' not found.</source>
-        <target state="new">NETSDK1155: Crossgen2Tool executable '{0}' not found.</target>
+        <target state="translated">NETSDK1155: o executável Crossgen2Tool '{0}' não encontrado.</target>
         <note>{StrBegin="NETSDK1155: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen2ToolMissingWhenUseCrossgen2IsSet">
         <source>NETSDK1154: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</source>
-        <target state="new">NETSDK1154: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</target>
+        <target state="translated">NETSDK1154: crossgen2Tool deve ser especificado quando UseCrossgen2 é definido como verdadeiro.</target>
         <note>{StrBegin="NETSDK1154: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen5CannotEmitSymbolsInCompositeMode">
         <source>NETSDK1166: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</source>
-        <target state="new">NETSDK1166: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</target>
+        <target state="translated">NETSDK1166: não é possível emitir símbolos ao publicar para .NET 5 com Crossgen2 usando o modo composto.</target>
         <note>{StrBegin="NETSDK1166: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolExecutableNotFound">
         <source>NETSDK1160: CrossgenTool executable '{0}' not found.</source>
-        <target state="new">NETSDK1160: CrossgenTool executable '{0}' not found.</target>
+        <target state="translated">NETSDK1160: executável CrossgenTool '{0}' não encontrado.</target>
         <note>{StrBegin="NETSDK1160: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolMissingInPDBCompilationMode">
         <source>NETSDK1153: CrossgenTool not specified in PDB compilation mode.</source>
-        <target state="new">NETSDK1153: CrossgenTool not specified in PDB compilation mode.</target>
+        <target state="translated">NETSDK1153: crossgenTool não especificado no modo de compilação PDB.</target>
         <note>{StrBegin="NETSDK1153: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolMissingWhenUseCrossgen2IsNotSet">
         <source>NETSDK1159: CrossgenTool must be specified when UseCrossgen2 is set to false.</source>
-        <target state="new">NETSDK1159: CrossgenTool must be specified when UseCrossgen2 is set to false.</target>
+        <target state="translated">NETSDK1159: crossgenTool deve ser especificado quando UseCrossgen2 é definido como falso.</target>
         <note>{StrBegin="NETSDK1159: "}</note>
       </trans-unit>
       <trans-unit id="DiaSymReaderLibraryNotFound">
         <source>NETSDK1161: DiaSymReader library '{0}' not found.</source>
-        <target state="new">NETSDK1161: DiaSymReader library '{0}' not found.</target>
+        <target state="translated">NETSDK1161: biblioteca DiaSymReader '{0}' não encontrada.</target>
         <note>{StrBegin="NETSDK1161: "}</note>
       </trans-unit>
       <trans-unit id="DotNetHostExecutableNotFound">
         <source>NETSDK1156: .NET host executable '{0}' not found.</source>
-        <target state="new">NETSDK1156: .NET host executable '{0}' not found.</target>
+        <target state="translated">NETSDK1156: executável de host .NET '{0}' não encontrado.</target>
         <note>{StrBegin="NETSDK1156: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
@@ -351,7 +351,7 @@
       </trans-unit>
       <trans-unit id="DuplicatePublishOutputFiles">
         <source>NETSDK1152: Found multiple publish output files with the same relative path: {0}.</source>
-        <target state="needs-review-translation">NETSDK1148: foram encontrados vários arquivos de saída de publicação com o mesmo caminho relativo: {0}.</target>
+        <target state="translated">NETSDK1152: vários arquivos de saída de publicação encontrados com o mesmo caminho relativo: {0}.</target>
         <note>{StrBegin="NETSDK1152: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
@@ -361,7 +361,7 @@
       </trans-unit>
       <trans-unit id="DuplicateTypeLibraryIds">
         <source>NETSDK1169: The same resource ID {0} was specified for two type libraries '{1}' and '{2}'. Duplicate type library IDs are not allowed.</source>
-        <target state="new">NETSDK1169: The same resource ID {0} was specified for two type libraries '{1}' and '{2}'. Duplicate type library IDs are not allowed.</target>
+        <target state="translated">NETSDK1169: o mesmo ID de recurso {0} foi especificado para duas bibliotecas de tipo '{1}' e '{2}'. IDs de biblioteca de tipo duplicado não são permitidos.</target>
         <note>{StrBegin="NETSDK1169: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
@@ -466,7 +466,7 @@
       </trans-unit>
       <trans-unit id="InputAssemblyNotFound">
         <source>NETSDK1163: Input assembly '{0}' not found.</source>
-        <target state="new">NETSDK1163: Input assembly '{0}' not found.</target>
+        <target state="translated">NETSDK1163: conjunto de entrada '{0}' não encontrado.</target>
         <note>{StrBegin="NETSDK1163: "}</note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
@@ -504,17 +504,17 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="InvalidTypeLibrary">
         <source>NETSDK1173: The provided type library '{0}' is in an invalid format.</source>
-        <target state="new">NETSDK1173: The provided type library '{0}' is in an invalid format.</target>
+        <target state="translated">NETSDK1173: a biblioteca de tipos fornecida '{0}' está em um formato inválido.</target>
         <note>{StrBegin="NETSDK1173: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTypeLibraryId">
         <source>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
-        <target state="new">NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</target>
+        <target state="translated">NETSDK1170: o ID de biblioteca de tipo fornecido '{0}' para a biblioteca de tipo '{1}' é inválido. O ID deve ser um número inteiro positivo menor que 65536.</target>
         <note>{StrBegin="NETSDK1170: "}</note>
       </trans-unit>
       <trans-unit id="JitLibraryNotFound">
         <source>NETSDK1157: JIT library '{0}' not found.</source>
-        <target state="new">NETSDK1157: JIT library '{0}' not found.</target>
+        <target state="translated">NETSDK1157: biblioteca JIT '{0}' não encontrada.</target>
         <note>{StrBegin="NETSDK1157: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
@@ -532,17 +532,17 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="MissingOutputPDBImagePath">
         <source>NETSDK1164: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</source>
-        <target state="new">NETSDK1164: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</target>
+        <target state="translated">NETSDK1164: caminho do PDB de saída ausente no modo de geração do PDB (metadados OutputPDBImage).</target>
         <note>{StrBegin="NETSDK1164: "}</note>
       </trans-unit>
       <trans-unit id="MissingOutputR2RImageFileName">
         <source>NETSDK1165: Missing output R2R image path (OutputR2RImage metadata).</source>
-        <target state="new">NETSDK1165: Missing output R2R image path (OutputR2RImage metadata).</target>
+        <target state="translated">NETSDK1165: caminho da imagem R2R de saída ausente (metadados OutputR2RImage).</target>
         <note>{StrBegin="NETSDK1165: "}</note>
       </trans-unit>
       <trans-unit id="MissingTypeLibraryId">
         <source>NETSDK1171: An integer ID less than 65536 must be provided for type library '{0}' because more than one type library is specified.</source>
-        <target state="new">NETSDK1171: An integer ID less than 65536 must be provided for type library '{0}' because more than one type library is specified.</target>
+        <target state="translated">NETSDK1171: um ID de número inteiro menor que 65536 deve ser fornecido para a biblioteca de tipos '{0}' porque mais de uma biblioteca de tipos é especificada.</target>
         <note>{StrBegin="NETSDK1171: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
@@ -559,6 +559,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
         <target state="translated">NETSDK1115: o SDK do .NET atual não dá suporte ao .NET Framework sem o uso de Padrões do SDK do .NET. O motivo é provavelmente uma incompatibilidade entre a propriedade CLRSupport do projeto C++/CLI e a TargetFramework.</target>
         <note>{StrBegin="NETSDK1115: "}</note>
+      </trans-unit>
+      <trans-unit id="Net6NotCompatibleWithDev16">
+        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: a segmentação do .NET 6.0 no Visual Studio 2019 não é compatível.</target>
+        <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
@@ -617,12 +622,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
         <source>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.  For more information, see https://aka.ms/netsdk1151</source>
-        <target state="needs-review-translation">NETSDK1151: O projeto referenciado '{0}' é um executável autossuficiente.  Um executável autossuficiente não pode ser referenciado por um executável não autossuficiente.</target>
+        <target state="translated">NETSDK1151: O projeto referenciado '{0}' é um executável autossuficiente.  Um executável autossuficiente não pode ser referenciado por um executável não autossuficiente. Para mais informações, consulte https://aka.ms/netsdk1151</target>
         <note>{StrBegin="NETSDK1151: "}</note>
       </trans-unit>
       <trans-unit id="PDBGeneratorInputExecutableNotFound">
         <source>NETSDK1162: PDB generation: R2R executable '{0}' not found.</source>
-        <target state="new">NETSDK1162: PDB generation: R2R executable '{0}' not found.</target>
+        <target state="translated">NETSDK1162: geração de PDB: executável R2R '{0}' não encontrado.</target>
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
@@ -652,7 +657,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
         <source>NETSDK1176: Placeholder</source>
-        <target state="new">NETSDK1176: Placeholder</target>
+        <target state="translated">NETSDK1176: espaço reservado</target>
         <note>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
@@ -737,17 +742,17 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
         <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
-        <target state="needs-review-translation">NETSDK1150: O projeto referenciado '{0}' é um executável não autossuficiente.  Um executável não autossuficiente não pode ser referenciado por um executável autossuficiente.</target>
+        <target state="translated">NETSDK1150: O projeto referenciado '{0}' é um executável não autossuficiente.  Um executável não autossuficiente não pode ser referenciado por um executável autossuficiente. Para mais informações, consulte https://aka.ms/netsdk1150</target>
         <note>{StrBegin="NETSDK1150: "}</note>
       </trans-unit>
       <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
-        <target state="new">NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</target>
+        <target state="translated">NETSDK1179: uma das opções '--auto--contidas ' ou '--não-independentes ' é necessária quando '--runtime ' é usado.</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
       <trans-unit id="SingleFileWin7Incompatible">
         <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="new">NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</target>
+        <target state="translated">NETSDK1180: o identificador de tempo de execução especificado '{0}'implica em compatibilidade com o Windows 7. A publicação de arquivo único não é compatível com o Windows 7.</target>
         <note>{StrBegin="NETSDK1180: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
@@ -777,17 +782,17 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
         <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
-        <target state="new">NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</target>
+        <target state="translated">NETSDK1175: O Windows Forms não é compatível ou recomendado com corte habilitado. Acesse https://aka.ms/dotnet-illink/windows-forms para obter mais detalhes.</target>
         <note>{StrBegin="NETSDK1175: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWpfIsNotSupported">
         <source>NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
-        <target state="new">NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</target>
+        <target state="translated">NETSDK1168: WPF não é compatível ou recomendado com corte habilitado. Acesse https://aka.ms/dotnet-illink/wpf para obter mais detalhes.</target>
         <note>{StrBegin="NETSDK1168: "}</note>
       </trans-unit>
       <trans-unit id="TypeLibraryDoesNotExist">
         <source>NETSDK1172: The provided type library '{0}' does not exist.</source>
-        <target state="new">NETSDK1172: The provided type library '{0}' does not exist.</target>
+        <target state="translated">NETSDK1172: a biblioteca de tipos fornecida '{0}' não existe.</target>
         <note>{StrBegin="NETSDK1172: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
@@ -897,21 +902,21 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsSDKVersionConflicts">
         <source>NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</source>
-        <target state="new">NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</target>
+        <target state="translated">NETSDK1148: um assembly referenciado foi compilado usando uma versão mais recente do Microsoft.Windows.SDK.NET.dll. Atualize para um SDK do .NET mais recente para referenciar este assembly.</target>
         <note>{StrBegin="NETSDK1148: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotAvailable">
         <source>NETSDK1178: The project depends on the following workload packs that do not exist in any of the workloads available in this installation: {0}
 You may need to build the project on another operating system or architecture, or update the .NET SDK.</source>
-        <target state="new">NETSDK1178: The project depends on the following workload packs that do not exist in any of the workloads available in this installation: {0}
-You may need to build the project on another operating system or architecture, or update the .NET SDK.</target>
+        <target state="translated">NETSDK1178: o projeto depende dos seguintes pacotes de carga de trabalho que não existem em nenhuma das cargas de trabalho disponíveis nesta instalação: {0}
+Talvez você precise compilar o projeto em outro sistema operacional ou arquitetura, ou atualizar o SDK do .NET.</target>
         <note>{StrBegin="NETSDK1178: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
 To install these workloads, run the following command: {1}</source>
-        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</target>
+        <target state="translated">NETSDK1147: para construir este projeto, as seguintes cargas de trabalho devem ser instaladas: {0}
+Para instalar essas cargas de trabalho, execute o seguinte comando: {1}</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

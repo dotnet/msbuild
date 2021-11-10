@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 using System.Linq;
 
@@ -44,6 +45,26 @@ namespace Microsoft.DotNet.Cli
             return option;
         }
 
+        public static Option<T> Hide<T>(this Option<T> option)
+        {
+            option.IsHidden = true;
+            return option;
+        }
+
+        public static Option<T> WithHelpDescription<T>(this Option<T> option, Command command, string helpText)
+        {
+            if (Parser.HelpDescriptionCustomizations.ContainsKey(option))
+            {
+                Parser.HelpDescriptionCustomizations[option].Add(command, helpText);
+            }
+            else
+            {
+                Parser.HelpDescriptionCustomizations.Add(option, new Dictionary<Command, string>() { { command, helpText } });
+            }
+
+            return option;
+        }
+
         private static IEnumerable<string> ForwardedArguments(string alias, IEnumerable<string> arguments)
         {
             foreach (string arg in arguments)
@@ -69,6 +90,9 @@ namespace Microsoft.DotNet.Cli
 
         public ForwardedOption(string alias, string description = null) : base(alias, description) { }
 
+        public ForwardedOption(string alias, ParseArgument<T> parseArgument, string description = null) :
+            base(alias, parseArgument, description: description) { }
+
         public ForwardedOption<T> SetForwardingFunction(Func<T, IEnumerable<string>> func)
         {
             ForwardingFunction = GetForwardingFunction(func);
@@ -83,13 +107,13 @@ namespace Microsoft.DotNet.Cli
 
         public ForwardedOption<T> SetForwardingFunction(Func<T, ParseResult, IEnumerable<string>> func)
         {
-            ForwardingFunction = (ParseResult parseResult) => parseResult.HasOption(Aliases.First()) ? func(parseResult.ValueForOption<T>(Aliases.First()), parseResult) : Array.Empty<string>();
+            ForwardingFunction = (ParseResult parseResult) => parseResult.HasOption(this) ? func(parseResult.GetValueForOption<T>(this), parseResult) : Array.Empty<string>();
             return this;
         }
 
         public Func<ParseResult, IEnumerable<string>> GetForwardingFunction(Func<T, IEnumerable<string>> func)
         {
-            return (ParseResult parseResult) => parseResult.HasOption(Aliases.First()) ? func(parseResult.ValueForOption<T>(Aliases.First())) : Array.Empty<string>();
+            return (ParseResult parseResult) => parseResult.HasOption(this) ? func(parseResult.GetValueForOption<T>(this)) : Array.Empty<string>();
         }
 
         public Func<ParseResult, IEnumerable<string>> GetForwardingFunction()

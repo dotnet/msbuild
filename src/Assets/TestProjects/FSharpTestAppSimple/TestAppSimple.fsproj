@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
     <!-- Issue: https://github.com/dotnet/sdk/issues/1150 -->
     <DisableImplicitAssetTargetFallback>true</DisableImplicitAssetTargetFallback>

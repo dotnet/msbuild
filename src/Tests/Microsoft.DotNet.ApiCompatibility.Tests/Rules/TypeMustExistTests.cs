@@ -11,10 +11,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
 {
     public class TypeMustExistTests
     {
-        [Theory]
-        [InlineData("")]
-        [InlineData("CP002")]
-        public void MissingPublicTypesInRightAreReported(string noWarn)
+        [Fact]
+        public void MissingPublicTypesInRightAreReported()
         {
             string leftSyntax = @"
 
@@ -39,7 +37,6 @@ namespace CompatTests
 ";
 
             ApiComparer differ = new();
-            differ.NoWarn = noWarn;
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
@@ -55,7 +52,7 @@ namespace CompatTests
 #endif
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -85,7 +82,7 @@ namespace B.B
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:A.B.C"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -115,7 +112,7 @@ public class A
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:A.B"),
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -151,7 +148,7 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.ForwardedTestType")
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]
@@ -178,33 +175,7 @@ namespace CompatTests
         }
 
         [Fact]
-        public void NoDifferencesReportedWithNoWarn()
-        {
-            string leftSyntax = @"
-
-namespace CompatTests
-{
-  public class First { }
-  public class Second { }
-}
-";
-
-            string rightSyntax = @"
-namespace CompatTests
-{
-  public class First { }
-}
-";
-
-            ApiComparer differ = new();
-            differ.NoWarn = DiagnosticIds.TypeMustExist;
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            Assert.Empty(differ.GetDifferences(new[] { left }, new[] { right }));
-        }
-
-        [Fact]
-        public void DifferenceIsIgnoredForMember()
+        public void RecordsAreMappedCorrectly()
         {
             string leftSyntax = @"
 
@@ -229,26 +200,20 @@ namespace CompatTests
 }
 ";
 
-            (string, string)[] ignoredDifferences = new[]
-            {
-                (DiagnosticIds.TypeMustExist, "T:CompatTests.Second"),
-                (DiagnosticIds.TypeMustExist, "T:CompatTests.MyEnum"),
-            };
-
             ApiComparer differ = new();
-            differ.IgnoredDifferences = ignoredDifferences;
-
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
 
             CompatDifference[] expected = new[]
             {
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Second"),
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Third"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Fourth")
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Fourth"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.MyEnum")
             };
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Theory]
@@ -289,7 +254,7 @@ namespace CompatTests
                     new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.InternalType")
                 };
 
-                Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+                Assert.Equal(expected, differences);
             }
         }
 
@@ -344,7 +309,7 @@ namespace CompatTests
                 );
             }
 
-            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences);
         }
 
         [Fact]

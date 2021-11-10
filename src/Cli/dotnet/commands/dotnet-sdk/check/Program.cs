@@ -6,6 +6,8 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
 using System;
 using System.CommandLine.Parsing;
+using System.IO;
+using System.Text.Json;
 using EnvironmentProvider = Microsoft.DotNet.NativeWrapper.EnvironmentProvider;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
@@ -16,13 +18,20 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
         private readonly INETBundleProvider _netBundleProvider;
         private readonly IReporter _reporter;
         private readonly IProductCollectionProvider _productCollectionProvider;
+        private readonly string _dotnetPath;
+        private readonly SdkCheckConfig _sdkCheckConfig;
 
         public SdkCheckCommand(
             ParseResult parseResult,
             INETBundleProvider bundleProvider = null,
             IProductCollectionProvider productCollectionProvider = null,
-            IReporter reporter = null) : base(parseResult)
+            IReporter reporter = null,
+            string dotnetRoot = null, 
+            string dotnetVersion = null) : base(parseResult)
         {
+            _dotnetPath = dotnetRoot ?? EnvironmentProvider.GetDotnetExeDirectory();
+            var configFilePath = Path.Combine(_dotnetPath, "sdk", dotnetVersion ?? Product.Version, "sdk-check-config.json");
+            _sdkCheckConfig = File.Exists(configFilePath) ? JsonSerializer.Deserialize<SdkCheckConfig>(File.ReadAllText(configFilePath)) : null;
             _reporter = reporter ?? Reporter.Output;
             _netBundleProvider = bundleProvider == null ? new NETBundlesNativeWrapper() : bundleProvider;
             _productCollectionProvider = productCollectionProvider == null ? new ProductCollectionProvider() : productCollectionProvider;
@@ -30,41 +39,56 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
 
         public override int Execute()
         {
-            try
+            if (_sdkCheckConfig != null && !string.IsNullOrEmpty(_sdkCheckConfig.CommandOutputReplacementString))
             {
-                var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
-                var productCollection = _productCollectionProvider.GetProductCollection();
-                var environmentInfo = _netBundleProvider.GetDotnetEnvironmentInfo(dotnetPath);
-                var sdkFormatter = new SdkOutputWriter(environmentInfo.SdkInfo, productCollection, _productCollectionProvider, _reporter);
-                var runtimeFormatter = new RuntimeOutputWriter(environmentInfo.RuntimeInfo, productCollection, _productCollectionProvider, _reporter);
-
-                sdkFormatter.PrintSdkInfo();
                 _reporter.WriteLine();
-                runtimeFormatter.PrintRuntimeInfo();
-                _reporter.WriteLine();
-                _reporter.WriteLine(LocalizableStrings.CommandFooter);
+                _reporter.WriteLine(_sdkCheckConfig.CommandOutputReplacementString);
                 _reporter.WriteLine();
             }
-            catch (HostFxrResolutionException hostfxrResolutionException)
+            else
             {
-                switch (hostfxrResolutionException)
+                try
                 {
-                    case HostFxrRuntimePropertyNotSetException:
-                        throw new GracefulException(new[] { LocalizableStrings.RuntimePropertyNotFound }, new string[] { }, isUserError: false);
+                    var productCollection = _productCollectionProvider.GetProductCollection(
+                        _sdkCheckConfig?.ReleasesUri == null ? null : new Uri(_sdkCheckConfig.ReleasesUri),
+                        _sdkCheckConfig?.ReleasesFilePath == null ? null : _sdkCheckConfig.ReleasesFilePath);
+                    var environmentInfo = _netBundleProvider.GetDotnetEnvironmentInfo(_dotnetPath);
+                    var sdkFormatter = new SdkOutputWriter(environmentInfo.SdkInfo, productCollection, _productCollectionProvider, _reporter);
+                    var runtimeFormatter = new RuntimeOutputWriter(environmentInfo.RuntimeInfo, productCollection, _productCollectionProvider, _reporter);
 
-                    case HostFxrNotFoundException hostFxrNotFoundException:
-                        throw new GracefulException(new[] { LocalizableStrings.HostFxrCouldNotBeLoaded }, new string[] { hostFxrNotFoundException.Message }, isUserError: false);
+                    sdkFormatter.PrintSdkInfo();
+                    _reporter.WriteLine();
+                    runtimeFormatter.PrintRuntimeInfo();
+                    _reporter.WriteLine();
+                    _reporter.WriteLine(LocalizableStrings.CommandFooter);
+                    _reporter.WriteLine();
+                }
+                catch (HostFxrResolutionException hostfxrResolutionException)
+                {
+                    switch (hostfxrResolutionException)
+                    {
+                        case HostFxrRuntimePropertyNotSetException:
+                            throw new GracefulException(new[] { LocalizableStrings.RuntimePropertyNotFound }, new string[] { }, isUserError: false);
+
+                        case HostFxrNotFoundException hostFxrNotFoundException:
+                            throw new GracefulException(new[] { LocalizableStrings.HostFxrCouldNotBeLoaded }, new string[] { hostFxrNotFoundException.Message }, isUserError: false);
+                    }
                 }
             }
 
             return 0;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            var parseResult = Parser.Instance.ParseFrom("dotnet sdk check", args);
-
             return new SdkCheckCommand(parseResult).Execute();
         }
+    }
+
+    internal class SdkCheckConfig
+    {
+        public string ReleasesUri { get; set; }
+        public string ReleasesFilePath { get; set; }
+        public string CommandOutputReplacementString { get; set; }
     }
 }

@@ -208,9 +208,9 @@
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.dll.br",
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.dll.gz",
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.pdb.gz",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.js",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.js.br",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.js.gz",
+  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
+  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js.br",
+  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat.br",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat.gz",
@@ -238,5 +238,5 @@
   "${OutputPath}\\wwwroot\\custom-service-worker-assets.js",
   "${OutputPath}\\wwwroot\\index.html",
   "${OutputPath}\\wwwroot\\serviceworkers\\my-service-worker.js",
-  "${ProjectPath}\\blazorhosted\\obj\\Debug\\net6.0\\jsmodules\\jsmodules.publish.manifest.json"
+  "${ProjectPath}\\blazorhosted\\obj\\Debug\\${Tfm}\\jsmodules\\jsmodules.publish.manifest.json"
 ]

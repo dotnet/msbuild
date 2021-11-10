@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         return;
                     }
 
-                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(symbol, Settings.EqualityComparer);
+                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(symbol, Settings.EqualityComparer, setIndex);
 
                     Stack<INamespaceSymbol> stack = new();
                     stack.Push(symbol.GlobalNamespace);
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                     }
                 }
 
-                static Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> ResolveTypeForwards(IAssemblySymbol assembly, IEqualityComparer<ISymbol> comparer)
+                Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> ResolveTypeForwards(IAssemblySymbol assembly, IEqualityComparer<ISymbol> comparer, int index)
                 {
                     Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = new(comparer);
                     foreach (INamedTypeSymbol symbol in assembly.GetForwardedTypes())
@@ -123,7 +123,15 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         }
                         else
                         {
-                            // TODO: Log Warning;
+                            // If we should warn on missing references and we are unable to resolve the type forward, then we should log a diagnostic
+                            if (Settings.WarnOnMissingReferences)
+                            {
+                                _assemblyLoadErrors[index].Add(new CompatDifference(
+                                        DiagnosticIds.AssemblyReferenceNotFound,
+                                        string.Format(Resources.MatchingAssemblyNotFound, $"{symbol.ContainingAssembly.Name}.dll"),
+                                        DifferenceType.Changed,
+                                        string.Empty));
+                            }
                         }
                     }
 

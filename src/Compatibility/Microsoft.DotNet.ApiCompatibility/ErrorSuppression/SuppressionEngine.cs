@@ -22,16 +22,15 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         protected HashSet<Suppression> _validationSuppressions;
         private readonly ReaderWriterLockSlim _readerWriterLock = new();
         private readonly XmlSerializer _serializer = new(typeof(Suppression[]), new XmlRootAttribute("Suppressions"));
+        private readonly HashSet<string?> _noWarn;
 
-        protected SuppressionEngine(string suppressionFile)
+        protected SuppressionEngine(string? suppressionFile, string noWarn)
         {
+            _noWarn = string.IsNullOrEmpty(noWarn) ? new HashSet<string?>() : new HashSet<string?>(noWarn.Split(';'));
             _validationSuppressions = ParseSuppressionFile(suppressionFile);
         }
 
-        protected SuppressionEngine()
-        {
-            _validationSuppressions = new HashSet<Suppression>();
-        }
+        protected SuppressionEngine(string noWarn) : this(null, noWarn) { }
 
         /// <summary>
         /// Checks if the passed in error is suppressed or not.
@@ -64,7 +63,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
             _readerWriterLock.EnterReadLock();
             try
             {
-                if (_validationSuppressions.Contains(error))
+                if (_noWarn.Contains(error.DiagnosticId) || _validationSuppressions.Contains(error))
                 {
                     return true;
                 }
@@ -171,15 +170,15 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         /// </summary>
         /// <param name="suppressionFile">The path to the suppressions file to be used for initialization.</param>
         /// <returns>An instance of <see cref="SuppressionEngine"/>.</returns>
-        public static SuppressionEngine CreateFromFile(string suppressionFile)
-            => new SuppressionEngine(suppressionFile);
+        public static SuppressionEngine CreateFromFile(string suppressionFile, string noWarn = "")
+            => new SuppressionEngine(suppressionFile, noWarn);
 
         /// <summary>
         /// Creates a new instance of <see cref="SuppressionEngine"/> which is empty.
         /// </summary>
         /// <returns>An instance of <see cref="SuppressionEngine"/>.</returns>
-        public static SuppressionEngine Create()
-            => new SuppressionEngine();
+        public static SuppressionEngine Create(string noWarn = "")
+            => new SuppressionEngine(noWarn);
 
         private HashSet<Suppression> ParseSuppressionFile(string? file)
         {

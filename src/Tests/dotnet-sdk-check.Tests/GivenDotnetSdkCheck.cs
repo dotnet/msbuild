@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using FluentAssertions;
 using Microsoft.DotNet.NativeWrapper;
 using Microsoft.DotNet.Tools.Sdk.Check;
@@ -26,7 +27,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
       .NET SDK Check Command
     
     Usage:
-      dotnet [options] sdk check
+      dotnet sdk check [options]
     
     Options:
       -?, -h, --help    Show command line help.";
@@ -193,6 +194,24 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
                     .Should()
                     .NotContain(line);
             }
+        }
+
+        [Fact]
+        public void ItUsesConfigFile()
+        {
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "sdk", "check" });
+            var dotnetRoot = _testAssetsManager.CreateTestDirectory().Path;
+            var bundles = GetFakeEnvironmentInfo(new[] { "1.0.10", "2.1.809", "3.1.100", "5.0.100" }, new[] { "1.1.4", "2.1.8", "3.1.0", "3.1.3", "5.0.0" });
+            var replacementString = "Mock command output";
+            var configFileContent = JsonSerializer.Serialize(new SdkCheckConfig() { CommandOutputReplacementString = replacementString });
+            var configFilePath = Path.Combine(dotnetRoot, "sdk", "6.0.100", "sdk-check-config.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(configFilePath));
+            File.WriteAllText(configFilePath, configFileContent);
+
+            new SdkCheckCommand(parseResult, new MockNETBundleProvider(bundles), dotnetRoot: dotnetRoot, dotnetVersion: "6.0.100", reporter: _reporter).Execute();
+
+            _reporter.Lines.Count().Should().Be(3);
+            _reporter.Lines.Should().Contain(replacementString);
         }
 
         private NetEnvironmentInfo GetFakeEnvironmentInfo(IEnumerable<string> sdkVersions, IEnumerable<string> runtimeVersions)

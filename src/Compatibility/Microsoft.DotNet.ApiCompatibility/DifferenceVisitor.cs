@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Extensions;
 using System;
 using System.Collections.Generic;
 
@@ -12,26 +13,24 @@ namespace Microsoft.DotNet.ApiCompatibility
     /// </summary>
     public class DifferenceVisitor : MapperVisitor
     {
-        private readonly DiagnosticBag<CompatDifference>[] _diagnosticBags;
+        private readonly HashSet<CompatDifference>[] _diagnostics;
 
         /// <summary>
         /// Instantiates the visitor with the desired settings.
         /// </summary>
         /// <param name="rightCount">Represents the number of elements that the mappers contain on the right hand side.</param>
-        /// <param name="noWarn">A comma separated list of diagnostic IDs to ignore.</param>
-        /// <param name="ignoredDifferences">A list of tuples to ignore diagnostic IDs by symbol.</param>
-        public DifferenceVisitor(int rightCount = 1, string noWarn = null, (string diagnosticId, string symbolId)[] ignoredDifferences = null)
+        public DifferenceVisitor(int rightCount = 1)
         {
             if (rightCount < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(rightCount));
             }
 
-            _diagnosticBags = new DiagnosticBag<CompatDifference>[rightCount];
+            _diagnostics = new HashSet<CompatDifference>[rightCount];
 
             for (int i = 0; i < rightCount; i++)
             {
-                _diagnosticBags[i] = new DiagnosticBag<CompatDifference>(noWarn ?? string.Empty, ignoredDifferences ?? Array.Empty<(string, string)>());
+                _diagnostics[i] = new HashSet<CompatDifference>();
             }
         }
 
@@ -48,6 +47,9 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             AddDifferences(assembly);
             base.Visit(assembly);
+            // After visiting the assembly, the assembly mapper will contain any assembly load errors that happened
+            // when trying to resolve typeforwarded types. If there were any, we add them to the diagnostic bag next.
+            AddAssemblyLoadErrors(assembly);
         }
 
         /// <summary>
@@ -87,20 +89,32 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// A list of <see cref="DiagnosticBag{CompatDifference}"/>.
         /// One per element compared in the right hand side.
         /// </summary>
-        public IEnumerable<DiagnosticBag<CompatDifference>> DiagnosticBags => _diagnosticBags;
+        public IEnumerable<IEnumerable<CompatDifference>> DiagnosticCollections => _diagnostics;
 
         private void AddDifferences<T>(ElementMapper<T> mapper)
         {
             IReadOnlyList<IEnumerable<CompatDifference>> differences = mapper.GetDifferences();
 
-            if (_diagnosticBags.Length != differences.Count)
+            AddToDiagnosticCollections(differences);
+        }
+
+        private void AddAssemblyLoadErrors<T>(ElementMapper<T> mapper)
+        {
+            IReadOnlyList<IEnumerable<CompatDifference>> assemblyLoadErrors = mapper.GetAssemblyLoadErrors();
+
+            AddToDiagnosticCollections(assemblyLoadErrors);
+        }
+
+        private void AddToDiagnosticCollections(IReadOnlyList<IEnumerable<CompatDifference>> diagnosticsToAdd)
+        {
+            if (_diagnostics.Length != diagnosticsToAdd.Count)
             {
                 throw new InvalidOperationException(Resources.VisitorRightCountShouldMatchMappersSetSize);
             }
 
-            for (int i = 0; i < differences.Count; i++)
+            for (int i = 0; i < diagnosticsToAdd.Count; i++)
             {
-                _diagnosticBags[i].AddRange(differences[i]);
+                _diagnostics[i].AddRange(diagnosticsToAdd[i]);
             }
         }
     }

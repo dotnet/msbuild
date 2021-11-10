@@ -13,6 +13,9 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.Razor.Tasks
 {
+    // The manifest needs to always be case sensitive, since we don't know what the final runtime environment
+    // will be. The runtime is responsible for merging the tree nodes in the manifest when the underlying OS
+    // is case insensitive.
     public class GenerateStaticWebAssetsDevelopmentManifest : Task
     {
         // Since the manifest is only used at development time, it's ok for it to use the relaxed
@@ -39,6 +42,12 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         {
             try
             {
+                if (Assets.Length == 0 && DiscoveryPatterns.Length == 0)
+                {
+                    Log.LogMessage("Skipping manifest generation because no assets nor discovery patterns were found.");
+                    return true;
+                }
+
                 var manifest = ComputeDevelopmentManifest(
                     Assets.Select(a => StaticWebAsset.FromTaskItem(a)),
                     DiscoveryPatterns.Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem));
@@ -47,8 +56,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogError(ex.ToString());
-                Log.LogErrorFromException(ex);
+                Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, file: null);
             }
             return !Log.HasLoggedErrors;
         }
@@ -59,8 +67,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         {
             var assetsWithPathSegments = ComputeManifestAssets(assets).ToArray();
 
-            var discoveryPatternsByBasePath = DiscoveryPatterns
-                .Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem)
+            var discoveryPatternsByBasePath = discoveryPatterns
                 .GroupBy(p => p.HasSourceId(Source) ? "" : p.BasePath,
                  (key, values) => (key.Split(new[] { '/' }, options: StringSplitOptions.RemoveEmptyEntries), values));
 
@@ -80,11 +87,12 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 if (asset == null)
                 {
                     Log.LogMessage("Skipping candidate asset '{0}' because it is a 'Publish' asset.", group.Key);
+                    continue;
                 }
 
                 if (asset.HasSourceId(Source) && !StaticWebAssetsManifest.ManifestModes.ShouldIncludeAssetInCurrentProject(asset, StaticWebAssetsManifest.ManifestModes.Root))
                 {
-                    Log.LogMessage("Skipping candidate asset '{0}' because asset mode is '{2}'",
+                    Log.LogMessage("Skipping candidate asset '{0}' because asset mode is '{1}'",
                         asset.Identity,
                         asset.AssetMode);
 
@@ -106,17 +114,22 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
             if (!fileExists)
             {
-                Log.LogMessage($"Creating manifest because manifest file '{ManifestPath}' does not exist.");
+                Log.LogMessage("Creating manifest because manifest file '{0}' does not exist.", ManifestPath);
                 File.WriteAllBytes(ManifestPath, data);
             }
             else if (!currentHash.SequenceEqual(existingManifestHash))
             {
-                Log.LogMessage($"Updating manifest because manifest version '{Convert.ToBase64String(currentHash)}' is different from existing manifest hash '{Convert.ToBase64String(existingManifestHash)}'.");
+                Log.LogMessage(
+                    "Updating manifest because manifest version '{0}' is different from existing manifest hash '{1}'.",
+                    Convert.ToBase64String(currentHash),
+                    Convert.ToBase64String(existingManifestHash));
                 File.WriteAllBytes(ManifestPath, data);
             }
             else
             {
-                Log.LogMessage($"Skipping manifest updated because manifest version '{Convert.ToBase64String(currentHash)}' has not changed.");
+                Log.LogMessage(
+                    "Skipping manifest update because manifest version '{0}' has not changed.",
+                    Convert.ToBase64String(currentHash));
             }
         }
 
@@ -142,11 +155,11 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         var matchingAsset = new StaticWebAssetMatch
                         {
                             SubPath = asset.Identity.StartsWith(asset.ContentRoot) ?
-                                asset.Identity.Substring(asset.ContentRoot.Length) :
+                                StaticWebAsset.Normalize(asset.Identity.Substring(asset.ContentRoot.Length)) :
                                 asset.RelativePath,
                             ContentRootIndex = index
                         };
-                        currentNode.Children ??= new Dictionary<string, StaticWebAssetNode>();
+                        currentNode.Children ??= new Dictionary<string, StaticWebAssetNode>(StringComparer.Ordinal);
                         currentNode.Children.Add(segment, new StaticWebAssetNode
                         {
                             Asset = matchingAsset
@@ -155,7 +168,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     }
                     else
                     {
-                        currentNode.Children ??= new Dictionary<string, StaticWebAssetNode>();
+                        currentNode.Children ??= new Dictionary<string, StaticWebAssetNode>(StringComparer.Ordinal);
                         if (currentNode.Children.TryGetValue(segment, out var existing))
                         {
                             currentNode = existing;
@@ -164,7 +177,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         {
                             var newNode = new StaticWebAssetNode
                             {
-                                Children = new Dictionary<string, StaticWebAssetNode>()
+                                Children = new Dictionary<string, StaticWebAssetNode>(StringComparer.Ordinal)
                             };
                             currentNode.Children.Add(segment, newNode);
                             currentNode = newNode;
@@ -219,7 +232,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
                                 patterns.Add(matchingPattern);
                             }
-                            currentNode.Children ??= new Dictionary<string, StaticWebAssetNode>();
+                            currentNode.Children ??= new Dictionary<string, StaticWebAssetNode>(StringComparer.Ordinal);
                             if (!currentNode.Children.TryGetValue(segment, out var childNode))
                             {
                                 childNode = new StaticWebAssetNode
@@ -237,7 +250,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         }
                         else
                         {
-                            currentNode.Children ??= new Dictionary<string, StaticWebAssetNode>();
+                            currentNode.Children ??= new Dictionary<string, StaticWebAssetNode>(StringComparer.Ordinal);
                             if (currentNode.Children.TryGetValue(segment, out var existing))
                             {
                                 currentNode = existing;
@@ -246,7 +259,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                             {
                                 var newNode = new StaticWebAssetNode
                                 {
-                                    Children = new Dictionary<string, StaticWebAssetNode>()
+                                    Children = new Dictionary<string, StaticWebAssetNode>(StringComparer.Ordinal)
                                 };
                                 currentNode.Children.Add(segment, newNode);
                                 currentNode = newNode;
@@ -285,7 +298,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
         public class StaticWebAssetNode
         {
-            public IDictionary<string, StaticWebAssetNode> Children { get; set; }
+            public Dictionary<string, StaticWebAssetNode> Children { get; set; }
             public StaticWebAssetMatch Asset { get; set; }
             public StaticWebAssetPattern[] Patterns { get; set; }
         }

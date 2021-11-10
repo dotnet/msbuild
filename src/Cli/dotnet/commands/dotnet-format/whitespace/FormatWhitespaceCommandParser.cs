@@ -4,30 +4,30 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.Format;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli;
+using static Microsoft.DotNet.Tools.Format.FormatCommandCommon;
 
-using static Microsoft.DotNet.Cli.Format.FormatCommandCommon;
-
-using LocalizableStrings = Microsoft.DotNet.Tools.Format.LocalizableStrings;
-
-namespace Microsoft.DotNet.Cli
+namespace Microsoft.DotNet.Tools.Format
 {
     internal static class FormatWhitespaceCommandParser
     {
-        private static readonly FormatWhitespaceHandler s_formattingHandler = new();
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
         {
-            var command = new Command("whitespace", LocalizableStrings.Run_whitespace_formatting);
-            command.AddCommonOptions();
-            command.Handler = s_formattingHandler;
-            return command;
+            return Command;
         }
 
-        class FormatWhitespaceHandler : ICommandHandler
+        private static Command ConstructCommand()
         {
-            public Task<int> InvokeAsync(InvocationContext context)
-                => Task.FromResult(new FormatWhitespaceCommand().FromArgs(context.ParseResult).Execute());
+            var command = new Command("whitespace", LocalizableStrings.Run_whitespace_formatting)
+            {
+                FolderOption,
+            };
+            command.AddCommonOptions();
+            command.Handler = CommandHandler.Create<ParseResult>((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
+            return command;
         }
     }
 }

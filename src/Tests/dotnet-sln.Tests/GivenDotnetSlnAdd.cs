@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Sln.Add.Tests
   Add one or more projects to a solution file.
 
 Usage:
-  dotnet [options] sln <SLN_FILE> add [<PROJECT_PATH>...]
+  dotnet sln <SLN_FILE> add [<PROJECT_PATH>...] [options]
 
 Arguments:
   <SLN_FILE>        The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
@@ -837,7 +837,7 @@ EndGlobal
                 SearchOption.AllDirectories);
             appReleaseDirectory.Count().Should().Be(1, $"App {reasonString}");
             Directory.EnumerateFiles(appReleaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
-                .Count().Should().Be(1, $"App {reasonString}");
+                .Count().Should().Be(2, $"App {reasonString}");
 
             var libReleaseDirectory = Directory.EnumerateDirectories(
                 Path.Combine(projectDirectory, "Lib", "bin"),

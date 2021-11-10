@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -73,7 +72,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     var candidate = Candidates[i];
                     if (ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
                     {
-                        Log.LogMessage("Skipping asset '{0}' becasue '{1}'", candidate.ItemSpec, reason);
+                        Log.LogMessage("Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                         filesToRemove.Add(candidate);
                         continue;
                     }
@@ -97,7 +96,29 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     }
 
                     var destinationSubPath = candidate.GetMetadata("DestinationSubPath");
-                    if (string.IsNullOrEmpty(destinationSubPath))
+                    if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
+                    {
+                        var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
+                        var cacheBustedDotNetJSFileName = $"dotnet.{candidate.GetMetadata("NuGetPackageVersion")}.{itemHash}.js";
+
+                        var originalFileFullPath = Path.GetFullPath(candidate.ItemSpec);
+                        var originalFileDirectory = Path.GetDirectoryName(originalFileFullPath);
+
+                        var cacheBustedDotNetJSFullPath = Path.Combine(originalFileDirectory, cacheBustedDotNetJSFileName);
+
+                        var newDotNetJs = new TaskItem(cacheBustedDotNetJSFullPath, candidate.CloneCustomMetadata());
+                        newDotNetJs.SetMetadata("OriginalItemSpec", candidate.ItemSpec);
+
+                        var newRelativePath = $"_framework/{cacheBustedDotNetJSFileName}";
+                        newDotNetJs.SetMetadata("RelativePath", newRelativePath);
+
+                        newDotNetJs.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
+                        newDotNetJs.SetMetadata("AssetTraitValue", "native");
+
+                        assetCandidates.Add(newDotNetJs);
+                        continue;
+                    }
+                    else if (string.IsNullOrEmpty(destinationSubPath))
                     {
                         var relativePath = candidate.GetMetadata("FileName") + candidate.GetMetadata("Extension");
                         candidate.SetMetadata("RelativePath", $"_framework/{relativePath}");
@@ -105,6 +126,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     else
                     {
                         candidate.SetMetadata("RelativePath", $"_framework/{destinationSubPath}");
+                    }
+
+                    // Workaround for https://github.com/dotnet/aspnetcore/issues/37574.
+                    // For items added as "Reference" in project references, the OriginalItemSpec is incorrect.
+                    // Ignore it, and use the FullPath instead.
+                    if (candidate.GetMetadata("ReferenceSourceTarget") == "ProjectReference")
+                    {
+                        candidate.SetMetadata("OriginalItemSpec", candidate.ItemSpec);
                     }
 
                     var culture = candidate.GetMetadata("Culture");
@@ -158,7 +187,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         "_framework",
                         ProjectAssembly[0].GetMetadata("FileName") + ProjectAssembly[0].GetMetadata("Extension")));
 
-                    var normalizedPath = assetCandidate.GetMetadata("TargetPath").Replace('\\',  '/');
+                    var normalizedPath = assetCandidate.GetMetadata("TargetPath").Replace('\\', '/');
 
                     assetCandidate.SetMetadata("AssetKind", "Build");
                     assetCandidate.SetMetadata("AssetRole", "Related");
@@ -250,8 +279,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 ".blat" when !timezoneSupport => "timezone support is not enabled.",
                 ".dat" when invariantGlobalization && fileName.StartsWith("icudt") => "invariant globalization is enabled",
                 ".json" when fromMonoPackage && fileName == "emcc-props" => $"{fileName}{extension} is not used by Blazor",
-                ".js" when fileName == "dotnet" => "dotnet.js is already processed by Blazor",
-                ".js" when assetType == "native" => $"{fileName}{extension} is not used by Blazor",
+                ".js" when assetType == "native" && fileName != "dotnet" => $"{fileName}{extension} is not used by Blazor",
                 ".pdb" when !copySymbols => "copying symbols is disabled",
                 _ => null
             };

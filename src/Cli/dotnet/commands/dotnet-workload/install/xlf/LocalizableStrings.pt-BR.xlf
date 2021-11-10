@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
         <source>Updated advertising manifest {0}.</source>
-        <target state="new">Updated advertising manifest {0}.</target>
+        <target state="translated">Manifesto de publicidade atualizado {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CacheMissingPackage">
@@ -20,6 +20,11 @@
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="new">Uninstalling workload pack {0} version {1}…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadToCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="translated">DIRETÓRIO</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionDescription">
@@ -34,12 +39,12 @@
       </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
-        <target state="new">Failed to update the advertising manifest {0}: {1}.</target>
+        <target state="translated">Falha ao atualizar o manifesto de publicidade {0}: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToDownloadPackageManifest">
         <source>Failed to download manifest package {0}.</source>
-        <target state="new">Failed to download manifest package {0}.</target>
+        <target state="translated">Falha ao baixar o pacote de manifesto {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
@@ -49,22 +54,27 @@
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
         <source>Failed to install manifest {0} version {1}: {2}.</source>
-        <target state="new">Failed to install manifest {0} version {1}: {2}.</target>
+        <target state="translated">Falha ao instalar o manifesto {0} versão {1}: {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromCacheOptionArgumentName">
+        <source>DIRECTORY</source>
+        <target state="translated">DIRETÓRIO</target>
         <note />
       </trans-unit>
       <trans-unit id="FromCacheOptionDescription">
         <source>Complete the operation from cache (offline).</source>
-        <target state="new">Complete the operation from cache (offline).</target>
+        <target state="translated">Concluir a operação do cache (offline).</target>
         <note />
       </trans-unit>
       <trans-unit id="GarbageCollectingSdkFeatureBandsMessage">
         <source>Garbage collecting for SDK feature band(s) {0}...</source>
-        <target state="new">Garbage collecting for SDK feature band(s) {0}...</target>
+        <target state="translated">Coleta de lixo para faixa(s) do recurso SDK {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="GarbageCollectionFailed">
         <source>Warning: Workload garbage collection failed with error: {0}.</source>
-        <target state="new">Warning: Workload garbage collection failed with error: {0}.</target>
+        <target state="translated">Aviso: a coleta de lixo de carga de trabalho falhou com o erro: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InadequatePermissions">
@@ -74,7 +84,7 @@
       </trans-unit>
       <trans-unit id="IncludePreviewOptionDescription">
         <source>Allow prerelease workload manifests.</source>
-        <target state="new">Allow prerelease workload manifests.</target>
+        <target state="translated">Permitir manifestos de carga de trabalho de pré-lançamento.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncompatibleManifests">
@@ -84,12 +94,12 @@
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>Successfully installed workload(s) {0}.</source>
-        <target state="new">Successfully installed workload(s) {0}.</target>
+        <target state="translated">Carga(s) de trabalho(s) instalada(s) com êxito {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallingPackVersionMessage">
         <source>Installing pack {0} version {1}...</source>
-        <target state="new">Installing pack {0} version {1}...</target>
+        <target state="translated">Instalando o pacote {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
@@ -99,17 +109,17 @@
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
         <source>Insufficient privilege to start the server.</source>
-        <target state="new">Insufficient privilege to start the server.</target>
+        <target state="translated">Privilégio insuficiente para iniciar o servidor.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
-        <target state="new">The settings file in the workload's NuGet package is invalid: {0}</target>
+        <target state="translated">O arquivo de configurações no pacote NuGet da carga de trabalho é inválido: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install one or more workloads.</source>
-        <target state="needs-review-translation">Instale a ferramentas local ou global. Ferramentas locais são adicionadas ao manifesto e restauradas.</target>
+        <target state="translated">Instale uma ou mais cargas de trabalho.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -119,7 +129,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the workload for.</source>
-        <target state="needs-review-translation">A estrutura de destino para a qual instalar a ferramenta.</target>
+        <target state="translated">A estrutura de destino para a qual a carga de trabalho será instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestDoesNotExist">
@@ -129,37 +139,37 @@
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
         <source>Installing {0} </source>
-        <target state="new">Installing {0} </target>
+        <target state="translated">Instalando {0} </target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressRepair">
         <source>Repairing {0} </source>
-        <target state="new">Repairing {0} </target>
+        <target state="translated">Reparando {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressUninstall">
         <source>Removing {0} </source>
-        <target state="new">Removing {0} </target>
+        <target state="translated">Removendo {0} </target>
         <note />
       </trans-unit>
       <trans-unit id="NoManifestsExistForFeatureBand">
         <source>No manifests exist for SDK version {0}.</source>
-        <target state="new">No manifests exist for SDK version {0}.</target>
+        <target state="translated">Não existem manifestos para a versão do SDK{0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTrustWithParentPID">
         <source>Failed to establish a trust relationship with parent process ({0}).</source>
-        <target state="new">Failed to establish a trust relationship with parent process ({0}).</target>
+        <target state="translated">Falha ao estabelecer uma relação de confiança com o processo pai ({0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="OSDoesNotSupportMsi">
         <source>MSI installations are only supported on Windows.</source>
-        <target state="new">MSI installations are only supported on Windows.</target>
+        <target state="translated">As instalações MSI só têm suporte no Windows.</target>
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
         <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="new">The machine has a pending reboot. Installation will continue, but you may need to restart.</target>
+        <target state="translated">A máquina tem uma reinicialização pendente. A instalação vai continuar, mas talvez seja necessário reiniciar.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
@@ -173,13 +183,13 @@
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
-        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</target>
+        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
+        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
         <source>Provided rollback definition file {0} doesn't exist.</source>
-        <target state="new">Provided rollback definition file {0} doesn't exist.</target>
+        <target state="translated">O arquivo de definição de reversão {0} fornecido não existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollingBackInstall">
@@ -189,12 +199,12 @@
       </trans-unit>
       <trans-unit id="RollingBackPackInstall">
         <source>Rolling back pack {0} installation...</source>
-        <target state="new">Rolling back pack {0} installation...</target>
+        <target state="translated">Revertendo o pacote {0} instalação...</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
-        <target state="new">Skip updating the workload manifests.</target>
+        <target state="translated">Ignorar a atualização dos manifestos de carga de trabalho.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
@@ -204,12 +214,12 @@
       </trans-unit>
       <trans-unit id="SourceOptionDescription">
         <source>The NuGet package source to use during the restore. To specify multiple sources, repeat the option.</source>
-        <target state="new">The NuGet package source to use during the restore. To specify multiple sources, repeat the option.</target>
+        <target state="translated">A origem do pacote NuGet a ser usada durante a restauração. Para especificar várias fontes, repita a opção.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">ORIGEM</target>
         <note />
       </trans-unit>
       <trans-unit id="TempDirOptionDescription">
@@ -219,42 +229,42 @@
       </trans-unit>
       <trans-unit id="UnknownInstallType">
         <source>Unknown installation type: {0}.</source>
-        <target state="new">Unknown installation type: {0}.</target>
+        <target state="translated">Tipo de instalação desconhecido: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPackError">
         <source>Pack ID {0} unrecognized.</source>
-        <target state="new">Pack ID {0} unrecognized.</target>
+        <target state="translated">ID do pacote {0} não reconhecido.</target>
         <note />
       </trans-unit>
       <trans-unit id="PrintDownloadLinkOnlyDescription">
         <source>Only print the list of links to download without downloading.</source>
-        <target state="new">Only print the list of links to download without downloading.</target>
+        <target state="translated">Somente imprimir a lista de links para download sem baixá-la.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingCacheForPackInstall">
         <source>Installing package {0} version {1} from offline cache {2}.</source>
-        <target state="new">Installing package {0} version {1} from offline cache {2}.</target>
+        <target state="translated">Instalando o pacote {0} versão {1} do cache offline {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the SDK.</source>
-        <target state="needs-review-translation">A versão do pacote da ferramenta a ser instalada.</target>
+        <target state="translated">A versão do SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
         <source>.NET install command</source>
-        <target state="needs-review-translation">Comando de instalação do .NET</target>
+        <target state="translated">Comando de instalação do .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' doesn't exist.</source>
-        <target state="needs-review-translation">O arquivo de configuração '{0}' do NuGet não existe.</target>
+        <target state="translated">O arquivo de configuração '{0}' do NuGet não existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' isn't a valid NuGet version range.</source>
-        <target state="needs-review-translation">A versão '{0}' especificada não é um intervalo de versão do NuGet válido.</target>
+        <target state="translated">A versão '{0}' especificada não é um intervalo de versão do NuGet válido.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
@@ -264,12 +274,12 @@
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="translated">FILE</target>
+        <target state="translated">ARQUIVO</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
         <source>Workload '{0}' is already installed.</source>
-        <target state="new">Workload '{0}' is already installed.</target>
+        <target state="translated">A carga de trabalho '{0}' já está instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">
@@ -279,17 +289,17 @@
       </trans-unit>
       <trans-unit id="WorkloadIdArgumentDescription">
         <source>The NuGet package ID of the workload to install.</source>
-        <target state="new">The NuGet package ID of the workload to install.</target>
+        <target state="translated">A ID do pacote NuGet da carga de trabalho a ser instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdArgumentName">
         <source>WORKLOAD_ID</source>
-        <target state="new">WORKLOAD_ID</target>
+        <target state="translated">WORKLOAD_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadInstallationFailed">
         <source>Workload installation failed: {0}</source>
-        <target state="new">Workload installation failed: {0}</target>
+        <target state="translated">Falha na instalação da carga de trabalho: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotRecognized">
@@ -304,32 +314,32 @@
       </trans-unit>
       <trans-unit id="WorkloadPackAlreadyInstalledMessage">
         <source>Pack {0} version {1} is already installed.</source>
-        <target state="new">Pack {0} version {1} is already installed.</target>
+        <target state="translated">O pacote {0} versão {1} já está instalado.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadPathOptionDescription">
         <source>The directory where the workload will be installed. The directory will be created if it doesn't exist.</source>
-        <target state="new">The directory where the workload will be installed. The directory will be created if it doesn't exist.</target>
+        <target state="translated">O diretório no qual a carga de trabalho será instalada. Ele será criado se ainda não existir.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">CAMINHO</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
-        <target state="new">Workload updates are available. Run `dotnet workload list` for more information.</target>
+        <target state="translated">As atualizações de carga de trabalho estão disponíveis. Execute ' lista de cargas de trabalho dotnet ' para obter mais informações.</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingPackInstallRecordMessage">
         <source>Writing workload pack installation record for {0} version {1}...</source>
-        <target state="new">Writing workload pack installation record for {0} version {1}...</target>
+        <target state="translated">Gravando o registro da instalação do pacote de carga de trabalho para {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingWorkloadInstallRecordMessage">
         <source>Writing workload installation record for {0}...</source>
-        <target state="new">Writing workload installation record for {0}...</target>
+        <target state="translated">Gravando o registro da instalação de carga de trabalho para {0}...</target>
         <note />
       </trans-unit>
     </body>

@@ -318,7 +318,7 @@ namespace Microsoft.NET.Build.Tasks
             // 5.0 Crossgen2 doesn't support PDB generation.
             if (!Crossgen2IsVersion5 && _emitSymbols)
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "windows")
                 {
                     result.AppendLine("--pdb");
                     result.AppendLine($"--pdb-path:{Path.GetDirectoryName(_outputPDBImage)}");

@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AdManifestOnlyOptionDescription">
         <source>Only update advertising manifests.</source>
-        <target state="new">Only update advertising manifests.</target>
+        <target state="translated">Atualizar somente manifestos de anúncio.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Update all installed workloads.</source>
-        <target state="needs-review-translation">Atualize uma ferramenta global.</target>
+        <target state="translated">Atualizar todas as cargas de trabalho instaladas.</target>
         <note />
       </trans-unit>
       <trans-unit id="FromPreviousSdkOptionDescription">
@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="FromRollbackDefinitionOptionDescription">
         <source>Update workloads based on specified rollback definition file.</source>
-        <target state="new">Update workloads based on specified rollback definition file.</target>
+        <target state="translated">Atualizar cargas de trabalho com base no arquivo de definição de reversão especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoWorkloadsToUpdate">
@@ -39,27 +39,27 @@
       </trans-unit>
       <trans-unit id="UpdateFailed">
         <source>Workload '{0}' failed to update due to the following:</source>
-        <target state="new">Workload '{0}' failed to update due to the following:</target>
+        <target state="translated">Falha ao atualizar a carga de trabalho '{0}' devido ao seguinte motivo:</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceeded">
         <source>Successfully updated workload(s): {0}.</source>
-        <target state="new">Successfully updated workload(s): {0}.</target>
+        <target state="translated">Carga(s) de trabalho atualizada(s) com êxito: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">
         <source>Failed to download workload update packages to cache: {0}</source>
-        <target state="new">Failed to download workload update packages to cache: {0}</target>
+        <target state="translated">Falha ao baixar pacotes de atualização de carga de trabalho para o cache: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdateAdManifestsSucceeded">
         <source>Successfully updated advertising manifests.</source>
-        <target state="new">Successfully updated advertising manifests.</target>
+        <target state="translated">Manifestos de anúncio atualizados com êxito.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdateFailed">
         <source>Workload update failed: {0}</source>
-        <target state="new">Workload update failed: {0}</target>
+        <target state="translated">A atualização da carga de trabalho falhou: {0}</target>
         <note />
       </trans-unit>
     </body>

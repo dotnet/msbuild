@@ -91,7 +91,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                     reference.Name = "Reference";
                     reference.Add(new XElement(
                         "HintPath",
-                        Path.Combine("..", "razorclasslibrary", "bin", "Debug", "net6.0", "RazorClassLibrary.dll")));
+                        Path.Combine("..", "razorclasslibrary", "bin", "Debug", DefaultTfm, "RazorClassLibrary.dll")));
                 }
             });
 
@@ -298,6 +298,46 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
+        public void Publish_WithInvariantGlobalizationEnabled_DoesNotCopyGlobalizationData()
+        {
+            // Arrange
+            var testAppName = "BlazorHosted";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+
+            testInstance.WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var itemGroup = new XElement(ns + "PropertyGroup");
+                itemGroup.Add(new XElement("InvariantGlobalization", true));
+                project.Root.Add(itemGroup);
+            });
+
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/bl")
+                .Should().Pass();
+
+            var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
+
+            var bootJsonPath = Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
+            var bootJsonData = ReadBootJsonData(bootJsonPath);
+
+            bootJsonData.icuDataMode.Should().Be(ICUDataMode.Invariant);
+            var runtime = bootJsonData.resources.runtime;
+            runtime.Should().ContainKey("dotnet.wasm");
+            runtime.Should().ContainKey("dotnet.timezones.blat");
+
+            runtime.Should().NotContainKey("icudt.dat");
+            runtime.Should().NotContainKey("icudt_EFIGS.dat");
+
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt.dat")).Should().NotExist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().NotExist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().NotExist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_no_CJK.dat")).Should().NotExist();
+        }
+
+        [Fact]
         public void Build_WithBlazorWebAssemblyLoadAllGlobalizationData_SetsICUDataMode()
         {
             // Arrange
@@ -334,6 +374,46 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt_no_CJK.dat")).Should().Exist();
+        }
+
+        [Fact]
+        public void Publish_WithBlazorWebAssemblyLoadAllGlobalizationData_SetsICUDataMode()
+        {
+            // Arrange
+            var testAppName = "BlazorHosted";
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+
+            testInstance.WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var itemGroup = new XElement(ns + "PropertyGroup");
+                itemGroup.Add(new XElement("BlazorWebAssemblyLoadAllGlobalizationData", true));
+                project.Root.Add(itemGroup);
+            });
+
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/bl")
+                .Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
+
+            var bootJsonPath = Path.Combine(publishDirectory, "wwwroot", "_framework", "blazor.boot.json");
+            var bootJsonData = ReadBootJsonData(bootJsonPath);
+
+            bootJsonData.icuDataMode.Should().Be(ICUDataMode.All);
+            var runtime = bootJsonData.resources.runtime;
+
+            runtime.Should().ContainKey("dotnet.wasm");
+            runtime.Should().ContainKey("dotnet.timezones.blat");
+            runtime.Should().ContainKey("icudt.dat");
+            runtime.Should().ContainKey("icudt_EFIGS.dat");
+
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt.dat")).Should().Exist();
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().Exist();
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().Exist();
+            new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt_no_CJK.dat")).Should().Exist();
         }
 
         [Fact]
@@ -409,7 +489,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             bootJsonPath.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/25959")]
+        [Fact]
         public void Build_WithCustomOutputPath_Works()
         {
             var testAppName = "BlazorWasmWithLibrary";
@@ -429,6 +509,112 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var buildCommand = new BuildCommand(testInstance, "blazorwasm");
             buildCommand.Execute().Should().Pass();
+        }
+
+        [Fact]
+        public void Build_WithTransitiveReference_Works()
+        {
+            // Regression test for https://github.com/dotnet/aspnetcore/issues/37574.
+            var testInstance = CreateAspNetSdkTestAsset("BlazorWasmWithLibrary");
+
+            var buildCommand = new BuildCommand(testInstance, "classlibrarywithsatelliteassemblies");
+            buildCommand.Execute().Should().Pass();
+            var referenceAssemblyPath = new FileInfo(Path.Combine(
+                buildCommand.GetOutputDirectory(DefaultTfm).ToString(),
+                "classlibrarywithsatelliteassemblies.dll"));
+
+            referenceAssemblyPath.Should().Exist();
+
+            testInstance.WithProjectChanges((path, project) =>
+            {
+                if (path.Contains("razorclasslibrary"))
+                {
+                    var ns = project.Root.Name.Namespace;
+                    // <ItemGroup>
+                    //  <Reference Include="classlibrarywithsatelliteassemblies" HintPath="$Path\classlibrarywithsatelliteassemblies.dll" />
+                    // </ItemGroup>
+                    var itemGroup = new XElement(ns + "ItemGroup",
+                        new XElement(ns + "Reference",
+                            new XAttribute("Include", "classlibrarywithsatelliteassemblies"),
+                            new XAttribute("HintPath", referenceAssemblyPath)));
+
+                    project.Root.Add(itemGroup);
+                }
+            });
+
+            // Ensure a compile time reference exists between the project and the assembly added as a reference. This is required for 
+            // the assembly to be resolved by the "app" as part of RAR
+            File.WriteAllText(Path.Combine(testInstance.Path, "razorclasslibrary", "TestReference.cs"),
+@"
+public class TestReference
+{
+    public void Method() => System.GC.KeepAlive(typeof(classlibrarywithsatelliteassemblies.Class1));
+}");
+
+            buildCommand = new BuildCommand(testInstance, "blazorwasm");
+            buildCommand.Execute().Should().Pass();
+
+            // Assert
+            var outputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
+            var fileInWwwroot = new FileInfo(Path.Combine(outputDirectory, "wwwroot", "_framework", "classlibrarywithsatelliteassemblies.dll"));
+            fileInWwwroot.Should().Exist();
+
+            // Make sure it's a the correct copy.
+            fileInWwwroot.Length.Should().Be(referenceAssemblyPath.Length);
+            Assert.Equal(File.ReadAllBytes(referenceAssemblyPath.FullName), File.ReadAllBytes(fileInWwwroot.FullName));
+        }
+
+        [Fact]
+        public void Build_WithReference_Works()
+        {
+            // Regression test for https://github.com/dotnet/aspnetcore/issues/37574.
+            var testInstance = CreateAspNetSdkTestAsset("BlazorWasmWithLibrary");
+
+            var buildCommand = new BuildCommand(testInstance, "classlibrarywithsatelliteassemblies");
+            buildCommand.Execute().Should().Pass();
+            var referenceAssemblyPath = new FileInfo(Path.Combine(
+                buildCommand.GetOutputDirectory(DefaultTfm).ToString(),
+                "classlibrarywithsatelliteassemblies.dll"));
+
+            referenceAssemblyPath.Should().Exist();
+
+            testInstance.WithProjectChanges((path, project) =>
+            {
+                if (path.Contains("blazorwasm"))
+                {
+                    var ns = project.Root.Name.Namespace;
+                    // <ItemGroup>
+                    //  <Reference Include="classlibrarywithsatelliteassemblies" HintPath="$Path\classlibrarywithsatelliteassemblies.dll" />
+                    // </ItemGroup>
+                    var itemGroup = new XElement(ns + "ItemGroup",
+                        new XElement(ns + "Reference",
+                            new XAttribute("Include", "classlibrarywithsatelliteassemblies"),
+                            new XAttribute("HintPath", referenceAssemblyPath)));
+
+                    project.Root.Add(itemGroup);
+                }
+            });
+
+            // Ensure a compile time reference exists between the project and the assembly added as a reference. This is required for 
+            // the assembly to be resolved by the "app" as part of RAR
+            File.WriteAllText(Path.Combine(testInstance.Path, "blazorwasm", "TestReference.cs"),
+@"
+public class TestReference
+{
+    public void Method() => System.GC.KeepAlive(typeof(classlibrarywithsatelliteassemblies.Class1));
+}");
+
+            buildCommand = new BuildCommand(testInstance, "blazorwasm");
+            buildCommand.Execute().Should().Pass();
+
+            // Assert
+            var outputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
+            var fileInWwwroot = new FileInfo(Path.Combine(outputDirectory, "wwwroot", "_framework", "classlibrarywithsatelliteassemblies.dll"));
+            fileInWwwroot.Should().Exist();
+
+            // Make sure it's a the correct copy.
+            fileInWwwroot.Length.Should().Be(referenceAssemblyPath.Length);
+            Assert.Equal(File.ReadAllBytes(referenceAssemblyPath.FullName), File.ReadAllBytes(fileInWwwroot.FullName));
         }
 
         private static BootJsonData ReadBootJsonData(string path)

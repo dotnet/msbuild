@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Xml.Linq;
 using FluentAssertions;
@@ -236,6 +237,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             AssertManifest(manifest, LoadPublishManifest());
 
             var publishExtension = GetPublishExtension(Path.Combine(intermediateOutputPath, "blazor.publish.boot.json"));
+            GetPublishExtensionEntriesCount(Path.Combine(intermediateOutputPath, "blazor.publish.boot.json")).Should().Be(1);
 
             new FileInfo(Path.Combine(outputPath, "wwwroot", "blazorwasm-minimal.modules.json")).Should().NotExist();
             var lib = new FileInfo(Path.Combine(outputPath, "wwwroot", "blazorwasm-minimal.lib.module.js"));
@@ -251,18 +253,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
                 outputPath,
                 intermediateOutputPath);
-
-            static JsonElement GetPublishExtension(string path)
-            {
-                var blazorBootJson = new FileInfo(path);
-                blazorBootJson.Should().Exist();
-                var contents = JsonSerializer.Deserialize<JsonDocument>(blazorBootJson.OpenRead());
-                contents.RootElement.TryGetProperty("resources", out var resources).Should().BeTrue();
-                resources.TryGetProperty("extensions", out var extensions).Should().BeTrue();
-                extensions.TryGetProperty("my-custom-extension", out var extension).Should().BeTrue();
-                extension.TryGetProperty("_bin/publish.extension.txt", out var file).Should().BeTrue();
-                return file;
-            }
         }
 
         [Fact]
@@ -329,18 +319,29 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
                 outputPath,
                 intermediateOutputPath);
+        }
 
-            static JsonElement GetPublishExtension(string path)
-            {
-                var blazorBootJson = new FileInfo(path);
-                blazorBootJson.Should().Exist();
-                var contents = JsonSerializer.Deserialize<JsonDocument>(blazorBootJson.OpenRead());
-                contents.RootElement.TryGetProperty("resources", out var resources).Should().BeTrue();
-                resources.TryGetProperty("extensions", out var extensions).Should().BeTrue();
-                extensions.TryGetProperty("my-custom-extension", out var extension).Should().BeTrue();
-                extension.TryGetProperty("_bin/publish.extension.txt", out var file).Should().BeTrue();
-                return file;
-            }
+        private static JsonElement GetPublishExtension(string path)
+        {
+            var blazorBootJson = new FileInfo(path);
+            blazorBootJson.Should().Exist();
+            var contents = JsonSerializer.Deserialize<JsonDocument>(blazorBootJson.OpenRead());
+            contents.RootElement.TryGetProperty("resources", out var resources).Should().BeTrue();
+            resources.TryGetProperty("extensions", out var extensions).Should().BeTrue();
+            extensions.TryGetProperty("my-custom-extension", out var extension).Should().BeTrue();
+            extension.TryGetProperty("_bin/publish.extension.txt", out var file).Should().BeTrue();
+            return file;
+        }
+
+        private static int GetPublishExtensionEntriesCount(string path)
+        {
+            var blazorBootJson = new FileInfo(path);
+            blazorBootJson.Should().Exist();
+            var contents = JsonSerializer.Deserialize<JsonDocument>(blazorBootJson.OpenRead());
+            contents.RootElement.TryGetProperty("resources", out var resources).Should().BeTrue();
+            resources.TryGetProperty("extensions", out var extensions).Should().BeTrue();
+            extensions.TryGetProperty("my-custom-extension", out var extension).Should().BeTrue();
+            return extension.EnumerateObject().Count();
         }
     }
 }

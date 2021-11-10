@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AppFullName">
         <source>.NET SDK Command</source>
-        <target state="needs-review-translation">Команда .NET "Очистить"</target>
+        <target state="translated">Команда пакета SDK для .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Manage .NET SDK installation.</source>
-        <target state="needs-review-translation">Команда для очистки ранее созданных выходных данных сборки.</target>
+        <target state="translated">Управление установкой пакета SDK .NET.</target>
         <note />
       </trans-unit>
     </body>

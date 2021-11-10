@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="UpdateSdkVersion">
         <source> The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</source>
-        <target state="new"> The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</target>
+        <target state="translated"> La versión mínima requerida de Roslyn es "{1}" y está usando la versión de "{0}" de Roslyn. Puede actualizar el SDK para obtener la versión más reciente.</target>
         <note />
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <target state="translated">Se escribieron correctamente las supresiones de compatibilidad en "{0}".</target>
         <note />
       </trans-unit>
     </body>

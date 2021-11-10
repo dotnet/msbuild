@@ -4,22 +4,27 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Repair workload installations.</source>
-        <target state="needs-review-translation">Genel veya yerel araç yükleyin. Yerel araçlar bildirime eklenir ve geri yüklenir.</target>
+        <target state="translated">İş yükü yüklemelerini onarın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoWorkloadsToRepair">
+        <source>No workloads are installed, nothing to repair. Run `dotnet workload search` to find workloads to install.</source>
+        <target state="translated">İş yükü yüklenmediğinden onarılacak iş yükü yok. Yüklenecek iş yüklerini bulmak için `dotnet workload search` çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="RepairSucceeded">
         <source>Successfully repaired workloads: {0}</source>
-        <target state="new">Successfully repaired workloads: {0}</target>
+        <target state="translated">İş yükleri başarıyla onarıldı: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RepairingWorkloads">
         <source>Repairing workload installation for workloads: {0}</source>
-        <target state="new">Repairing workload installation for workloads: {0}</target>
+        <target state="translated">Şu iş yükleri için iş yükü yüklemesi onarılıyor: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadRepairFailed">
         <source>Workload repair failed: {0}</source>
-        <target state="new">Workload repair failed: {0}</target>
+        <target state="translated">İş yükü onarılamadı: {0}</target>
         <note />
       </trans-unit>
     </body>

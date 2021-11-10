@@ -4,32 +4,32 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Search for available workloads.</source>
-        <target state="needs-review-translation">Mostrar las herramientas instaladas local o globalmente.</target>
+        <target state="translated">Permite buscar cargas de trabajo disponibles.</target>
         <note />
       </trans-unit>
       <trans-unit id="DescriptionColumnName">
         <source>Description</source>
-        <target state="new">Description</target>
+        <target state="translated">Descripción</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformColumnName">
         <source>Platforms</source>
-        <target state="new">Platforms</target>
+        <target state="translated">Plataformas</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdColumnName">
         <source>Workload ID</source>
-        <target state="new">Workload ID</target>
+        <target state="translated">Id. de carga de trabajo</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentDescription">
-        <source>The text to search for in the IDs of available workloads.</source>
-        <target state="new">The text to search for in the IDs of available workloads.</target>
+        <source>The text to search for in the IDs and descriptions of available workloads.</source>
+        <target state="translated">Texto que se buscará en los id. y las descripciones de las cargas de trabajo disponibles.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentName">
         <source>SEARCH_STRING</source>
-        <target state="new">SEARCH_STRING</target>
+        <target state="translated">SEARCH_STRING</target>
         <note />
       </trans-unit>
     </body>

@@ -1,17 +1,21 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Diagnostics;
-using System.Management;
+using System.Runtime.Versioning;
+using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     /// <summary>
     /// Extensions methods for <see cref="Process"/> components.
     /// </summary>
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static class ProcessExtensions
     {
+#pragma warning disable CA1416
         /// <summary>
         /// Returns the parent process of this process by querying the Win32_Process class.
         /// </summary>
@@ -29,27 +33,19 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         /// <param name="process">The process component.</param>
         /// <returns>The process ID of the parent process, or -1 if the parent process could not be found.</returns>
-        public static int GetParentProcessId(this Process process)
+        public unsafe static int GetParentProcessId(this Process process)
         {
-            ManagementObjectSearcher searcher = new($"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId='{process.Id}'");
-            using ManagementObjectCollection result = searcher.Get();
-            ManagementObjectCollection.ManagementObjectEnumerator enumerator = result.GetEnumerator();
+            SafeProcessHandle handle = process.SafeHandle;
+            NativeMethods.Windows.PROCESS_BASIC_INFORMATION info;
 
-            return enumerator.MoveNext() ? Convert.ToInt32(enumerator.Current.GetPropertyValue("ParentProcessId")) : -1;
+            if (NativeMethods.Windows.NtQueryInformationProcess(handle, NativeMethods.Windows.ProcessBasicInformation,
+                &info, (uint)sizeof(NativeMethods.Windows.PROCESS_BASIC_INFORMATION), out _) != 0)
+            {
+                return -1;
+            }
+
+            return (int)info.InheritedFromUniqueProcessId;
         }
-
-        /// <summary>
-        /// Returns the command line of this process by querying the Win32_Process class.
-        /// </summary>
-        /// <param name="process">The process component.</param>
-        /// <returns>The command line of the process or <see langword="null"/> if it could not be retrieved.</returns>
-        public static string GetCommandLine(this Process process)
-        {
-            ManagementObjectSearcher searcher = new($"SELECT CommandLine FROM Win32_Process WHERE ProcessId='{process.Id}'");
-            using ManagementObjectCollection result = searcher.Get();
-            ManagementObjectCollection.ManagementObjectEnumerator enumerator = result.GetEnumerator();
-
-            return enumerator.MoveNext() ? Convert.ToString(enumerator.Current.GetPropertyValue("CommandLine")) : null;
-        }
+#pragma warning restore CA1416
     }
 }

@@ -4,37 +4,37 @@
     <body>
       <trans-unit id="DownloadVersionFailed">
         <source>Downloading {0} version {1} failed.</source>
-        <target state="new">Downloading {0} version {1} failed.</target>
+        <target state="translated">{0} sürüm {1} indirilemedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToLoadNuGetSource">
         <source>Failed to load NuGet source {0}</source>
-        <target state="new">Failed to load NuGet source {0}</target>
+        <target state="translated">{0} NuGet kaynağı yüklemesi yüklenemedi</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToLoadNuGetSourceSourceIsNotValid">
         <source>Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</source>
-        <target state="new">Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</target>
+        <target state="translated">{0} NuGet kaynağı yüklenemedi: kaynak geçerli değil. Daha fazla işlemede atlanacak.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToValidatePackageSigning">
         <source>Failed to validate package signing.</source>
-        <target state="new">Failed to validate package signing.</target>
+        <target state="translated">Paket imzası doğrulanamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="IsNotFoundInNuGetFeeds">
         <source>{0} is not found in NuGet feeds {1}".</source>
-        <target state="new">{0} is not found in NuGet feeds {1}".</target>
+        <target state="translated">{0}, {1} NuGet akışlarında bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
         <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
-        <target state="new">Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</target>
+        <target state="translated">NuGet paketi imza doğrulamasını atlayın. Geçerli .NET SDK’sı birinci tarafça imzalanmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">
         <source>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</source>
-        <target state="new">Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</target>
+        <target state="translated">NuGet paketi imza doğrulamasını atlayın. NuGet imza doğrulaması Linux veya macOS üzerinde kullanılamıyor. Daha fazla bilgi için bkz. https://aka.ms/workloadskippackagevalidation.</target>
         <note />
       </trans-unit>
     </body>

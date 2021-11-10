@@ -2,14 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using LocalizableStrings = Microsoft.DotNet.Tools.Format.LocalizableStrings;
-using Microsoft.DotNet.Tools;
-using System.Collections.Generic;
-using System;
 
-namespace Microsoft.DotNet.Cli.Format
+using Microsoft.DotNet.Cli;
+
+namespace Microsoft.DotNet.Tools.Format
 {
     internal static class FormatCommandCommon
     {
@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Cli.Format
             Arity = ArgumentArity.ZeroOrOne
         }.DefaultToCurrentDirectory();
 
+        internal static readonly Option<bool> FolderOption = new(new[] { "--folder" }, LocalizableStrings.Whether_to_treat_the_workspace_argument_as_a_simple_folder_of_files);
         internal static readonly Option<bool> NoRestoreOption = new(new[] { "--no-restore" }, LocalizableStrings.Doesnt_execute_an_implicit_restore_before_formatting);
         internal static readonly Option<bool> VerifyNoChanges = new(new[] { "--verify-no-changes" }, LocalizableStrings.Verify_no_formatting_changes_would_be_performed_Terminates_with_a_non_zero_exit_code_if_any_files_would_have_been_formatted);
         internal static readonly Option<string[]> DiagnosticsOption = new(new[] { "--diagnostics" }, () => Array.Empty<string>(), LocalizableStrings.A_space_separated_list_of_diagnostic_ids_to_use_as_a_filter_when_fixing_code_style_or_3rd_party_issues);
@@ -71,21 +72,21 @@ namespace Microsoft.DotNet.Cli.Format
             }
 
             if (parseResult.HasOption(VerbosityOption) &&
-                parseResult.ValueForOption(VerbosityOption) is string { Length: > 0 } verbosity)
+                parseResult.GetValueForOption(VerbosityOption) is string { Length: > 0 } verbosity)
             {
                 dotnetFormatArgs.Add("--verbosity");
                 dotnetFormatArgs.Add(verbosity);
             }
 
             if (parseResult.HasOption(IncludeOption) &&
-                parseResult.ValueForOption(IncludeOption) is string[] { Length: > 0 } fileToInclude)
+                parseResult.GetValueForOption(IncludeOption) is string[] { Length: > 0 } fileToInclude)
             {
                 dotnetFormatArgs.Add("--include");
                 dotnetFormatArgs.Add(string.Join(" ", fileToInclude));
             }
 
             if (parseResult.HasOption(ExcludeOption) &&
-                parseResult.ValueForOption(ExcludeOption) is string[] { Length: > 0 } fileToExclude)
+                parseResult.GetValueForOption(ExcludeOption) is string[] { Length: > 0 } fileToExclude)
             {
                 dotnetFormatArgs.Add("--exclude");
                 dotnetFormatArgs.Add(string.Join(" ", fileToExclude));
@@ -94,7 +95,7 @@ namespace Microsoft.DotNet.Cli.Format
             if (parseResult.HasOption(ReportOption))
             {
                 dotnetFormatArgs.Add("--report");
-                if (parseResult.ValueForOption(ReportOption) is string { Length: > 0 } reportPath)
+                if (parseResult.GetValueForOption(ReportOption) is string { Length: > 0 } reportPath)
                 {
                     dotnetFormatArgs.Add(reportPath);
                 }
@@ -103,7 +104,7 @@ namespace Microsoft.DotNet.Cli.Format
             if (parseResult.HasOption(BinarylogOption))
             {
                 dotnetFormatArgs.Add("--binarylog");
-                if (parseResult.ValueForOption(BinarylogOption) is string { Length: > 0 } binaryLogPath)
+                if (parseResult.GetValueForOption(BinarylogOption) is string { Length: > 0 } binaryLogPath)
                 {
                     dotnetFormatArgs.Add(binaryLogPath);
                 }
@@ -119,7 +120,7 @@ namespace Microsoft.DotNet.Cli.Format
         {
             dotnetFormatArgs.Add("--fix-style");
             if (parseResult.HasOption(SeverityOption) && 
-                parseResult.ValueForOption(SeverityOption) is string { Length: > 0 } styleSeverity)
+                parseResult.GetValueForOption(SeverityOption) is string { Length: > 0 } styleSeverity)
             {
                 dotnetFormatArgs.Add(styleSeverity);
             }
@@ -129,13 +130,13 @@ namespace Microsoft.DotNet.Cli.Format
         {
             dotnetFormatArgs.Add("--fix-analyzers");
             if (parseResult.HasOption(SeverityOption) &&
-                parseResult.ValueForOption(SeverityOption) is string { Length: > 0 } analyzerSeverity)
+                parseResult.GetValueForOption(SeverityOption) is string { Length: > 0 } analyzerSeverity)
             {
                 dotnetFormatArgs.Add(analyzerSeverity);
             }
 
             if (parseResult.HasOption(DiagnosticsOption) &&
-                parseResult.ValueForOption(DiagnosticsOption) is string[] { Length: > 0 } diagnostics)
+                parseResult.GetValueForOption(DiagnosticsOption) is string[] { Length: > 0 } diagnostics)
             {
                 dotnetFormatArgs.Add("--diagnostics");
                 dotnetFormatArgs.Add(string.Join(" ", diagnostics));
@@ -144,7 +145,7 @@ namespace Microsoft.DotNet.Cli.Format
 
         public static void AddProjectOrSolutionDotnetFormatArgs(this List<string> dotnetFormatArgs, ParseResult parseResult)
         {
-            if (parseResult.ValueForArgument<string>(SlnOrProjectArgument) is string { Length: > 0 } slnOrProject)
+            if (parseResult.GetValueForArgument(SlnOrProjectArgument) is string { Length: > 0 } slnOrProject)
             {
                 dotnetFormatArgs.Add(slnOrProject);
             }

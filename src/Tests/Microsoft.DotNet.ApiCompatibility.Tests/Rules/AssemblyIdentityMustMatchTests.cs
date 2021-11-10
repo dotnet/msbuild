@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.Single(differences);
 
             CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, "AssemblyB, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
-            Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences.First());
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.Single(differences);
 
             CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=de, PublicKeyToken=null");
-            Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences.First());
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.Single(differences);
 
             CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{rightSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
-            Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences.First());
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.Single(differences);
 
             CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-            Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences.First());
         }
 
         [Theory]
@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             {
                 Assert.Single(differences);
                 CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{rightSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
-                Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
+                Assert.Equal(expected, differences.First());
             }
             else
             {
@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.Single(differences);
 
             CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
-            Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
+            Assert.Equal(expected, differences.First());
         }
 
         [Theory]

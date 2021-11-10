@@ -120,6 +120,12 @@ namespace Microsoft.NET.Build.Tasks
         public string ProjectLanguage { get; set; }
 
         /// <summary>
+        /// Optional version of the compiler API (E.g. 'roslyn3.9', 'roslyn4.0')
+        /// Impacts applicability of analyzer assets.
+        /// </summary>
+        public string CompilerApiVersion { get; set; }
+
+        /// <summary>
         /// Check that there is at least one package dependency in the RID graph that is not in the RID-agnostic graph.
         /// Used as a heuristic to detect invalid RIDs.
         /// </summary>
@@ -425,6 +431,7 @@ namespace Microsoft.NET.Build.Tasks
                         }
                     }
                     writer.Write(ProjectLanguage ?? "");
+                    writer.Write(CompilerApiVersion ?? "");
                     writer.Write(ProjectPath);
                     writer.Write(RuntimeIdentifier ?? "");
                     if (ShimRuntimeIdentifiers != null)
@@ -848,7 +855,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteAnalyzers()
             {
-                Dictionary<(string, NuGetVersion), LockFileTargetLibrary> targetLibraries = null;
+                AnalyzerResolver resolver = new AnalyzerResolver(this);
 
                 foreach (var library in _lockFile.Libraries)
                 {
@@ -859,21 +866,188 @@ namespace Microsoft.NET.Build.Tasks
 
                     foreach (var file in library.Files)
                     {
-                        if (!NuGetUtils.IsApplicableAnalyzer(file, _task.ProjectLanguage))
-                        {
-                            continue;
-                        }
+                        resolver.AddFile(file, library);
+                    }
 
-                        if (targetLibraries == null)
-                        {
-                            targetLibraries = _compileTimeTarget.Libraries.ToDictionary(l => (l.Name, l.Version), new LibraryComparer());
-                        }
+                    resolver.CompleteLibraryAnalyzers();
+                }
+            }
 
-                        if (targetLibraries.TryGetValue((library.Name, library.Version), out var targetLibrary))
+            /// <summary>
+            /// Resolves the correct analyzer assets from a NuGet package.
+            /// </summary>
+            /// <remarks>
+            /// This allows packages to ship multiple analyzers that target different versions
+            /// of the compiler. For example, a package may include:
+            ///
+            /// "analyzers/dotnet/roslyn3.7/analyzer.dll"
+            /// "analyzers/dotnet/roslyn3.8/analyzer.dll"
+            /// "analyzers/dotnet/roslyn4.0/analyzer.dll"
+            ///
+            /// When the <paramref name="compilerApiVersion"/> is 'roslyn3.9', only the assets 
+            /// in the folder with the highest applicable compiler version are picked.
+            /// In this case,
+            /// 
+            /// "analyzers/dotnet/roslyn3.8/analyzer.dll"
+            /// 
+            /// will be picked, and the other analyzer assets will be excluded.
+            /// </remarks>
+            private class AnalyzerResolver
+            {
+                private readonly CacheWriter _cacheWriter;
+                private readonly string? _compilerNameSearchString;
+                private readonly Version? _compilerVersion;
+                private Dictionary<(string, NuGetVersion), LockFileTargetLibrary>? _targetLibraries;
+                private List<(string, LockFileLibrary, Version)>? _potentialAnalyzers;
+                private Version _maxApplicableVersion;
+
+                private Dictionary<(string, NuGetVersion), LockFileTargetLibrary> TargetLibraries =>
+                    _targetLibraries ??=
+                        _cacheWriter._compileTimeTarget.Libraries.ToDictionary(l => (l.Name, l.Version), new LibraryComparer());
+
+                public AnalyzerResolver(CacheWriter cacheWriter)
+                {
+                    _cacheWriter = cacheWriter;
+
+                    if (ParseCompilerApiVersion(_cacheWriter._task.CompilerApiVersion, out ReadOnlyMemory<char> compilerName, out Version compilerVersion))
+                    {
+#if NET
+                        _compilerNameSearchString = string.Concat("/".AsSpan(), compilerName.Span);
+#else
+                        _compilerNameSearchString = "/" + compilerName;
+#endif                   
+                        _compilerVersion = compilerVersion;
+                    }
+                }
+
+                public void AddFile(string file, LockFileLibrary library)
+                {
+                    if (NuGetUtils.IsApplicableAnalyzer(file, _cacheWriter._task.ProjectLanguage))
+                    {
+                        if (IsFileCompilerVersionSpecific(file, out Version fileCompilerVersion))
                         {
-                            WriteItem(_packageResolver.ResolvePackageAssetPath(targetLibrary, file), targetLibrary);
+                            if (fileCompilerVersion > _compilerVersion)
+                            {
+                                // version is too high - skip this file
+                                return;
+                            }
+
+                            _potentialAnalyzers ??= new List<(string, LockFileLibrary, Version)>();
+                            _potentialAnalyzers.Add((file, library, fileCompilerVersion));
+
+                            if (_maxApplicableVersion == null || fileCompilerVersion > _maxApplicableVersion)
+                            {
+                                _maxApplicableVersion = fileCompilerVersion;
+                            }
+                        }
+                        else
+                        {
+                            // if this file isn't specific to a compiler version, just write it directly
+                            WriteAnalyzer(file, library);
                         }
                     }
+                }
+
+                private bool IsFileCompilerVersionSpecific(string file, out Version fileCompilerVersion)
+                {
+                    fileCompilerVersion = null;
+
+                    if (_compilerNameSearchString == null)
+                    {
+                        // unable to tell if this file is specific to a compiler version
+                        return false;
+                    }
+
+                    int compilerNameStart = file.IndexOf(_compilerNameSearchString);
+                    if (compilerNameStart == -1)
+                    {
+                        return false;
+                    }
+
+                    int compilerVersionStart = compilerNameStart + _compilerNameSearchString.Length;
+                    int compilerVersionStop = file.IndexOf('/', compilerVersionStart);
+                    if (compilerVersionStop == -1)
+                    {
+                        return false;
+                    }
+
+                    return TryParseVersion(file, compilerVersionStart, compilerVersionStop - compilerVersionStart, out fileCompilerVersion);
+                }
+
+                public void CompleteLibraryAnalyzers()
+                {
+                    if (_maxApplicableVersion != null && _potentialAnalyzers?.Count > 0)
+                    {
+                        foreach (var (file, library, version) in _potentialAnalyzers)
+                        {
+                            if (version == _maxApplicableVersion)
+                            {
+                                WriteAnalyzer(file, library);
+                            }
+                        }
+                    }
+
+                    // clear the variables that are scoped per library
+                    _maxApplicableVersion = null;
+                    _potentialAnalyzers?.Clear();
+                }
+
+                private void WriteAnalyzer(string file, LockFileLibrary library)
+                {
+                    if (TargetLibraries.TryGetValue((library.Name, library.Version), out var targetLibrary))
+                    {
+                        _cacheWriter.WriteItem(_cacheWriter._packageResolver.ResolvePackageAssetPath(targetLibrary, file), targetLibrary);
+                    }
+                }
+
+                /// <summary>
+                /// Parses the <paramref name="compilerApiVersion"/> string into its component parts:
+                /// compilerName:, e.g. "roslyn"
+                /// compilerVersion: e.g. 3.9
+                /// </summary>
+                private static bool ParseCompilerApiVersion(string compilerApiVersion, out ReadOnlyMemory<char> compilerName, out Version compilerVersion)
+                {
+                    compilerName = default;
+                    compilerVersion = default;
+
+                    if (string.IsNullOrEmpty(compilerApiVersion))
+                    {
+                        return false;
+                    }
+
+                    int compilerVersionStart = -1;
+                    for (int i = 0; i < compilerApiVersion.Length; i++)
+                    {
+                        if (char.IsDigit(compilerApiVersion[i]))
+                        {
+                            compilerVersionStart = i;
+                            break;
+                        }
+                    }
+
+                    if (compilerVersionStart > 0)
+                    {
+                        if (TryParseVersion(compilerApiVersion, compilerVersionStart, out compilerVersion))
+                        {
+                            compilerName = compilerApiVersion.AsMemory(0, compilerVersionStart);
+                            return true;
+                        }
+                    }
+
+                    // didn't find a compiler name or version
+                    return false;
+                }
+
+                private static bool TryParseVersion(string value, int startIndex, out Version version) =>
+                    TryParseVersion(value, startIndex, value.Length - startIndex, out version);
+
+                private static bool TryParseVersion(string value, int startIndex, int length, out Version version)
+                {
+#if NET
+                    return Version.TryParse(value.AsSpan(startIndex, length), out version);
+#else
+                    return Version.TryParse(value.Substring(startIndex, length), out version);
+#endif
                 }
             }
 

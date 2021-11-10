@@ -66,6 +66,30 @@ namespace Microsoft.NET.Build.Tasks
         private List<ITaskItem> _r2rCompositeReferences = new List<ITaskItem>();
         private List<ITaskItem> _r2rCompositeInput = new List<ITaskItem>();
 
+        private bool IsTargetWindows
+        {
+            get
+            {
+                // Crossgen2 V6 and above always has TargetOS metadata available
+                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS))) 
+                    return Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "windows";
+                else
+                    return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            }
+        }
+
+        private bool IsTargetLinux
+        {
+            get
+            {
+                // Crossgen2 V6 and above always has TargetOS metadata available
+                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS))) 
+                    return Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "linux";
+                else
+                    return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+            }
+        }
+
         protected override void ExecuteCore()
         {
             if (ReadyToRunUseCrossgen2)
@@ -140,13 +164,13 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (EmitSymbols)
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && hasValidDiaSymReaderLib)
+                    if (IsTargetWindows && hasValidDiaSymReaderLib)
                     {
                         outputPDBImage = Path.ChangeExtension(outputR2RImage, "ni.pdb");
                         outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, "ni.pdb");
                         crossgen1CreatePDBCommand = $"/CreatePDB \"{Path.GetDirectoryName(outputPDBImage)}\"";
                     }
-                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    else if (IsTargetLinux)
                     {
                         string perfmapExtension;
                         if (ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5 && _perfmapFormatVersion >= 1)
@@ -246,12 +270,12 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     string compositePDBImage = null;
                     string compositePDBRelativePath = null;
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && hasValidDiaSymReaderLib)
+                    if (IsTargetWindows && hasValidDiaSymReaderLib)
                     {
                         compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.pdb");
                         compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.pdb");
                     }
-                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    else if (IsTargetLinux)
                     {
                         string perfmapExtension = (_perfmapFormatVersion >= 1 ? ".ni.r2rmap" : ".ni.{composite}.map");
                         compositePDBImage = Path.ChangeExtension(compositeR2RImage, perfmapExtension);

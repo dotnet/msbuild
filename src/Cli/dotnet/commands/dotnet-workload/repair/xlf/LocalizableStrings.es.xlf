@@ -4,22 +4,27 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Repair workload installations.</source>
-        <target state="needs-review-translation">Instalar herramienta global o local. Las herramientas locales se agregan al manifiesto y se restauran.</target>
+        <target state="translated">Reparar las instalaciones de cargas de trabajo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoWorkloadsToRepair">
+        <source>No workloads are installed, nothing to repair. Run `dotnet workload search` to find workloads to install.</source>
+        <target state="translated">No hay cargas de trabajo instaladas, no hay nada que reparar. Ejecute "dotnet workload search" para buscar las cargas de trabajo que se van a instalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="RepairSucceeded">
         <source>Successfully repaired workloads: {0}</source>
-        <target state="new">Successfully repaired workloads: {0}</target>
+        <target state="translated">Cargas de trabajo reparadas correctamente: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RepairingWorkloads">
         <source>Repairing workload installation for workloads: {0}</source>
-        <target state="new">Repairing workload installation for workloads: {0}</target>
+        <target state="translated">Reparando la instalación de carga de trabajo para las cargas de trabajo: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadRepairFailed">
         <source>Workload repair failed: {0}</source>
-        <target state="new">Workload repair failed: {0}</target>
+        <target state="translated">Error en la reparación de la carga de trabajo: {0}</target>
         <note />
       </trans-unit>
     </body>

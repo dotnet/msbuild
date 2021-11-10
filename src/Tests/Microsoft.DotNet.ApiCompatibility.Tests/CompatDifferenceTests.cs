@@ -43,6 +43,25 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         }
 
         [Fact]
+        public void IsEquatableWorksAsExpected()
+        {
+            CompatDifference difference = new(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:Foo");
+            CompatDifference otherEqual = new(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:Foo");
+            CompatDifference differentDiagId = new(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Removed, "T:Foo");
+            CompatDifference differentType = new(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:Foo");
+            CompatDifference differentMemberId = new(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:FooBar");
+            CompatDifference differentMessage = new(DiagnosticIds.TypeMustExist, "Hello", DifferenceType.Removed, "T:Foo");
+
+            Assert.False(difference.Equals(null));
+            Assert.True(difference.Equals(otherEqual));
+            Assert.True(difference.Equals((object)otherEqual));
+            Assert.False(difference.Equals(differentDiagId));
+            Assert.False(difference.Equals(differentType));
+            Assert.False(difference.Equals(differentMemberId));
+            Assert.True(difference.Equals(differentMessage));
+        }
+
+        [Fact]
         public void ConstructorThrowsExpected()
         {
             Assert.Throws<ArgumentNullException>("diagnosticId", () => new CompatDifference(null, string.Empty, DifferenceType.Added, string.Empty));
