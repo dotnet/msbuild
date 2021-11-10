@@ -30,7 +30,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetIntermediateDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputDirectory = buildCommand.GetIntermediateDirectory();
 
             outputDirectory.Should().HaveFile(globalUsingsFileName);
 
@@ -63,7 +63,7 @@ global using global::System.Threading.Tasks;
                 .Should()
                 .Fail();
 
-            var outputDirectory = buildCommand.GetIntermediateDirectory(ToolsetInfo.CurrentTargetFramework);
+            var outputDirectory = buildCommand.GetIntermediateDirectory();
 
             outputDirectory.Should().NotHaveFile(globalUsingsFileName);
         }
