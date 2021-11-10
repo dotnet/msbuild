@@ -82,7 +82,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
-        public virtual DirectoryInfo GetIntermediateDirectory(string targetFramework = ToolsetInfo.CurrentTargetFramework, string configuration = "Debug", string runtimeIdentifier = "")
+        public virtual DirectoryInfo GetIntermediateDirectory(string targetFramework, string configuration = "Debug", string runtimeIdentifier = "")
         {
             targetFramework = targetFramework ?? string.Empty;
             configuration = configuration ?? string.Empty;
