@@ -3,6 +3,7 @@
 
 #nullable enable
 using System;
+using System.Diagnostics;
 using System.Text;
 using Microsoft.Build.Shared;
 
@@ -53,6 +54,7 @@ namespace Microsoft.Build.BackEnd.Logging
             try
             {
                 StringBuilder sb = _reusedStringBuilder;
+                Debug.Assert(sb.Length == 0, "Something else is using _reusedStringBuilder. Please make sure this instance method is not called concurrently.");
                 sb.Length = 0;
                 // The string contains new lines, treat each new line as a different string to format and send to the console
                 while (j >= 0)
