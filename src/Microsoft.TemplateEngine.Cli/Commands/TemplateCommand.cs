@@ -27,7 +27,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             TemplateGroup templateGroup,
-            CliTemplateInfo template)
+            CliTemplateInfo template,
+            bool buildDefaultLanguageValidation = false)
             : base(
                   templateGroup.ShortNames[0],
                   template.Name + Environment.NewLine + template.Description)
@@ -50,14 +51,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(AllowScriptsOption);
 
             string? templateLanguage = template.GetLanguage();
-
+            string? defaultLanguage = environmentSettings.GetDefaultLanguage();
             if (!string.IsNullOrWhiteSpace(templateLanguage))
             {
                 LanguageOption = SharedOptionsFactory.CreateLanguageOption();
                 LanguageOption.FromAmong(templateLanguage);
-                if (templateGroup.Languages.Count > 1)
+
+                if (!string.IsNullOrWhiteSpace(defaultLanguage)
+                     && buildDefaultLanguageValidation)
                 {
-                    LanguageOption.SetDefaultValue(environmentSettings.GetDefaultLanguage());
+                    LanguageOption.SetDefaultValue(defaultLanguage);
                     LanguageOption.AddValidator(optionResult =>
                     {
                         var value = optionResult.GetValueOrDefault<string>();

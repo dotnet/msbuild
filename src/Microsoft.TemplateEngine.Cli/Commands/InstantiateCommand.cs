@@ -8,6 +8,7 @@ using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -69,24 +70,35 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 TemplatePackageManager templatePackageManager,
                 TemplateGroup templateGroup)
         {
+            //groups templates in the group by precedence
             foreach (IGrouping<int, CliTemplateInfo> templateGrouping in templateGroup.Templates.GroupBy(g => g.Precedence).OrderByDescending(g => g.Key))
             {
-                HashSet<TemplateCommand> candidates = new HashSet<TemplateCommand>();
-                foreach (CliTemplateInfo template in templateGrouping)
-                {
-                    TemplateCommand command = new TemplateCommand(this, environmentSettings, templatePackageManager, templateGroup, template);
-                    Parser parser = ParserFactory.CreateTemplateParser(command);
-                    ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-                    if (!parseResult.Errors.Any())
-                    {
-                        candidates.Add(command);
-                    }
-                }
+                HashSet<TemplateCommand> candidates = ReparseForTemplate(
+                    args,
+                    environmentSettings,
+                    templatePackageManager,
+                    templateGroup,
+                    templateGrouping,
+                    out bool languageOptionSpecified);
+
+                //if no candidates continue with next precedence
                 if (!candidates.Any())
                 {
                     continue;
                 }
-                return candidates;
+                //if language option is not specified, we do not need to do reparsing for default language
+                if (languageOptionSpecified || string.IsNullOrWhiteSpace(environmentSettings.GetDefaultLanguage()))
+                {
+                    return candidates;
+                }
+
+                // try to reparse for default language
+                return ReparseForDefaultLanguage(
+                    args,
+                    environmentSettings,
+                    templatePackageManager,
+                    templateGroup,
+                    candidates);
             }
             return new HashSet<TemplateCommand>();
         }
@@ -177,6 +189,63 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         }
 
         private NewCommandStatus HandleAmbuguousResult() => throw new NotImplementedException();
+
+        private HashSet<TemplateCommand> ReparseForTemplate(
+            InstantiateCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            TemplateGroup templateGroup,
+            IEnumerable<CliTemplateInfo> templatesToReparse,
+            out bool languageOptionSpecified)
+        {
+            languageOptionSpecified = false;
+            HashSet<TemplateCommand> candidates = new HashSet<TemplateCommand>();
+            foreach (CliTemplateInfo template in templatesToReparse)
+            {
+                TemplateCommand command = new TemplateCommand(this, environmentSettings, templatePackageManager, templateGroup, template);
+                Parser parser = ParserFactory.CreateTemplateParser(command);
+                ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
+
+                languageOptionSpecified = command.LanguageOption != null
+                    && parseResult.FindResultFor(command.LanguageOption) != null;
+                if (!parseResult.Errors.Any())
+                {
+                    candidates.Add(command);
+                }
+            }
+            return candidates;
+        }
+
+        private HashSet<TemplateCommand> ReparseForDefaultLanguage(
+            InstantiateCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            TemplateGroup templateGroup,
+            HashSet<TemplateCommand> candidates)
+        {
+            HashSet<TemplateCommand> languageAwareCandidates = new HashSet<TemplateCommand>();
+            foreach (var templateCommand in candidates)
+            {
+                TemplateCommand command = new TemplateCommand(
+                    this,
+                    environmentSettings,
+                    templatePackageManager,
+                    templateGroup,
+                    templateCommand.Template,
+                    buildDefaultLanguageValidation: true);
+                Parser parser = ParserFactory.CreateTemplateParser(command);
+                ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
+
+                if (!parseResult.Errors.Any())
+                {
+                    languageAwareCandidates.Add(command);
+                }
+            }
+            return languageAwareCandidates.Any()
+                ? languageAwareCandidates
+                : candidates;
+        }
+
     }
 
     internal class InstantiateCommandArgs : GlobalArgs
