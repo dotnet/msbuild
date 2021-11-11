@@ -161,8 +161,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        private static ArgumentArity GetOptionArity(CliTemplateParameter parameter) => new ArgumentArity(parameter.IsRequired ? 1 : 0, 1);
-
         private HashSet<string> GetReservedAliases()
         {
             HashSet<string> reservedAliases = new HashSet<string>();
@@ -170,8 +168,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 reservedAliases.Add(alias);
             }
+            foreach (string alias in this.Children.OfType<Command>().SelectMany(o => o.Aliases))
+            {
+                reservedAliases.Add(alias);
+            }
             //add options of parent? - this covers debug: options
-            foreach (string alias in _instantiateCommand.SelectMany(p => p.Children).OfType<Option>().SelectMany(o => o.Aliases))
+            foreach (string alias in _instantiateCommand.Children.OfType<Option>().SelectMany(o => o.Aliases))
+            {
+                reservedAliases.Add(alias);
+            }
+            foreach (string alias in _instantiateCommand.Children.OfType<Command>().SelectMany(o => o.Aliases))
             {
                 reservedAliases.Add(alias);
             }
@@ -199,27 +205,34 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 {
                     ParameterType.Boolean => new Option<bool>(aliases.ToArray())
                     {
-                        Arity = GetOptionArity(parameter),
+                        Arity = new ArgumentArity(0, 1)
                     },
                     ParameterType.Integer => new Option<int>(aliases.ToArray())
                     {
-                        Arity = GetOptionArity(parameter),
+                        Arity = new ArgumentArity(1, 1)
                     },
                     ParameterType.String => new Option<string>(aliases.ToArray())
                     {
-                        Arity = GetOptionArity(parameter),
+                        Arity = new ArgumentArity(1, 1)
                     },
                     ParameterType.Choice => CreateChoiceOption(parameter, aliases),
                     ParameterType.Float => new Option<float>(aliases.ToArray())
                     {
-                        Arity = GetOptionArity(parameter),
+                        Arity = new ArgumentArity(1, 1)
                     },
                     ParameterType.Hex => CreateHexOption(parameter, aliases),
                     _ => throw new Exception($"Unexpected value for {nameof(ParameterType)}: {parameter.Type}.")
                 };
                 option.IsHidden = parameter.IsHidden;
                 option.IsRequired = parameter.IsRequired;
-                option.SetDefaultValue(parameter.DefaultValue);
+                if (!string.IsNullOrWhiteSpace(parameter.DefaultValue))
+                {
+                    option.SetDefaultValue(parameter.DefaultValue);
+                }
+                if (parameter.Type == ParameterType.String && parameter.DefaultValue != null)
+                {
+                    option.SetDefaultValue(parameter.DefaultValue);
+                }
                 option.Description = parameter.Description;
 
                 this.AddOption(option);
@@ -234,7 +247,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             Option option = new Option<string>(aliases.ToArray())
             {
-                Arity = GetOptionArity(parameter),
+                Arity = new ArgumentArity(1, 1)
             };
             if (parameter.Choices != null)
             {
