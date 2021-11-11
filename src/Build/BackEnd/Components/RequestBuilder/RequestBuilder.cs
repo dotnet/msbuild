@@ -1363,12 +1363,10 @@ namespace Microsoft.Build.BackEnd
             ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
             if (project != null)
             {
-                //example: C:\Users\USER_NAME\.nuget\;C:\Program Files\dotnet\sdk\NuGetFallbackFolder
-                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("NuGetPackageFolders")?.Trim());
                 // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
-                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("FrameworkPathOverride")?.Trim());
+                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("FrameworkPathOverride")?.Trim());
                 // example: C:\Program Files\dotnet\
-                FileClassifier.Shared.RegisterImmutableDirectories(project.GetPropertyValue("NetCoreRoot")?.Trim());
+                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("NetCoreRoot")?.Trim());
             }
         }
 

@@ -44,11 +44,6 @@ namespace Microsoft.Build.Framework
         private static readonly StringComparison PathComparison = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
         /// <summary>
-        ///     Single, static instance of an array that contains a semi-colon ';', which is used to split strings.
-        /// </summary>
-        private static readonly char[] s_semicolonDelimiter = {';'};
-
-        /// <summary>
         ///     Single, static <see cref="Lazy{T}"/> instance of shared file FileClassifier for <see cref="Shared"/> member.
         /// </summary>
         private static readonly Lazy<FileClassifier> s_sharedInstance = new(() => new FileClassifier());
@@ -71,15 +66,14 @@ namespace Microsoft.Build.Framework
         ///     Creates default FileClassifier which following immutable folders:
         ///     Classifications provided are:
         ///     <list type="number">
-        ///         <item>Program Files</item>
-        ///         <item>Program Files (x86)</item>
-        ///         <item>Default .nuget cache location</item>
+        ///         <item>Program Files\Reference Assemblies\Microsoft</item>
+        ///         <item>Program Files (x86)\Reference Assemblies\Microsoft</item>
         ///         <item>Visual Studio installation root</item>
         ///     </list>
         /// </summary>
         /// <remarks>
         ///     Individual projects NuGet folders are added during project build by calling
-        ///     <see cref="RegisterImmutableDirectories" />
+        ///     <see cref="RegisterImmutableDirectory" />
         /// </remarks>
         public FileClassifier()
         {
@@ -90,11 +84,11 @@ namespace Microsoft.Build.Framework
             {
                 RegisterImmutableDirectory(Path.Combine(programFiles32, "Reference Assemblies", "Microsoft"));
             }
+
             if (!string.IsNullOrEmpty(programFiles64))
             {
                 RegisterImmutableDirectory(Path.Combine(programFiles64, "Reference Assemblies", "Microsoft"));
             }
-            RegisterImmutableDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"));
 
 #if !RUNTIME_TYPE_NETCORE
             RegisterImmutableDirectory(GetVSInstallationDirectory());
@@ -156,9 +150,11 @@ namespace Microsoft.Build.Framework
                 static string GetFolderAbove(string path, int count = 1)
                 {
                     if (count < 1)
+                    {
                         return path;
+                    }
 
-                    var parent = Directory.GetParent(path);
+                    DirectoryInfo? parent = Directory.GetParent(path);
 
                     while (count > 1 && parent?.Parent != null)
                     {
@@ -178,29 +174,14 @@ namespace Microsoft.Build.Framework
         public static FileClassifier Shared => s_sharedInstance.Value;
 
         /// <summary>
-        ///     Try add paths found into set of known immutable paths.
-        ///     Project files under any of these folders are considered non-modifiable.
+        ///     Try add path into set of known immutable paths.
+        ///     Files under any of these folders are considered non-modifiable.
         /// </summary>
         /// <remarks>
         ///     This value is used by <see cref="IsNonModifiable" />.
         ///     Files in the NuGet package cache are not expected to change over time, once they are created.
         /// </remarks>
-        /// <remarks>
-        ///     Example value: <c>"C:\Users\myusername\.nuget\;D:\LocalNuGetCache\"</c>
-        /// </remarks>
-        public void RegisterImmutableDirectories(string? nuGetPackageFolders)
-        {
-            if (nuGetPackageFolders?.Length > 0)
-            {
-                string[] folders = nuGetPackageFolders.Split(s_semicolonDelimiter, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string folder in folders)
-                {
-                    RegisterImmutableDirectory(folder);
-                }
-            }
-        }
-
-        private void RegisterImmutableDirectory(string? directory)
+        public void RegisterImmutableDirectory(string? directory)
         {
             if (directory?.Length > 0)
             {
@@ -240,7 +221,9 @@ namespace Microsoft.Build.Framework
             for (int i = 0; i < immutableDirectories.Count; i++)
             {
                 if (filePath.StartsWith(immutableDirectories[i], PathComparison))
+                {
                     return true;
+                }
             }
 
             return false;

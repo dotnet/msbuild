@@ -425,9 +425,9 @@ namespace Microsoft.Build.Evaluation
 
                     // Register toolset paths into list of immutable directories
                     //   example: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
-                    FileClassifier.Shared.RegisterImmutableDirectories(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
+                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
                     //   example:  C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
-                    FileClassifier.Shared.RegisterImmutableDirectories(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
+                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
 
                     if (toolset != null)
                     {
