@@ -347,12 +347,17 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             File.Exists(Path.Combine(rc1InstallRecordPath, existingWorkload))
                 .Should().BeTrue();
 
+            // Assert that packs have been installed
             var packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
             packRecordDirs.Count().Should().Be(3);
-            var featureBandRecords = Directory.GetFiles(Directory.GetDirectories(packRecordDirs[0])[0]);
-            featureBandRecords.Count().Should().Be(2);
             var installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
             installPacks.Count().Should().Be(2);
+
+            // Assert feature band records are correct
+            var featureBandRecords = Directory.GetFiles(Directory.GetDirectories(packRecordDirs[0])[0]);
+            featureBandRecords.Count().Should().Be(2);
+            featureBandRecords.Select(recordPath => Path.GetFileName(recordPath))
+                .Should().BeEquivalentTo(new string[] { prev7FormattedFeatureVersion, rc1FormattedFeatureVersion });
         }
 
         private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(

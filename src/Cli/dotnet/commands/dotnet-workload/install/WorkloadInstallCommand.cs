@@ -107,17 +107,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var availableWorkloads = _workloadResolver.GetAvailableWorkloads();
             foreach (var workloadId in _workloadIds)
             {
-               if (!availableWorkloads.Select(workload => workload.Id.ToString()).Contains(workloadId))
-               {
-                   if (_workloadResolver.IsPlatformIncompatibleWorkload(new WorkloadId(workloadId)))
-                   {
-                       throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotSupportedOnPlatform, workloadId), isUserError: false);
-                   }
-                   else
-                   {
-                       throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotRecognized, workloadId), isUserError: false);
-                   }
-               }
+                if (!availableWorkloads.Select(workload => workload.Id.ToString()).Contains(workloadId))
+                {
+                    if (_workloadResolver.IsPlatformIncompatibleWorkload(new WorkloadId(workloadId)))
+                    {
+                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotSupportedOnPlatform, workloadId), isUserError: false);
+                    }
+                    else
+                    {
+                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotRecognized, workloadId), isUserError: false);
+                    }
+                }
             }
         }
 

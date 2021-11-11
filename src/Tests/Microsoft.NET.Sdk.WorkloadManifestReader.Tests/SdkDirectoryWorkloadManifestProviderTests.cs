@@ -276,7 +276,7 @@ namespace ManifestReaderTests
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("6.0.100", "5.0.100");
+                .BeEquivalentTo("6.0.100/iOS", "5.0.100/Android");
         }
 
         [Fact]
@@ -298,16 +298,17 @@ namespace ManifestReaderTests
             CreateMockManifest(fakeDotnetRootDirectory, "7.0.100", "Android");
             CreateMockManifest(fakeDotnetRootDirectory, "7.0.100", "iOS");
 
-            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", "6.0.100-preview.4.12345", "IncludedWorkloadManifests.txt");
+            var prev4Version = "6.0.100-preview.4.12345";
+            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", prev4Version, "IncludedWorkloadManifests.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: fakeDotnetRootDirectory, sdkVersion: "6.0.100-preview.4.12345", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: fakeDotnetRootDirectory, sdkVersion: prev4Version, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("4.0.100", "5.0.100");
+                .BeEquivalentTo("6.0.100-preview.2/iOS", "5.0.100/Android");
         }
 
         [Fact]
@@ -329,16 +330,17 @@ namespace ManifestReaderTests
             // Write 6.0.100 manifests-> android
             CreateMockManifest(fakeDotnetRootDirectory, "6.0.100", "Android");
 
-            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", "6.0.100-preview.4.12345", "IncludedWorkloadManifests.txt");
+            var prev4Version = "6.0.100-preview.4.12345";
+            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", prev4Version, "IncludedWorkloadManifests.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: fakeDotnetRootDirectory, sdkVersion: "6.0.100-preview.4.12345", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: fakeDotnetRootDirectory, sdkVersion: prev4Version, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("6.0.100-preview.4", "6.0.100");
+                .BeEquivalentTo("6.0.100-preview.4/iOS", "6.0.100/Android");
         }
 
         private void CreateMockManifest(string rootDir, string version, string manifestId)
@@ -352,7 +354,7 @@ namespace ManifestReaderTests
             {
                 Directory.CreateDirectory(Path.Combine(manifestDirectory, manifestId));
             }
-            File.WriteAllText(Path.Combine(manifestDirectory, manifestId, "WorkloadManifest.json"), version);
+            File.WriteAllText(Path.Combine(manifestDirectory, manifestId, "WorkloadManifest.json"), $"{version}/{manifestId}");
         }
 
         [Fact]
