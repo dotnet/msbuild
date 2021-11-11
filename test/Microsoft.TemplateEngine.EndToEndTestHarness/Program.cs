@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -59,7 +60,10 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             host.VirtualizeDirectory(hivePath);
             host.VirtualizeDirectory(outputPath);
 
-            int result = NewCommandFactory.Create(CommandName, host, new TelemetryLogger(null), new NewCommandCallbacks()).Invoke(passthroughArgs);
+            var command = NewCommandFactory.Create(CommandName, host, new TelemetryLogger(null), new NewCommandCallbacks());
+
+            int result = ParserFactory.CreateParser(command).Parse(passthroughArgs).Invoke();
+
             bool verificationsPassed = false;
 
             for (int i = 0; i < batteryCount; ++i)
