@@ -38,6 +38,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 command = (parseResult.CommandResult.Parent as CommandResult)?.Command;
             }
+
+            //if new command is not found, search for instantiate command
+            //in instantiation workflow via new command (dotnet new template) NewCommand is replaced by InstantiateCommand
+            if (string.IsNullOrWhiteSpace(command?.Name))
+            {
+                command = parseResult.CommandResult.Command;
+                while (command != null && command is not InstantiateCommand)
+                {
+                    command = (parseResult.CommandResult.Parent as CommandResult)?.Command;
+                }
+            }
             return command?.Name ?? string.Empty;
         }
     }
