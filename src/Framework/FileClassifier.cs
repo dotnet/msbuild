@@ -234,9 +234,8 @@ namespace Microsoft.Build.Framework
         /// <returns><see langword="true" /> if the file is non-modifiable, otherwise <see langword="false" />.</returns>
         public bool IsNonModifiable(string filePath)
         {
-            // In order to have allocation-less iteration we can not use nor foreach neither linq.Any.
-            // We shall copy reference of _knownImmutableDirectoriesSnapshot into local variable as otherwise
-            // it could be changed during for loop enumeration by other thread.
+            // Avoid a foreach loop or linq.Any because they allocate.
+            // Copy _knownImmutableDirectoriesSnapshot into a local variable so other threads can't modify it during enumeration.
             IReadOnlyList<string> immutableDirectories = _knownImmutableDirectoriesSnapshot;
             for (int i = 0; i < immutableDirectories.Count; i++)
             {
