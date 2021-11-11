@@ -368,6 +368,29 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             string.Join(" ", _reporter.Lines).Should().Contain("Invalid rollback definition");
         }
 
+        [Fact]
+        public void GivenWorkloadInstallItErrorsWhenTheWorkloadIsAlreadyInstalled()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            var tmpDir = Path.Combine(testDirectory, "tmp");
+            var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), dotnetRoot, false, userProfileDir);
+            var manifestUpdater = new MockWorkloadManifestUpdater();
+            var sdkFeatureVersion = "6.0.100";
+            var workloadId = "mock-1";
+            // Successfully install a workload
+            var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", workloadId });
+            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            installCommand.Execute();
+
+            // Install again, this time it should tell you that you already have the workload installed
+            var exceptionThrown = Assert.Throws<GracefulException>(() => installCommand.Execute());
+            exceptionThrown.Message.Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadAlreadyInstalled, workloadId));
+        }
+
         private string AppendForUserLocal(string identifier, bool userLocal)
         {
             if (!userLocal)

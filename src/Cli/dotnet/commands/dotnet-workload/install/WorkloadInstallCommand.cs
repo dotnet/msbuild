@@ -175,7 +175,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 // Update currently installed workloads
                 var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(_sdkFeatureBand);
-                workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
+                var previouslyInstalledWorkloads = installedWorkloads.Intersect(workloadIds);
+                if (previouslyInstalledWorkloads.Any())
+                {
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadAlreadyInstalled, string.Join(" ", previouslyInstalledWorkloads)));
+                }
+                workloadIds = workloadIds.Concat(installedWorkloads);
 
                 _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
                 manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?
