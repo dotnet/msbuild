@@ -15,6 +15,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new CommandLineBuilder(command)
             .UseHelp()
+            .UseParseErrorReporting()
             .UseParseDirective()
             .UseSuggestDirective()
             .DisablePosixBinding()
@@ -24,6 +25,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal static Parser CreateParser(Command command)
         {
             return new CommandLineBuilder(command)
+            .UseParseErrorReporting()
             .DisablePosixBinding()
             .Build();
         }

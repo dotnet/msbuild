@@ -5,6 +5,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Builder;
+using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 
 namespace Dotnet_new3
@@ -18,7 +19,15 @@ namespace Dotnet_new3
             //.UseLocalizationResources(new CommandLineValidationMessages())
             .UseParseDirective()
             .UseSuggestDirective()
-            .DisablePosixBinding();
+            .UseParseErrorReporting()//TODO: discuss with SDK if it is possible to use it.
+            //TODO: implement when help is done
+            //.UseHelpBuilder((context) =>
+            //{
+            //    var hb = new HelpBuilder(LocalizationResources.Instance);
+            //    hb.Customize(command, (result) => )
+            //    return hb;
+            // })
+            .DisablePosixBundling();
 
             if (!disableHelp)
             {
@@ -28,7 +37,7 @@ namespace Dotnet_new3
             return builder.Build();
         }
 
-        private static CommandLineBuilder DisablePosixBinding(this CommandLineBuilder builder)
+        private static CommandLineBuilder DisablePosixBundling(this CommandLineBuilder builder)
         {
             builder.EnablePosixBundling = false;
             return builder;

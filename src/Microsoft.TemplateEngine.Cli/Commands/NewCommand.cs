@@ -81,7 +81,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             InstantiateCommand command = InstantiateCommand.FromNewCommand(this);
-            ParseResult reparseResult = ParserFactory.CreateTemplateParser(command).Parse(args.Tokens);
+            ParseResult reparseResult = ParserFactory.CreateParser(command).Parse(args.Tokens);
             return command.ExecuteAsync(reparseResult, environmentSettings, context);
         }
 
