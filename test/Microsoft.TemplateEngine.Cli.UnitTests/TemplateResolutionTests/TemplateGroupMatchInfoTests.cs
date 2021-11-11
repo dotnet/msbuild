@@ -172,7 +172,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             };
         }
 
-        [Theory(DisplayName = nameof(GetInvalidParametersTest))]
+#pragma warning disable xUnit1004 // Test methods should not be skipped
+        [Theory(DisplayName = nameof(GetInvalidParametersTest), Skip = "Test is not migrated yet.")]
+#pragma warning restore xUnit1004 // Test methods should not be skipped
         [MemberData(nameof(GetInvalidParametersTestData))]
         internal async Task GetInvalidParametersTest(MockNewCommandInput command, MockTemplateInfo[] templates, MockInvalidParameterInfo[] expectedInvalidParams)
         {

@@ -796,6 +796,12 @@ Examples:
                     continue;
                 }
 
+                // tags can be shortened so the tag criteria might be truncated.
+                if (columnsNames.Contains("Tags") && tableOutput[i][tableOutput[0].IndexOf("Tags")].EndsWith("..."))
+                {
+                    continue;
+                }
+
                 // if columns are template name and/or short name and they are empty - skip, grouping in done
                 bool criteriaA = columnsNames.Contains("Template Name")
                     && string.IsNullOrWhiteSpace(tableOutput[i][tableOutput[0].IndexOf("Template Name")])

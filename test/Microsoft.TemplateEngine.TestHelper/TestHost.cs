@@ -80,11 +80,20 @@ namespace Microsoft.TemplateEngine.TestHelper
         public static ITemplateEngineHost GetVirtualHost(
             [CallerMemberName] string hostIdentifier = "",
             IEnvironment? environment = null,
-            IReadOnlyList<(Type, IIdentifiedComponent)>? additionalComponents = null)
+            IReadOnlyList<(Type, IIdentifiedComponent)>? additionalComponents = null,
+            IReadOnlyDictionary<string, string>? defaultParameters = null)
         {
-            ITemplateEngineHost host = new TestHost(hostIdentifier: hostIdentifier, additionalComponents: additionalComponents);
+            TestHost host = new TestHost(hostIdentifier: hostIdentifier, additionalComponents: additionalComponents);
             environment = environment ?? new DefaultEnvironment();
-            host.VirtualizeDirectory(new DefaultPathInfo(environment, host).GlobalSettingsDir);
+            
+            if (defaultParameters != null)
+            {
+                foreach (var parameter in defaultParameters)
+                {
+                    host.HostParamDefaults[parameter.Key] = parameter.Value;
+                }
+            }
+            ((ITemplateEngineHost)host).VirtualizeDirectory(new DefaultPathInfo(environment, host).GlobalSettingsDir);
             return host;
         }
 
