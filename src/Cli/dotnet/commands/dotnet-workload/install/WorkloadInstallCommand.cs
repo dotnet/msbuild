@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var previouslyInstalledWorkloads = installedWorkloads.Intersect(workloadIds);
                 if (previouslyInstalledWorkloads.Any())
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadAlreadyInstalled, string.Join(" ", previouslyInstalledWorkloads)));
+                    _reporter.WriteLine(string.Format(LocalizableStrings.WorkloadAlreadyInstalled, string.Join(" ", previouslyInstalledWorkloads)).Yellow());
                 }
                 workloadIds = workloadIds.Concat(installedWorkloads);
 

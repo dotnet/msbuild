@@ -380,15 +380,17 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var sdkFeatureVersion = "6.0.100";
             var workloadId = "mock-1";
+
             // Successfully install a workload
             var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", workloadId });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
                 workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             installCommand.Execute();
+            _reporter.Clear();
 
             // Install again, this time it should tell you that you already have the workload installed
-            var exceptionThrown = Assert.Throws<GracefulException>(() => installCommand.Execute());
-            exceptionThrown.Message.Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadAlreadyInstalled, workloadId));
+            installCommand.Execute();
+            string.Join(" ", _reporter.Lines).Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadAlreadyInstalled, workloadId));
         }
 
         private string AppendForUserLocal(string identifier, bool userLocal)
