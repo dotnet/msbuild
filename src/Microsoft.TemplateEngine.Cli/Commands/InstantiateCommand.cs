@@ -21,7 +21,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
-            this.AddOption(HelpOption);
             IsHidden = true;
         }
 
@@ -30,7 +29,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             _parentCommand = parentCommand;
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
-            this.AddOption(HelpOption);
         }
 
         internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
@@ -41,11 +39,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
         {
             Arity = new ArgumentArity(0, 999)
-        };
-
-        internal Option HelpOption { get; } = new Option(new string[] { "-h", "--help", "-?" })
-        {
-            IsHidden = true
         };
 
         internal static InstantiateCommand FromNewCommand(NewCommand parentCommand)
@@ -254,7 +247,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             RemainingArguments = parseResult.GetValueForArgument(command.RemainingArguments) ?? Array.Empty<string>();
             ShortName = parseResult.GetValueForArgument(command.ShortNameArgument);
-            HelpRequested = parseResult.GetValueForOption<bool>(command.HelpOption);
 
             var tokens = new List<string>();
             if (!string.IsNullOrWhiteSpace(ShortName))
@@ -262,10 +254,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 tokens.Add(ShortName);
             }
             tokens.AddRange(RemainingArguments);
-            if (HelpRequested)
-            {
-                tokens.Add(command.HelpOption.Aliases.First());
-            }
             TokensToInvoke = tokens.ToArray();
 
         }
