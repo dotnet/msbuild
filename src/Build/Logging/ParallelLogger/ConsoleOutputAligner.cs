@@ -51,29 +51,22 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             int i = 0;
             int j = message.IndexOfAny(MSBuildConstants.CrLf);
-            try
-            {
-                StringBuilder sb = _reusedStringBuilder;
-                Debug.Assert(sb.Length == 0, "Something else is using _reusedStringBuilder. Please make sure this instance method is not called concurrently.");
-                sb.Length = 0;
-                // The string contains new lines, treat each new line as a different string to format and send to the console
-                while (j >= 0)
-                {
-                    AlignAndIndentLineOfMessage(sb, prefixAlreadyWritten, prefixWidth, message, i, j - i);
-                    i = j + (message[j] == '\r' ? 2 : 1);
-                    j = i < message.Length ? message.IndexOfAny(MSBuildConstants.CrLf, i) : -1;
-                }
 
-                // Process rest of message
-                AlignAndIndentLineOfMessage(sb, prefixAlreadyWritten, prefixWidth, message, i, message.Length - i);
-
-                return sb.ToString();
-            }
-            finally
+            StringBuilder sb = _reusedStringBuilder;
+            Debug.Assert(sb.Length == 0, "Something else is using _reusedStringBuilder. Please make sure this instance method is not called concurrently.");
+            sb.Length = 0;
+            // The string contains new lines, treat each new line as a different string to format and send to the console
+            while (j >= 0)
             {
-                // prepare for reuse
-                _reusedStringBuilder.Length = 0;
+                AlignAndIndentLineOfMessage(sb, prefixAlreadyWritten, prefixWidth, message, i, j - i);
+                i = j + (message[j] == '\r' && (j + 1) < message.Length && message[j + 1] == '\n' ? 2 : 1);
+                j = i < message.Length ? message.IndexOfAny(MSBuildConstants.CrLf, i) : -1;
             }
+
+            // Process rest of message
+            AlignAndIndentLineOfMessage(sb, prefixAlreadyWritten, prefixWidth, message, i, message.Length - i);
+
+            return sb.ToString();
         }
 
         /// <summary>

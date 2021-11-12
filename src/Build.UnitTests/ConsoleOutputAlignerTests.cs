@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("a\nb")]
         [InlineData("12345\n54321")]
         [InlineData("\t12345\n\t54321")]
-        public void MultiLineWithoutAlign_NoChange(string input)
+        public void MultiLineWithoutAlign_NotChanged(string input)
         {
             input = input.Replace("\n", Environment.NewLine);
             var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: false);
@@ -148,6 +148,20 @@ namespace Microsoft.Build.UnitTests
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 0);
 
             output.ShouldBe(input + Environment.NewLine);
+        }
+
+        [Theory]
+        [InlineData("a\n\rb")]
+        [InlineData("a\rb")]
+        [InlineData("\n\ra")]
+        [InlineData("\ra")]
+        [InlineData("a\nb\n\r")]
+        [InlineData("a\nb\r")]
+        public void NonStandardNewLines_DoNotCrash(string input)
+        {
+            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: false);
+
+            string _ = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 0);
         }
 
         [Theory]
