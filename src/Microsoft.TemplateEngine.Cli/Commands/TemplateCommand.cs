@@ -5,6 +5,8 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using System.Globalization;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Cli.Extensions;
@@ -190,6 +192,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 reservedAliases.Add(alias);
             }
+
+            //TODO: is it possible to get list of aliases for help?
+            reservedAliases.Add("-h");
+            reservedAliases.Add("--help");
+
             return reservedAliases;
         }
 
@@ -198,7 +205,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IList<Option> paramOptionList = new List<Option>();
             HashSet<string> initiallyTakenAliases = GetReservedAliases();
             IEnumerable<CliTemplateParameter> parameters = templateInfo.GetParameters();
-
             //TODO: handle errors
             var parametersWithAliasAssignments = AliasAssignmentCoordinator.AssignAliasesForParameter(parameters, initiallyTakenAliases);
 
@@ -210,20 +216,31 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     {
                         Arity = new ArgumentArity(0, 1)
                     },
-                    ParameterType.Integer => new Option<int>(aliases.ToArray())
+                    ParameterType.Integer => new Option<long>(
+                        aliases.ToArray(),
+                        parseArgument: result => GetParseArgument(parameter, ConvertValueToInt)(result))
                     {
-                        Arity = new ArgumentArity(1, 1)
+                        Arity = new ArgumentArity(0, 1)
                     },
-                    ParameterType.String => new Option<string>(aliases.ToArray())
+                    ParameterType.String => new Option<string>(
+                        aliases.ToArray(),
+                        parseArgument: result => GetParseArgument(parameter, ConvertValueToString)(result))
                     {
-                        Arity = new ArgumentArity(1, 1)
+                        Arity = new ArgumentArity(0, 1)
                     },
                     ParameterType.Choice => CreateChoiceOption(parameter, aliases),
-                    ParameterType.Float => new Option<float>(aliases.ToArray())
+                    ParameterType.Float => new Option<double>(
+                        aliases.ToArray(),
+                        parseArgument: result => GetParseArgument(parameter, ConvertValueToFloat)(result))
                     {
-                        Arity = new ArgumentArity(1, 1)
+                        Arity = new ArgumentArity(0, 1)
                     },
-                    ParameterType.Hex => CreateHexOption(parameter, aliases),
+                    ParameterType.Hex => new Option<long>(
+                       aliases.ToArray(),
+                       parseArgument: result => GetParseArgument(parameter, ConvertValueToHex)(result))
+                    {
+                        Arity = new ArgumentArity(0, 1)
+                    },
                     _ => throw new Exception($"Unexpected value for {nameof(ParameterType)}: {parameter.Type}.")
                 };
                 option.IsHidden = parameter.IsHidden;
@@ -243,14 +260,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        //TODO
-        private Option CreateHexOption(CliTemplateParameter parameter, IEnumerable<string> aliases) => throw new NotImplementedException();
-
         private Option CreateChoiceOption(CliTemplateParameter parameter, IEnumerable<string> aliases)
         {
-            Option option = new Option<string>(aliases.ToArray())
+            Option option = new Option<string>(
+                aliases.ToArray(),
+                parseArgument: result => GetParseChoiceArgument(parameter)(result))
             {
-                Arity = new ArgumentArity(1, 1)
+                Arity = new ArgumentArity(0, 1)
             };
             if (parameter.Choices != null)
             {
@@ -259,5 +275,192 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return option;
         }
 
+        private ParseArgument<T> GetParseArgument<T>(CliTemplateParameter parameter, Func<string?, (bool, T)> convert)
+        {
+            return (argumentResult) =>
+            {
+                if (argumentResult.Parent is not OptionResult or)
+                {
+                    throw new NotSupportedException("The method should be only used with option.");
+                }
+
+                if (argumentResult.Tokens.Count == 0)
+                {
+                    if (or.IsImplicit)
+                    {
+                        if (parameter.DefaultValue != null)
+                        {
+                            (bool parsed, T value) = convert(parameter.DefaultValue);
+                            if (parsed)
+                            {
+                                return value;
+                            }
+                            argumentResult.ErrorMessage = $"Cannot parse default value '{parameter.DefaultValue}' for option '{or.Token?.Value}' as expected type {typeof(T).Name}.";
+                            //https://github.com/dotnet/command-line-api/blob/5eca6545a0196124cc1a66d8bd43db8945f1f1b7/src/System.CommandLine/Argument%7BT%7D.cs#L99-L113
+                            //TODO: system-command-line can handle null.
+                            return default!;
+                        }
+                        argumentResult.ErrorMessage = $"Default value for argument missing for option: {or.Token?.Value}.";
+                        return default!;
+                    }
+                    if (parameter.DefaultIfOptionWithoutValue != null)
+                    {
+                        (bool parsed, T value) = convert(parameter.DefaultIfOptionWithoutValue);
+                        if (parsed)
+                        {
+                            return value;
+                        }
+                        argumentResult.ErrorMessage = $"Cannot parse default if option without value '{parameter.DefaultIfOptionWithoutValue}' for option '{or.Token?.Value}' as expected type {typeof(T).Name}.";
+                        return default!;
+                    }
+                    argumentResult.ErrorMessage = $"Required argument missing for option: {or.Token?.Value}.";
+                    return default!;
+                }
+                else if (argumentResult.Tokens.Count == 1)
+                {
+                    (bool parsed, T value) = convert(argumentResult.Tokens[0].Value);
+                    if (parsed)
+                    {
+                        return value;
+                    }
+                    argumentResult.ErrorMessage = $"Cannot parse argument '{argumentResult.Tokens[0].Value}' for option '{or.Token?.Value}' as expected type {typeof(T).Name}.";
+                    return default!;
+                }
+                else
+                {
+                    argumentResult.ErrorMessage = $"Using more than 1 argument is not allowed for '{or.Token?.Value}', used: {argumentResult.Tokens.Count}.";
+                    return default!;
+                }
+            };
+        }
+
+        private ParseArgument<string> GetParseChoiceArgument(CliTemplateParameter parameter)
+        {
+            return (argumentResult) =>
+            {
+                if (argumentResult.Parent is not OptionResult or)
+                {
+                    throw new NotSupportedException("The method should be only used with option.");
+                }
+
+                if (argumentResult.Tokens.Count == 0)
+                {
+                    if (or.IsImplicit)
+                    {
+                        if (string.IsNullOrWhiteSpace(parameter.DefaultValue))
+                        {
+                            if (TryConvertValueToChoice(parameter.DefaultValue, parameter, out string defaultValue, out string error))
+                            {
+                                return defaultValue;
+                            }
+                            argumentResult.ErrorMessage = $"Cannot parse default value '{parameter.DefaultValue}' for option '{or.Token?.Value}' as expected type 'choice': {error}.";
+                            return string.Empty;
+                        }
+                        argumentResult.ErrorMessage = $"Default value for argument missing for option: {or.Token?.Value}.";
+                        return string.Empty;
+                    }
+                    if (parameter.DefaultIfOptionWithoutValue != null)
+                    {
+                        if (TryConvertValueToChoice(parameter.DefaultIfOptionWithoutValue, parameter, out string defaultValue, out string error))
+                        {
+                            return defaultValue;
+                        }
+                        argumentResult.ErrorMessage = $"Cannot parse default if option without value '{parameter.DefaultIfOptionWithoutValue}' for option '{or.Token?.Value}' as expected type 'choice': {error}.";
+                        return string.Empty;
+                    }
+                    argumentResult.ErrorMessage = $"Required argument missing for option: {or.Token?.Value}.";
+                    return string.Empty;
+                }
+                else if (argumentResult.Tokens.Count == 1)
+                {
+                    if (TryConvertValueToChoice(argumentResult.Tokens[0].Value, parameter, out string value, out string error))
+                    {
+                        return value;
+                    }
+                    argumentResult.ErrorMessage = $"Cannot parse argument '{argumentResult.Tokens[0].Value}' for option '{or.Token?.Value}' as expected type 'choice': {error}.";
+                    return string.Empty;
+                }
+                else
+                {
+                    argumentResult.ErrorMessage = $"Using more than 1 argument is not allowed for '{or.Token?.Value}', used: {argumentResult.Tokens.Count}.";
+                    return string.Empty;
+                }
+            };
+        }
+
+        private (bool, string) ConvertValueToString(string? value)
+        {
+            return (true, value ?? string.Empty);
+        }
+
+        private (bool, long) ConvertValueToInt(string? value)
+        {
+            if (long.TryParse(value, out long result))
+            {
+                return (true, result);
+            }
+            return (false, default);
+        }
+
+        private (bool, double) ConvertValueToFloat(string? value)
+        {
+            if (Utils.ParserExtensions.DoubleTryParseСurrentOrInvariant(value, out double convertedFloat))
+            {
+                return (true, convertedFloat);
+            }
+            return (false, default);
+        }
+
+        private (bool, long) ConvertValueToHex(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return (false, default);
+            }
+
+            if (value.Length < 3)
+            {
+                return (false, default);
+            }
+
+            if (!string.Equals(value.Substring(0, 2), "0x", StringComparison.OrdinalIgnoreCase))
+            {
+                return (false, default);
+            }
+
+            if (long.TryParse(value.Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out long convertedHex))
+            {
+                return (true, convertedHex);
+            }
+            return (false, default);
+        }
+
+        private bool TryConvertValueToChoice(string? value, CliTemplateParameter parameter, out string parsedValue, out string error)
+        {
+            parsedValue = string.Empty;
+            if (value == null)
+            {
+                error = "value is <null>";
+                return false;
+            }
+
+            if (parameter.Choices == null)
+            {
+                error = "no choices are defined for parameter";
+                return false;
+            }
+
+            foreach (string choiceValue in parameter.Choices.Keys)
+            {
+                if (string.Equals(choiceValue, value, StringComparison.OrdinalIgnoreCase))
+                {
+                    parsedValue = choiceValue;
+                    error = string.Empty;
+                    return true;
+                }
+            }
+            error = $"value '{value}' is not allowed, allowed values are: {string.Join(",", parameter.Choices.Keys.Select(key => $"'{key}'"))}";
+            return false;
+        }
     }
 }

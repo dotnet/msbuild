@@ -31,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli
             Description = parameter.Description ?? string.Empty;
             Type = ParseType(parameter.DataType);
             DefaultValue = parameter.DefaultValue;
-            DefaultIfOptionWithoutValue = parameter.DefaultIfOptionWithoutValue ?? string.Empty;
+            DefaultIfOptionWithoutValue = parameter.DefaultIfOptionWithoutValue;
             IsRequired = parameter.Priority == TemplateParameterPriority.Required && parameter.DefaultValue == null;
             IsHidden = parameter.Priority == TemplateParameterPriority.Implicit || data.HiddenParameterNames.Contains(parameter.Name);
 
@@ -87,8 +87,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal IReadOnlyList<string> LongNameOverrides => _longNameOverrides;
 
-        //TODO: decide if we handle it
-        internal string DefaultIfOptionWithoutValue { get; private set; }
+        internal string? DefaultIfOptionWithoutValue { get; private set; }
 
         private static ParameterType ParseType(string dataType)
         {
@@ -100,6 +99,7 @@ namespace Microsoft.TemplateEngine.Cli
                 "float" => ParameterType.Float,
                 "int" => ParameterType.Integer,
                 "integer" => ParameterType.Integer,
+                "hex" => ParameterType.Hex,
                 _ => ParameterType.String
             };
         }

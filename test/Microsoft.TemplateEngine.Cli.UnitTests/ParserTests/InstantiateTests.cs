@@ -272,38 +272,47 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             new object?[][]
             {
                 //bool
-                new [] { "foo --bool", "bool", "bool", null, "True" },
-                new [] { "foo -b", "bool", "bool", null, "True" },
-                new [] { "foo --bool true", "bool", "bool", null, "True" },
-                new [] { "foo -b true", "bool", "bool", null, "True" },
-                new [] { "foo --bool false", "bool", "bool", null, "False" },
-                new [] { "foo -b false", "bool", "bool", null, "False" },
+                new [] { "foo --bool", "bool", "bool", null, null, "True" },
+                new [] { "foo -b", "bool", "bool", null, null, "True" },
+                new [] { "foo --bool true", "bool", "bool", null, null, "True" },
+                new [] { "foo -b true", "bool", "bool", null, null, "True" },
+                new [] { "foo --bool false", "bool", "bool", null, null, "False" },
+                new [] { "foo -b false", "bool", "bool", null, null, "False" },
                 //the default values are ignored when creating args - they are processed by template engine core
-                new [] { "foo", "bool", "bool", null, null },
-                new [] { "foo", "bool", "bool", "true", null },
-                new [] { "foo", "bool", "bool", "false", null },
+                new [] { "foo", "bool", "bool", null, null, null },
+                new [] { "foo", "bool", "bool", "true", null, null },
+                new [] { "foo", "bool", "bool", "false", null, null },
                 //text
-                new [] { "foo --text val", "text", "string", null, "val" },
-                new [] { "foo -t val", "text", "string", null, "val" },
-                new [] { "foo --text val", "text", "text", null, "val" },
-                new [] { "foo", "text", "text", "def", null },
+                new [] { "foo --text val", "text", "string", null, null, "val" },
+                new [] { "foo -t val", "text", "string", null, null, "val" },
+                new [] { "foo --text val", "text", "text", null, null, "val" },
+                new [] { "foo", "text", "text", "def", null, null },
+                new [] { "foo --text", "text", "text", null, "defIfNoOpValue", "defIfNoOpValue" },
                 //int
-                new [] { "foo --int 30", "int", "int", null, "30" },
-                new [] { "foo --int 30", "int", "integer", null, "30" },
-                new [] { "foo -in 30", "int", "integer", null, "30" }, //-i is already defined for legacy install command
-                new [] { "foo", "int", "integer", "50", null },
+                new [] { "foo --int 30", "int", "int", null, null, "30" },
+                new [] { "foo --int 30", "int", "integer", null, null, "30" },
+                new [] { "foo -in 30", "int", "integer", null, null, "30" }, //-i is already defined for legacy install command
+                new [] { "foo", "int", "integer", "50", null, null },
+                new [] { "foo --int", "int", "int", null, "550", "550" },
                 //float
-                new [] { "foo --float 30.9", "float", "float", null, "30.9" },
-                new [] { "foo -f 30.9", "float", "float", null, "30.9" },
-                new [] { "foo", "float", "float", "50.9", null },
+                new [] { "foo --float 30.9", "float", "float", null, null, "30.9" },
+                new [] { "foo -f 30.9", "float", "float", null, null, "30.9" },
+                new [] { "foo", "float", "float", "50.9", null, null },
+                new [] { "foo --float", "float", "float", null, "5.501", "5.501" },
+
+                //hex
+                new [] { "foo --hex 0xABCDEF", "hex", "hex", null, null, "0xABCDEF" },
+                new [] { "foo -he 0xABCDEF", "hex", "hex", null, null, "0xABCDEF" }, //-h is already defined for help
+                new [] { "foo", "hex", "hex", "0xABCDE", null, null },
+                new [] { "foo --hex", "hex", "hex", null, "0xABCD", "0xABCD" },
             };
 
         [Theory]
         [MemberData(nameof(CanParseTemplateOptionsData))]
-        internal void CanParseTemplateOptions(string command, string parameterName, string parameterType, string? defaultValue, string? expectedValue)
+        internal void CanParseTemplateOptions(string command, string parameterName, string parameterType, string? defaultValue, string? defaultIfNoOptionValue, string? expectedValue)
         {
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
-                .WithParameter(parameterName, parameterType, defaultValue: defaultValue);
+                .WithParameter(parameterName, parameterType, defaultValue: defaultValue, defaultIfNoOptionValue: defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
@@ -336,17 +345,18 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public static IEnumerable<object?[]> CanParseChoiceTemplateOptionsData =>
             new object?[][]
             {
-                new [] { "foo --framework net5.0", "framework", "net5.0|net6.0", "net5.0" },
-                new [] { "foo -f net5.0", "framework", "net5.0|net6.0", "net5.0" },
-                new [] { "foo --framework net6.0", "framework", "net5.0|net6.0", "net6.0" },
+                new [] { "foo --framework net5.0", "framework", "net5.0|net6.0", null, "net5.0" },
+                new [] { "foo -f net5.0", "framework", "net5.0|net6.0", null, "net5.0" },
+                new [] { "foo --framework net6.0", "framework", "net5.0|net6.0", null, "net6.0" },
+                new [] { "foo --framework ", "framework", "net5.0|net6.0", "net6.0", "net6.0" },
             };
 
         [Theory]
         [MemberData(nameof(CanParseChoiceTemplateOptionsData))]
-        internal void CanParseChoiceTemplateOptions(string command, string parameterName, string parameterValues, string? expectedValue)
+        internal void CanParseChoiceTemplateOptions(string command, string parameterName, string parameterValues, string? defaultIfNoOptionValue, string? expectedValue)
         {
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
-                .WithChoiceParameter(parameterName, parameterValues.Split("|"));
+                .WithChoiceParameter(parameterName, parameterValues.Split("|"), defaultIfNoOptionValue: defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
@@ -380,20 +390,28 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             new object?[][]
             {
                 //bool
-                new object?[] { "foo", "bool", "bool", true, null, "Option '--bool' is required." },
-                new object?[] { "foo -b text", "bool", "bool", true, null, "Unrecognized command or argument 'text'" },
-                new object?[] { "foo --bool 0", "bool", "bool", true, null, "Unrecognized command or argument '0'" },
+                new object?[] { "foo", "bool", "bool", true, null, null, "Option '--bool' is required." },
+                new object?[] { "foo -b text", "bool", "bool", true, null, null, "Unrecognized command or argument 'text'" },
+                new object?[] { "foo --bool 0", "bool", "bool", true, null, null, "Unrecognized command or argument '0'" },
                 //text
-                new object?[] { "foo --text", "text", "string", false, null, "Required argument missing for option: --text" },
-                new object?[] { "foo", "text", "string", true, null, "Option '--text' is required." },
+                new object?[] { "foo --text", "text", "string", false, null, null, "Required argument missing for option: --text." },
+                new object?[] { "foo", "text", "string", true, null, null, "Option '--text' is required." },
                 //int
-                new object?[] { "foo --int text", "int", "int", false, null, "Cannot parse argument 'text' for option '--int' as expected type System.Int32." },
-                new object?[] { "foo --int", "int", "int", false, null, "Required argument missing for option: --int" },
-                new object?[] { "foo", "int", "int", true, null, "Option '--int' is required." },
+                new object?[] { "foo --int text", "int", "int", false, null, null, "Cannot parse argument 'text' for option '--int' as expected type Int64." },
+                new object?[] { "foo --int", "int", "int", false, null, null, "Required argument missing for option: --int." },
+                new object?[] { "foo", "int", "int", true, null, null, "Option '--int' is required." },
+                new object?[] { "foo --int", "int", "int", true, null, "not-int", "Cannot parse default if option without value 'not-int' for option '--int' as expected type Int64." },
                 //float
-                new object?[] { "foo --float text", "float", "float", false, null, "Cannot parse argument 'text' for option '--float' as expected type System.Single." },
-                new object?[] { "foo --float", "float", "float", false, null, "Required argument missing for option: --float" },
-                new object?[] { "foo", "float", "float", true, null, "Option '--float' is required." },
+                new object?[] { "foo --float text", "float", "float", false, null, null, "Cannot parse argument 'text' for option '--float' as expected type Double." },
+                new object?[] { "foo --float", "float", "float", false, null, null, "Required argument missing for option: --float." },
+                new object?[] { "foo", "float", "float", true, null, null, "Option '--float' is required." },
+                new object?[] { "foo --float", "float", "float", true, null, "not-float", "Cannot parse default if option without value 'not-float' for option '--float' as expected type Double." },
+
+                //hex
+                new object?[] { "foo --hex text", "hex", "hex", false, null, null, "Cannot parse argument 'text' for option '--hex' as expected type Int64." },
+                new object?[] { "foo --hex", "hex", "hex", false, null, null, "Required argument missing for option: --hex." },
+                new object?[] { "foo", "hex", "hex", true, null, null, "Option '--hex' is required." },
+                new object?[] { "foo --hex", "hex", "hex", true, null, "not-hex", "Cannot parse default if option without value 'not-hex' for option '--hex' as expected type Int64." },
 
             };
 
@@ -405,10 +423,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             string parameterType,
             bool isRequired,
             string? defaultValue,
+            string? defaultIfNoOptionValue,
             string expectedError)
         { 
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
-                .WithParameter(parameterName, parameterType, isRequired, defaultValue: defaultValue);
+                .WithParameter(parameterName, parameterType, isRequired, defaultValue: defaultValue, defaultIfNoOptionValue: defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
@@ -433,9 +452,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public static IEnumerable<object?[]> CanDetectParseErrorsChoiceTemplateOptionsData =>
             new object?[][]
             {
-                new object?[] { "foo --framework netcoreapp3.1", "framework", "net5.0|net6.0", false, null, "Argument 'netcoreapp3.1' not recognized. Must be one of:\n\t'net5.0'\n\t'net6.0'" },
-                new object?[] { "foo --framework", "framework", "net5.0|net6.0", false, null, "Required argument missing for option: --framework" },
-                new object?[] { "foo", "framework", "net5.0|net6.0", true, null, "Option '--framework' is required." }
+                new object?[] { "foo --framework netcoreapp3.1", "framework", "net5.0|net6.0", false, null, null, "Argument 'netcoreapp3.1' not recognized. Must be one of:\n\t'net5.0'\n\t'net6.0'" },
+                new object?[] { "foo --framework", "framework", "net5.0|net6.0", false, null, null, "Required argument missing for option: --framework." },
+                new object?[] { "foo", "framework", "net5.0|net6.0", true, null, null, "Option '--framework' is required." },
+                new object?[] { "foo --framework", "framework", "net5.0|net6.0", true, null, "netcoreapp2.1", "Cannot parse default if option without value 'netcoreapp2.1' for option '--framework' as expected type 'choice': value 'netcoreapp2.1' is not allowed, allowed values are: 'net5.0','net6.0'." }
             };
 
         [Theory]
@@ -446,10 +466,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
               string parameterValues,
               bool isRequired,
               string? defaultValue,
+              string? defaultIfNoOptionValue,
               string expectedError)
         {
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
-                .WithChoiceParameter(parameterName, parameterValues.Split("|"), isRequired, defaultValue);
+                .WithChoiceParameter(parameterName, parameterValues.Split("|"), isRequired, defaultValue, defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))

@@ -73,7 +73,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             get
             {
-                return _templateOptions.Select(o => (o.Key, _parseResult.GetValueForOptionOrNull(o.Value.Option)))
+                return _templateOptions.Select(o => (o.Key, GetValueForOption(o.Key, o.Value)))
                     .Where(kvp => kvp.Item2 != null)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Item2);
             }
@@ -91,6 +91,32 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             alias = null;
             return false;
+        }
+
+        private string? GetValueForOption(string parameterName, OptionResult optionResult)
+        {
+            if (optionResult.Token is null)
+            {
+                return null;
+            }
+
+            var optionValue = optionResult.GetValueOrDefault();
+            if (optionValue == null)
+            {
+                return null;
+            }
+
+            var parameter = Template.GetParameters().FirstOrDefault(p => p.Name.Equals(parameterName, StringComparison.OrdinalIgnoreCase));
+            if (parameter == null)
+            {
+                throw new InvalidOperationException($"Parameter {parameterName} is not defined for {Template.Identity}.");
+            }
+            if (parameter.Type == ParameterType.Hex && optionResult.Option.ValueType == typeof(long))
+            {
+                var intValue = (long)optionValue;
+                return $"0x{intValue.ToString("X")}";
+            }
+            return optionValue.ToString();
         }
     }
 }

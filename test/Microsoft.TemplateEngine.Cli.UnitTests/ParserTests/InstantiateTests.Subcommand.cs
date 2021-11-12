@@ -89,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
         [Theory]
         [MemberData(nameof(CanParseTemplateOptionsData))]
-        internal void Create_CanParseTemplateOptions(string command, string parameterName, string parameterType, string? defaultValue, string? expectedValue)
+        internal void Create_CanParseTemplateOptions(string command, string parameterName, string parameterType, string? defaultValue, string? defaultIfNoOptionValue, string? expectedValue)
         {
             //unique case for dotnet new create
             if (command == "foo -in 30")
@@ -98,7 +98,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             }
 
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
-                .WithParameter(parameterName, parameterType, defaultValue: defaultValue);
+                .WithParameter(parameterName, parameterType, defaultValue: defaultValue, defaultIfNoOptionValue: defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
@@ -130,10 +130,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
         [Theory]
         [MemberData(nameof(CanParseChoiceTemplateOptionsData))]
-        internal void Create_CanParseChoiceTemplateOptions(string command, string parameterName, string parameterValues, string? expectedValue)
+        internal void Create_CanParseChoiceTemplateOptions(string command, string parameterName, string parameterValues, string? defaultIfNoOptionValue, string? expectedValue)
         {
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
-                .WithChoiceParameter(parameterName, parameterValues.Split("|"));
+                .WithChoiceParameter(parameterName, parameterValues.Split("|"), defaultIfNoOptionValue: defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
@@ -171,10 +171,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             string parameterType,
             bool isRequired,
             string? defaultValue,
+            string? defaultIfNoOptionValue,
             string expectedError)
         {
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
-                .WithParameter(parameterName, parameterType, isRequired, defaultValue: defaultValue);
+                .WithParameter(parameterName, parameterType, isRequired, defaultValue: defaultValue, defaultIfNoOptionValue: defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
@@ -204,10 +205,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
               string parameterValues,
               bool isRequired,
               string? defaultValue,
+              string? defaultIfNoOptionValue,
               string expectedError)
         {
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
-                .WithChoiceParameter(parameterName, parameterValues.Split("|"), isRequired, defaultValue);
+                .WithChoiceParameter(parameterName, parameterValues.Split("|"), isRequired, defaultValue, defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
