@@ -226,8 +226,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             manifestUpdater.DownloadManifestPackagesCallCount.Should().Be(1);
             manifestUpdater.ExtractManifestPackagesToTempDirCallCount.Should().Be(1);
             // 6 android pack packages need to be updated
-            installer.CachedPacks.Count.Should().Be(6);
             installer.CachedPacks.Select(pack => pack.Id).Should().NotContain("Xamarin.Android.Sdk"); // This pack is up to date, doesn't need to be cached
+            installer.CachedPacks.Count.Should().Be(6);
             installer.CachePath.Should().Be(cachePath);
         }
 
