@@ -2142,38 +2142,38 @@
       "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.Algorithms.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\compress\\[[_framework/System.Security.Cryptography.Primitives.dll.br]]",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\compress\\[[_framework/System.Security.Cryptography.dll.br]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
       "BasePath": "/",
-      "RelativePath": "_framework/System.Security.Cryptography.Primitives.dll.br",
+      "RelativePath": "_framework/System.Security.Cryptography.dll.br",
       "AssetKind": "Publish",
       "AssetMode": "All",
       "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.Primitives.dll",
+      "RelatedAsset": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.dll",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "br",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.Primitives.dll"
+      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\compress\\[[_framework/System.Security.Cryptography.Primitives.dll.gz]]",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\compress\\[[_framework/System.Security.Cryptography.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
       "BasePath": "/",
-      "RelativePath": "_framework/System.Security.Cryptography.Primitives.dll.gz",
+      "RelativePath": "_framework/System.Security.Cryptography.dll.gz",
       "AssetKind": "Publish",
       "AssetMode": "All",
       "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.Primitives.dll",
+      "RelatedAsset": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.dll",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.Primitives.dll"
+      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.dll"
     },
     {
       "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\compress\\[[_framework/System.Text.Encodings.Web.dll.br]]",
@@ -3655,12 +3655,12 @@
       "OriginalItemSpec": "obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.Algorithms.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.Primitives.dll",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.dll",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
       "BasePath": "/",
-      "RelativePath": "_framework/System.Security.Cryptography.Primitives.dll",
+      "RelativePath": "_framework/System.Security.Cryptography.dll",
       "AssetKind": "Publish",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -3669,7 +3669,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.Primitives.dll"
+      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\linked\\System.Security.Cryptography.dll"
     },
     {
       "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\linked\\System.Text.Encodings.Web.dll",

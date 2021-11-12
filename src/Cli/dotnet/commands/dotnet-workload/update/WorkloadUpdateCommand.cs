@@ -153,7 +153,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         {
             _reporter.WriteLine();
             var featureBand =
-                new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
+                new SdkFeatureBand(_sdkVersion);
 
             var workloadIds = GetUpdatableWorkloads();
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
