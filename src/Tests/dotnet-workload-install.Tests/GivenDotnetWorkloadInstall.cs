@@ -309,6 +309,57 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installPacks.Count().Should().Be(3);
         }
 
+        [Fact]
+        public void GivenWorkloadInstallItTreatsPreviewsAsSeparateFeatureBands()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            var tmpDir = Path.Combine(testDirectory, "tmp");
+            var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), dotnetRoot, userProfileDir: userProfileDir);
+            var manifestUpdater = new MockWorkloadManifestUpdater();
+            var prev7SdkFeatureVersion = "6.0.100-preview.7.21379.14";
+            var prev7FormattedFeatureVersion = "6.0.100-preview.7";
+            var rc1SdkFeatureVersion = "6.0.100-rc.1.21463.6";
+            var rc1FormattedFeatureVersion = "6.0.100-rc.1";
+            var existingWorkload = "mock-1";
+
+            // Install a workload for preview 7
+            var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", existingWorkload });
+            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: prev7SdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            installCommand.Execute();
+
+            // Install workload for RC1
+            installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: rc1SdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            installCommand.Execute();
+
+            // Existing installation is present
+            var prev7InstallRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", prev7FormattedFeatureVersion, "InstalledWorkloads");
+            Directory.GetFiles(prev7InstallRecordPath).Count().Should().Be(1);
+            File.Exists(Path.Combine(prev7InstallRecordPath, existingWorkload))
+                .Should().BeTrue();
+
+            var rc1InstallRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", rc1FormattedFeatureVersion, "InstalledWorkloads");
+            Directory.GetFiles(rc1InstallRecordPath).Count().Should().Be(1);
+            File.Exists(Path.Combine(rc1InstallRecordPath, existingWorkload))
+                .Should().BeTrue();
+
+            // Assert that packs have been installed
+            var packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            packRecordDirs.Count().Should().Be(3);
+            var installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            installPacks.Count().Should().Be(2);
+
+            // Assert feature band records are correct
+            var featureBandRecords = Directory.GetFiles(Directory.GetDirectories(packRecordDirs[0])[0]);
+            featureBandRecords.Count().Should().Be(2);
+            featureBandRecords.Select(recordPath => Path.GetFileName(recordPath))
+                .Should().BeEquivalentTo(new string[] { prev7FormattedFeatureVersion, rc1FormattedFeatureVersion });
+        }
+
         private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
                 ParseResult parseResult,
                 bool userLocal,
