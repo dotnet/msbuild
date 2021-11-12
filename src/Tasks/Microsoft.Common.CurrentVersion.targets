@@ -1617,6 +1617,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <UseDefaultPlatformLookupTables Condition="'$(UseDefaultPlatformLookupTables)' == ''">true</UseDefaultPlatformLookupTables>
+    <!-- Allow an override to the property that the SetPlatform logic will set or undefine. -->
+    <_SetPlatformPropertyToSet Condition="$(SetPlatformPropertyToSet) == ''">Platform</_SetPlatformPropertyToSet>
   </PropertyGroup>
 
   <!-- This target skips VS builds because they already supply Platform and
@@ -1665,12 +1667,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment)' != ''">
       <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
-        <SetPlatform>Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+        <SetPlatform>$(_SetPlatformPropertyToSet)=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
 
       <!-- When GetCompatiblePlatform fails to assign NearestPlatform, undefine Platform and let that project build "on its own" -->
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
-        <UndefineProperties>%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
+        <UndefineProperties>%(ProjectsWithNearestPlatform.UndefineProperties);$(_SetPlatformPropertyToSet)</UndefineProperties>
       </ProjectsWithNearestPlatform>
 
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
