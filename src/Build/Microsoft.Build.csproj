@@ -723,10 +723,6 @@
       <Link>SharedUtilities\LoadedType.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\NativeMethodsShared.cs">
-      <Link>SharedUtilities\NativeMethodsShared.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

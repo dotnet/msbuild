@@ -54,9 +54,6 @@
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>FileUtilitiesRegex.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\NativeMethodsShared.cs">
-      <Link>NativeMethodsShared.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>ResourceUtilities.cs</Link>
     </Compile>

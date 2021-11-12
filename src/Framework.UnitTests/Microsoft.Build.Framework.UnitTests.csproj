@@ -37,7 +37,6 @@
     <Compile Include="..\Shared\FileUtilities.cs" />
     <Compile Include="..\Shared\TempFileUtilities.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
-    <Compile Include="..\Shared\NativeMethodsShared.cs" />
     <Compile Include="..\Shared\EscapingUtilities.cs" />
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />

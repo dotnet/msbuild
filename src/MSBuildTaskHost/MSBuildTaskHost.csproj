@@ -112,7 +112,7 @@
       <Link>Modifiers.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
-    <Compile Include="..\Shared\NativeMethodsShared.cs">
+    <Compile Include="..\Framework\NativeMethods.cs">
       <Link>NativeMethodsShared.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeBuildComplete.cs">

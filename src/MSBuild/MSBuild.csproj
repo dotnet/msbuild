@@ -108,9 +108,6 @@
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
-    <Compile Include="..\Shared\NativeMethodsShared.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs" />
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
