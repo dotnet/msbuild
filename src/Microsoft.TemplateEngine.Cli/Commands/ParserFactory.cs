@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             .UseParseErrorReporting()
             .UseParseDirective()
             .UseSuggestDirective()
-            .DisablePosixBinding()
+            .DisablePosixBundling()
             .Build();
         }
 
@@ -26,11 +26,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new CommandLineBuilder(command)
             .UseParseErrorReporting()
-            .DisablePosixBinding()
+            .DisablePosixBundling()
             .Build();
         }
 
-        private static CommandLineBuilder DisablePosixBinding(this CommandLineBuilder builder)
+        private static CommandLineBuilder DisablePosixBundling(this CommandLineBuilder builder)
         {
             builder.EnablePosixBundling = false;
             return builder;
