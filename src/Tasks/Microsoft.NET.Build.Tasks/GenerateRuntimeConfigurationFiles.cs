@@ -91,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (!string.IsNullOrEmpty(RollForward))
             {
-                if (!RollForwardValues.Any(v => string.Equals(RollForward, v, StringComparison.OrdinalIgnoreCase)))
+                if (!RollForwardValues.Contains(RollForward, StringComparer.OrdinalIgnoreCase))
                 {
                     Log.LogError(Strings.InvalidRollForwardValue, RollForward, string.Join(", ", RollForwardValues));
                     return;
