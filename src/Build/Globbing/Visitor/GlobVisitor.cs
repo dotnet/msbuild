@@ -12,11 +12,11 @@ namespace Microsoft.Build.Globbing.Visitor
                 VisitMSBuildGlob(msbuildGlob);
             }
 
-            if (glob is CompositeGlob compositGlob)
+            if (glob is CompositeGlob compositeGlob)
             {
-                VisitCompositeGlob(compositGlob);
+                VisitCompositeGlob(compositeGlob);
 
-                foreach (var globPart in compositGlob.Globs)
+                foreach (var globPart in compositeGlob.Globs)
                 {
                     Visit(globPart);
                 }
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Globbing.Visitor
         {
         }
 
-        protected virtual void VisitCompositeGlob(CompositeGlob compositGlob)
+        protected virtual void VisitCompositeGlob(CompositeGlob compositeGlob)
         {
         }
 
