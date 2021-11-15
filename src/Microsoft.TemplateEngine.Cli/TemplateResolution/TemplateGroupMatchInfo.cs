@@ -49,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// True when the group matches group filters.
         /// </summary>
-        internal bool IsGroupMatch => _groupDispositions.Any(x => x.Kind != MatchKind.Mismatch);
+        internal bool IsGroupMatch => _groupDispositions.All(x => x.Kind != MatchKind.Mismatch);
 
         /// <summary>
         /// True when the group matches group and template info filters.
