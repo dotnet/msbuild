@@ -6,7 +6,6 @@
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
-    
     <IsPackable>false</IsPackable>
 
     <AssemblyName>Microsoft.Build.Engine.OM.UnitTests</AssemblyName>
