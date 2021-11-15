@@ -7,6 +7,7 @@ using System.Xml;
 using System.IO;
 using System.Text;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -114,6 +115,12 @@ namespace Microsoft.Build.Construction
         private Version _currentVisualStudioVersion;
         private int _currentLineNumber;
 
+        // TODO: Unify to NativeMethodsShared.OSUsesCaseSensitive paths
+        // when possible.
+        private static StringComparer _pathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+            ? StringComparer.Ordinal
+            : StringComparer.OrdinalIgnoreCase;
+
         #endregion
 
         #region Constructors
@@ -202,7 +209,12 @@ namespace Microsoft.Build.Construction
             {
                 // Should already be canonicalized to a full path
                 ErrorUtilities.VerifyThrowInternalRooted(value);
-                if (FileUtilities.IsSolutionFilterFilename(value))
+                // To reduce code duplication, this should be
+                //   if (FileUtilities.IsSolutionFilterFilename(value))
+                // But that's in Microsoft.Build.Framework and this codepath
+                // is called from old versions of NuGet that can't resolve
+                // Framework (see https://github.com/dotnet/msbuild/issues/5313).
+                if (value.EndsWith(".slnf", StringComparison.OrdinalIgnoreCase))
                 {
                     ParseSolutionFilter(value);
                 }
@@ -386,7 +398,7 @@ namespace Microsoft.Build.Construction
 
                 SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
 
-                _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                _solutionFilter = new HashSet<string>(_pathComparer);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
                     _solutionFilter.Add(FileUtilities.FixFilePath(project.GetString()));
@@ -549,7 +561,7 @@ namespace Microsoft.Build.Construction
 
             if (_solutionFilter != null)
             {
-                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, _pathComparer);
                 foreach (ProjectInSolution project in _projectsInOrder)
                 {
                     projectPaths.Add(FileUtilities.FixFilePath(project.RelativePath));
