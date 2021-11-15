@@ -1,0 +1,6 @@
+﻿Error: Invalid option(s):
+--fake
+   '--fake' is not a valid option
+
+For more information, run:
+   dotnet new3 console -h

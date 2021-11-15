@@ -8,6 +8,7 @@
     <ProjectReference Include="$(SrcDir)dotnet-new3\dotnet-new3.csproj" />
     <ProjectReference Include="$(TestDir)Microsoft.TemplateEngine.Cli.TestHelper\Microsoft.TemplateEngine.Cli.TestHelper.csproj" />
     <ProjectReference Include="$(TestDir)Microsoft.TemplateEngine.TestHelper\Microsoft.TemplateEngine.TestHelper.csproj" />
+    <PackageReference Include="ApprovalTests" />
     <PackageReference Include="Wcwidth.Sources" />
   </ItemGroup>
 

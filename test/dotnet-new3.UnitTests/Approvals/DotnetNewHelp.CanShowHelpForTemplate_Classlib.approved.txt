@@ -1,0 +1,22 @@
+﻿Class Library (C#)
+Author: Microsoft
+Description: A project for creating a class library that targets .NET Standard or .NET Core
+Options:                                                                             
+  -f|--framework  The target framework for the project.                              
+                      net7.0            - Target net7.0                              
+                      netstandard2.1    - Target netstandard2.1                      
+                      netstandard2.0    - Target netstandard2.0                      
+                      net5.0            - Target net5.0                              
+                      netcoreapp3.1     - Target netcoreapp3.1                       
+                  Default: net7.0                                                    
+
+  --langVersion   Sets the LangVersion property in the created project file          
+                  text - Optional                                                    
+
+  --no-restore    If specified, skips the automatic restore of the project on create.
+                  bool - Optional                                                    
+                  Default: false                                                     
+
+
+To see help for other template languages (F#, VB), use --language option:
+   dotnet new3 classlib -h --language F#

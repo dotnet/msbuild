@@ -1,0 +1,3 @@
+﻿Warning: Failed to load dotnet CLI host data for template TestAssets.Invalid.InvalidHostData from <%TEMPLATE ROOT%>.template.config/dotnetcli.host.json. The host data will be ignored.
+Details: <%DETAILS%>
+The template "TestAssets.Invalid.InvalidHostData" was created successfully.

@@ -1,0 +1,7 @@
+﻿Unable to resolve the template, the following installed templates are conflicting:
+Identity                                       Template Name   Short Name  Language  Precedence  Author      
+
+TestAssets.SamePrecedenceGroup.BasicTemplate1  Basic Template  basic       C#        100         Test Asset  
+TestAssets.SamePrecedenceGroup.BasicTemplate2  Basic Template  basic       C#        100         Test Asset  
+
+Uninstall the templates or the packages to keep only one template from the list.

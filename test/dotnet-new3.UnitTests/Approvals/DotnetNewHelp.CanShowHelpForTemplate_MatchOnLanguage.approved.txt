@@ -1,0 +1,17 @@
+﻿Console App (F#)
+Author: Microsoft
+Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
+Options:                                                                             
+  -f|--framework  The target framework for the project.                              
+                      net7.0           - Target net7.0                               
+                      net5.0           - Target net5.0                               
+                      netcoreapp3.1    - Target netcoreapp3.1                        
+                  Default: net7.0                                                    
+
+  --no-restore    If specified, skips the automatic restore of the project on create.
+                  bool - Optional                                                    
+                  Default: false                                                     
+
+
+To see help for other template languages (C#, VB), use --language option:
+   dotnet new3 console -h --language C#

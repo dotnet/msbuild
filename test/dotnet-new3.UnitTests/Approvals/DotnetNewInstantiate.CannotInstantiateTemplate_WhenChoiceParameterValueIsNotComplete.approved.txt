@@ -1,0 +1,9 @@
+﻿Error: Invalid option(s):
+--framework netcoreapp
+   'netcoreapp' is not a valid value for --framework. The possible values are:
+      net5.0          - Target net5.0
+      net7.0          - Target net7.0
+      netcoreapp3.1   - Target netcoreapp3.1
+
+For more information, run:
+   dotnet new3 console -h

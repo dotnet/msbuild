@@ -1,0 +1,6 @@
+﻿No templates found matching: 'class'.
+
+To list installed templates, run:
+   dotnet new3 --list
+To search for the templates on NuGet.org, run:
+   dotnet new3 class --search
