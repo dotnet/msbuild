@@ -1560,10 +1560,10 @@ namespace Microsoft.Build.Globbing
         public static Microsoft.Build.Globbing.MSBuildGlob Parse(string fileSpec) { throw null; }
         public static Microsoft.Build.Globbing.MSBuildGlob Parse(string globRoot, string fileSpec) { throw null; }
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        public partial struct MatchInfoResult
+        public readonly partial struct MatchInfoResult
         {
-            private object _dummy;
-            private int _dummyPrimitive;
+            private readonly object _dummy;
+            private readonly int _dummyPrimitive;
             public string FilenamePartMatchGroup { get { throw null; } }
             public string FixedDirectoryPartMatchGroup { get { throw null; } }
             public bool IsMatch { get { throw null; } }
