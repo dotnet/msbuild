@@ -25,9 +25,9 @@ namespace Microsoft.Build.Globbing
         public CompositeGlob(IEnumerable<IMSBuildGlob> globs)
         {
             // ImmutableArray also does this check, but copied it here just in case they remove it
-            if (globs is ImmutableArray<IMSBuildGlob>)
+            if (globs is ImmutableArray<IMSBuildGlob> immutableGlobs)
             {
-                Globs = (ImmutableArray<IMSBuildGlob>)globs;
+                Globs = immutableGlobs;
             }
 
             Globs = globs.ToImmutableArray();
