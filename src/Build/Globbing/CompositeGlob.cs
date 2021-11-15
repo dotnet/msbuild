@@ -38,6 +38,15 @@ namespace Microsoft.Build.Globbing
         /// <summary>
         ///     Constructor
         /// </summary>
+        /// <param name="glob1">First child glob.</param>
+        /// <param name="glob2">Second child glob.</param>
+        internal CompositeGlob(IMSBuildGlob glob1, IMSBuildGlob glob2)
+            : this(ImmutableArray.Create(glob1, glob2))
+        {}
+
+        /// <summary>
+        ///     Constructor
+        /// </summary>
         /// <param name="globs">Children globs.</param>
         private CompositeGlob(ImmutableArray<IMSBuildGlob> globs)
         {
