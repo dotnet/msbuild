@@ -526,35 +526,32 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="e"></param>
         internal void RaiseStronglyTypedEvent(BuildEventArgs e)
         {
-            // FXCop may complain that there are unecessary casts here, and there are, but
-            // using "as" and allocating another variable for each event is extremely costly
-            // and is much slower then this approach even with the additional casts
-            if (e is BuildMessageEventArgs)
-                this.RaiseMessageEvent(null, (BuildMessageEventArgs)e);
-            else if (e is TaskStartedEventArgs)
-                this.RaiseTaskStartedEvent(null, (TaskStartedEventArgs)e);
-            else if (e is TaskFinishedEventArgs)
-                this.RaiseTaskFinishedEvent(null, (TaskFinishedEventArgs)e);
-            else if (e is TargetStartedEventArgs)
-                this.RaiseTargetStartedEvent(null, (TargetStartedEventArgs)e);
-            else if (e is TargetFinishedEventArgs)
-                this.RaiseTargetFinishedEvent(null, (TargetFinishedEventArgs)e);
-            else if (e is ProjectStartedEventArgs)
-                this.RaiseProjectStartedEvent(null, (ProjectStartedEventArgs)e);
-            else if (e is ProjectFinishedEventArgs)
-                this.RaiseProjectFinishedEvent(null, (ProjectFinishedEventArgs)e);
-            else if (e is BuildStartedEventArgs)
-                this.RaiseBuildStartedEvent(null, (BuildStartedEventArgs)e);
-            else if (e is BuildFinishedEventArgs)
-                this.RaiseBuildFinishedEvent(null, (BuildFinishedEventArgs)e);
-            else if (e is CustomBuildEventArgs)
-                this.RaiseCustomEvent(null, (CustomBuildEventArgs)e);
-            else if (e is BuildStatusEventArgs)
-                this.RaiseStatusEvent(null, (BuildStatusEventArgs)e);
-            else if (e is BuildWarningEventArgs)
-                this.RaiseWarningEvent(null, (BuildWarningEventArgs)e);
-            else if (e is BuildErrorEventArgs)
-                this.RaiseErrorEvent(null, (BuildErrorEventArgs)e);
+            if (e is BuildMessageEventArgs buildMessageEvent)
+                this.RaiseMessageEvent(null, buildMessageEvent);
+            else if (e is TaskStartedEventArgs taskStartedEvent)
+                this.RaiseTaskStartedEvent(null, taskStartedEvent);
+            else if (e is TaskFinishedEventArgs taskFinishedEvent)
+                this.RaiseTaskFinishedEvent(null, taskFinishedEvent);
+            else if (e is TargetStartedEventArgs targetStartedEvent)
+                this.RaiseTargetStartedEvent(null, targetStartedEvent);
+            else if (e is TargetFinishedEventArgs targetFinishedEvent)
+                this.RaiseTargetFinishedEvent(null, targetFinishedEvent);
+            else if (e is ProjectStartedEventArgs projectStartedEvent)
+                this.RaiseProjectStartedEvent(null, projectStartedEvent);
+            else if (e is ProjectFinishedEventArgs projectFinishedEvent)
+                this.RaiseProjectFinishedEvent(null, projectFinishedEvent);
+            else if (e is BuildStartedEventArgs buildStartedEvent)
+                this.RaiseBuildStartedEvent(null, buildStartedEvent);
+            else if (e is BuildFinishedEventArgs buildFinishedEvent)
+                this.RaiseBuildFinishedEvent(null, buildFinishedEvent);
+            else if (e is CustomBuildEventArgs customBuildEvent)
+                this.RaiseCustomEvent(null, customBuildEvent);
+            else if (e is BuildStatusEventArgs buildStatusEvent)
+                this.RaiseStatusEvent(null, buildStatusEvent);
+            else if (e is BuildWarningEventArgs buildWarningEvent)
+                this.RaiseWarningEvent(null, buildWarningEvent);
+            else if (e is BuildErrorEventArgs buildErrorEvent)
+                this.RaiseErrorEvent(null, buildErrorEvent);
             else
                 ErrorUtilities.VerifyThrow(false, "Unknown event args type.");
         }

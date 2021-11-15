@@ -217,66 +217,63 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void Consume(BuildEventArgs buildEvent)
         {
-            // FXCop may complain that there are unecessary casts here, and there are, but
-            // using "as" and allocating another variable for each event is extremely costly
-            // and is much slower then this approach even with the additional casts
-            if (buildEvent is BuildMessageEventArgs)
+            if (buildEvent is BuildMessageEventArgs buildMessageEvent)
             {
-                this.RaiseMessageEvent(null, (BuildMessageEventArgs)buildEvent);
+                this.RaiseMessageEvent(null, buildMessageEvent);
             }
-            else if (buildEvent is TaskStartedEventArgs)
+            else if (buildEvent is TaskStartedEventArgs taskStartedEvent)
             {
-                this.RaiseTaskStartedEvent(null, (TaskStartedEventArgs)buildEvent);
+                this.RaiseTaskStartedEvent(null, taskStartedEvent);
             }
-            else if (buildEvent is TaskFinishedEventArgs)
+            else if (buildEvent is TaskFinishedEventArgs taskFinishedEvent)
             {
-                this.RaiseTaskFinishedEvent(null, (TaskFinishedEventArgs)buildEvent);
+                this.RaiseTaskFinishedEvent(null, taskFinishedEvent);
             }
-            else if (buildEvent is TargetStartedEventArgs)
+            else if (buildEvent is TargetStartedEventArgs targetStartedEvent)
             {
-                this.RaiseTargetStartedEvent(null, (TargetStartedEventArgs)buildEvent);
+                this.RaiseTargetStartedEvent(null, targetStartedEvent);
             }
-            else if (buildEvent is TargetFinishedEventArgs)
+            else if (buildEvent is TargetFinishedEventArgs targetFinishedEvent)
             {
-                this.RaiseTargetFinishedEvent(null, (TargetFinishedEventArgs)buildEvent);
+                this.RaiseTargetFinishedEvent(null, targetFinishedEvent);
             }
-            else if (buildEvent is ProjectStartedEventArgs)
+            else if (buildEvent is ProjectStartedEventArgs projectStartedEvent)
             {
-                this.RaiseProjectStartedEvent(null, (ProjectStartedEventArgs)buildEvent);
+                this.RaiseProjectStartedEvent(null, projectStartedEvent);
             }
-            else if (buildEvent is ProjectFinishedEventArgs)
+            else if (buildEvent is ProjectFinishedEventArgs projectFinishedEvent)
             {
-                this.RaiseProjectFinishedEvent(null, (ProjectFinishedEventArgs)buildEvent);
+                this.RaiseProjectFinishedEvent(null, projectFinishedEvent);
             }
-            else if (buildEvent is BuildStartedEventArgs)
+            else if (buildEvent is BuildStartedEventArgs buildStartedEvent)
             {
                 HaveLoggedBuildStartedEvent = true;
-                this.RaiseBuildStartedEvent(null, (BuildStartedEventArgs)buildEvent);
+                this.RaiseBuildStartedEvent(null, buildStartedEvent);
             }
-            else if (buildEvent is BuildFinishedEventArgs)
+            else if (buildEvent is BuildFinishedEventArgs buildFinishedEvent)
             {
                 HaveLoggedBuildFinishedEvent = true;
-                this.RaiseBuildFinishedEvent(null, (BuildFinishedEventArgs)buildEvent);
+                this.RaiseBuildFinishedEvent(null, buildFinishedEvent);
             }
-            else if (buildEvent is CustomBuildEventArgs)
+            else if (buildEvent is CustomBuildEventArgs customBuildEvent)
             {
-                this.RaiseCustomEvent(null, (CustomBuildEventArgs)buildEvent);
+                this.RaiseCustomEvent(null, customBuildEvent);
             }
-            else if (buildEvent is BuildStatusEventArgs)
+            else if (buildEvent is BuildStatusEventArgs buildStatusEvent)
             {
-                this.RaiseStatusEvent(null, (BuildStatusEventArgs)buildEvent);
+                this.RaiseStatusEvent(null, buildStatusEvent);
             }
-            else if (buildEvent is BuildWarningEventArgs)
+            else if (buildEvent is BuildWarningEventArgs buildWarningEvent)
             {
-                this.RaiseWarningEvent(null, (BuildWarningEventArgs)buildEvent);
+                this.RaiseWarningEvent(null, buildWarningEvent);
             }
-            else if (buildEvent is BuildErrorEventArgs)
+            else if (buildEvent is BuildErrorEventArgs buildErrorEvent)
             {
-                this.RaiseErrorEvent(null, (BuildErrorEventArgs)buildEvent);
+                this.RaiseErrorEvent(null, buildErrorEvent);
             }
-            else if (buildEvent is TelemetryEventArgs)
+            else if (buildEvent is TelemetryEventArgs telemetryEvent)
             {
-                this.RaiseTelemetryEvent(null, (TelemetryEventArgs) buildEvent);
+                this.RaiseTelemetryEvent(null, telemetryEvent);
             }
             else
             {
