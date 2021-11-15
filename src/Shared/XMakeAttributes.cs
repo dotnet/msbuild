@@ -442,7 +442,6 @@ namespace Microsoft.Build.Shared
 #endif
         }
 
-
         /// <summary>
         /// Given an MSBuildArchitecture value that may be non-explicit -- e.g. "CurrentArchitecture" or "Any" --
         /// return the specific MSBuildArchitecture value that it would map to in this case.  If it does not map 
