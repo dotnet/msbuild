@@ -29,8 +29,10 @@ namespace Microsoft.Build.Globbing
             {
                 Globs = immutableGlobs;
             }
-
-            Globs = globs.ToImmutableArray();
+            else
+            {
+                Globs = globs.ToImmutableArray();
+            }
         }
 
         /// <summary>
