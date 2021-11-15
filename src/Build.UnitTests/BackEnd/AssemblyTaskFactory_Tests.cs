@@ -184,8 +184,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             SetupTaskFactory(factoryIdentityParameters, false /* don't want task host */);
 
             IDictionary<string, string> taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            taskIdentityParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr4);
-            taskIdentityParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
+            taskIdentityParameters.Add(XMakeAttributes.runtime, XMakeAttributes.GetCurrentMSBuildRuntime());
+            taskIdentityParameters.Add(XMakeAttributes.architecture, XMakeAttributes.GetCurrentMSBuildArchitecture());
 
             Assert.True(_taskFactory.TaskNameCreatableByFactory("TaskToTestFactories", taskIdentityParameters, String.Empty, null, ElementLocation.Create(".", 1, 1)));
         }
@@ -309,7 +309,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr4);
+                taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.GetCurrentMSBuildRuntime());
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.GetCurrentMSBuildArchitecture());
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
@@ -406,7 +406,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 IDictionary<string, string> factoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                factoryParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr4);
+                factoryParameters.Add(XMakeAttributes.runtime, XMakeAttributes.GetCurrentMSBuildRuntime());
 
                 SetupTaskFactory(factoryParameters, false /* don't want task host */);
 

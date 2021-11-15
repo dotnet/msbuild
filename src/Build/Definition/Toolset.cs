@@ -920,6 +920,17 @@ namespace Microsoft.Build.Evaluation
                     reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
                     reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
 
+                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
+#if RUNTIME_TYPE_NETCORE
+                        "Core",
+#elif MONO
+                        NativeMethodsShared.IsMono ? "Mono" : "Full");
+#else
+                        "Full",
+#endif
+                        mayBeReserved: true));
+
+
                     // Add one for the subtoolset version property -- it may or may not be set depending on whether it has already been set by the
                     // environment or global properties, but it's better to create a dictionary that's one too big than one that's one too small.
                     int count = _environmentProperties.Count + reservedProperties.Count + Properties.Values.Count + _globalProperties.Count + 1;

@@ -372,7 +372,9 @@ namespace Microsoft.Build.BackEnd
 
                     if (s_msbuildName == null)
                     {
-                        s_msbuildName = "MSBuild.exe";
+                        s_msbuildName = (hostContext & HandshakeOptions.NET) == HandshakeOptions.NET
+                            ? "MSBuild.dll"
+                            : "MSBuild.exe";
                     }
                 }
 
