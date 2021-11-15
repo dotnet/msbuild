@@ -355,12 +355,12 @@ namespace Microsoft.Build.BackEnd
 
                 mergedParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                if (!mergedParameters.TryGetValue(XMakeAttributes.runtime, out _))
+                if (!mergedParameters.ContainsKey(XMakeAttributes.runtime))
                 {
                     mergedParameters[XMakeAttributes.runtime] = XMakeAttributes.GetCurrentMSBuildRuntime();
                 }
 
-                if (!mergedParameters.TryGetValue(XMakeAttributes.architecture, out _))
+                if (!mergedParameters.ContainsKey(XMakeAttributes.architecture))
                 {
                     mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }

@@ -80,7 +80,7 @@ namespace Microsoft.Build.Internal
 
         internal Handshake(HandshakeOptions nodeType)
         {
-            // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
+            // We currently use 7 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
             // This indicates in the first byte that we are a modern build.
             options = (int)nodeType | (((int)CommunicationsUtilities.handshakeVersion) << 24);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
