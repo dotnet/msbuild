@@ -136,11 +136,11 @@ stages:
       parameters:
         agentOs: Darwin
         pool:
-          vmImage: 'macOS-latest'
+          vmImage: 'macOS-10.15'
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1100.Amd64.Open
+          helixTargetQueue: OSX.1015.Amd64.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1100.Amd64
+          helixTargetQueue: OSX.1015.Amd64
         strategy:
           matrix:
             Build_Release:
