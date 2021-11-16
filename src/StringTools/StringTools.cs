@@ -93,10 +93,6 @@ namespace Microsoft.NET.StringTools
             return WeakStringCacheInterner.Instance.FormatStatistics();
         }
 
-#if NETSTANDARD2_0
-        public string AsSpan(string s) => s;
-#endif // NETSTANDARD2_0
-
         #endregion
 
         /// <summary>
