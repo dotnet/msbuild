@@ -37,6 +37,20 @@ namespace Microsoft.Build.Globbing
         /// </summary>
         /// <param name="mainGlob">The main glob</param>
         /// <param name="gaps">The gap glob</param>
+        internal MSBuildGlobWithGaps(IMSBuildGlob mainGlob, IMSBuildGlob gaps)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(mainGlob, nameof(mainGlob));
+            ErrorUtilities.VerifyThrowArgumentNull(gaps, nameof(gaps));
+
+            MainGlob = mainGlob;
+            Gaps = gaps;
+        }
+
+        /// <summary>
+        ///     Constructor
+        /// </summary>
+        /// <param name="mainGlob">The main glob</param>
+        /// <param name="gaps">The gap glob</param>
         public MSBuildGlobWithGaps(IMSBuildGlob mainGlob, IEnumerable<IMSBuildGlob> gaps)
         {
             ErrorUtilities.VerifyThrowArgumentNull(mainGlob, nameof(mainGlob));
