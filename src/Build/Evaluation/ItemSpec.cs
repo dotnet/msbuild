@@ -97,7 +97,7 @@ namespace Microsoft.Build.Evaluation
 
             protected override IMSBuildGlob CreateMsBuildGlob()
             {
-                return new CompositeGlob(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
+                return CompositeGlob.Create(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
             }
 
             private bool InitReferencedItemsIfNecessary()
@@ -368,7 +368,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IMSBuildGlob ToMSBuildGlob()
         {
-            return new CompositeGlob(Fragments.Select(f => f.ToMSBuildGlob()));
+            return CompositeGlob.Create(Fragments.Select(f => f.ToMSBuildGlob()));
         }
 
         /// <summary>

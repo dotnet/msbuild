@@ -1536,6 +1536,7 @@ namespace Microsoft.Build.Globbing
         public CompositeGlob(params Microsoft.Build.Globbing.IMSBuildGlob[] globs) { }
         public CompositeGlob(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) { }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> Globs { get { throw null; } }
+        public static Microsoft.Build.Globbing.IMSBuildGlob Create(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) { throw null; }
         public bool IsMatch(string stringToMatch) { throw null; }
     }
     public partial interface IMSBuildGlob

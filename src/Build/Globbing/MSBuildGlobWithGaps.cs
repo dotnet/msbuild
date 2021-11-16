@@ -43,7 +43,7 @@ namespace Microsoft.Build.Globbing
             ErrorUtilities.VerifyThrowArgumentNull(gaps, nameof(gaps));
 
             MainGlob = mainGlob;
-            Gaps = new CompositeGlob(gaps);
+            Gaps = CompositeGlob.Create(gaps);
         }
 
         /// <summary>

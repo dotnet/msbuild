@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Globbing
 {
@@ -60,6 +61,89 @@ namespace Microsoft.Build.Globbing
             //return Globs.AsParallel().Any(g => g.IsMatch(stringToMatch));
 
             return _globs.Any(g => g.IsMatch(stringToMatch));
+        }
+
+        /// <summary>
+        ///     Creates an <see cref="IMSBuildGlob"/> that aggregates multiple other globs
+        ///     such that the resulting glob matches when any inner glob matches (disjunction).
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         When <paramref name="globs"/> contains no elements, a singleton glob is
+        ///         returned that never matches, regardless of input.
+        ///     </para>
+        ///     <para>
+        ///         When <paramref name="globs"/> contains one element, that single element is
+        ///         returned directly. This avoids allocating a redundant wrapper instance.
+        ///     </para>
+        /// </remarks>
+        /// <param name="globs">An enumeration of globs to compose.</param>
+        /// <returns>The logical disjunction of the input globs.</returns>
+        public static IMSBuildGlob Create(IEnumerable<IMSBuildGlob> globs)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(globs, nameof(globs));
+
+            if (globs is ImmutableArray<IMSBuildGlob> immutableGlobs)
+            {
+                // Avoid allocations in the case that the input is an ImmutableArray
+                return immutableGlobs.Length switch
+                {
+                    0 => NeverMatchingGlob.Instance,
+                    1 => immutableGlobs[0],
+                    _ => new CompositeGlob(immutableGlobs)
+                };
+            }
+
+            // Use explicit enumeration so we can do minimal work in the case
+            // that the input set of globs is either empty or only contains a
+            // single item.
+
+            using var enumerator = globs.GetEnumerator();
+
+            if (!enumerator.MoveNext())
+            {
+                // The input is empty, so return our singleton that doesn't
+                // match anything.
+                return NeverMatchingGlob.Instance;
+            }
+
+            var first = enumerator.Current;
+
+            if (!enumerator.MoveNext())
+            {
+                // The input contains only a single glob. Disjunction has no
+                // effect on a single input, so return it directly and avoid
+                // allocating a CompositeGlob instance.
+                return first;
+            }
+
+            // We have more than one input glob, to add them all to a builder
+            // and create a new CompositeGlob.
+
+            var builder = ImmutableArray.CreateBuilder<IMSBuildGlob>();
+
+            builder.Add(first);
+            builder.Add(enumerator.Current);
+
+            while (enumerator.MoveNext())
+            {
+                builder.Add(enumerator.Current);
+            }
+
+            return new CompositeGlob(builder.ToImmutable());
+        }
+
+        /// <summary>
+        ///    A glob that never returns a match.
+        /// </summary>
+        private sealed class NeverMatchingGlob : IMSBuildGlob
+        {
+            /// <summary>
+            ///    Singleton instance of this type.
+            /// </summary>
+            public static NeverMatchingGlob Instance { get; } = new();
+
+            public bool IsMatch(string stringToMatch) => false;
         }
     }
 }
