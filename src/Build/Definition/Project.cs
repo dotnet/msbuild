@@ -2604,17 +2604,13 @@ namespace Microsoft.Build.Evaluation
 
             private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
             {
-                if (excludeGlob == null)
+                return (excludeGlob, removeGlob) switch
                 {
-                    return removeGlob == null ? includeGlob :
-                        new MSBuildGlobWithGaps(includeGlob, removeGlob);
-                }
-                else
-                {
-                    return new MSBuildGlobWithGaps(includeGlob,
-                        removeGlob == null ? excludeGlob :
-                        new CompositeGlob(excludeGlob, removeGlob));
-                }
+                    (null,     null)     => includeGlob,
+                    (not null, null)     => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
+                    (null,     not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
+                    (not null, not null) => new MSBuildGlobWithGaps(includeGlob, new CompositeGlob(excludeGlob, removeGlob))
+                };
             }
 
             private void CacheInformationFromRemoveItem(ProjectItemElement itemElement, Dictionary<string, CumulativeRemoveElementData> removeElementCache)
