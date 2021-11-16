@@ -305,10 +305,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData("build", false)]
-        [InlineData("publish", false)]
-        [InlineData("run", true)]
-        public void GivenWorkloadsAreOutOfDateUpdatesAreAdvertisedOnRestoringCommands(string commandName, bool commandOptedOut)
+        [InlineData("build", true)]
+        [InlineData("publish", true)]
+        [InlineData("run", false)]
+        public void GivenWorkloadsAreOutOfDateUpdatesAreAdvertisedOnRestoringCommands(string commandName, bool shouldShowUpdateNotification)
         {
             var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld", identifier: commandName)
                 .WithSource()
@@ -325,20 +325,21 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .WithEnvironmentVariable("DOTNET_CLI_HOME", testInstance.Path)
                 .WithWorkingDirectory(testInstance.Path)
                 .Execute(commandName);
-            if (!commandOptedOut)
+
+            commandResult
+                .Should()
+                .Pass();
+
+            if (shouldShowUpdateNotification)
             {
                 commandResult
                     .Should()
-                    .Pass()
-                    .And
                     .HaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.WorkloadUpdatesAvailable);
             }
             else
             {
                 commandResult
                     .Should()
-                    .Pass()
-                    .And
                     .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.WorkloadUpdatesAvailable);
             }
 
