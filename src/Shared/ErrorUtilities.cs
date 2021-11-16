@@ -488,7 +488,7 @@ namespace Microsoft.Build.Shared
         /// <param name="innerException">Can be null.</param>
         /// <param name="resourceName"></param>
         /// <param name="args"></param>
-        private static void ThrowArgument
+        internal static void ThrowArgument
         (
             Exception innerException,
             string resourceName,

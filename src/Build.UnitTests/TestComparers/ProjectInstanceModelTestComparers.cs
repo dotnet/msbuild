@@ -183,6 +183,12 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                 Assert.Equal(x.RemoveMetadataLocation, y.RemoveMetadataLocation, new Helpers.ElementLocationComparerIgnoringType());
                 Assert.Equal(x.ConditionLocation, y.ConditionLocation, new Helpers.ElementLocationComparerIgnoringType());
 
+                Assert.Equal(x.MatchOnMetadata, y.MatchOnMetadata);
+                Assert.Equal(x.MatchOnMetadataLocation, y.MatchOnMetadataLocation, new Helpers.ElementLocationComparerIgnoringType());
+
+                Assert.Equal(x.MatchOnMetadataOptions, y.MatchOnMetadataOptions);
+                Assert.Equal(x.MatchOnMetadataOptionsLocation, y.MatchOnMetadataOptionsLocation, new Helpers.ElementLocationComparerIgnoringType());
+
                 Assert.Equal(x.Metadata, y.Metadata, new TargetItemMetadataComparer());
 
                 return true;

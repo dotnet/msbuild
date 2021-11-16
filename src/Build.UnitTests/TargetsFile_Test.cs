@@ -32,11 +32,12 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <OutputType>Library</OutputType>
                         <Configuration>Debug</Configuration>
                         <PlatformTarget>arm</PlatformTarget>
@@ -134,18 +135,18 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>Library</OutputType>
                         <Configuration>Debug</Configuration>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <PlatformTarget>AnyCPU</PlatformTarget>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
@@ -186,7 +187,7 @@ namespace Microsoft.Build.UnitTests
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
                     @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
                         <OutputPath>" + outputPath + @"</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
@@ -241,10 +242,10 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>winmdobj</OutputType>
                         <Configuration>Debug</Configuration>
@@ -253,10 +254,10 @@ namespace Microsoft.Build.UnitTests
                       <!-- For dealing with the case where the Jupiter targets do not exist, in order to follow the appropriate codepaths in the standard managed
                            we need to be .NET 4.5 or greater -->
                       <PropertyGroup Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')`>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets` Condition=`Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                       <!-- Fall back to CSharp targets for the sake of this test if the Jupiter targets don't exist, since what we're testing can be equally well resolved by either -->
@@ -298,17 +299,17 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>Exe</OutputType>
                         <Configuration>Debug</Configuration>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
@@ -348,18 +349,18 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>Exe</OutputType>
                         <Configuration>Debug</Configuration>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <PlatformTarget>AnyCPU</PlatformTarget>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
@@ -400,7 +401,7 @@ namespace Microsoft.Build.UnitTests
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
                     @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
                         <OutputPath>" + outputPath + @"</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
@@ -434,10 +435,10 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Check that with an explicit platformtarget of anycpu, exe type assemblies that are 
-        /// targeting .NET 4.0 do not get forced to anycpu32bitpreferred by default. 
+        /// targeting .NET 4.0+ do not get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Fact]
-        public void ExplicitAnyCPU40ExeProjectIsNot32BitPreferred()
+        public void ExplicitAnyCPUExeProjectIsNot32BitPreferred()
         {
             string file = null;
             string outputPath = Path.GetTempPath() + "\\" + Guid.NewGuid().ToString("N");
@@ -449,18 +450,18 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>Exe</OutputType>
                         <Configuration>Debug</Configuration>
-                        <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <PlatformTarget>AnyCPU</PlatformTarget>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
@@ -470,7 +471,7 @@ namespace Microsoft.Build.UnitTests
 
                 project.Build();
 
-                logger.AssertLogContains(" /platform:AnyCPU ");
+                logger.AssertLogContains("Platform=AnyCPU");
             }
             finally
             {
@@ -500,21 +501,21 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>AppContainerExe</OutputType>
                         <Configuration>Debug</Configuration>
                       </PropertyGroup>
                       <!-- For dealing with the case where the Jupiter targets do not exist, in order to follow the appropriate codepaths in the standard managed
-                           we need to be .NET 4.5 or greater -->
+                           we need to be .NET 4.5 or greater, but 4.8 is on the CI machine -->
                       <PropertyGroup Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')`>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets` Condition=`Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                       <!-- Fall back to CSharp targets for the sake of this test if the Jupiter targets don't exist, since what we're testing can be equally well resolved by either -->
@@ -556,10 +557,10 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>AppContainerExe</OutputType>
                         <Configuration>Debug</Configuration>
@@ -568,10 +569,10 @@ namespace Microsoft.Build.UnitTests
                       <!-- For dealing with the case where the Jupiter targets do not exist, in order to follow the appropriate codepaths in the standard managed
                            we need to be .NET 4.5 or greater -->
                       <PropertyGroup Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')`>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets` Condition=`Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                       <!-- Fall back to CSharp targets for the sake of this test if the Jupiter targets don't exist, since what we're testing can be equally well resolved by either -->
@@ -613,19 +614,19 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`Current` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>Library</OutputType>
                         <Configuration>Debug</Configuration>
                         <PlatformTarget>AnyCPU</PlatformTarget>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <Prefer32Bit>true</Prefer32Bit>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                    </Project>
@@ -665,17 +666,17 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <Configuration>Debug</Configuration>
                         <PlatformTarget>AnyCPU</PlatformTarget>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                    </Project>
@@ -715,17 +716,17 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
-                   <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`>
+                    $@"
+                   <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <Configuration>Debug</Configuration>
                         <PlatformTarget>AnyCPU</PlatformTarget>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + file + @"` />
+                        <Compile Include=`{file}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets` Condition=`Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                       <!-- Fall back to CSharp targets for the sake of this test if the Jupiter targets don't exist, since what we're testing can be equally well resolved by either -->
@@ -867,20 +868,20 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
+                    $@"
                    <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>Library</OutputType>
                         <Configuration>Debug</Configuration>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <SynthesizeLinkMetadata>true</SynthesizeLinkMetadata>
                       </PropertyGroup>
                       <ItemGroup>
-                        <Compile Include=`" + files[0] + @"` />
-                        <None Include=`" + files[1] + @"` />
-                        <Content Include=`" + files[2] + @"` />
+                        <Compile Include=`{files[0]}` />
+                        <None Include=`{files[1]}` />
+                        <Content Include=`{files[2]}` />
                       </ItemGroup>
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                       <Target Name=`AfterBuild`>
@@ -952,17 +953,17 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
+                    $@"
                    <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>Library</OutputType>
                         <Configuration>Debug</Configuration>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <SynthesizeLinkMetadata>true</SynthesizeLinkMetadata>
                       </PropertyGroup>
-                      <Import Project=`" + files[3] + @"` />
+                      <Import Project=`{files[3]}` />
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                       <Target Name=`AfterBuild`>
                         <Message Text=`%(Compile.Identity): [%(Compile.Link)]` />
@@ -1030,17 +1031,17 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
-                    @"
+                    $@"
                    <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
-                        <OutputPath>" + outputPath + @"</OutputPath>
+                        <OutputPath>{outputPath}</OutputPath>
                         <AssemblyName>MyAssembly</AssemblyName>
                         <OutputType>Library</OutputType>
                         <Configuration>Debug</Configuration>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <SynthesizeLinkMetadata>false</SynthesizeLinkMetadata>
                       </PropertyGroup>
-                      <Import Project=`" + files[3] + @"` />
+                      <Import Project=`{files[3]}` />
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                       <Target Name=`AfterBuild`>
                         <Message Text=`%(Compile.Identity): [%(Compile.Link)]` />

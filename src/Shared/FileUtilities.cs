@@ -903,7 +903,7 @@ namespace Microsoft.Build.Shared
                 fileSystem ??= DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
-                    ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.DirectoryExists)
+                    ? FileExistenceCache.GetOrAdd(fullPath, fullPath => fileSystem.DirectoryExists(fullPath))
                     : fileSystem.DirectoryExists(fullPath);
             }
             catch
@@ -927,7 +927,7 @@ namespace Microsoft.Build.Shared
                 fileSystem ??= DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
-                    ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.FileExists)
+                    ? FileExistenceCache.GetOrAdd(fullPath, fullPath => fileSystem.FileExists(fullPath))
                     : fileSystem.FileExists(fullPath);
             }
             catch
@@ -951,7 +951,7 @@ namespace Microsoft.Build.Shared
                 fileSystem ??= DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
-                    ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.FileOrDirectoryExists)
+                    ? FileExistenceCache.GetOrAdd(fullPath, fullPath => fileSystem.FileOrDirectoryExists(fullPath))
                     : fileSystem.FileOrDirectoryExists(fullPath);
             }
             catch

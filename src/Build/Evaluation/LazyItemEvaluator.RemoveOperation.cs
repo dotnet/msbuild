@@ -23,7 +23,7 @@ namespace Microsoft.Build.Evaluation
                 _matchOnMetadata = builder.MatchOnMetadata.ToImmutable();
 
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    _matchOnMetadata.IsEmpty || _itemSpec.Fragments.All(f => f is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment),
+                    _matchOnMetadata.IsEmpty || _itemSpec.Fragments.All(f => f is ItemSpec<P, I>.ItemExpressionFragment),
                     new BuildEventFileInfo(string.Empty),
                     "OM_MatchOnMetadataIsRestrictedToReferencedItems");
 

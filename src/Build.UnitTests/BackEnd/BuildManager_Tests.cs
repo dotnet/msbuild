@@ -1598,7 +1598,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogDoesntContain("[errormessage]");
         }
 
-#if FEATURE_TASKHOST && !NO_MSBUILDTASKHOST
+#if !NO_MSBUILDTASKHOST
         // Run this test only if we expect MSBuildTaskHost to have been produced, which requires that MSBuildTaskHost.csproj
         // be built with full-framework MSBuild (so that it can target .NET 3.5).
 
@@ -1672,7 +1672,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogDoesntContain("[errormessage]");
         }
 
-#if FEATURE_TASKHOST
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.0 task, we should
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly.
@@ -1706,7 +1705,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Task host should not have exited prematurely
             _logger.AssertLogDoesntContain("MSB4217");
         }
-#endif
 
         /// <summary>
         /// This test verifies that builds of the same project instance in sequence are permitted.
@@ -4360,10 +4358,8 @@ $@"<Project InitialTargets=`Sleep`>
         [Theory]
         [InlineData("", false)] // regular task host, input logging disabled
         [InlineData("", true)] // regular task host, input logging enabled
-#if NETFRAMEWORK // https://github.com/microsoft/msbuild/issues/5158
         [InlineData("TaskHostFactory", false)] // OOP task host, input logging disabled
         [InlineData("TaskHostFactory", true)] // OOP task host, input logging enabled
-#endif
         public void TaskInputLoggingIsExposedToTasks(string taskFactory, bool taskInputLoggingEnabled)
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>

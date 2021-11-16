@@ -372,12 +372,13 @@ namespace Microsoft.Build.UnitTests
 
             // Just a normal console application project.
             ObjectModelHelpers.CreateFileInTempProjectDirectory(
-                @"bug'533'369\Sub;Dir\ConsoleApplication1\ConsoleApplication1.csproj", @"
+                @"bug'533'369\Sub;Dir\ConsoleApplication1\ConsoleApplication1.csproj", $@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                   <PropertyGroup>
                     <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                     <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                    <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                     <OutputType>Exe</OutputType>
                     <AssemblyName>ConsoleApplication1</AssemblyName>
                   </PropertyGroup>

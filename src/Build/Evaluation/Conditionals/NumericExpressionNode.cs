@@ -21,60 +21,20 @@ namespace Microsoft.Build.Evaluation
             _value = value;
         }
 
-        /// <summary>
-        /// Evaluate as boolean
-        /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
         {
-            // Should be unreachable: all calls check CanBoolEvaluate() first
-            ErrorUtilities.VerifyThrow(false, "Can't evaluate a numeric expression as boolean.");
+            result = default;
             return false;
         }
 
-        /// <summary>
-        /// Evaluate as numeric
-        /// </summary>
-        internal override double NumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
         {
-            return ConversionUtilities.ConvertDecimalOrHexToDouble(_value);
+            return ConversionUtilities.TryConvertDecimalOrHexToDouble(_value, out result);
         }
 
-        /// <summary>
-        /// Evaluate as a Version
-        /// </summary>
-        internal override Version VersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
         {
-            return Version.Parse(_value);
-        }
-
-        /// <summary>
-        /// Whether it can be evaluated as a boolean: never allowed for numerics
-        /// </summary>
-        internal override bool CanBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            // Numeric expressions are never allowed to be treated as booleans.
-            return false;
-        }
-
-        /// <summary>
-        /// Whether it can be evaluated as numeric
-        /// </summary>
-        internal override bool CanNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            // It is not always possible to numerically evaluate even a numerical expression -
-            // for example, it may overflow a double. So check here.
-            return ConversionUtilities.ValidDecimalOrHexNumber(_value);
-        }
-
-        /// <summary>
-        /// Whether it can be evaluated as a Version
-        /// </summary>
-        internal override bool CanVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            // Check if the value can be formatted as a Version number
-            // This is needed for nodes that identify as Numeric but can't be parsed as numbers (e.g. 8.1.1.0 vs 8.1)
-            Version unused;
-            return Version.TryParse(_value, out unused);
+            return Version.TryParse(_value, out result);
         }
 
         /// <summary>
