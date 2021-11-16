@@ -145,8 +145,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool AlwaysEvaluateDangerousGlobs = Environment.GetEnvironmentVariable("MSBuildAlwaysEvaluateDangerousGlobs") == "1";
 
-        public readonly bool DoNotOptimizeConsoleLogger = Environment.GetEnvironmentVariable("MSBUILDDONOOPTIMISECONSOLELOGGER") == "1";
-
         /// <summary>
         /// Emit events for project imports.
         /// </summary>

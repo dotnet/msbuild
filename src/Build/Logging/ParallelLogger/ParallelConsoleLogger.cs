@@ -1344,7 +1344,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 int adjustedPrefixWidth = _prefixWidth + prefixAdjustment;
 
-                if (Traits.Instance.EscapeHatches.DoNotOptimizeConsoleLogger || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
                 {
                     // The string may contain new lines, treat each new line as a different string to format and send to the console
                     string[] nonNullMessages = SplitStringOnNewLines(message);

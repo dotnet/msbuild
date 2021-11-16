@@ -45,7 +45,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns>Aligned message ready to be written to Console</returns>
         /// <remarks>
         /// For optimization purposes this method uses single <see cref="StringBuilder"/> instance. This makes this method non thread safe.
-        /// Calling side is expected this usage is non-concurrent. This shall nto be an issue as it is expected that writing into Console shall be serialized anyway.
+        /// Calling side is expected this usage is non-concurrent. This shall not be an issue as it is expected that writing into Console shall be serialized anyway.
         /// </remarks>
         public string AlignConsoleOutput(string message, bool prefixAlreadyWritten, int prefixWidth)
         {
@@ -60,7 +60,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 AlignAndIndentLineOfMessage(sb, prefixAlreadyWritten, prefixWidth, message, i, j - i);
                 i = j + (message[j] == '\r' && (j + 1) < message.Length && message[j + 1] == '\n' ? 2 : 1);
-                j = i < message.Length ? message.IndexOfAny(MSBuildConstants.CrLf, i) : -1;
+                j = message.IndexOfAny(MSBuildConstants.CrLf, i);
             }
 
             // Process rest of message
