@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     _reporter.WriteLine(string.Format(LocalizableStrings.WorkloadAlreadyInstalled, string.Join(" ", previouslyInstalledWorkloads)).Yellow());
                 }
-                workloadIds = workloadIds.Concat(installedWorkloads);
+                workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
 
                 _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
                 manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?

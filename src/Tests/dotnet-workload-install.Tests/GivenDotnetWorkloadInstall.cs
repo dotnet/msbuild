@@ -369,7 +369,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Fact]
-        public void GivenWorkloadInstallItErrorsWhenTheWorkloadIsAlreadyInstalled()
+        public void GivenWorkloadInstallItWarnsWhenTheWorkloadIsAlreadyInstalled()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
@@ -385,12 +385,23 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", workloadId });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
                 workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
-            installCommand.Execute();
+            installCommand.Execute()
+                .Should().Be(0);
             _reporter.Clear();
 
             // Install again, this time it should tell you that you already have the workload installed
-            installCommand.Execute();
+            installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", workloadId, "mock-2" });
+            installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            installCommand.Execute()
+                .Should().Be(0);
+            
+            // Install command warns
             string.Join(" ", _reporter.Lines).Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadAlreadyInstalled, workloadId));
+
+            // Both workloads are installed
+            var installRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads");
+            Directory.GetFiles(installRecordPath).Count().Should().Be(2);
         }
 
         private string AppendForUserLocal(string identifier, bool userLocal)

@@ -278,7 +278,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload(s) '{0}' are already installed. Run `dotnet workload update` to update your workloads.</source>
+        <source>Workload(s) '{0}' are already installed.</source>
         <target state="needs-review-translation">Die Workload "{0}" ist bereits installiert.</target>
         <note />
       </trans-unit>
