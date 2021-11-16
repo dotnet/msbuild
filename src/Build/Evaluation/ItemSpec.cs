@@ -97,6 +97,12 @@ namespace Microsoft.Build.Evaluation
 
             protected override IMSBuildGlob CreateMsBuildGlob()
             {
+                if (ReferencedItems.Count == 1)
+                {
+                    // Optimize the common case, avoiding allocation of enumerable/enumerator.
+                    return ReferencedItems[0].ItemAsValueFragment.ToMSBuildGlob();
+                }
+
                 return CompositeGlob.Create(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
             }
 
@@ -368,6 +374,12 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IMSBuildGlob ToMSBuildGlob()
         {
+            if (Fragments.Count == 1)
+            {
+                // Optimize the common case, avoiding allocation of enumerable/enumerator.
+                return Fragments[0].ToMSBuildGlob();
+            }
+
             return CompositeGlob.Create(Fragments.Select(f => f.ToMSBuildGlob()));
         }
 
