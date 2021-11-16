@@ -153,6 +153,7 @@ jobs:
               --projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
               /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TestInHelix.binlog
               /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
+              $(_InternalRuntimeDownloadArgs)
         displayName: Run Tests in Helix
         condition: succeededOrFailed()
         env:
