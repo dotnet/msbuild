@@ -490,6 +490,19 @@ namespace Microsoft.Build.Eventing
             WriteEvent(67, sdkName, solutionPath, projectPath, success);
         }
 
+        [Event(68, Keywords = Keywords.All)]
+        public void ReusableStringBuilderFactoryStart(int hash, int newCapacity, int oldCapacity, string type)
+        {
+            WriteEvent(68, hash, newCapacity, oldCapacity, type);
+        }
+
+        [Event(69, Keywords = Keywords.All)]
+        public void ReusableStringBuilderFactoryStop(int hash, int returningCapacity, string type)
+        {
+            WriteEvent(69, hash, returningCapacity, type);
+        }
+
+
         #endregion
     }
 }

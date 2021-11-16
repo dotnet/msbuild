@@ -33,6 +33,9 @@
 
 using System;
 using System.Text;
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+using Microsoft.Build.Eventing;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -59,11 +62,19 @@ namespace Microsoft.Build.Shared
                     {
                         StringBuilderCache.t_cachedInstance = null;
                         sb.Length = 0; // Equivalent of sb.Clear() that works on .Net 3.5
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+                        MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: sb.GetHashCode(), newCapacity: capacity, oldCapacity: sb.Capacity, type: "sbc-reused");
+#endif
                         return sb;
                     }
                 }
             }
-            return new StringBuilder(capacity);
+
+            StringBuilder stringBuilder = new StringBuilder(capacity);
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+            MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: stringBuilder.GetHashCode(), newCapacity: capacity, oldCapacity: stringBuilder.Capacity, type: "sbc-new");
+#endif
+            return stringBuilder;
         }
 
         public static void Release(StringBuilder sb)
@@ -72,6 +83,9 @@ namespace Microsoft.Build.Shared
             {
                 StringBuilderCache.t_cachedInstance = sb;
             }
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+            MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: sb.GetHashCode(), returningCapacity: sb.Capacity, type: sb.Capacity <= MAX_BUILDER_SIZE ? "sbc-returned" :  "sbc-discarded");
+#endif
         }
 
         public static string GetStringAndRelease(StringBuilder sb)

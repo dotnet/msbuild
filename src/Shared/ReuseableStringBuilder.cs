@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.Shared
 {
@@ -236,6 +237,7 @@ namespace Microsoft.Build.Shared
 #endif
                     // Currently loaned out so return a new one
                     returned = new StringBuilder(capacity);
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity:capacity, oldCapacity:0, type:"missed");
                 }
                 else if (returned.Capacity < capacity)
                 {
@@ -244,7 +246,12 @@ namespace Microsoft.Build.Shared
 #endif
                     // It's essential we guarantee the capacity because this
                     // may be used as a buffer to a PInvoke call.
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: capacity, oldCapacity: returned.Capacity, type: "reused-inflated");
                     returned.Capacity = capacity;
+                }
+                else
+                {
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: capacity, oldCapacity: returned.Capacity, type: "reused");
                 }
 
 #if DEBUG
@@ -280,14 +287,20 @@ namespace Microsoft.Build.Shared
                     // ErrorUtilities.VerifyThrow(handouts.TryRemove(returningBuilder, out dummy), "returned but not loaned");
                     returningBuilder.Clear(); // Clear before pooling
 
-                    Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
+                    var oldSharedBuilder = Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, type: oldSharedBuilder == null ? "returned-set" : "returned-replace");
+
 #if DEBUG
                     Interlocked.Increment(ref s_accepts);
+#endif
                 }
                 else
                 {
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, type: "discarded");
+#if DEBUG
                     Interlocked.Increment(ref s_discards);
 #endif
+
                 }
             }
 
