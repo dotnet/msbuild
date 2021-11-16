@@ -10,7 +10,8 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Globbing
 {
     /// <summary>
-    ///     A Composite glob
+    ///     A composite glob that returns a match for an input if any of its
+    ///     inner globs match the input (disjunction).
     /// </summary>
     public class CompositeGlob : IMSBuildGlob
     {
