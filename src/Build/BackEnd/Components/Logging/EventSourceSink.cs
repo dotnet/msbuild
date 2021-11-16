@@ -201,7 +201,7 @@ namespace Microsoft.Build.BackEnd.Logging
         #region IEventSink Methods
 
         /// <summary>
-        /// Raises the given event to all registered loggers. This method up-cast the events
+        /// Raises the given event to all registered loggers. This method down-casts the events
         /// extracted from the queue.
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs</param>
@@ -212,72 +212,60 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Raises the given event to all registered loggers. This method up-cast the events
+        /// Raises the given event to all registered loggers. This method down-casts the events
         /// extracted from the queue.
         /// </summary>
         public void Consume(BuildEventArgs buildEvent)
         {
-            if (buildEvent is BuildMessageEventArgs buildMessageEvent)
+            switch (buildEvent)
             {
-                this.RaiseMessageEvent(null, buildMessageEvent);
-            }
-            else if (buildEvent is TaskStartedEventArgs taskStartedEvent)
-            {
-                this.RaiseTaskStartedEvent(null, taskStartedEvent);
-            }
-            else if (buildEvent is TaskFinishedEventArgs taskFinishedEvent)
-            {
-                this.RaiseTaskFinishedEvent(null, taskFinishedEvent);
-            }
-            else if (buildEvent is TargetStartedEventArgs targetStartedEvent)
-            {
-                this.RaiseTargetStartedEvent(null, targetStartedEvent);
-            }
-            else if (buildEvent is TargetFinishedEventArgs targetFinishedEvent)
-            {
-                this.RaiseTargetFinishedEvent(null, targetFinishedEvent);
-            }
-            else if (buildEvent is ProjectStartedEventArgs projectStartedEvent)
-            {
-                this.RaiseProjectStartedEvent(null, projectStartedEvent);
-            }
-            else if (buildEvent is ProjectFinishedEventArgs projectFinishedEvent)
-            {
-                this.RaiseProjectFinishedEvent(null, projectFinishedEvent);
-            }
-            else if (buildEvent is BuildStartedEventArgs buildStartedEvent)
-            {
-                HaveLoggedBuildStartedEvent = true;
-                this.RaiseBuildStartedEvent(null, buildStartedEvent);
-            }
-            else if (buildEvent is BuildFinishedEventArgs buildFinishedEvent)
-            {
-                HaveLoggedBuildFinishedEvent = true;
-                this.RaiseBuildFinishedEvent(null, buildFinishedEvent);
-            }
-            else if (buildEvent is CustomBuildEventArgs customBuildEvent)
-            {
-                this.RaiseCustomEvent(null, customBuildEvent);
-            }
-            else if (buildEvent is BuildStatusEventArgs buildStatusEvent)
-            {
-                this.RaiseStatusEvent(null, buildStatusEvent);
-            }
-            else if (buildEvent is BuildWarningEventArgs buildWarningEvent)
-            {
-                this.RaiseWarningEvent(null, buildWarningEvent);
-            }
-            else if (buildEvent is BuildErrorEventArgs buildErrorEvent)
-            {
-                this.RaiseErrorEvent(null, buildErrorEvent);
-            }
-            else if (buildEvent is TelemetryEventArgs telemetryEvent)
-            {
-                this.RaiseTelemetryEvent(null, telemetryEvent);
-            }
-            else
-            {
-                ErrorUtilities.ThrowInternalError("Unknown event args type.");
+                case BuildMessageEventArgs buildMessageEvent:
+                    RaiseMessageEvent(null, buildMessageEvent);
+                    break;
+                case TaskStartedEventArgs taskStartedEvent:
+                    RaiseTaskStartedEvent(null, taskStartedEvent);
+                    break;
+                case TaskFinishedEventArgs taskFinishedEvent:
+                    RaiseTaskFinishedEvent(null, taskFinishedEvent);
+                    break;
+                case TargetStartedEventArgs targetStartedEvent:
+                    RaiseTargetStartedEvent(null, targetStartedEvent);
+                    break;
+                case TargetFinishedEventArgs targetFinishedEvent:
+                    RaiseTargetFinishedEvent(null, targetFinishedEvent);
+                    break;
+                case ProjectStartedEventArgs projectStartedEvent:
+                    RaiseProjectStartedEvent(null, projectStartedEvent);
+                    break;
+                case ProjectFinishedEventArgs projectFinishedEvent:
+                    RaiseProjectFinishedEvent(null, projectFinishedEvent);
+                    break;
+                case BuildStartedEventArgs buildStartedEvent:
+                    HaveLoggedBuildStartedEvent = true;
+                    RaiseBuildStartedEvent(null, buildStartedEvent);
+                    break;
+                case BuildFinishedEventArgs buildFinishedEvent:
+                    HaveLoggedBuildFinishedEvent = true;
+                    RaiseBuildFinishedEvent(null, buildFinishedEvent);
+                    break;
+                case CustomBuildEventArgs customBuildEvent:
+                    RaiseCustomEvent(null, customBuildEvent);
+                    break;
+                case BuildStatusEventArgs buildStatusEvent:
+                    RaiseStatusEvent(null, buildStatusEvent);
+                    break;
+                case BuildWarningEventArgs buildWarningEvent:
+                    RaiseWarningEvent(null, buildWarningEvent);
+                    break;
+                case BuildErrorEventArgs buildErrorEvent:
+                    RaiseErrorEvent(null, buildErrorEvent);
+                    break;
+                case TelemetryEventArgs telemetryEvent:
+                    RaiseTelemetryEvent(null, telemetryEvent);
+                    break;
+                default:
+                    ErrorUtilities.ThrowInternalError("Unknown event args type.");
+                    break;
             }
         }
 
