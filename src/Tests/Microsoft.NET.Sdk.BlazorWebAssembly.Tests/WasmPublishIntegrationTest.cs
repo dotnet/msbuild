@@ -1280,6 +1280,59 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "Newtonsoft.Json.dll.br")).Should().NotExist();
         }
 
+        [Fact]
+        public void Publish_WithTransitiveReference_Works()
+        {
+            // Regression test for https://github.com/dotnet/aspnetcore/issues/37574.
+            var testInstance = CreateAspNetSdkTestAsset("BlazorWasmWithLibrary");
+
+            var buildCommand = new BuildCommand(testInstance, "classlibrarywithsatelliteassemblies");
+            buildCommand.Execute().Should().Pass();
+            var referenceAssemblyPath = new FileInfo(Path.Combine(
+                buildCommand.GetOutputDirectory(DefaultTfm).ToString(),
+                "classlibrarywithsatelliteassemblies.dll"));
+
+            referenceAssemblyPath.Should().Exist();
+
+            testInstance.WithProjectChanges((path, project) =>
+            {
+                if (path.Contains("razorclasslibrary"))
+                {
+                    var ns = project.Root.Name.Namespace;
+                    // <ItemGroup>
+                    //  <Reference Include="classlibrarywithsatelliteassemblies" HintPath="$Path\classlibrarywithsatelliteassemblies.dll" />
+                    // </ItemGroup>
+                    var itemGroup = new XElement(ns + "ItemGroup",
+                        new XElement(ns + "Reference",
+                            new XAttribute("Include", "classlibrarywithsatelliteassemblies"),
+                            new XAttribute("HintPath", referenceAssemblyPath)));
+
+                    project.Root.Add(itemGroup);
+                }
+            });
+
+            // Ensure a compile time reference exists between the project and the assembly added as a reference. This is required for 
+            // the assembly to be resolved by the "app" as part of RAR
+            File.WriteAllText(Path.Combine(testInstance.Path, "razorclasslibrary", "TestReference.cs"),
+@"
+public class TestReference
+{
+    public void Method() => System.GC.KeepAlive(typeof(classlibrarywithsatelliteassemblies.Class1));
+}");
+
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
+            publishCommand.Execute().Should().Pass();
+
+            // Assert
+            var outputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
+            var fileInWwwroot = new FileInfo(Path.Combine(outputDirectory, "wwwroot", "_framework", "classlibrarywithsatelliteassemblies.dll"));
+            fileInWwwroot.Should().Exist();
+
+            // Make sure it's a the correct copy.
+            fileInWwwroot.Length.Should().Be(referenceAssemblyPath.Length);
+            Assert.Equal(File.ReadAllBytes(referenceAssemblyPath.FullName), File.ReadAllBytes(fileInWwwroot.FullName));
+        }
+
         private static void VerifyBootManifestHashes(TestAsset testAsset, string blazorPublishDirectory)
         {
             var bootManifestResolvedPath = Path.Combine(blazorPublishDirectory, "_framework", "blazor.boot.json");
