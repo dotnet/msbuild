@@ -1542,6 +1542,7 @@ namespace Microsoft.Build.Globbing
         public CompositeGlob(params Microsoft.Build.Globbing.IMSBuildGlob[] globs) { }
         public CompositeGlob(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) { }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> Globs { get { throw null; } }
+        public static Microsoft.Build.Globbing.IMSBuildGlob Create(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) { throw null; }
         public bool IsMatch(string stringToMatch) { throw null; }
     }
     public partial interface IMSBuildGlob
@@ -1560,10 +1561,10 @@ namespace Microsoft.Build.Globbing
         public static Microsoft.Build.Globbing.MSBuildGlob Parse(string fileSpec) { throw null; }
         public static Microsoft.Build.Globbing.MSBuildGlob Parse(string globRoot, string fileSpec) { throw null; }
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        public partial struct MatchInfoResult
+        public readonly partial struct MatchInfoResult
         {
-            private object _dummy;
-            private int _dummyPrimitive;
+            private readonly object _dummy;
+            private readonly int _dummyPrimitive;
             public string FilenamePartMatchGroup { get { throw null; } }
             public string FixedDirectoryPartMatchGroup { get { throw null; } }
             public bool IsMatch { get { throw null; } }

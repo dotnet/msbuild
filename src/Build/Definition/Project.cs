@@ -2575,7 +2575,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.TextFragment).ToImmutableArray();
-                var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
+                var includeGlob = CompositeGlob.Create(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
 
                 IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
                 IMSBuildGlob excludeGlob = null;
@@ -2594,7 +2594,7 @@ namespace Microsoft.Build.Evaluation
                 if (removeElementCache.TryGetValue(itemElement.ItemType, out CumulativeRemoveElementData removeItemElement))
                 {
                     removeFragmentStrings = removeItemElement.FragmentStrings;
-                    removeGlob = new CompositeGlob(removeItemElement.Globs);
+                    removeGlob = CompositeGlob.Create(removeItemElement.Globs);
                 }
 
                 var includeGlobWithGaps = CreateIncludeGlobWithGaps(includeGlob, excludeGlob, removeGlob);
@@ -2604,17 +2604,13 @@ namespace Microsoft.Build.Evaluation
 
             private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
             {
-                if (excludeGlob == null)
+                return (excludeGlob, removeGlob) switch
                 {
-                    return removeGlob == null ? includeGlob :
-                        new MSBuildGlobWithGaps(includeGlob, removeGlob);
-                }
-                else
-                {
-                    return new MSBuildGlobWithGaps(includeGlob,
-                        removeGlob == null ? excludeGlob :
-                        new CompositeGlob(excludeGlob, removeGlob));
-                }
+                    (null,     null)     => includeGlob,
+                    (not null, null)     => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
+                    (null,     not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
+                    (not null, not null) => new MSBuildGlobWithGaps(includeGlob, new CompositeGlob(excludeGlob, removeGlob))
+                };
             }
 
             private void CacheInformationFromRemoveItem(ProjectItemElement itemElement, Dictionary<string, CumulativeRemoveElementData> removeElementCache)
