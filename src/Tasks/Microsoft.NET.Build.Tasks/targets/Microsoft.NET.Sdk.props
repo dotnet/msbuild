@@ -101,7 +101,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DebugSymbols Condition="'$(DebugSymbols)'==''">false</DebugSymbols>
     <CheckForOverflowUnderflow Condition="'$(CheckForOverflowUnderflow)'==''">false</CheckForOverflowUnderflow>
     <AutomaticallyUseReferenceAssemblyPackages Condition="'$(AutomaticallyUseReferenceAssemblyPackages)'==''">true</AutomaticallyUseReferenceAssemblyPackages>
-    <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.0</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
+    <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.2</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
     <CopyConflictingTransitiveContent>false</CopyConflictingTransitiveContent>
     <MSBuildCopyContentTransitively Condition="'$(MSBuildCopyContentTransitively)' == ''">true</MSBuildCopyContentTransitively>
     <ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts Condition="'$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)' == ''">true</ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts>
@@ -121,9 +121,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Put workload resolution behind a feature flag.  It can be enabled either by setting the MSBuildEnableWorkloadResolver environment variable to true, or by
        putting an EnableWorkloadResolver.sentinel file beside the MSBuild SDK resolver DLL -->
   <PropertyGroup Condition="'$(MSBuildEnableWorkloadResolver)' == ''">
-    <__EnableWorkloadResolverSentinelPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildBinPath)\EnableWorkloadResolver.sentinel</__EnableWorkloadResolverSentinelPath>
-    <__EnableWorkloadResolverSentinelPath Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildBinPath)\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\EnableWorkloadResolver.sentinel</__EnableWorkloadResolverSentinelPath>
-    <MSBuildEnableWorkloadResolver Condition="Exists('$(__EnableWorkloadResolverSentinelPath)')">true</MSBuildEnableWorkloadResolver>
+    <__DisableWorkloadResolverSentinelPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildBinPath)\DisableWorkloadResolver.sentinel</__DisableWorkloadResolverSentinelPath>
+    <__DisableWorkloadResolverSentinelPath Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildBinPath)\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\DisableWorkloadResolver.sentinel</__DisableWorkloadResolverSentinelPath>
+    <MSBuildEnableWorkloadResolver Condition="!Exists('$(__DisableWorkloadResolverSentinelPath)')">true</MSBuildEnableWorkloadResolver>
   </PropertyGroup>
 
   <!-- Import workload props -->
@@ -142,11 +142,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.props" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ILLink.props" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Compatibility.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.props" />
 
-  <Import Project="$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.props"/>
+  <Import Project="$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.props" Condition="Exists('$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.props')" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.props" />
 
 </Project>

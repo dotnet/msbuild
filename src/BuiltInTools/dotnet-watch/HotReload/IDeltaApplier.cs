@@ -14,7 +14,9 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         ValueTask InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken);
 
-        ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken);
+        Task<ImmutableArray<string>> GetApplyUpdateCapabilitiesAsync(DotNetWatchContext context, CancellationToken cancellationToken);
+
+        ValueTask<bool> Apply(DotNetWatchContext context, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken);
 
         ValueTask ReportDiagnosticsAsync(DotNetWatchContext context, IEnumerable<string> diagnostics, CancellationToken cancellationToken);
     }

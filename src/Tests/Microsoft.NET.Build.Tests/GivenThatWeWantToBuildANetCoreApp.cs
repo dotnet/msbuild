@@ -251,7 +251,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
-                "netcoreapp2.1", "TargetDefinitions", GetValuesCommand.ValueType.Item)
+                ToolsetInfo.CurrentTargetFramework, "TargetDefinitions", GetValuesCommand.ValueType.Item)
             {
                 DependsOnTargets = "RunResolvePackageDependencies",
                 Properties = { { "EmitLegacyAssetsFileItems", "true" } }
@@ -266,7 +266,7 @@ namespace Microsoft.NET.Build.Tests
             // should only contain one target with no RIDs
             var targetDefs = getValuesCommand.GetValues();
             targetDefs.Count.Should().Be(1);
-            targetDefs.Should().Contain(".NETCoreApp,Version=v2.1");
+            targetDefs.Should().Contain(ToolsetInfo.CurrentTargetFramework);
         }
 
         [Theory]
@@ -374,6 +374,68 @@ public static class Program
                 .And
                 .HaveStdOutContaining(outputMessage);
 
+        }
+
+        [Theory]
+        [InlineData("netcoreapp2.0", true)]
+        [InlineData("netcoreapp3.0", true)]
+        [InlineData("net5.0", true)]
+        [InlineData("net6.0", false)]
+        public void It_stops_generating_runtimeconfig_dev_json_after_net6(string targetFramework, bool shouldGenerateRuntimeConfigDevJson)
+        {
+            TestProject proj = new TestProject()
+            {
+                Name = "NetCoreApp",
+                ProjectSdk = "Microsoft.NET.Sdk",
+                IsExe = true,
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            var buildCommand = new BuildCommand(_testAssetsManager.CreateTestProject(proj, identifier: targetFramework));
+
+            var runtimeconfigFile = Path.Combine(
+                buildCommand.GetOutputDirectory(targetFramework).FullName,
+                $"{proj.Name}.runtimeconfig.dev.json");
+
+            buildCommand.Execute().StdOut
+                        .Should()
+                        .NotContain("NETSDK1048");
+
+            File.Exists(runtimeconfigFile).Should().Be(shouldGenerateRuntimeConfigDevJson);
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
+        public void It_stops_generating_runtimeconfig_dev_json_after_net6_allow_property_override(string targetFramework)
+        {
+            TestProject proj = new TestProject()
+            {
+                Name = "NetCoreApp",
+                ProjectSdk = "Microsoft.NET.Sdk",
+                IsExe = true,
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            var buildCommand = new BuildCommand(_testAssetsManager.CreateTestProject(proj, identifier: targetFramework));
+            var runtimeconfigFile = Path.Combine(
+                buildCommand.GetOutputDirectory(targetFramework).FullName,
+                $"{proj.Name}.runtimeconfig.dev.json");
+
+            // GenerateRuntimeConfigDevFile overrides default behavior
+            buildCommand.Execute("/p:GenerateRuntimeConfigDevFile=true").StdOut
+                        .Should()
+                        .NotContain("NETSDK1048"); ;
+            File.Exists(runtimeconfigFile).Should().BeTrue();
+
+            buildCommand.Execute("/p:GenerateRuntimeConfigDevFile=false").StdOut
+                        .Should()
+                        .NotContain("NETSDK1048"); ;
+            File.Exists(runtimeconfigFile).Should().BeFalse();
         }
 
         [Theory]
@@ -806,5 +868,44 @@ class Program
                 .Pass();
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_builds_the_project_successfully_with_only_reference_assembly_set(bool produceOnlyReferenceAssembly)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "MainProject",
+                TargetFrameworks = "net5.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.AdditionalProperties["ProduceOnlyReferenceAssembly"] = produceOnlyReferenceAssembly.ToString();
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: produceOnlyReferenceAssembly.ToString());
+
+            var buildCommand = new BuildCommand(testProjectInstance);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputPath = buildCommand.GetOutputDirectory(targetFramework: "net5.0").FullName;
+            if (produceOnlyReferenceAssembly == true)
+            {
+                var refPath = Path.Combine(outputPath, "ref");
+                Directory.Exists(refPath)
+                    .Should()
+                    .BeFalse();
+            }
+            else
+            {
+                var refPath = Path.Combine(outputPath, "ref", "MainProject.dll");
+                File.Exists(refPath)
+                    .Should()
+                    .BeTrue();
+            }
+        }
     }
 }

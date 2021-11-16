@@ -3,16 +3,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
+using System.Linq;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
-using Microsoft.TemplateEngine.Utils;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.New
 {
@@ -58,15 +60,15 @@ namespace Microsoft.DotNet.Tools.New
 
         private static ITemplateEngineHost CreateHost(bool disableSdkTemplates)
         {
-            var builtIns = new List<KeyValuePair<Guid, Func<Type>>>(new AssemblyComponentCatalog(new[]
-            {
-                typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).Assembly
-            }));
-
+            var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
+            builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
+            builtIns.AddRange(Microsoft.TemplateEngine.Edge.Components.AllComponents);
+            builtIns.AddRange(Microsoft.TemplateEngine.Cli.Components.AllComponents);
+            builtIns.AddRange(Microsoft.TemplateSearch.Common.Components.AllComponents);
             if (!disableSdkTemplates)
             {
-                builtIns.Add(new KeyValuePair<Guid, Func<Type>>(BuiltInTemplatePackageProviderFactory.FactoryId, () => typeof(BuiltInTemplatePackageProviderFactory)));
-                builtIns.Add(new KeyValuePair<Guid, Func<Type>>(OptionalWorkloadProviderFactory.FactoryId, () => typeof(OptionalWorkloadProviderFactory)));
+                builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackageProviderFactory()));
+                builtIns.Add((typeof(ITemplatePackageProviderFactory), new OptionalWorkloadProviderFactory()));
             }
 
             string preferredLangEnvVar = Environment.GetEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG");

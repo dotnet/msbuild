@@ -1,8 +1,10 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -53,7 +55,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromException(ex);
+                Log.LogError(ex.ToString());
             }
 
             return !Log.HasLoggedErrors;
@@ -93,61 +95,117 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             //     - ContentHash (e.g., "3448f339acf512448")
             if (Resources != null)
             {
+                var remainingLazyLoadAssemblies = new List<ITaskItem>(LazyLoadedAssemblies ?? Array.Empty<ITaskItem>());
                 var resourceData = result.resources;
                 foreach (var resource in Resources)
                 {
                     ResourceHashesByNameDictionary resourceList;
 
                     var fileName = resource.GetMetadata("FileName");
-                    var extension = resource.GetMetadata("Extension");
-                    var resourceCulture = resource.GetMetadata("Culture");
-                    var assetType = resource.GetMetadata("AssetType");
-                    var resourceName = $"{fileName}{extension}";
+                    var assetTraitName = resource.GetMetadata("AssetTraitName");
+                    var assetTraitValue = resource.GetMetadata("AssetTraitValue");
+                    var resourceName = Path.GetFileName(resource.GetMetadata("RelativePath"));
 
-                    if (IsLazyLoadedAssembly(resourceName))
+                    if (TryGetLazyLoadedAssembly(resourceName, out var lazyLoad))
                     {
+                        Log.LogMessage("Candidate '{0}' is defined as a lazy loaded assembly.", resource.ItemSpec);
+                        remainingLazyLoadAssemblies.Remove(lazyLoad);
                         resourceData.lazyAssembly ??= new ResourceHashesByNameDictionary();
                         resourceList = resourceData.lazyAssembly;
                     }
-                    else if (!string.IsNullOrEmpty(resourceCulture))
+                    else if (string.Equals("Culture", assetTraitName))
                     {
+                        Log.LogMessage("Candidate '{0}' is defined as satellite assembly with culture '{1}'.", resource.ItemSpec, assetTraitValue);
                         resourceData.satelliteResources ??= new Dictionary<string, ResourceHashesByNameDictionary>(StringComparer.OrdinalIgnoreCase);
-                        resourceName = resourceCulture + "/" + resourceName;
+                        resourceName = assetTraitValue + "/" + resourceName;
 
-                        if (!resourceData.satelliteResources.TryGetValue(resourceCulture, out resourceList))
+                        if (!resourceData.satelliteResources.TryGetValue(assetTraitValue, out resourceList))
                         {
                             resourceList = new ResourceHashesByNameDictionary();
-                            resourceData.satelliteResources.Add(resourceCulture, resourceList);
+                            resourceData.satelliteResources.Add(assetTraitValue, resourceList);
                         }
                     }
-                    else if (string.Equals(extension, ".pdb", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals("symbol", assetTraitValue, StringComparison.OrdinalIgnoreCase))
                     {
-                        resourceData.pdb ??= new ResourceHashesByNameDictionary();
-                        if (IsLazyLoadedAssembly($"{fileName}.dll"))
+                        if (TryGetLazyLoadedAssembly($"{fileName}.dll", out _))
                         {
+                            Log.LogMessage("Candidate '{0}' is defined as a lazy loaded symbols file.", resource.ItemSpec);
+                            resourceData.lazyAssembly ??= new ResourceHashesByNameDictionary();
                             resourceList = resourceData.lazyAssembly;
-                        } else {
+                        }
+                        else
+                        {
+                            Log.LogMessage("Candidate '{0}' is defined as symbols file.", resource.ItemSpec);
+                            resourceData.pdb ??= new ResourceHashesByNameDictionary();
                             resourceList = resourceData.pdb;
                         }
                     }
-                    else if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals("runtime", assetTraitValue, StringComparison.OrdinalIgnoreCase))
                     {
+                        Log.LogMessage("Candidate '{0}' is defined as an app assembly.", resource.ItemSpec);
                         resourceList = resourceData.assembly;
                     }
-                    else if (string.Equals(assetType, "native", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(assetTraitName, "BlazorWebAssemblyResource", StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(assetTraitValue, "native", StringComparison.OrdinalIgnoreCase))
                     {
+                        Log.LogMessage("Candidate '{0}' is defined as a native application resource.", resource.ItemSpec);
                         resourceList = resourceData.runtime;
+                    }
+                    else if (string.Equals("JSModule", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
+                             string.Equals(assetTraitValue, "JSLibraryModule", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Log.LogMessage("Candidate '{0}' is defined as a library initializer resource.", resource.ItemSpec);
+                        resourceData.libraryInitializers ??= new();
+                        resourceList = resourceData.libraryInitializers;
+                        var targetPath = resource.GetMetadata("TargetPath");
+                        Debug.Assert(!string.IsNullOrEmpty(targetPath), "Target path for '{0}' must exist.", resource.ItemSpec);
+                        AddResourceToList(resource, resourceList, targetPath);
+                        continue;
+                    }
+                    else if (string.Equals("BlazorWebAssemblyResource", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
+                             assetTraitValue.StartsWith("extension:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Log.LogMessage("Candidate '{0}' is defined as an extension resource '{1}'.", resource.ItemSpec, assetTraitValue);
+                        var extensionName = assetTraitValue.Substring("extension:".Length);
+                        resourceData.extensions ??= new();
+                        if (!resourceData.extensions.TryGetValue(extensionName, out resourceList))
+                        {
+                            resourceList = new();
+                            resourceData.extensions[extensionName] = resourceList;
+                        }
+                        var targetPath = resource.GetMetadata("TargetPath");
+                        Debug.Assert(!string.IsNullOrEmpty(targetPath), "Target path for '{0}' must exist.", resource.ItemSpec);
+                        AddResourceToList(resource, resourceList, targetPath);
+                        continue;
                     }
                     else
                     {
+                        Log.LogMessage("Skipping resource '{0}' since it doesn't belong to a defined category.", resource.ItemSpec);
                         // This should include items such as XML doc files, which do not need to be recorded in the manifest.
                         continue;
                     }
 
-                    if (!resourceList.ContainsKey(resourceName))
-                    {
-                        resourceList.Add(resourceName, $"sha256-{resource.GetMetadata("FileHash")}");
-                    }
+                    AddResourceToList(resource, resourceList, resourceName);
+                }
+
+                if (remainingLazyLoadAssemblies.Count > 0)
+                {
+                    const string message = "Unable to find '{0}' to be lazy loaded later. Confirm that project or " +
+                        "package references are included and the reference is used in the project.";
+
+                    Log.LogError(
+                        subcategory: null,
+                        errorCode: "BLAZORSDK1001",
+                        helpKeyword: null,
+                        file: null,
+                        lineNumber: 0,
+                        columnNumber: 0,
+                        endLineNumber: 0,
+                        endColumnNumber: 0,
+                        message: message,
+                        string.Join(";", LazyLoadedAssemblies.Select(a => a.ItemSpec)));
+
+                    return;
                 }
             }
 
@@ -166,11 +224,20 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
             using var writer = JsonReaderWriterFactory.CreateJsonWriter(output, Encoding.UTF8, ownsStream: false, indent: true);
             serializer.WriteObject(writer, result);
+
+            void AddResourceToList(ITaskItem resource, ResourceHashesByNameDictionary resourceList, string resourceKey)
+            {
+                if (!resourceList.ContainsKey(resourceKey))
+                {
+                    Log.LogMessage("Added resource '{0}' to the manifest.", resource.ItemSpec);
+                    resourceList.Add(resourceKey, $"sha256-{resource.GetMetadata("FileHash")}");
+                }
+            }
         }
 
-        private bool IsLazyLoadedAssembly(string fileName)
+        private bool TryGetLazyLoadedAssembly(string fileName, out ITaskItem lazyLoadedAssembly)
         {
-            return LazyLoadedAssemblies != null && LazyLoadedAssemblies.Any(a => a.ItemSpec == fileName);
+            return (lazyLoadedAssembly = LazyLoadedAssemblies?.SingleOrDefault(a => a.ItemSpec == fileName)) != null;
         }
     }
 }

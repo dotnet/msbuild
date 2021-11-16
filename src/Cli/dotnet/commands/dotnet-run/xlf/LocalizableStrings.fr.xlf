@@ -32,6 +32,16 @@
         <target state="translated">Impossible de convertir la valeur de la propriété '{0}' en chaîne.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneProjectAllowed">
+        <source>Only one project can be specified at a time using the `-p` option.</source>
+        <target state="translated">Vous ne pouvez spécifier qu’un seul projet à la fois à l’aide de l’option-p.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyOptionDescription">
+        <source>Properties to be passed to MSBuild.</source>
+        <target state="translated">Propriétés à passer à MSBuild</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
         <target state="translated">Génération...</target>
@@ -105,6 +115,11 @@ Le {1} actuel est '{2}'.</target>
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
         <target state="translated">(Par défaut)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="translated">AVERTISSEMENT NETSDK1174 : l’abréviation de-p pour--Project est déconseillée. Veuillez utiliser--Project.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">

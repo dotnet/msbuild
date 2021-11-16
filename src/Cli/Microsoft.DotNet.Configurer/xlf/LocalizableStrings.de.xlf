@@ -22,7 +22,7 @@ Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cl
         <target state="translated">----------------
 Ein ASP.NET Core-HTTPS-Entwicklungszertifikat wurde installiert.
 Um das Zertifikat als vertrauenswürdig einzustufen, führen Sie "dotnet dev-certs https --trust" aus (nur Windows und macOS).
-Weitere Informationen zu HTTPS: https://aka.ms/dotnet-HTTPS
+Weitere Informationen zu HTTPS: https://aka.ms/dotnet-https
 ----------------
 Schreiben Sie Ihre erste App: https://aka.ms/dotnet-hello-world
 Neuigkeiten: https://aka.ms/dotnet-whats-new

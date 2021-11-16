@@ -10,7 +10,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
-using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.Sln.Add
 {
@@ -20,31 +19,37 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private readonly bool _inRoot;
         private readonly IList<string> _relativeRootSolutionFolders;
 
-        private const string InRootOption = "in-root";
-        private const string SolutionFolderOption = "solution-folder";
-
         public AddProjectToSolutionCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.ValueForArgument<string>(SlnCommandParser.SlnArgument);
+            _fileOrDirectory = parseResult.GetValueForArgument(SlnCommandParser.SlnArgument);
 
-            _inRoot = parseResult.ValueForOption<bool>(SlnAddParser.InRootOption);
-            string relativeRoot = parseResult.ValueForOption<string>(SlnAddParser.SolutionFolderOption);
-
-            if (_inRoot && !string.IsNullOrEmpty(relativeRoot))
+            _inRoot = parseResult.GetValueForOption(SlnAddParser.InRootOption);
+            string relativeRoot = parseResult.GetValueForOption(SlnAddParser.SolutionFolderOption);
+            bool hasRelativeRoot = !string.IsNullOrEmpty(relativeRoot);
+            
+            if (_inRoot && hasRelativeRoot)
             {
                 // These two options are mutually exclusive
                 throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
             }
 
-            _relativeRootSolutionFolders = string.IsNullOrEmpty(relativeRoot)? null : relativeRoot.Split(Path.DirectorySeparatorChar);
+            if (hasRelativeRoot)
+            {
+                relativeRoot = PathUtility.GetPathWithDirectorySeparator(relativeRoot);
+                _relativeRootSolutionFolders = relativeRoot.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            }
+            else
+            {
+                _relativeRootSolutionFolders = null;
+            }
         }
 
         public override int Execute()
         {
             SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
-            var arguments = (_parseResult.ValueForArgument<IEnumerable<string>>(SlnAddParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
+            var arguments = (_parseResult.GetValueForArgument<IEnumerable<string>>(SlnAddParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
             if (arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);

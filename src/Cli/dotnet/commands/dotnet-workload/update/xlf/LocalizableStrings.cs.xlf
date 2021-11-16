@@ -2,104 +2,64 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
-      <trans-unit id="InvalidNuGetVersionRange">
-        <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="translated">Zadaná verze {0} není platným rozsahem verzí NuGet.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PackageIdArgumentName">
-        <source>PACKAGE_ID</source>
-        <target state="translated">PACKAGE_ID</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PackageIdArgumentDescription">
-        <source>The NuGet Package Id of the workload to update.</source>
-        <target state="translated">ID balíčku NuGet nástroje, který se má aktualizovat</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Specify one workload Package Id to update.</source>
-        <target state="translated">Zadejte jedno ID balíčku nástroje, který se má aktualizovat.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateLocaWorkloadSucceededVersionNoChange">
-        <source>Workload '{0}' is up to date.</source>
-        <target state="new">Workload '{0}' is up to date.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateLocaWorkloadToLowerVersion">
-        <source>The requested version {0} is lower than existing version {1}.</source>
-        <target state="new">The requested version {0} is lower than existing version {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateLocalWorkloadSucceeded">
-        <source>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
-        <target state="new">Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateToLowerVersion">
-        <source>The requested version {0} is lower than existing version {1}.</source>
-        <target state="translated">Požadovaná verze {0} je nižší než stávající verze {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionOptionDescription">
-        <source>The version range of the workload package to update to.</source>
-        <target state="translated">Rozsah verzí balíčku nástroje, na který se má aktualizovat</target>
+      <trans-unit id="AdManifestOnlyOptionDescription">
+        <source>Only update advertising manifests.</source>
+        <target state="translated">Aktualizujte jenom manifesty reklamy.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a workload.</source>
-        <target state="needs-review-translation">Aktualizuje globální nástroj.</target>
+        <source>Update all installed workloads.</source>
+        <target state="translated">Aktualizace všech nainstalovaných úloh.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ConfigFileOptionDescription">
-        <source>The NuGet configuration file to use.</source>
-        <target state="translated">Konfigurační soubor NuGet, který se použije.</target>
+      <trans-unit id="FromPreviousSdkOptionDescription">
+        <source>Include workloads installed with earlier SDK versions in update.</source>
+        <target state="translated">Zahrnout do aktualizace úlohy nainstalované s předchozími verzemi sady SDK.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NuGetConfigurationFileDoesNotExist">
-        <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="translated">Konfigurační soubor NuGet {0} neexistuje.</target>
+      <trans-unit id="FromRollbackDefinitionOptionDescription">
+        <source>Update workloads based on specified rollback definition file.</source>
+        <target state="translated">Aktualizuje úlohy na základě zadaného souboru definice vrácení zpět.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoWorkloadsToUpdate">
+        <source>No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</source>
+        <target state="translated">Pro toto pásmo funkcí nejsou nainstalované žádné úlohy. Pokud chcete provést aktualizaci úlohy nainstalované z předchozí sady SDK, přidejte možnost --from-previous-sdk.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollBackFailedMessage">
+        <source>Installation rollback failed: {0}</source>
+        <target state="translated">Vrácení instalace se nepovedlo: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackInstall">
+        <source>Workload installation failed. Rolling back installed packs...</source>
+        <target state="translated">Instalace úlohy se nepovedla. Vrací se zpět nainstalované balíčky…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateFailed">
+        <source>Workload '{0}' failed to update due to the following:</source>
+        <target state="translated">Aktualizace úlohy {0} neproběhla úspěšně z následujícího důvodu:</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceeded">
-        <source>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
-        <target state="translated">Nástroj {0} byl úspěšně aktualizován z verze {1} na verzi {2}.</target>
+        <source>Successfully updated workload(s): {0}.</source>
+        <target state="translated">Úlohy se úspěšně aktualizovaly: {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateFullCommandNameLocalized">
-        <source>.NET update Command</source>
-        <target state="translated">Příkaz Aktualizovat rozhraní .NET</target>
+      <trans-unit id="WorkloadCacheDownloadFailed">
+        <source>Failed to download workload update packages to cache: {0}</source>
+        <target state="translated">Nepovedlo se stáhnout balíčky aktualizace úlohy do mezipaměti: {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Workload '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">Nástroj {0} byl přeinstalován nejnovější stabilní verzí (verze {1}).</target>
+      <trans-unit id="WorkloadUpdateAdManifestsSucceeded">
+        <source>Successfully updated advertising manifests.</source>
+        <target state="translated">Manifesty reklamy se úspěšně aktualizovaly.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateWorkloadFailed">
-        <source>Workload '{0}' failed to update due to the following:</source>
-        <target state="translated">Aktualizace nástroje {0} se nezdařila z následujícího důvodu:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSourceOptionDescription">
-        <source>Add an additional NuGet package source to use during the update.</source>
-        <target state="translated">Přidá další zdroj balíčku NuGet, který se použije při aktualizaci.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSourceOptionName">
-        <source>SOURCE</source>
-        <target state="translated">SOURCE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigFileOptionName">
-        <source>FILE</source>
-        <target state="translated">FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionOptionName">
-        <source>VERSION</source>
-        <target state="translated">VERSION</target>
+      <trans-unit id="WorkloadUpdateFailed">
+        <source>Workload update failed: {0}</source>
+        <target state="translated">Aktualizace úlohy se nepovedla: {0}.</target>
         <note />
       </trans-unit>
     </body>

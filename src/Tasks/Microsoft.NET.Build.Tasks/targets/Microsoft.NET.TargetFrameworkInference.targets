@@ -98,9 +98,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
   </Target>
 
+  <!-- Skip this target for design time builds when there are missing workload packs.
+       This will prevent design time builds from failing and therefore allow
+       Visual Studio to collect the workloads from the GetSuggestedWorkloads target -->
   <Target Name="_CheckForUnsupportedTargetPlatformIdentifier"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths;CollectPackageReferences"
-          Condition="'$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))" >
+          Condition="'$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) And ('$(DesignTimeBuild)' != 'true' Or '@(MissingWorkloadPack)' == '')" >
 
     <PropertyGroup>
       <TargetPlatformSupported Condition="'$(TargetPlatformIdentifier)' == 'Windows'">true</TargetPlatformSupported>
@@ -230,7 +233,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))" >true</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true')" >true</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <!--
@@ -240,11 +243,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
     <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
     <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <DisableWinExeOutputInference Condition="'$(DisableWinExeOutputInference)' == '' and ('$(TargetFrameworkIdentifier)' != '.NETCoreApp' or $([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '5.0')))">true</DisableWinExeOutputInference>
-    <OutputType Condition="'$(DisableWinExeOutputInference)' != 'true' and '$(OutputType)' == 'Exe' and ('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">WinExe</OutputType>
   </PropertyGroup>
 
 </Project>

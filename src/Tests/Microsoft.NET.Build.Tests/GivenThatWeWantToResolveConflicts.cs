@@ -226,5 +226,36 @@ namespace Microsoft.NET.Build.Tests
 
             outputDirectory.Should().NotHaveFile("Microsoft.Extensions.DependencyInjection.Abstractions.dll");
         }
+
+        [Fact]
+        public void AnalyzersAreConflictResolved()
+        {
+            var testProject = new TestProject()
+            {
+                Name = nameof(AnalyzersAreConflictResolved),
+                TargetFrameworks = "net5.0"
+            };
+
+            // add the package referenced analyzers
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.CodeAnalysis.NetAnalyzers", "5.0.3"));
+
+            // enable inbox analyzers too
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "PropertyGroup");
+                    project.Root.Add(itemGroup);
+                    itemGroup.Add(new XElement(ns + "EnableNETAnalyzers", "true"));
+                    itemGroup.Add(new XElement(ns + "TreatWarningsAsErrors", "true"));
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }

@@ -97,37 +97,6 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
-        [WindowsOnlyTheory]
-        [InlineData("net5.0", "TargetPlatformIdentifier", "Windows", "Exe")]
-        [InlineData("net5.0", "UseWindowsForms", "true", "WinExe")]
-        [InlineData("netcoreapp3.1", "UseWindowsForms", "true", "Exe")]
-        [InlineData("net5.0", "UseWPF", "true", "WinExe")]
-        [InlineData("netcoreapp3.1", "UseWPF", "true", "Exe")]
-        [InlineData("net5.0", "UseWPF", "false", "Exe")]
-        [InlineData("netcoreapp3.1", "UseWPF", "false", "Exe")]
-        public void It_infers_WinExe_output_type(string targetFramework, string propName, string propValue, string expectedOutputType)
-        {
-            var testProject = new TestProject()
-            {
-                Name = "WinExeOutput",
-                TargetFrameworks = targetFramework,
-                IsExe = true,
-            };
-            testProject.AdditionalProperties[propName] = propValue;
-
-            var asset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework +  propName +  propValue);
-
-            var getValuesCommand = new GetValuesCommand(asset, "OutputType");
-            getValuesCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var values = getValuesCommand.GetValues();
-            values.Count.Should().Be(1);
-            values.First().Should().Be(expectedOutputType);
-        }
-
         [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_builds_on_windows_with_the_windows_desktop_sdk_5_0_with_ProjectSdk_set()
         {
@@ -293,6 +262,56 @@ namespace Microsoft.NET.Build.Tests
             publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}", $"-p:PublishSingleFile=true")
                 .Should()
                 .Pass();
+        }
+
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
+        public void Given_duplicated_ResolvedFileToPublish_It_Can_Publish()
+        {
+            const string ProjectName = "WindowsDesktopSdkTest_without_ProjectSdk_set";
+
+            const string tfm = "net5.0";
+
+            var testProject = new TestProject()
+            {
+                Name = ProjectName,
+                TargetFrameworks = tfm,
+                IsWinExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject).WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var duplicatedResolvedFileToPublish = XElement.Parse(@"
+<ItemGroup>
+    <ResolvedFileToPublish Include=""obj\Debug\net5.0\WindowsDesktopSdkTest_without_ProjectSdk_set.dll"">
+      <RelativePath>WindowsDesktopSdkTest_without_ProjectSdk_set.dll</RelativePath>
+    </ResolvedFileToPublish>
+    <ResolvedFileToPublish Include=""obj\Debug\net5.0\WindowsDesktopSdkTest_without_ProjectSdk_set.dll"">
+      <RelativePath>WindowsDesktopSdkTest_without_ProjectSdk_set.dll</RelativePath>
+    </ResolvedFileToPublish>
+  </ItemGroup>
+");
+                project.Root.Add(duplicatedResolvedFileToPublish);
+            });
+
+            var publishItemsOutputGroupOutputsCommand = new GetValuesCommand(
+                Log,
+                Path.Combine(testAsset.Path, testProject.Name),
+                testProject.TargetFrameworks,
+                "PublishItemsOutputGroupOutputs",
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "Publish",
+                MetadataNames = { "OutputPath" },
+            };
+
+            publishItemsOutputGroupOutputsCommand.Execute().Should().Pass();
+            var publishItemsOutputGroupOutputsItems =
+                from item in publishItemsOutputGroupOutputsCommand.GetValuesWithMetadata()
+                select new
+                {
+                    OutputPath = item.metadata["OutputPath"]
+                };
         }
 
         private TestAsset CreateWindowsDesktopSdkTestAsset(string projectName, string uiFrameworkProperty, string identifier, [CallerMemberName] string callingMethod = "")

@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">$(SdkTargetFramework)</TargetFrameworks>
     <WarningsAsErrors>true</WarningsAsErrors>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
@@ -16,7 +17,7 @@
 
   <Target Name="VerifyMSBuildDependency" BeforeTargets="ResolveAssemblyReferences" Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'">
     <PropertyGroup>
-      <MSBuildPathInPackage>$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net5.0\MSBuild.dll</MSBuildPathInPackage>
+      <MSBuildPathInPackage>$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net6.0\MSBuild.dll</MSBuildPathInPackage>
     </PropertyGroup>
     <Error Condition="!Exists('$(MSBuildPathInPackage)')" Text="Something moved around in Microsoft.Build.Runtime, adjust code here accordingly." />
     <ItemGroup>
@@ -42,6 +43,5 @@
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
-    <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />    
   </ItemGroup>
 </Project>

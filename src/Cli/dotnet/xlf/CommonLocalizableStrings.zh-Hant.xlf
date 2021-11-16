@@ -1,7 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../CommonLocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchitectureOptionDescription">
+        <source>The target architecture.</source>
+        <target state="translated">目標結構。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotResolveRuntimeIdentifier">
+        <source>Resolving the current runtime identifier failed.</source>
+        <target state="translated">解析目前執行階段識別碼失敗。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndArchOptions">
+        <source>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</source>
+        <target state="translated">不支援同時指定 `-r|--runtime` 與 `-a|--arch` 選項。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndOsOptions">
+        <source>Specifying both the `-r|--runtime` and `-os` options is not supported.</source>
+        <target state="translated">不支援同時指定 `-r|--runtime` 與 `-os` 選項。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="translated">允許命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
@@ -15,6 +35,11 @@
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">在 `{0}` 中找不到任何專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableBuildServersOptionDescription">
+        <source>Force the command to ignore any persistent build servers.</source>
+        <target state="new">Force the command to ignore any persistent build servers.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">
@@ -75,9 +100,19 @@ export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>
+      <trans-unit id="FrameworkDependentOptionDescription">
+        <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
+        <target state="translated">將您的應用程式發佈為架構相依的應用程式。必須在目標機器上安裝相容的 .NET 執行階段，才能執行您的應用程式。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">在 `{0}` 中找到多個專案。請指定要使用的專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperatingSystemOptionDescription">
+        <source>The target operating system.</source>
+        <target state="translated">目標作業系統。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -133,6 +168,18 @@ export PATH="$PATH:{0}"
       <trans-unit id="Package">
         <source>Package</source>
         <target state="translated">套件</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
+        <target state="translated">不能同時使用 '--self-contained' 和 '--no-self-contained' 選項。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="translated">將 .NET 執行階段發佈於您的應用程式中，以便目標電腦不必安裝執行階段。
+如有指定執行階段識別碼，則預設為 'true'。</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">

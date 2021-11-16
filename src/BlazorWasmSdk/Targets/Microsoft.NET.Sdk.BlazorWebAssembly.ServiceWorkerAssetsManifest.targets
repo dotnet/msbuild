@@ -13,157 +13,223 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project>
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.GenerateServiceWorkerAssetsManifest" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
 
-  <Target Name="_ComputeServiceWorkerAssets" BeforeTargets="ResolveStaticWebAssetsInputs">
+  <PropertyGroup>
+    <ResolveStaticWebAssetsInputsDependsOn>$(ResolveStaticWebAssetsInputsDependsOn);_AddServiceWorkerAssets</ResolveStaticWebAssetsInputsDependsOn>
+    <GenerateComputedPublishStaticWebAssetsDependsOn>$(GenerateComputedPublishStaticWebAssetsDependsOn);_WritePublishServiceWorkerAssetsManifest</GenerateComputedPublishStaticWebAssetsDependsOn>
+    <GenerateComputedBuildStaticWebAssetsDependsOn>$(GenerateComputedBuildStaticWebAssetsDependsOn);_WriteBuildServiceWorkerAssetsManifest</GenerateComputedBuildStaticWebAssetsDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_AddServiceWorkerAssets" DependsOnTargets="_ComputeServiceWorkerAssets">
+    <ItemGroup>
+      <StaticWebAsset Include="@(_ServiceWorkerStaticWebAsset)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_ComputeServiceWorkerAssets">
 
     <PropertyGroup>
-      <_ServiceWorkerAssetsManifestIntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(BaseIntermediateOutputPath)))' == 'true'">obj\$(Configuration)\$(TargetFramework)\$(ServiceWorkerAssetsManifest)</_ServiceWorkerAssetsManifestIntermediateOutputPath>
-      <_ServiceWorkerAssetsManifestIntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(BaseIntermediateOutputPath)))' != 'true'">$(IntermediateOutputPath)$(ServiceWorkerAssetsManifest)</_ServiceWorkerAssetsManifestIntermediateOutputPath>
-      <_ServiceWorkerAssetsManifestFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/$(_ServiceWorkerAssetsManifestIntermediateOutputPath)'))</_ServiceWorkerAssetsManifestFullPath>
+      <_PublishServiceWorkerSourcePath>@(ServiceWorker->'%(PublishedContent)')</_PublishServiceWorkerSourcePath>
+      <_PublishServiceWorkerIntermediatePath>$(IntermediateOutputPath)service-worker\$([System.IO.Path]::GetFileName('$(_PublishServiceWorkerSourcePath)'))</_PublishServiceWorkerIntermediatePath>
+      <_BuildServiceWorkerSourcePath>%(ServiceWorker.Identity)</_BuildServiceWorkerSourcePath>
+      <_BuildServiceWorkerIntermediatePath>$(IntermediateOutputPath)service-worker\@(ServiceWorker->'%(FileName)%(Extension)')</_BuildServiceWorkerIntermediatePath>
     </PropertyGroup>
 
+    <ItemGroup Condition="'@(ServiceWorker)' != ''">
+
+      <!-- Service workers are defined as follows: <ServiceWorker Include="wwwroot\serviceworkers\my-service-worker.js" PublishedContent="wwwroot\serviceworkers\my-prod-service-worker.js" />
+           The item in the Include attribute indicates the "development version" of the service worker file.
+           The item on the PublishedContent attribute indicates the "publish version" of the service worker file.
+           For PWAs we need to do the following:
+           * At publish time, generate a file (typically service-worker-assets.js) that contains a list of resources (this is, all publish static web assets minus the assets we are about to define).
+           * At publish time, after generating the manifest, we'll have a "version" hash. We need to update the "publish manifest" with that version.
+      -->
+
+      <!-- This is the dev service worker, which is defined as a Build static web asset -->
+      <_BuildServiceWorker
+        Include="$(_BuildServiceWorkerIntermediatePath)"
+        OriginalItemSpec="$(_BuildServiceWorkerSourcePath)"
+        SourceType="Computed"
+        AssetKind="Build"
+        TargetPath="$(_BuildServiceWorkerSourcePath)"
+        ContentRoot="$(IntermediateOutputPath)service-worker"
+        CopyToOutputDirectory="PreserveNewest"
+        CopyToPublishDirectory="Never"
+        AssetTraitName="BlazorServiceWorker"
+        AssetTraitValue="ServiceWorkerJs" />
+
+      <!-- This is the publish service worker, which will be generated during publish and that is defined here as a Publish
+           static web asset.
+      -->
+      <_PublishServiceWorker Include="$(_PublishServiceWorkerIntermediatePath)">
+        <TargetPath>@(ServiceWorker->'%(Identity)')</TargetPath>
+        <ContentRoot>$(IntermediateOutputPath)service-worker</ContentRoot>
+        <AssetTraitName>BlazorServiceWorker</AssetTraitName>
+        <AssetTraitValue>ServiceWorkerJs</AssetTraitValue>
+        <AssetKind>Publish</AssetKind>
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <OriginalItemSpec>$(_PublishServiceWorkerSourcePath)</OriginalItemSpec>
+      </_PublishServiceWorker>
+
+      <!-- This is the publish service worker manifest file -->
+      <_PublishServiceWorkerManifest
+        OriginalItemSpec="$(IntermediateOutputPath)$(ServiceWorkerAssetsManifest)"
+        Include="$(IntermediateOutputPath)$(ServiceWorkerAssetsManifest)"
+        CopyToOutputDirectory="Never"
+        AssetKind="Publish"
+        TargetPath="wwwroot\$(ServiceWorkerAssetsManifest)"
+        AssetTraitName="BlazorServiceWorker"
+        AssetTraitValue="ServiceWorkerManifest" />
+
+      <!-- This is the build service worker manifest file -->
+      <_BuildServiceWorkerManifest
+        OriginalItemSpec="$(IntermediateOutputPath)$(ServiceWorkerAssetsManifest).build"
+        Include="$(IntermediateOutputPath)$(ServiceWorkerAssetsManifest).build"
+        CopyToOutputDirectory="PreserveNewest"
+        CopyToPublishDirectory="Never"
+        AssetKind="Build"
+        ContentRoot="$(OutputPath)wwwroot\"
+        TargetPath="wwwroot\$(ServiceWorkerAssetsManifest)"
+        AssetTraitName="BlazorServiceWorker"
+        AssetTraitValue="ServiceWorkerManifest" />
+    </ItemGroup>
+
+    <DefineStaticWebAssets
+      CandidateAssets="@(_BuildServiceWorker);@(_BuildServiceWorkerManifest);@(_PublishServiceWorker);@(_PublishServiceWorkerManifest)"
+      RelativePathPattern="wwwroot/**"
+      SourceType="Computed"
+      SourceId="$(PackageId)"
+      ContentRoot="$(TargetDir)wwwroot\"
+      BasePath="$(StaticWebAssetBasePath)"
+      >
+      <Output TaskParameter="Assets" ItemName="_ServiceWorkerStaticWebAsset" />
+      <Output TaskParameter="CopyCandidates" ItemName="_ServiceWorkerCopyCandidates" />
+    </DefineStaticWebAssets>
+
+  </Target>
+
+  <Target Name="_WriteBuildServiceWorkerAssetsManifest" DependsOnTargets="ResolveStaticWebAssetsInputs">
+
     <ItemGroup>
-      <_ManifestStaticWebAsset Include="$(_ServiceWorkerAssetsManifestFullPath)">
-        <SourceType></SourceType>
-        <SourceId>$(PackageId)</SourceId>
-        <ContentRoot>$([MSBuild]::NormalizeDirectory('$(TargetDir)wwwroot\'))</ContentRoot>
-        <BasePath>$(StaticWebAssetBasePath)</BasePath>
-        <RelativePath>$(ServiceWorkerAssetsManifest)</RelativePath>
-        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-      </_ManifestStaticWebAsset>
+      <_BuildAssetsForManifestCandidate Include="@(StaticWebAsset)" Condition="'%(StaticWebAsset.AssetTraitName)' != 'BlazorServiceWorker' and '%(AssetRole)' != 'Alternative' and Exists('%(Identity)')" />
+      <_BuildAssetsForManifestCandidate Include="@(StaticWebAsset->'%(OriginalItemSpec)')" Condition="'%(StaticWebAsset.AssetTraitName)' != 'BlazorServiceWorker' and '%(AssetRole)' != 'Alternative' and !Exists('%(Identity)')" />
+    </ItemGroup>
 
-      <!-- Figure out where we're getting the content for each @(ServiceWorker) entry, depending on whether there's a PublishedContent value -->
-      <_ServiceWorkerIntermediateFile Include="@(ServiceWorker->'$(IntermediateOutputPath)serviceworkers\%(Identity)')">
-        <ContentSourcePath Condition="'%(_ServiceWorker.PublishedContent)' != ''">%(ServiceWorker.PublishedContent)</ContentSourcePath>
-        <ContentSourcePath Condition="'%(_ServiceWorker.PublishedContent)' == ''">%(ServiceWorker.Identity)</ContentSourcePath>
-        <OriginalPath>%(ServiceWorker.Identity)</OriginalPath>
-        <TargetOutputPath>%(ServiceWorker.Identity)</TargetOutputPath>
-        <TargetOutputPath Condition="$([System.String]::Copy('%(ServiceWorker.Identity)').Replace('\','/').StartsWith('wwwroot/'))">$([System.String]::Copy('%(ServiceWorker.Identity)').Substring(8))</TargetOutputPath>
-      </_ServiceWorkerIntermediateFile>
+    <ComputeStaticWebAssetsForCurrentProject
+      Assets="@(_BuildAssetsForManifestCandidate)"
+      ProjectMode="$(StaticWebAssetProjectMode)"
+      AssetKind="Build"
+      Source="$(PackageId)"
+    >
+      <Output TaskParameter="StaticWebAssets" ItemName="_BuildAssetsForManifest" />
+    </ComputeStaticWebAssetsForCurrentProject>
 
-      <_ServiceWorkerStaticWebAsset Include="%(_ServiceWorkerIntermediateFile.FullPath)">
-        <SourceType></SourceType>
-        <SourceId>$(PackageId)</SourceId>
-        <ContentRoot>$([MSBuild]::NormalizeDirectory('$(TargetDir)wwwroot\'))</ContentRoot>
-        <BasePath>$(StaticWebAssetBasePath)</BasePath>
-        <RelativePath>%(TargetOutputPath)</RelativePath>
-        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-      </_ServiceWorkerStaticWebAsset>
+    <ComputeStaticWebAssetsTargetPaths Assets="@(_BuildAssetsForManifest)" PathPrefix="$(StaticWebAssetBasePath)" UseAlternatePathDirectorySeparator="true">
+      <Output TaskParameter="AssetsWithTargetPath" ItemName="_BuildAssetsForManifestWithTargetPath" />
+    </ComputeStaticWebAssetsTargetPaths>
 
-      <StaticWebAsset Include="
-          @(_ManifestStaticWebAsset);
-          @(_ServiceWorkerStaticWebAsset)" />
+    <ItemGroup>
+      <_BuildServiceWorkItem Include="@(_BuildAssetsForManifestWithTargetPath)">
+        <AssetUrl>%(_BuildAssetsForManifestWithTargetPath.TargetPath)</AssetUrl>
+      </_BuildServiceWorkItem>
+      <_BuildServiceWorkerFile Include="@(StaticWebAsset)" Condition="'%(AssetKind)' == 'Build' And '%(StaticWebAsset.AssetTraitName)' == 'BlazorServiceWorker' And '%(StaticWebAsset.AssetTraitValue)' == 'ServiceWorkerJs'" />
+    </ItemGroup>
+
+    <GenerateServiceWorkerAssetsManifest
+      Version="$(ServiceWorkerAssetsManifestVersion)"
+      Assets="@(_BuildServiceWorkItem)"
+      OutputPath="$(IntermediateOutputPath)$(ServiceWorkerAssetsManifest).build">
+      <Output TaskParameter="CalculatedVersion" PropertyName="_BuildServiceWorkerAssetsManifestVersion" />
+    </GenerateServiceWorkerAssetsManifest>
+
+    <Copy SourceFiles="@(_BuildServiceWorkerFile->'%(OriginalItemSpec)')"
+      DestinationFiles="@(_BuildServiceWorkerFile->'%(Identity)')"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+    <WriteLinesToFile
+      File="@(_BuildServiceWorkerFile->'%(Identity)')"
+      Lines="/* Manifest version: $(_BuildServiceWorkerAssetsManifestVersion) */"
+      Condition="'$(_BuildServiceWorkerAssetsManifestVersion)' != ''" />
+
+    <ItemGroup>
+      <FileWrites Include="@(_BuildServiceWorkerFile->'%(Identity)')" />
+      <FileWrites Include="$(IntermediateOutputPath)$(ServiceWorkerAssetsManifest).build" />
     </ItemGroup>
 
   </Target>
 
-  <Target Name="_WriteServiceWorkerAssetsManifest"
-    DependsOnTargets="_ComputeServiceWorkerAssets;ResolveStaticWebAssetsInputs">
+  <Target Name="_WritePublishServiceWorkerAssetsManifest" DependsOnTargets="_ComputeServiceWorkerAssets;LoadStaticWebAssetsPublishManifest">
 
     <ItemGroup>
-      <_ServiceWorkItem Include="@(StaticWebAsset)" Exclude="$(_ServiceWorkerAssetsManifestFullPath);@(_ServiceWorkerStaticWebAsset)">
-        <AssetUrl>$([System.String]::Copy('$([System.String]::Copy('%(StaticWebAsset.BasePath)').TrimEnd('/'))/%(StaticWebAsset.RelativePath)').Replace('\','/').TrimStart('/'))</AssetUrl>
+      <_PublishAssetsForManifestCandidate Include="@(StaticWebAsset)" Condition="'%(StaticWebAsset.AssetTraitName)' != 'BlazorServiceWorker' and '%(AssetRole)' != 'Alternative'" />
+    </ItemGroup>
+
+    <ComputeStaticWebAssetsForCurrentProject
+      Assets="@(_PublishAssetsForManifestCandidate)"
+      ProjectMode="$(StaticWebAssetProjectMode)"
+      AssetKind="Publish"
+      Source="$(PackageId)"
+    >
+      <Output TaskParameter="StaticWebAssets" ItemName="_PublishAssetsForManifest" />
+    </ComputeStaticWebAssetsForCurrentProject>
+
+    <ComputeStaticWebAssetsTargetPaths Assets="@(_PublishAssetsForManifest)" PathPrefix="$(StaticWebAssetBasePath)" UseAlternatePathDirectorySeparator="true">
+      <Output TaskParameter="AssetsWithTargetPath" ItemName="_PublishAssetsForManifestWithTargetPath" />
+    </ComputeStaticWebAssetsTargetPaths>
+
+    <ItemGroup>
+      <_ServiceWorkItem Include="@(_PublishAssetsForManifestWithTargetPath)">
+        <AssetUrl>%(_PublishAssetsForManifestWithTargetPath.TargetPath)</AssetUrl>
       </_ServiceWorkItem>
+      <_PublishServiceWorkerFile Include="@(StaticWebAsset)" Condition="'%(AssetKind)' == 'Publish' And '%(StaticWebAsset.AssetTraitName)' == 'BlazorServiceWorker' And '%(StaticWebAsset.AssetTraitValue)' == 'ServiceWorkerJs'" />
     </ItemGroup>
 
     <GenerateServiceWorkerAssetsManifest
       Version="$(ServiceWorkerAssetsManifestVersion)"
       Assets="@(_ServiceWorkItem)"
-      OutputPath="$(_ServiceWorkerAssetsManifestIntermediateOutputPath)">
+      OutputPath="$(IntermediateOutputPath)$(ServiceWorkerAssetsManifest)">
       <Output TaskParameter="CalculatedVersion" PropertyName="_ServiceWorkerAssetsManifestVersion" />
     </GenerateServiceWorkerAssetsManifest>
 
-    <Copy
-      SourceFiles="%(_ServiceWorkerIntermediateFile.ContentSourcePath)"
-      DestinationFiles="%(_ServiceWorkerIntermediateFile.Identity)" />
+    <Copy SourceFiles="@(_PublishServiceWorkerFile->'%(OriginalItemSpec)')"
+      DestinationFiles="@(_PublishServiceWorkerFile->'%(Identity)')"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
 
     <WriteLinesToFile
-      File="%(_ServiceWorkerIntermediateFile.Identity)"
+      File="@(_PublishServiceWorkerFile->'%(Identity)')"
       Lines="/* Manifest version: $(_ServiceWorkerAssetsManifestVersion) */"
       Condition="'$(_ServiceWorkerAssetsManifestVersion)' != ''" />
 
     <ItemGroup>
-      <FileWrites Include="@(_ServiceWorkerIntermediateFile)" />
-      <FileWrites Include="$(_ServiceWorkerAssetsManifestIntermediateOutputPath)" />
+      <FileWrites Include="@(_PublishServiceWorkerFile->'%(TargetPath)')" />
+      <FileWrites Include="$(IntermediateOutputPath)$(ServiceWorkerAssetsManifest)" />
     </ItemGroup>
 
   </Target>
 
-  <Target Name="_BlazorStaticAssetsCopyFilesToOutputDirectory" AfterTargets="CopyFilesToOutputDirectory" DependsOnTargets="_WriteServiceWorkerAssetsManifest">
-    <Copy
-        SourceFiles="@(_ManifestStaticWebAsset);@(_ServiceWorkerStaticWebAsset)"
-        DestinationFiles="$(OutDir)wwwroot\%(RelativePath)"
-        SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-        OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-        Retries="$(CopyRetryCount)"
-        RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-        UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
-        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
-        ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
-        Condition="Exists('%(Identity)')">
-
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
-    </Copy>
-  </Target>
-
   <Target Name="_OmitServiceWorkerContent"
-    BeforeTargets="AssignTargetPaths;ResolveCurrentProjectStaticWebAssetsInputs">
+    BeforeTargets="ResolveProjectStaticWebAssets">
 
     <ItemGroup>
       <!-- Don't emit the service worker source files to the output -->
       <Content Remove="@(ServiceWorker)" />
       <Content Remove="@(ServiceWorker->'%(PublishedContent)')" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="_GenerateServiceWorkerFileForPublish"
-    BeforeTargets="_BlazorCompressPublishFiles"
-    AfterTargets="_ProcessPublishFilesForBlazor">
-
-    <PropertyGroup>
-      <_ServiceWorkerAssetsManifestPublishIntermediateOutputPath>$(IntermediateOutputPath)publish-$(ServiceWorkerAssetsManifest)</_ServiceWorkerAssetsManifestPublishIntermediateOutputPath>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <_ServiceWorkerIntermediatePublishFile Include="$(IntermediateOutputPath)serviceworkers\%(FileName).publish%(Extension)">
-        <ContentSourcePath Condition="'%(ServiceWorker.PublishedContent)' != ''">%(ServiceWorker.PublishedContent)</ContentSourcePath>
-        <ContentSourcePath Condition="'%(ServiceWorker.PublishedContent)' == ''">%(ServiceWorker.Identity)</ContentSourcePath>
-        <RelativePath>%(ServiceWorker.Identity)</RelativePath>
-        <RelativePath Condition="$([System.String]::Copy('%(ServiceWorker.Identity)').Replace('/','\').StartsWith('wwwroot\'))">$(_BlazorPublishOutputPath)$([System.String]::Copy('%(ServiceWorker.Identity)').Substring(8))</RelativePath>
-      </_ServiceWorkerIntermediatePublishFile>
-
-      <_ServiceWorkerPublishFile Include="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').Replace('\','/').StartsWith('wwwroot/'))">
-        <AssetUrl>$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').Replace('\','/').TrimStart('/'))</AssetUrl>
-        <AssetUrl>$([System.String]::Copy('%(RelativePath)').Replace('\','/').Substring(8))</AssetUrl>
-      </_ServiceWorkerPublishFile>
-    </ItemGroup>
-
-    <GenerateServiceWorkerAssetsManifest
-      Version="$(ServiceWorkerAssetsManifestVersion)"
-      Assets="@(_ServiceWorkerPublishFile)"
-      OutputPath="$(_ServiceWorkerAssetsManifestPublishIntermediateOutputPath)">
-
-      <Output TaskParameter="CalculatedVersion" PropertyName="_ServiceWorkerPublishAssetsManifestVersion" />
-    </GenerateServiceWorkerAssetsManifest>
-
-    <Copy SourceFiles="%(_ServiceWorkerIntermediatePublishFile.ContentSourcePath)"
-      DestinationFiles="%(_ServiceWorkerIntermediatePublishFile.Identity)" />
-
-    <WriteLinesToFile
-      File="%(_ServiceWorkerIntermediatePublishFile.Identity)"
-      Lines="/* Manifest version: $(_ServiceWorkerPublishAssetsManifestVersion) */" />
-
-    <ItemGroup>
-      <ResolvedFileToPublish
-        Include="@(_ServiceWorkerIntermediatePublishFile)"
-        CopyToPublishDirectory="PreserveNewest"
-        RelativePath="%(_ServiceWorkerIntermediatePublishFile.RelativePath)"
-        ExcludeFromSingleFile="true" />
-
-      <ResolvedFileToPublish
-        Include="$(_ServiceWorkerAssetsManifestPublishIntermediateOutputPath)"
-        CopyToPublishDirectory="PreserveNewest"
-        RelativePath="$(_BlazorPublishOutputPath)$(ServiceWorkerAssetsManifest)"
-        ExcludeFromSingleFile="true" />
     </ItemGroup>
   </Target>
 

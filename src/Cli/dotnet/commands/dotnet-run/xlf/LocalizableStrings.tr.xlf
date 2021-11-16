@@ -32,6 +32,16 @@
         <target state="translated">'{0}' özelliğinin değeri dizeye dönüştürülemedi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneProjectAllowed">
+        <source>Only one project can be specified at a time using the `-p` option.</source>
+        <target state="translated">`-p` seçeneği kullanılarak tek seferde yalnızca bir proje belirtilebilir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyOptionDescription">
+        <source>Properties to be passed to MSBuild.</source>
+        <target state="translated">MSBuild'e geçirilecek özellikler.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
         <target state="translated">Derleniyor...</target>
@@ -105,6 +115,11 @@ Geçerli {1}: '{2}'.</target>
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
         <target state="translated">(Varsayılan)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="translated">Uyarı NETSDK1174: --project için -p kısaltması kullanımdan kaldırıldı. Lütfen --project kullanın.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">

@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System;
 using System.Collections.Generic;
@@ -24,10 +25,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
                 description: "System.IO.Compression.CompressionLevel for the Brotli compression algorithm.");
             var sourcesOption = new Option<List<string>>(
                 "-s",
-                description: "A list of files to compress.") { AllowMultipleArgumentsPerToken = false };
+                description: "A list of files to compress.")
+            {
+                AllowMultipleArgumentsPerToken = false
+            };
             var outputsOption = new Option<List<string>>(
                 "-o",
-                "The filenames to output the compressed file to.") { AllowMultipleArgumentsPerToken = false };
+                "The filenames to output the compressed file to.")
+            {
+                AllowMultipleArgumentsPerToken = false
+            };
 
             brotli.Add(compressionLevelOption);
             brotli.Add(sourcesOption);
@@ -37,18 +44,24 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
 
             brotli.Handler = CommandHandler.Create<CompressionLevel, List<string>, List<string>>((c, s, o) =>
             {
-                Parallel.For(0, s.Count, i =>
-                {
-                    var source = s[i];
-                    var output = o[i];
+                    Parallel.For(0, s.Count, i =>
+                    {
+                        var source = s[i];
+                        var output = o[i];
+                        try
+                        {
+                            using var sourceStream = File.OpenRead(source);
+                            using var fileStream = new FileStream(output, FileMode.Create);
 
-                    using var sourceStream = File.OpenRead(source);
-                    using var fileStream = new FileStream(output, FileMode.Create);
-
-                    using var stream = new BrotliStream(fileStream, c);
-
-                    sourceStream.CopyTo(stream);
-                });
+                            using var stream = new BrotliStream(fileStream, c);
+                            sourceStream.CopyTo(stream);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Error.WriteLine($"Error compressing '{source}' into '{output}'");
+                            Console.Error.WriteLine(ex.ToString());
+                        }
+                    });
             });
 
             return rootCommand.InvokeAsync(args).Result;

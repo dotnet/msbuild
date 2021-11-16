@@ -107,6 +107,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
       UserRuntimeConfig="$(UserRuntimeConfig)"
       WriteAdditionalProbingPathsToMainConfig="true"
+      AlwaysIncludeCoreFramework="$(AlwaysIncludeCoreFrameworkInRuntimeConfig)"
       />
 
     <ItemGroup>

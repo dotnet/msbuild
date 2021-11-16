@@ -32,6 +32,16 @@
         <target state="translated">Der Wert der Eigenschaft "{0}" konnte nicht in eine Zeichenfolge konvertiert werden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneProjectAllowed">
+        <source>Only one project can be specified at a time using the `-p` option.</source>
+        <target state="translated">Mithilfe der Option „-p“ kann jeweils nur ein Projekt angegeben werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyOptionDescription">
+        <source>Properties to be passed to MSBuild.</source>
+        <target state="translated">Eigenschaften, die an MSBuild übergeben werden sollen.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
         <target state="translated">Buildvorgang wird ausgeführt...</target>
@@ -105,6 +115,11 @@ Ein ausführbares Projekt muss ein ausführbares TFM (z. B. net5.0) und den Outp
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
         <target state="translated">(Standard)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="translated">Warnung NETSDK1174: Die Abkürzung von „-p“ für „--project“ ist veraltet. Verwenden Sie „--project“.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">

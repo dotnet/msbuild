@@ -1,20 +1,22 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
     internal class NetSdkManagedInstallationRecordRepository : IWorkloadInstallationRecordRepository
     {
         private readonly string _workloadMetadataDir;
-        private readonly string _installedWorkloadDir = "InstalledWorkloads";
+        private const string InstalledWorkloadDir = "InstalledWorkloads";
 
-        public NetSdkManagedInstallationRecordRepository(string dotnetDir)
+        public NetSdkManagedInstallationRecordRepository(string workloadMetadataDir)
         {
-            _workloadMetadataDir = Path.Combine(dotnetDir, "metadata", "workloads");
+            _workloadMetadataDir = workloadMetadataDir;
         }
 
         public IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords()
@@ -23,7 +25,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             {
                 var bands = Directory.EnumerateDirectories(_workloadMetadataDir);
                 return bands
-                    .Where(band => Directory.Exists(Path.Combine(band, _installedWorkloadDir)) && Directory.GetFiles(Path.Combine(band, _installedWorkloadDir)).Any())
+                    .Where(band => Directory.Exists(Path.Combine(band, InstalledWorkloadDir)) && Directory.GetFiles(Path.Combine(band, InstalledWorkloadDir)).Any())
                     .Select(path => new SdkFeatureBand(Path.GetFileName(path)));
             }
             else
@@ -32,34 +34,37 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             }
         }
 
-        public IEnumerable<string> GetInstalledWorkloads(SdkFeatureBand featureBand)
+        public IEnumerable<WorkloadId> GetInstalledWorkloads(SdkFeatureBand featureBand)
         {
-            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir);
+            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), InstalledWorkloadDir);
             if (Directory.Exists(path))
             {
                 return Directory.EnumerateFiles(path)
-                    .Select(file => Path.GetFileName(file));
+                    .Select(file => new WorkloadId(Path.GetFileName(file)));
             }
             else
             {
-                return new List<string>();
+                return new List<WorkloadId>();
             }
         }
 
         public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand featureBand)
         {
-            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir, workloadId.ToString());
-            var pathDir = Path.GetDirectoryName(path);
-            if (pathDir != null && !Directory.Exists(pathDir))
+            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), InstalledWorkloadDir, workloadId.ToString());
+            if (!File.Exists(path))
             {
-                Directory.CreateDirectory(pathDir);
+                var pathDir = Path.GetDirectoryName(path);
+                if (pathDir != null && !Directory.Exists(pathDir))
+                {
+                    Directory.CreateDirectory(pathDir);
+                }
+                File.Create(path).Close();
             }
-            File.Create(path);
         }
 
         public void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand featureBand)
         {
-            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir, workloadId.ToString());
+            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), InstalledWorkloadDir, workloadId.ToString());
             if (File.Exists(path))
             {
                 File.Delete(path);

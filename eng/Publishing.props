@@ -3,6 +3,8 @@
 <Project>
   <PropertyGroup>
     <PublishingVersion>3</PublishingVersion>
+    <!-- This repo does its own symbol package generation to avoid generating symbols for a bunch of unrelated test packages. -->
+    <AutoGenerateSymbolPackages>false</AutoGenerateSymbolPackages>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -58,7 +60,7 @@
 
   <!-- We use a separate target to publish this to blob storage so that we can push this to
        a relative path inside the blob storage. -->
-  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish" Condition="'$(PublishToAzure)' == 'true'">
+  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish">
     <ItemGroup>
       <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)">
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(ToolsetVersionValue)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>

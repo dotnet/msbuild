@@ -10,5 +10,17 @@ namespace Microsoft.DotNet.ApiCompatibility
     {
         public const string TypeMustExist = "CP0001";
         public const string MemberMustExist = "CP0002";
+        public const string AssemblyIdentityMustMatch = "CP0003";
+        public const string MatchingAssemblyDoesNotExist = "CP0004";
+        public const string CannotAddAbstractMember = "CP0005";
+        public const string CannotAddMemberToInterface = "CP0006";
+        public const string CannotRemoveBaseType = "CP0007";
+        public const string CannotRemoveBaseInterface = "CP0008";
+        public const string CannotSealType = "CP0009";
+
+        // Assembly loading ids
+        public const string AssemblyNotFound = "CP1001";
+        public const string AssemblyReferenceNotFound = "CP1002";
+        public const string SearchDirectoriesNotFoundForTfm = "CP1003";
     }
 }

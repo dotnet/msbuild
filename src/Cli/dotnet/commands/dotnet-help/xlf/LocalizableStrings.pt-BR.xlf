@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="FormatDefinition">
+        <source>Apply style preferences to a project or solution.</source>
+        <target state="translated">Aplicar preferências de estilo a um projeto ou solução.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
         <target state="translated">Role para frente para a versão de estrutura (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
@@ -9,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SdkDefinition">
         <source>Manage .NET SDK installation.</source>
-        <target state="new">Manage .NET SDK installation.</target>
+        <target state="translated">Gerencie a instalação do SDK do .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -54,7 +59,7 @@
       </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display the version of the .NET SDK, including the effects of any global.json</source>
-        <target state="needs-review-translation">Exibir o Número de Versão da CLI do .NET</target>
+        <target state="translated">Exibir a versão do SDK do .NET, incluindo os efeitos de qualquer global.json</target>
         <note />
       </trans-unit>
       <trans-unit id="InfoDescription">
@@ -262,11 +267,6 @@
         <target state="translated">Crie e gerencie certificados de desenvolvimento.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Ferramentas de linha de comando do cache do SQL Server.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Gerencie segredos do usuário de desenvolvimento.</target>
@@ -295,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">Iniciar F# Interativo / executar scripts do F#.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">Gerenciar as cargas de trabalho opcionais.</target>
         <note />
       </trans-unit>
     </body>

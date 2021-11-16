@@ -137,6 +137,18 @@ dotnet run
 
 This should print `Hello World!`.
 
+## Locked files
+
+If you see error like ` error MSB3021: Unable to copy file "toolset-tasks.dll" to "toolset-tasks.dll". The process cannot access the file 'toolset-tasks.dll' because it is being used by another process.`
+
+You could run the following to stop all dotnet related processes
+
+```batch
+taskkill /F /IM dotnet.exe /T ||
+taskkill /F /IM VSTest.Console.exe /T ||
+taskkill /F /IM msbuild.exe /T
+```
+
 ## Adding a Command
 
 The dotnet CLI supports several models for adding new commands:

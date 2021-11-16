@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -621,7 +621,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1129: "}</comment>
   </data>
   <data name="WinMDReferenceNotSupportedOnTargetFramework" xml:space="preserve">
-    <value>NETSDK1130: Referencing a Windows Metadata component directly when targeting {0} is not supported. Use the C#/WinRT projection tool (https://aka.ms/cswinrt) or a provided projection for this target.</value>
+    <value>NETSDK1130: {1} cannot be referenced. Referencing a Windows Metadata component directly when targeting .NET 5 or higher is not supported. For more information, see https://aka.ms/netsdk1130</value>
     <comment>{StrBegin="NETSDK1130: "}</comment>
   </data>
   <data name="WinMDObjNotSupportedOnTargetFramework" xml:space="preserve">
@@ -691,87 +691,149 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1146: "}</comment>
   </data>
   <data name="WorkloadNotInstalled" xml:space="preserve">
-    <value>NETSDK1147: The following workload packs were not installed: {0}</value>
+    <value>NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: {1}</value>
     <comment>{StrBegin="NETSDK1147: "}</comment>
   </data>
-  <data name="DuplicatePublishOutputFiles" xml:space="preserve">
-    <value>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</value>
+  <data name="WindowsSDKVersionConflicts" xml:space="preserve">
+    <value>NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</value>
     <comment>{StrBegin="NETSDK1148: "}</comment>
   </data>
-  <data name="WindowsSDKVersionConflicts" xml:space="preserve">
-    <value>NETSDK1149: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</value>
+  <data name="WinMDTransitiveReferenceNotSupported" xml:space="preserve">
+    <value>NETSDK1149: {0} cannot be referenced because it uses built-in support for WinRT, which is no longer supported in .NET 5 and higher.  An updated version of the component supporting .NET 5 is needed. For more information, see https://aka.ms/netsdk1149</value>
     <comment>{StrBegin="NETSDK1149: "}</comment>
   </data>
-  <data name="CrossgenToolMissingInPDBCompilationMode" xml:space="preserve">
-    <value>NETSDK1150: CrossgenTool not specified in PDB compilation mode.</value>
+  <data name="SelfContainedExeCannotReferenceNonSelfContained" xml:space="preserve">
+    <value>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</value>
     <comment>{StrBegin="NETSDK1150: "}</comment>
   </data>
-  <data name="Crossgen2ToolMissingWhenUseCrossgen2IsSet" xml:space="preserve">
-    <value>NETSDK1151: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</value>
+  <data name="NonSelfContainedExeCannotReferenceSelfContained" xml:space="preserve">
+    <value>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.  For more information, see https://aka.ms/netsdk1151</value>
     <comment>{StrBegin="NETSDK1151: "}</comment>
   </data>
-  <data name="Crossgen2ToolExecutableNotFound" xml:space="preserve">
-    <value>NETSDK1152: Crossgen2Tool executable '{0}' not found.</value>
+  <data name="DuplicatePublishOutputFiles" xml:space="preserve">
+    <value>NETSDK1152: Found multiple publish output files with the same relative path: {0}.</value>
     <comment>{StrBegin="NETSDK1152: "}</comment>
   </data>
-  <data name="DotNetHostExecutableNotFound" xml:space="preserve">
-    <value>NETSDK1153: .NET host executable '{0}' not found.</value>
+  <data name="CrossgenToolMissingInPDBCompilationMode" xml:space="preserve">
+    <value>NETSDK1153: CrossgenTool not specified in PDB compilation mode.</value>
     <comment>{StrBegin="NETSDK1153: "}</comment>
   </data>
-  <data name="JitLibraryNotFound" xml:space="preserve">
-    <value>NETSDK1154: JIT library '{0}' not found.</value>
+  <data name="Crossgen2ToolMissingWhenUseCrossgen2IsSet" xml:space="preserve">
+    <value>NETSDK1154: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</value>
     <comment>{StrBegin="NETSDK1154: "}</comment>
   </data>
-  <data name="Crossgen2MissingRequiredMetadata" xml:space="preserve">
-    <value>NETSDK1155: Required '{0}' metadata missing on Crossgen2Tool item.</value>
+  <data name="Crossgen2ToolExecutableNotFound" xml:space="preserve">
+    <value>NETSDK1155: Crossgen2Tool executable '{0}' not found.</value>
     <comment>{StrBegin="NETSDK1155: "}</comment>
   </data>
-  <data name="CrossgenToolMissingWhenUseCrossgen2IsNotSet" xml:space="preserve">
-    <value>NETSDK1156: CrossgenTool must be specified when UseCrossgen2 is set to false.</value>
+  <data name="DotNetHostExecutableNotFound" xml:space="preserve">
+    <value>NETSDK1156: .NET host executable '{0}' not found.</value>
     <comment>{StrBegin="NETSDK1156: "}</comment>
   </data>
-  <data name="CrossgenToolExecutableNotFound" xml:space="preserve">
-    <value>NETSDK1157: CrossgenTool executable '{0}' not found.</value>
+  <data name="JitLibraryNotFound" xml:space="preserve">
+    <value>NETSDK1157: JIT library '{0}' not found.</value>
     <comment>{StrBegin="NETSDK1157: "}</comment>
   </data>
-  <data name="DiaSymReaderLibraryNotFound" xml:space="preserve">
-    <value>NETSDK1158: DiaSymReader library '{0}' not found.</value>
+  <data name="Crossgen2MissingRequiredMetadata" xml:space="preserve">
+    <value>NETSDK1158: Required '{0}' metadata missing on Crossgen2Tool item.</value>
     <comment>{StrBegin="NETSDK1158: "}</comment>
   </data>
-  <data name="PDBGeneratorInputExecutableNotFound" xml:space="preserve">
-    <value>NETSDK1159: PDB generation: R2R executable '{0}' not found.</value>
+  <data name="CrossgenToolMissingWhenUseCrossgen2IsNotSet" xml:space="preserve">
+    <value>NETSDK1159: CrossgenTool must be specified when UseCrossgen2 is set to false.</value>
     <comment>{StrBegin="NETSDK1159: "}</comment>
   </data>
-  <data name="InputAssemblyNotFound" xml:space="preserve">
-    <value>NETSDK1160: Input assembly '{0}' not found.</value>
+  <data name="CrossgenToolExecutableNotFound" xml:space="preserve">
+    <value>NETSDK1160: CrossgenTool executable '{0}' not found.</value>
     <comment>{StrBegin="NETSDK1160: "}</comment>
   </data>
-  <data name="MissingOutputPDBImagePath" xml:space="preserve">
-    <value>NETSDK1161: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</value>
+  <data name="DiaSymReaderLibraryNotFound" xml:space="preserve">
+    <value>NETSDK1161: DiaSymReader library '{0}' not found.</value>
     <comment>{StrBegin="NETSDK1161: "}</comment>
   </data>
-  <data name="MissingOutputR2RImageFileName" xml:space="preserve">
-    <value>NETSDK1162: Missing output R2R image path (OutputR2RImage metadata).</value>
+  <data name="PDBGeneratorInputExecutableNotFound" xml:space="preserve">
+    <value>NETSDK1162: PDB generation: R2R executable '{0}' not found.</value>
     <comment>{StrBegin="NETSDK1162: "}</comment>
   </data>
-  <data name="Crossgen5CannotEmitSymbolsInCompositeMode" xml:space="preserve">
-    <value>NETSDK1163: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</value>
+  <data name="InputAssemblyNotFound" xml:space="preserve">
+    <value>NETSDK1163: Input assembly '{0}' not found.</value>
     <comment>{StrBegin="NETSDK1163: "}</comment>
   </data>
-  <data name="CompressionInSingleFileRequires60" xml:space="preserve">
-    <value>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</value>
-    <comment>{StrBegin="NETSDK1142: "}</comment>
-  </data>
-  <data name="CompressionInSingleFileRequiresSelfContained" xml:space="preserve">
-    <value>NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
-    <comment>{StrBegin="NETSDK1142: "}</comment>
-  </data>
-  <data name="TrimmingWindowsFormsIsNotSupported" xml:space="preserve">
-    <value>NETSDK1164: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</value>
+  <data name="MissingOutputPDBImagePath" xml:space="preserve">
+    <value>NETSDK1164: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</value>
     <comment>{StrBegin="NETSDK1164: "}</comment>
   </data>
-  <data name="TrimmingWpfIsNotSupported" xml:space="preserve">
-    <value>NETSDK1165: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</value>
+  <data name="MissingOutputR2RImageFileName" xml:space="preserve">
+    <value>NETSDK1165: Missing output R2R image path (OutputR2RImage metadata).</value>
     <comment>{StrBegin="NETSDK1165: "}</comment>
+  </data>
+  <data name="Crossgen5CannotEmitSymbolsInCompositeMode" xml:space="preserve">
+    <value>NETSDK1166: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</value>
+    <comment>{StrBegin="NETSDK1166: "}</comment>
+  </data>
+  <data name="CompressionInSingleFileRequires60" xml:space="preserve">
+    <value>NETSDK1167: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</value>
+    <comment>{StrBegin="NETSDK1167: "}</comment>
+  </data>
+  <data name="TrimmingWpfIsNotSupported" xml:space="preserve">
+    <value>NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</value>
+    <comment>{StrBegin="NETSDK1168: "}</comment>
+  </data>
+  <data name="DuplicateTypeLibraryIds" xml:space="preserve">
+    <value>NETSDK1169: The same resource ID {0} was specified for two type libraries '{1}' and '{2}'. Duplicate type library IDs are not allowed.</value>
+    <comment>{StrBegin="NETSDK1169: "}</comment>
+  </data>
+  <data name="InvalidTypeLibraryId" xml:space="preserve">
+    <value>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</value>
+    <comment>{StrBegin="NETSDK1170: "}</comment>
+  </data>
+  <data name="MissingTypeLibraryId" xml:space="preserve">
+    <value>NETSDK1171: An integer ID less than 65536 must be provided for type library '{0}' because more than one type library is specified.</value>
+    <comment>{StrBegin="NETSDK1171: "}</comment>
+  </data>
+  <data name="TypeLibraryDoesNotExist" xml:space="preserve">
+    <value>NETSDK1172: The provided type library '{0}' does not exist.</value>
+    <comment>{StrBegin="NETSDK1172: "}</comment>
+  </data>
+  <data name="InvalidTypeLibrary" xml:space="preserve">
+    <value>NETSDK1173: The provided type library '{0}' is in an invalid format.</value>
+    <comment>{StrBegin="NETSDK1173: "}</comment>
+  </data>
+  <data name="CompressionInSingleFileRequiresSelfContained" xml:space="preserve">
+    <value>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
+    <comment>{StrBegin="NETSDK1174: "}</comment>
+  </data>
+  <data name="TrimmingWindowsFormsIsNotSupported" xml:space="preserve">
+    <value>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</value>
+    <comment>{StrBegin="NETSDK1175: "}</comment>
+  </data>
+  <data name="PlaceholderRunCommandProjectAbbreviationDeprecated" xml:space="preserve">
+    <value>NETSDK1176: Placeholder</value>
+    <comment>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</comment>
+  </data>
+    <data name="AppHostSigningFailed" xml:space="preserve">
+    <value>NETSDK1177: Failed to sign apphost with error code {1}: {0}</value>
+    <comment>{StrBegin="NETSDK1177: "}</comment>
+  </data>
+  <data name="WorkloadNotAvailable" xml:space="preserve">
+    <value>NETSDK1178: The project depends on the following workload packs that do not exist in any of the workloads available in this installation: {0}
+You may need to build the project on another operating system or architecture, or update the .NET SDK.</value>
+    <comment>{StrBegin="NETSDK1178: "}</comment>
+  </data>
+    <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
+    <value>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</value>
+    <comment>{StrBegin="NETSDK1179: "}</comment>
+  </data>
+  <data name="SingleFileWin7Incompatible" xml:space="preserve">
+    <value>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</value>
+    <comment>{StrBegin="NETSDK1180: "}</comment>
+  </data>
+  <data name="CouldNotGetPackVersionFromWorkloadManifests" xml:space="preserve">
+    <value>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</value>
+    <comment>{StrBegin="NETSDK1181: "}</comment>
+  </data>
+  <data name="Net6NotCompatibleWithDev16" xml:space="preserve">
+    <value>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</value>
+    <comment>{StrBegin="NETSDK1182: "}</comment>
   </data>
 </root>

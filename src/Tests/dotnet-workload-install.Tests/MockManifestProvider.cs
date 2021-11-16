@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -9,21 +11,43 @@ namespace ManifestReaderTests
 {
     internal class MockManifestProvider : IWorkloadManifestProvider
     {
-        readonly string[] _filePaths;
+        readonly (string name, string path)[] _manifests;
 
-        public MockManifestProvider(params string[] filePaths)
+        public MockManifestProvider(params string[] manifestPaths)
         {
-            _filePaths = filePaths;
+            _manifests = Array.ConvertAll(manifestPaths, mp =>
+            {
+                string manifestId = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(mp));
+                return (manifestId, mp);
+            });
         }
 
-        public IEnumerable<string> GetManifestDirectories() => throw new System.NotImplementedException();
+        public MockManifestProvider(params (string name, string path)[] manifests)
+        {
+            _manifests = manifests;
+        }
 
-        public IEnumerable<(string manifestId, Stream manifestStream)> GetManifests()
+        public IEnumerable<string> GetManifestDirectories()
+        {
+            foreach ((_, var filePath) in _manifests)
             {
-                foreach (var filePath in _filePaths)
-                {
-                    yield return (filePath, new FileStream(filePath, FileMode.Open, FileAccess.Read));
-                }
+                yield return Path.GetDirectoryName(filePath);
             }
         }
+
+        public IEnumerable<(string manifestId, string informationalPath, Func<Stream> openManifestStream, Func<Stream> openLocalizationStream)> GetManifests()
+            {
+                foreach ((var id, var path) in _manifests)
+                {
+                    yield return (
+                        id,
+                        path,
+                        () => File.OpenRead(path),
+                        () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(path)
+                    );
+                }
+            }
+
+        public string GetSdkFeatureBand() => "6.0.100";
+    }
 }

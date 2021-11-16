@@ -1,10 +1,14 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+#nullable enable
+
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Graph;
 using Microsoft.DotNet.Watcher.Internal;
 using Microsoft.Extensions.Tools.Internal;
 
@@ -12,13 +16,10 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class ScopedCssFileHandler
     {
-        private static readonly string _muxerPath = DotnetMuxer.MuxerPath;
-        private readonly ProcessRunner _processRunner;
         private readonly IReporter _reporter;
 
-        public ScopedCssFileHandler(ProcessRunner processRunner, IReporter reporter)
+        public ScopedCssFileHandler(IReporter reporter)
         {
-            _processRunner = processRunner;
             _reporter = reporter;
         }
 
@@ -33,30 +34,37 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
 
             _reporter.Verbose($"Handling file change event for scoped css file {file.FilePath}.");
-            if (!await RebuildScopedCss(file.ProjectPath, cancellationToken))
+            if (!RebuildScopedCss(context.ProjectGraph!, file.ProjectPath))
             {
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.ScopedCssHandler);
                 return false;
             }
             await HandleBrowserRefresh(context.BrowserRefreshServer, file, cancellationToken);
+            _reporter.Output("Hot reload of scoped css succeeded.");
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.ScopedCssHandler);
             return true;
         }
 
-        private async ValueTask<bool> RebuildScopedCss(string projectPath, CancellationToken cancellationToken)
+        private bool RebuildScopedCss(ProjectGraph projectGraph, string projectPath)
         {
-            var build = new ProcessSpec
+            var project = projectGraph.ProjectNodesTopologicallySorted.FirstOrDefault(f => string.Equals(f.ProjectInstance.FullPath, projectPath, StringComparison.OrdinalIgnoreCase));
+            if (project is null)
             {
-                Executable = _muxerPath,
-                Arguments = new[] { "msbuild", "/nologo", "/t:_PrepareForScopedCss", projectPath, }
-            };
+                return false;
+            }
 
-            var result = await _processRunner.RunAsync(build, cancellationToken);
-            return result == 0;
+            var projectInstance = project.ProjectInstance.DeepCopy();
+            var logger = _reporter.IsVerbose ? new[] { new Build.Logging.ConsoleLogger() } : null;
+            return projectInstance.Build("GenerateComputedBuildStaticWebAssets", logger);
         }
 
-        private static async Task HandleBrowserRefresh(BrowserRefreshServer browserRefreshServer, FileItem fileItem, CancellationToken cancellationToken)
+        private static async Task HandleBrowserRefresh(BrowserRefreshServer? browserRefreshServer, FileItem fileItem, CancellationToken cancellationToken)
         {
+            if (browserRefreshServer is null)
+            {
+                return;
+            }
+
             // We'd like an accurate scoped css path, but this needs a lot of work to wire-up now.
             // We'll handle this as part of https://github.com/dotnet/aspnetcore/issues/31217.
             // For now, we'll make it look like some css file which would cause JS to update a

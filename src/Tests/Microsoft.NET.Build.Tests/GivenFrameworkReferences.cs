@@ -34,13 +34,15 @@ namespace FrameworkReferenceTest
     }
 }";
 
-        [WindowsOnlyFact]
-        public void Multiple_frameworks_are_written_to_runtimeconfig_when_there_are_multiple_FrameworkReferences()
+        [WindowsOnlyRequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("net6.0", true)]
+        [InlineData("netcoreapp3.1", false)]
+        public void Multiple_frameworks_are_written_to_runtimeconfig_when_there_are_multiple_FrameworkReferences(string targetFramework, bool shouldIncludeBaseFramework)
         {
             var testProject = new TestProject()
             {
                 Name = "MultipleFrameworkReferenceTest",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = targetFramework,
                 IsExe = true
             };
 
@@ -49,7 +51,7 @@ namespace FrameworkReferenceTest
 
             testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var buildCommand = new BuildCommand(testAsset);
 
@@ -63,9 +65,14 @@ namespace FrameworkReferenceTest
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
 
-            //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
-            //  Microsoft.NETCore.App will need to be added to this list
-            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
+            if (shouldIncludeBaseFramework)
+            {
+                runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App", "Microsoft.NETCore.App");
+            }
+            else
+            {
+                runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
+            }
         }
 
         [Theory]
@@ -142,13 +149,13 @@ namespace FrameworkReferenceTest
             Assert.True(File.Exists(runtimeConfigFile), $"Expected to generate runtime config file '{runtimeConfigFile}'");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void DuplicateFrameworksAreNotWrittenToRuntimeConfigWhenThereAreDifferentProfiles()
         {
             var testProject = new TestProject()
             {
                 Name = "MultipleProfileFrameworkReferenceTest",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 
@@ -171,9 +178,7 @@ namespace FrameworkReferenceTest
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
 
-            //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
-            //  Microsoft.NETCore.App will need to be added to this list
-            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.WindowsDesktop.App");
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.WindowsDesktop.App", "Microsoft.NETCore.App");
         }
 
         [Fact]
@@ -489,7 +494,7 @@ namespace FrameworkReferenceTest
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
             };
-            
+
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
 
@@ -671,20 +676,20 @@ namespace FrameworkReferenceTest
         //  Transitive framework references require NuGet support, which isn't currently
         //  in the full Framework MSBuild we use in CI, so only run these tests for
         //  core MSBuild for now
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void TransitiveFrameworkReferenceFromProjectReference()
         {
             var testProject = new TestProject()
             {
                 Name = "TransitiveFrameworkReference",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 
             var referencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "net6.0",
             };
 
             referencedProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
@@ -707,7 +712,7 @@ namespace FrameworkReferenceTest
 
             //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
             //  Microsoft.NETCore.App will need to be added to this list
-            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App");
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.NETCore.App");
         }
 
         [Fact]

@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
                 Name = "DesignerTest",
                 IsExe = true,
                 TargetFrameworks = targetFramework,
-                PackageReferences = { new TestPackageReference("NewtonSoft.Json", "12.0.1") },
+                PackageReferences = { new TestPackageReference("NewtonSoft.Json", "13.0.1") },
                 ReferencedProjects = { projectRef }
             };
 

@@ -17,14 +17,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IsPublishable Condition="'$(IsPublishable)' == ''">true</IsPublishable>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(PublishReadyToRun)' == 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
-    <!-- For .NET 6 and higher, default to using Crossgen2 in non-composite mode -->
-    <PublishReadyToRunUseCrossgen2 Condition="'$(PublishReadyToRunUseCrossgen2)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '6.0'">true</PublishReadyToRunUseCrossgen2>
-    <PublishReadyToRunComposite Condition="'$(PublishReadyToRunComposite)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '6.0'">false</PublishReadyToRunComposite>
-    <PublishReadyToRunComposite Condition="'$(PublishReadyToRunComposite)' == ''">true</PublishReadyToRunComposite>
-    <PublishReadyToRunComposite Condition="'$(PublishReadyToRunUseCrossgen2)' != 'true' or '$(SelfContained)' != 'true'">false</PublishReadyToRunComposite>
-  </PropertyGroup>
-
   <ItemDefinitionGroup>
     <ResolvedFileToPublish>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
@@ -119,10 +111,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(EnableCompressionInSingleFile)' == 'true' And
                             '$(SelfContained)' != 'true'"
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
-    <NetSdkWarning Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true'"
-                 ResourceName="TrimmingWindowsFormsIsNotSupported" />
-    <NetSdkWarning Condition="'$(UseWpf)' == 'true' and '$(PublishTrimmed)' == 'true'"
-                 ResourceName="TrimmingWpfIsNotSupported" />
 
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
@@ -300,39 +288,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Copy>
   </Target>
 
-  <!--
-    ============================================================
-                                        CreateReadyToRunImages
-
-    Create ReadyToRun images for managed assemblies in _ResolvedFileToPublishAlways and _ResolvedFileToPublishPreserveNewest.
-    ============================================================
-    -->
-  <Target Name="CreateReadyToRunImages"
-          Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(PublishReadyToRun)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
-          DependsOnTargets="_PrepareForReadyToRunCompilation;
-                            _CreateR2RImages;
-                            _CreateR2RSymbols">
-
-    <AllowEmptyTelemetry EventName="ReadyToRun" EventData="PublishReadyToRunUseCrossgen2=$(PublishReadyToRunUseCrossgen2);Crossgen2PackVersion=%(ResolvedCrossgen2Pack.NuGetPackageVersion);CompileListCount=@(_ReadyToRunCompileList->Count());FailedCount=@(_ReadyToRunCompilationFailures->Count())" />
-
-    <NETSdkError Condition="'@(_ReadyToRunCompilationFailures)' != ''" ResourceName="ReadyToRunCompilationFailed" />
-
-    <NETSdkInformation Condition="'$(_ReadyToRunCompilerHasWarnings)' != ''" ResourceName="ReadyToRunCompilationHasWarnings_Info" />
-
-    <ItemGroup>
-      <!--
-      Note: we only remove the entries for the IL images and replace them with the entries for the R2R images.
-      We do not do the same for PDBs, because the native PDBs created by the R2R compiler complement the IL PDBs
-      and do not replace them. IL PDBs are still required for debugging. Native PDBs emitted by the R2R compiler are
-      only used for profiling purposes.
-      -->
-      <ResolvedFileToPublish Remove="@(_ReadyToRunImplementationAssemblies)" Condition="'$(PublishReadyToRunComposite)' == 'true'"/>
-      <ResolvedFileToPublish Remove="@(_ReadyToRunCompileList)" />
-      <ResolvedFileToPublish Include="@(_ReadyToRunFilesToPublish)" />
-    </ItemGroup>
-
-  </Target>
-
   <UsingTask TaskName="ResolveReadyToRunCompilers" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="ResolveReadyToRunCompilers">
     <ResolveReadyToRunCompilers RuntimePacks="@(ResolvedRuntimePack)"
@@ -341,138 +296,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 EmitSymbols="$(PublishReadyToRunEmitSymbols)"
-                                ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)">
+                                ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                                PerfmapFormatVersion="$(PublishReadyToRunPerfmapFormatVersion)">
 
       <Output TaskParameter="CrossgenTool" ItemName="CrossgenTool" />
       <Output TaskParameter="Crossgen2Tool" ItemName="Crossgen2Tool" />
     </ResolveReadyToRunCompilers>
-  </Target>
-
-  <!--
-    ============================================================
-                                        _PrepareForReadyToRunCompilation
-
-    Prepare build for ReadyToRun compilations. Builds list of assemblies to compile, and computes paths to ReadyToRun compiler bits
-    ============================================================
-    -->
-  <UsingTask TaskName="PrepareForReadyToRunCompilation" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <Target Name="_PrepareForReadyToRunCompilation" DependsOnTargets="ResolveReadyToRunCompilers;_ComputeManagedRuntimePackAssemblies;_ComputeAssembliesToPostprocessOnPublish">
-
-    <PropertyGroup>
-      <_ReadyToRunOutputPath>$(IntermediateOutputPath)R2R</_ReadyToRunOutputPath>
-    </PropertyGroup>
-
-    <MakeDir Directories="$(_ReadyToRunOutputPath)" />
-
-    <ItemGroup>
-      <_ReadyToRunImplementationAssemblies Include="@(ResolvedFileToPublish->WithMetadataValue('PostprocessAssembly', 'true'))" />
-    </ItemGroup>
-
-    <!-- Even if app is not self-contained, crossgen requires closure of implementation assemblies. Resolve conflicts
-         of the runtime pack assets as though we were copying them locally, and add them to the R2R implementation
-         assembly list. -->
-    <ItemGroup Condition="'$(SelfContained)' != 'true'">
-      <_ReadyToRunImplementationAssemblies Include="@(_ManagedRuntimePackAssembly)" ReferenceOnly="true" />
-    </ItemGroup>
-
-    <ResolvePackageFileConflicts Condition="'$(SelfContained)' != 'true'"
-                                 ReferenceCopyLocalPaths="@(_ReadyToRunImplementationAssemblies)">
-      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReadyToRunImplementationAssembliesWithoutConflicts" />
-    </ResolvePackageFileConflicts>
-
-    <ItemGroup Condition="'$(SelfContained)' != 'true'">
-      <_ReadyToRunImplementationAssemblies Remove="@(_ReadyToRunImplementationAssemblies)" />
-      <_ReadyToRunImplementationAssemblies Include="@(_ReadyToRunImplementationAssembliesWithoutConflicts)" />
-    </ItemGroup>
-
-    <PrepareForReadyToRunCompilation CrossgenTool="@(CrossgenTool)"
-                                     Crossgen2Tool="@(Crossgen2Tool)"
-                                     OutputPath="$(_ReadyToRunOutputPath)"
-                                     MainAssembly="@(IntermediateAssembly)"
-                                     Assemblies="@(_ReadyToRunImplementationAssemblies)"
-                                     ExcludeList="@(PublishReadyToRunExclude)"
-                                     EmitSymbols="$(PublishReadyToRunEmitSymbols)"
-                                     IncludeSymbolsInSingleFile="$(IncludeSymbolsInSingleFile)"
-                                     ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
-                                     Crossgen2Composite="$(PublishReadyToRunComposite)">
-
-      <Output TaskParameter="ReadyToRunCompileList" ItemName="_ReadyToRunCompileList" />
-      <Output TaskParameter="ReadyToRunSymbolsCompileList" ItemName="_ReadyToRunSymbolsCompileList" />
-
-      <Output TaskParameter="ReadyToRunFilesToPublish" ItemName="_ReadyToRunFilesToPublish" />
-      <Output TaskParameter="ReadyToRunAssembliesToReference" ItemName="_ReadyToRunAssembliesToReference" />
-
-    </PrepareForReadyToRunCompilation>
-  </Target>
-
-  <!--
-    ============================================================
-                                        _CreateR2RImages
-
-    Compiles assemblies in the _ReadyToRunCompileList list into ReadyToRun images
-    ============================================================
-    -->
-  <UsingTask TaskName="RunReadyToRunCompiler" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <Target Name="_CreateR2RImages"
-          Inputs="@(_ReadyToRunCompileList)"
-          Outputs="%(_ReadyToRunCompileList.OutputR2RImage)">
-
-    <RunReadyToRunCompiler CrossgenTool="@(CrossgenTool)"
-                           Crossgen2Tool="@(Crossgen2Tool)"
-                           UseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
-                           Crossgen2Composite="$(PublishReadyToRunComposite)"
-                           Crossgen2ExtraCommandLineArgs="$(PublishReadyToRunCrossgen2ExtraArgs)"
-                           ImplementationAssemblyReferences="@(_ReadyToRunAssembliesToReference)"
-                           ShowCompilerWarnings="$(PublishReadyToRunShowWarnings)"
-                           CompilationEntry="@(_ReadyToRunCompileList)"
-                           ContinueOnError="ErrorAndContinue">
-      <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
-      <Output TaskParameter="WarningsDetected" PropertyName="_ReadyToRunWarningsDetected" />
-    </RunReadyToRunCompiler>
-
-    <PropertyGroup>
-      <!-- Use distinct property here as any of the invocations can set it -->
-      <_ReadyToRunCompilerHasWarnings Condition="'$(_ReadyToRunWarningsDetected)' == 'true'">true</_ReadyToRunCompilerHasWarnings>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <_ReadyToRunCompilationFailures Condition="'$(_ReadyToRunCompilerExitCode)' != '' And $(_ReadyToRunCompilerExitCode) != 0"
-                                      Include="@(_ReadyToRunCompileList)" />
-    </ItemGroup>
-  </Target>
-
-  <!--
-    ============================================================
-                                        _CreateR2RSymbols
-
-    Emit native symbols for ReadyToRun images in the _ReadyToRunSymbolsCompileList list
-    ============================================================
-    -->
-  <Target Name="_CreateR2RSymbols"
-          Inputs="@(_ReadyToRunSymbolsCompileList)"
-          Outputs="%(_ReadyToRunSymbolsCompileList.OutputPDBImage)"
-          Condition="'$(PublishReadyToRunUseCrossgen2)' != 'true' or '@(Crossgen2Tool -> '%(IsVersion5)')' == 'true'">
-    <RunReadyToRunCompiler CrossgenTool="@(CrossgenTool)"
-                           Crossgen2Tool="@(Crossgen2Tool)"
-                           UseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
-                           Crossgen2ExtraCommandLineArgs="$(PublishReadyToRunCrossgen2ExtraArgs)"
-                           ImplementationAssemblyReferences="@(_ReadyToRunAssembliesToReference)"
-                           ShowCompilerWarnings="$(PublishReadyToRunShowWarnings)"
-                           CompilationEntry="@(_ReadyToRunSymbolsCompileList)"
-                           ContinueOnError="ErrorAndContinue">
-      <Output TaskParameter="ExitCode" PropertyName="_ReadyToRunCompilerExitCode" />
-      <Output TaskParameter="WarningsDetected" PropertyName="_ReadyToRunWarningsDetected" />
-    </RunReadyToRunCompiler>
-
-    <PropertyGroup>
-      <!-- Use distinct property here as any of the invocations can set it -->
-      <_ReadyToRunCompilerHasWarnings Condition="'$(_ReadyToRunWarningsDetected)' == 'true'">true</_ReadyToRunCompilerHasWarnings>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <_ReadyToRunCompilationFailures Condition="'$(_ReadyToRunCompilerExitCode)' != '' And $(_ReadyToRunCompilerExitCode) != 0"
-                                      Include="@(_ReadyToRunSymbolsCompileList)" />
-    </ItemGroup>
   </Target>
 
   <!--
@@ -667,7 +496,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <ItemGroup>
         <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
-                                         Condition="'$(SelfContained)' == 'true' Or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true'" />
+                                         Condition="('$(SelfContained)' == 'true' Or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true') and '%(RuntimePackAsset.AssetType)' != 'pgodata'" />
       </ItemGroup>
 
       <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">
@@ -809,7 +638,7 @@ Copyright (c) .NET Foundation. All rights reserved.
              Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
              Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToPublishDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false'"
              ContinueOnError="$(ContinueOnError)"
-             RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+             RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
 
       <Output TaskParameter="TargetOutputs" ItemName="_AllChildProjectPublishItemsWithTargetPath"/>
 
@@ -1033,14 +862,26 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PublishedSingleFileName>$(AssemblyName)$(_NativeExecutableExtension)</PublishedSingleFileName>
       <PublishedSingleFilePath>$(PublishDir)$(PublishedSingleFileName)</PublishedSingleFilePath>
     </PropertyGroup>
-
   </Target>
 
+  <Target Name="PrepareForBundle"
+      DependsOnTargets="_ComputeFilesToBundle"
+      Condition="'$(PublishSingleFile)' == 'true'">
+
+    <ItemGroup>
+      <FilesToBundle Include="@(_FilesToBundle)"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <AppHostFile>$(PublishedSingleFileName)</AppHostFile>
+    </PropertyGroup>
+  </Target>
+  
   <UsingTask TaskName="GenerateBundle" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="GenerateSingleFileBundle"
           Condition="'$(PublishSingleFile)' == 'true'"
-          DependsOnTargets="_ComputeFilesToBundle"
-          Inputs="@(_FilesToBundle)"
+          DependsOnTargets="_ComputeFilesToBundle;PrepareForBundle"
+          Inputs="@(FilesToBundle)"
           Outputs="$(PublishedSingleFilePath)">
 
     <PropertyGroup>
@@ -1054,7 +895,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(IncludeAllContentForSelfExtract)' == 'true' And '$(IncludeNativeLibrariesForSelfExtract)' != 'true'"
                  ResourceName="CannotIncludeAllContentButNotNativeLibrariesInSingleFile" />
 
-    <GenerateBundle FilesToBundle="@(_FilesToBundle)"
+    <GenerateBundle FilesToBundle="@(FilesToBundle)"
                     AppHostName="$(PublishedSingleFileName)"
                     IncludeSymbols="$(IncludeSymbolsInSingleFile)"
                     EnableCompressionInSingleFile="$(EnableCompressionInSingleFile)"
@@ -1210,13 +1051,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PublishItemsOutputGroupDependsOn>
   </PropertyGroup>
 
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetPublishItemsOutputGroupOutputs"
+          AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
+    <GetPublishItemsOutputGroupOutputs
+      ResolvedFileToPublish="@(ResolvedFileToPublish)"
+      PublishDir="$(PublishDir)"
+        >
+
+      <Output TaskParameter="PublishItemsOutputGroupOutputs" ItemName="PublishItemsOutputGroupOutputs" />
+    </GetPublishItemsOutputGroupOutputs>
+
     <ItemGroup>
-      <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')"
-                                      TargetPath="%(ResolvedFileToPublish.RelativePath)"
-                                      IsKeyOutput="%(ResolvedFileToPublish.IsKeyOutput)"
-                                      OutputPath="@(ResolvedFileToPublish->'$(PublishDir)%(relativePath)')"
-                                      OutputGroup="PublishItemsOutputGroup" />
       <PublishItemsOutputGroupOutputs Include="$(PublishedSingleFilePath)"
                                       TargetPath="$(PublishedSingleFileName)"
                                       IsKeyOutput="true"

@@ -17,9 +17,34 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolveAssemblyReferencesDependsOn>
   </PropertyGroup>
 
+  <UsingTask TaskName="CreateWindowsSdkKnownFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="CheckForDuplicateFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ProcessFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveAppHosts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="AddWindowsSdkKnownFrameworkReferences"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetPlatformIdentifier)' == 'Windows'">
+
+    <!-- Remove Windows SDK KnownFrameworkReference items from BundledVersions.props (they will eventually be removed, but that is in a different repo so
+         we can't do the change atomically -->
+    <ItemGroup>
+      <KnownFrameworkReference Remove="Microsoft.Windows.SDK.NET.Ref" />
+    </ItemGroup>
+    
+    <!-- Generate KnownFrameworkReference items for the Windows SDK pack -->
+    <CreateWindowsSdkKnownFrameworkReferences
+      UseWindowsSDKPreview="$(UseWindowsSDKPreview)"
+      WindowsSdkPackageVersion="$(WindowsSdkPackageVersion)"
+      TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
+      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
+      TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
+      TargetPlatformVersion="$(TargetPlatformVersion)"
+      WindowsSdkSupportedTargetPlatformVersions="@(WindowsSdkSupportedTargetPlatformVersion)">
+
+      <Output TaskParameter="KnownFrameworkReferences" ItemName="KnownFrameworkReference" />
+      
+    </CreateWindowsSdkKnownFrameworkReferences>
+  </Target>
 
   <!--
     ============================================================
@@ -34,6 +59,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="ProcessFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CollectPackageDownloads"
+          DependsOnTargets="AddWindowsSdkKnownFrameworkReferences"
           Condition="'@(FrameworkReference)' != ''">
 
     <CheckForDuplicateFrameworkReferences
@@ -81,7 +107,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)"
                                 EnableRuntimePackDownload="$(EnableRuntimePackDownload)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
-                                NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)">
+                                NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
+                                NetCoreRoot="$(NetCoreRoot)"
+                                NETCoreSdkVersion="$(NETCoreSdkVersion)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
@@ -326,18 +354,26 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <ResolveTargetingPackAssets FrameworkReferences="@(FrameworkReference)"
+                                ProjectLanguage="$(Language)"
                                 ResolvedTargetingPacks="@(ResolvedTargetingPack)"
                                 RuntimeFrameworks="@(RuntimeFramework)"
                                 GenerateErrorForMissingTargetingPacks="$(GenerateErrorForMissingTargetingPacks)"
                                 NuGetRestoreSupported="$(_NuGetRestoreSupported)"
                                 NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
       <Output TaskParameter="ReferencesToAdd" ItemName="Reference" />
+      <Output TaskParameter="AnalyzersToAdd" ItemName="Analyzer" />
       <Output TaskParameter="PlatformManifests" ItemName="PlatformManifestsFromTargetingPacks" />
       <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
       <Output TaskParameter="PackageConflictOverrides" ItemName="PackageConflictOverrides" />
       <Output TaskParameter="UsedRuntimeFrameworks" ItemName="_UsedRuntimeFramework" />
 
     </ResolveTargetingPackAssets>
+
+    <PropertyGroup>
+      <!-- Unescape this semicolon-delimited ordered list so that it's passed as a list to targets
+           that consume it. -->
+      <PackageConflictPreferredPackages>$([MSBuild]::Unescape($(PackageConflictPreferredPackages)))</PackageConflictPreferredPackages>
+    </PropertyGroup>
 
     <ItemGroup Condition="'$(RuntimeIdentifier)' == '' or '$(SelfContained)' != 'true'">
       <PackageConflictPlatformManifests Include="@(PlatformManifestsFromTargetingPacks)" />
@@ -364,7 +400,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
         RootPath="$(TargetFrameworkRootPath)"
         TargetFrameworkFallbackSearchPaths="$(TargetFrameworkFallbackSearchPaths)"
-        BypassFrameworkInstallChecks="$(BypassFrameworkInstallChecks)"
+        BypassFrameworkInstallChecks="true"
         SuppressNotFoundError="true">
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="_FullFrameworkReferenceAssemblyPaths"/>
     </GetReferenceAssemblyPaths>
@@ -398,7 +434,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <ReferenceCopyLocalPaths Include="@(RuntimePackAsset)"
-                               Condition="'$(CopyLocalLockFileAssemblies)' == 'true' and ('$(SelfContained)' == 'true' or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true')" />
+                               Condition="'$(CopyLocalLockFileAssemblies)' == 'true' and ('$(SelfContained)' == 'true' or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true') and '%(RuntimePackAsset.AssetType)' != 'pgodata'" />
     </ItemGroup>
 
 

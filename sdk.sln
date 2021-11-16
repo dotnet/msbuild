@@ -160,31 +160,31 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Worker.Ta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Publish.Tasks.Tests", "src\Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj", "{1F26FAE6-2654-4E83-8936-146134638C59}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk", "Sdk", "{F717D467-EF88-49B9-AD67-55FC6350A9DE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk (2)", "Sdk (2)", "{F717D467-EF88-49B9-AD67-55FC6350A9DE}"
 	ProjectSection(SolutionItems) = preProject
 		src\WebSdk\Publish\Sdk\Sdk.props = src\WebSdk\Publish\Sdk\Sdk.props
 		src\WebSdk\Publish\Sdk\Sdk.targets = src\WebSdk\Publish\Sdk\Sdk.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{2F565AE9-3DBC-4EFF-A3C4-4B65C7262282}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets (2)", "Targets (2)", "{2F565AE9-3DBC-4EFF-A3C4-4B65C7262282}"
 	ProjectSection(SolutionItems) = preProject
 		src\WebSdk\Publish\Targets\Microsoft.NET.Sdk.Publish.props = src\WebSdk\Publish\Targets\Microsoft.NET.Sdk.Publish.props
 		src\WebSdk\Publish\Targets\Microsoft.NET.Sdk.Publish.targets = src\WebSdk\Publish\Targets\Microsoft.NET.Sdk.Publish.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk", "Sdk", "{63DA18A8-D24A-4CD1-A7E7-2B181AB2DF9A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk (2)", "Sdk (2)", "{63DA18A8-D24A-4CD1-A7E7-2B181AB2DF9A}"
 	ProjectSection(SolutionItems) = preProject
 		src\WebSdk\Web\Sdk\Sdk.props = src\WebSdk\Web\Sdk\Sdk.props
 		src\WebSdk\Web\Sdk\Sdk.targets = src\WebSdk\Web\Sdk\Sdk.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk", "Sdk", "{2869912E-BD63-40CF-A17F-7195B6FE9630}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk (2)", "Sdk (2)", "{2869912E-BD63-40CF-A17F-7195B6FE9630}"
 	ProjectSection(SolutionItems) = preProject
 		src\WebSdk\Worker\Sdk\Sdk.props = src\WebSdk\Worker\Sdk\Sdk.props
 		src\WebSdk\Worker\Sdk\Sdk.targets = src\WebSdk\Worker\Sdk\Sdk.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{EE6A0097-62A5-40B7-8E6C-F8FD009B5C33}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets (2)", "Targets (2)", "{EE6A0097-62A5-40B7-8E6C-F8FD009B5C33}"
 	ProjectSection(SolutionItems) = preProject
 		src\WebSdk\Worker\Targets\Microsoft.NET.Sdk.Worker.props = src\WebSdk\Worker\Targets\Microsoft.NET.Sdk.Worker.props
 		src\WebSdk\Worker\Targets\Microsoft.NET.Sdk.Worker.targets = src\WebSdk\Worker\Targets\Microsoft.NET.Sdk.Worker.targets
@@ -235,15 +235,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transforms", "Transforms", 
 		src\WebSdk\Publish\Targets\TransformTargets\Transforms\EnvironmentWithLocation.transform = src\WebSdk\Publish\Targets\TransformTargets\Transforms\EnvironmentWithLocation.transform
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{6FBE1C01-77B7-41B9-ADD6-84B072526DCA}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets (2)", "Targets (2)", "{6FBE1C01-77B7-41B9-ADD6-84B072526DCA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{02EA412D-60F9-41E2-A1D9-D1569BB8FC79}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks (2)", "Tasks (2)", "{02EA412D-60F9-41E2-A1D9-D1569BB8FC79}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{5F8809DE-414C-42CB-A1BC-CF95267E6F49}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks (2)", "Tasks (2)", "{5F8809DE-414C-42CB-A1BC-CF95267E6F49}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{27302615-7D46-499E-AC84-D3E193F9A62D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks (2)", "Tasks (2)", "{27302615-7D46-499E-AC84-D3E193F9A62D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{EBEF2950-E27B-4EB8-8F1C-2001984B4D41}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks (2)", "Tasks (2)", "{EBEF2950-E27B-4EB8-8F1C-2001984B4D41}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.TemplateLocator", "src\Microsoft.DotNet.TemplateLocator\Microsoft.DotNet.TemplateLocator.csproj", "{89F798D9-A8BA-4556-B2A2-39CEF3587093}"
 EndProject
@@ -283,7 +283,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.BlazorWeb
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BlazorWasmSdk", "BlazorWasmSdk", "{9D207DE3-6D6E-4CD8-B3A4-E88FD255FCB0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{35D87DC9-B492-43B6-9FB3-F3ADFC162193}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets (2)", "Targets (2)", "{35D87DC9-B492-43B6-9FB3-F3ADFC162193}"
+	ProjectSection(SolutionItems) = preProject
+		src\BlazorWasmSdk\Targets\BlazorWasm.web.config = src\BlazorWasmSdk\Targets\BlazorWasm.web.config
+		src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.props = src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.props
+		src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.targets = src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.targets
+		src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.ServiceWorkerAssetsManifest.targets = src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.ServiceWorkerAssetsManifest.targets
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Razor.Tool", "src\RazorSdk\Tool\Microsoft.NET.Sdk.Razor.Tool.csproj", "{066660EC-8570-4093-8259-04760F757430}"
 EndProject
@@ -297,16 +303,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Razor.Too
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tool", "Tool", "{5BE2A52C-E48E-4AFC-A530-47B61A040694}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{0929FC08-CD95-4FC5-9AD7-B37B74A3378A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks (2)", "Tasks (2)", "{0929FC08-CD95-4FC5-9AD7-B37B74A3378A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk", "Sdk", "{4ACCAC39-8ECD-45F8-B5AF-EB7E37CD36CC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk (2)", "Sdk (2)", "{4ACCAC39-8ECD-45F8-B5AF-EB7E37CD36CC}"
 	ProjectSection(SolutionItems) = preProject
 		src\RazorSdk\Sdk\Sdk.props = src\RazorSdk\Sdk\Sdk.props
 		src\RazorSdk\Sdk\Sdk.Razor.StaticAssets.ProjectSystem.props = src\RazorSdk\Sdk\Sdk.Razor.StaticAssets.ProjectSystem.props
 		src\RazorSdk\Sdk\Sdk.targets = src\RazorSdk\Sdk\Sdk.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{D64884FD-A3F3-4082-A814-A9377B661509}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets (2)", "Targets (2)", "{D64884FD-A3F3-4082-A814-A9377B661509}"
 	ProjectSection(SolutionItems) = preProject
 		src\RazorSdk\Targets\Microsoft.NET.Sdk.Razor.CodeGeneration.targets = src\RazorSdk\Targets\Microsoft.NET.Sdk.Razor.CodeGeneration.targets
 		src\RazorSdk\Targets\Microsoft.NET.Sdk.Razor.Compilation.targets = src\RazorSdk\Targets\Microsoft.NET.Sdk.Razor.Compilation.targets
@@ -335,7 +341,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SourceGenerators", "SourceG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Razor.SourceGenerators", "src\RazorSdk\SourceGenerators\Microsoft.NET.Sdk.Razor.SourceGenerators.csproj", "{56C34654-DE8F-4F14-B2F8-6C37285B786E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.AspNetCoreDeltaApplier", "src\BuiltInTools\AspNetCoreDeltaApplier\Microsoft.Extensions.AspNetCoreDeltaApplier.csproj", "{1BBFA19C-03F0-4D27-9D0D-0F8172642107}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.DotNetDeltaApplier", "src\BuiltInTools\DotNetDeltaApplier\Microsoft.Extensions.DotNetDeltaApplier.csproj", "{1BBFA19C-03F0-4D27-9D0D-0F8172642107}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.NativeWrapper", "src\Resolvers\Microsoft.DotNet.NativeWrapper\Microsoft.DotNet.NativeWrapper.csproj", "{E97E9E7F-11B4-42F7-8B55-D0451F5E82A0}"
 EndProject
@@ -345,12 +351,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Compatibility", "Compatibil
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.ApiCompatibility", "src\Compatibility\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj", "{3F5A028C-C51B-434A-8C10-37680CD2635C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.ApiCompatibility.Tests", "src\Tests\Microsoft.DotNet.ApiCompatibility.Tests\Microsoft.DotNet.ApiCompatibility.Tests.csproj", "{24F084ED-35BB-401E-89F5-63E5E22C3B3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.ApiCompatibility.Tests", "src\Tests\Microsoft.DotNet.ApiCompatibility.Tests\Microsoft.DotNet.ApiCompatibility.Tests.csproj", "{24F084ED-35BB-401E-89F5-63E5E22C3B3B}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Win32.Msi", "src\Microsoft.Win32.Msi\Microsoft.Win32.Msi.csproj", "{3D002392-6308-41DF-8BD5-224CCC5B049F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Win32.Msi.Tests", "src\Tests\Microsoft.Win32.Msi.Tests\Microsoft.Win32.Msi.Tests.csproj", "{80932949-B8B2-4163-B325-76F8FDBE3897}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Win32.Msi.Manual.Tests", "src\Tests\Microsoft.Win32.Msi.Manual.Tests\Microsoft.Win32.Msi.Manual.Tests.csproj", "{EEF4C7DD-CDC9-44B6-8B4F-725647D54ED8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.PackageValidation", "src\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj", "{E56BEA9A-B52A-4781-9FF4-217439923319}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.PackageValidation.Tests", "src\Tests\Microsoft.DotNet.PackageValidation.Tests\Microsoft.DotNet.PackageValidation.Tests.csproj", "{69C03400-12AC-4E4D-B970-6A880616BF68}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.DotNetDeltaApplier.Tests", "src\Tests\Microsoft.Extensions.DotNetDeltaApplier.Tests\Microsoft.Extensions.DotNetDeltaApplier.Tests.csproj", "{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Compatibility", "src\Compatibility\Microsoft.DotNet.Compatibility\Microsoft.DotNet.Compatibility.csproj", "{87AE3308-8CCB-4383-8F51-C5061E348C36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -646,6 +661,22 @@ Global
 		{EEF4C7DD-CDC9-44B6-8B4F-725647D54ED8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEF4C7DD-CDC9-44B6-8B4F-725647D54ED8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEF4C7DD-CDC9-44B6-8B4F-725647D54ED8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E56BEA9A-B52A-4781-9FF4-217439923319}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E56BEA9A-B52A-4781-9FF4-217439923319}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E56BEA9A-B52A-4781-9FF4-217439923319}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E56BEA9A-B52A-4781-9FF4-217439923319}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69C03400-12AC-4E4D-B970-6A880616BF68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69C03400-12AC-4E4D-B970-6A880616BF68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69C03400-12AC-4E4D-B970-6A880616BF68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69C03400-12AC-4E4D-B970-6A880616BF68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87AE3308-8CCB-4383-8F51-C5061E348C36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87AE3308-8CCB-4383-8F51-C5061E348C36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87AE3308-8CCB-4383-8F51-C5061E348C36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87AE3308-8CCB-4383-8F51-C5061E348C36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -765,6 +796,10 @@ Global
 		{3D002392-6308-41DF-8BD5-224CCC5B049F} = {22AB674F-ED91-4FBC-BFEE-8A1E82F9F05E}
 		{80932949-B8B2-4163-B325-76F8FDBE3897} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{EEF4C7DD-CDC9-44B6-8B4F-725647D54ED8} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{E56BEA9A-B52A-4781-9FF4-217439923319} = {AF683E5C-421E-4DE0-ADD7-9841E5D12BFA}
+		{69C03400-12AC-4E4D-B970-6A880616BF68} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{87AE3308-8CCB-4383-8F51-C5061E348C36} = {AF683E5C-421E-4DE0-ADD7-9841E5D12BFA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

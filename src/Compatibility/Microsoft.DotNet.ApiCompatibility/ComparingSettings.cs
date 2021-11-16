@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Rules;
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility
@@ -16,7 +17,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <summary>
         /// The factory to get the <see cref="IRuleRunner"/>.
         /// </summary>
-        public IRuleRunnerFactory RuleRunnerFactory { get; }
+        public RuleRunnerFactory RuleRunnerFactory { get; }
 
         /// <summary>
         /// The metadata filter to use when creating the <see cref="ElementMapper{T}"/>.
@@ -29,16 +30,22 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEqualityComparer<ISymbol> EqualityComparer { get; }
 
         /// <summary>
+        /// Indicates if we should warn on missing references.
+        /// </summary>
+        public bool WarnOnMissingReferences { get; }
+
+        /// <summary>
         /// Instantiate an object with the desired settings.
         /// </summary>
         /// <param name="ruleRunnerFactory">The factory to create a <see cref="IRuleRunner"/></param>
         /// <param name="filter">The symbol filter.</param>
         /// <param name="equalityComparer">The comparer to map metadata.</param>
-        public ComparingSettings(IRuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null)
+        public ComparingSettings(RuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null, bool includeInternalSymbols = false, bool strictMode = false, bool warnOnMissingReferences = false, string leftName = null, string[] rightNames = null)
         {
-            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory();
-            Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols: false);
+            Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols: includeInternalSymbols);
             EqualityComparer = equalityComparer ?? new DefaultSymbolsEqualityComparer();
+            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(leftName, rightNames, EqualityComparer, includeInternalSymbols, strictMode, warnOnMissingReferences);
+            WarnOnMissingReferences = warnOnMissingReferences;
         }
     }
 }

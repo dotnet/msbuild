@@ -27,6 +27,10 @@
 /src/Assets/TestPackages/PackageLibraryTransitiveDependency/ @captainsafia, @pranavkm, @mkArtakMSFT
 /src/src/Assets/TestProjects/Razor*/ @captainsafia, @pranavkm, @mkArtakMSFT
 
+# Area-Format
+/src/Cli/dotnet/commands/dotnet-format @jmarolf, @JoeRobich
+/src/Tests/dotnet-format.Tests @jmarolf, @JoeRobich
+
 # Area-NuGet
 /src/Cli/dotnet/commands/dotnet-add/dotnet-add-package @dotnet/nuget-team
 /src/Tests/dotnet-add-package.Tests @dotnet/nuget-team
@@ -67,4 +71,5 @@
 # Compatibility tools owned by runtime team
 # Area-Compatibility
 /src/Compatibility/ @Anipik, @safern, @ericstj
-/src/Tests/Microsoft.DotNet.ApiCompatibility/ @Anipik, @safern, @ericstj
+/src/Tests/Microsoft.DotNet.ApiCompatibility.Tests/ @Anipik, @safern, @ericstj
+/src/Tests/Microsoft.DotNet.PackageValidation.Tests/ @Anipik, @safern, @ericstj

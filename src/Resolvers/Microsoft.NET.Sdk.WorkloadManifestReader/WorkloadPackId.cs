@@ -2,6 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+#if USE_SYSTEM_TEXT_JSON
+using System.Text.Json;
+using System.Text.Json.Serialization;
+#endif
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -10,7 +14,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// However, display strings and paths in the sdk/packs/* folder use original casing.
     /// This internal struct helps preserve/annotate these semantics.
     /// </summary>
-    /// <remarks>We also use this for workload definition ids for consistency</remarks>
+    /// <remarks>This is distinct from <see cref="WorkloadId"/> to prevent accidental confusion, but the behavior is identical</remarks>
     public struct WorkloadPackId : IComparable<WorkloadPackId>, IEquatable<WorkloadPackId>
     {
         string _id;
@@ -36,5 +40,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public override string ToString() => _id;
 
         public string GetNuGetCanonicalId() => _id.ToLowerInvariant();
+
+        public static implicit operator string(WorkloadPackId id) => id._id;
+
+        public static bool operator ==(WorkloadPackId a, WorkloadPackId b) => a.Equals(b);
+
+        public static bool operator !=(WorkloadPackId a, WorkloadPackId b) => !a.Equals(b);
     }
+
+#if USE_SYSTEM_TEXT_JSON
+    internal class PackIdJsonConverter : JsonConverter<WorkloadPackId>
+    {
+        public override WorkloadPackId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+            new WorkloadPackId(reader.GetString() ?? string.Empty);
+
+        public override void Write(Utf8JsonWriter writer, WorkloadPackId value, JsonSerializerOptions options) => writer.WriteStringValue(value.ToString());
+    }
+#endif
 }

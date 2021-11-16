@@ -1,7 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="FormatDefinition">
+        <source>Apply style preferences to a project or solution.</source>
+        <target state="translated">将样式首选项应用到项目或解决方案。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
         <target state="translated">前滚至框架版本(LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable)。</target>
@@ -9,7 +14,7 @@
       </trans-unit>
       <trans-unit id="SdkDefinition">
         <source>Manage .NET SDK installation.</source>
-        <target state="new">Manage .NET SDK installation.</target>
+        <target state="translated">管理 .NET SDK 安装。</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -54,7 +59,7 @@
       </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display the version of the .NET SDK, including the effects of any global.json</source>
-        <target state="needs-review-translation">显示 .NET CLI 版本号</target>
+        <target state="translated">显示 .NET SDK 的版本，包括任何 global.json 的影响</target>
         <note />
       </trans-unit>
       <trans-unit id="InfoDescription">
@@ -262,11 +267,6 @@
         <target state="translated">创建和管理开发证书。</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server 缓存命令行工具。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">管理开发用户密码。</target>
@@ -295,6 +295,11 @@
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">启动 F# 交互/执行 F# 脚本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">管理可选工作负荷。</target>
         <note />
       </trans-unit>
     </body>

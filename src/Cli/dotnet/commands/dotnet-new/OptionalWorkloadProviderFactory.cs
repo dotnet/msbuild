@@ -3,7 +3,7 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using System;
 
-namespace Microsoft.TemplateEngine.Utils
+namespace Microsoft.DotNet.Tools.New
 {
     /// <summary>
     /// TemplateEngine calls this when it wants to gather list of installed template packages.

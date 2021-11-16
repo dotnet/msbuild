@@ -20,10 +20,12 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem CompilationEntry { get; set; }
         [Required]
         public ITaskItem[] ImplementationAssemblyReferences { get; set; }
+        public ITaskItem[] ReadyToRunCompositeBuildReferences { get; set; }
+        public ITaskItem[] ReadyToRunCompositeBuildInput { get; set; }
         public bool ShowCompilerWarnings { get; set; }
         public bool UseCrossgen2 { get; set; }
-        public bool Crossgen2Composite { get; set; }
         public string Crossgen2ExtraCommandLineArgs { get; set; }
+        public ITaskItem[] Crossgen2PgoFiles { get; set; }
 
         [Output]
         public bool WarningsDetected { get; set; }
@@ -33,8 +35,9 @@ namespace Microsoft.NET.Build.Tasks
         private string _outputR2RImage;
         private string _outputPDBImage;
         private string _createPDBCommand;
+        private bool _createCompositeImage;
 
-        private bool IsPdbCompilation => !String.IsNullOrEmpty(_createPDBCommand);
+        private bool IsPdbCompilation => !string.IsNullOrEmpty(_createPDBCommand);
         private bool ActuallyUseCrossgen2 => UseCrossgen2 && !IsPdbCompilation;
 
         private string DotNetHostPath => Crossgen2Tool?.GetMetadata(MetadataKeys.DotNetHostPath);
@@ -79,6 +82,8 @@ namespace Microsoft.NET.Build.Tasks
             string emitSymbolsMetadata = CompilationEntry.GetMetadata(MetadataKeys.EmitSymbols);
             _emitSymbols = !string.IsNullOrEmpty(emitSymbolsMetadata) && bool.Parse(emitSymbolsMetadata);
             _createPDBCommand = CompilationEntry.GetMetadata(MetadataKeys.CreatePDBCommand);
+            string createCompositeImageMetadata = CompilationEntry.GetMetadata(MetadataKeys.CreateCompositeImage);
+            _createCompositeImage = !string.IsNullOrEmpty(createCompositeImageMetadata) && bool.Parse(createCompositeImageMetadata);
 
             if (IsPdbCompilation && CrossgenTool == null)
             {
@@ -162,14 +167,14 @@ namespace Microsoft.NET.Build.Tasks
             {
                 _outputR2RImage = CompilationEntry.ItemSpec;
 
-                if (!String.IsNullOrEmpty(DiaSymReader) && !File.Exists(DiaSymReader))
+                if (!string.IsNullOrEmpty(DiaSymReader) && !File.Exists(DiaSymReader))
                 {
                     Log.LogError(Strings.DiaSymReaderLibraryNotFound, DiaSymReader);
                     return false;
                 }
 
                 // R2R image has to be created before emitting native symbols (crossgen needs this as an input argument)
-                if (String.IsNullOrEmpty(_outputPDBImage))
+                if (string.IsNullOrEmpty(_outputPDBImage))
                 {
                     Log.LogError(Strings.MissingOutputPDBImagePath);
                 }
@@ -182,21 +187,28 @@ namespace Microsoft.NET.Build.Tasks
             }
             else
             {
-                _inputAssembly = CompilationEntry.ItemSpec;
                 _outputR2RImage = CompilationEntry.GetMetadata(MetadataKeys.OutputR2RImage);
 
-                if (!File.Exists(_inputAssembly))
+                if (!_createCompositeImage)
                 {
-                    Log.LogError(Strings.InputAssemblyNotFound, _inputAssembly);
-                    return false;
+                    _inputAssembly = CompilationEntry.ItemSpec;
+                    if (!File.Exists(_inputAssembly))
+                    {
+                        Log.LogError(Strings.InputAssemblyNotFound, _inputAssembly);
+                        return false;
+                    }
                 }
-                
+                else
+                {
+                    _inputAssembly = "CompositeImage";
+                }
+
                 if (string.IsNullOrEmpty(_outputR2RImage))
                 {
                     Log.LogError(Strings.MissingOutputR2RImageFileName);
                     return false;
                 }
-                
+
                 if (_emitSymbols && string.IsNullOrEmpty(_outputPDBImage))
                 {
                     Log.LogError(Strings.MissingOutputPDBImagePath);
@@ -210,19 +222,24 @@ namespace Microsoft.NET.Build.Tasks
         {
             StringBuilder result = new StringBuilder();
 
-            foreach (var reference in ImplementationAssemblyReferences)
-            {
-                // When generating PDBs, we must not add a reference to the IL version of the R2R image for which we're trying to generate a PDB
-                if (IsPdbCompilation && String.Equals(Path.GetFileName(reference.ItemSpec), Path.GetFileName(_outputR2RImage), StringComparison.OrdinalIgnoreCase))
-                    continue;
+            var references = _createCompositeImage ? ReadyToRunCompositeBuildReferences : ImplementationAssemblyReferences;
 
-                if (UseCrossgen2 && !IsPdbCompilation)
+            if (references != null)
+            {
+                foreach (var reference in (_createCompositeImage ? ReadyToRunCompositeBuildReferences : ImplementationAssemblyReferences))
                 {
-                    result.AppendLine($"-r:\"{reference}\"");
-                }
-                else
-                {
-                    result.AppendLine($"-r \"{reference}\"");
+                    // When generating PDBs, we must not add a reference to the IL version of the R2R image for which we're trying to generate a PDB
+                    if (IsPdbCompilation && string.Equals(Path.GetFileName(reference.ItemSpec), Path.GetFileName(_outputR2RImage), StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (UseCrossgen2 && !IsPdbCompilation)
+                    {
+                        result.AppendLine($"-r:\"{reference}\"");
+                    }
+                    else
+                    {
+                        result.AppendLine($"-r \"{reference}\"");
+                    }
                 }
             }
 
@@ -261,7 +278,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 result.Append(GetAssemblyReferencesCommands());
 
-                if (!String.IsNullOrEmpty(DiaSymReader))
+                if (!string.IsNullOrEmpty(DiaSymReader))
                 {
                     result.AppendLine($"/DiasymreaderPath \"{DiaSymReader}\"");
                 }
@@ -284,7 +301,7 @@ namespace Microsoft.NET.Build.Tasks
         private string GenerateCrossgen2ResponseFile()
         {
             StringBuilder result = new StringBuilder();
-            
+
             string jitPath = Crossgen2Tool.GetMetadata(MetadataKeys.JitPath);
             if (!string.IsNullOrEmpty(jitPath))
             {
@@ -297,23 +314,37 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             result.AppendLine("-O");
-            
+
             // 5.0 Crossgen2 doesn't support PDB generation.
             if (!Crossgen2IsVersion5 && _emitSymbols)
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "windows")
                 {
                     result.AppendLine("--pdb");
-                    result.AppendLine($"--pdb-path:{_outputPDBImage}");
+                    result.AppendLine($"--pdb-path:{Path.GetDirectoryName(_outputPDBImage)}");
                 }
                 else
                 {
                     result.AppendLine("--perfmap");
-                    result.AppendLine($"--perfmap-path:{_outputPDBImage}");
+                    result.AppendLine($"--perfmap-path:{Path.GetDirectoryName(_outputPDBImage)}");
+                    
+                    string perfmapFormatVersion = Crossgen2Tool.GetMetadata(MetadataKeys.PerfmapFormatVersion);
+                    if (!string.IsNullOrEmpty(perfmapFormatVersion))
+                    {
+                        result.AppendLine($"--perfmap-format-version:{perfmapFormatVersion}");
+                    }
                 }
             }
 
-            if (!String.IsNullOrEmpty(Crossgen2ExtraCommandLineArgs))
+            if (Crossgen2PgoFiles != null)
+            {
+                foreach (var mibc in Crossgen2PgoFiles)
+                {
+                    result.AppendLine($"-m:\"{mibc.ItemSpec}\"");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(Crossgen2ExtraCommandLineArgs))
             {
                 foreach (string extraArg in Crossgen2ExtraCommandLineArgs.Split(new char[]{';'}, StringSplitOptions.RemoveEmptyEntries))
                 {
@@ -321,15 +352,21 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            if (Crossgen2Composite)
+            if (_createCompositeImage)
             {
                 result.AppendLine("--composite");
-                result.AppendLine("--inputbubble");
+
+                // Crossgen2 v5 only supported compilation with --inputbubble specified
+                if (Crossgen2IsVersion5)
+                    result.AppendLine("--inputbubble");
+
                 result.AppendLine($"--out:\"{_outputR2RImage}\"");
+
+                result.Append(GetAssemblyReferencesCommands());
 
                 // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line
                 // parsing logic will append this string to the working directory if it's a relative path, so any double quotes will result in errors.
-                foreach (var reference in ImplementationAssemblyReferences)
+                foreach (var reference in ReadyToRunCompositeBuildInput)
                 {
                     result.AppendLine(reference.ItemSpec);
                 }

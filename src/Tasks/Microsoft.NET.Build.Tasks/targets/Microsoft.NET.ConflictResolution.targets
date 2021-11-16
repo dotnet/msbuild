@@ -38,6 +38,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ResolvePackageFileConflicts References="@(Reference)"
+                                 Analyzers="@(Analyzer)"
                                  ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                  OtherRuntimeItems="@(_RuntimeAssetsForConflictResolution)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
@@ -45,6 +46,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                  PackageOverrides="@(PackageConflictOverrides)"
                                  PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
+      <Output TaskParameter="AnalyzersWithoutConflicts" ItemName="_AnalyzersWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />
     </ResolvePackageFileConflicts>
@@ -56,6 +58,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <Reference Remove="@(Reference)" />
       <Reference Include="@(_ReferencesWithoutConflicts)" />
+      <Analyzer Remove="@(Analyzer)" />
+      <Analyzer Include="@(_AnalyzersWithoutConflicts)" />
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
       <ReferenceCopyLocalPaths Include="@(_ReferenceCopyLocalPathsWithoutConflicts)" />
     </ItemGroup>

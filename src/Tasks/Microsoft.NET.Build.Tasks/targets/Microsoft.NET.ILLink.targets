@@ -17,35 +17,37 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IntermediateLinkDir Condition=" '$(IntermediateLinkDir)' == '' ">$(IntermediateOutputPath)linked\</IntermediateLinkDir>
     <IntermediateLinkDir Condition=" !HasTrailingSlash('$(IntermediateLinkDir)') ">$(IntermediateLinkDir)\</IntermediateLinkDir>
     <!-- Used to enable incremental build for the linker target. -->
-    <_LinkSemaphore>$(IntermediateOutputPath)Link.semaphore</_LinkSemaphore>
+    <_LinkSemaphore>$(IntermediateLinkDir)Link.semaphore</_LinkSemaphore>
   </PropertyGroup>
 
-  <!-- We disable startup hooks for trimmed apps here so that the feature
-       switch can flow to the runtimeconfig.json. Startup hooks are disabled
-       by default since they may require assemblies, types or members that
-       could be removed by the linker, causing a trimmed app to crash. -->
-  <PropertyGroup Condition="'$(StartupHookSupport)' == '' And
-                            '$(PublishTrimmed)' == 'true' And
+  <ItemGroup>
+    <AssemblyAttribute Condition="'$(IsTrimmable)' == 'true'" Include="System.Reflection.AssemblyMetadata">
+      <_Parameter1>IsTrimmable</_Parameter1>
+      <_Parameter2>True</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+
+  <!-- We disable features for trimmed apps here so that the feature
+      switches can flow to the runtimeconfig.json. Features are disabled
+      by default since they may require assemblies, types or members that
+      could be removed by the linker, causing a trimmed app to crash. -->
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' And
                             $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <StartupHookSupport>false</StartupHookSupport>
+    <StartupHookSupport Condition="'$(StartupHookSupport)' == ''">false</StartupHookSupport>
+    <CustomResourceTypesSupport Condition="'$(CustomResourceTypesSupport)' == ''">false</CustomResourceTypesSupport>
+    <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization Condition="'$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)' == ''">false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
+    <EnableUnsafeBinaryFormatterSerialization Condition="'$(EnableUnsafeBinaryFormatterSerialization)' == ''">false</EnableUnsafeBinaryFormatterSerialization>
+    <EnableUnsafeUTF7Encoding Condition="'$(EnableUnsafeUTF7Encoding)' == ''">false</EnableUnsafeUTF7Encoding>
+    <BuiltInComInteropSupport Condition="'$(BuiltInComInteropSupport)' == ''">false</BuiltInComInteropSupport>
+    <AutoreleasePoolSupport Condition="'$(AutoreleasePoolSupport)' == ''">false</AutoreleasePoolSupport>
+    <EnableCppCLIHostActivation Condition="'$(EnableCppCLIHostActivation)' == ''">false</EnableCppCLIHostActivation>
+    <_EnableConsumingManagedCodeFromNativeHosting Condition="'$(_EnableConsumingManagedCodeFromNativeHosting)' == ''">false</_EnableConsumingManagedCodeFromNativeHosting>
+    <VerifyDependencyInjectionOpenGenericServiceTrimmability Condition="'$(VerifyDependencyInjectionOpenGenericServiceTrimmability)' == ''">true</VerifyDependencyInjectionOpenGenericServiceTrimmability>
   </PropertyGroup>
 
-  <!-- We disable custom resource types for trimmed apps here so that the feature
-       switch can flow to the runtimeconfig.json. Custom resource types are disabled
-       by default since they may require assemblies, types or members that
-       could be removed by the linker, causing a trimmed app to crash. -->
-  <PropertyGroup Condition="'$(CustomResourceTypesSupport)' == '' And
-                            '$(PublishTrimmed)' == 'true' And
-                            $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)' == '' And
-                            '$(PublishTrimmed)' == 'true' And
-                            $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
-  </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == '' And ('$(EnableTrimAnalyzer)' == 'true' Or '$(PublishTrimmed)' == 'true')">
+  <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == '' And '$(PublishTrimmed)' == 'true' And '$(EnableTrimAnalyzer)' != 'true'">
     <!-- Trim analysis warnings are suppressed for .NET < 6. -->
     <SuppressTrimAnalysisWarnings Condition="$([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '6.0'))">true</SuppressTrimAnalysisWarnings>
     <!-- Suppress for WPF/WinForms (unless linking everything) -->
@@ -54,11 +56,38 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SuppressTrimAnalysisWarnings Condition="'$(SuppressTrimAnalysisWarnings)' == ''">false</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
 
-  <!-- Suppress warnings produced by the linker or by the ILLink Roslyn analyzer. Warnings produced
-       exclusively by the linker should be set in PrepareForILLink, to avoid polluting the global NoWarn list. -->
+  <!-- Suppress warnings produced by the linker or by the ILLink Roslyn analyzer. -->
   <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == 'true'">
     <!-- RequiresUnreferenceCodeAttribute method called -->
     <NoWarn>$(NoWarn);IL2026</NoWarn>
+    <!-- Invalid use of DynamicallyAccessedMembersAttribute -->
+    <NoWarn>$(NoWarn);IL2041;IL2042;IL2043;IL2056</NoWarn>
+    <!-- Reference to removed attribute type -->
+    <NoWarn>$(NoWarn);IL2045</NoWarn>
+    <!-- RequiresUnreferencedCodeAttribute mismatch on virtual override -->
+    <NoWarn>$(NoWarn);IL2046</NoWarn>
+    <!-- COM marshalling warning -->
+    <NoWarn>$(NoWarn);IL2050</NoWarn>
+    <!-- Reflection intrinsics with unknown arguments -->
+    <NoWarn>$(NoWarn);IL2032;IL2055;IL2057;IL2058;IL2059;IL2060;IL2061;IL2096</NoWarn>
+    <!-- Unknown values passed to locations with DynamicallyAccessedMemberTypes -->
+    <NoWarn>$(NoWarn);IL2062;IL2063;IL2064;IL2065;IL2066</NoWarn>
+    <!-- Unsatisfied DynamicallyAccessedMembers requirements -->
+    <NoWarn>$(NoWarn);IL2067;IL2068;IL2069;IL2070;IL2071;IL2072;IL2073;IL2074;IL2075;IL2076;IL2077;IL2078;IL2079;IL2080;IL2081;IL2082;IL2083;IL2084;IL2085;IL2086;IL2087;IL2088;IL2089;IL2090;IL2091</NoWarn>
+    <!-- DynamicallyAccessedMembersAttribute mismatch on virtual override -->
+    <NoWarn>$(NoWarn);IL2092;IL2093;IL2094;IL2095</NoWarn>
+    <!-- DynamicallyAccessedMembersAttribute used on unsupported member -->
+    <NoWarn>$(NoWarn);IL2097;IL2098;IL2099;IL2106</NoWarn>
+    <!-- Unknown value passed to Expression.Property -->
+    <NoWarn>$(NoWarn);IL2103</NoWarn>
+    <!-- Multiple methods associated with state machine type -->
+    <NoWarn>$(NoWarn);IL2107</NoWarn>
+    <!-- Unannotated type derived from base type with RequiresUnreferencedCode -->
+    <NoWarn>$(NoWarn);IL2109</NoWarn>
+    <!-- Reflection access to members with DynamicallyAccessedMembers requirements -->
+    <NoWarn>$(NoWarn);IL2110;IL2111;IL2114;IL2115</NoWarn>
+    <!-- Reflection access to members with RequiresUnreferencedCode -->
+    <NoWarn>$(NoWarn);IL2112;IL2113</NoWarn>
   </PropertyGroup>
 
   <!--
@@ -203,41 +232,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
       <TrimmerSingleWarn Condition=" '$(TrimmerSingleWarn)' == '' ">true</TrimmerSingleWarn>
     </PropertyGroup>
-    
-    <!-- Suppress warnings produced by the linker. Any warnings shared with the analyzer should be
-         moved to the global PropertyGroup above. -->
-    <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == 'true'">
-      <!-- Invalid use of DynamicallyAccessedMembersAttribute -->
-      <NoWarn>$(NoWarn);IL2041;IL2042;IL2043;IL2056</NoWarn>
-      <!-- Reference to removed attribute type -->
-      <NoWarn>$(NoWarn);IL2045</NoWarn>
-      <!-- RequiresUnreferencedCodeAttribute mismatch on virtual override -->
-      <NoWarn>$(NoWarn);IL2046</NoWarn>
-      <!-- COM marshalling warning -->
-      <NoWarn>$(NoWarn);IL2050</NoWarn>
-      <!-- Reflection intrinsics with unknown arguments -->
-      <NoWarn>$(NoWarn);IL2032;IL2055;IL2057;IL2058;IL2059;IL2060;IL2061;IL2096</NoWarn>
-      <!-- Unknown values passed to locations with DynamicallyAccessedMemberTypes -->
-      <NoWarn>$(NoWarn);IL2062;IL2063;IL2064;IL2065;IL2066</NoWarn>
-      <!-- Unsatisfied DynamicallyAccessedMembers requirements -->
-      <NoWarn>$(NoWarn);IL2067;IL2068;IL2069;IL2070;IL2071;IL2072;IL2073;IL2074;IL2075;IL2076;IL2077;IL2078;IL2079;IL2080;IL2081;IL2082;IL2083;IL2084;IL2085;IL2086;IL2087;IL2088;IL2089;IL2090;IL2091</NoWarn>
-      <!-- DynamicallyAccessedMembersAttribute mismatch on virtual override -->
-      <NoWarn>$(NoWarn);IL2092;IL2093;IL2094;IL2095</NoWarn>
-      <!-- DynamicallyAccessedMembersAttribute used on unsupported member -->
-      <NoWarn>$(NoWarn);IL2097;IL2098;IL2099</NoWarn>
 
+    <!-- Suppressions to work around issues in previous versions of the framework. See https://github.com/dotnet/runtime/issues/40336 -->
+    <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == 'true' And $([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '6.0'))">
+      <!-- Framework embedded XML descriptors reference windows-only members. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2008</NoWarn> <!-- Unresolved type referenced in XML. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2009</NoWarn> <!-- Unresolved member on type referenced in XML. -->
       <!-- Framework has DynamicDependencyAttributes that reference windows-only members. -->
       <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2037</NoWarn> <!-- Unresolved member for DynamicDependencyAttribute -->
       <!-- Framework embedded XML descriptors reference 32-bit-only members. -->
       <NoWarn Condition=" '$(PlatformTarget)' != 'x64' AND '$(PlatformTarget)' != 'arm64'">$(NoWarn);IL2009;IL2012</NoWarn> <!-- Unresolved field referenced in XML -->
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(PublishTrimmed)' == 'true' ">
-      <!-- Temporarily suppress these warnings regardless of SuppressTrimAnalysisWarnings to remove spurious warnings on non-Windows platforms. -->
-      <!-- Warnings from the framework. Can be removed once https://github.com/dotnet/runtime/issues/40336 is fixed. -->
-      <!-- Framework embedded XML descriptors reference windows-only members. -->
-      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2008</NoWarn> <!-- Unresolved type referenced in XML. -->
-      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2009</NoWarn> <!-- Unresolved member on type referenced in XML. -->
     </PropertyGroup>
 
     <!-- Set a default value for TrimmerRemoveSymbols unless set explicitly. -->
@@ -316,7 +320,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <TrimmerSingleWarn Condition=" '%(ManagedAssemblyToLink.TrimmerSingleWarn)' == '' ">false</TrimmerSingleWarn>
       </ManagedAssemblyToLink>
     </ItemGroup>
-  
+
     <ItemGroup>
       <_TrimmerFeatureSettings Include="@(RuntimeHostConfigurationOption)" Condition="'%(RuntimeHostConfigurationOption.Trim)' == 'true'" />
     </ItemGroup>

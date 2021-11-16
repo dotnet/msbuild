@@ -122,7 +122,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(msbuildArgs.ToArray())
                 .Should().Pass();
 
-            publishDirectory = publishCommand.GetOutputDirectory("netcoreapp2.1", runtimeIdentifier: runtimeIdentifier);
+            publishDirectory = publishCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, runtimeIdentifier: runtimeIdentifier);
         }
     }
 }

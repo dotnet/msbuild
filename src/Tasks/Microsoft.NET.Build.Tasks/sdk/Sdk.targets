@@ -41,6 +41,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.targets"
           Condition="'$(IsCrossTargetingBuild)' != 'true'"/>
 
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Compatibility.targets" />
+
   <!-- Import targets from NuGet.Build.Tasks.Pack package/Sdk -->
   <PropertyGroup Condition="'$(NuGetBuildTasksPackTargets)' == '' AND '$(ImportNuGetBuildTasksPackTargetsFromSdk)' != 'false'">
     <NuGetBuildTasksPackTargets Condition="'$(IsCrossTargetingBuild)' == 'true'">$(MSBuildThisFileDirectory)..\..\NuGet.Build.Tasks.Pack\buildCrossTargeting\NuGet.Build.Tasks.Pack.targets</NuGetBuildTasksPackTargets>

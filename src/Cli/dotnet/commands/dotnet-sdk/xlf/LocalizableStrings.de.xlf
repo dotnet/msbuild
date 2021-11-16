@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AppFullName">
         <source>.NET SDK Command</source>
-        <target state="needs-review-translation">.NET-Befehl "Clean"</target>
+        <target state="translated">.NET SDK-Befehl</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Manage .NET SDK installation.</source>
-        <target state="needs-review-translation">Befehl zum Bereinigen zuvor generierter Buildausgaben.</target>
+        <target state="translated">.NET SDK-Installation verwalten</target>
         <note />
       </trans-unit>
     </body>

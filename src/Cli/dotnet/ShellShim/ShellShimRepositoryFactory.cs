@@ -8,9 +8,9 @@ namespace Microsoft.DotNet.ShellShim
 {
     internal static class ShellShimRepositoryFactory
     {
-        public static IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null)
+        public static IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null)
         {
-            return new ShellShimRepository(nonGlobalLocation ?? GetShimLocation());
+            return new ShellShimRepository(nonGlobalLocation ?? GetShimLocation(), appHostSourceDirectory);
         }
 
         private static DirectoryPath GetShimLocation()

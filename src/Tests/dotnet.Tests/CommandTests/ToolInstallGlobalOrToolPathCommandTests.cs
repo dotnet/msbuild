@@ -21,6 +21,8 @@ using System.Text.Json;
 using Microsoft.NET.TestFramework.Utilities;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
@@ -53,8 +55,9 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _toolPackageStore = toolPackageStoreMock;
             _toolPackageStoreQuery = toolPackageStoreMock;
             _createShellShimRepository =
-                (nonGlobalLocation) => new ShellShimRepository(
+                (_, nonGlobalLocation) => new ShellShimRepository(
                     new DirectoryPath(_pathToPlaceShim),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem),
                     filePermissionSetter: new NoOpFilePermissionSetter());
@@ -358,6 +361,78 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         }
 
         [Fact]
+        public void WhenRunWithPrereleaseItShouldSucceed()
+        {
+            IToolPackageInstaller toolToolPackageInstaller = GetToolToolPackageInstallerWithPreviewInFeed();
+
+            ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --prerelease");
+
+            var toolInstallGlobalOrToolPathCommand = new ToolInstallGlobalOrToolPathCommand(
+                result,
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolToolPackageInstaller),
+                _createShellShimRepository,
+                _environmentPathInstructionMock,
+                _reporter);
+
+            toolInstallGlobalOrToolPathCommand.Execute().Should().Be(0);
+
+            _reporter
+                .Lines
+                .Should()
+                .Contain(l => l == string.Format(
+                    LocalizableStrings.InstallationSucceeded,
+                    ToolCommandName,
+                    PackageId,
+                    "2.0.1-preview1").Green());
+        }
+
+        [Fact]
+        public void WhenRunWithPrereleaseAndPackageVersionItShouldThrow()
+        {
+            IToolPackageInstaller toolToolPackageInstaller = GetToolToolPackageInstallerWithPreviewInFeed();
+
+            ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --version 2.0 --prerelease");
+
+            var toolInstallGlobalOrToolPathCommand = new ToolInstallGlobalOrToolPathCommand(
+                result,
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolToolPackageInstaller),
+                _createShellShimRepository,
+                _environmentPathInstructionMock,
+                _reporter);
+
+            Action a = () => toolInstallGlobalOrToolPathCommand.Execute();
+            a.ShouldThrow<GracefulException>();
+        }
+
+        private IToolPackageInstaller GetToolToolPackageInstallerWithPreviewInFeed()
+        {
+            var toolToolPackageInstaller = CreateToolPackageInstaller(
+                feeds: new List<MockFeed>
+                {
+                    new MockFeed
+                    {
+                        Type = MockFeedType.ImplicitAdditionalFeed,
+                        Packages = new List<MockFeedPackage>
+                        {
+                            new MockFeedPackage
+                            {
+                                PackageId = PackageId,
+                                Version = "1.0.4",
+                                ToolCommandName = "SimulatorCommand"
+                            },
+                            new MockFeedPackage
+                            {
+                                PackageId = PackageId,
+                                Version = "2.0.1-preview1",
+                                ToolCommandName = "SimulatorCommand"
+                            }
+                        }
+                    }
+                });
+            return toolToolPackageInstaller;
+        }
+
+        [Fact]
         public void WhenRunWithoutAMatchingRangeItShouldFail()
         {
             ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --version [5.0,10.0]");
@@ -453,6 +528,41 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _fileSystem.File.ReadAllText(ExpectedCommandPath()).Should().Be(tokenToIdentifyPackagedShim);
         }
 
+        [Fact]
+        public void WhenRunWithArchOptionItErrorsOnInvalidRids()
+        {
+            _reporter.Clear();
+            var parseResult = Parser.Instance.Parse($"dotnet tool install -g {PackageId} -a invalid");
+            var toolInstallGlobalOrToolPathCommand = new ToolInstallGlobalOrToolPathCommand(
+                parseResult,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
+                _environmentPathInstructionMock,
+                _reporter);
+
+            var exceptionThrown = Assert.Throws<AggregateException>(() => toolInstallGlobalOrToolPathCommand.Execute());
+            exceptionThrown.Message.Should().Contain("-invalid is invalid");
+        }
+
+        [WindowsOnlyFact]
+        public void WhenRunWithArchOptionItDownloadsAppHostTemplate()
+        {
+            var nugetPackageDownloader = new MockNuGetPackageDownloader();
+            var parseResult = Parser.Instance.Parse($"dotnet tool install -g {PackageId} -a arm64");
+            var toolInstallGlobalOrToolPathCommand = new ToolInstallGlobalOrToolPathCommand(
+                parseResult,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
+                _environmentPathInstructionMock,
+                _reporter,
+                nugetPackageDownloader);
+
+            toolInstallGlobalOrToolPathCommand.Execute().Should().Be(0);
+            nugetPackageDownloader.DownloadCallParams.Count.Should().Be(1);
+            nugetPackageDownloader.ExtractCallParams.Count.Should().Be(1);
+            nugetPackageDownloader.DownloadCallParams.First().Item1.Should().Be(new PackageId("microsoft.netcore.app.host.win-arm64"));
+        }
+
         private IToolPackageInstaller CreateToolPackageInstaller(
             List<MockFeed> feeds = null,
             Action installCallback = null)
@@ -475,9 +585,13 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 ToolCommandName + extension);
         }
 
-        private class NoOpFilePermissionSetter : IFilePermissionSetter
+        internal class NoOpFilePermissionSetter : IFilePermissionSetter
         {
             public void SetUserExecutionPermission(string path)
+            {
+            }
+
+            public void SetPermission(string path, string chmodArgument)
             {
             }
         }

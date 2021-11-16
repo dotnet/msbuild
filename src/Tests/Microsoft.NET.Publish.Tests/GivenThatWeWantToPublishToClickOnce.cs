@@ -26,7 +26,7 @@ namespace Microsoft.NET.Publish.Tests
         [FullMSBuildOnlyTheory]
         [InlineData(false)]
         [InlineData(true)]
-        public void It_publishes_with_a_publish_profile(bool? publishSingleFile)
+        public void PublishClickOnceWithPublishProfile(bool? publishSingleFile)
         {
             var tfm = "netcoreapp3.1";
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);

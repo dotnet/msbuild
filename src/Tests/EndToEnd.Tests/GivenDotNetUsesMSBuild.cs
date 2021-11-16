@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
         }
 
-        [RequiresMSBuildVersionFact("16.8.0")]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
             string projectDirectory = _testAssetsManager.CreateTestDirectory().Path;
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should().Pass()
-                        .And.HaveStdOutContaining("Hello World!");
+                        .And.HaveStdOutContaining("Hello, World!");
 
             var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
             binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);

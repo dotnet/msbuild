@@ -2,7 +2,6 @@
   <ItemGroup>
     <!-- Dlls from packages created for tests to consume -->
     <FileSignInfo Include="dotnet-dependency-context-test.dll" CertificateName="None" />
-    <FileSignInfo Include="dotnet-desktop-binding-redirects.exe" CertificateName="None" />
     <FileSignInfo Include="dotnet-fallbackfoldertool.dll" CertificateName="None" />
     <FileSignInfo Include="dotnet-hello.dll" CertificateName="None" />
     <FileSignInfo Include="dotnet-outputsframeworkversion-netcoreapp1.0.dll" CertificateName="None" />
@@ -53,4 +52,13 @@
     <FileSignInfo Include="xunit.performance.execution.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="xunit.performance.metrics.dll" CertificateName="3PartySHA2" />
   </ItemGroup>
+
+  <!-- Filter out any test packages from ItemsToSign -->
+  <ItemGroup>
+    <ItemsToSignPostBuild Remove="*tests*.nupkg" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <UseDotNetCertificate>true</UseDotNetCertificate>
+  </PropertyGroup>
 </Project>

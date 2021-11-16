@@ -19,18 +19,18 @@ namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
 {
     public class GivenDotnetSlnRemove : SdkTest
     {
-        private Func<string, string> HelpText = (defaultVal) => $@"remove:
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
   Remove one or more projects from a solution file.
 
 Usage:
-  dotnet [options] sln <SLN_FILE> remove <PROJECT_PATH>...
+  dotnet sln <SLN_FILE> remove [<PROJECT_PATH>...] [options]
 
 Arguments:
   <SLN_FILE>        The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
   <PROJECT_PATH>    The paths to the projects to remove from the solution.
 
 Options:
-  -?, -h, --help    Show help and usage information";
+  -?, -h, --help    Show command line help.";
 
         private const string ExpectedSlnContentsAfterRemove = @"
 Microsoft Visual Studio Solution File, Format Version 12.00
@@ -625,7 +625,7 @@ EndGlobal
                 SearchOption.AllDirectories);
             releaseDirectory.Count().Should().Be(1, $"App {reasonString}");
             Directory.EnumerateFiles(releaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
-                .Count().Should().Be(1, $"App {reasonString}");
+                .Count().Should().Be(2, $"App {reasonString}");
         }
 
         [Fact]

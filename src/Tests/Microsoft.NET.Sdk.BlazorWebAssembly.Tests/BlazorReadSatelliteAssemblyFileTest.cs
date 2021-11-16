@@ -9,7 +9,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.NET.Sdk.BlazorWebAssembly
+namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
     public class BlazorReadSatelliteAssemblyFileTest
     {

@@ -17,6 +17,9 @@ namespace Microsoft.NET.TestFramework
 {
     public class ToolsetInfo
     {
+        public const string CurrentTargetFramework = "net7.0";
+        public const string CurrentTargetFrameworkVersion = "7.0";
+
         public string DotNetRoot { get; }
         public string DotNetHostPath { get; }
 

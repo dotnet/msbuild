@@ -5,6 +5,7 @@ using System.CommandLine;
 using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using System.Threading.Tasks;
+using Moq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,11 +13,13 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     public class CommandLineOptionsTests
     {
+        private readonly Extensions.Tools.Internal.TestReporter _testReporter;
         private readonly TestConsole _console;
 
         public CommandLineOptionsTests(ITestOutputHelper output)
         {
             _console = new();
+            _testReporter = new(output);
         }
 
         [Theory]
@@ -26,7 +29,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(new object[] { new[] { "--help", "--bogus" } })]
         public async Task HelpArgs(string[] args)
         {
-            var rootCommand = Program.CreateRootCommand(c => Task.FromResult(0));
+            var rootCommand = Program.CreateRootCommand(c => Task.FromResult(0), _testReporter);
 
             await rootCommand.InvokeAsync(args, _console);
 
@@ -46,7 +49,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 options = c;
                 return Task.FromResult(0);
-            });
+            }, _testReporter);
 
             await rootCommand.InvokeAsync(args, _console);
 
@@ -59,11 +62,40 @@ namespace Microsoft.DotNet.Watcher.Tools
         [Fact]
         public async Task CannotHaveQuietAndVerbose()
         {
-            var rootCommand = Program.CreateRootCommand(c => Task.FromResult(0));
+            var rootCommand = Program.CreateRootCommand(c => Task.FromResult(0), _testReporter);
 
             await rootCommand.InvokeAsync(new[] { "--quiet", "--verbose" }, _console);
 
             Assert.Contains(Resources.Error_QuietAndVerboseSpecified, _console.Error.ToString());
+        }
+
+        [Fact]
+        public async Task ShortFormForProjectArgumentPrintsWarning()
+        {
+            var reporter = new Mock<Extensions.Tools.Internal.IReporter>();
+            reporter.Setup(r => r.Warn(Resources.Warning_ProjectAbbreviationDeprecated)).Verifiable();
+            CommandLineOptions options = null;
+            var rootCommand = Program.CreateRootCommand(c => { options = c; return Task.FromResult(0); }, reporter.Object);
+
+            await rootCommand.InvokeAsync(new[] { "-p", "MyProject.csproj" }, _console);
+
+            reporter.Verify();
+            Assert.NotNull(options);
+            Assert.Equal("MyProject.csproj", options.Project);
+        }
+
+        [Fact]
+        public async Task LongFormForProjectArgumentWorks()
+        {
+            var reporter = new Mock<Extensions.Tools.Internal.IReporter>();
+            CommandLineOptions options = null;
+            var rootCommand = Program.CreateRootCommand(c => { options = c; return Task.FromResult(0); }, reporter.Object);
+
+            await rootCommand.InvokeAsync(new[] { "--project", "MyProject.csproj" }, _console);
+
+            reporter.Verify(r => r.Warn(It.IsAny<string>()), Times.Never());
+            Assert.NotNull(options);
+            Assert.Equal("MyProject.csproj", options.Project);
         }
     }
 }

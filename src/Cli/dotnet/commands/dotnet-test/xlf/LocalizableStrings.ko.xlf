@@ -123,7 +123,7 @@ Examples:
                                         </source>
         <target state="translated">지정된 식과 일치하는 테스트를 실행합니다.
                                         예:
-                                        우선 순위가 1로 설정된 테스트 실행:  --filter "Priority = 1"
+                                        우선 순위가 1로 설정된 테스트 실행: --filter "Priority = 1"
                                         지정된 전체 이름이 있는 테스트 실행: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
                                         지정된 이름을 포함하는 테스트 실행: --filter "FullyQualifiedName~Namespace.Class"
                                         필터링 지원에 대한 자세한 내용은 https://aka.ms/vstest-filtering을 참조하세요.

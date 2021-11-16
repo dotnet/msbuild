@@ -2,20 +2,22 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
+using System.CommandLine.Parsing;
+using System.IO;
+using System.Linq;
 using System.Reflection;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Format;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
-using Command = System.CommandLine.Command;
-using ICommand = System.CommandLine.ICommand;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -23,13 +25,18 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly RootCommand RootCommand = new RootCommand();
 
+        internal static Dictionary<Option, Dictionary<Command, string>> HelpDescriptionCustomizations = new Dictionary<Option, Dictionary<Command, string>>();
+
+        public static readonly Command InstallSuccessCommand = InternalReportinstallsuccessCommandParser.GetCommand();
+
         // Subcommands
-        private static readonly Command[] Subcommands = new Command[]
+        public static readonly Command[] Subcommands = new Command[]
         {
             AddCommandParser.GetCommand(),
             BuildCommandParser.GetCommand(),
             BuildServerCommandParser.GetCommand(),
             CleanCommandParser.GetCommand(),
+            FormatCommandParser.GetCommand(),
             CompleteCommandParser.GetCommand(),
             FsiCommandParser.GetCommand(),
             ListCommandParser.GetCommand(),
@@ -48,39 +55,32 @@ namespace Microsoft.DotNet.Cli
             ToolCommandParser.GetCommand(),
             VSTestCommandParser.GetCommand(),
             HelpCommandParser.GetCommand(),
-            SdkCommandParser.GetCommand()
+            SdkCommandParser.GetCommand(),
+            InstallSuccessCommand,
+            WorkloadCommandParser.GetCommand()
         };
 
-        // Internal commands
-        public static readonly Command InstallSuccessCommand = InternalReportinstallsuccessCommandParser.GetCommand();
-
         // Options
-        public static readonly Option DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" });
+        public static readonly Option<bool> DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" });
 
-        public static readonly Option VersionOption = new Option<bool>("--version");
+        public static readonly Option<bool> VersionOption = new Option<bool>("--version");
 
-        public static readonly Option InfoOption = new Option<bool>("--info");
+        public static readonly Option<bool> InfoOption = new Option<bool>("--info");
 
-        public static readonly Option ListSdksOption = new Option<bool>("--list-sdks");
+        public static readonly Option<bool> ListSdksOption = new Option<bool>("--list-sdks");
 
-        public static readonly Option ListRuntimesOption = new Option<bool>("--list-runtimes");
+        public static readonly Option<bool> ListRuntimesOption = new Option<bool>("--list-runtimes");
 
         // Argument
-        public static readonly Argument DotnetSubCommand = new Argument<string>() { Arity = ArgumentArity.ExactlyOne, IsHidden = true };
+        public static readonly Argument<string> DotnetSubCommand = new Argument<string>() { Arity = ArgumentArity.ExactlyOne, IsHidden = true };
 
-        private static Command ConfigureCommandLine(Command rootCommand, bool includeWorkloadCommands = false)
+        private static Command ConfigureCommandLine(Command rootCommand)
         {
             // Add subcommands
             foreach (var subcommand in Subcommands)
             {
                 rootCommand.AddCommand(subcommand);
             }
-
-            // Workload command is behind a feature flag during development
-            rootCommand.AddCommand(WorkloadCommandParser.GetCommand(includeWorkloadCommands || Env.GetEnvironmentVariableAsBool("DEVENABLEWORKLOADCOMMAND", defaultValue: false)));
-
-            //Add internal commands
-           rootCommand.AddCommand(InstallSuccessCommand);
 
             // Add options
             rootCommand.AddOption(DiagOption);
@@ -101,21 +101,17 @@ namespace Microsoft.DotNet.Cli
             return builder;
         }
 
+        public static Command GetBuiltInCommand(string commandName)
+        {
+            return Subcommands
+                .FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
+        }
+
         public static System.CommandLine.Parsing.Parser Instance { get; } = new CommandLineBuilder(ConfigureCommandLine(RootCommand))
             .UseExceptionHandler(ExceptionHandler)
             .UseHelp()
-            .UseHelpBuilder(context => new DotnetHelpBuilder(context.Console))
-            .UseResources(new CommandLineValidationMessages())
-            .UseParseDirective()
-            .UseSuggestDirective()
-            .DisablePosixBinding()
-            .Build();
-
-        public static System.CommandLine.Parsing.Parser GetWorkloadsInstance { get; } = new CommandLineBuilder(ConfigureCommandLine(new RootCommand(), true))
-            .UseExceptionHandler(ExceptionHandler)
-            .UseHelp()
-            .UseHelpBuilder(context => new DotnetHelpBuilder(context.Console))
-            .UseResources(new CommandLineValidationMessages())
+            .UseHelpBuilder(context => DotnetHelpBuilder.Instance.Value)
+            .UseLocalizationResources(new CommandLineValidationMessages())
             .UseParseDirective()
             .UseSuggestDirective()
             .DisablePosixBinding()
@@ -160,11 +156,49 @@ namespace Microsoft.DotNet.Cli
 
         internal class DotnetHelpBuilder : HelpBuilder
         {
-            public DotnetHelpBuilder(IConsole console) : base(console) { }
+            private DotnetHelpBuilder(int maxWidth = int.MaxValue) : base(LocalizationResources.Instance, maxWidth) { }
 
-            public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => new DotnetHelpBuilder(new CommandLineConsole()));
+            public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => {
+                int windowWidth;
+                try
+                {
+                    windowWidth = Console.WindowWidth;
+                }
+                catch
+                {
+                    windowWidth = int.MaxValue;
+                }
 
-            public override void Write(ICommand command)
+                DotnetHelpBuilder dotnetHelpBuilder = new DotnetHelpBuilder(windowWidth);
+                dotnetHelpBuilder.Customize(FormatCommandCommon.DiagnosticsOption, defaultValue: Tools.Format.LocalizableStrings.whichever_ids_are_listed_in_the_editorconfig_file);
+                dotnetHelpBuilder.Customize(FormatCommandCommon.IncludeOption, defaultValue: Tools.Format.LocalizableStrings.all_files_in_the_solution_or_project);
+                dotnetHelpBuilder.Customize(FormatCommandCommon.ExcludeOption, defaultValue: Tools.Format.LocalizableStrings.none);
+
+                SetHelpCustomizations(dotnetHelpBuilder);
+
+                return dotnetHelpBuilder;
+            });
+
+            private static void SetHelpCustomizations(HelpBuilder builder)
+            {
+                foreach (var option in HelpDescriptionCustomizations.Keys)
+                {
+                    Func<ParseResult, string> descriptionCallback = (ParseResult parseResult) =>
+                    {
+                        foreach (var (command, helpText) in HelpDescriptionCustomizations[option])
+                        {
+                            if (parseResult.CommandResult.Command.Equals(command))
+                            {
+                                return helpText;
+                            }
+                        }
+                        return null;
+                    };
+                    builder.Customize(option, description: descriptionCallback);
+                }
+            }
+
+            public override void Write(ICommand command, TextWriter writer, ParseResult parseResult)
             {
                 var helpArgs = new string[] { "--help" };
                 if (command.Equals(RootCommand))
@@ -200,7 +234,7 @@ namespace Microsoft.DotNet.Cli
                         AddPackageParser.CmdPackageArgument.Suggestions.Clear();
                     }
 
-                    base.Write(command);
+                    base.Write(command, writer, parseResult);
                 }
             }
         }

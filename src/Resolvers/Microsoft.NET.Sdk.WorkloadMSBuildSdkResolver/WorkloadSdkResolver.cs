@@ -1,10 +1,15 @@
-﻿using Microsoft.Build.Framework;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.NativeWrapper;
+using System.Collections.Immutable;
 
 #if NET
 using Microsoft.DotNet.Cli;
@@ -16,130 +21,56 @@ using Microsoft.DotNet.DotNetSdkResolver;
 
 namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 {
+
+    //  This SdkResolver is used by the .NET SDK version of MSBuild.  Workload resolution logic which
+    //  is shared with Full Framework / Visual Studio MSBuild is in CachingWorkloadResolver.
     public class WorkloadSdkResolver : SdkResolver
     {
         public override string Name => "Microsoft.DotNet.MSBuildWorkloadSdkResolver";
 
         public override int Priority => 4000;
 
-        private bool _enabled;
-
-        private IWorkloadManifestProvider _workloadManifestProvider;
-        private IWorkloadResolver _workloadResolver;
-
-
-#if NETFRAMEWORK
-        private readonly NETCoreSdkResolver _sdkResolver;
-#endif
-
-
-        public WorkloadSdkResolver()
+        private class CachedState
         {
-            //  Put workload resolution behind a feature flag.
-            _enabled = false;
-            var envVar = Environment.GetEnvironmentVariable("MSBuildEnableWorkloadResolver");
-            if (envVar != null)
-            {
-                if (envVar.Equals("true", StringComparison.OrdinalIgnoreCase))
-                {
-                    _enabled = true;
-                }
-            }
+            public string DotnetRootPath { get; init; }
+            public string SdkVersion { get; init; }
 
-            if (!_enabled)
-            {
-                string sentinelPath = Path.Combine(Path.GetDirectoryName(typeof(WorkloadSdkResolver).Assembly.Location), "EnableWorkloadResolver.sentinel");
-                if (File.Exists(sentinelPath))
-                {
-                    _enabled = true;
-                }
-            }
-
-#if NETFRAMEWORK
-            if (_enabled)
-            {
-                _sdkResolver = new NETCoreSdkResolver();
-            }
-#endif
-        }
-
-        private void InitializeWorkloadResolver(SdkResolverContext context)
-        {
-            var dotnetRootPath = GetDotNetRoot(context);
-
-            var sdkDirectory = GetSdkDirectory(context);
-            //  The SDK version is the name of the SDK directory (ie dotnet\sdk\5.0.100)
-            var sdkVersion = Path.GetFileName(sdkDirectory);
-
-            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
-            _workloadResolver ??= WorkloadResolver.Create(_workloadManifestProvider, dotnetRootPath, sdkVersion);
+            public CachingWorkloadResolver WorkloadResolver { get; init; }
         }
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)
         {
-            if (!_enabled)
+            CachedState cachedState = null;
+
+            if (resolverContext.State is CachedState resolverContextState)
             {
-                return null;
+                cachedState = resolverContextState;
             }
 
-            InitializeWorkloadResolver(resolverContext);
+            
+            if (cachedState == null)
+            {
+                var dotnetRootPath = GetDotNetRoot(resolverContext);
 
-            if (sdkReference.Name.Equals("Microsoft.NET.SDK.WorkloadAutoImportPropsLocator", StringComparison.OrdinalIgnoreCase))
-            {
-                List<string> autoImportSdkPaths = new List<string>();
-                foreach (var sdkPackInfo in _workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk))
-                {
-                    string sdkPackSdkFolder = Path.Combine(sdkPackInfo.Path, "Sdk");
-                    string autoImportPath = Path.Combine(sdkPackSdkFolder, "AutoImport.props");
-                    if (File.Exists(autoImportPath))
-                    {
-                        autoImportSdkPaths.Add(sdkPackSdkFolder);
-                    }
-                }
-                //  Call Distinct() here because with aliased packs, there may be duplicates of the same path
-                return factory.IndicateSuccess(autoImportSdkPaths.Distinct(), sdkReference.Version);
-            }
-            else if (sdkReference.Name.Equals("Microsoft.NET.SDK.WorkloadManifestTargetsLocator", StringComparison.OrdinalIgnoreCase))
-            {
-                List<string> workloadManifestPaths = new List<string>();
-                foreach (var manifestDirectory in _workloadManifestProvider.GetManifestDirectories())
-                {
-                    var workloadManifestTargetPath = Path.Combine(manifestDirectory, "WorkloadManifest.targets");
-                    if (File.Exists(workloadManifestTargetPath))
-                    {
-                        workloadManifestPaths.Add(manifestDirectory);
-                    }
-                }
-                return factory.IndicateSuccess(workloadManifestPaths, sdkReference.Version);
-            }
-            else
-            {
-                var packInfo = _workloadResolver.TryGetPackInfo(sdkReference.Name);
-                if (packInfo != null)
-                {
-                    if (Directory.Exists(packInfo.Path))
-                    {
-                        return factory.IndicateSuccess(Path.Combine(packInfo.Path, "Sdk"), sdkReference.Version);
-                    }
-                    else
-                    {
-                        var itemsToAdd = new Dictionary<string, SdkResultItem>();
-                        itemsToAdd.Add("MissingWorkloadPack",
-                            new SdkResultItem(sdkReference.Name,
-                                metadata: new Dictionary<string, string>()
-                                {
-                                    { "Version", packInfo.Version }
-                                }));
+                var sdkDirectory = GetSdkDirectory(resolverContext);
+                //  The SDK version is the name of the SDK directory (ie dotnet\sdk\5.0.100)
+                var sdkVersion = Path.GetFileName(sdkDirectory);
 
-                        Dictionary<string, string> propertiesToAdd = new Dictionary<string, string>();
-                        return factory.IndicateSuccess(Enumerable.Empty<string>(),
-                            sdkReference.Version,
-                            propertiesToAdd: propertiesToAdd,
-                            itemsToAdd: itemsToAdd);
-                    }
-                }
+                cachedState = new CachedState()
+                {
+                    DotnetRootPath = dotnetRootPath,
+                    SdkVersion = sdkVersion,
+                    WorkloadResolver = new CachingWorkloadResolver()
+                };
+
+                resolverContext.State = cachedState;
             }
-            return null;
+
+            string userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
+            var result = cachedState.WorkloadResolver.Resolve(sdkReference.Name, cachedState.DotnetRootPath, cachedState.SdkVersion, userProfileDir);
+
+
+            return result.ToSdkResult(sdkReference, factory);
         }
 
         private string GetSdkDirectory(SdkResolverContext context)
@@ -166,3 +97,4 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
         }
     }
 }
+

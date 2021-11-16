@@ -60,20 +60,20 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!--
+    Import targets from RazorSDK if referenced
+    Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.BeforeCommon.targets
+    Sdks\Microsoft.NET.Sdk.Razor\targets\Microsoft.NET.Sdk.Razor.BeforeCommon.targets
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.NET.Sdk.Razor\targets\Microsoft.NET.Sdk.Razor.BeforeCommon.targets" Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true'" />
+
+  <!-- Import workload targets -->
+  <Import Project="Microsoft.NET.Sdk.ImportWorkloads.targets" Condition="'$(MSBuildEnableWorkloadResolver)' == 'true'" />
+
+  <!--
     Use RuntimeIdentifier to determine PlatformTarget.
     Also, enforce that RuntimeIdentifier is always specified for .NETFramework executables.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.RuntimeIdentifierInference.targets" />
-
-  <!--
-    Import targets from RazorSDK if referenced
-    Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.BeforeCommon.targets
-    Sdks\Microsoft.NET.Sdk.Razor\build\netstandard2.0\Microsoft.NET.Sdk.Razor.BeforeCommon.targets
-  -->
-  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.NET.Sdk.Razor\build\netstandard2.0\Microsoft.NET.Sdk.Razor.BeforeCommon.targets" Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true'" />
-
-  <!-- Import workload targets -->
-  <Import Project="Microsoft.NET.Sdk.ImportWorkloads.targets" Condition="'$(MSBuildEnableWorkloadResolver)' == 'true'" />
 
   <!-- Checks for EOL frameworks -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.EolTargetFrameworks.targets" />
@@ -152,10 +152,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Framework assemblies introduced in .NET 4.5 -->
     <_SDKImplicitReference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
-
-    <!-- Don't automatically reference System.IO.Compression or System.Net.Http to help avoid hitting https://github.com/Microsoft/msbuild/issues/1329. -->
-    <!--<Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
-    <_SDKImplicitReference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>-->
 
     <_SDKImplicitReference Update="@(_SDKImplicitReference)"
                            Pack="false"
@@ -269,5 +265,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup>
     <ProjectCapability Include="GenerateDocumentationFile" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <IsNetCoreAppTargetingLatestTFM Condition="'$(IsNetCoreAppTargetingLatestTFM)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' == '$(NETCoreAppMaximumVersion)'">true</IsNetCoreAppTargetingLatestTFM>
+  </PropertyGroup>
 
 </Project>

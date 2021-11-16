@@ -186,10 +186,10 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
 
         [Theory]
         [InlineData("", "[net451]", null)]
-        [InlineData("", "[netcoreapp3.1]", null)]
-        [InlineData("--framework netcoreapp3.1 --framework net451", "[net451]", null)]
-        [InlineData("--framework netcoreapp3.1 --framework net451", "[netcoreapp3.1]", null)]
-        [InlineData("--framework netcoreapp3.1", "[netcoreapp3.1]", "[net451]")]
+        [InlineData("", $"[{ToolsetInfo.CurrentTargetFramework}]", null)]
+        [InlineData($"--framework {ToolsetInfo.CurrentTargetFramework} --framework net451", "[net451]", null)]
+        [InlineData($"--framework {ToolsetInfo.CurrentTargetFramework} --framework net451", $"[{ToolsetInfo.CurrentTargetFramework}]", null)]
+        [InlineData($"--framework {ToolsetInfo.CurrentTargetFramework}", $"[{ToolsetInfo.CurrentTargetFramework}]", "[net451]")]
         [InlineData("--framework net451", "[net451]", "[netcoreapp3.0]")]
         public void ItListsValidFrameworks(string args, string shouldInclude, string shouldntInclude)
         {

@@ -6,6 +6,14 @@
     <SupportedPlatform Remove="iOS" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--
+      The System.Threading.Tasks global import interferes with Microsoft.Build.Utilities.Task that is used extensively
+      in this repository. Remove it to avoid the conflict.
+    -->
+    <Import Remove="System.Threading.Tasks" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Include="xunit.console" Version="$(XUnitVersion)" Private="true" />
 

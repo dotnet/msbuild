@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using FluentAssertions;
 using Microsoft.DotNet.NativeWrapper;
 using Microsoft.DotNet.Tools.Sdk.Check;
@@ -22,14 +23,14 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
         private readonly BufferedReporter _reporter;
         private readonly string fakeReleasesPath;
 
-        private const string HelpText = @"check:
+        private const string HelpText = @"Description:
       .NET SDK Check Command
     
     Usage:
-      dotnet [options] sdk check
+      dotnet sdk check [options]
     
     Options:
-      -?, -h, --help    Show help and usage information";
+      -?, -h, --help    Show command line help.";
 
         public GivenDotnetSdkCheck(ITestOutputHelper log) : base(log)
         {
@@ -106,10 +107,10 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
         [InlineData(new string[] { "5.0.100" }, new string[] { }, new string[] { })]
         [InlineData(new string[] { }, new string[] { "3.1.3" }, new string[] { "3.1.10" })]
         [InlineData(new string[] { }, new string[] { "5.0.0" }, new string[] { })]
-        [InlineData(new string[] { "1.1.10", "2.1.300", "2.1.810", "3.1.400" }, new string[] { }, new string[] { "2.1.302", "2.1.811", "3.1.404" })]
-        [InlineData(new string[] { }, new string[] { "1.1.10", "2.1.20", "3.1.0" }, new string[] { "2.1.23", "3.1.10" })]
-        [InlineData(new string[] { "1.1.10", "2.1.300", "2.1.810", "3.1.400" }, new string[] { "1.1.10", "2.1.20", "3.1.0" }, new string[] { "2.1.302", "2.1.811", "3.1.404", "2.1.23", "3.1.10" })]
-        public void WhenANewPatchIsAvaliableItIsAdvertised(string[] sdkVersions, string[] runtimeVersions, string[] latestPatchVersions)
+        [InlineData(new string[] { "1.1.10", "2.1.300", "2.1.810", "3.1.400" }, new string[] { }, new string[] {  "3.1.404" })]
+        [InlineData(new string[] { }, new string[] { "1.1.10", "2.1.20", "3.1.0" }, new string[] { "3.1.10" })]
+        [InlineData(new string[] { "1.1.10", "2.1.300", "2.1.810", "3.1.400" }, new string[] { "1.1.10", "2.1.20", "3.1.0" }, new string[] { "3.1.404", "3.1.10" })]
+        public void WhenANewPatchIsAvailableItIsAdvertised(string[] sdkVersions, string[] runtimeVersions, string[] latestPatchVersions)
         {
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "sdk", "check" });
             var bundles = GetFakeEnvironmentInfo(sdkVersions, runtimeVersions);
@@ -117,7 +118,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
             new SdkCheckCommand(parseResult, new MockNETBundleProvider(bundles), new MockProductCollectionProvider(fakeReleasesPath), _reporter).Execute();
 
             var commandResult = string.Join(' ', _reporter.Lines);
-            var expectedLines = latestPatchVersions.Select(version => string.Format(LocalizableStrings.NewPatchAvaliableMessage, version));
+            var expectedLines = latestPatchVersions.Select(version => string.Format(LocalizableStrings.NewPatchAvailableMessage, version));
             foreach (var line in expectedLines)
             {
                 commandResult
@@ -131,10 +132,10 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
         [InlineData(new string[] { "5.0.100" }, new string[] { }, new string[] { })]
         [InlineData(new string[] { }, new string[] { "1.0.1" }, new string[] { "1.0.1" })]
         [InlineData(new string[] { }, new string[] { "5.0.0" }, new string[] { })]
-        [InlineData(new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804", "3.0.309", "3.1.401" }, new string[] { }, new string[] { "1.0.10", "1.0.9", "2.0.308" })]
-        [InlineData(new string[] { }, new string[] { "1.0.0", "1.0.1", "2.0.3", "2.1.8", "3.0.3", "3.1.4" }, new string[] { "1.0.0", "1.0.1", "2.0.3" })]
+        [InlineData(new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804", "3.0.309", "3.1.401" }, new string[] { }, new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804"})]
+        [InlineData(new string[] { }, new string[] { "1.0.0", "1.0.1", "2.0.3", "2.1.8", "3.0.3", "3.1.4" }, new string[] { "1.0.0", "1.0.1", "2.0.3", "2.1.8" })]
         [InlineData(new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804", "3.0.309", "3.1.401" }, new string[] { "1.0.0", "1.0.1", "2.0.3", "2.1.8", "3.0.3", "3.1.4" },
-            new string[] { "1.0.10", "1.0.9", "2.0.308", "1.0.0", "1.0.1", "2.0.3" })]
+            new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804", "1.0.0", "1.0.1", "2.0.3" , "2.1.8" })]
         public void WhenABundleIsOutOfSupportItPrintsWarning(string[] sdkVersions, string[] runtimeVersions, string[] outOfSupportVersions)
         {
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "sdk", "check" });
@@ -193,6 +194,24 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
                     .Should()
                     .NotContain(line);
             }
+        }
+
+        [Fact]
+        public void ItUsesConfigFile()
+        {
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "sdk", "check" });
+            var dotnetRoot = _testAssetsManager.CreateTestDirectory().Path;
+            var bundles = GetFakeEnvironmentInfo(new[] { "1.0.10", "2.1.809", "3.1.100", "5.0.100" }, new[] { "1.1.4", "2.1.8", "3.1.0", "3.1.3", "5.0.0" });
+            var replacementString = "Mock command output";
+            var configFileContent = JsonSerializer.Serialize(new SdkCheckConfig() { CommandOutputReplacementString = replacementString });
+            var configFilePath = Path.Combine(dotnetRoot, "sdk", "6.0.100", "sdk-check-config.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(configFilePath));
+            File.WriteAllText(configFilePath, configFileContent);
+
+            new SdkCheckCommand(parseResult, new MockNETBundleProvider(bundles), dotnetRoot: dotnetRoot, dotnetVersion: "6.0.100", reporter: _reporter).Execute();
+
+            _reporter.Lines.Count().Should().Be(3);
+            _reporter.Lines.Should().Contain(replacementString);
         }
 
         private NetEnvironmentInfo GetFakeEnvironmentInfo(IEnumerable<string> sdkVersions, IEnumerable<string> runtimeVersions)

@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 '{1}' aracı (sürüm '{2}') başarıyla yüklendi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">{0} çalışma zamanı tanımlayıcısı geçersiz. Geçerli çalışma zamanı tanımlayıcıları: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">Aracı yükle ve yerel araç bildirimine ekle (varsayılan).</target>
@@ -66,6 +71,11 @@ Bir bildirim oluşturmak istiyorsanız 'dotnet new tool-manifest' ifadesini kull
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">Aracın yükleneceği hedef çerçeve.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">--prerelease ve --version seçenekleri aynı komutta desteklenmiyor</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">

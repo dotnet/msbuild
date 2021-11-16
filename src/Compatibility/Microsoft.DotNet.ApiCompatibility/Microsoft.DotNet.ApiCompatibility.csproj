@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <IsPackable>true</IsPackable>
-    <IsShipping>true</IsShipping>
     <StrongNameKeyId>Open</StrongNameKeyId>
-    <VersionPrefix>0.1.0</VersionPrefix>
-    <!--We need to compare ISymbols in a special way (by name) and roslyn symbol comparers take more heuristics into consideration.-->
+    <!-- We need to compare ISymbols in a special way (by name) and roslyn symbol comparers take more heuristics into consideration.-->
     <NoWarn>RS1024;$(NoWarn)</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysisPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx" GenerateSource="True" />
   </ItemGroup>
 
 </Project>

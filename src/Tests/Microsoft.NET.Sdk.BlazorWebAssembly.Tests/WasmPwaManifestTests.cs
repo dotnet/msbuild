@@ -31,7 +31,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var buildCommand = new BuildCommand(testInstance, "blazorwasm");
-            buildCommand.Execute("/p:ServiceWorkerAssetsManifest=service-worker-assets.js")
+            buildCommand.WithWorkingDirectory(testInstance.TestRoot);
+            buildCommand.Execute("/p:ServiceWorkerAssetsManifest=service-worker-assets.js", "/bl")
                 .Should().Pass();
 
             var buildOutputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
@@ -39,9 +40,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm.dll")).Should().Exist();
-
-            var staticWebAssets = Path.Combine(buildOutputDirectory, "blazorwasm.StaticWebAssets.xml");
-            new FileInfo(staticWebAssets).Should().Contain(Path.Combine(DefaultTfm, "wwwroot"));
 
             var serviceWorkerAssetsManifest = Path.Combine(buildOutputDirectory, "wwwroot", "service-worker-assets.js");
             // Trim prefix 'self.assetsManifest = ' and suffix ';'
@@ -74,9 +72,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 .Should().Pass();
 
             var buildOutputDirectory = Path.Combine(testInstance.TestRoot, "blazorwasm", "bin", "Debug", DefaultTfm);
-
-            var staticWebAssets = Path.Combine(buildOutputDirectory, "blazorwasm.StaticWebAssets.xml");
-            new FileInfo(staticWebAssets).Should().Contain(Path.Combine(DefaultTfm, "wwwroot"));
 
             var serviceWorkerAssetsManifest = Path.Combine(buildOutputDirectory, "wwwroot", "custom-service-worker-assets.js");
             // Trim prefix 'self.assetsManifest = ' and suffix ';'

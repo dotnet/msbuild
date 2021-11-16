@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -114,16 +115,60 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             Assert.Equal(StatusCodes.Status418ImATeapot, context.Response.StatusCode);
         }
 
-        private static RequestDelegate GetRequestDelegate()
+        [Fact]
+        public async Task GetUnknownFrameworkPathWorks()
         {
-            var action = new HostingStartup().Configure(builder =>
+            // Arrange
+            var requestDelegate = GetRequestDelegate(builder =>
+            {
+                builder.Use((context, next) =>
+                {
+                    var path = context.Request.Path;
+                    if (path == "/_framework/blazor.webassembly.js")
+                    {
+                        context.Response.StatusCode = StatusCodes.Status206PartialContent;
+                        return Task.CompletedTask;
+                    }
+                    else if (path == "/_framework/System.dll")
+                    {
+                        context.Response.StatusCode = StatusCodes.Status226IMUsed;
+                        return Task.CompletedTask;
+                    }
+
+                    return next();
+                });
+            });
+
+            var context = new DefaultHttpContext();
+            context.Request.Path = "/_framework/blazor.webassembly.js";
+
+            // Act
+            await requestDelegate(context);
+
+            // Assert
+            Assert.Equal(StatusCodes.Status206PartialContent, context.Response.StatusCode);
+
+
+            // Act - 2
+            context.Request.Path = "/_framework/System.dll";
+            await requestDelegate(context);
+
+            // Assert
+            Assert.Equal(StatusCodes.Status226IMUsed, context.Response.StatusCode);
+        }
+
+        private static RequestDelegate GetRequestDelegate(Action<IApplicationBuilder>? configureBuilder = null)
+        {
+            configureBuilder ??= static builder =>
             {
                 builder.Run(context =>
                 {
                     context.Response.StatusCode = StatusCodes.Status418ImATeapot;
                     return Task.CompletedTask;
                 });
-            });
+            };
+
+            var action = new HostingStartup().Configure(configureBuilder);
 
             var serviceProvider = new ServiceCollection()
                 .AddLogging()

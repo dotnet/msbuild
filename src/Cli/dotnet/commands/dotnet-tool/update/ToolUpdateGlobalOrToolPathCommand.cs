@@ -19,7 +19,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Update
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
 
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller) CreateToolPackageStoresAndInstallerAndUninstaller(
         DirectoryPath? nonGlobalLocation = null,
@@ -48,14 +48,14 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             IReporter reporter = null)
             : base(parseResult)
         {
-            _packageId = new PackageId(parseResult.ValueForArgument<string>(ToolUninstallCommandParser.PackageIdArgument));
-            _configFilePath = parseResult.ValueForOption<string>(ToolUpdateCommandParser.ConfigOption);
-            _framework = parseResult.ValueForOption<string>(ToolUpdateCommandParser.FrameworkOption);
-            _additionalFeeds = parseResult.ValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption);
-            _packageVersion = parseResult.ValueForOption<string>(ToolUpdateCommandParser.VersionOption);
-            _global = parseResult.ValueForOption<bool>(ToolUpdateCommandParser.GlobalOption);
-            _verbosity = Enum.GetName(parseResult.ValueForOption<VerbosityOptions>(ToolUpdateCommandParser.VerbosityOption));
-            _toolPath = parseResult.ValueForOption<string>(ToolUpdateCommandParser.ToolPathOption);
+            _packageId = new PackageId(parseResult.GetValueForArgument(ToolUninstallCommandParser.PackageIdArgument));
+            _configFilePath = parseResult.GetValueForOption(ToolUpdateCommandParser.ConfigOption);
+            _framework = parseResult.GetValueForOption(ToolUpdateCommandParser.FrameworkOption);
+            _additionalFeeds = parseResult.GetValueForOption(ToolUpdateCommandParser.AddSourceOption);
+            _packageVersion = parseResult.GetValueForOption(ToolUpdateCommandParser.VersionOption);
+            _global = parseResult.GetValueForOption(ToolUpdateCommandParser.GlobalOption);
+            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolUpdateCommandParser.VerbosityOption));
+            _toolPath = parseResult.GetValueForOption(ToolUpdateCommandParser.ToolPathOption);
             _forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand());
 
             _createToolPackageStoreInstallerUninstaller = createToolPackageStoreInstallerUninstaller ??
@@ -78,21 +78,15 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                 toolPath = new DirectoryPath(_toolPath);
             }
 
-            VersionRange versionRange = null;
-            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
-            {
-                throw new GracefulException(
-                    string.Format(
-                        LocalizableStrings.InvalidNuGetVersionRange,
-                        _packageVersion));
-            }
+            VersionRange versionRange = _parseResult.GetVersionRange();
 
             (IToolPackageStore toolPackageStore,
              IToolPackageStoreQuery toolPackageStoreQuery,
              IToolPackageInstaller toolPackageInstaller,
              IToolPackageUninstaller toolPackageUninstaller) = _createToolPackageStoreInstallerUninstaller(toolPath, _forwardRestoreArguments);
 
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
+            var appHostSourceDirectory = ShellShimTemplateFinder.GetDefaultAppHostSourceDirectory();
+            IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolPath);
 
             IToolPackage oldPackageNullable = GetOldPackage(toolPackageStoreQuery);
 
@@ -126,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
                     foreach (RestoredCommand command in newInstalledPackage.Commands)
                     {
-                        shellShimRepository.CreateShim(command.Executable, command.Name);
+                        shellShimRepository.CreateShim(command.Executable, command.Name, newInstalledPackage.PackagedShims);
                     }
 
                     PrintSuccessMessage(oldPackageNullable, newInstalledPackage);

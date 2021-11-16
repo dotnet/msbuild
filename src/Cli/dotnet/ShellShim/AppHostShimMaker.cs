@@ -18,11 +18,9 @@ namespace Microsoft.DotNet.ShellShim
         private readonly IFilePermissionSetter _filePermissionSetter;
         private const ushort WindowsGUISubsystem = 0x2;
 
-        public AppHostShellShimMaker(string appHostSourceDirectory = null, IFilePermissionSetter filePermissionSetter = null)
+        public AppHostShellShimMaker(string appHostSourceDirectory, IFilePermissionSetter filePermissionSetter = null)
         {
-            _appHostSourceDirectory =
-                appHostSourceDirectory
-                ?? Path.Combine(AppContext.BaseDirectory, "AppHostTemplate");
+            _appHostSourceDirectory = appHostSourceDirectory;
 
             _filePermissionSetter =
                 filePermissionSetter
@@ -63,7 +61,8 @@ namespace Microsoft.DotNet.ShellShim
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
                                          windowsGraphicalUserInterface: false,
-                                         assemblyToCopyResorcesFrom: null);
+                                         assemblyToCopyResorcesFrom: null,
+                                         enableMacOSCodeSign: OperatingSystem.IsMacOS());
             }
 
             _filePermissionSetter.SetUserExecutionPermission(appHostDestinationFilePath);

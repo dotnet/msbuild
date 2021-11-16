@@ -30,9 +30,9 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(Path.Combine(baseDirectory.FullName, PublishSubfolderName));
         }
 
-        public string GetPublishedAppPath(string appName)
+        public string GetPublishedAppPath(string appName, string targetFramework = "netcoreapp1.1")
         {
-            return Path.Combine(GetOutputDirectory().FullName, $"{appName}.dll");
+            return Path.Combine(GetOutputDirectory(targetFramework).FullName, $"{appName}.dll");
         }
     }
 }

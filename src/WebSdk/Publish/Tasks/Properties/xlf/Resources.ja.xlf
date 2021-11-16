@@ -1145,22 +1145,22 @@ Error details:</source>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Check_DeploymentStatus">
         <source>Checking the deployment status...</source>
-        <target state="new">Checking the deployment status...</target>
+        <target state="translated">配置状態を確認しています...</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_DeploymentStatus">
         <source>Deployment status is {0}.</source>
-        <target state="new">Deployment status is {0}.</target>
+        <target state="translated">配置状態は {0} です。</target>
         <note>{0} - Success or failed</note>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_DeploymentStatusPolling">
         <source>Polling for deployment status...</source>
-        <target state="new">Polling for deployment status...</target>
+        <target state="translated">配置状態をポーリングしています...</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Failed">
         <source>Zip Deployment failed. </source>
-        <target state="new">Zip Deployment failed. </target>
+        <target state="translated">zip 配置に失敗しました。</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedDeploy">
@@ -1185,12 +1185,12 @@ Error details:</source>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Succeeded">
         <source>Zip Deployment succeeded.</source>
-        <target state="new">Zip Deployment succeeded.</target>
+        <target state="translated">zip 配置に成功しました。</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Uploaded">
         <source>Uploaded the Zip file to the target.</source>
-        <target state="new">Uploaded the Zip file to the target.</target>
+        <target state="translated">zip ファイルがターゲットにアップロードされました。</target>
         <note />
       </trans-unit>
     </body>

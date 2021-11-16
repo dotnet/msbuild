@@ -1,17 +1,14 @@
 ﻿using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.TemplateLocator;
+using Microsoft.DotNet.Configurer;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
-using Microsoft.TemplateEngine.Edge;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.TemplateEngine.Utils
+namespace Microsoft.DotNet.Tools.New
 {
     internal class OptionalWorkloadProvider : ITemplatePackageProvider
     {
@@ -35,16 +32,17 @@ namespace Microsoft.TemplateEngine.Utils
         public Task<IReadOnlyList<ITemplatePackage>> GetAllTemplatePackagesAsync(CancellationToken cancellationToken)
         {
             var list = new List<TemplatePackage>();
-            var optionalWorkloadLocator = new TemplateLocator();
+            var optionalWorkloadLocator = new TemplateLocator.TemplateLocator();
             var sdkDirectory = Path.GetDirectoryName(typeof(DotnetFiles).Assembly.Location);
             var sdkVersion = Path.GetFileName(sdkDirectory);
             var dotnetRootPath = Path.GetDirectoryName(Path.GetDirectoryName(sdkDirectory));
+            string userProfileDir = CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
-            var packages = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion, dotnetRootPath);
-            var fileSystem = _environmentSettings.Host.FileSystem as IFileLastWriteTimeSource;
-            foreach (IOptionalSdkTemplatePackageInfo packageInfo in packages)
+            var packages = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion, dotnetRootPath, userProfileDir);
+            var fileSystem = _environmentSettings.Host.FileSystem;
+            foreach (var packageInfo in packages)
             {
-                list.Add(new TemplatePackage(this, packageInfo.Path, fileSystem?.GetLastWriteTimeUtc(packageInfo.Path) ?? File.GetLastWriteTime(packageInfo.Path)));
+                list.Add(new TemplatePackage(this, packageInfo.Path, fileSystem.GetLastWriteTimeUtc(packageInfo.Path)));
             }
             return Task.FromResult<IReadOnlyList<ITemplatePackage>>(list);
         }

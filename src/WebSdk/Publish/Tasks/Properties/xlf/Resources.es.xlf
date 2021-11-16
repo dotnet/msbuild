@@ -1145,22 +1145,22 @@ Detalles del error:</target>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Check_DeploymentStatus">
         <source>Checking the deployment status...</source>
-        <target state="new">Checking the deployment status...</target>
+        <target state="translated">Comprobando el estado de la implementación...</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_DeploymentStatus">
         <source>Deployment status is {0}.</source>
-        <target state="new">Deployment status is {0}.</target>
+        <target state="translated">El estado de implementación es {0}.</target>
         <note>{0} - Success or failed</note>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_DeploymentStatusPolling">
         <source>Polling for deployment status...</source>
-        <target state="new">Polling for deployment status...</target>
+        <target state="translated">Sondeando el estado de implementación...</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Failed">
         <source>Zip Deployment failed. </source>
-        <target state="new">Zip Deployment failed. </target>
+        <target state="translated">No se pudo realizar la implementación de ZIP. </target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedDeploy">
@@ -1185,12 +1185,12 @@ Detalles del error:</target>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Succeeded">
         <source>Zip Deployment succeeded.</source>
-        <target state="new">Zip Deployment succeeded.</target>
+        <target state="translated">La implementación de ZIP se realizó correctamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Uploaded">
         <source>Uploaded the Zip file to the target.</source>
-        <target state="new">Uploaded the Zip file to the target.</target>
+        <target state="translated">El archivo ZIP se ha cargado en el destino.</target>
         <note />
       </trans-unit>
     </body>

@@ -283,6 +283,71 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             AssertDefaultInstallSuccess();
         }
 
+        [Fact]
+        public void WhenRunWithPrereleaseAndPackageVersionItShouldSucceed()
+        {
+            ParseResult result =
+                Parser.Instance.Parse($"dotnet tool install {_packageIdA.ToString()} --prerelease");
+
+            var installLocalCommand = new ToolInstallLocalCommand(
+                result,
+                GetToolToolPackageInstallerWithPreviewInFeed(),
+                _toolManifestFinder,
+                _toolManifestEditor,
+                _localToolsResolverCache,
+                _reporter);
+
+            installLocalCommand.Execute().Should().Be(0);
+            var manifestPackages = _toolManifestFinder.Find();
+            manifestPackages.Should().HaveCount(1);
+            var addedPackage = manifestPackages.Single();
+            _localToolsResolverCache.TryLoad(new RestoredCommandIdentifier(
+                    addedPackage.PackageId,
+                    new NuGetVersion("2.0.1-preview1"),
+                    NuGetFramework.Parse(BundledTargetFramework.GetTargetFrameworkMoniker()),
+                    Constants.AnyRid,
+                    addedPackage.CommandNames.Single()),
+                out RestoredCommand restoredCommand
+            ).Should().BeTrue();
+
+            _fileSystem.File.Exists(restoredCommand.Executable.Value);
+        }
+
+        private IToolPackageInstaller GetToolToolPackageInstallerWithPreviewInFeed()
+        {
+            List<MockFeed> feeds = new List<MockFeed>
+            {
+                new MockFeed
+                {
+                    Type = MockFeedType.ImplicitAdditionalFeed,
+                    Packages = new List<MockFeedPackage>
+                    {
+                        new MockFeedPackage
+                        {
+                            PackageId = _packageIdA.ToString(),
+                            Version = "1.0.4",
+                            ToolCommandName = "SimulatorCommand"
+                        },
+                        new MockFeedPackage
+                        {
+                            PackageId = _packageIdA.ToString(),
+                            Version = "2.0.1-preview1",
+                            ToolCommandName = "SimulatorCommand"
+                        }
+                    }
+                }
+            };
+            var toolToolPackageInstaller = (IToolPackageInstaller)new ToolPackageInstallerMock(
+                fileSystem: _fileSystem,
+                store: _toolPackageStore,
+                projectRestorer: new ProjectRestorerMock(
+                    fileSystem: _fileSystem,
+                    reporter: _reporter,
+                    feeds: feeds),
+                installCallback: null);
+            return toolToolPackageInstaller;
+        }
+
         private void AssertDefaultInstallSuccess()
         {
             var manifestPackages = _toolManifestFinder.Find();

@@ -20,17 +20,17 @@ namespace Microsoft.DotNet.Cli.Sln.List.Tests
 {
     public class GivenDotnetSlnList : SdkTest
     {
-        private Func<string, string> HelpText = (defaultVal) => $@"list:
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
   List all projects in a solution file.
 
 Usage:
-  dotnet [options] sln <SLN_FILE> list
+  dotnet sln <SLN_FILE> list [options]
 
 Arguments:
   <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -?, -h, --help    Show help and usage information";
+  -?, -h, --help    Show command line help.";
 
         public GivenDotnetSlnList(ITestOutputHelper log) : base(log)
         {

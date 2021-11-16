@@ -22,8 +22,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public string? LaunchUrl { get; set; }
 
-        public string? HotReloadProfile { get; set; }
-
         public IDictionary<string, string>? EnvironmentVariables { get; set; }
 
         internal static LaunchSettingsProfile? ReadDefaultProfile(string projectDirectory, IReporter reporter)

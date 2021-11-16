@@ -1,30 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
     <ProjectGuid>{C91F7F4C-47ED-4D1C-8990-B2E886B0FAD9}</ProjectGuid>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
-  <!-- Host configuration properties -->
+  <!-- Host configuration properties
+       Keep this list in the same order as the configProperties in GivenThatWeWantToPublishAProjectWithAllFeatures. -->
   <PropertyGroup>
+    <VerifyDependencyInjectionOpenGenericServiceTrimmability>true</VerifyDependencyInjectionOpenGenericServiceTrimmability>
+    <_AggressiveAttributeTrimming>true</_AggressiveAttributeTrimming>
+    <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
+    <DebuggerSupport>true</DebuggerSupport>
+    <EventSourceSupport>false</EventSourceSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PredefinedCulturesOnly>true</PredefinedCulturesOnly>
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
-    <ThreadPoolMinThreads>2</ThreadPoolMinThreads>
-    <ThreadPoolMaxThreads>9</ThreadPoolMaxThreads>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <UseNativeHttpHandler>true</UseNativeHttpHandler>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <NullabilityInfoContextSupport>false</NullabilityInfoContextSupport>
+    <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <_EnableConsumingManagedCodeFromNativeHosting>false</_EnableConsumingManagedCodeFromNativeHosting>
+    <EnableCppCLIHostActivation>false</EnableCppCLIHostActivation>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
     <TieredCompilation>true</TieredCompilation>
     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
     <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
     <StartupHookSupport>false</StartupHookSupport>
-    <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
-    <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
-    <EventSourceSupport>false</EventSourceSupport>
-    <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
-    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
-    <DebuggerSupport>true</DebuggerSupport>
+    <AutoreleasePoolSupport>false</AutoreleasePoolSupport>
+    <ThreadPoolMinThreads>2</ThreadPoolMinThreads>
+    <ThreadPoolMaxThreads>9</ThreadPoolMaxThreads>
   </PropertyGroup>
 
   <ItemGroup>
@@ -51,7 +63,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
-    
+
     <None Include="NoneCopyOutputAlways.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -66,7 +78,7 @@
     <ProjectReference Include="../TestLibrary/TestLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <!-- 
+    <!--
       The TestLibrary has a hard dependency on Newtonsoft.Json.
       The TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel.
       Microsoft.Extensions.DependencyModel depends on Newtonsoft.Json.

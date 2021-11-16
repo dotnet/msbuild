@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -9,12 +10,12 @@ namespace Microsoft.DotNet.Cli
     {
         public CommandParsingException(
             string message, 
-            string helpText = null) : base(message)
+            ParseResult parseResult = null) : base(message)
         {
-            HelpText = helpText ?? "";
+            ParseResult = parseResult;
             Data.Add("CLI_User_Displayed_Exception", true);
         }
 
-        public string HelpText { get; } = "";
+        public ParseResult ParseResult;
     }
 }

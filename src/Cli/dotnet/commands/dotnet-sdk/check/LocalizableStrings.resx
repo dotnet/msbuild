@@ -132,7 +132,7 @@
   <data name="BundleUpToDateMessage" xml:space="preserve">
     <value>Up to date.</value>
   </data>
-  <data name="NewPatchAvaliableMessage" xml:space="preserve">
+  <data name="NewPatchAvailableMessage" xml:space="preserve">
     <value>Patch {0} is available.</value>
   </data>
   <data name="OutOfSupportMessage" xml:space="preserve">
@@ -158,5 +158,11 @@
   </data>
   <data name="StatusColumnHeader" xml:space="preserve">
     <value>Status</value>
+  </data>
+  <data name="RuntimePropertyNotFound" xml:space="preserve">
+    <value>Runtime property 'HOSTFXR_PATH' was not set or empty.</value>
+  </data>
+  <data name="HostFxrCouldNotBeLoaded" xml:space="preserve">
+    <value>Could not load hostfxr from '{0}'.</value>
   </data>
 </root>

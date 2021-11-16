@@ -63,24 +63,36 @@ namespace Microsoft.NET.Publish.Tests
             var runtimeConfigJsonContents = File.ReadAllText(Path.Combine(publishDirectory.FullName, "TestApp.runtimeconfig.json"));
             var runtimeConfigJsonObject = JObject.Parse(runtimeConfigJsonContents);
 
+            // Keep this list sorted
             var baselineConfigJsonObject = JObject.Parse(@"{
     ""runtimeOptions"": {
         ""configProperties"": {
+            ""Microsoft.Extensions.DependencyInjection.VerifyOpenGenericServiceTrimmability"": true,
+            ""System.AggressiveAttributeTrimming"": true,
+            ""System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"": false,
             ""System.Diagnostics.Debugger.IsSupported"": true,
             ""System.Diagnostics.Tracing.EventSource.IsSupported"": false,
             ""System.Globalization.Invariant"": true,
+            ""System.Globalization.PredefinedCulturesOnly"": true,
             ""System.GC.Concurrent"": false,
             ""System.GC.Server"": true,
             ""System.GC.RetainVM"": false,
             ""System.Net.Http.EnableActivityPropagation"": false,
+            ""System.Net.Http.UseNativeHttpHandler"": true,
+            ""System.Reflection.Metadata.MetadataUpdater.IsSupported"": false,
+            ""System.Reflection.NullabilityInfoContext.IsSupported"": false,
+            ""System.Resources.ResourceManager.AllowCustomResourceTypes"": false,
             ""System.Resources.UseSystemResourceKeys"": true,
+            ""System.Runtime.InteropServices.BuiltInComInterop.IsSupported"": false,
+            ""System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting"": false,
+            ""System.Runtime.InteropServices.EnableCppCLIHostActivation"": false,
+            ""System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization"": false,
             ""System.Runtime.TieredCompilation"": true,
             ""System.Runtime.TieredCompilation.QuickJit"": true,
             ""System.Runtime.TieredCompilation.QuickJitForLoops"": true,
             ""System.StartupHookProvider.IsSupported"": false,
-            ""System.Resources.ResourceManager.AllowCustomResourceTypes"": false,
-            ""System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"": false,
             ""System.Text.Encoding.EnableUnsafeUTF7Encoding"": false,
+            ""System.Threading.Thread.EnableAutoreleasePool"": false,
             ""System.Threading.ThreadPool.MinThreads"": 2,
             ""System.Threading.ThreadPool.MaxThreads"": 9,
             ""extraProperty"": true
@@ -93,7 +105,7 @@ namespace Microsoft.NET.Publish.Tests
     }
 }");
             baselineConfigJsonObject["runtimeOptions"]["tfm"] = targetFramework;
-            baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] = 
+            baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] =
                 targetFramework == "netcoreapp1.0" ? "1.0.5" : "1.1.2";
 
             runtimeConfigJsonObject
@@ -138,7 +150,7 @@ namespace Microsoft.NET.Publish.Tests
             {
                 File.GetLastWriteTimeUtc(file)
                     .Should().Be(
-                        modificationTime, 
+                        modificationTime,
                         because: $"Publish with NoBuild=true should not overwrite {file}");
             }
         }
@@ -201,7 +213,7 @@ namespace Microsoft.NET.Publish.Tests
             library.RuntimeAssemblyGroups[0].Runtime.Should().Be(string.Empty);
             library.RuntimeAssemblyGroups[0].AssetPaths.Count.Should().Be(1);
             library.RuntimeAssemblyGroups[0].AssetPaths[0].Should().Be($"{path}{dllName}.dll");
-            
+
             foreach (string locale in locales)
             {
                 // Try to get the locale as part of a dependency package: Humanizer.Core.af
@@ -213,7 +225,7 @@ namespace Microsoft.NET.Publish.Tests
                 {
                     localeLibrary = library;
                 }
-                
+
                 localeLibrary
                    .ResourceAssemblies
                    .FirstOrDefault(r => r.Locale == locale && r.Path == $"{path}{locale}/{dllName}.resources.dll")

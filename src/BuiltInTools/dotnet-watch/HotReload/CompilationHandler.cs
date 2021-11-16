@@ -11,7 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
@@ -35,42 +34,51 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async ValueTask InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
+            Debug.Assert(context.ProjectGraph is not null);
+
             if (_deltaApplier is null)
             {
-                _deltaApplier = context.DefaultLaunchSettingsProfile.HotReloadProfile switch
+                var hotReloadProfile = HotReloadProfileReader.InferHotReloadProfile(context.ProjectGraph, _reporter);
+                _deltaApplier = hotReloadProfile switch
                 {
-                    "blazorwasm" => new BlazorWebAssemblyDeltaApplier(_reporter),
-                    "blazorwasmhosted" => new BlazorWebAssemblyHostedDeltaApplier(_reporter),
-                    _ => new AspNetCoreDeltaApplier(_reporter),
+                    HotReloadProfile.BlazorWebAssembly => new BlazorWebAssemblyDeltaApplier(_reporter),
+                    HotReloadProfile.BlazorHosted => new BlazorWebAssemblyHostedDeltaApplier(_reporter),
+                    _ => new DefaultDeltaApplier(_reporter),
                 };
             }
 
             await _deltaApplier.InitializeAsync(context, cancellationToken);
 
-            if (context.Iteration == 0)
-            {
-                var instance = MSBuildLocator.QueryVisualStudioInstances().First();
-
-                _reporter.Verbose($"Using MSBuild at '{instance.MSBuildPath}' to load projects.");
-                MSBuildLocator.RegisterInstance(instance);
-            }
-            else if (_currentSolution is not null)
+            if (_currentSolution is not null)
             {
                 _currentSolution.Workspace.Dispose();
                 _currentSolution = null;
             }
 
-            _initializeTask = Task.Run(() => CompilationWorkspaceProvider.CreateWorkspaceAsync(context.FileSet.Project.ProjectPath, _reporter, cancellationToken), cancellationToken);
+            _initializeTask = Task.Run(async () =>
+            {
+                var (solution, service) = await CompilationWorkspaceProvider.CreateWorkspaceAsync(
+                    context.FileSet.Project.ProjectPath,
+                    _deltaApplier.GetApplyUpdateCapabilitiesAsync(context, cancellationToken),
+                    _reporter,
+                    cancellationToken);
+
+                return (solution, service);
+            }, cancellationToken);
 
             return;
         }
 
-        public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
+        public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem[] files, CancellationToken cancellationToken)
         {
             HotReloadEventSource.Log.HotReloadStart(HotReloadEventSource.StartType.CompilationHandler);
-            if (!file.FilePath.EndsWith(".cs", StringComparison.Ordinal) &&
-                !file.FilePath.EndsWith(".razor", StringComparison.Ordinal) &&
-                !file.FilePath.EndsWith(".cshtml", StringComparison.Ordinal))
+            var compilationFiles = files.Where(static file =>
+                file.FilePath.EndsWith(".cs", StringComparison.Ordinal) ||
+                file.FilePath.EndsWith(".razor", StringComparison.Ordinal) ||
+                file.FilePath.EndsWith(".cshtml", StringComparison.Ordinal))
+                .ToArray();
+
+            if (compilationFiles.Length == 0)
             {
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
@@ -85,23 +93,31 @@ namespace Microsoft.DotNet.Watcher.Tools
             Debug.Assert(_currentSolution != null);
             Debug.Assert(_deltaApplier != null);
 
-            Solution? updatedSolution = null;
-            ProjectId updatedProjectId;
-            if (_currentSolution.Projects.SelectMany(p => p.Documents).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is Document documentToUpdate)
+            var updatedSolution = _currentSolution;
+
+            var foundFiles = false;
+            foreach (var file in compilationFiles)
             {
-                var sourceText = await GetSourceTextAsync(file.FilePath);
-                updatedSolution = documentToUpdate.WithText(sourceText).Project.Solution;
-                updatedProjectId = documentToUpdate.Project.Id;
+                if (updatedSolution.Projects.SelectMany(p => p.Documents).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is Document documentToUpdate)
+                {
+                    var sourceText = await GetSourceTextAsync(file.FilePath);
+                    updatedSolution = documentToUpdate.WithText(sourceText).Project.Solution;
+                    foundFiles = true;
+                }
+                else if (updatedSolution.Projects.SelectMany(p => p.AdditionalDocuments).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is AdditionalDocument additionalDocument)
+                {
+                    var sourceText = await GetSourceTextAsync(file.FilePath);
+                    updatedSolution = updatedSolution.WithAdditionalDocumentText(additionalDocument.Id, sourceText, PreservationMode.PreserveValue);
+                    foundFiles = true;
+                }
+                else
+                {
+                    _reporter.Verbose($"Could not find document with path {file.FilePath} in the workspace.");
+                }
             }
-            else if (_currentSolution.Projects.SelectMany(p => p.AdditionalDocuments).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is AdditionalDocument additionalDocument)
+
+            if (!foundFiles)
             {
-                var sourceText = await GetSourceTextAsync(file.FilePath);
-                updatedSolution = _currentSolution.WithAdditionalDocumentText(additionalDocument.Id, sourceText, PreservationMode.PreserveValue);
-                updatedProjectId = additionalDocument.Project.Id;
-            }
-            else
-            {
-                _reporter.Verbose($"Could not find document with path {file.FilePath} in the workspace.");
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
             }
@@ -118,22 +134,27 @@ namespace Microsoft.DotNet.Watcher.Tools
                 var diagnostics = GetDiagnostics(updatedSolution, cancellationToken);
                 if (diagnostics.IsDefaultOrEmpty)
                 {
-                    await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
+                    _reporter.Verbose("No deltas modified. Applying changes to clear diagnostics.");
+                    await _deltaApplier.Apply(context, updates, cancellationToken);
+                    // Even if there were diagnostics, continue treating this as a success
+                    _reporter.Output("No hot reload changes to apply.");
                 }
                 else
                 {
+                    _reporter.Verbose("Found compilation errors during hot reload. Reporting it in application UI.");
                     await _deltaApplier.ReportDiagnosticsAsync(context, diagnostics, cancellationToken);
                 }
 
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
-                // Even if there were diagnostics, continue treating this as a success
+                // Return true so that the watcher continues to keep the current hot reload session alive. If there were errors, this allows the user to fix errors and continue
+                // working on the running app.
                 return true;
             }
 
             if (!rudeEdits.IsDefaultOrEmpty)
             {
                 // Rude edit.
-                _reporter.Output("Unable to apply hot reload because of a rude edit. Rebuilding the app...");
+                _reporter.Output("Unable to apply hot reload because of a rude edit.");
                 foreach (var diagnostic in hotReloadDiagnostics)
                 {
                     _reporter.Verbose(CSharpDiagnosticFormatter.Instance.Format(diagnostic));
@@ -145,8 +166,14 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             _currentSolution = updatedSolution;
 
-            var applyState = await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
+            var applyState = await _deltaApplier.Apply(context, updates, cancellationToken);
+            _reporter.Verbose($"Received {(applyState ? "successful" : "failed")} apply from delta applier.");
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
+            if (applyState)
+            {
+                _reporter.Output($"Hot reload of changes succeeded.");
+            }
+
             return applyState;
         }
 
@@ -173,7 +200,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     if (item.Severity == DiagnosticSeverity.Error)
                     {
                         var diagnostic = CSharpDiagnosticFormatter.Instance.Format(item);
-                        _reporter.Output(diagnostic);
+                        _reporter.Output("\x1B[40m\x1B[31m" + diagnostic);
                         projectDiagnostics = projectDiagnostics.Add(diagnostic);
                     }
                 }
@@ -213,12 +240,35 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private async ValueTask<SourceText> GetSourceTextAsync(string filePath)
         {
+            var zeroLengthRetryPerformed = false;
             for (var attemptIndex = 0; attemptIndex < 6; attemptIndex++)
             {
                 try
                 {
-                    using var stream = File.OpenRead(filePath);
-                    return SourceText.From(stream, Encoding.UTF8);
+                    // File.OpenRead opens the file with FileShare.Read. This may prevent IDEs from saving file
+                    // contents to disk
+                    SourceText sourceText;
+                    using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        sourceText = SourceText.From(stream, Encoding.UTF8);
+                    }
+
+                    if (!zeroLengthRetryPerformed && sourceText.Length == 0)
+                    {
+                        zeroLengthRetryPerformed = true;
+
+                        // VSCode (on Windows) will sometimes perform two separate writes when updating a file on disk.
+                        // In the first update, it clears the file contents, and in the second, it writes the intended
+                        // content.
+                        // It's atypical that a file being watched for hot reload would be empty. We'll use this as a
+                        // hueristic to identify this case and perform an additional retry reading the file after a delay.
+                        await Task.Delay(20);
+
+                        using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                        sourceText = SourceText.From(stream, Encoding.UTF8);
+                    }
+
+                    return sourceText;
                 }
                 catch (IOException) when (attemptIndex < 5)
                 {

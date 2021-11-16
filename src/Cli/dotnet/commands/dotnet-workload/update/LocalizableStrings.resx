@@ -117,64 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PackageIdArgumentName" xml:space="preserve">
-    <value>PACKAGE_ID</value>
-  </data>
-  <data name="PackageIdArgumentDescription" xml:space="preserve">
-    <value>The NuGet Package Id of the workload to update.</value>
-  </data>
-  <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
-    <value>Specify one workload Package Id to update.</value>
-  </data>
-  <data name="AddSourceOptionDescription" xml:space="preserve">
-    <value>Add an additional NuGet package source to use during the update.</value>
-  </data>
-  <data name="AddSourceOptionName" xml:space="preserve">
-    <value>SOURCE</value>
-  </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Update a workload.</value>
-  </data>
-  <data name="ConfigFileOptionName" xml:space="preserve">
-    <value>FILE</value>
-  </data>
-  <data name="ConfigFileOptionDescription" xml:space="preserve">
-    <value>The NuGet configuration file to use.</value>
-  </data>
-  <data name="NuGetConfigurationFileDoesNotExist" xml:space="preserve">
-    <value>NuGet configuration file '{0}' does not exist.</value>
+    <value>Update all installed workloads.</value>
   </data>
   <data name="UpdateSucceeded" xml:space="preserve">
-    <value>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</value>
+    <value>Successfully updated workload(s): {0}.</value>
   </data>
-  <data name="UpdateFullCommandNameLocalized" xml:space="preserve">
-    <value>.NET update Command</value>
-  </data>
-  <data name="UpdateSucceededVersionNoChange" xml:space="preserve">
-    <value>Workload '{0}' was reinstalled with the latest stable version (version '{1}').</value>
-  </data>
-  <data name="UpdateWorkloadFailed" xml:space="preserve">
+  <data name="UpdateFailed" xml:space="preserve">
     <value>Workload '{0}' failed to update due to the following:</value>
   </data>
-  <data name="VersionOptionName" xml:space="preserve">
-    <value>VERSION</value>
+  <data name="RollBackFailedMessage" xml:space="preserve">
+    <value>Installation rollback failed: {0}</value>
   </data>
-  <data name="VersionOptionDescription" xml:space="preserve">
-    <value>The version range of the workload package to update to.</value>
+  <data name="RollingBackInstall" xml:space="preserve">
+    <value>Workload installation failed. Rolling back installed packs...</value>
   </data>
-  <data name="InvalidNuGetVersionRange" xml:space="preserve">
-    <value>Specified version '{0}' is not a valid NuGet version range.</value>
+  <data name="WorkloadCacheDownloadFailed" xml:space="preserve">
+    <value>Failed to download workload update packages to cache: {0}</value>
   </data>
-  <data name="UpdateToLowerVersion" xml:space="preserve">
-    <value>The requested version {0} is lower than existing version {1}.</value>
+  <data name="WorkloadUpdateFailed" xml:space="preserve">
+    <value>Workload update failed: {0}</value>
   </data>
-  <data name="UpdateLocalWorkloadSucceeded" xml:space="preserve">
-    <value>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</value>
+  <data name="FromPreviousSdkOptionDescription" xml:space="preserve">
+    <value>Include workloads installed with earlier SDK versions in update.</value>
   </data>
-  <data name="UpdateLocaWorkloadToLowerVersion" xml:space="preserve">
-    <value>The requested version {0} is lower than existing version {1}.</value>
+  <data name="NoWorkloadsToUpdate" xml:space="preserve">
+    <value>No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</value>
   </data>
-  <data name="UpdateLocaWorkloadSucceededVersionNoChange" xml:space="preserve">
-    <value>Workload '{0}' is up to date.</value>
+  <data name="WorkloadUpdateAdManifestsSucceeded" xml:space="preserve">
+    <value>Successfully updated advertising manifests.</value>
+  </data>
+  <data name="AdManifestOnlyOptionDescription" xml:space="preserve">
+    <value>Only update advertising manifests.</value>
+  </data>
+  <data name="FromRollbackDefinitionOptionDescription" xml:space="preserve">
+    <value>Update workloads based on specified rollback definition file.</value>
   </data>
 </root>

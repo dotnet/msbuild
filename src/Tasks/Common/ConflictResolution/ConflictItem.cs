@@ -19,7 +19,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         Reference,
         CopyLocal,
         Runtime,
-        Platform
+        Platform,
+        Analyzer
     }
 
     internal interface IConflictItem

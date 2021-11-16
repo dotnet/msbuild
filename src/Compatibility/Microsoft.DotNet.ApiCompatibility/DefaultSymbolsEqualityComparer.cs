@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Extensions;
 using System;
 using System.Collections.Generic;
 
@@ -15,15 +16,19 @@ namespace Microsoft.DotNet.ApiCompatibility
         public int GetHashCode(ISymbol obj) =>
             GetKey(obj).GetHashCode();
 
-        private static string GetKey(ISymbol symbol) =>
-            symbol switch
+        private static string GetKey(ISymbol symbol)
+        {
+            if (symbol is IMethodSymbol method)
             {
-                IMethodSymbol => symbol.ToDisplayString(),
-                IFieldSymbol => symbol.ToDisplayString(),
-                IPropertySymbol => symbol.ToDisplayString(),
-                IEventSymbol => symbol.ToDisplayString(),
-                ITypeSymbol => symbol.ToDisplayString(),
-                _ => symbol.Name,
-            };
+                // The display string for event add and remove varies
+                // depending if we have references or not.
+                // As these can't have different overrides we don't care
+                // about the full display string.
+                if (method.IsEventAdderOrRemover())
+                    return method.Name;
+            }
+
+            return symbol.ToComparisonDisplayString();
+        }
     }
 }

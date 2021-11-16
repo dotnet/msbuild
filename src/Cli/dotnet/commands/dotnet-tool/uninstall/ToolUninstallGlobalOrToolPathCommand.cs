@@ -15,7 +15,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.Uninstall
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageUninstaller) CreateToolPackageStoresAndUninstaller(DirectoryPath? nonGlobalLocation = null);
     internal class ToolUninstallGlobalOrToolPathCommand : CommandBase
     {
@@ -41,8 +41,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
         public override int Execute()
         {
-            var global = _parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
-            var toolPath = _parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
+            var global = _parseResult.GetValueForOption(ToolAppliedOption.GlobalOption);
+            var toolPath = _parseResult.GetValueForOption(ToolAppliedOption.ToolPathOption);
 
             DirectoryPath? toolDirectoryPath = null;
             if (!string.IsNullOrWhiteSpace(toolPath))
@@ -60,9 +60,10 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
             (IToolPackageStore toolPackageStore, IToolPackageStoreQuery toolPackageStoreQuery, IToolPackageUninstaller toolPackageUninstaller)
                 = _createToolPackageStoresAndUninstaller(toolDirectoryPath);
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolDirectoryPath);
+            var appHostSourceDirectory = ShellShimTemplateFinder.GetDefaultAppHostSourceDirectory();
+            IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolDirectoryPath);
 
-            var packageId = new PackageId(_parseResult.ValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
+            var packageId = new PackageId(_parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
             IToolPackage package = null;
             try
             {

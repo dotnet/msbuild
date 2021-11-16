@@ -120,16 +120,16 @@
   <data name="CommandDescription" xml:space="preserve">
     <value>List workloads available.</value>
   </data>
-  <data name="WorkloadPathOptionName" xml:space="preserve">
-    <value>PATH</value>
+  <data name="WorkloadIdColumn" xml:space="preserve">
+    <value>Installed Workload Ids</value>
   </data>
-  <data name="PackageIdColumn" xml:space="preserve">
-    <value>Package Id</value>
+  <data name="WorkloadUpdatesAvailable" xml:space="preserve">
+    <value>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</value>
   </data>
-  <data name="VersionColumn" xml:space="preserve">
-    <value>Version</value>
+  <data name="WorkloadListFooter" xml:space="preserve">
+    <value>Use `dotnet workload search` to find additional workloads to install.</value>
   </data>
-  <data name="CommandsColumn" xml:space="preserve">
-    <value>Commands</value>
+  <data name="WorkloadListHeader" xml:space="preserve">
+    <value>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</value>
   </data>
 </root>

@@ -44,7 +44,6 @@
       <AnalyzerAssemblies Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll" />
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/Microsoft.CodeAnalysis.NetAnalyzers.props" />
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/Microsoft.CodeAnalysis.NetAnalyzers.targets" />
-      <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/config/**/*" />
       <ILLinkAnalyzersTargets Include="$(PkgMicrosoft_NET_ILLink_Analyzers)/build/Microsoft.NET.ILLink.Analyzers.props" />
       <CodeStyleCSharpAssemblies Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/analyzers/dotnet/cs/**/*.dll" />
       <CodeStyleVisualBasicAssemblies Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/analyzers/dotnet/vb/**/*.dll" />
@@ -66,6 +65,24 @@
     <Copy SourceFiles="@(AnalyzerConfig)" DestinationFiles="@(AnalyzerConfig->'$(AnalyzerConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
+  <Target Name="PublishDotnetFormat"
+          BeforeTargets="Build;PublishNetSdk">
+    <PropertyGroup>
+      <DotnetFormatDestinationDirectory>$(OutputPath)/DotnetTools/dotnet-format</DotnetFormatDestinationDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <DotnetFormatDllFiles Include="$(Pkgdotnet-format)/tools/net6.0/any/**/*.dll" />
+      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net6.0/any/**/*.json" />
+      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net6.0/any/**/*.config" />
+    </ItemGroup>
+
+    <Error Condition="'@(DotnetFormatDllFiles)' == ''" Text="Something moved around in dotnet-format package, adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(DotnetFormatConfigFiles)' == ''" Text="Something moved around in dotnet-format package, adjust code here accordingly. TFM change?" />
+    <Copy SourceFiles="@(DotnetFormatDllFiles)" DestinationFiles="@(DotnetFormatDllFiles->'$(DotnetFormatDestinationDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(DotnetFormatConfigFiles)" DestinationFiles="@(DotnetFormatConfigFiles->'$(DotnetFormatDestinationDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
   <Target Name="PublishMSBuildExtensions"
           DependsOnTargets="GenerateMSBuildExtensions"
           BeforeTargets="Build">
@@ -76,6 +93,12 @@
 
   <Target Name="PublishNetSdks"
           BeforeTargets="Build">
+    <ItemGroup>
+      <WebSdkProjectFile Include="$(RepoRoot)src\WebSdk\**\*.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(WebSdkProjectFile)" />
+
     <PropertyGroup>
       <NETSdkSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk</NETSdkSourceRoot>
       <NETSdkWebSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web</NETSdkWebSourceRoot>
@@ -108,7 +131,9 @@
   <Target Name="PublishTestCli"
           BeforeTargets="Build">
     <PropertyGroup>
-      <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/netcoreapp2.1/</TestCliNuGetDirectory>
+      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' != 'true'" >netcoreapp2.1</TestCliNuGetDirectoryTargetFramework>
+      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'" >net6.0</TestCliNuGetDirectoryTargetFramework>
+      <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/$(TestCliNuGetDirectoryTargetFramework)/</TestCliNuGetDirectory>
     </PropertyGroup>
     <ItemGroup>
       <!-- https://github.com/microsoft/vstest/issues/1886 -->
@@ -117,6 +142,7 @@
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Memory.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Runtime.CompilerServices.Unsafe.dll" />
       <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NuGet.Frameworks.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Text.Json.dll" />
       <TestCliBits Include="$(TestCliNuGetDirectory)**/*"
                    Exclude="@(TestCliBitsToExclude)" />
     </ItemGroup>
@@ -141,7 +167,7 @@
     <ItemGroup>
       <DotNetWatchFile Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
       <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\*.dll" DeploymentSubpath="middleware" />
-      <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.Extensions.AspNetCoreDeltaApplier\$(Configuration)\net6.0\*.dll" DeploymentSubpath="hotreload" />
+      <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.Extensions.DotNetDeltaApplier\$(Configuration)\net6.0\*.dll" DeploymentSubpath="hotreload" />
       <DotNetWatchFile Include="$(ArtifactsDir)bin\DotNetWatchTasks\$(Configuration)\netstandard2.0\DotNetWatchTasks.dll" />
     </ItemGroup>
 
@@ -253,9 +279,12 @@
   <Target Name="MoveRazorSdkTools" AfterTargets="PublishRazorSdkTools">
     <ItemGroup>
       <_RazorToolOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\*.*" />
-      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
-      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.AspNetCore.Razor.Language.dll" />
-      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.CodeAnalysis.Razor.dll" />
+      <!-- To reduce the size of the SDK, we use the compiler dependencies that are located in the `Rosyln/bincore` location
+      instead of shipping our own copies in the Razor compiler. These assemblies will be resolved by path in the
+      rzc executable. -->
+      <_RazorToolOutput Remove="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.CodeAnalysis.dll" />
+      <_RazorToolOutput Remove="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.CodeAnalysis.CSharp.dll" />
+      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.AspNetCore.Razor.Internal.SourceGenerator.Transport.dll" />
       <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.NET.Sdk.Razor.SourceGenerators.dll" />
       <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\RazorSourceGenerator.razorencconfig	" />
     </ItemGroup>

@@ -59,18 +59,19 @@
     <PackageReference Include="Microsoft.Deployment.DotNet.Releases" Version="$(DeploymentReleasesVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-
   <!-- To reduce dll load (cause RPS perf regression). Directly compile files from Microsoft.DotNet.NativeWrapper, Microsoft.DotNet.SdkResolver, and the workload resolver -->
   <ItemGroup>
     <Compile Include="..\Microsoft.DotNet.NativeWrapper\**\*.cs" LinkBase="Microsoft.DotNet.NativeWrapper" />
     <Compile Include="..\Microsoft.DotNet.SdkResolver\**\*.cs" LinkBase="Microsoft.DotNet.SdkResolver" />
-    <Compile Include="..\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\**\*.cs" LinkBase="Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver" />
+    <Compile Include="..\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\CachingWorkloadResolver.cs" LinkBase="Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver" />
     <Compile Include="..\Microsoft.NET.Sdk.WorkloadManifestReader\**\*.cs" LinkBase="Microsoft.NET.Sdk.WorkloadManifestReader" />
-    <Compile Include="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\**\*.cs" LinkBase="WorkloadInstallRecords" />
+    <Compile Include="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\**\*.cs" 
+             Exclude="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\RegistryWorkloadInstallationRecordRepository.cs"
+             LinkBase="WorkloadInstallRecords" />
+
+    <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common"/>
+    <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculatorCore.cs" LinkBase="Common"/>
+    <Compile Include="$(RepoRoot)src\Common\WorkloadFileBasedInstall.cs" LinkBase="Common"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
@@ -81,6 +82,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" PrivateAssets="All" ExcludeAssets="Runtime" />
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
   </ItemGroup>
   
   <ItemGroup>

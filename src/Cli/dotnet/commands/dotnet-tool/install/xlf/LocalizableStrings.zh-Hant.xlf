@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
@@ -12,6 +12,11 @@
 Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">您可以使用下列命令來叫用工具: {0}
 已成功安裝工具 '{1}' ('{2}' 版)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">執行階段識別碼 {0} 無效。有效的執行階段識別碼為: {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -66,6 +71,11 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">要為工具安裝的目標 Framework。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">同一個命令中不支援 --prerelease 與 --version 選項</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">

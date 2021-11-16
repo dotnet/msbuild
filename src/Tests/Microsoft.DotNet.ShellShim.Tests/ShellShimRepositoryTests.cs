@@ -22,6 +22,8 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
+using NuGet.Frameworks;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {
@@ -403,6 +405,17 @@ namespace Microsoft.DotNet.ShellShim.Tests
                            string.Join(';', filePaths)));
         }
 
+        [WindowsOnlyTheory]
+        [InlineData("net5.0")]
+        [InlineData("netcoreapp3.1")]
+        public void WhenRidNotSupportedOnWindowsItIsImplicit(string tfm)
+        {
+            var tempDir = _testAssetsManager.CreateTestDirectory(identifier: tfm).Path;
+            var templateFinder = new ShellShimTemplateFinder(new MockNuGetPackageDownloader(), new DirectoryPath(tempDir), null);
+            var path = templateFinder.ResolveAppHostSourceDirectoryAsync(null, NuGetFramework.Parse(tfm), Architecture.Arm64).Result;
+            path.Should().Contain(tfm.Equals("net5.0") ? "AppHostTemplate" : "win-x64");
+        }
+
         private static void MakeNameConflictingCommand(string pathToPlaceShim, string shellCommandName)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -498,6 +511,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             return new ShellShimRepository(
                     new DirectoryPath(pathToShim),
+                    string.Empty,
                     appHostShellShimMaker: new AppHostShellShimMakerMock());
         }
     }

@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\**\*.cs" LinkBase="Microsoft.DotNet.SdkResolver"/>
     <Compile Include="..\Resolvers\Microsoft.DotNet.MSBuildSdkResolver\FXVersion.cs" LinkBase="Microsoft.DotNet.SdkResolver"/>
+    <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common"/>
+    <Compile Include="$(RepoRoot)src\Common\WorkloadFileBasedInstall.cs" LinkBase="Common"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -56,7 +58,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="4.7.2" Condition="'$(UseSystemTextJson)'=='True'"/>
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" Condition="'$(UseSystemTextJson)'=='True'"/>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" Condition="'$(UseSystemTextJson)'!='True'"/>
   </ItemGroup>
 </Project>

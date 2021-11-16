@@ -14,12 +14,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- We can't add it here because the OutputPath and other msbuild properties are not evaluated.-->
   <!--<Import Sdk="Microsoft.NET.Sdk.Publish" Project="ImportPublishProfile.targets" />-->
 
-  <PropertyGroup>
-    <!-- Trimmer defaults that depend on user-definable settings.
-         This must be configured before it's initialized in the .NET SDK targets. -->
-    <SuppressTrimAnalysisWarnings Condition="'$(SuppressTrimAnalysisWarnings)' == '' And '$(TrimmerDefaultAction)' != 'link'">true</SuppressTrimAnalysisWarnings>
-  </PropertyGroup>
-
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 
   <PropertyGroup>

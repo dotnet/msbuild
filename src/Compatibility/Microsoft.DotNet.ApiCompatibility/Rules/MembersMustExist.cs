@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Extensions;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -15,15 +16,31 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     public class MembersMustExist : Rule
     {
         /// <summary>
+        /// Method that is called when the rules are created by the <see cref="IRuleRunner"/> in
+        /// order to do the initial setup for the rule.
+        /// </summary>
+        /// <param name="context">The context that the <see cref="IRuleRunner"/> creates holding callbacks to get the differences.</param>
+        public override void Initialize(RuleRunnerContext context)
+        {
+            context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
+            context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
+        }
+
+        /// <summary>
         /// Evaluates whether a type exists on both sides of the <see cref="TypeMapper"/>.
         /// </summary>
         /// <param name="mapper">The <see cref="TypeMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        public override void Run(TypeMapper mapper, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, IList<CompatDifference> differences)
         {
-            ITypeSymbol left = mapper.Left;
-            if (left != null && mapper.Right == null)
-                differences.Add(new CompatDifference(DiagnosticIds.TypeMustExist, $"Type '{left.ToDisplayString()}' exists on the left but not on the right", DifferenceType.Removed, left));
+            if (left != null && right == null)
+            {
+                differences.Add(CreateDifference(left, DiagnosticIds.TypeMustExist, DifferenceType.Removed, Resources.TypeExistsOnLeft, leftName, rightName));
+            }
+            else if (Settings.StrictMode && left == null && right != null)
+            {
+                differences.Add(CreateDifference(right, DiagnosticIds.TypeMustExist, DifferenceType.Added, Resources.TypeExistsOnRight, leftName, rightName));
+            }
         }
 
         /// <summary>
@@ -31,38 +48,63 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        public override void Run(MemberMapper mapper, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol left, ISymbol right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences)
         {
-            ISymbol left = mapper.Left;
-            if (left != null && mapper.Right == null)
+            if (left != null && right == null)
             {
-                // Events and properties are handled via their accessors.
-                if (left.Kind == SymbolKind.Property || left.Kind == SymbolKind.Event)
-                    return;
-
-                if (left is IMethodSymbol method)
+                if (ShouldReportMissingMember(left, rightContainingType))
                 {
-                    // Will be handled by a different rule
-                    if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation)
-                        return;
-
-                    // If method is an override or hides a base type definition removing it from right is compatible.
-                    if (method.IsOverride || FindMatchingOnBaseType(method))
-                        return;
+                    differences.Add(CreateDifference(left, DiagnosticIds.MemberMustExist, DifferenceType.Removed, Resources.MemberExistsOnLeft, leftName, rightName));
                 }
-
-                differences.Add(new CompatDifference(DiagnosticIds.MemberMustExist, $"Member '{left.ToDisplayString()}' exists on the left but not on the right", DifferenceType.Removed, left));
+            }
+            else if (Settings.StrictMode && left == null && right != null)
+            {
+                if (ShouldReportMissingMember(right, leftContainingType))
+                {
+                    differences.Add(CreateDifference(right, DiagnosticIds.MemberMustExist, DifferenceType.Added, Resources.MemberExistsOnRight, leftName, rightName));
+                }
             }
         }
 
-        private bool FindMatchingOnBaseType(IMethodSymbol method)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private CompatDifference CreateDifference(ISymbol symbol, string id, DifferenceType type, string format, string leftName, string rightName) =>
+            new(id, string.Format(format, symbol.ToDisplayString(), leftName, rightName), type, symbol);
+
+        private bool ShouldReportMissingMember(ISymbol symbol, ITypeSymbol containingType)
         {
-            foreach (ITypeSymbol type in method.ContainingType.GetAllBaseTypes())
+            // Events and properties are handled via their accessors.
+            if (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
+                return false;
+
+            if (symbol is IMethodSymbol method)
             {
-                foreach (ISymbol symbol in type.GetMembers())
+                // Will be handled by a different rule
+                if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation)
+                    return false;
+
+                // If method is an override or is promoted to the base type should not be reported.
+                if (method.IsOverride || FindMatchingOnBaseType(method, containingType))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private bool FindMatchingOnBaseType(IMethodSymbol method, ITypeSymbol containingType)
+        {
+            // Constructors cannot be promoted
+            if (method.MethodKind == MethodKind.Constructor)
+                return false;
+
+            if (containingType != null)
+            {
+                foreach (ITypeSymbol type in containingType.GetAllBaseTypes())
                 {
-                    if (symbol is IMethodSymbol candidate && IsMatchingMethod(method, candidate))
-                        return true;
+                    foreach (ISymbol symbol in type.GetMembers())
+                    {
+                        if (symbol is IMethodSymbol candidate && IsMatchingMethod(method, candidate))
+                            return true;
+                    }
                 }
             }
 
@@ -84,7 +126,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         private bool ReturnTypesMatch(IMethodSymbol method, IMethodSymbol candidate) =>
-            method.ReturnType.ToDisplayString() == candidate.ReturnType.ToDisplayString();
+            method.ReturnType.ToComparisonDisplayString() == candidate.ReturnType.ToComparisonDisplayString();
 
         private bool ParametersMatch(IMethodSymbol method, IMethodSymbol candidate)
         {
@@ -93,7 +135,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             for (int i = 0; i < method.Parameters.Length; i++)
             {
-                if (method.Parameters[i].Type.ToDisplayString() != method.Parameters[i].Type.ToDisplayString())
+                if (method.Parameters[i].Type.ToComparisonDisplayString() != method.Parameters[i].Type.ToComparisonDisplayString())
                     return false;
             }
 

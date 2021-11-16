@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Restore.Test
                 TargetFrameworks = "net5.0",
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.3"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: useStaticGraphEvaluation.ToString() + extension, targetExtension: extension);
 

@@ -84,20 +84,30 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
             for (var i = 0; i < FilesToCompress.Length; i++)
             {
-                var input = FilesToCompress[i];
-                var inputFullPath = input.GetMetadata("FullPath");
-                var relativePath = input.GetMetadata("RelativePath");
+                var file = FilesToCompress[i];
+                var inputFullPath = file.GetMetadata("FullPath");
+                var relativePath = file.GetMetadata("RelativePath");
                 var outputRelativePath = Path.Combine(OutputDirectory, CalculateTargetPath(inputFullPath, ".br"));
                 var outputFullPath = Path.GetFullPath(outputRelativePath);
 
-                var outputItem = new TaskItem(outputRelativePath);
+                var outputItem = new TaskItem(outputRelativePath, file.CloneCustomMetadata());
                 outputItem.SetMetadata("RelativePath", relativePath + ".br");
+                outputItem.SetMetadata("OriginalItemSpec", file.ItemSpec);
                 CompressedFiles[i] = outputItem;
 
-                if (SkipIfOutputIsNewer && File.Exists(outputFullPath) && File.GetLastWriteTimeUtc(inputFullPath) < File.GetLastWriteTimeUtc(outputFullPath))
+                if (!File.Exists(outputRelativePath))
                 {
-                    Log.LogMessage(MessageImportance.Low, $"Skipping compression for '{input.ItemSpec}' because '{outputRelativePath}' is newer than '{input.ItemSpec}'.");
+                    Log.LogMessage(MessageImportance.Low, "Compressing '{0}' because compressed file '{1}' does not exist.", file.ItemSpec, outputRelativePath);
+                }
+                else if (File.GetLastWriteTimeUtc(inputFullPath) < File.GetLastWriteTimeUtc(outputRelativePath))
+                {
+                    // Incrementalism. If input source doesn't exist or it exists and is not newer than the expected output, do nothing.
+                    Log.LogMessage(MessageImportance.Low, "Skipping '{0}' because '{1}' is newer than '{2}'.", file.ItemSpec, outputRelativePath, file.ItemSpec);
                     continue;
+                }
+                else
+                {
+                    Log.LogMessage(MessageImportance.Low, "Compressing '{0}' because file is newer than '{1}'.", inputFullPath, outputRelativePath);
                 }
 
                 builder.AppendLine("-s");

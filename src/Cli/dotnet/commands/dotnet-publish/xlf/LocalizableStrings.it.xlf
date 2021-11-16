@@ -22,11 +22,6 @@
         <target state="translated">Framework di destinazione per cui eseguire la pubblicazione. Il framework di destinazione deve essere specificato nel file di progetto.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
-        <target state="translated">Pubblica l'applicazione come applicazione dipendente dal framework senza il runtime .NET. Per eseguire l'applicazione, è necessario installare un runtime .NET supportato.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
@@ -62,18 +57,6 @@ Per impostazione predefinita, viene generato un pacchetto dipendente dal framewo
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">Configurazione per cui eseguire la pubblicazione. L'impostazione predefinita per la maggior parte dei progetti è 'Debug'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">Le opzioni '--self-contained' e '--no-self-contained' sono in conflitto tra loro. Specificare una sola delle opzioni.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Pubblica il runtime .NET con l'applicazione in modo che non sia necessario installarlo nel computer di destinazione.
-L'impostazione predefinita è 'true' se si specifica un identificatore di runtime.</target>
         <note />
       </trans-unit>
     </body>

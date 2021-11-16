@@ -17,5 +17,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// String representing the ID for the object that the diagnostic was created for.
         /// </summary>
         string ReferenceId { get; }
+
+        /// <summary>
+        /// String describing the diagnostic.
+        /// </summary>
+        string Message { get; }
     }
 }

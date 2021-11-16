@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>List workloads available.</source>
-        <target state="needs-review-translation">Hiermit listen Sie die global oder lokal installierten Tools auf.</target>
+        <target state="translated">Hiermit werden die verfügbaren Workloads aufgelistet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="VersionColumn">
-        <source>Version</source>
-        <target state="translated">Version</target>
+      <trans-unit id="WorkloadIdColumn">
+        <source>Installed Workload Ids</source>
+        <target state="translated">Installierte Workload-IDs</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommandsColumn">
-        <source>Commands</source>
-        <target state="translated">Befehle</target>
+      <trans-unit id="WorkloadListFooter">
+        <source>Use `dotnet workload search` to find additional workloads to install.</source>
+        <target state="translated">Verwenden Sie „dotnet workload search“, um zusätzliche zu installierende Workloads zu finden.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PackageIdColumn">
-        <source>Package Id</source>
-        <target state="translated">Paket-ID</target>
+      <trans-unit id="WorkloadListHeader">
+        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
+        <target state="translated">Dieser Befehl führt nur Workloads auf, die über „dotnet workload install“ in dieser SDK-Version installiert wurden, und nicht die Workloads, die über Visual Studio installiert wurden.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadPathOptionName">
-        <source>PATH</source>
-        <target state="new">PATH</target>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">Updates sind für die folgenden Workloads verfügbar: {0}. Führen Sie „dotnet workload update“ aus, um die neueste Info zu erhalten.</target>
         <note />
       </trans-unit>
     </body>

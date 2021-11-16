@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools.NuGet;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -10,9 +13,18 @@ namespace Microsoft.DotNet.Cli
     // See https://github.com/NuGet/NuGet.Client for the actual implementation.
     internal static class NuGetCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-nuget";
+
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
         {
-            var command = new Command("nuget");
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
+            var command = new DocumentedCommand("nuget", DocsLink);
 
             command.AddOption(new Option<bool>("--version"));
             command.AddOption(new Option<string>(new string[] { "-v", "--verbosity" }));
@@ -22,6 +34,10 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(GetLocalsCommand());
             command.AddCommand(GetPushCommand());
             command.AddCommand(GetVerifyCommand());
+            command.AddCommand(GetTrustCommand());
+            command.AddCommand(GetSignCommand());
+
+            command.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
 
             return command;
         }
@@ -37,6 +53,8 @@ namespace Microsoft.DotNet.Cli
             deleteCommand.AddOption(new Option<bool>("--no-service-endpoint"));
             deleteCommand.AddOption(new Option<bool>("--interactive"));
 
+            deleteCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+
             return deleteCommand;
         }
 
@@ -50,6 +68,8 @@ namespace Microsoft.DotNet.Cli
             localsCommand.AddOption(new Option<bool>("--force-english-output"));
             localsCommand.AddOption(new Option<bool>(new string[] { "-c", "--clear" }));
             localsCommand.AddOption(new Option<bool>(new string[] { "-l", "--list" }));
+
+            localsCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
 
             return localsCommand;
         }
@@ -72,6 +92,8 @@ namespace Microsoft.DotNet.Cli
             pushCommand.AddOption(new Option<bool>("--interactive"));
             pushCommand.AddOption(new Option<bool>("--skip-duplicate"));
 
+            pushCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+
             return pushCommand;
         }
 
@@ -86,9 +108,53 @@ namespace Microsoft.DotNet.Cli
             verifyCommand.AddOption(new ForwardedOption<IEnumerable<string>>(fingerprint)
                 .ForwardAsManyArgumentsEachPrefixedByOption(fingerprint)
                 .AllowSingleArgPerToken());
-            verifyCommand.AddOption(CommonOptions.VerbosityOption());
+            verifyCommand.AddOption(CommonOptions.VerbosityOption);
+
+            verifyCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
 
             return verifyCommand;
+        }
+
+        private static Command GetTrustCommand()
+        {
+            var trustCommand = new Command("trust");
+
+            trustCommand.AddArgument(new Argument<string>() { Arity = ArgumentArity.ZeroOrOne }
+                         .FromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" }));
+
+            trustCommand.AddOption(new Option<string>("--algorithm"));
+            trustCommand.AddOption(new Option<bool>("--allow-untrusted-root"));
+            trustCommand.AddOption(new Option<string>("--owners"));
+            trustCommand.AddOption(new Option<string>("--configfile"));
+            trustCommand.AddOption(CommonOptions.VerbosityOption);
+
+            trustCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+
+            return trustCommand;
+        }
+        
+        private static Command GetSignCommand()
+        {
+            var signCommand = new Command("sign");
+
+            signCommand.AddArgument(new Argument<IEnumerable<string>>() { Arity = ArgumentArity.OneOrMore });
+
+            signCommand.AddOption(new Option<string>(new string[] { "-o", "--output" }));
+            signCommand.AddOption(new Option<string>("--certificate-path"));
+            signCommand.AddOption(new Option<string>("--certificate-store-name"));
+            signCommand.AddOption(new Option<string>("--certificate-store-location"));
+            signCommand.AddOption(new Option<string>("--certificate-subject-name"));
+            signCommand.AddOption(new Option<string>("--certificate-fingerprint"));
+            signCommand.AddOption(new Option<string>("--certificate-password"));
+            signCommand.AddOption(new Option<string>("--hash-algorithm"));
+            signCommand.AddOption(new Option<string>("--timestamper"));
+            signCommand.AddOption(new Option<string>("--timestamp-hash-algorithm"));
+            signCommand.AddOption(new Option<bool>("--overwrite"));
+            signCommand.AddOption(CommonOptions.VerbosityOption);
+
+            signCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+
+            return signCommand;
         }
     }
 }

@@ -20,11 +20,11 @@ namespace Microsoft.DotNet.Cli.Remove.Reference.Tests
 {
     public class GivenDotnetRemoveReference : SdkTest
     {
-        private Func<string, string> HelpText = (defaultVal) => $@"reference:
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
   Remove a project-to-project reference from the project.
 
 Usage:
-  dotnet [options] remove <PROJECT> reference <PROJECT_PATH>...
+  dotnet remove <PROJECT> reference <PROJECT_PATH>... [options]
 
 Arguments:
   <PROJECT>         The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
@@ -32,19 +32,19 @@ Arguments:
 
 Options:
   -f, --framework <FRAMEWORK>    Remove the reference only when targeting a specific framework.
-  -?, -h, --help                 Show help and usage information";
+  -?, -h, --help                 Show command line help.";
 
-        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"remove:
+        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"Description:
       .NET Remove Command
     
     Usage:
-      dotnet [options] remove <PROJECT> [command]
+      dotnet remove <PROJECT> [command] [options]
     
     Arguments:
       <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
     
     Options:
-      -?, -h, --help    Show help and usage information
+      -?, -h, --help    Show command line help.
     
     Commands:
       package <PACKAGE_NAME>      Remove a NuGet package reference from the project.
@@ -196,12 +196,26 @@ Options:
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
 
+            string brokenFolder = Path.Combine(setup.TestRoot, "Broken");
+            Directory.CreateDirectory(brokenFolder);
+            string brokenProjectPath = Path.Combine(brokenFolder, "Broken.csproj");
+            File.WriteAllText(brokenProjectPath, @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFrameworks>net451;netcoreapp2.1</TargetFrameworks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include=""**\*.cs""/>
+        <EmbeddedResource Include=""**\*.resx""/>
+    <!--intentonally broken-->");
+
             var cmd = new RemoveReferenceCommand(Log)
                     .WithProject(projName)
                     .WithWorkingDirectory(setup.TestRoot)
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, "Broken/Broken.csproj"));
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, projName));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
         }
 

@@ -22,14 +22,6 @@ namespace Microsoft.DotNet.NativeWrapper
             _getEnvironmentVariable = getEnvironmentVariable;
         }
 
-        public string ExecutableExtension
-        {
-            get
-            {
-                return Interop.RunningOnWindows ? ".exe" : string.Empty;
-            }
-        }
-
         private IEnumerable<string> SearchPaths
         {
             get
@@ -39,8 +31,8 @@ namespace Microsoft.DotNet.NativeWrapper
                     var searchPaths = new List<string>();
 
                     searchPaths.AddRange(
-                        _getEnvironmentVariable("PATH")
-                        .Split(Path.PathSeparator)
+                        _getEnvironmentVariable(Constants.PATH)
+                        .Split(new char[] { Path.PathSeparator }, options: StringSplitOptions.RemoveEmptyEntries)
                         .Select(p => p.Trim('"')));
 
                     _searchPaths = searchPaths;
@@ -52,7 +44,7 @@ namespace Microsoft.DotNet.NativeWrapper
 
         public string GetCommandPath(string commandName)
         {
-            var commandNameWithExtension = commandName + ExecutableExtension;
+            var commandNameWithExtension = commandName + Constants.ExeSuffix;
             var commandPath = SearchPaths
                 .Where(p => !Path.GetInvalidPathChars().Any(c => p.Contains(c)))
                 .Select(p => Path.Combine(p, commandNameWithExtension))
@@ -63,13 +55,13 @@ namespace Microsoft.DotNet.NativeWrapper
 
         public string GetDotnetExeDirectory()
         {
-            string environmentOverride = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
+            string environmentOverride = _getEnvironmentVariable(Constants.DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR);
             if (!string.IsNullOrEmpty(environmentOverride))
             {
                 return environmentOverride;
             }
 
-            var dotnetExe = GetCommandPath("dotnet");
+            var dotnetExe = GetCommandPath(Constants.DotNet);
 
             if (dotnetExe != null && !Interop.RunningOnWindows)
             {
@@ -78,7 +70,7 @@ namespace Microsoft.DotNet.NativeWrapper
                 dotnetExe = Interop.Unix.realpath(dotnetExe) ?? dotnetExe;
             }
 
-            if (dotnetExe == null)
+            if (string.IsNullOrWhiteSpace(dotnetExe))
             {
                 dotnetExe = Process.GetCurrentProcess().MainModule.FileName;
             }

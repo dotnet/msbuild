@@ -23,21 +23,34 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
         {
             return app =>
             {
-                app.Map(ApplicationPaths.ClearSiteData, app1 => app1.Run(context =>
-                {
-                    // Scoped css files can contain links to other css files. We'll try clearing out the http caches to force the browser to re-download.
-                    // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Clear-Site-Data#directives
-                    context.Response.Headers["Clear-Site-Data"] = "\"cache\"";
-                    return Task.CompletedTask;
-                }));
+                app.MapWhen(
+                    static (context) =>
+                    {
+                        var path = context.Request.Path;
+                        return path.StartsWithSegments(ApplicationPaths.FrameworkRoot) &&
+                            (path.StartsWithSegments(ApplicationPaths.ClearSiteData) ||
+                            path.StartsWithSegments(ApplicationPaths.BlazorHotReloadMiddleware) ||
+                            path.StartsWithSegments(ApplicationPaths.BrowserRefreshJS) ||
+                            path.StartsWithSegments(ApplicationPaths.BlazorHotReloadJS));
+                    },
+                    static app =>
+                    {
+                        app.Map(ApplicationPaths.ClearSiteData, static app => app.Run(context =>
+                        {
+                            // Scoped css files can contain links to other css files. We'll try clearing out the http caches to force the browser to re-download.
+                            // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Clear-Site-Data#directives
+                            context.Response.Headers["Clear-Site-Data"] = "\"cache\"";
+                            return Task.CompletedTask;
+                        }));
 
-                app.Map(ApplicationPaths.BlazorHotReloadMiddleware, app1 => app1.UseMiddleware<BlazorWasmHotReloadMiddleware>());
+                        app.Map(ApplicationPaths.BlazorHotReloadMiddleware, static app => app.UseMiddleware<BlazorWasmHotReloadMiddleware>());
 
-                app.Map(ApplicationPaths.BrowserRefreshJS,
-                    app1 => app1.UseMiddleware<BrowserScriptMiddleware>(BrowserScriptMiddleware.GetBrowserRefreshJS()));
+                        app.Map(ApplicationPaths.BrowserRefreshJS,
+                            static app => app.UseMiddleware<BrowserScriptMiddleware>(BrowserScriptMiddleware.GetBrowserRefreshJS()));
 
-                app.Map(ApplicationPaths.BlazorHotReloadJS,
-                    app1 => app1.UseMiddleware<BrowserScriptMiddleware>(BrowserScriptMiddleware.GetBlazorHotReloadJS()));
+                        app.Map(ApplicationPaths.BlazorHotReloadJS,
+                            static app => app.UseMiddleware<BrowserScriptMiddleware>(BrowserScriptMiddleware.GetBlazorHotReloadJS()));
+                    });
 
                 app.UseMiddleware<BrowserRefreshMiddleware>();
                 next(app);

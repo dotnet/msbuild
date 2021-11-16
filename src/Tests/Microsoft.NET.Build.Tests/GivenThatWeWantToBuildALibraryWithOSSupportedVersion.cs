@@ -38,7 +38,7 @@ namespace Microsoft.NET.Build.Tests
         {
             TestProject testProject = SetUpProject();
 
-            var targetPlatformIdentifier = "iOS";
+            var targetPlatformIdentifier = "fakeOS";
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
             testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
             testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
@@ -52,8 +52,8 @@ namespace Microsoft.NET.Build.Tests
             runCommand.Execute()
                 .Should()
                 .Pass()
-                .And.HaveStdOutContaining(TargetPlatformAttribute("iOS14.0"))
-                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("iOS13.2"));
+                .And.HaveStdOutContaining(TargetPlatformAttribute("fakeOS14.0"))
+                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("fakeOS13.2"));
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tests
         {
             TestProject testProject = SetUpProject();
 
-            var targetPlatformIdentifier = "iOS";
+            var targetPlatformIdentifier = "fakeOS";
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
             testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
             testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
@@ -74,8 +74,8 @@ namespace Microsoft.NET.Build.Tests
             runCommand.Execute()
                 .Should()
                 .Pass()
-                .And.HaveStdOutContaining(TargetPlatformAttribute("iOS13.2"))
-                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("iOS13.2"));
+                .And.HaveStdOutContaining(TargetPlatformAttribute("fakeOS13.2"))
+                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("fakeOS13.2"));
         }
 
         [Fact]
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Build.Tests
         {
             TestProject testProject = SetUpProject();
 
-            var targetPlatformIdentifier = "iOS";
+            var targetPlatformIdentifier = "fakeOS";
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
             testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
             testProject.AdditionalProperties["TargetPlatformVersion"] = "13.2";
@@ -167,7 +167,7 @@ namespace Microsoft.NET.Build.Tests
                 .And.HaveStdOutContaining(SupportedOSPlatformAttribute("Windows10.0.18362.0"));
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void WhenTargetingWindowsSupportedOSVersionPropertySetsTargetPlatformMinVersion()
         {
             TestProject testProject = SetUpProject("net6.0-windows10.0.19041");
@@ -190,7 +190,7 @@ namespace Microsoft.NET.Build.Tests
 
             getValuesCommand.GetValues()
                 .Should()
-                .BeEquivalentTo("10.0.18362.0");                
+                .BeEquivalentTo("10.0.18362.0");
         }
 
         [WindowsOnlyFact]
@@ -239,7 +239,7 @@ namespace Microsoft.NET.Build.Tests
         {
             TestProject testProject = SetUpProject();
 
-            var targetPlatformIdentifier = "iOS";
+            var targetPlatformIdentifier = "fakeOS";
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
             testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
             testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
@@ -254,8 +254,8 @@ namespace Microsoft.NET.Build.Tests
             runCommand.Execute()
                 .Should()
                 .Pass()
-                .And.HaveStdOutContaining(TargetPlatformAttribute("iOS14.0"))
-                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("iOS13.2"));
+                .And.HaveStdOutContaining(TargetPlatformAttribute("fakeOS14.0"))
+                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("fakeOS13.2"));
         }
 
         private static string TargetPlatformAttribute(string targetPlatform)
@@ -266,7 +266,7 @@ namespace Microsoft.NET.Build.Tests
 
             return expected;
         }
-  
+
         private static string SupportedOSPlatformAttribute(string supportedOSPlatform)
         {
             string expected = string.IsNullOrEmpty(supportedOSPlatform) ?

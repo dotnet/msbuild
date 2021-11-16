@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 {
     internal class ToolInstallLocalInstaller
     {
+        private readonly ParseResult _parseResult;
         public string TargetFrameworkToInstall { get; private set; }
 
         private readonly IToolPackageInstaller _toolPackageInstaller;
@@ -27,11 +28,12 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             ParseResult parseResult,
             IToolPackageInstaller toolPackageInstaller = null)
         {
-            _packageId = new PackageId(parseResult.ValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
-            _packageVersion = parseResult.ValueForOption<string>(ToolInstallCommandParser.VersionOption);
-            _configFilePath = parseResult.ValueForOption<string>(ToolInstallCommandParser.ConfigOption);
-            _sources = parseResult.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption);
-            _verbosity = Enum.GetName(parseResult.ValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption));
+            _parseResult = parseResult;
+            _packageId = new PackageId(parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
+            _packageVersion = parseResult.GetValueForOption(ToolInstallCommandParser.VersionOption);
+            _configFilePath = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
+            _sources = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
+            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolInstallCommandParser.VerbosityOption));
 
             if (toolPackageInstaller == null)
             {
@@ -60,14 +62,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         Path.GetFullPath(_configFilePath)));
             }
 
-            VersionRange versionRange = null;
-            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
-            {
-                throw new GracefulException(
-                    string.Format(
-                        LocalizableStrings.InvalidNuGetVersionRange,
-                        _packageVersion));
-            }
+            VersionRange versionRange = _parseResult.GetVersionRange();
 
             FilePath? configFile = null;
             if (!string.IsNullOrEmpty(_configFilePath))

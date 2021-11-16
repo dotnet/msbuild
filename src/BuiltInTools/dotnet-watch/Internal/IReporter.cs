@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.Tools.Internal
     /// </summary>
     public interface IReporter
     {
+        public bool IsVerbose => false;
         void Verbose(string message);
         void Output(string message);
         void Warn(string message);

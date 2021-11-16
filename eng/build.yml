@@ -15,12 +15,14 @@ parameters:
   timeoutInMinutes: 180
 
 jobs:
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/6.0.1xx')) }}:
   - template: /eng/common/templates/job/onelocbuild.yml
     parameters:
-      CreatePr: false
+      CreatePr: true
       LclSource: lclFilesfromPackage
       LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
+      MirrorBranch: release/6.0.1xx
+      MirrorRepo: sdk
 - template: /eng/common/templates/job/job.yml
   parameters:
     name: ${{ parameters.agentOs }}
@@ -42,33 +44,17 @@ jobs:
       - _OfficialBuildIdArgs: ''
       - _PublishArgs: ''
       - _SignArgs: ''
-      - _InternalRuntimeDownloadArgs: ''
       - _HelixApiToken: ''
       # Helix Testing requires a token when internally run
       - ${{ if ne(variables['System.TeamProject'], 'public') }}:
         - group: DotNet-HelixApi-Access
         - _HelixApiToken: $(HelixApiAccessToken)
       - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-        - group: DotNet-Symbol-Server-PATs
         - group: dotnet-benchview
-        - group: DotNet-Blob-Feed
         - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
-        - _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                    /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
-                    /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
-                    /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
-                    /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
-                    /p:PB_PublishType=$(_PublishType)
-                    /p:DotNetPublishUsingPipelines=true
-                    /p:PublishToAzure=$(_PublishToAzure)
         - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
         - _PerfIterations: 25
 
-      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-        - group: DotNet-MSRC-Storage
-        - name: _InternalRuntimeDownloadArgs
-          value: /p:DotNetRuntimeSourceFeed=https://dotnetclimsrc.blob.core.windows.net/dotnet
-            /p:DotNetRuntimeSourceFeedKey=$(dotnetclimsrc-read-sas-token-base64)
     steps:
     - ${{ if ne(variables['System.TeamProject'], 'public') }}:
       - task: PowerShell@2
@@ -89,8 +75,6 @@ jobs:
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
-          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
-          PublishType: $(_PublishType)
           SYSTEM_ACCESSTOKEN: $(System.AccessToken)
           HelixAccessToken: ${{ parameters.HelixAccessToken }}
       - powershell: eng\runHelixAndNonHelixInParallel.ps1
@@ -107,7 +91,6 @@ jobs:
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
       - script: eng\CIBuild.cmd
                   -configuration $(_BuildConfig)
-                  $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
                   $(_InternalRuntimeDownloadArgs)
@@ -115,8 +98,6 @@ jobs:
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
-          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
-          PublishType: $(_PublishType)
           TestFullMSBuild: 'true'
           SYSTEM_ACCESSTOKEN: $(System.AccessToken)
           HelixAccessToken: ${{ parameters.HelixAccessToken }}
@@ -135,7 +116,6 @@ jobs:
     - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
       - script: eng\CIBuild.cmd
                   -configuration $(_BuildConfig)
-                  $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
                   $(_Test)
@@ -144,13 +124,10 @@ jobs:
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
-          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
-          PublishType: $(_PublishType)
 
     - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools') }}:
       - script: eng/common/cibuild.sh
                   --configuration $(_BuildConfig)
-                  $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
                   $(_InternalRuntimeDownloadArgs)
@@ -158,8 +135,6 @@ jobs:
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
-          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
-          PublishType: $(_PublishType)
       - script: eng/runTestsCannotRunOnHelix.sh
                   --configuration $(_BuildConfig)
                   --ci

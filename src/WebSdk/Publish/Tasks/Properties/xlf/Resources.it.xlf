@@ -1145,22 +1145,22 @@ Dettagli errore:</target>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Check_DeploymentStatus">
         <source>Checking the deployment status...</source>
-        <target state="new">Checking the deployment status...</target>
+        <target state="translated">Controllo dello stato della distribuzione...</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_DeploymentStatus">
         <source>Deployment status is {0}.</source>
-        <target state="new">Deployment status is {0}.</target>
+        <target state="translated">Lo stato della distribuzione è {0}.</target>
         <note>{0} - Success or failed</note>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_DeploymentStatusPolling">
         <source>Polling for deployment status...</source>
-        <target state="new">Polling for deployment status...</target>
+        <target state="translated">Polling dello stato della distribuzione...</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Failed">
         <source>Zip Deployment failed. </source>
-        <target state="new">Zip Deployment failed. </target>
+        <target state="translated">La distribuzione del file ZIP non è riuscita. </target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedDeploy">
@@ -1185,12 +1185,12 @@ Dettagli errore:</target>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Succeeded">
         <source>Zip Deployment succeeded.</source>
-        <target state="new">Zip Deployment succeeded.</target>
+        <target state="translated">La distribuzione del file ZIP è riuscita.</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_Uploaded">
         <source>Uploaded the Zip file to the target.</source>
-        <target state="new">Uploaded the Zip file to the target.</target>
+        <target state="translated">Il file ZIP è stato caricato nella destinazione.</target>
         <note />
       </trans-unit>
     </body>

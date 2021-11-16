@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
@@ -23,6 +23,17 @@
       <_Parameter1>AspNetTestTfm</_Parameter1>
       <_Parameter2>$(SdkTargetFramework)</_Parameter2>
     </AssemblyAttribute>
+    <!-- We use these to templatize the output from our build/publish tests to ensure the right set of
+         files gets published in all circumstances.
+    -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>NetCoreAppRuntimePackageVersion</_Parameter1>
+      <_Parameter2>$(MicrosoftNETCoreAppRuntimePackageVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>DefaultTestBaselinePackageVersion</_Parameter1>
+      <_Parameter2>5.0</_Parameter2>
+    </AssemblyAttribute>
   </ItemGroup>
   
   <ItemGroup>
@@ -44,6 +55,8 @@
     <None Include="TestFiles\Generated\*.bundle.scp.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <EmbeddedResource Include="StaticWebAssetsBaselines\**">
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

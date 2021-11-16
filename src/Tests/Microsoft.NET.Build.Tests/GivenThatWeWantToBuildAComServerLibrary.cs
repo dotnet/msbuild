@@ -33,15 +33,14 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1");
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
                 "ComServer.pdb",
                 "ComServer.deps.json",
                 "ComServer.comhost.dll",
-                "ComServer.runtimeconfig.json",
-                "ComServer.runtimeconfig.dev.json"
+                "ComServer.runtimeconfig.json"
             });
 
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, "ComServer.runtimeconfig.json");
@@ -70,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1");
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
@@ -78,8 +77,7 @@ namespace Microsoft.NET.Build.Tests
                 "ComServer.deps.json",
                 "ComServer.comhost.dll",
                 "ComServer.X.manifest",
-                "ComServer.runtimeconfig.json",
-                "ComServer.runtimeconfig.dev.json"
+                "ComServer.runtimeconfig.json"
             });
         }
 
@@ -104,15 +102,14 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1", runtimeIdentifier: rid);
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, runtimeIdentifier: rid);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
                 "ComServer.pdb",
                 "ComServer.deps.json",
                 "ComServer.comhost.dll",
-                "ComServer.runtimeconfig.json",
-                "ComServer.runtimeconfig.dev.json"
+                "ComServer.runtimeconfig.json"
             });
         }
 
@@ -181,6 +178,166 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1092: ");
+        }
+
+        [WindowsOnlyFact]
+        public void It_embeds_single_typelib_with_default_id()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj => proj.Root.Add(new XElement("ItemGroup", new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb")))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [WindowsOnlyFact]
+        public void It_fails_when_multiple_typelibs_without_ids_specified()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj =>
+                    proj.Root.Add(
+                        new XElement("ItemGroup",
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb")),
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy2.tlb")))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1171: ");
+        }
+
+        [WindowsOnlyFact]
+        public void It_fails_when_multiple_typelibs_with_same_ids_specified()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj =>
+                    proj.Root.Add(
+                        new XElement("ItemGroup",
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb"), new XAttribute("Id", 1)),
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy2.tlb"), new XAttribute("Id", 1)))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1169: ");
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("non-integer-id")]
+        [InlineData(ushort.MaxValue + 1)]
+        [InlineData(0)]
+        [InlineData(3.14)]
+        public void It_fails_when_typelib_with_invalid_id_specified(object id)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs", identifier: id.ToString())
+                .WithSource()
+                .WithProjectChanges(proj =>
+                    proj.Root.Add(
+                        new XElement("ItemGroup",
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb"), new XAttribute("Id", id)))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1170: ");
+        }
+
+        [WindowsOnlyFact]
+        public void It_embeds_multiple_typelibs_with_distinct_ids()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj =>
+                    proj.Root.Add(
+                        new XElement("ItemGroup",
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb"), new XAttribute("Id", 1)),
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy2.tlb"), new XAttribute("Id", 2)))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [WindowsOnlyFact]
+        public void It_fails_when_typelib_does_not_exist()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj => proj.Root.Add(new XElement("ItemGroup", new XElement("ComHostTypeLibrary", new XAttribute("Include", "doesnotexist.tlb")))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1172: ");
+        }
+
+        [WindowsOnlyFact]
+        public void It_fails_when_typelib_is_invalid()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj => proj.Root.Add(new XElement("ItemGroup", new XElement("ComHostTypeLibrary", new XAttribute("Include", "invalid.tlb")))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1173: ");
+        }
+
+        [WindowsOnlyFact]
+        public void It_copies_nuget_package_dependencies()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithDependencies")
+                .WithSource();
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1");
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "ComServerWithDependencies.dll",
+                "ComServerWithDependencies.pdb",
+                "ComServerWithDependencies.deps.json",
+                "ComServerWithDependencies.comhost.dll",
+                "ComServerWithDependencies.runtimeconfig.json",
+                "ComServerWithDependencies.runtimeconfig.dev.json",
+                "Newtonsoft.Json.dll"
+            });
         }
     }
 }

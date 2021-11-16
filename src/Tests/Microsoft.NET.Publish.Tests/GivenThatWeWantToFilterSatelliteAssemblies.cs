@@ -55,7 +55,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.runtimeconfig.json"
             };
 
-            if (tfm == "netcoreapp3.0" && !RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (tfm == "netcoreapp3.0")
             {
                 files.Add($"{testProject.Name}{Constants.ExeSuffix}");
             }

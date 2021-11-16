@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             }
             else if (NewerRuntimePatchExists(runtime))
             {
-                return string.Format(LocalizableStrings.NewPatchAvaliableMessage, NewestRuntimePatchVersion(runtime));
+                return string.Format(LocalizableStrings.NewPatchAvailableMessage, NewestRuntimePatchVersion(runtime));
             }
             else
             {

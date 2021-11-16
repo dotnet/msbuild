@@ -63,7 +63,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
                 {
                     CreateItem(Path.Combine("wwwroot","js","sample.js"), new Dictionary<string,string>
                     {
-                        ["SourceType"] = "",
+                        ["SourceType"] = "Discovered",
                         ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                         ["BasePath"] = "_content/mylibrary",
                         ["RelativePath"] = Path.Combine("js", "sample.js"),
@@ -96,7 +96,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
                 {
                     CreateItem(Path.Combine("wwwroot","js","sample.js"), new Dictionary<string,string>
                     {
-                        ["SourceType"] = "",
+                        ["SourceType"] = "Discovered",
                         ["SourceId"] = "MyLibrary",
                         ["BasePath"] = "_content/mylibrary",
                         ["RelativePath"] = Path.Combine("js", "sample.js"),
@@ -129,7 +129,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
                 {
                     CreateItem(Path.Combine("wwwroot","js","sample.js"), new Dictionary<string,string>
                     {
-                        ["SourceType"] = "",
+                        ["SourceType"] = "Discovered",
                         ["SourceId"] = "MyLibrary",
                         ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                         ["RelativePath"] = Path.Combine("js", "sample.js"),
@@ -162,10 +162,18 @@ namespace Microsoft.NET.Sdk.Razor.Test
                 {
                     CreateItem(Path.Combine("wwwroot","js","sample.js"), new Dictionary<string,string>
                     {
-                        ["SourceType"] = "",
+                        ["SourceType"] = "Discovered",
                         ["SourceId"] = "MyLibrary",
                         ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                         ["BasePath"] = "_content/mylibrary",
+                        ["AssetKind"] = "All",
+                        ["AssetMode"] = "All",
+                        ["AssetRole"] = "Primary",
+                        ["RelatedAsset"] = "",
+                        ["AssetTraitName"] = "",
+                        ["AssetTraitValue"] = "",
+                        ["CopyToOutputDirectory"] = "Never",
+                        ["CopyToPublishDirectory"] = "PreserveNewest"
                     })
                 }
             };
@@ -180,12 +188,11 @@ namespace Microsoft.NET.Sdk.Razor.Test
         }
 
         [Fact]
-        public void Fails_WhenStaticWebAsset_HaveDifferentSourceType()
+        public void Fails_WhenStaticWebAsset_HasInvalidSourceType()
         {
             // Arrange
-            var expectedError = "Static web assets have different 'SourceType' metadata values " +
-                "'' and 'Package' " +
-                $"for '{Path.Combine("wwwroot", "js", "sample.js")}' and '{Path.Combine("wwwroot", "css", "site.css")}'.";
+
+            var expectedError = $"Static web asset '{Path.Combine("wwwroot", "css", "site.css")}' has invalid source type 'Package'.";
 
             var errorMessages = new List<string>();
             var buildEngine = new Mock<IBuildEngine>();
@@ -199,11 +206,19 @@ namespace Microsoft.NET.Sdk.Razor.Test
                 {
                     CreateItem(Path.Combine("wwwroot","js","sample.js"), new Dictionary<string,string>
                     {
-                        ["SourceType"] = "",
+                        ["SourceType"] = "Discovered",
                         ["SourceId"] = "MyLibrary",
                         ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                         ["BasePath"] = "_content/mylibrary",
                         ["RelativePath"] = Path.Combine("js", "sample.js"),
+                        ["AssetKind"] = "All",
+                        ["AssetMode"] = "All",
+                        ["AssetRole"] = "Primary",
+                        ["RelatedAsset"] = "",
+                        ["AssetTraitName"] = "",
+                        ["AssetTraitValue"] = "",
+                        ["CopyToOutputDirectory"] = "Never",
+                        ["CopyToPublishDirectory"] = "PreserveNewest"
                     }),
                     CreateItem(Path.Combine("wwwroot","css","site.css"), new Dictionary<string,string>
                     {
@@ -212,6 +227,14 @@ namespace Microsoft.NET.Sdk.Razor.Test
                         ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                         ["BasePath"] = "_content/mylibrary",
                         ["RelativePath"] = Path.Combine("css", "site.css"),
+                        ["AssetKind"] = "All",
+                        ["AssetMode"] = "All",
+                        ["AssetRole"] = "Primary",
+                        ["RelatedAsset"] = "",
+                        ["AssetTraitName"] = "",
+                        ["AssetTraitValue"] = "",
+                        ["CopyToOutputDirectory"] = "Never",
+                        ["CopyToPublishDirectory"] = "PreserveNewest"
                     })
                 }
             };
@@ -244,19 +267,35 @@ namespace Microsoft.NET.Sdk.Razor.Test
                 {
                     CreateItem(Path.Combine("wwwroot","js","sample.js"), new Dictionary<string,string>
                     {
-                        ["SourceType"] = "",
+                        ["SourceType"] = "Discovered",
                         ["SourceId"] = "MyLibrary",
                         ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                         ["BasePath"] = "_content/mylibrary",
                         ["RelativePath"] = Path.Combine("js", "sample.js"),
+                        ["AssetKind"] = "All",
+                        ["AssetMode"] = "All",
+                        ["AssetRole"] = "Primary",
+                        ["RelatedAsset"] = "",
+                        ["AssetTraitName"] = "",
+                        ["AssetTraitValue"] = "",
+                        ["CopyToOutputDirectory"] = "Never",
+                        ["CopyToPublishDirectory"] = "PreserveNewest"
                     }),
                     CreateItem(Path.Combine("wwwroot","css","site.css"), new Dictionary<string,string>
                     {
-                        ["SourceType"] = "",
+                        ["SourceType"] = "Discovered",
                         ["SourceId"] = "MyLibrary2",
                         ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                         ["BasePath"] = "_content/mylibrary",
                         ["RelativePath"] = Path.Combine("css", "site.css"),
+                        ["AssetKind"] = "All",
+                        ["AssetMode"] = "All",
+                        ["AssetRole"] = "Primary",
+                        ["RelatedAsset"] = "",
+                        ["AssetTraitName"] = "",
+                        ["AssetTraitValue"] = "",
+                        ["CopyToOutputDirectory"] = "Never",
+                        ["CopyToPublishDirectory"] = "PreserveNewest"
                     })
                 }
             };
@@ -289,19 +328,35 @@ namespace Microsoft.NET.Sdk.Razor.Test
                 {
                     CreateItem(Path.Combine("wwwroot","js","sample.js"), new Dictionary<string,string>
                     {
-                        ["SourceType"] = "",
+                        ["SourceType"] = "Discovered",
                         ["SourceId"] = "MyLibrary",
                         ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                         ["BasePath"] = "_content/mylibrary",
                         ["RelativePath"] = Path.Combine("js", "sample.js"),
+                        ["AssetKind"] = "All",
+                        ["AssetMode"] = "All",
+                        ["AssetRole"] = "Primary",
+                        ["RelatedAsset"] = "",
+                        ["AssetTraitName"] = "",
+                        ["AssetTraitValue"] = "",
+                        ["CopyToOutputDirectory"] = "Never",
+                        ["CopyToPublishDirectory"] = "PreserveNewest"
                     }),
                     CreateItem(Path.Combine("wwwroot","css","site.css"), new Dictionary<string,string>
                     {
-                        ["SourceType"] = "",
+                        ["SourceType"] = "Discovered",
                         ["SourceId"] = "MyLibrary",
                         ["ContentRoot"] = @"..\staticwebassets",
                         ["BasePath"] = "_content/mylibrary",
                         ["RelativePath"] = Path.Combine("css", "site.css"),
+                        ["AssetKind"] = "All",
+                        ["AssetMode"] = "All",
+                        ["AssetRole"] = "Primary",
+                        ["RelatedAsset"] = "",
+                        ["AssetTraitName"] = "",
+                        ["AssetTraitValue"] = "",
+                        ["CopyToOutputDirectory"] = "Never",
+                        ["CopyToPublishDirectory"] = "PreserveNewest"
                     })
                 }
             };
@@ -321,12 +376,21 @@ namespace Microsoft.NET.Sdk.Razor.Test
             var file = Path.GetTempFileName();
             var expectedDocument = @"<Project>
   <ItemGroup>
-    <StaticWebAsset Include=""$(MSBuildThisFileDirectory)..\staticwebassets\js\sample.js"">
+    <StaticWebAsset Include=""$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\js\sample.js))"">
       <SourceType>Package</SourceType>
       <SourceId>MyLibrary</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>_content/mylibrary</BasePath>
       <RelativePath>js/sample.js</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\js\sample.js))</OriginalItemSpec>
     </StaticWebAsset>
   </ItemGroup>
 </Project>";
@@ -343,11 +407,19 @@ namespace Microsoft.NET.Sdk.Razor.Test
                     {
                         CreateItem(Path.Combine("wwwroot","js","sample.js"), new Dictionary<string,string>
                         {
-                            ["SourceType"] = "",
+                            ["SourceType"] = "Discovered",
                             ["SourceId"] = "MyLibrary",
                             ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                             ["BasePath"] = "_content/mylibrary",
                             ["RelativePath"] = Path.Combine("js", "sample.js").Replace("\\","/"),
+                            ["AssetKind"] = "All",
+                            ["AssetMode"] = "All",
+                            ["AssetRole"] = "Primary",
+                            ["RelatedAsset"] = "",
+                            ["AssetTraitName"] = "",
+                            ["AssetTraitValue"] = "",
+                            ["CopyToOutputDirectory"] = "Never",
+                            ["CopyToPublishDirectory"] = "PreserveNewest"                            
                         }),
                     }
                 };
@@ -376,19 +448,37 @@ namespace Microsoft.NET.Sdk.Razor.Test
             var file = Path.GetTempFileName();
             var expectedDocument = @"<Project>
   <ItemGroup>
-    <StaticWebAsset Include=""$(MSBuildThisFileDirectory)..\staticwebassets\App.styles.css"">
+    <StaticWebAsset Include=""$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\App.styles.css))"">
       <SourceType>Package</SourceType>
       <SourceId>MyLibrary</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>/</BasePath>
       <RelativePath>App.styles.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\App.styles.css))</OriginalItemSpec>
     </StaticWebAsset>
-    <StaticWebAsset Include=""$(MSBuildThisFileDirectory)..\staticwebassets\js\sample.js"">
+    <StaticWebAsset Include=""$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\js\sample.js))"">
       <SourceType>Package</SourceType>
       <SourceId>MyLibrary</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>_content/mylibrary</BasePath>
       <RelativePath>js/sample.js</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\js\sample.js))</OriginalItemSpec>
     </StaticWebAsset>
   </ItemGroup>
 </Project>";
@@ -405,19 +495,35 @@ namespace Microsoft.NET.Sdk.Razor.Test
                     {
                         CreateItem(Path.Combine("wwwroot","js","sample.js"), new Dictionary<string,string>
                         {
-                            ["SourceType"] = "",
+                            ["SourceType"] = "Discovered",
                             ["SourceId"] = "MyLibrary",
                             ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                             ["BasePath"] = "_content/mylibrary",
                             ["RelativePath"] = Path.Combine("js", "sample.js").Replace("\\","/"),
+                            ["AssetKind"] = "All",
+                            ["AssetMode"] = "All",
+                            ["AssetRole"] = "Primary",
+                            ["RelatedAsset"] = "",
+                            ["AssetTraitName"] = "",
+                            ["AssetTraitValue"] = "",
+                            ["CopyToOutputDirectory"] = "Never",
+                            ["CopyToPublishDirectory"] = "PreserveNewest"
                         }),
                         CreateItem(Path.Combine("wwwroot","App.styles.css"), new Dictionary<string,string>
                         {
-                            ["SourceType"] = "",
+                            ["SourceType"] = "Discovered",
                             ["SourceId"] = "MyLibrary",
                             ["ContentRoot"] = @"$(MSBuildThisFileDirectory)..\staticwebassets",
                             ["BasePath"] = "/",
                             ["RelativePath"] = "App.styles.css",
+                            ["AssetKind"] = "All",
+                            ["AssetMode"] = "All",
+                            ["AssetRole"] = "Primary",
+                            ["RelatedAsset"] = "",
+                            ["AssetTraitName"] = "",
+                            ["AssetTraitValue"] = "",
+                            ["CopyToOutputDirectory"] = "Never",
+                            ["CopyToPublishDirectory"] = "PreserveNewest"
                         }),
                     }
                 };

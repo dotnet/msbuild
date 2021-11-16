@@ -3,63 +3,43 @@
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>The NuGet Package Id of the workload to uninstall.</source>
-        <target state="translated">El id. del paquete de NuGet de la herramienta que se desinstalará.</target>
+        <source>The workload ID(s) to uninstall.</source>
+        <target state="translated">Identificadores de carga de trabajo que se van a desinstalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstall a workload.</source>
-        <target state="needs-review-translation">Desinstalar una herramienta global o local.</target>
+        <source>Uninstall one or more workloads.</source>
+        <target state="translated">Desinstale una o varias cargas de trabajo.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
-        <source>PACKAGE_ID</source>
-        <target state="translated">PACKAGE_ID</target>
+        <source>WORKLOAD_ID</source>
+        <target state="translated">WORKLOAD_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemovingWorkloadInstallationRecord">
+        <source>Removing workload installation record for {0}...</source>
+        <target state="translated">Quitando el registro de instalación de carga de trabajo para {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Specify one workload Package Id to uninstall.</source>
-        <target state="translated">Especifique un id. de paquete de herramientas para desinstalar.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallLocalWorkloadSucceeded">
-        <source>Workload '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
-        <target state="translated">La herramienta "{0}" se desinstaló y quitó correctamente del archivo de manifiesto {1}.</target>
+        <source>Specify one workload ID to uninstall.</source>
+        <target state="translated">Especifique un identificador de carga de trabajo para desinstalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
-        <source>Workload '{0}' (version '{1}') was successfully uninstalled.</source>
-        <target state="translated">La herramienta "{0}" (versión "{1}") se desinstaló correctamente.</target>
+        <source>Successfully uninstalled workload(s): {0}</source>
+        <target state="translated">Carga(s) de trabajo: {0} desinstalada(s) correctamente</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>A workload with the package Id '{0}' could not be found.</source>
-        <target state="needs-review-translation">No se encontró ninguna herramienta con el identificador de paquete "{0}". 
-
-Para desinstalar las herramientas se usa su identificador de paquete, que puede ser distinto 
-del nombre de herramienta que se usa al llamarla. Para buscar los nombres de herramientas 
-y los identificadores de paquete correspondientes de las herramientas instaladas, use el comando
-"dotnet workload list".</target>
+        <source>Couldn't find workload ID(s): {0}</source>
+        <target state="translated">No se encontraron los identificadores de carga de trabajo: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToUninstallWorkload">
-        <source>Failed to uninstall workload '{0}': {1}</source>
-        <target state="translated">No se pudo desinstalar la herramienta "{0}": {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidWorkloadPathOption">
-        <source>Workload path '{0}' does not exist.</source>
-        <target state="translated">La ruta de acceso de la herramienta "{0}" no existe.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionName">
-        <source>PATH</source>
-        <target state="translated">PATH</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionDescription">
-        <source>The directory containing the workload to uninstall.</source>
-        <target state="translated">El directorio que contiene la herramienta que se va a instalar.</target>
+      <trans-unit id="WorkloadUninstallFailed">
+        <source>Workload uninstallation failed: {0}</source>
+        <target state="translated">Error de desinstalación de la carga de trabajo: {0}</target>
         <note />
       </trans-unit>
     </body>

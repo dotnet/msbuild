@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Watcher.Internal;
@@ -22,6 +23,7 @@ namespace Microsoft.DotNet.Watcher
         private readonly ProcessRunner _processRunner;
         private readonly DotNetWatchOptions _dotNetWatchOptions;
         private readonly IWatchFilter[] _filters;
+        private readonly RudeEditDialog _rudeEditDialog;
 
         public HotReloadDotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions, IConsole console)
         {
@@ -34,23 +36,31 @@ namespace Microsoft.DotNet.Watcher
 
             _filters = new IWatchFilter[]
             {
-                new MSBuildEvaluationFilter(fileSetFactory),
-                new DotNetBuildFilter(_processRunner, _reporter),
-                new LaunchBrowserFilter(_dotNetWatchOptions),
+                new DotNetBuildFilter(fileSetFactory, _processRunner, _reporter),
+                new LaunchBrowserFilter(dotNetWatchOptions),
+                new BrowserRefreshFilter(dotNetWatchOptions, _reporter),
             };
+            _rudeEditDialog = new(reporter, _console);
         }
 
         public async Task WatchAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
             var processSpec = context.ProcessSpec;
 
-            if (context.SuppressMSBuildIncrementalism)
-            {
-                _reporter.Verbose("MSBuild incremental optimizations suppressed.");
-            }
-
             _reporter.Output("Hot reload enabled. For a list of supported edits, see https://aka.ms/dotnet/hot-reload. " +
                 "Press \"Ctrl + R\" to restart.");
+
+            var forceReload = new CancellationTokenSource();
+
+            _console.KeyPressed += (key) =>
+            {
+                var modifiers = ConsoleModifiers.Control;
+                if ((key.Modifiers & modifiers) == modifiers && key.Key == ConsoleKey.R)
+                {
+                    var cancellationTokenSource = Interlocked.Exchange(ref forceReload, new CancellationTokenSource());
+                    cancellationTokenSource.Cancel();
+                }
+            };
 
             while (true)
             {
@@ -60,9 +70,6 @@ namespace Microsoft.DotNet.Watcher
                 {
                     await _filters[i].ProcessAsync(context, cancellationToken);
                 }
-
-                // Reset for next run
-                context.RequiresMSBuildRevaluation = false;
 
                 processSpec.EnvironmentVariables["DOTNET_WATCH_ITERATION"] = (context.Iteration + 1).ToString(CultureInfo.InvariantCulture);
 
@@ -90,12 +97,12 @@ namespace Microsoft.DotNet.Watcher
                 }
 
                 using var currentRunCancellationSource = new CancellationTokenSource();
-                var forceReload = _console.ListenForForceReloadRequest();
                 using var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
                     cancellationToken,
                     currentRunCancellationSource.Token,
-                    forceReload);
-                using var fileSetWatcher = new FileSetWatcher(fileSet, _reporter);
+                    forceReload.Token);
+                using var fileSetWatcher = new HotReloadFileSetWatcher(fileSet, _reporter);
+
                 try
                 {
                     using var hotReload = new HotReload(_processRunner, _reporter);
@@ -107,7 +114,7 @@ namespace Microsoft.DotNet.Watcher
 
                     _reporter.Output("Started");
 
-                    Task<FileItem?> fileSetTask;
+                    Task<FileItem[]> fileSetTask;
                     Task finishedTask;
 
                     while (true)
@@ -115,25 +122,49 @@ namespace Microsoft.DotNet.Watcher
                         fileSetTask = fileSetWatcher.GetChangedFileAsync(combinedCancellationSource.Token);
                         finishedTask = await Task.WhenAny(processTask, fileSetTask).WaitAsync(combinedCancellationSource.Token);
 
-                        if (finishedTask != fileSetTask || fileSetTask.Result is not FileItem fileItem)
+                        if (finishedTask != fileSetTask || fileSetTask.Result is not FileItem[] fileItems)
                         {
                             // The app exited.
                             break;
                         }
                         else
                         {
-                            _reporter.Output($"File changed: {fileItem.FilePath}.");
-
-                            var start = Stopwatch.GetTimestamp();
-                            if (await hotReload.TryHandleFileChange(context, fileItem, combinedCancellationSource.Token))
+                            if (MayRequireRecompilation(context, fileItems) is { } newFile)
                             {
-                                var totalTime = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - start);
-                                _reporter.Output($"Hot reload of changes succeeded.");
-                                _reporter.Verbose($"Hot reload applied in {totalTime.TotalMilliseconds}ms.");
+                                _reporter.Output($"New file: {newFile.FilePath}. Rebuilding the application.");
+                                break;
+                            }
+                            else if (fileItems.All(f => f.IsNewFile))
+                            {
+                                // If every file is a new file and none of them need to be compiled, keep moving.
+                                continue;
+                            }
+
+                            if (fileItems.Length > 1)
+                            {
+                                // Filter out newly added files from the list to make the reporting cleaner.
+                                // Any action we needed to take on significant newly added files is handled by MayRequiredRecompilation.
+                                fileItems = fileItems.Where(f => !f.IsNewFile).ToArray();
+                            }
+
+                            if (fileItems.Length == 1)
+                            {
+                                _reporter.Output($"File changed: {fileItems[0].FilePath}.");
                             }
                             else
                             {
-                                _reporter.Verbose($"Unable to handle changes to {fileItem.FilePath}. Rebuilding the app.");
+                                _reporter.Output($"Files changed: {string.Join(", ", fileItems.Select(f => f.FilePath))}");
+                            }
+                            var start = Stopwatch.GetTimestamp();
+                            if (await hotReload.TryHandleFileChange(context, fileItems, combinedCancellationSource.Token))
+                            {
+                                var totalTime = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - start);
+                                _reporter.Verbose($"Hot reload change handled in {totalTime.TotalMilliseconds}ms.");
+                            }
+                            else
+                            {
+                                await _rudeEditDialog.EvaluateAsync(combinedCancellationSource.Token);
+
                                 break;
                             }
                         }
@@ -158,20 +189,18 @@ namespace Microsoft.DotNet.Watcher
 
                     if (finishedTask == processTask)
                     {
-                        // Process exited. Redo evaludation
-                        context.RequiresMSBuildRevaluation = true;
                         // Now wait for a file to change before restarting process
-                        context.ChangedFile = await fileSetWatcher.GetChangedFileAsync(cancellationToken, () => _reporter.Warn("Waiting for a file to change before restarting dotnet..."));
+                        _reporter.Warn("Waiting for a file to change before restarting dotnet...");
+                        await fileSetWatcher.GetChangedFileAsync(cancellationToken, forceWaitForNewUpdate: true);
                     }
                     else
                     {
                         Debug.Assert(finishedTask == fileSetTask);
-                        var changedFile = fileSetTask.Result;
-                        context.ChangedFile = changedFile;
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    _reporter.Verbose($"Caught top-level exception from hot reload: {e}");
                     if (!currentRunCancellationSource.IsCancellationRequested)
                     {
                         currentRunCancellationSource.Cancel();
@@ -184,6 +213,49 @@ namespace Microsoft.DotNet.Watcher
                     }
                 }
             }
+        }
+
+        private static FileItem? MayRequireRecompilation(DotNetWatchContext context, FileItem[] fileInfo)
+        {
+            // This method is invoked when a new file is added to the workspace. To determine if we need to
+            // recompile, we'll see if it's any of the usual suspects (.cs, .cshtml, .razor) files.
+
+            foreach (var file in fileInfo)
+            {
+                if (!file.IsNewFile || file.IsStaticFile)
+                {
+                    continue;
+                }
+
+                var filePath = file.FilePath;
+
+                if (filePath is null)
+                {
+                    continue;
+                }
+
+                if (filePath.EndsWith(".cs", StringComparison.Ordinal) || filePath.EndsWith(".razor", StringComparison.Ordinal))
+                {
+                    return file;
+                }
+
+                if (filePath.EndsWith(".cshtml", StringComparison.Ordinal) &&
+                    context.ProjectGraph.GraphRoots.FirstOrDefault() is { } project &&
+                    project.ProjectInstance.GetPropertyValue("AddCshtmlFilesToDotNetWatchList") is not "false")
+                {
+                    // For cshtml files, runtime compilation can opt out of watching cshtml files.
+                    // Obviously this does not work if a user explicitly removed files out of the watch list,
+                    // but we could wait for someone to report it before we think about ways to address it.
+                    return file;
+                }
+
+                if (filePath.EndsWith(".razor.css", StringComparison.Ordinal) || filePath.EndsWith(".cshtml.css", StringComparison.Ordinal))
+                {
+                    return file;
+                }
+            }
+
+            return default;
         }
 
         private static void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
@@ -213,7 +285,7 @@ namespace Microsoft.DotNet.Watcher
 
             if (context.DefaultLaunchSettingsProfile.EnvironmentVariables is IDictionary<string, string> envVariables)
             {
-                foreach (var entry in context.DefaultLaunchSettingsProfile.EnvironmentVariables)
+                foreach (var entry in envVariables)
                 {
                     var value = Environment.ExpandEnvironmentVariables(entry.Value);
                     // NOTE: MSBuild variables are not expanded like they are in VS

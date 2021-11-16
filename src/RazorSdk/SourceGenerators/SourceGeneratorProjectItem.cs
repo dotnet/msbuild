@@ -2,20 +2,17 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Text;
 using System.IO;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
-    internal class SourceGeneratorProjectItem : RazorProjectItem
+    internal class SourceGeneratorProjectItem : RazorProjectItem, IEquatable<SourceGeneratorProjectItem>
     {
         private readonly string _fileKind;
 
-        private readonly GeneratorExecutionContext _context;
-
-        public SourceGeneratorProjectItem(string basePath, string filePath, string relativePhysicalPath, string fileKind, AdditionalText additionalText, string? cssScope, GeneratorExecutionContext context)
+        public SourceGeneratorProjectItem(string basePath, string filePath, string relativePhysicalPath, string fileKind, AdditionalText additionalText, string? cssScope)
         {
             BasePath = basePath;
             FilePath = filePath;
@@ -23,13 +20,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             _fileKind = fileKind;
             AdditionalText = additionalText;
             CssScope = cssScope;
-            _context = context;
             var text = AdditionalText.GetText();
-            if (text is null)
-            {
-                _context.ReportDiagnostic(Diagnostic.Create(RazorDiagnostics.SourceTextNotFoundDescriptor, Location.None, filePath));
-            }
-            else 
+            if (text is not null)
             {
                 RazorSourceDocument = new SourceTextRazorSourceDocument(AdditionalText.Path, relativePhysicalPath, text);
             }
@@ -54,5 +46,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         public override Stream Read() 
             => throw new NotSupportedException("This API should not be invoked. We should instead be relying on " +
                 "the RazorSourceDocument associated with this item instead.");
+
+        public bool Equals(SourceGeneratorProjectItem other) => AdditionalText == other.AdditionalText;
+
+        public override int GetHashCode() => AdditionalText.GetHashCode();
+
+        public override bool Equals(object obj) => obj is SourceGeneratorProjectItem projectItem && Equals(projectItem);
     }
 }

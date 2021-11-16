@@ -19,11 +19,11 @@ namespace Microsoft.DotNet.Cli.Sln.Add.Tests
 {
     public class GivenDotnetSlnAdd : SdkTest
     {
-        private Func<string, string> HelpText = (defaultVal) => $@"add:
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
   Add one or more projects to a solution file.
 
 Usage:
-  dotnet [options] sln <SLN_FILE> add <PROJECT_PATH>...
+  dotnet sln <SLN_FILE> add [<PROJECT_PATH>...] [options]
 
 Arguments:
   <SLN_FILE>        The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
@@ -32,24 +32,7 @@ Arguments:
 Options:
   --in-root                                  Place project in root of the solution, rather than creating a solution folder.
   -s, --solution-folder <solution-folder>    The destination solution folder path to add the projects to.
-  -?, -h, --help                             Show help and usage information";
-
-        private Func<string, string> SlnCommandHelpText = (defaultVal) => $@"sln:
-  .NET modify solution file command
-
-Usage:
-  dotnet [options] sln <SLN_FILE> [command]
-
-Arguments:
-  <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
-
-Options:
-  -?, -h, --help    Show help and usage information
-
-Commands:
-  add <PROJECT_PATH>       Add one or more projects to a solution file.
-  list                     List all projects in a solution file.
-  remove <PROJECT_PATH>    Remove one or more projects from a solution file.";
+  -?, -h, --help                             Show command line help";
 
         public GivenDotnetSlnAdd(ITestOutputHelper log) : base(log)
         {
@@ -854,7 +837,7 @@ EndGlobal
                 SearchOption.AllDirectories);
             appReleaseDirectory.Count().Should().Be(1, $"App {reasonString}");
             Directory.EnumerateFiles(appReleaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
-                .Count().Should().Be(1, $"App {reasonString}");
+                .Count().Should().Be(2, $"App {reasonString}");
 
             var libReleaseDirectory = Directory.EnumerateDirectories(
                 Path.Combine(projectDirectory, "Lib", "bin"),
@@ -1185,6 +1168,28 @@ EndGlobal
             File.ReadAllText(solutionPath)
                 .Should()
                 .BeVisuallyEquivalentTo(contentBefore);
+        }
+
+        [Theory]
+        [InlineData("/TestFolder//", "ForwardSlash")]
+        [InlineData("\\TestFolder\\\\", "BackwardSlash")]
+        public void WhenSolutionFolderIsPassedWithDirectorySeparatorFolderStructureIsCorrect(string solutionFolder, string testIdentifier)
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojInSubDir", identifier: testIdentifier)
+                .WithSource()
+                .Path;
+
+            var projectToAdd = Path.Combine("src", "Lib", "Lib.csproj");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"sln", "App.sln", "add", "--solution-folder", solutionFolder, projectToAdd);
+            cmd.Should().Pass();
+
+            var slnPath = Path.Combine(projectDirectory, "App.sln");
+            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingProjectWithSolutionFolderOption);
+            File.ReadAllText(slnPath)
+                .Should().BeVisuallyEquivalentTo(expectedSlnContents);
         }
 
         private string GetExpectedSlnContents(

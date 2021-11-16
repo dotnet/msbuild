@@ -1,0 +1,5 @@
+[
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\jsmodules\\AppWithPackageAndP2PReference.modules.json",
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\jsmodules\\jsmodules.build.manifest.json",
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
+]

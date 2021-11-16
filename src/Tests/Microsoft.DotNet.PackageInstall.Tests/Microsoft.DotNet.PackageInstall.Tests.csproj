@@ -28,6 +28,9 @@
     <None Update="DotnetToolSettingsMajorHigherVersion.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="UnixFilePermissionsSample.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
 
     <Compile Remove="SampleGlobalTool/**" />
     <Content Remove="SampleGlobalTool/**" />

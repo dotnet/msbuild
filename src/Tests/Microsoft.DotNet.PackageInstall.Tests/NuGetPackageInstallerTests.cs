@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -12,8 +13,16 @@ using Xunit;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.NET.HostModel;
 using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Utilities;
+using NuGet.Packaging;
+using NuGet.Packaging.Signing;
 using Xunit.Abstractions;
+using System.Security.Cryptography.X509Certificates;
+using System.Linq;
+using System.Threading;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {
@@ -33,7 +42,9 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             _tempDirectory = GetUniqueTempProjectPathEachTest();
             _logger = new NuGetTestLogger();
-            _installer = new NuGetPackageDownloader(_tempDirectory, _logger);
+            _installer =
+                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(), _logger,
+                    restoreActionConfig: new RestoreActionConfig(NoCache: true), timer: () => ExponentialRetry.Timer(ExponentialRetry.TestingIntervals));
         }
 
         [Fact]
@@ -63,6 +74,26 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     TestPackageId,
                     new NuGetVersion(TestPackageVersion),
                     new PackageSourceLocation(sourceFeedOverrides: new[] {nonExistFeed.Value})));
+        }
+
+        [Fact]
+        public async Task GivenAFailedSourceAndIgnoreFailedSourcesItShouldNotThrowFatalProtocolException ()
+        {
+            var installer =
+                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(),
+                    _logger, restoreActionConfig: new RestoreActionConfig(IgnoreFailedSources: true, NoCache: true));
+
+            // should not throw FatalProtocolException
+            // when there is at least one valid source, it should pass.
+            // but it is hard to set up that in unit test
+            await Assert.ThrowsAsync<NuGetPackageInstallerException>(() =>
+                installer.DownloadPackageAsync(
+                    TestPackageId,
+                    new NuGetVersion(TestPackageVersion),
+                    new PackageSourceLocation(sourceFeedOverrides: new[]
+                    {
+                        "https://nonexist.nuget.source/F/nonexist/api/v3/index.json"
+                    })));
         }
 
         [Fact]
@@ -152,6 +183,139 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             File.Exists(packagePath).Should().BeTrue();
             packagePath.Should().Contain(TestPackageId + "." + TestPreviewPackageVersion,
                 "Package should download higher package version");
+        }
+
+        [WindowsOnlyFact]
+        public async Task GivenANonSignedSdkItShouldPrintMessageOnce()
+        {
+            BufferedReporter bufferedReporter = new BufferedReporter();
+            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+                new MockFirstPartyNuGetPackageSigningVerifier(isExecutableIsFirstPartySignedWithoutValidation: false),
+                _logger, bufferedReporter, restoreActionConfig: new RestoreActionConfig(NoCache: true));
+            await nuGetPackageDownloader.DownloadPackageAsync(
+                TestPackageId,
+                new NuGetVersion(TestPackageVersion),
+                new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()}));
+
+            // download 2 packages should only print the message once
+            string packagePath = await nuGetPackageDownloader.DownloadPackageAsync(
+                TestPackageId,
+                new NuGetVersion(TestPackageVersion),
+                new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()}));
+
+            bufferedReporter.Lines.Should()
+                .ContainSingle(
+                    LocalizableStrings.SkipNuGetpackageSigningValidationSDKNotFirstParty);
+            File.Exists(packagePath).Should().BeTrue();
+        }
+
+        [WindowsOnlyFact]
+        public async Task WhenCalledWithNotSignedPackageItShouldThrowWithCommandOutput()
+        {
+            string commandOutput = "COMMAND OUTPUT";
+            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+                new MockFirstPartyNuGetPackageSigningVerifier(verifyResult: false, commandOutput: commandOutput),
+                _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
+
+            NuGetPackageInstallerException ex = await Assert.ThrowsAsync<NuGetPackageInstallerException>(() =>
+                nuGetPackageDownloader.DownloadPackageAsync(
+                    TestPackageId,
+                    new NuGetVersion(TestPackageVersion),
+                    new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()})));
+
+            ex.Message.Should().Contain(commandOutput);
+        }
+
+        [UnixOnlyFact]
+        public async Task GivenANonWindowsMachineItShouldPrintMessageOnce()
+        {
+            BufferedReporter bufferedReporter = new BufferedReporter();
+            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+                new MockFirstPartyNuGetPackageSigningVerifier(isExecutableIsFirstPartySignedWithoutValidation: false),
+                _logger, bufferedReporter, restoreActionConfig: new RestoreActionConfig(NoCache: true));
+            await nuGetPackageDownloader.DownloadPackageAsync(
+                TestPackageId,
+                new NuGetVersion(TestPackageVersion),
+                new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()}));
+
+            // download 2 packages should only print the message once
+            string packagePath = await nuGetPackageDownloader.DownloadPackageAsync(
+                TestPackageId,
+                new NuGetVersion(TestPackageVersion),
+                new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()}));
+
+            bufferedReporter.Lines.Should()
+                .ContainSingle(
+                    LocalizableStrings.SkipNuGetpackageSigningValidationmacOSLinux);
+            File.Exists(packagePath).Should().BeTrue();
+        }
+
+        [WindowsOnlyFact]
+        // https://aka.ms/netsdkinternal-certificate-rotate
+        public void ItShouldHaveUpdateToDateCertificateSha()
+        {
+            var samplePackage = DownloadSamplePackage(new PackageId("Microsoft.iOS.Ref"));
+
+            var firstPartyNuGetPackageSigningVerifier = new FirstPartyNuGetPackageSigningVerifier();
+            string shaFromPackage = GetShaFromSamplePackage(samplePackage);
+
+            firstPartyNuGetPackageSigningVerifier._firstPartyCertificateThumbprints.Contains(shaFromPackage).Should()
+                .BeTrue(
+                    $"Add {shaFromPackage} to the _firstPartyCertificateThumbprints of FirstPartyNuGetPackageSigningVerifier class. More info https://aka.ms/netsdkinternal-certificate-rotate");
+        }
+
+        private string DownloadSamplePackage(PackageId packageId)
+        {
+            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+                new MockFirstPartyNuGetPackageSigningVerifier(),
+                _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
+
+            return ExponentialRetry.ExecuteWithRetry<string>(
+                    action: DownloadMostRecentSamplePackageFromPublicFeed,
+                    shouldStopRetry: result => result != null,
+                    maxRetryCount: 3,
+                    timer: () => ExponentialRetry.Timer(ExponentialRetry.Intervals),
+                    taskDescription: "Run command while retry transient restore error")
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+
+            string DownloadMostRecentSamplePackageFromPublicFeed()
+            {
+                try
+                {
+                    return nuGetPackageDownloader.DownloadPackageAsync(
+                            new PackageId("Microsoft.iOS.Ref"), null, includePreview: true,
+                            packageSourceLocation: new PackageSourceLocation(
+                                sourceFeedOverrides: new[] { "https://api.nuget.org/v3/index.json" })).GetAwaiter()
+                        .GetResult();
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
+        [WindowsOnlyFact]
+        public void GivenFirstPartyPackageItShouldReturnTrue()
+        {
+            var iosSamplePackage = DownloadSamplePackage(new PackageId("Microsoft.iOS.Ref"));
+            var androidSamplePackage = DownloadSamplePackage(new PackageId("Microsoft.Android.Ref"));
+
+            var package = new FirstPartyNuGetPackageSigningVerifier();
+            package.IsFirstParty(new FilePath(iosSamplePackage)).Should().BeTrue();
+            package.IsFirstParty(new FilePath(androidSamplePackage)).Should().BeTrue();
+        }
+
+        private string GetShaFromSamplePackage(string samplePackage)
+        {
+            using (var packageReader = new PackageArchiveReader(samplePackage))
+            {
+                PrimarySignature primarySignature = packageReader.GetPrimarySignatureAsync(CancellationToken.None).GetAwaiter().GetResult();
+                using (IX509CertificateChain certificateChain = SignatureUtility.GetCertificateChain(primarySignature))
+                {
+                    return certificateChain.First().GetCertHashString(HashAlgorithmName.SHA256);
+                }
+            }
         }
 
         private static DirectoryPath GetUniqueTempProjectPathEachTest()

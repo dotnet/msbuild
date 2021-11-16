@@ -8,9 +8,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     public interface IWorkloadResolver
     {
         IEnumerable<WorkloadResolver.PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind);
-        IEnumerable<string> GetPacksInWorkload(string workloadId);
-        ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packId);
-        
+        IEnumerable<WorkloadPackId> GetPacksInWorkload(WorkloadId workloadId);
+        ISet<WorkloadResolver.WorkloadInfo>? GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packId, out ISet<WorkloadPackId> unsatisfiablePacks);
+        IEnumerable<WorkloadResolver.WorkloadInfo> GetAvailableWorkloads();
+        bool IsPlatformIncompatibleWorkload(WorkloadId workloadId);
+        string GetManifestVersion(string manifestId);
+        IEnumerable<WorkloadResolver.ManifestInfo> GetInstalledManifests();
+        string GetSdkFeatureBand();
+        IEnumerable<WorkloadId> GetUpdatedWorkloads(WorkloadResolver advertisingManifestResolver, IEnumerable<WorkloadId> installedWorkloads);
+
         /// <summary>
         /// Resolve the pack for this resolver's SDK band.
         /// </summary>
@@ -20,6 +26,17 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </remarks>
         /// <param name="packId">A workload pack ID</param>
         /// <returns>Information about the workload pack, or null if the specified pack ID isn't found in the manifests</returns>
-        WorkloadResolver.PackInfo? TryGetPackInfo(string packId);
+        WorkloadResolver.PackInfo? TryGetPackInfo(WorkloadPackId packId);
+
+        /// <summary>
+        /// Refresh workload and pack information based on the current installed workload manifest files
+        /// </summary>
+        /// <remarks>This is not valid for overlay resolvers</remarks>
+        void RefreshWorkloadManifests();
+
+        /// <summary>
+        /// Derives a resolver from this resolver by overlaying a set of updated manifests and recomposing.
+        /// </summary>
+        WorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider);
     }
 }

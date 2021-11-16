@@ -681,8 +681,8 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = "netcoreapp3.0",
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             
             testProject.SourceFiles["Test.cs"] = @"
 public class Class1

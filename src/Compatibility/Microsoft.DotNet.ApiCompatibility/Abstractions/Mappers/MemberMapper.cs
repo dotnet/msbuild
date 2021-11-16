@@ -14,6 +14,18 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
-        public MemberMapper(ComparingSettings settings) : base(settings) { }
+        /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
+        public MemberMapper(ComparingSettings settings, TypeMapper containingType, int rightSetSize = 1)
+            : base(settings, rightSetSize)
+        {
+            ContainingType = containingType;
+        }
+
+        internal TypeMapper ContainingType { get; }
+
+        // If we got to this point it means that ContainingType.Left is not null.
+        // Because of that we can only check ContainingType.Right.
+        internal bool ShouldDiffElement(int rightIndex) =>
+            ContainingType.Right.Length == 1 || ContainingType.Right[rightIndex] != null;
     }
 }

@@ -19,4 +19,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(_BlazorWebAssemblyPropsFile)" />
+
+  <ItemGroup Condition="'$(Language)' == 'C#' AND ('$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable')">
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
 </Project>

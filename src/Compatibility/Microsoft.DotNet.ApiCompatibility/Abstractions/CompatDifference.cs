@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -61,28 +62,26 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         }
 
         /// <summary>
-        /// Evaluates whether the current object is equal to another <see cref="CompatDifference"/>.
-        /// </summary>
-        /// <param name="other"><see cref="CompatDifference"/> to compare against.</param>
-        /// <returns>True if equals, False if different.</returns>
-        public bool Equals(CompatDifference other) =>
-            other != null &&
-            Type == other.Type &&
-            DiagnosticId.Equals(other.DiagnosticId, StringComparison.OrdinalIgnoreCase) &&
-            ReferenceId.Equals(other.ReferenceId, StringComparison.OrdinalIgnoreCase) &&
-            Message.Equals(other.Message, StringComparison.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Gets the hashcode that reperesents this instance.
-        /// </summary>
-        /// <returns>Unique <see cref="int"/> based on the properties' values of the instance.</returns>
-        public override int GetHashCode() =>
-            HashCode.Combine(ReferenceId, DiagnosticId, Message, Type);
-
-        /// <summary>
         /// Gets a <see cref="string"/> representation of the difference.
         /// </summary>
         /// <returns><see cref="string"/> describing the difference.</returns>
         public override string ToString() => $"{DiagnosticId} : {Message}";
+
+        public bool Equals(CompatDifference other) => other != null &&
+                                                      (object.ReferenceEquals(this, other) ||
+                                                      (DiagnosticId.Equals(other.DiagnosticId, StringComparison.InvariantCultureIgnoreCase) &
+                                                      Type.Equals(other.Type) &
+                                                      ReferenceId.Equals(other.ReferenceId, StringComparison.InvariantCultureIgnoreCase)));
+
+        public override bool Equals(object obj) => Equals(obj as CompatDifference);
+
+        public override int GetHashCode()
+        {
+            int hashCode = 1447485498;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(DiagnosticId?.ToLowerInvariant() ?? string.Empty);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Type.ToString().ToLowerInvariant() ?? string.Empty);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ReferenceId?.ToLowerInvariant() ?? string.Empty);
+            return hashCode;
+        }
     }
 }

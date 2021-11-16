@@ -188,8 +188,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(Path.Combine(outputPath, "AnotherClassLib.dll")).Should().Exist();
 
             // dotnet msbuild /t:Publish /p:BuildProjectReferences=false
-            var publish = new PublishCommand(Log, $"{projectDirectory.TestRoot}/AppWithP2PReference");
-            publish.Execute("/p:BuildProjectReferences=false").Should().Pass();
+            var publish = new PublishCommand(Log, Path.Combine(projectDirectory.TestRoot, "AppWithP2PReference"));
+            publish.Execute("/p:BuildProjectReferences=false", "/p:ErrorOnDuplicatePublishOutputFiles=false").Should().Pass();
 
             var publishOutputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 

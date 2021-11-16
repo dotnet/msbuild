@@ -131,6 +131,7 @@ Updating a compiled file requires two requirements -
 
 1. the compiler needs to able to produce a binary patch from the source changes
 1. The app needs to be able to apply the binary patch.
+1. Have the app state update to reflect the result of the binary patch.
 
 The former has been available as a compiler feature to support debugger / IDE's Edit and Continue capabilities. Starting in 6.0, the runtime (.NET Core and Mono) [expose APIs](https://github.com/dotnet/runtime/blob/f15722c2c25ce945f2f1c7673ff3f4fbdb244feb/src/mono/System.Private.CoreLib/src/System/Reflection/Metadata/AssemblyExtensions.cs#L28) to patch a running app. The combination of the two makes it possible to hot reload changes to files that are compiled as part of the application. The first bullet point is easy for files that are already compiled as part of the app e.g. .cs or .vb files. For any other file types, source generators offer a way to participate in the compilation process. This is the route taken by Razor Source Generator for .razor and .cshtml files.
 
@@ -138,7 +139,7 @@ To enable this, dotnet-watch hosts a Roslyn workspace that contains the project 
 
 Since different app models have different constraints, this implementation is app-model specific:
 
-* For .NET Core apps, dotnet-watch hosts a NamedPipe server. It once again uses a startup hook to inject code (`Microsoft.Extensions.AspNetCoreDeltaApplier`) in to the app that creates a client to listen to this NamedPipe. Each successful hot reload results in a binary payload with the following format:
+* For .NET Core apps, dotnet-watch hosts a NamedPipe server. It once again uses a startup hook to inject code (`Microsoft.Extensions.DotNetDeltaApplier`) in to the app that creates a client to listen to this NamedPipe. Each successful hot reload results in a binary payload with the following format:
 
 ```
 [Version: byte | Currently 0]
@@ -178,7 +179,15 @@ An interesting side-effect of adding a startup hook to the launched app is that 
 }
 ```
 
-Blazor WebAssembly's implementation [bakes in an API](https://github.com/dotnet/aspnetcore/blob/bc1ff6a45949c3debc483aae93abd0dfdf97bec1/src/Components/WebAssembly/WebAssembly/src/Infrastructure/JSInteropMethods.cs#L51-L64) available via [JSInterop](https://docs.microsoft.com/en-us/aspnet/core/blazor/call-dotnet-from-javascript?view=aspnetcore-5.0) that can receive and apply these deltas.
+Blazor WebAssembly's implementation [bakes in an API](https://github.com/dotnet/aspnetcore/blob/bb3bdd76a2601c6ed2a118343788b7eef2ebdd62/src/Components/WebAssembly/WebAssembly/src/HotReload/WebAssemblyHotReload.cs) available via [JSInterop](https://docs.microsoft.com/en-us/aspnet/core/blazor/call-dotnet-from-javascript?view=aspnetcore-5.0) that can receive and apply these deltas.
+
+Once the delta is applied, the app state needs to be updated to reflect the new state. To support this, the runtime exposes a new assembly-level attribute https://github.com/dotnet/runtime/blob/5297337e5b7db9feef81f612f3d4e70128c7fa55/src/libraries/System.Private.CoreLib/src/System/Reflection/Metadata/MetadataUpdateHandlerAttribute.cs. The agent code (assembly injected by the startup hook), discovers types annotated with these attributes and invokes methods on them via reflection. Currently the following methods are called:
+
+```C#
+static void ClearCache(Type[]?);
+static void UpdateApplication(Type[]?);
+```
+`ClearCache` allows runtime and library code to clear any reflection-based caches. This allows applications to "renew" their state based on new information produced by the delta. This includes caches such as System.Text.Json's caches about types being serialized, Blazor's caches about what properties are parameters, MVC's caches about controllers, actions and models, etc. `UpdateApplication` allows any state (primarily UI) to be updated. For e.g. in a Blazor or WinForms app, this causes the UI to re-rendered.
 
 ## Contribution
 

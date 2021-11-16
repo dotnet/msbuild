@@ -6,29 +6,54 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.Extensions.EnvironmentAbstractions;
+using System.Linq;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
     internal class MockPackWorkloadInstaller : IWorkloadPackInstaller
     {
-        public IList<PackInfo> InstalledPacks = new List<PackInfo>();
+        public IList<PackInfo> InstalledPacks;
         public IList<PackInfo> RolledBackPacks = new List<PackInfo>();
+        public IList<(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache)> InstalledManifests = 
+            new List<(ManifestId, ManifestVersion, SdkFeatureBand, DirectoryPath?)>();
+        public IList<PackInfo> CachedPacks = new List<PackInfo>();
+        public string CachePath;
         public bool GarbageCollectionCalled = false;
         public MockInstallationRecordRepository InstallationRecordRepository;
         public bool FailingRollback;
+        public bool FailingGarbageCollection;
+        private readonly string FailingPack;
 
-        public MockPackWorkloadInstaller(string failingWorkload = null, bool failingRollback = false)
+        public int ExitCode => 0;
+
+        public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null, 
+            IList<PackInfo> installedPacks = null, bool failingGarbageCollection = false)
         {
-            InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload);
+            InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload, installedWorkloads);
             FailingRollback = failingRollback;
+            InstalledPacks = installedPacks ?? new List<PackInfo>();
+            FailingPack = failingPack;
+            FailingGarbageCollection = failingGarbageCollection;
         }
 
-        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false)
+        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
-            InstalledPacks.Add(packInfo);
+            InstalledPacks = InstalledPacks.Append(packInfo).ToList();
+            CachePath = offlineCache?.Value;
+            if (packInfo.Id.ToString().Equals(FailingPack))
+            {
+                throw new Exception($"Failing pack: {packInfo.Id}");
+            }
         }
 
-        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
+        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        {
+            InstallWorkloadPack(packInfo, sdkFeatureBand, offlineCache);
+        }
+
+        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             if (FailingRollback)
             {
@@ -37,8 +62,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             RolledBackPacks.Add(packInfo);
         }
 
-        public void GarbageCollectInstalledWorkloadPacks()
+        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
         {
+            if (FailingGarbageCollection)
+            {
+                throw new Exception("Failing garbage collection");
+            }
             GarbageCollectionCalled = true;
         }
 
@@ -57,19 +86,40 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return InstallationRecordRepository;
         }
 
-        public void DownloadToOfflineCache(IEnumerable<string> manifests) => throw new System.NotImplementedException();
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand) => throw new System.NotImplementedException();
+        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null, bool isRollback = false)
+        {
+            InstalledManifests.Add((manifestId, manifestVersion, sdkFeatureBand, offlineCache));
+        }
+
+        public void DownloadToOfflineCache(PackInfo pack, DirectoryPath cachePath, bool includePreviews)
+        {
+            CachedPacks.Add(pack);
+            CachePath = cachePath.Value;
+        }
+
+        public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        {
+            return InstalledPacks.Select(pack => (pack.Id, pack.Version));
+        }
+
         public IWorkloadInstaller GetWorkloadInstaller() => throw new NotImplementedException();
+
+        public void Shutdown()
+        {
+
+        }
     }
 
     internal class MockInstallationRecordRepository : IWorkloadInstallationRecordRepository
     {
         public IList<WorkloadId> WorkloadInstallRecord = new List<WorkloadId>();
         private readonly string FailingWorkload;
+        public IList<WorkloadId> InstalledWorkloads;
 
-        public MockInstallationRecordRepository(string failingWorkload = null)
+        public MockInstallationRecordRepository(string failingWorkload = null, IList<WorkloadId> installedWorkloads = null)
         {
             FailingWorkload = failingWorkload;
+            InstalledWorkloads = installedWorkloads ?? new List<WorkloadId>();
         }
 
         public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
@@ -85,8 +135,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             WorkloadInstallRecord.Remove(workloadId);
         }
+        public IEnumerable<WorkloadId> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand)
+        {
+            return InstalledWorkloads;
+        }
 
-        public IEnumerable<string> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand) => throw new NotImplementedException();
-        public IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords() => throw new NotImplementedException();
+        public IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords()
+        {
+            return Enumerable.Empty<SdkFeatureBand>();
+        }
     }
 }

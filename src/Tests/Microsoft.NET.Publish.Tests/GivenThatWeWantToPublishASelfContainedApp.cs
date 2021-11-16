@@ -119,7 +119,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             string outputDirectory = publishCommand.GetOutputDirectory(
-                targetFramework: TargetFramework, 
+                targetFramework: TargetFramework,
                 runtimeIdentifier: runtimeIdentifier).FullName;
             byte[] fileContent = File.ReadAllBytes(Path.Combine(outputDirectory, TestProjectName + ".exe"));
             UInt32 peHeaderOffset = BitConverter.ToUInt32(fileContent, PEHeaderPointerOffset);
@@ -139,8 +139,8 @@ namespace Microsoft.NET.Publish.Tests
             var args = new string[]
             {
                 "/p:SelfContained=true",
-                "/p:TargetFramework=netcoreapp3.1",
-                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid("netcoreapp3.1")}"
+                $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework}",
+                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework)}"
             };
 
             new RestoreCommand(testAsset, "main").Execute(args);
@@ -243,6 +243,31 @@ namespace Microsoft.NET.Publish.Tests
                     "tr",
                     "zh-Hans",
                 });
+        }
+
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        public void NoStaticLibs()
+        {
+             var testAsset = _testAssetsManager
+                .CopyTestAsset(TestProjectName)
+                .WithSource();
+
+            var publishCommand = new PublishCommand(testAsset);
+            var tfm = PublishTestUtils.LatestTfm;
+            var rid = RuntimeInformation.RuntimeIdentifier;
+            publishCommand
+                .Execute(
+                    "/p:SelfContained=true",
+                    $"/p:TargetFramework={tfm}",
+                    $"/p:RuntimeIdentifier={rid}")
+                .Should()
+                .Pass();
+
+            var output = publishCommand.GetOutputDirectory(targetFramework: tfm, runtimeIdentifier: rid);
+            output.Should()
+                .NotHaveFilesMatching("*.lib", SearchOption.AllDirectories)
+                .And
+                .NotHaveFilesMatching("*.a", SearchOption.AllDirectories);
         }
     }
 }

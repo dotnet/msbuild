@@ -19,7 +19,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
-        public AssemblyMapper(ComparingSettings settings) : base(settings) { }
+        /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
+        public AssemblyMapper(ComparingSettings settings, int rightSetSize = 1)
+            : base(settings, rightSetSize) { }
 
         /// <summary>
         /// Gets the mappers for the namespaces contained in <see cref="ElementMapper{T}.Left"/> and <see cref="ElementMapper{T}.Right"/>
@@ -30,44 +32,81 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             if (_namespaces == null)
             {
                 _namespaces = new Dictionary<INamespaceSymbol, NamespaceMapper>(Settings.EqualityComparer);
-                Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards;
-                if (Left != null)
-                {
-                    typeForwards = ResolveTypeForwards(Left, Settings.EqualityComparer);
-                    AddOrCreateMappers(Left.GlobalNamespace, 0);
-                }
+                AddOrCreateMappers(Left, ElementSide.Left);
 
-                if (Right != null)
+                if (Right.Length == 1)
                 {
-                    typeForwards = ResolveTypeForwards(Right, Settings.EqualityComparer);
-                    AddOrCreateMappers(Right.GlobalNamespace, 1);
+                    AddOrCreateMappers(Right[0], ElementSide.Right);
                 }
-
-                void AddOrCreateMappers(INamespaceSymbol ns, int index)
+                else
                 {
-                    Stack<INamespaceSymbol> stack = new();
-                    stack.Push(ns);
-                    while (stack.Count > 0)
+                    for (int i = 0; i < Right.Length; i++)
                     {
-                        INamespaceSymbol symbol = stack.Pop();
-                        if (typeForwards.TryGetValue(symbol, out List<INamedTypeSymbol> forwardedTypes) || symbol.GetTypeMembers().Length > 0)
-                        {
-                            if (!_namespaces.TryGetValue(symbol, out NamespaceMapper mapper))
-                            {
-                                mapper = new NamespaceMapper(Settings);
-                                _namespaces.Add(symbol, mapper);
-                            }
-
-                            mapper.AddElement(symbol, index);
-                            mapper.AddForwardedTypes(forwardedTypes ?? new List<INamedTypeSymbol>(), index);
-                        }
-
-                        foreach (INamespaceSymbol child in symbol.GetNamespaceMembers())
-                            stack.Push(child);
+                        AddOrCreateMappers(Right[i], ElementSide.Right, i);
                     }
                 }
 
-                static Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> ResolveTypeForwards(IAssemblySymbol assembly, IEqualityComparer<ISymbol> comparer)
+                void AddOrCreateMappers(IAssemblySymbol symbol, ElementSide side, int setIndex = 0)
+                {
+                    if (symbol == null)
+                    {
+                        return;
+                    }
+
+                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(symbol, Settings.EqualityComparer, setIndex);
+
+                    Stack<INamespaceSymbol> stack = new();
+                    stack.Push(symbol.GlobalNamespace);
+                    while (stack.Count > 0)
+                    {
+                        INamespaceSymbol nsSymbol = stack.Pop();
+                        bool hasTypeForwards = typeForwards.TryGetValue(nsSymbol, out List<INamedTypeSymbol> types);
+                        if (hasTypeForwards || nsSymbol.GetTypeMembers().Length > 0)
+                        {
+                            NamespaceMapper mapper = AddMapper(nsSymbol);
+                            if (hasTypeForwards)
+                            {
+                                mapper.AddForwardedTypes(types, side, setIndex);
+
+                                // remove the typeforwards for this namespace as we did
+                                // find and instance of the namespace on the current assembly
+                                // and we don't want to create a mapper with the namespace in
+                                // the assembly where the forwarded type is defined.
+                                typeForwards.Remove(nsSymbol);
+                            }
+                        }
+
+                        foreach (INamespaceSymbol child in nsSymbol.GetNamespaceMembers())
+                            stack.Push(child);
+                    }
+
+                    // If the current assembly didn't have a namespace symbol for the resolved typeforwards
+                    // use the namespace symbol in the assembly where the forwarded type is defined.
+                    // But create the mapper with typeForwardsOnly setting to not visit types defined in the target assembly.
+                    foreach (KeyValuePair<INamespaceSymbol, List<INamedTypeSymbol>> kvp in typeForwards)
+                    {
+                        NamespaceMapper mapper = AddMapper(kvp.Key, checkIfExists: true, typeforwardsOnly: true);
+                        mapper.AddForwardedTypes(kvp.Value, side, setIndex);
+                    }
+
+                    NamespaceMapper AddMapper(INamespaceSymbol ns, bool checkIfExists = false, bool typeforwardsOnly = false)
+                    {
+                        if (!_namespaces.TryGetValue(ns, out NamespaceMapper mapper))
+                        {
+                            mapper = new NamespaceMapper(Settings, Right.Length, typeforwardsOnly: typeforwardsOnly);
+                            _namespaces.Add(ns, mapper);
+                        }
+                        else if (checkIfExists && mapper.GetElement(side, setIndex) != null)
+                        {
+                            return mapper;
+                        }
+
+                        mapper.AddElement(ns, side, setIndex);
+                        return mapper;
+                    }
+                }
+
+                Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> ResolveTypeForwards(IAssemblySymbol assembly, IEqualityComparer<ISymbol> comparer, int index)
                 {
                     Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = new(comparer);
                     foreach (INamedTypeSymbol symbol in assembly.GetForwardedTypes())
@@ -84,7 +123,15 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         }
                         else
                         {
-                            // TODO: Log Warning;
+                            // If we should warn on missing references and we are unable to resolve the type forward, then we should log a diagnostic
+                            if (Settings.WarnOnMissingReferences)
+                            {
+                                _assemblyLoadErrors[index].Add(new CompatDifference(
+                                        DiagnosticIds.AssemblyReferenceNotFound,
+                                        string.Format(Resources.MatchingAssemblyNotFound, $"{symbol.ContainingAssembly.Name}.dll"),
+                                        DifferenceType.Changed,
+                                        string.Empty));
+                            }
                         }
                     }
 

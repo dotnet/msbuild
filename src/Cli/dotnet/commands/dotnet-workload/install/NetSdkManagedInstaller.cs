@@ -8,14 +8,15 @@ using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using NuGet.Common;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
-using EnvironmentProvider = Microsoft.DotNet.NativeWrapper.EnvironmentProvider;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using NuGet.Common;
+using System.Text.Json;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -23,31 +24,46 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         private readonly IReporter _reporter;
         private readonly string _workloadMetadataDir;
-        private readonly string _installedPacksDir = "InstalledPacks";
+        private const string InstalledPacksDir = "InstalledPacks";
         protected readonly string _dotnetDir;
+        protected readonly string _userProfileDir;
         protected readonly DirectoryPath _tempPackagesDir;
-        private readonly INuGetPackageDownloader _nugetPackageInstaller;
+        private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly IWorkloadResolver _workloadResolver;
         private readonly SdkFeatureBand _sdkFeatureBand;
         private readonly NetSdkManagedInstallationRecordRepository _installationRecordRepository;
+        private readonly PackageSourceLocation _packageSourceLocation;
+        private readonly RestoreActionConfig _restoreActionConfig;
 
-        public NetSdkManagedInstaller(
-            IReporter reporter,
+        public int ExitCode => 0;
+
+        public NetSdkManagedInstaller(IReporter reporter,
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver,
+            string userProfileDir,
             INuGetPackageDownloader nugetPackageDownloader = null,
-            string dotnetDir =  null,
-            VerbosityOptions verbosity = VerbosityOptions.normal)
+            string dotnetDir = null,
+            string tempDirPath = null,
+            VerbosityOptions verbosity = VerbosityOptions.normal,
+            PackageSourceLocation packageSourceLocation = null,
+            RestoreActionConfig restoreActionConfig = null)
         {
-            _dotnetDir = dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory();
-            _tempPackagesDir = new DirectoryPath(Path.Combine(_dotnetDir, "metadata", "temp"));
-            _nugetPackageInstaller = nugetPackageDownloader ?? 
-                new NuGetPackageDownloader(_tempPackagesDir, verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger());
-            _workloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
+            _userProfileDir = userProfileDir;
+            _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            _tempPackagesDir = new DirectoryPath(tempDirPath ?? Path.GetTempPath());
+            ILogger logger = verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
+            _restoreActionConfig = restoreActionConfig;
+            _nugetPackageDownloader = nugetPackageDownloader ??
+                                      new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null,
+                                          new FirstPartyNuGetPackageSigningVerifier(_tempPackagesDir), logger,
+                                          restoreActionConfig: _restoreActionConfig);
+            bool userLocal = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString());
+            _workloadMetadataDir = Path.Combine(userLocal ? _userProfileDir : _dotnetDir, "metadata", "workloads");
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;
             _workloadResolver = workloadResolver;
-            _installationRecordRepository = new NetSdkManagedInstallationRecordRepository(_dotnetDir);
+            _installationRecordRepository = new NetSdkManagedInstallationRecordRepository(_workloadMetadataDir);
+            _packageSourceLocation = packageSourceLocation;
         }
 
         public InstallationUnit GetInstallationUnit()
@@ -70,13 +86,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return _installationRecordRepository;
         }
 
-        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false)
+        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
-            if (useOfflineCache)
-            {
-                throw new NotImplementedException();
-            }
-
             _reporter.WriteLine(string.Format(LocalizableStrings.InstallingPackVersionMessage, packInfo.Id, packInfo.Version));
             var tempDirsToDelete = new List<string>();
             var tempFilesToDelete = new List<string>();
@@ -87,8 +98,24 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     {
                         if (!PackIsInstalled(packInfo))
                         {
-                            var packagePath = _nugetPackageInstaller.DownloadPackageAsync(new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)).Result;
-                            tempFilesToDelete.Add(packagePath);
+                            string packagePath;
+                            if (offlineCache == null || !offlineCache.HasValue)
+                            {
+                                packagePath = _nugetPackageDownloader
+                                    .DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId),
+                                        new NuGetVersion(packInfo.Version),
+                                        _packageSourceLocation).GetAwaiter().GetResult();
+                                tempFilesToDelete.Add(packagePath);
+                            }
+                            else
+                            {
+                                _reporter.WriteLine(string.Format(LocalizableStrings.UsingCacheForPackInstall, packInfo.Id, packInfo.Version, offlineCache));
+                                packagePath = Path.Combine(offlineCache.Value.Value, $"{packInfo.ResolvedPackageId}.{packInfo.Version}.nupkg");
+                                if (!File.Exists(packagePath))
+                                {
+                                    throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, packInfo.ResolvedPackageId, packInfo.Version, offlineCache));
+                                }
+                            }
 
                             if (!Directory.Exists(Path.GetDirectoryName(packInfo.Path)))
                             {
@@ -104,9 +131,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                 var tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{packInfo.Id}-{packInfo.Version}-extracted");
                                 tempDirsToDelete.Add(tempExtractionDir);
                                 Directory.CreateDirectory(tempExtractionDir);
-                                var packFiles = _nugetPackageInstaller.ExtractPackageAsync(packagePath, tempExtractionDir).Result;
+                                var packFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
 
-                                FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempExtractionDir, packInfo.Path));
+                                FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(tempExtractionDir, packInfo.Path));
                             }
                         }
                         else
@@ -120,7 +147,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         try
                         {
                             _reporter.WriteLine(string.Format(LocalizableStrings.RollingBackPackInstall, packInfo.Id));
-                            RollBackWorkloadPackInstall(packInfo, sdkFeatureBand);
+                            RollBackWorkloadPackInstall(packInfo, sdkFeatureBand, offlineCache);
                         }
                         catch (Exception e)
                         {
@@ -149,7 +176,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
+        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        {
+            InstallWorkloadPack(packInfo, sdkFeatureBand, offlineCache);
+        }
+
+        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             DeletePackInstallationRecord(packInfo, sdkFeatureBand);
             if (!PackHasInstallRecords(packInfo))
@@ -158,16 +190,118 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand) => throw new NotImplementedException();
-
-        public void DownloadToOfflineCache(IEnumerable<string> manifests) => throw new NotImplementedException();
-
-        public void GarbageCollectInstalledWorkloadPacks()
+        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null, bool isRollback = false)
         {
-            var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1");
+            string packagePath = null;
+            string tempExtractionDir = null;
+            string tempBackupDir = null;
+            string rootInstallDir = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString()) ? _userProfileDir : _dotnetDir;
+            var manifestPath = Path.Combine(rootInstallDir, "sdk-manifests", sdkFeatureBand.ToString(), manifestId.ToString());
+
+            _reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloadManifest, manifestId, manifestVersion));
+
+            try
+            {
+                TransactionalAction.Run(
+                   action: () =>
+                   {
+                       if (offlineCache == null || !offlineCache.HasValue)
+                       {
+                           packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId),
+                               new NuGetVersion(manifestVersion.ToString()), _packageSourceLocation).GetAwaiter().GetResult();
+                       }
+                       else
+                       {
+                           packagePath = Path.Combine(offlineCache.Value.Value, $"{WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId)}.{manifestVersion}.nupkg");
+                           if (!File.Exists(packagePath))
+                           {
+                               throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), manifestVersion, offlineCache));
+                           }
+                       }
+                       tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-extracted");
+                       Directory.CreateDirectory(tempExtractionDir);
+                       var manifestFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
+
+                       if (Directory.Exists(manifestPath) && Directory.GetFileSystemEntries(manifestPath).Any())
+                       {
+                           // Backup existing manifest data for roll back purposes
+                           tempBackupDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-backup");
+                           if (Directory.Exists(tempBackupDir))
+                           {
+                               Directory.Delete(tempBackupDir, true);
+                           }
+                           FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(manifestPath, tempBackupDir));
+                       }
+                       Directory.CreateDirectory(Path.GetDirectoryName(manifestPath));
+                       FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(tempExtractionDir, "data"), manifestPath));
+                   },
+                    rollback: () =>
+                    {
+                        if (!string.IsNullOrEmpty(tempBackupDir) && Directory.Exists(tempBackupDir))
+                        {
+                            FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(tempBackupDir, manifestPath));
+                        }
+                    });
+
+                // Delete leftover dirs and files
+                if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath) && (offlineCache == null || !offlineCache.HasValue))
+                {
+                    File.Delete(packagePath);
+                }
+
+                var versionDir = Path.GetDirectoryName(packagePath);
+                if (Directory.Exists(versionDir) && !Directory.GetFileSystemEntries(versionDir).Any())
+                {
+                    Directory.Delete(versionDir);
+                    var idDir = Path.GetDirectoryName(versionDir);
+                    if (Directory.Exists(idDir) && !Directory.GetFileSystemEntries(idDir).Any())
+                    {
+                        Directory.Delete(idDir);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(tempExtractionDir) && Directory.Exists(tempExtractionDir))
+                {
+                    Directory.Delete(tempExtractionDir, true);
+                }
+
+                if (!string.IsNullOrEmpty(tempBackupDir) && Directory.Exists(tempBackupDir))
+                {
+                    Directory.Delete(tempBackupDir, true);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(LocalizableStrings.FailedToInstallWorkloadManifest, manifestId, manifestVersion, e.Message));
+            }
+        }
+
+        public void DownloadToOfflineCache(PackInfo packInfo, DirectoryPath cachePath, bool includePreviews)
+        {
+            _reporter.WriteLine(string.Format(LocalizableStrings.DownloadingPackToCacheMessage, packInfo.Id, packInfo.Version, cachePath.Value));
+            if (!Directory.Exists(cachePath.Value))
+            {
+                Directory.CreateDirectory(cachePath.Value);
+            }
+
+            _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId),
+                new NuGetVersion(packInfo.Version),
+                packageSourceLocation: _packageSourceLocation,
+                includePreview: includePreviews,
+                downloadFolder: cachePath).GetAwaiter().GetResult();
+        }
+
+        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
+        {
             var installedSdkFeatureBands = _installationRecordRepository.GetFeatureBandsWithInstallationRecords();
             _reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectingSdkFeatureBandsMessage, string.Join(" ", installedSdkFeatureBands)));
             var currentBandInstallRecords = GetExpectedPackInstallRecords(_sdkFeatureBand);
+            string installedPacksDir = Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1");
+
+            if (!Directory.Exists(installedPacksDir))
+            {
+                return;
+            }
 
             foreach (var packIdDir in Directory.GetDirectories(installedPacksDir))
             {
@@ -184,6 +318,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         unneededBandRecords = unneededBandRecords.Append(currentBandRecordPath);
                     }
 
+                    if (!unneededBandRecords.Any())
+                    {
+                        continue;
+                    }
+
+                    // Save the pack info in case we need to delete the pack
+                    var jsonPackInfo = File.ReadAllText(unneededBandRecords.First());
                     foreach (var unneededRecord in unneededBandRecords)
                     {
                         File.Delete(unneededRecord);
@@ -193,6 +334,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     {
                         Directory.Delete(packVersionDir);
                         var deletablePack = GetPackInfo(packVersionDir);
+                        if (deletablePack == null)
+                        {
+                            // Pack no longer exists in manifests, get pack info from installation record
+                            deletablePack = JsonSerializer.Deserialize(jsonPackInfo, typeof(PackInfo)) as PackInfo;
+                        }
                         DeletePack(deletablePack);
                     }
                 }
@@ -204,12 +350,41 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
+        public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        {
+            var installedPacksDir = Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1");
+            if (!Directory.Exists(installedPacksDir))
+            {
+                return Enumerable.Empty<(WorkloadPackId, string)>();
+            }
+            return Directory.GetDirectories(installedPacksDir)
+                .Where(packIdDir => HasFeatureBandMarkerFile(packIdDir, sdkFeatureBand))
+                .SelectMany(packIdPath => Directory.GetDirectories(packIdPath))
+                .Select(packVersionPath => (new WorkloadPackId(Path.GetFileName(Path.GetDirectoryName(packVersionPath))), Path.GetFileName(packVersionPath)));
+        }
+
+        public void Shutdown()
+        {
+            // Perform any additional cleanup here that's intended to run at the end of the command, regardless
+            // of success or failure. For file based installs, there shouldn't be any additional work to 
+            // perform.
+        }
+
+        private bool HasFeatureBandMarkerFile(string packIdDir, SdkFeatureBand featureBand)
+        {
+            return Directory.GetDirectories(packIdDir)
+                .SelectMany(packVersionDir => Directory.GetFiles(packVersionDir))
+                .Select(featureBandPath => Path.GetFileName(featureBandPath))
+                .Any(featureBandFileName => featureBand.ToString().Equals(featureBandFileName));
+        }
+
         private IEnumerable<string> GetExpectedPackInstallRecords(SdkFeatureBand sdkFeatureBand)
         {
             var installedWorkloads = _installationRecordRepository.GetInstalledWorkloads(sdkFeatureBand);
             return installedWorkloads
                 .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
                 .Select(pack => _workloadResolver.TryGetPackInfo(pack))
+                .Where(pack => pack != null)
                 .Select(packInfo => GetPackInstallRecordPath(packInfo, sdkFeatureBand));
         }
 
@@ -218,7 +393,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             // Expected path: <DOTNET ROOT>/metadata/workloads/installedpacks/v1/<Pack ID>/<Pack Version>/
             var idRecordPath = Path.GetDirectoryName(packRecordDir);
             var packId = Path.GetFileName(idRecordPath);
-            var packInfo = _workloadResolver.TryGetPackInfo(packId);
+            var packInfo = _workloadResolver.TryGetPackInfo(new WorkloadPackId(packId));
             if (packInfo != null && packInfo.Version.Equals(Path.GetFileName(packRecordDir)))
             {
                 return packInfo;
@@ -242,8 +417,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             if (PackIsInstalled(packInfo))
             {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                _reporter.WriteLine(string.Format(LocalizableStrings.DeletingWorkloadPack, packInfo.Id, packInfo.Version));
                 if (IsSingleFilePack(packInfo))
                 {
                     File.Delete(packInfo.Path);
@@ -261,7 +435,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         private string GetPackInstallRecordPath(PackInfo packInfo, SdkFeatureBand featureBand) =>
-            Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1", packInfo.Id, packInfo.Version, featureBand.ToString());
+            Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1", packInfo.Id, packInfo.Version, featureBand.ToString());
 
         private void WritePackInstallationRecord(PackInfo packInfo, SdkFeatureBand featureBand)
         {
@@ -271,7 +445,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
             }
-            File.Create(path);
+            File.WriteAllText(path, JsonSerializer.Serialize(packInfo));
         }
 
         private void DeletePackInstallationRecord(PackInfo packInfo, SdkFeatureBand featureBand)
@@ -279,8 +453,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var packInstallRecord = GetPackInstallRecordPath(packInfo, featureBand);
             if (File.Exists(packInstallRecord))
             {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
                 File.Delete(packInstallRecord);
 
                 var packRecordVersionDir = Path.GetDirectoryName(packInstallRecord);
@@ -299,7 +471,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private bool PackHasInstallRecords(PackInfo packInfo)
         {
-            var packInstallRecordDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1", packInfo.Id, packInfo.Version);
+            var packInstallRecordDir = Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1", packInfo.Id, packInfo.Version);
             return Directory.Exists(packInstallRecordDir) && Directory.GetFiles(packInstallRecordDir).Any();
         }
 

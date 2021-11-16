@@ -7,8 +7,10 @@
     <LangVersion>Latest</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <DebugSymbols>true</DebugSymbols>
+    <!-- Default to all packages generating a corresponding symbol package -->
+    <IncludeSymbols>true</IncludeSymbols>
     <IsShippingPackage>false</IsShippingPackage>
-    <SdkTargetFramework>net6.0</SdkTargetFramework>
+    <SdkTargetFramework>net7.0</SdkTargetFramework>
     <ToolsetTargetFramework>$(SdkTargetFramework)</ToolsetTargetFramework>
 
     <!-- Disable implict package target fallback, and disable warning for when we explicitly add it (currently needed for
@@ -25,6 +27,10 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateProgramFile>false</GenerateProgramFile>
     <!-- <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments> -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyInformationCachePaths Condition="Exists('$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SdkPrecomputedAssemblyReferences.cache')">$(AssemblyInformationCachePaths);$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SDKPrecomputedAssemblyReferences.cache</AssemblyInformationCachePaths>
   </PropertyGroup>
 
   <Import Project="build/GenerateResxSource.targets" />

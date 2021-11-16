@@ -10,12 +10,19 @@ namespace Microsoft.DotNet.Cli
 {
     public class CompleteCommand
     {
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            return RunWithReporter(args, Reporter.Output);
+            return RunWithReporter(parseResult, Reporter.Output);
         }
 
-        public static int RunWithReporter(string [] args, IReporter reporter)
+        public static int RunWithReporter(string[] args, IReporter reporter)
+        {
+            var parser = Parser.Instance;
+            var result = parser.ParseFrom("dotnet complete", args);
+            return RunWithReporter(result, reporter);
+        }
+
+        public static int RunWithReporter(ParseResult result, IReporter reporter)
         {
             if (reporter == null)
             {
@@ -24,13 +31,7 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                DebugHelper.HandleDebugSwitch(ref args);
-
-                // get the parser for the current subcommand
-                var parser = Parser.Instance;
-
-                // parse the arguments
-                var result = parser.ParseFrom("dotnet complete", args);
+                result.HandleDebugSwitch();
 
                 var suggestions = Suggestions(result);
 
@@ -49,9 +50,9 @@ namespace Microsoft.DotNet.Cli
 
         private static string[] Suggestions(ParseResult complete)
         {
-            var input = complete.ValueForArgument<string>(CompleteCommandParser.PathArgument) ?? string.Empty;
+            var input = complete.GetValueForArgument(CompleteCommandParser.PathArgument) ?? string.Empty;
 
-            var position = complete.ValueForOption<int>(CompleteCommandParser.PositionOption);
+            var position = complete.GetValueForOption(CompleteCommandParser.PositionOption);
 
             if (position > input.Length)
             {
@@ -60,7 +61,7 @@ namespace Microsoft.DotNet.Cli
 
             var result = Parser.Instance.Parse(input);
 
-            return result.GetSuggestions()
+            return result.GetSuggestions(position)
                 .Distinct()
                 .ToArray();
         }

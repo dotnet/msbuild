@@ -92,7 +92,7 @@ Bunun nedeni şunlardan biri olabilir:
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="translated">Belirtilen dosya adı ('{0})' 1024 bayttan uzun</target>
+        <target state="translated">Belirtilen dosya adı '{0}' 1024 bayttan uzun</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">

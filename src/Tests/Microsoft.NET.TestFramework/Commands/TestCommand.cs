@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 using System.Diagnostics;
 using System.Linq;
 using System;
-using static Microsoft.NET.TestFramework.ExponentialRetry;
+using static Microsoft.DotNet.Cli.Utils.ExponentialRetry;
 
 namespace Microsoft.NET.TestFramework.Commands
 {

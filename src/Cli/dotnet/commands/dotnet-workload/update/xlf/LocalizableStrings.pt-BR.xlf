@@ -2,104 +2,64 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
-      <trans-unit id="InvalidNuGetVersionRange">
-        <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="translated">A versão '{0}' especificada não é um intervalo de versão do NuGet válido.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PackageIdArgumentName">
-        <source>PACKAGE_ID</source>
-        <target state="translated">PACKAGE_ID</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PackageIdArgumentDescription">
-        <source>The NuGet Package Id of the workload to update.</source>
-        <target state="translated">A ID do pacote do NuGet da ferramenta a ser atualizada.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Specify one workload Package Id to update.</source>
-        <target state="translated">Especifique uma ID de Pacote de ferramenta a ser atualizada.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateLocaWorkloadSucceededVersionNoChange">
-        <source>Workload '{0}' is up to date.</source>
-        <target state="new">Workload '{0}' is up to date.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateLocaWorkloadToLowerVersion">
-        <source>The requested version {0} is lower than existing version {1}.</source>
-        <target state="new">The requested version {0} is lower than existing version {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateLocalWorkloadSucceeded">
-        <source>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
-        <target state="new">Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateToLowerVersion">
-        <source>The requested version {0} is lower than existing version {1}.</source>
-        <target state="translated">A versão solicitada {0} é inferior à versão existente {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionOptionDescription">
-        <source>The version range of the workload package to update to.</source>
-        <target state="translated">O intervalo de versão do pacote de ferramentas para atualização.</target>
+      <trans-unit id="AdManifestOnlyOptionDescription">
+        <source>Only update advertising manifests.</source>
+        <target state="translated">Atualizar somente manifestos de anúncio.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a workload.</source>
-        <target state="needs-review-translation">Atualize uma ferramenta global.</target>
+        <source>Update all installed workloads.</source>
+        <target state="translated">Atualizar todas as cargas de trabalho instaladas.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ConfigFileOptionDescription">
-        <source>The NuGet configuration file to use.</source>
-        <target state="translated">O arquivo de configuração do NuGet a ser usado.</target>
+      <trans-unit id="FromPreviousSdkOptionDescription">
+        <source>Include workloads installed with earlier SDK versions in update.</source>
+        <target state="new">Include workloads installed with earlier SDK versions in update.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NuGetConfigurationFileDoesNotExist">
-        <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="translated">O arquivo de configuração '{0}' do NuGet não existe.</target>
+      <trans-unit id="FromRollbackDefinitionOptionDescription">
+        <source>Update workloads based on specified rollback definition file.</source>
+        <target state="translated">Atualizar cargas de trabalho com base no arquivo de definição de reversão especificado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoWorkloadsToUpdate">
+        <source>No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</source>
+        <target state="new">No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollBackFailedMessage">
+        <source>Installation rollback failed: {0}</source>
+        <target state="new">Installation rollback failed: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackInstall">
+        <source>Workload installation failed. Rolling back installed packs...</source>
+        <target state="new">Workload installation failed. Rolling back installed packs...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateFailed">
+        <source>Workload '{0}' failed to update due to the following:</source>
+        <target state="translated">Falha ao atualizar a carga de trabalho '{0}' devido ao seguinte motivo:</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceeded">
-        <source>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
-        <target state="translated">A ferramenta '{0}' foi atualizada com êxito da versão '{1}' para a versão '{2}'.</target>
+        <source>Successfully updated workload(s): {0}.</source>
+        <target state="translated">Carga(s) de trabalho atualizada(s) com êxito: {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateFullCommandNameLocalized">
-        <source>.NET update Command</source>
-        <target state="translated">Comando de atualização .NET</target>
+      <trans-unit id="WorkloadCacheDownloadFailed">
+        <source>Failed to download workload update packages to cache: {0}</source>
+        <target state="translated">Falha ao baixar pacotes de atualização de carga de trabalho para o cache: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Workload '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">A ferramenta '{0}' foi reinstalada com a versão estável mais recente (versão '{1}').</target>
+      <trans-unit id="WorkloadUpdateAdManifestsSucceeded">
+        <source>Successfully updated advertising manifests.</source>
+        <target state="translated">Manifestos de anúncio atualizados com êxito.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateWorkloadFailed">
-        <source>Workload '{0}' failed to update due to the following:</source>
-        <target state="translated">Falha ao atualizar a ferramenta '{0}' devido ao seguinte motivo:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSourceOptionDescription">
-        <source>Add an additional NuGet package source to use during the update.</source>
-        <target state="translated">Adicionar uma origem adicional do pacote do NuGet a ser usada durante a atualização.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSourceOptionName">
-        <source>SOURCE</source>
-        <target state="translated">SOURCE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigFileOptionName">
-        <source>FILE</source>
-        <target state="translated">FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionOptionName">
-        <source>VERSION</source>
-        <target state="translated">VERSION</target>
+      <trans-unit id="WorkloadUpdateFailed">
+        <source>Workload update failed: {0}</source>
+        <target state="translated">A atualização da carga de trabalho falhou: {0}</target>
         <note />
       </trans-unit>
     </body>

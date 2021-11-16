@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
@@ -36,6 +36,11 @@
         <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
         <target state="translated">NETSDK1072: Nepovedlo se použít {0} jako spustitelný soubor aplikace, protože to není spustitelný soubor Windows pro subsystém CUI (Console).</target>
         <note>{StrBegin="NETSDK1072: "}</note>
+      </trans-unit>
+      <trans-unit id="AppHostSigningFailed">
+        <source>NETSDK1177: Failed to sign apphost with error code {1}: {0}</source>
+        <target state="translated">NETSDK1177: Nepovedlo se podepsat hostitele aplikace s kódem chyby {1}: {0}.</target>
+        <note>{StrBegin="NETSDK1177: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
@@ -213,14 +218,14 @@
 {0} - The path to the invalid assembly.</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequires60">
-        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
-        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
-        <note>{StrBegin="NETSDK1142: "}</note>
+        <source>NETSDK1167: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
+        <target state="translated">NETSDK1167: Komprese do jediné souborové sady se podporuje jen u publikování pro .NET6 nebo vyšší.</target>
+        <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
-        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
-        <note>{StrBegin="NETSDK1142: "}</note>
+        <source>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="translated">NETSDK1174: Komprese do jediné souborové sady se podporuje jen u publikování samostatné aplikace.</target>
+        <note>{StrBegin="NETSDK1174: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
@@ -259,6 +264,11 @@
         <target state="translated">Vítěze nebylo možné určit, protože {0} není sestavení.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotGetPackVersionFromWorkloadManifests">
+        <source>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</source>
+        <target state="translated">NETSDK1181: Chyba při získávání verze sady: Balíček {0} nebyl v manifestech úlohy nalezen.</target>
+        <note>{StrBegin="NETSDK1181: "}</note>
+      </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</source>
         <target state="translated">NETSDK1042: Ze souboru {0} nebylo možné načíst manifest platformy, protože neexistoval.</target>
@@ -270,9 +280,9 @@
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen2MissingRequiredMetadata">
-        <source>NETSDK1155: Required '{0}' metadata missing on Crossgen2Tool item.</source>
-        <target state="translated">NETSDK1155: Prvek Crossgen2Tool neobsahuje povinná metadata '{0}'.</target>
-        <note>{StrBegin="NETSDK1155: "}</note>
+        <source>NETSDK1158: Required '{0}' metadata missing on Crossgen2Tool item.</source>
+        <target state="translated">NETSDK1158: V položce Crossgen2Tool chybí požadovaná metadata {0}.</target>
+        <note>{StrBegin="NETSDK1158: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen2RequiresSelfContained">
         <source>NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</source>
@@ -280,44 +290,44 @@
         <note>{StrBegin="NETSDK1126: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen2ToolExecutableNotFound">
-        <source>NETSDK1152: Crossgen2Tool executable '{0}' not found.</source>
-        <target state="translated">NETSDK1152: Spustitelný soubor Crossgen2Tool '{0}' nebyl nalezen.</target>
-        <note>{StrBegin="NETSDK1152: "}</note>
+        <source>NETSDK1155: Crossgen2Tool executable '{0}' not found.</source>
+        <target state="translated">NETSDK1155: Spustitelný soubor Crossgen2Tool {0} se nenašel.</target>
+        <note>{StrBegin="NETSDK1155: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen2ToolMissingWhenUseCrossgen2IsSet">
-        <source>NETSDK1151: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</source>
-        <target state="translated">NETSDK1151: Crossgen2Tool musí být specifikován, pokud je UseCrossgen2 nastaven (true).</target>
-        <note>{StrBegin="NETSDK1151: "}</note>
+        <source>NETSDK1154: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</source>
+        <target state="translated">NETSDK1154: Pokud je UseCrossgen2 nastavené na true, musí se zadat Crossgen2Tool.</target>
+        <note>{StrBegin="NETSDK1154: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen5CannotEmitSymbolsInCompositeMode">
-        <source>NETSDK1163: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</source>
-        <target state="translated">NETSDK1163: Publikování v .NET 5 s použitím Crossgen2 v kompozitním módu nepodporuje výstup symbolů.</target>
-        <note>{StrBegin="NETSDK1163: "}</note>
+        <source>NETSDK1166: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</source>
+        <target state="translated">NETSDK1166: Pokud se publikuje pro .NET 5 s Crossgen2 pomocí kompozitního režimu, nedají se generovat symboly.</target>
+        <note>{StrBegin="NETSDK1166: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolExecutableNotFound">
-        <source>NETSDK1157: CrossgenTool executable '{0}' not found.</source>
-        <target state="translated">NETSDK1157: Spustitelný soubor CrossgenTool '{0}' nebyl nalezen.</target>
-        <note>{StrBegin="NETSDK1157: "}</note>
+        <source>NETSDK1160: CrossgenTool executable '{0}' not found.</source>
+        <target state="translated">NETSDK1160: Spustitelný soubor CrossgenTool {0} se nenašel.</target>
+        <note>{StrBegin="NETSDK1160: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolMissingInPDBCompilationMode">
-        <source>NETSDK1150: CrossgenTool not specified in PDB compilation mode.</source>
-        <target state="translated">NETSDK1150: CrossgenTool není zadán v módu generování PDB.</target>
-        <note>{StrBegin="NETSDK1150: "}</note>
+        <source>NETSDK1153: CrossgenTool not specified in PDB compilation mode.</source>
+        <target state="translated">NETSDK1153: V režimu kompilace PDB se nezadal nástroj CrossgenTool.</target>
+        <note>{StrBegin="NETSDK1153: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolMissingWhenUseCrossgen2IsNotSet">
-        <source>NETSDK1156: CrossgenTool must be specified when UseCrossgen2 is set to false.</source>
-        <target state="translated">NETSDK1156: CrossgenTool musí být zadán, pokud je UseCrossgen2 neaktivní (false).</target>
-        <note>{StrBegin="NETSDK1156: "}</note>
+        <source>NETSDK1159: CrossgenTool must be specified when UseCrossgen2 is set to false.</source>
+        <target state="translated">NETSDK1159: Pokud je UseCrossgen2 nastavené na false, musí se zadat CrossgenTool.</target>
+        <note>{StrBegin="NETSDK1159: "}</note>
       </trans-unit>
       <trans-unit id="DiaSymReaderLibraryNotFound">
-        <source>NETSDK1158: DiaSymReader library '{0}' not found.</source>
-        <target state="translated">NETSDK1158: Knihovna DiaSymReader '{0}' nebyla nalezena.</target>
-        <note>{StrBegin="NETSDK1158: "}</note>
+        <source>NETSDK1161: DiaSymReader library '{0}' not found.</source>
+        <target state="translated">NETSDK1161: Knihovna DiaSymReader {0} se nenašla.</target>
+        <note>{StrBegin="NETSDK1161: "}</note>
       </trans-unit>
       <trans-unit id="DotNetHostExecutableNotFound">
-        <source>NETSDK1153: .NET host executable '{0}' not found.</source>
-        <target state="translated">NETSDK1153: Spustitelný soubor hostitele .NET '{0}' nebyl nalezen.</target>
-        <note>{StrBegin="NETSDK1153: "}</note>
+        <source>NETSDK1156: .NET host executable '{0}' not found.</source>
+        <target state="translated">NETSDK1156: Spustitelný soubor hostitele .NET {0} se nenašel.</target>
+        <note>{StrBegin="NETSDK1156: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</source>
@@ -340,14 +350,19 @@
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
       <trans-unit id="DuplicatePublishOutputFiles">
-        <source>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</source>
-        <target state="translated">NETSDK1148: Našlo se několik výstupních souborů publikování se stejnou relativní cestou: {0}</target>
-        <note>{StrBegin="NETSDK1148: "}</note>
+        <source>NETSDK1152: Found multiple publish output files with the same relative path: {0}.</source>
+        <target state="translated">NETSDK1152: Našlo se několik výstupních souborů publikování se stejnou relativní cestou: {0}</target>
+        <note>{StrBegin="NETSDK1152: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1110: Více než jeden prostředek v balíčku modulu runtime má stejnou cílovou dílčí cestu {0}. Tady můžete tuto chybu nahlásit týmu .NET: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1110: "}</note>
+      </trans-unit>
+      <trans-unit id="DuplicateTypeLibraryIds">
+        <source>NETSDK1169: The same resource ID {0} was specified for two type libraries '{1}' and '{2}'. Duplicate type library IDs are not allowed.</source>
+        <target state="translated">NETSDK1169: Pro dvě knihovny typů, {0} a {1} se zadalo stejné ID prostředku {2}. Duplicitní identifikátory knihovny typů nejsou povoleny.</target>
+        <note>{StrBegin="NETSDK1169: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
@@ -450,9 +465,9 @@
         <note>{StrBegin="NETSDK1025: "}</note>
       </trans-unit>
       <trans-unit id="InputAssemblyNotFound">
-        <source>NETSDK1160: Input assembly '{0}' not found.</source>
-        <target state="translated">NETSDK1160: Vstupní modul '{0}' nebyl nalezen.</target>
-        <note>{StrBegin="NETSDK1160: "}</note>
+        <source>NETSDK1163: Input assembly '{0}' not found.</source>
+        <target state="translated">NETSDK1163: Vstupní sestavení {0} se nenašlo.</target>
+        <note>{StrBegin="NETSDK1163: "}</note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>NETSDK1003: Invalid framework name: '{0}'.</source>
@@ -487,10 +502,20 @@ The following are names of parameters or literal values and should not be transl
 {2}</target>
         <note>{StrBegin="NETSDK1140: "}</note>
       </trans-unit>
+      <trans-unit id="InvalidTypeLibrary">
+        <source>NETSDK1173: The provided type library '{0}' is in an invalid format.</source>
+        <target state="translated">NETSDK1173: Poskytnutá knihovna typů {0} má neplatný formát.</target>
+        <note>{StrBegin="NETSDK1173: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidTypeLibraryId">
+        <source>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
+        <target state="translated">NETSDK1170: Zadané ID knihovny typů {0} pro knihovnu typů {1} je neplatné. ID musí být kladné celé číslo menší než 65536.</target>
+        <note>{StrBegin="NETSDK1170: "}</note>
+      </trans-unit>
       <trans-unit id="JitLibraryNotFound">
-        <source>NETSDK1154: JIT library '{0}' not found.</source>
-        <target state="translated">NETSDK1154: Knihovna JIT '{0}' nebyla nalezena.</target>
-        <note>{StrBegin="NETSDK1154: "}</note>
+        <source>NETSDK1157: JIT library '{0}' not found.</source>
+        <target state="translated">NETSDK1157: Knihovna JIT {0} se nenašla.</target>
+        <note>{StrBegin="NETSDK1157: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
@@ -506,14 +531,19 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1008: "}</note>
       </trans-unit>
       <trans-unit id="MissingOutputPDBImagePath">
-        <source>NETSDK1161: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</source>
-        <target state="translated">NETSDK1161: Není zadán název výstupního PDB souboru v módu generování PDB (metadata OutputPDBImage).</target>
-        <note>{StrBegin="NETSDK1161: "}</note>
+        <source>NETSDK1164: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</source>
+        <target state="translated">NETSDK1164: V režimu generování PDB chybí výstupní cesta PDB (metadata OutputPDBImage).</target>
+        <note>{StrBegin="NETSDK1164: "}</note>
       </trans-unit>
       <trans-unit id="MissingOutputR2RImageFileName">
-        <source>NETSDK1162: Missing output R2R image path (OutputR2RImage metadata).</source>
-        <target state="translated">NETSDK1162: Není zadán název výstupního R2R souboru (metadata OutputR2RImage).</target>
-        <note>{StrBegin="NETSDK1162: "}</note>
+        <source>NETSDK1165: Missing output R2R image path (OutputR2RImage metadata).</source>
+        <target state="translated">NETSDK1165: Chybí cesta k výstupní imagi R2R (metadata OutputR2RImage).</target>
+        <note>{StrBegin="NETSDK1165: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingTypeLibraryId">
+        <source>NETSDK1171: An integer ID less than 65536 must be provided for type library '{0}' because more than one type library is specified.</source>
+        <target state="translated">NETSDK1171: Pro knihovnu typů {0} musí být zadáno celočíselné ID menší než 65536, protože je zadaná více než jedna knihovna typů.</target>
+        <note>{StrBegin="NETSDK1171: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>NETSDK1021: More than one file found for {0}</source>
@@ -529,6 +559,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
         <target state="translated">NETSDK1115: Aktuální sada .NET SDK nepodporuje .NET Framework bez použití výchozích nastavení .NET SDK. Pravděpodobně došlo k neshodě mezi vlastnostmi CLRSupport projektu C++/CLI a TargetFramework.</target>
         <note>{StrBegin="NETSDK1115: "}</note>
+      </trans-unit>
+      <trans-unit id="Net6NotCompatibleWithDev16">
+        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: Cílení na .NET 6.0 ve Visual Studiu 2019 se nepodporuje.</target>
+        <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
@@ -585,10 +620,15 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1121: Projekty C++/CLI cílené na rozhraní .NET Core nemůžou používat SelfContained=true.</target>
         <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
+      <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
+        <source>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.  For more information, see https://aka.ms/netsdk1151</source>
+        <target state="translated">NETSDK1151: odkazovaný projekt {0} je samostatně obsažený spustitelný soubor.  Na samostatně obsažený spustitelný soubor se nedá odkazovat pomocí spustitelného souboru, který není samostatně obsažený. Další informace najdete na https://aka.ms/netsdk1151</target>
+        <note>{StrBegin="NETSDK1151: "}</note>
+      </trans-unit>
       <trans-unit id="PDBGeneratorInputExecutableNotFound">
-        <source>NETSDK1159: PDB generation: R2R executable '{0}' not found.</source>
-        <target state="translated">NETSDK1159: Generování PDB: spustitelný soubor R2R '{0}' nebyl nalezen.</target>
-        <note>{StrBegin="NETSDK1159: "}</note>
+        <source>NETSDK1162: PDB generation: R2R executable '{0}' not found.</source>
+        <target state="translated">NETSDK1162: Generování PDB: Spustitelný soubor R2R {0} se nenašel.</target>
+        <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
@@ -614,6 +654,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
         <target state="translated">NETSDK1071: PackageReference na balíček {0} určuje verzi {1}. Určení verze tohoto balíčku se nedoporučuje. Další informace najdete na adrese https://aka.ms/sdkimplicitrefs.</target>
         <note>{StrBegin="NETSDK1071: "}</note>
+      </trans-unit>
+      <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
+        <source>NETSDK1176: Placeholder</source>
+        <target state="translated">NETSDK1176: Zástupný symbol</target>
+        <note>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
@@ -695,6 +740,21 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1112: Balíček modulu runtime pro {0} se nestáhl. Zkuste spustit obnovení NuGet s identifikátorem RuntimeIdentifier {1}.</target>
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
+      <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
+        <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
+        <target state="translated">NETSDK1150: odkazovaný projekt {0} je spustitelný soubor, který není samostatně obsažený.  Na spustitelný soubor, který není samostatně obsažený, nelze odkazovat pomocí samostatně obsaženého spustitelného souboru. Další informace najdete na https://aka.ms/netsdk1150</target>
+        <note>{StrBegin="NETSDK1150: "}</note>
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
+        <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
+        <target state="translated">NETSDK1179: Při použití příkazu --runtime je vyžadována jedna z možností --self-contained nebo --no-self-contained.</target>
+        <note>{StrBegin="NETSDK1179: "}</note>
+      </trans-unit>
+      <trans-unit id="SingleFileWin7Incompatible">
+        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
+        <target state="translated">NETSDK1180: Zadaný identifikátor modulu runtime {0} představuje kompatibilitu s Windows 7. Publikování jednoho souboru není kompatibilní se systémem Windows 7.</target>
+        <note>{StrBegin="NETSDK1180: "}</note>
+      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: Cesty AdditionalProbingPaths byly zadány pro GenerateRuntimeConfigurationFiles, ale vynechávají se, protože RuntimeConfigDevPath je prázdné.</target>
@@ -721,14 +781,19 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
-        <source>NETSDK1164: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
-        <target state="new">NETSDK1164: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</target>
-        <note>{StrBegin="NETSDK1164: "}</note>
+        <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
+        <target state="translated">NETSDK1175: Model Windows Forms se nepodporuje nebo se nedoporučuje používat, pokud je povoleno ořezávání. Přejděte prosím na https://aka.ms/dotnet-illink/windows-forms, kde najdete další podrobnosti.</target>
+        <note>{StrBegin="NETSDK1175: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWpfIsNotSupported">
-        <source>NETSDK1165: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
-        <target state="new">NETSDK1165: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</target>
-        <note>{StrBegin="NETSDK1165: "}</note>
+        <source>NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
+        <target state="translated">NETSDK1168: WPF (Windows Presentation Foundation) se nepodporuje nebo se nedoporučuje používat, pokud je povoleno ořezávání. Přejděte prosím na https://aka.ms/dotnet-illink/wpf, kde najdete další podrobnosti.</target>
+        <note>{StrBegin="NETSDK1168: "}</note>
+      </trans-unit>
+      <trans-unit id="TypeLibraryDoesNotExist">
+        <source>NETSDK1172: The provided type library '{0}' does not exist.</source>
+        <target state="translated">NETSDK1172: Poskytnutá knihovna typů {0} neexistuje.</target>
+        <note>{StrBegin="NETSDK1172: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>
@@ -806,9 +871,14 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1131: "}</note>
       </trans-unit>
       <trans-unit id="WinMDReferenceNotSupportedOnTargetFramework">
-        <source>NETSDK1130: Referencing a Windows Metadata component directly when targeting {0} is not supported. Use the C#/WinRT projection tool (https://aka.ms/cswinrt) or a provided projection for this target.</source>
-        <target state="translated">NETSDK1130: Přímé odkazování na komponentu Metadata Windows se při cílení na {0} nepodporuje. Použijte nástroj pro projekci C#/WinRT (https://aka.ms/cswinrt) nebo poskytnutou projekci pro tento cíl.</target>
+        <source>NETSDK1130: {1} cannot be referenced. Referencing a Windows Metadata component directly when targeting .NET 5 or higher is not supported. For more information, see https://aka.ms/netsdk1130</source>
+        <target state="translated">NETSDK1130: {1} nelze odkazovat. Odkazování na komponentu Windows Metadata přímo při cílení na .NET 5 nebo vyšší verzi není podporováno. Pro další informace se podívejte na https://aka.ms/netsdk1130</target>
         <note>{StrBegin="NETSDK1130: "}</note>
+      </trans-unit>
+      <trans-unit id="WinMDTransitiveReferenceNotSupported">
+        <source>NETSDK1149: {0} cannot be referenced because it uses built-in support for WinRT, which is no longer supported in .NET 5 and higher.  An updated version of the component supporting .NET 5 is needed. For more information, see https://aka.ms/netsdk1149</source>
+        <target state="translated">NETSDK1149: {0} nelze odkazovat, protože používá vestavěnou podporu pro WinRT, která už není podporována ve verzi .NET 5 a vyšší.  Je potřeba mít aktualizovanou verzi komponenty podporující rozhraní .NET 5. Další informace naleznete v tématu https://aka.ms/netsdk1149</target>
+        <note>{StrBegin="NETSDK1149: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">
         <source>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</source>
@@ -831,13 +901,22 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1136: "}</note>
       </trans-unit>
       <trans-unit id="WindowsSDKVersionConflicts">
-        <source>NETSDK1149: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</source>
-        <target state="translated">NETSDK1149: Závislý modul byl zkompilován novější verzí Microsoft.Windows.SDK.NET.dll. Pro odkazování na tento modul prosím přejděte na novější verzi .NET SDK.</target>
-        <note>{StrBegin="NETSDK1149: "}</note>
+        <source>NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</source>
+        <target state="translated">NETSDK1148: Odkazované sestavení se zkompilovalo pomocí novější verze Microsoft.Windows.SDK.NET.dll. Pokud chcete odkazovat na toto sestavení, aktualizujte prosím novější sadu .NET SDK.</target>
+        <note>{StrBegin="NETSDK1148: "}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadNotAvailable">
+        <source>NETSDK1178: The project depends on the following workload packs that do not exist in any of the workloads available in this installation: {0}
+You may need to build the project on another operating system or architecture, or update the .NET SDK.</source>
+        <target state="translated">NETSDK1178: Projekt závisí na následujících balíčcích úloh, které neexistují v žádné z úloh dostupných v této instalaci: {0}
+Možná bude nutné sestavit projekt v jiném operačním systému nebo architektuře nebo aktualizovat sadu .NET SDK.</target>
+        <note>{StrBegin="NETSDK1178: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>NETSDK1147: The following workload packs were not installed: {0}</source>
-        <target state="translated">NETSDK1147: Nebyly nainstalovány následující sady úloh: {0}.</target>
+        <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: {1}</source>
+        <target state="translated">NETSDK1147: k sestavení tohoto projektu musí být nainstalované následující úlohy: {0}
+Pokud chcete nainstalovat tyto úlohy, spusťte následující příkaz: {1}</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

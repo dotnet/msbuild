@@ -53,7 +53,9 @@ namespace Microsoft.NET.TestFramework.Commands
             string targetFramework = null)
             : base(testAsset, "WriteValuesToFile", relativePathToProject: null)
         {
+
             _targetFramework = targetFramework ?? testAsset.TestProject?.TargetFrameworks;
+            _targetFramework = _targetFramework.Contains(";") ? "" : _targetFramework;
 
             _valueName = valueName;
             _valueType = valueType;

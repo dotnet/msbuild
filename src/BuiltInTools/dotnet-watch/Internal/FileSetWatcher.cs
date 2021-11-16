@@ -29,10 +29,10 @@ namespace Microsoft.DotNet.Watcher.Internal
                 _fileWatcher.WatchDirectory(Path.GetDirectoryName(file.FilePath));
             }
 
-            var tcs = new TaskCompletionSource<FileItem?>();
+            var tcs = new TaskCompletionSource<FileItem?>(TaskCreationOptions.RunContinuationsAsynchronously);
             cancellationToken.Register(() => tcs.TrySetResult(null));
 
-            void callback(string path)
+            void FileChangedCallback(string path, bool newFile)
             {
                 if (_fileSet.TryGetValue(path, out var fileItem))
                 {
@@ -40,10 +40,10 @@ namespace Microsoft.DotNet.Watcher.Internal
                 }
             }
 
-            _fileWatcher.OnFileChange += callback;
+            _fileWatcher.OnFileChange += FileChangedCallback;
             startedWatching();
             var changedFile = await tcs.Task;
-            _fileWatcher.OnFileChange -= callback;
+            _fileWatcher.OnFileChange -= FileChangedCallback;
 
             return changedFile;
         }

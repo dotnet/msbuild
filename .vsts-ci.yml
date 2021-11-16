@@ -7,29 +7,26 @@ trigger:
     - release/*
     - internal/release/3.*
     - internal/release/5.*
+    - internal/release/6.*
 
 variables:
   - name: teamName
     value: Roslyn-Project-System
-  - name: PB_PublishBlobFeedUrl
-    value: ''
   - name: _DotNetPublishToBlobFeed
     value: false
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCore
-  - name: _PublishToAzure
-    value: false
   - name: PostBuildSign
     value: true
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - name: PB_PublishBlobFeedUrl
-      value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
     - name: _DotNetPublishToBlobFeed
       value: true
-    - name: _PublishToAzure
-      value: true
+    - group: DotNet-MSRC-Storage
+    - name: _InternalRuntimeDownloadArgs
+      value: /p:DotNetRuntimeSourceFeed=https://dotnetclimsrc.blob.core.windows.net/dotnet
+        /p:DotNetRuntimeSourceFeedKey=$(dotnetclimsrc-read-sas-token-base64)
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-CLI-SDLValidation-Params
 
@@ -37,40 +34,49 @@ stages:
 - stage: build
   displayName: Build
   jobs:
+  - job: Publish_Build_Configuration
+    steps:
+      - publish: $(Build.SourcesDirectory)\eng\BuildConfiguration
+        artifact: BuildConfiguration
+        displayName: Publish Build Config
   - template: /eng/build.yml
     parameters:
       agentOs: Windows_NT
       pool:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          name: NetCorePublic-Pool
-          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+          name: NetCore1ESPool-Public
+          demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          name: NetCoreInternal-Pool
-          queue:  BuildPool.Windows.10.Amd64.VS2019.Pre
+          name: NetCore1ESPool-Internal
+          demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
       helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
       strategy:
         matrix:
           Build_Release:
             _BuildConfig: Release
+            _PublishArgs: '-publish /p:DotNetPublishUsingPipelines=true'
             ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-              _PublishType: none
               _SignType: test
               _Test: -test
             ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-              _PublishType: blob
               _SignType: real
               _Test: ''
+  - template: /eng/common/templates/job/source-build.yml
+    parameters:
+      platform:
+        name: 'Managed'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
   - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
         agentOs: Windows_NT_FullFramework
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCorePublic-Pool
-            queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+            name: NetCore1ESPool-Public
+            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCoreInternal-Pool
-            queue: BuildPool.Windows.10.Amd64.VS2019.Pre
+            name: NetCore1ESPool-Internal
+            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
@@ -79,12 +85,12 @@ stages:
           matrix:
             Build_Debug:
               _BuildConfig: Debug
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
               _Test: -test
             Build_Release:
               _BuildConfig: Release
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
               _Test: -test
 
@@ -93,16 +99,16 @@ stages:
         agentOs: Windows_NT_TestAsTools
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCorePublic-Pool
-            queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+            name: NetCore1ESPool-Public
+            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCoreInternal-Pool
-            queue: BuildPool.Windows.10.Amd64.VS2019.Pre
+            name: NetCore1ESPool-Internal
+            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
         strategy:
           matrix:
             Build_Debug:
               _BuildConfig: Debug
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
 
     - template: /eng/build.yml
@@ -110,11 +116,11 @@ stages:
         agentOs: Ubuntu_18_04
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCorePublic-Pool
-            queue: BuildPool.Ubuntu.1804.Amd64.Open
+            name: NetCore1ESPool-Public
+            demands: ImageOverride -equals Build.Ubuntu.1804.Amd64.Open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCoreInternal-Pool
-            queue: BuildPool.Ubuntu.1804.Amd64
+            name: NetCore1ESPool-Internal
+            demands: ImageOverride -equals Build.Ubuntu.1804.Amd64
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Ubuntu.1804.Amd64.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
@@ -123,7 +129,7 @@ stages:
           matrix:
             Build_Release:
               _BuildConfig: Release
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
 
     - template: /eng/build.yml
@@ -139,7 +145,7 @@ stages:
           matrix:
             Build_Release:
               _BuildConfig: Release
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
 
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:

@@ -159,4 +159,31 @@
   <data name="UnknownWorkloadPackKind" xml:space="preserve">
     <value>Unknown workload pack kind '{0}' at offset {1}</value>
   </data>
+  <data name="RedirectWorkloadHasOtherKeys" xml:space="preserve">
+    <value>Redirect workload '{0}' has keys other than 'redirect-to'</value>
+  </data>
+  <data name="UnresolvedWorkloadRedirect" xml:space="preserve">
+    <value>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</value>
+  </data>
+  <data name="ConflictingWorkloadDefinition" xml:space="preserve">
+    <value>Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</value>
+  </data>
+  <data name="ConflictingWorkloadPack" xml:space="preserve">
+    <value>Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</value>
+  </data>
+  <data name="DuplicateManifestID" xml:space="preserve">
+    <value>Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</value>
+  </data>
+  <data name="ManifestDependencyMissing" xml:space="preserve">
+    <value>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</value>
+  </data>
+  <data name="ManifestDependencyVersionTooLow" xml:space="preserve">
+    <value>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</value>
+  </data>
+  <data name="MissingBaseWorkload" xml:space="preserve">
+    <value>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</value>
+  </data>
+  <data name="CyclicWorkloadRedirect" xml:space="preserve">
+    <value>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</value>
+  </data>
 </root>

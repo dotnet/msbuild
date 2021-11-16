@@ -76,50 +76,52 @@ namespace Microsoft.NET.Build.Tests
             MainProject.ReferencedProjects.Add(ReferencedProject);
         }
 
-        private void RunTest(bool referencedExeShouldRun, [CallerMemberName] string callingMethod = null)
+        private void RunTest(string buildFailureCode = null, [CallerMemberName] string callingMethod = null)
         {
             var testProjectInstance = _testAssetsManager.CreateTestProject(MainProject, callingMethod: callingMethod, identifier: MainSelfContained.ToString() + "_" + ReferencedSelfContained.ToString());
 
             string outputDirectory;
 
+            TestCommand buildOrPublishCommand;
+
             if (TestWithPublish)
             {
                 var publishCommand = new PublishCommand(testProjectInstance);
 
-                publishCommand.Execute()
-                    .Should()
-                    .Pass();
-
                 outputDirectory = publishCommand.GetOutputDirectory(MainProject.TargetFrameworks, runtimeIdentifier: MainProject.RuntimeIdentifier).FullName;
+
+                buildOrPublishCommand = publishCommand;
             }
             else
             {
                 var buildCommand = new BuildCommand(testProjectInstance);
 
-                buildCommand.Execute()
+                outputDirectory = buildCommand.GetOutputDirectory(MainProject.TargetFrameworks, runtimeIdentifier: MainProject.RuntimeIdentifier).FullName;
+
+                buildOrPublishCommand = buildCommand;
+            }
+
+            if (buildFailureCode == null)
+            {
+                buildOrPublishCommand.Execute()
                     .Should()
                     .Pass();
 
-                outputDirectory = buildCommand.GetOutputDirectory(MainProject.TargetFrameworks, runtimeIdentifier: MainProject.RuntimeIdentifier).FullName;
-            }
+                var mainExePath = Path.Combine(outputDirectory, MainProject.Name + Constants.ExeSuffix);
 
-            var mainExePath = Path.Combine(outputDirectory, MainProject.Name + Constants.ExeSuffix);
+                var referencedExePath = Path.Combine(outputDirectory, ReferencedProject.Name + Constants.ExeSuffix);
 
-            var referencedExePath = Path.Combine(outputDirectory, ReferencedProject.Name + Constants.ExeSuffix);
-
-            new RunExeCommand(Log, mainExePath)
-                .Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOut("Main project");
+                new RunExeCommand(Log, mainExePath)
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOut("Main project");
 
 
-            var referencedExeResult = new RunExeCommand(Log, referencedExePath)
-                .Execute();
+                var referencedExeResult = new RunExeCommand(Log, referencedExePath)
+                    .Execute();
 
-            if (referencedExeShouldRun)
-            {
                 referencedExeResult
                     .Should()
                     .Pass()
@@ -128,12 +130,14 @@ namespace Microsoft.NET.Build.Tests
             }
             else
             {
-                referencedExeResult
+                //  Build should not succeed
+                buildOrPublishCommand.Execute()
                     .Should()
-                    .Fail();
+                    .Fail()
+                    .And
+                    .HaveStdOutContaining(buildFailureCode);
             }
         }
-
 
         [Theory]
         [InlineData(false, false)]
@@ -145,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
 
             CreateProjects();
 
-            RunTest(true);
+            RunTest();
         }
 
         [Fact]
@@ -153,28 +157,70 @@ namespace Microsoft.NET.Build.Tests
         {
             MainSelfContained = false;
             ReferencedSelfContained = false;
-            
+
             CreateProjects();
 
             ReferencedProject.TargetFrameworks = "netcoreapp3.1";
             ReferencedProject.AdditionalProperties["LangVersion"] = "9.0";
 
-            RunTest(true);
+            RunTest();
         }
 
         //  Having a self-contained and a framework-dependent app in the same folder is not supported (due to the way the host works).
         //  The referenced app will fail to run.  See here for more details: https://github.com/dotnet/sdk/pull/14488#issuecomment-725406998
         [Theory]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        public void ReferencedExeFailsToRun(bool mainSelfContained, bool referencedSelfContained)
+        [InlineData(true, false, "NETSDK1150")]
+        [InlineData(false, true, "NETSDK1151")]
+        public void ReferencedExeFailsToBuild(bool mainSelfContained, bool referencedSelfContained, string expectedFailureCode)
         {
             MainSelfContained = mainSelfContained;
             ReferencedSelfContained = referencedSelfContained;
 
             CreateProjects();
 
-            RunTest(referencedExeShouldRun: false);
+            RunTest(expectedFailureCode);
+        }
+
+        [Fact]
+        public void ReferencedExeCanRunWhenReferencesExeWithSelfContainedMismatchForDifferentTargetFramework()
+        {
+            MainSelfContained = true;
+            ReferencedSelfContained = false;
+
+            CreateProjects();
+
+            //  Reference project which is self-contained for net5.0, not self-contained for net5.0-windows.
+            ReferencedProject.TargetFrameworks = "net5.0;net5.0-windows";
+            ReferencedProject.ProjectChanges.Add(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                project.Root.Element(ns + "PropertyGroup")
+                    .Add(XElement.Parse(@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == 'net5.0'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
+            });
+
+            RunTest();
+        }
+
+        [Fact]
+        public void ReferencedExeFailsToBuildWhenReferencesExeWithSelfContainedMismatchForSameTargetFramework()
+        {
+            MainSelfContained = true;
+            ReferencedSelfContained = false;
+
+            CreateProjects();
+
+            //  Reference project which is self-contained for net5.0-windows, not self-contained for net5.0.
+            ReferencedProject.TargetFrameworks = "net5.0;net5.0-windows";
+            ReferencedProject.ProjectChanges.Add(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                project.Root.Element(ns + "PropertyGroup")
+                    .Add(XElement.Parse(@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == 'net5.0-windows'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
+            });
+
+            RunTest("NETSDK1150");
         }
 
         [Theory]
@@ -186,10 +232,10 @@ namespace Microsoft.NET.Build.Tests
             ReferencedSelfContained = selfContained;
 
             TestWithPublish = true;
-            
+
             CreateProjects();
 
-            RunTest(referencedExeShouldRun: true);
+            RunTest();
         }
 
         [Fact]
@@ -211,7 +257,80 @@ namespace Microsoft.NET.Build.Tests
                 ReferencedProject.AdditionalProperties["PublishTrimmed"] = "True";
             }
 
-            RunTest(referencedExeShouldRun: true);
+            RunTest();
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("xunit")]
+        [InlineData("mstest")]
+        public void TestProjectCanReferenceExe(string testTemplateName)
+        {
+            var testConsoleProject = new TestProject("ConsoleApp")
+            {
+                IsExe = true,
+                TargetFrameworks = "net5.0",
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testConsoleProject, identifier: testTemplateName);
+
+            var testProjectDirectory = Path.Combine(testAsset.TestRoot, "TestProject");
+            Directory.CreateDirectory(testProjectDirectory);
+
+            new DotnetCommand(Log, "new", testTemplateName)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new DotnetCommand(Log, "add", "reference", ".." + Path.DirectorySeparatorChar + testConsoleProject.Name)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new BuildCommand(Log, testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("xunit")]
+        [InlineData("mstest")]
+        public void ExeProjectCanReferenceTestProject(string testTemplateName)
+        {
+            var testConsoleProject = new TestProject("ConsoleApp")
+            {
+                IsExe = true,
+                TargetFrameworks = "net6.0",
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testConsoleProject, identifier: testTemplateName);
+
+            var testProjectDirectory = Path.Combine(testAsset.TestRoot, "TestProject");
+            Directory.CreateDirectory(testProjectDirectory);
+
+            new DotnetCommand(Log, "new", testTemplateName)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            string consoleProjectDirectory = Path.Combine(testAsset.Path, testConsoleProject.Name);
+
+            new DotnetCommand(Log, "add", "reference", ".." + Path.DirectorySeparatorChar + "TestProject")
+                .WithWorkingDirectory(consoleProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new BuildCommand(Log, consoleProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }

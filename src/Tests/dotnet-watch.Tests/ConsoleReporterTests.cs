@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Threading;
 using Xunit;
 
 namespace Microsoft.Extensions.Tools.Internal
@@ -43,6 +42,12 @@ namespace Microsoft.Extensions.Tools.Internal
             private readonly StringBuilder _out;
             private readonly StringBuilder _error;
 
+            event Action<ConsoleKeyInfo> IConsole.KeyPressed
+            {
+                add { }
+                remove { }
+            }
+
             public TestConsole()
             {
                 _out = new StringBuilder();
@@ -70,8 +75,6 @@ namespace Microsoft.Extensions.Tools.Internal
             {
                 ForegroundColor = default(ConsoleColor);
             }
-
-            public CancellationToken ListenForForceReloadRequest() => default;
 
             public TextWriter Out { get; }
             public TextWriter Error { get; }

@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Watcher.Internal
             _pollingThread.Start();
         }
 
-        public event EventHandler<string> OnFileChange;
+        public event EventHandler<(string, bool)> OnFileChange;
 
 #pragma warning disable CS0067 // not used
         public event EventHandler<Exception> OnError;
@@ -222,7 +222,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
                 if (OnFileChange != null)
                 {
-                    OnFileChange(this, path);
+                    OnFileChange(this, (path, false));
                 }
             }
         }

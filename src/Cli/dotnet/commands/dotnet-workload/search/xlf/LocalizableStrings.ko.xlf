@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Search for available workloads.</source>
+        <target state="translated">사용 가능한 워크로드를 검색합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DescriptionColumnName">
+        <source>Description</source>
+        <target state="translated">설명</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PlatformColumnName">
+        <source>Platforms</source>
+        <target state="translated">플랫폼</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdColumnName">
+        <source>Workload ID</source>
+        <target state="translated">워크로드 ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdStubArgumentDescription">
+        <source>The text to search for in the IDs and descriptions of available workloads.</source>
+        <target state="translated">ID에서 검색할 텍스트 및 사용 가능한 워크로드에 대한 설명입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdStubArgumentName">
+        <source>SEARCH_STRING</source>
+        <target state="translated">SEARCH_STRING</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
