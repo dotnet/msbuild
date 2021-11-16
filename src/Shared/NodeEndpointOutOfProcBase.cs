@@ -183,17 +183,16 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
-        /// <param name="pipeName">The name of the pipe to which we should connect.</param>
-        internal void InternalConstruct(string pipeName)
+        internal void InternalConstruct()
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pipeName, nameof(pipeName));
-
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
 
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
+
+            string pipeName = NamedPipeUtil.GetPipeNameOrPath();
 
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             if (!NativeMethodsShared.IsMono)

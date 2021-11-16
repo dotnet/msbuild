@@ -53,12 +53,14 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         internal bool Evaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject(
-                TryBoolEvaluate(state, out bool boolValue),
-                state.ElementLocation,
-                "ConditionNotBooleanDetail",
-                state.Condition,
-                GetExpandedValue(state));
+            if (!TryBoolEvaluate(state, out bool boolValue))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    state.ElementLocation,
+                    "ConditionNotBooleanDetail",
+                    state.Condition,
+                    GetExpandedValue(state));
+            }
 
             return boolValue;
         }

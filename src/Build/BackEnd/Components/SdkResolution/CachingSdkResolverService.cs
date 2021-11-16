@@ -47,7 +47,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             else
             {
                 // Get the dictionary for the specified submission if one is already added otherwise create a new dictionary for the submission.
-                ConcurrentDictionary<string, Lazy<SdkResult>> cached = _cache.GetOrAdd(submissionId, new ConcurrentDictionary<string, Lazy<SdkResult>>(MSBuildNameIgnoreCaseComparer.Default));
+                ConcurrentDictionary<string, Lazy<SdkResult>> cached = _cache.GetOrAdd(
+                    submissionId,
+                    _ => new ConcurrentDictionary<string, Lazy<SdkResult>>(MSBuildNameIgnoreCaseComparer.Default));
 
                 /*
                  * Get a Lazy<SdkResult> if available, otherwise create a Lazy<SdkResult> which will resolve the SDK with the SdkResolverService.Instance.  If multiple projects are attempting to resolve
