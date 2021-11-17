@@ -16,6 +16,10 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public const string X86 = "x86";
         /// <summary>
+        /// Represents the 64-bit AMD64 processor architecture.
+        /// </summary>
+        public const string X64 = "x64";
+        /// <summary>
         /// Represents the 64-bit IA64 processor architecture.
         /// </summary>
         public const string IA64 = nameof(IA64);
