@@ -57,7 +57,7 @@ namespace Microsoft.Build.Framework
             {
                 foreach (var kvp in Metadata)
                 {
-                    hashCode ^= StringComparer.OrdinalIgnoreCase.GetHashCode($"{kvp.Key}: {kvp.Value ?? "V"}");
+                    hashCode ^= StringComparer.OrdinalIgnoreCase.GetHashCode(kvp.Key) * (StringComparer.OrdinalIgnoreCase.GetHashCode(kvp.Value ?? "V") + 1);
                 }
             }
 
