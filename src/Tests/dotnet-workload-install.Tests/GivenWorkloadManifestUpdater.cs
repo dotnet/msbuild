@@ -305,9 +305,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData("build")]
-        [InlineData("publish")]
-        public void GivenWorkloadsAreOutOfDateUpdatesAreAdvertisedOnRestoringCommands(string commandName)
+        [InlineData("build", true)]
+        [InlineData("publish", true)]
+        [InlineData("run", false)]
+        public void GivenWorkloadsAreOutOfDateUpdatesAreAdvertisedOnRestoringCommands(string commandName, bool shouldShowUpdateNotification)
         {
             var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld", identifier: commandName)
                 .WithSource()
@@ -320,14 +321,28 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             File.WriteAllText(Path.Combine(testInstance.Path, ".dotnet", ".workloadAdvertisingManifestSentinal"), string.Empty);
 
             var command = new DotnetCommand(Log);
-            command
+            var commandResult = command
                 .WithEnvironmentVariable("DOTNET_CLI_HOME", testInstance.Path)
                 .WithWorkingDirectory(testInstance.Path)
-                .Execute(commandName)
+                .Execute(commandName);
+
+            commandResult
                 .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.WorkloadUpdatesAvailable);
+                .Pass();
+
+            if (shouldShowUpdateNotification)
+            {
+                commandResult
+                    .Should()
+                    .HaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.WorkloadUpdatesAvailable);
+            }
+            else
+            {
+                commandResult
+                    .Should()
+                    .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.WorkloadUpdatesAvailable);
+            }
+
         }
 
         private (WorkloadManifestUpdater, MockNuGetPackageDownloader, string) GetTestUpdater([CallerMemberName] string testName = "", Func<string, string> getEnvironmentVariable = null)
