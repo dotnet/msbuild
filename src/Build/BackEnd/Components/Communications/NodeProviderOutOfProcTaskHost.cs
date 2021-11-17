@@ -372,7 +372,9 @@ namespace Microsoft.Build.BackEnd
 
                     if (s_msbuildName == null)
                     {
-                        s_msbuildName = "MSBuild.exe";
+                        s_msbuildName = (hostContext & HandshakeOptions.NET) == HandshakeOptions.NET
+                            ? "MSBuild.dll"
+                            : "MSBuild.exe";
                     }
                 }
 
@@ -498,7 +500,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
-            if (AvailableNodes == 0)
+            if (AvailableNodes <= 0)
             {
                 ErrorUtilities.ThrowInternalError("All allowable nodes already created ({0}).", _nodeContexts.Count);
                 return false;
