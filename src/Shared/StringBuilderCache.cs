@@ -84,7 +84,7 @@ namespace Microsoft.Build.Shared
                 StringBuilderCache.t_cachedInstance = sb;
             }
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-            MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: sb.GetHashCode(), returningCapacity: sb.Capacity, type: sb.Capacity <= MAX_BUILDER_SIZE ? "sbc-returned" :  "sbc-discarded");
+            MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: sb.GetHashCode(), returningCapacity: sb.Capacity, returningLength: sb.Length, type: sb.Capacity <= MAX_BUILDER_SIZE ? "sbc-returned" :  "sbc-discarded");
 #endif
         }
 

@@ -497,9 +497,9 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(69, Keywords = Keywords.All)]
-        public void ReusableStringBuilderFactoryStop(int hash, int returningCapacity, string type)
+        public void ReusableStringBuilderFactoryStop(int hash, int returningCapacity, int returningLength, string type)
         {
-            WriteEvent(69, hash, returningCapacity, type);
+            WriteEvent(69, hash, returningCapacity, returningLength, type);
         }
 
 

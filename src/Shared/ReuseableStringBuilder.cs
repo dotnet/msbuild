@@ -174,12 +174,12 @@ namespace Microsoft.Build.Shared
             /// because we could otherwise hold a huge builder indefinitely.
             /// This size seems reasonable for MSBuild uses (mostly expression expansion)
             /// </summary>
-            private const int MaxBuilderSize = 1024;
+            private const int MaxBuilderSize = 10*1024*1024;
 
             /// <summary>
             /// The shared builder.
             /// </summary>
-            private static StringBuilder s_sharedBuilder;
+            private static StringBuilder s_sharedBuilder = new(MaxBuilderSize);
 
 #if DEBUG
             /// <summary>
@@ -273,6 +273,8 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal static void Release(StringBuilder returningBuilder)
             {
+                int returningLength = returningBuilder.Length;
+
                 // It's possible for someone to cause the builder to
                 // enlarge to such an extent that this static field
                 // would be a leak. To avoid that, only accept
@@ -288,7 +290,7 @@ namespace Microsoft.Build.Shared
                     returningBuilder.Clear(); // Clear before pooling
 
                     var oldSharedBuilder = Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, type: oldSharedBuilder == null ? "returned-set" : "returned-replace");
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, returningLength: returningLength, type: oldSharedBuilder == null ? "returned-set" : "returned-replace");
 
 #if DEBUG
                     Interlocked.Increment(ref s_accepts);
@@ -296,7 +298,7 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, type: "discarded");
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, returningLength: returningLength, type: "discarded");
 #if DEBUG
                     Interlocked.Increment(ref s_discards);
 #endif
