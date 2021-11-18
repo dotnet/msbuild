@@ -147,7 +147,7 @@ jobs:
 - job: RichCodeNavIndex
   displayName: "Windows Code Indexing"
   pool:
-    vmImage: 'windows-latest'
+    vmImage: 'windows-2022'
   steps:
   - task: BatchScript@1
     displayName: build.cmd
