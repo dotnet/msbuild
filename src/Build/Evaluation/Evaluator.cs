@@ -1844,7 +1844,7 @@ namespace Microsoft.Build.Evaluation
                     ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(sdkResult.Path, project),
                         throwOnFileNotExistsError, out projects);
 
-                    if (projects != null)
+                    if (projects.Any())
                     {
                         projectList = new List<ProjectRootElement>(projects);
                     }
@@ -2072,8 +2072,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                importList = importFilesEscaped.Length > 0 ? new List<ProjectRootElement>() : null;
-
                 foreach (string importFileEscaped in importFilesEscaped)
                 {
                     string importFileUnescaped = EscapingUtilities.UnescapeAll(importFileEscaped);
@@ -2189,6 +2187,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
+                            importList ??= new List<ProjectRootElement>();
                             importList.Add(importedProjectElement);
 
                             if (_lastModifiedProject == null || importedProjectElement.LastWriteTimeWhenRead > _lastModifiedProject.LastWriteTimeWhenRead)
