@@ -387,7 +387,7 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
-            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, overrideUsingTask.Equals("true", StringComparison.OrdinalIgnoreCase));
+            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, loggingService, buildEventContext, projectUsingTaskXml, overrideUsingTask.Equals("true", StringComparison.OrdinalIgnoreCase));
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
@@ -649,7 +649,17 @@ namespace Microsoft.Build.Execution
         /// Registers an evaluated using task tag for future
         /// consultation
         /// </summary>
-        private void RegisterTask(string taskName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord, bool overrideTask = false)
+        private void RegisterTask
+        (
+            string taskName,
+            AssemblyLoadInfo assemblyLoadInfo,
+            string taskFactory,
+            Dictionary<string, string> taskFactoryParameters,
+            RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
+            ILoggingService loggingService, BuildEventContext context,
+            ProjectUsingTaskElement projectUsingTaskInXml,
+            bool overrideTask = false
+        )
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, nameof(assemblyLoadInfo));
@@ -672,9 +682,17 @@ namespace Microsoft.Build.Execution
 
             RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
 
-            if (overrideTask && !overriddenTasks.ContainsKey(taskName))
+            if (overrideTask)
             {
-                overriddenTasks[taskName] = newRecord;
+                if (overriddenTasks.ContainsKey(taskName))
+                {
+                    loggingService.LogWarning(context, null, new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
+                }
+                else
+                {
+                    overriddenTasks[taskName] = newRecord;
+                    loggingService.LogComment(context, MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName);
+                }
             }
 
             registeredTaskEntries.Add(newRecord);

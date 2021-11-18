@@ -92,6 +92,12 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DuplicateOverrideUsingTaskElement">
+        <source>MSB4194: Attempted to create multiple overrides of the same task: {0}</source>
+        <target state="new">MSB4194: Attempted to create multiple overrides of the same task: {0}</target>
+        <note>
+    </note>
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: il file della cache dei risultati di output specificato è vuoto.</target>
@@ -218,6 +224,12 @@
         <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
         <target state="translated">MSB4265: è necessario specificare un singolo plug-in della cache del progetto, ma ne sono trovati più di uno: {0}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="OverrideUsingTaskElementCreated">
+        <source>MSB4194: Created an override using task: {0}</source>
+        <target state="new">MSB4194: Created an override using task: {0}</target>
+        <note>
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
