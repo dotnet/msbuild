@@ -725,7 +725,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
-            element.Architecture = "*";
+            element.Architecture = "x86";
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
@@ -740,23 +740,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
             // parameters that are a successful exact match - should retrieve from cache
-            RetrieveAndValidateRegisteredTaskRecord
-                (
-                    registry,
-                    exactMatchRequired: false,
-                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    architecture: XMakeAttributes.MSBuildArchitectureValues.any,
-                    shouldBeRetrieved: true,
-                    shouldBeRetrievedFromCache: true,
-                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
-                );
-
-            // parameters that would be a successful fuzzy match - should still be retrieved from the cache
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
@@ -766,7 +753,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
+                );
+
+            // parameters that would be a successful fuzzy match - should still be retrieved from the cache
+            RetrieveAndValidateRegisteredTaskRecord
+                (
+                    registry,
+                    exactMatchRequired: false,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
+                    architecture: XMakeAttributes.MSBuildArchitectureValues.any,
+                    shouldBeRetrieved: true,
+                    shouldBeRetrievedFromCache: true,
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
             // parameters that do not match -- but would match the previous fuzzy match request. Should NOT retrieve anything
@@ -774,7 +774,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 (
                     registry,
                     exactMatchRequired: false,
-                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr2,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
                     architecture: XMakeAttributes.MSBuildArchitectureValues.x64,
                     shouldBeRetrieved: false,
                     shouldBeRetrievedFromCache: false
@@ -786,11 +786,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     registry,
                     exactMatchRequired: false,
                     runtime: XMakeAttributes.MSBuildRuntimeValues.any,
-                    architecture: XMakeAttributes.MSBuildArchitectureValues.any,
+                    architecture: XMakeAttributes.MSBuildArchitectureValues.x86,
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
         }
 
@@ -808,7 +808,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
-            element.Architecture = null;
+            element.Architecture = "x86";
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
@@ -823,7 +823,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
             // parameters that do not match at all - shouldn't retrieve anything
@@ -843,11 +843,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     registry,
                     exactMatchRequired: false,
                     runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    architecture: XMakeAttributes.MSBuildArchitectureValues.any,
+                    architecture: XMakeAttributes.MSBuildArchitectureValues.x86,
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
         }
 
@@ -866,12 +866,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
-            element.Architecture = "*"; // was x86
+            element.Architecture = "x86";
             elementList.Add(element);
 
             element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
-            element.Runtime = "CLR2"; // was *
-            element.Architecture = "*"; // was x64
+            element.Runtime = "*";
+            element.Architecture = "x64";
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
@@ -886,10 +886,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
-            // parameters that are a successful exact match for CLR4|* -- should come from cache
+            // parameters that are a successful exact match for CLR4|x86 -- should come from cache
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
@@ -899,49 +899,49 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
-            // parameters that would be a successful fuzzy match for either, so should get the one in the cache (CLR4|*)
+            // parameters that would be a successful fuzzy match for either, so should get the one in the cache (CLR4|x86)
+            RetrieveAndValidateRegisteredTaskRecord
+                (
+                    registry,
+                    exactMatchRequired: false,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
+                    architecture: XMakeAttributes.MSBuildArchitectureValues.any,
+                    shouldBeRetrieved: true,
+                    shouldBeRetrievedFromCache: true,
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
+                );
+
+            // parameters that match *|x64 - should retrieve that
+            RetrieveAndValidateRegisteredTaskRecord
+                (
+                    registry,
+                    exactMatchRequired: false,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
+                    architecture: XMakeAttributes.MSBuildArchitectureValues.x64,
+                    shouldBeRetrieved: true,
+                    shouldBeRetrievedFromCache: false,
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
+                );
+
+            // match CLR4|x86 again - comes from the cache
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
                     exactMatchRequired: false,
                     runtime: XMakeAttributes.MSBuildRuntimeValues.any,
-                    architecture: XMakeAttributes.MSBuildArchitectureValues.any,
+                    architecture: XMakeAttributes.MSBuildArchitectureValues.x86,
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
-            // parameters that match CLR2|* - should retrieve that
-            RetrieveAndValidateRegisteredTaskRecord
-                (
-                    registry,
-                    exactMatchRequired: false,
-                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr2,
-                    architecture: XMakeAttributes.MSBuildArchitectureValues.x64,
-                    shouldBeRetrieved: true,
-                    shouldBeRetrievedFromCache: false,
-                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr2,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
-                );
-
-            // match CLR4|* again - comes from the cache
-            RetrieveAndValidateRegisteredTaskRecord
-                (
-                    registry,
-                    exactMatchRequired: false,
-                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    architecture: XMakeAttributes.MSBuildArchitectureValues.x64,
-                    shouldBeRetrieved: true,
-                    shouldBeRetrievedFromCache: true,
-                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
-                );
-
-            // match clr2|* again, should be a fuzzy cache hit
+            // match *|x64 again
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
@@ -950,21 +950,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     architecture: XMakeAttributes.MSBuildArchitectureValues.x64,
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
-                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr2,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
                 );
 
-            // match clr4|* again -- should still be a cache hit
+            // CLR2|x86 should not match either task record
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
                     exactMatchRequired: false,
-                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    architecture: XMakeAttributes.MSBuildArchitectureValues.any,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr2,
+                    architecture: XMakeAttributes.MSBuildArchitectureValues.x86,
+                    shouldBeRetrieved: false,
+                    shouldBeRetrievedFromCache: false
+                );
+
+            // match *|x64 again -- should still be a cache hit
+            RetrieveAndValidateRegisteredTaskRecord
+                (
+                    registry,
+                    exactMatchRequired: false,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr2,
+                    architecture: XMakeAttributes.MSBuildArchitectureValues.x64,
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
-                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
                 );
         }
 
@@ -985,12 +996,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
-            element.Architecture = "*";
+            element.Architecture = "x86";
             elementList.Add(element);
 
             element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
-            element.Runtime = "CLR2";
-            element.Architecture = "*";
+            element.Runtime = "*";
+            element.Architecture = "x64";
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
@@ -1000,26 +1011,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 (
                     registry,
                     exactMatchRequired: false,
-                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr2,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
                     architecture: XMakeAttributes.MSBuildArchitectureValues.x64,
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
-                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr2,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
                 );
 
-            // *|* -- could be filled by either, would normally be filled by CLR4|* (since it was registered first),
-            // but since CLR2|* is in the cache already, we return that one.
+            // CLR4|* -- could be filled by either, would normally be filled by CLR4|x86 (since it was registered first),
+            // but since *|x64 is in the cache already, we return that one.
             RetrieveAndValidateRegisteredTaskRecord
                 (
                     registry,
                     exactMatchRequired: false,
-                    runtime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
                     architecture: XMakeAttributes.MSBuildArchitectureValues.any,
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
-                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr2,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
                 );
         }
 
@@ -1037,7 +1048,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
-            element.Architecture = "*";
+            element.Architecture = "x86";
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
@@ -1048,11 +1059,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     registry,
                     exactMatchRequired: false,
                     runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    architecture: XMakeAttributes.MSBuildArchitectureValues.x86,
+                    architecture: XMakeAttributes.MSBuildArchitectureValues.any,
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
             // CLR4|x64 should not match
@@ -1060,7 +1071,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 (
                     registry,
                     exactMatchRequired: false,
-                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr2,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
                     architecture: XMakeAttributes.MSBuildArchitectureValues.x64,
                     shouldBeRetrieved: false,
                     shouldBeRetrievedFromCache: false
@@ -1076,7 +1087,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
             // try CLR4|x64 again -- should also come from the catch (but needless to say, still not be a match)
@@ -1084,7 +1095,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 (
                     registry,
                     exactMatchRequired: false,
-                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr2,
+                    runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
                     architecture: XMakeAttributes.MSBuildArchitectureValues.x64,
                     shouldBeRetrieved: false,
                     shouldBeRetrievedFromCache: true
@@ -1107,7 +1118,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
             element.Runtime = "CLR4";
-            element.Architecture = "*";
+            element.Architecture = "x86";
             elementList.Add(element);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
@@ -1126,7 +1137,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
             // And if we try again, we should get it from the cache this time.
@@ -1138,7 +1149,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
 
             taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1157,7 +1168,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: true,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.clr4,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.any
+                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
                 );
         }
 
