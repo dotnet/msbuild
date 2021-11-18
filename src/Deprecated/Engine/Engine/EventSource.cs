@@ -520,8 +520,8 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Raises the given event to all registered loggers. This method down-casts the events
-        /// extracted from the queue.
+        /// Raises the given event to all registered loggers.
+        /// This method casts the events extracted from the queue to a more specific type.
         /// </summary>
         /// <param name="e"></param>
         internal void RaiseStronglyTypedEvent(BuildEventArgs e)

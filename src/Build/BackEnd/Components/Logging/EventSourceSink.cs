@@ -201,8 +201,8 @@ namespace Microsoft.Build.BackEnd.Logging
         #region IEventSink Methods
 
         /// <summary>
-        /// Raises the given event to all registered loggers. This method down-casts the events
-        /// extracted from the queue.
+        /// Raises the given event to all registered loggers.
+        /// This method casts the events extracted from the queue to a more specific type.
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs</param>
         /// <param name="sinkId">Note this is not used in the eventsource sink</param>
@@ -212,8 +212,8 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Raises the given event to all registered loggers. This method down-casts the events
-        /// extracted from the queue.
+        /// Raises the given event to all registered loggers.
+        /// This method casts the events extracted from the queue to a more specific type.
         /// </summary>
         public void Consume(BuildEventArgs buildEvent)
         {
