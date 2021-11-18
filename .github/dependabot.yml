@@ -4,4 +4,4 @@ updates:
     directory: "/eng/dependabot"
     open-pull-requests-limit: 3
     schedule:
-      interval: "daily"
+      interval: "weekly"
