@@ -12,7 +12,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     public sealed class TaskHostFactory_Tests
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/5158")]
         [Trait("Category", "mono-osx-failing")]
         public void TaskNodesDieAfterBuild()
         {

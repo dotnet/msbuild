@@ -2199,7 +2199,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            return new List<string>();
+            return pathsList ?? new List<string>();
         }
 
         /// <summary>

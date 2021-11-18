@@ -18,30 +18,34 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (LeftChild.CanBoolEvaluate(state),
-                     state.ElementLocation,
-                     "ExpressionDoesNotEvaluateToBoolean",
-                     LeftChild.GetUnexpandedValue(state),
-                     LeftChild.GetExpandedValue(state),
-                     state.Condition);
+            if (!LeftChild.TryBoolEvaluate(state, out bool leftBool))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    state.ElementLocation,
+                    "ExpressionDoesNotEvaluateToBoolean",
+                    LeftChild.GetUnexpandedValue(state),
+                    LeftChild.GetExpandedValue(state),
+                    state.Condition);
+            }
 
-            if (LeftChild.BoolEvaluate(state))
+            if (leftBool)
             {
                 // Short circuit
                 return true;
             }
             else
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (RightChild.CanBoolEvaluate(state),
-                     state.ElementLocation,
-                     "ExpressionDoesNotEvaluateToBoolean",
-                     RightChild.GetUnexpandedValue(state),
-                     RightChild.GetExpandedValue(state),
-                     state.Condition);
+                if (!RightChild.TryBoolEvaluate(state, out bool rightBool))
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(
+                        state.ElementLocation,
+                        "ExpressionDoesNotEvaluateToBoolean",
+                        RightChild.GetUnexpandedValue(state),
+                        RightChild.GetExpandedValue(state),
+                        state.Condition);
+                }
 
-                return RightChild.BoolEvaluate(state);
+                return rightBool;
             }
         }
 

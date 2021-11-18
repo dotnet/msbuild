@@ -12,7 +12,6 @@ using System.Runtime.Remoting;
 #endif
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
@@ -442,9 +441,8 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject
+                    ProjectErrorUtilities.ThrowInvalidProject
                     (
-                        false,
                         parameterLocation,
                         "UnsupportedTaskParameterTypeError",
                         parameter.PropertyType.FullName,
@@ -482,9 +480,8 @@ namespace Microsoft.Build.BackEnd
 
                 // We do not recover from a task exception while getting outputs,
                 // so do not merely set gatheredGeneratedOutputsSuccessfully = false; here
-                ProjectErrorUtilities.VerifyThrowInvalidProject
+                ProjectErrorUtilities.ThrowInvalidProject
                 (
-                    false,
                     parameterLocation,
                     "FailedToRetrieveTaskOutputs",
                     _taskName,
@@ -500,9 +497,8 @@ namespace Microsoft.Build.BackEnd
                     throw;
                 }
 
-                ProjectErrorUtilities.VerifyThrowInvalidProject
+                ProjectErrorUtilities.ThrowInvalidProject
                 (
-                    false,
                     parameterLocation,
                     "FailedToRetrieveTaskOutputs",
                     _taskName,
@@ -1183,11 +1179,9 @@ namespace Microsoft.Build.BackEnd
                         {
                             // We only allow a single item to be passed into a parameter of ITaskItem.
 
-                            // Some of the computation (expansion) here is expensive, so don't make the above
-                            // "if" statement directly part of the first param to VerifyThrowInvalidProject.
-                            ProjectErrorUtilities.VerifyThrowInvalidProject
+                            // Some of the computation (expansion) here is expensive, so don't switch to VerifyThrowInvalidProject.
+                            ProjectErrorUtilities.ThrowInvalidProject
                                 (
-                                false,
                                 parameterLocation,
                                 "CannotPassMultipleItemsIntoScalarParameter",
                                 _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation),

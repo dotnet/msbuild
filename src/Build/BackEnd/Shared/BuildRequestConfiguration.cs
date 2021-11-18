@@ -768,7 +768,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     var fragments = items.SelectMany(i => ExpressionShredder.SplitSemiColonSeparatedList(i.EvaluatedInclude));
-                    var glob = new CompositeGlob(
+                    var glob = CompositeGlob.Create(
                         fragments
                             .Select(s => MSBuildGlob.Parse(Project.Directory, s)));
 

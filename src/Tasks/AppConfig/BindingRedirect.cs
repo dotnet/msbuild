@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
                     throw;
                 }
 
-                ErrorUtilities.VerifyThrowArgument(false, e, "AppConfig.InvalidOldVersionAttribute", e.Message);
+                ErrorUtilities.ThrowArgument(e, "AppConfig.InvalidOldVersionAttribute", e.Message);
             }
 
             string newVersionAttribute = reader.GetAttribute("newVersion");
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Tasks
                     throw;
                 }
 
-                ErrorUtilities.VerifyThrowArgument(false, e, "AppConfig.InvalidNewVersionAttribute", e.Message);
+                ErrorUtilities.ThrowArgument(e, "AppConfig.InvalidNewVersionAttribute", e.Message);
             }
         }
     }

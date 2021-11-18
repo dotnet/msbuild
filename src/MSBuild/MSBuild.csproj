@@ -105,6 +105,7 @@
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
+    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\NativeMethodsShared.cs">
@@ -229,6 +230,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">

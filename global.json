@@ -4,17 +4,12 @@
   },
   "tools": {
     "dotnet": "6.0.100-rc.1.21458.32",
-    "runtimes": {
-      "dotnet/x64": [
-        "2.1.7"
-      ]
-    },
     "vs": {
       "version": "16.0"
     }
   },
   "msbuild-sdks": {
     "Microsoft.Build.CentralPackageVersions": "2.0.1",
-    "Microsoft.DotNet.Arcade.Sdk": "6.0.0-beta.21460.7"
+    "Microsoft.DotNet.Arcade.Sdk": "6.0.0-beta.21519.3"
   }
 }

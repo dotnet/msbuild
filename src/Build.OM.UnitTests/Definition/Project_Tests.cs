@@ -3733,7 +3733,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var getAllGlobsResult = ObjectModelHelpers.CreateInMemoryProject(projectContents).GetAllGlobs();
 
-            var uberGlob = new CompositeGlob(getAllGlobsResult.Select(r => r.MsBuildGlob).ToImmutableArray());
+            var uberGlob = CompositeGlob.Create(getAllGlobsResult.Select(r => r.MsBuildGlob));
 
             foreach (var matchingString in stringsThatShouldMatch)
             {

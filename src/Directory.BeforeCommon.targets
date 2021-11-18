@@ -80,7 +80,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_SYSTEMPAGESIZE</DefineConstants>
     <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
     <DefineConstants>$(DefineConstants);FEATURE_TASK_GENERATERESOURCES</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_TASKHOST</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
@@ -140,6 +139,11 @@
       Resetting it here corrects it because $(IntermediateOutputPath) includes the TFM at this point
     -->
     <DocumentationFile Condition=" '$(GenerateDocumentationFile)' == 'true' ">$(IntermediateOutputPath)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MonoBuild)' != 'true' and $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">
+    <DefineConstants>$(DefineConstants);FEATURE_MSIOREDIST</DefineConstants>
+    <FeatureMSIORedist>true</FeatureMSIORedist>
   </PropertyGroup>
 
 </Project>

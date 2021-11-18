@@ -498,6 +498,7 @@ namespace Microsoft.Build.Definition
     public partial class ProjectOptions
     {
         public ProjectOptions() { }
+        public Microsoft.Build.FileSystem.IDirectoryCacheFactory DirectoryCacheFactory { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.Context.EvaluationContext EvaluationContext { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ProjectLoadSettings LoadSettings { get { throw null; } set { } }
@@ -1504,6 +1505,19 @@ namespace Microsoft.Build.Experimental.ProjectCache
 }
 namespace Microsoft.Build.FileSystem
 {
+    public delegate bool FindPredicate(ref System.ReadOnlySpan<char> fileName);
+    public delegate TResult FindTransform<TResult>(ref System.ReadOnlySpan<char> fileName);
+    public partial interface IDirectoryCache
+    {
+        bool DirectoryExists(string path);
+        System.Collections.Generic.IEnumerable<TResult> EnumerateDirectories<TResult>(string path, string pattern, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
+        System.Collections.Generic.IEnumerable<TResult> EnumerateFiles<TResult>(string path, string pattern, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
+        bool FileExists(string path);
+    }
+    public partial interface IDirectoryCacheFactory
+    {
+        Microsoft.Build.FileSystem.IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId);
+    }
     public abstract partial class MSBuildFileSystemBase
     {
         protected MSBuildFileSystemBase() { }
@@ -1528,6 +1542,7 @@ namespace Microsoft.Build.Globbing
         public CompositeGlob(params Microsoft.Build.Globbing.IMSBuildGlob[] globs) { }
         public CompositeGlob(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) { }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> Globs { get { throw null; } }
+        public static Microsoft.Build.Globbing.IMSBuildGlob Create(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) { throw null; }
         public bool IsMatch(string stringToMatch) { throw null; }
     }
     public partial interface IMSBuildGlob
@@ -1546,10 +1561,10 @@ namespace Microsoft.Build.Globbing
         public static Microsoft.Build.Globbing.MSBuildGlob Parse(string fileSpec) { throw null; }
         public static Microsoft.Build.Globbing.MSBuildGlob Parse(string globRoot, string fileSpec) { throw null; }
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        public partial struct MatchInfoResult
+        public readonly partial struct MatchInfoResult
         {
-            private object _dummy;
-            private int _dummyPrimitive;
+            private readonly object _dummy;
+            private readonly int _dummyPrimitive;
             public string FilenamePartMatchGroup { get { throw null; } }
             public string FixedDirectoryPartMatchGroup { get { throw null; } }
             public bool IsMatch { get { throw null; } }

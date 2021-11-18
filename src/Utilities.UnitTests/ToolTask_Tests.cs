@@ -681,18 +681,19 @@ namespace Microsoft.Build.UnitTests
         {
             string[] expectedCmdPath;
             string shellName;
+            string cmdPath;
             if (NativeMethodsShared.IsWindows)
             {
-                expectedCmdPath = new[] { Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe") };
+                expectedCmdPath = new[] { Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe").ToUpperInvariant() };
                 shellName = "cmd.exe";
+                cmdPath = ToolTask.FindOnPath(shellName).ToUpperInvariant();
             }
             else
             {
                 expectedCmdPath = new[] { "/bin/sh", "/usr/bin/sh" };
                 shellName = "sh";
+                cmdPath = ToolTask.FindOnPath(shellName);
             }
-
-            string cmdPath = ToolTask.FindOnPath(shellName);
 
             cmdPath.ShouldBeOneOf(expectedCmdPath);
         }

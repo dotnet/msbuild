@@ -90,8 +90,7 @@ namespace Microsoft.Build.Evaluation
             // We haven't implemented any other "functions"
             else
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject(
-                    false,
+                ProjectErrorUtilities.ThrowInvalidProject(
                     state.ElementLocation,
                     "UndefinedFunctionCall",
                     state.Condition,
