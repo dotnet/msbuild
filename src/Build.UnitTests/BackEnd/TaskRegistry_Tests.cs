@@ -622,8 +622,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 );
         }
 
-        [Fact]
-        public void ArchitectureSpecificTask_ShouldAlwaysReturnFirst()
+        [Theory]
+        [InlineData("x64","true","x86","", "x64")] // override wins
+        [InlineData("x64", "false", "x86", "true", "x86")] // override wins
+        [InlineData("x64","true","x86","true", "x64")] // first one wins
+        [InlineData("x86", "true", "x64", "true", "x86")] // first one wins
+        public void OverriddenTask_AlwaysWins(string firstArch, string firstOverride, string secondArch, string secondOverride, string expectedArch)
         {
             Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
@@ -631,10 +635,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectRootElement project = ProjectRootElement.Create();
 
             ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
+            element.Architecture = firstArch;
+            element.Override = firstOverride;
             elementList.Add(element);
 
             ProjectUsingTaskElement secondElement = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
-            secondElement.Architecture = "x86";
+            secondElement.Architecture = secondArch;
+            secondElement.Override = secondOverride;
             elementList.Add(secondElement);
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
@@ -649,7 +656,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
+                    expectedArchitecture: expectedArch
                 );
 
             // no parameters, fuzzy match
@@ -662,52 +669,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: true,
                     shouldBeRetrievedFromCache: false,
                     expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x86
-                );
-        }
-
-        [Fact]
-        public void ArchitectureSpecificTask_FirstOneWins()
-        {
-            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
-
-            List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
-            ProjectRootElement project = ProjectRootElement.Create();
-
-            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
-            element.Architecture = "x64";
-            elementList.Add(element);
-
-            ProjectUsingTaskElement secondElement = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
-            secondElement.Architecture = "x86";
-            elementList.Add(secondElement);
-
-            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-
-            // no parameters
-            RetrieveAndValidateRegisteredTaskRecord
-                (
-                    registry,
-                    exactMatchRequired: false,
-                    runtime: null,
-                    architecture: null,
-                    shouldBeRetrieved: true,
-                    shouldBeRetrievedFromCache: false,
-                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
-                );
-
-            // no parameters, fuzzy match
-            RetrieveAndValidateRegisteredTaskRecord
-                (
-                    registry,
-                    exactMatchRequired: false,
-                    runtime: null,
-                    architecture: null,
-                    shouldBeRetrieved: true,
-                    shouldBeRetrievedFromCache: false,
-                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
-                    expectedArchitecture: XMakeAttributes.MSBuildArchitectureValues.x64
+                    expectedArchitecture: expectedArch
                 );
         }
 
