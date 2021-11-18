@@ -412,10 +412,9 @@ namespace Microsoft.Build.Execution
         )
         {
             TaskFactoryWrapper taskFactory = null;
-            bool retrievedFromCache = false;
             
             // If there are no usingtask tags in the project don't bother caching or looking for tasks locally
-            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
+            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out bool retrievedFromCache);
 
             if (record != null)
             {
