@@ -1844,9 +1844,17 @@ namespace Microsoft.Build.Evaluation
                     ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(sdkResult.Path, project),
                         throwOnFileNotExistsError, out projects);
 
+                    if (projects != null)
+                    {
+                        projectList = new List<ProjectRootElement>(projects);
+                    }
+
                     if (sdkResult.AdditionalPaths != null)
                     {
-                        projectList = sdkResult.AdditionalPaths.Count > 0 ? new List<ProjectRootElement>() : null;
+                        if (projectList == null && sdkResult.AdditionalPaths.Count > 0)
+                        {
+                            projectList = new List<ProjectRootElement>();
+                        }
 
                         foreach (var additionalPath in sdkResult.AdditionalPaths)
                         {
