@@ -150,18 +150,27 @@ namespace Microsoft.Build.UnitTests
             output.ShouldBe(input + Environment.NewLine);
         }
 
+        /// <summary>
+        /// Although consoles interprets \r as return carrier to the begging of the line, we treat \r as NewLine, as it is most consistent with how file viewers interpret it and
+        ///    because logs are rarely read directly from console but more often from log files.
+        /// Consequently \n\r shall be interpreted not as sequence but two control characters with equivalent of \n\n.
+        /// </summary>
         [Theory]
-        [InlineData("a\n\rb")]
-        [InlineData("a\rb")]
-        [InlineData("\n\ra")]
-        [InlineData("\ra")]
-        [InlineData("a\nb\n\r")]
-        [InlineData("a\nb\r")]
-        public void NonStandardNewLines_DoNotCrash(string input)
+        [InlineData("a\n\rb", "a\n\n  b")]
+        [InlineData("a\rb", "a\n  b")]
+        [InlineData("\n\ra", "\n\n  a")]
+        [InlineData("\ra", "\n  a")]
+        [InlineData("a\nb\n\r", "a\n  b\n\n")]
+        [InlineData("a\nb\r", "a\n  b\n")]
+        public void NonStandardNewLines_AlignAsExpected(string input, string expected)
         {
-            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: false);
+            expected = expected.Replace("\n", Environment.NewLine) + Environment.NewLine;
 
-            string _ = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 0);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true);
+
+            string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 2);
+
+            output.ShouldBe(expected);
         }
 
         [Theory]
