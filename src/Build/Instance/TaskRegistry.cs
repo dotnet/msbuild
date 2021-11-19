@@ -474,7 +474,7 @@ namespace Microsoft.Build.Execution
             // was this task overridden?
             if (overriddenTasks.TryGetValue(taskName, out RegisteredTaskRecord rec))
             {
-                targetLoggingContext.LogComment(MessageImportance.Low, "OverriddenTaskChosen", taskName);
+                targetLoggingContext.LogComment(MessageImportance.Low, "OverriddenUsingTaskElementChosen", taskName);
                 return rec;
             }
 
