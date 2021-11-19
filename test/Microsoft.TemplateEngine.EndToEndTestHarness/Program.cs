@@ -32,37 +32,18 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             VerificationLookup["file_does_not_contain"] = CheckFileDoesNotContain;
 
             int batteryCount = int.Parse(args[0], CultureInfo.InvariantCulture);
-            string[] passthroughArgs = new string[args.Length - 2 - batteryCount];
             string outputPath = args[batteryCount + 1];
 
-            for (int i = 0; i < passthroughArgs.Length; ++i)
-            {
-                passthroughArgs[i] = args[i + 2 + batteryCount];
-            }
-
-            string home = "%USERPROFILE%";
-
-            if (Path.DirectorySeparatorChar == '/')
-            {
-                home = "%HOME%";
-            }
+            List<string> passThroughArgs = new List<string>();
+            passThroughArgs.AddRange(args.Skip(2 + batteryCount));
+            passThroughArgs.Add("--debug:ephemeral-hive");
 
             ITemplateEngineHost host = CreateHost();
-            string profileDir = Environment.ExpandEnvironmentVariables(home);
-
-            if (string.IsNullOrWhiteSpace(profileDir))
-            {
-                Console.Error.WriteLine("Could not determine home directory");
-                return 0;
-            }
-
-            string hivePath = Path.Combine(profileDir, ".tetestharness");
-            host.VirtualizeDirectory(hivePath);
             host.VirtualizeDirectory(outputPath);
 
             var command = NewCommandFactory.Create(CommandName, host, new TelemetryLogger(null), new NewCommandCallbacks());
 
-            int result = ParserFactory.CreateParser(command).Parse(passthroughArgs).Invoke();
+            int result = ParserFactory.CreateParser(command).Parse(passThroughArgs.ToArray()).Invoke();
 
             bool verificationsPassed = false;
 
