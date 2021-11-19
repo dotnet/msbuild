@@ -244,7 +244,6 @@ namespace Microsoft.Build.Utilities
         public const string ARM64 = "ARM64";
         public const string IA64 = "IA64";
         public const string MSIL = "MSIL";
-        public const string X64 = "x64";
         public const string X86 = "x86";
         public static string CurrentProcessArchitecture { get { throw null; } }
     }
