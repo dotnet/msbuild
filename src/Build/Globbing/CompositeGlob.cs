@@ -62,7 +62,7 @@ namespace Microsoft.Build.Globbing
             // Threadpools are a scarce resource in Visual Studio, do not use them.
             //return Globs.AsParallel().Any(g => g.IsMatch(stringToMatch));
 
-            return _globs.Any(g => g.IsMatch(stringToMatch));
+            return _globs.Any(static (glob, str) => glob.IsMatch(str), stringToMatch);
         }
 
         /// <summary>
