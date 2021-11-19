@@ -4,11 +4,6 @@
   },
   "tools": {
     "dotnet": "6.0.100",
-    "runtimes": {
-      "dotnet/x64": [
-        "2.1.7"
-      ]
-    },
     "vs": {
       "version": "16.0"
     }
