@@ -5,7 +5,6 @@
 
 using System.CommandLine;
 using System.CommandLine.Builder;
-using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 
 namespace Dotnet_new3

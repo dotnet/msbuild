@@ -2,6 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.TemplateEngine.Cli;
+using Microsoft.TemplateEngine.Edge;
 
 namespace Dotnet_new3
 {
@@ -27,6 +31,8 @@ namespace Dotnet_new3
             this.AddOption(DebugEmitTelemetryOption);
             this.AddOption(DebugDisableBuiltInTemplatesOption);
             this.AddArgument(RemainingTokensArgument);
+            this.AddCommand(new CompleteCommand());
+            this.Handler = CommandHandler.Create<ParseResult>(Run);
         }
 
         internal static Option<bool> DebugEmitTelemetryOption => _debugEmitTelemetryOption;
@@ -34,5 +40,16 @@ namespace Dotnet_new3
         internal static Option<bool> DebugDisableBuiltInTemplatesOption => _debugDisableBuiltInTemplatesOption;
 
         internal static Argument<string[]> RemainingTokensArgument => _remainingTokensArgument;
+
+        internal Task<int> Run(ParseResult result)
+        {
+            DefaultTemplateEngineHost host = HostFactory.CreateHost(result.GetValueForOption(DebugDisableBuiltInTemplatesOption));
+            ITelemetryLogger telemetryLogger = new TelemetryLogger(null, result.GetValueForOption(DebugEmitTelemetryOption));
+            string[] remainingArgs = result.GetValueForArgument(RemainingTokensArgument) ?? Array.Empty<string>();
+
+            Command newCommand = NewCommandFactory.Create(Name, host, telemetryLogger, new NewCommandCallbacks());
+
+            return ParserFactory.CreateParser(newCommand).Parse(remainingArgs).InvokeAsync();
+        }
     }
 }
