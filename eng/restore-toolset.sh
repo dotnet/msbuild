@@ -21,7 +21,7 @@ function InitializeCustomSDKToolset {
 
   InitializeDotNetCli true
   
-  cp "$DOTNET_INSTALL_DIR/dotnet" dotnet.bak
+  cp "$DOTNET_INSTALL_DIR/dotnet" "$DOTNET_INSTALL_DIR/dotnet.bak"
 
   if [[ "$DISTRO" != "ubuntu" || "$MAJOR_VERSION" -le 16 ]]; then
     InstallDotNetSharedFramework "1.0.5"
