@@ -17,6 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class TemplateCommand : Command, ICommandHandler
     {
+        private static readonly string[] _helpAliases = new[] { "-h", "/h", "--help", "-?", "/?" };
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly IEngineEnvironmentSettings _environmentSettings;
         private readonly InstantiateCommand _instantiateCommand;
@@ -96,6 +97,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             AddTemplateOptionsToCommand(template);
             this.Handler = this;
         }
+
+        internal static IReadOnlyList<string> KnownHelpAliases => _helpAliases;
 
         internal Option<string> OutputOption { get; } = SharedOptionsFactory.CreateOutputOption();
 
@@ -193,10 +196,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 reservedAliases.Add(alias);
             }
 
-            //TODO: is it possible to get list of aliases for help?
-            reservedAliases.Add("-h");
-            reservedAliases.Add("--help");
-
+            foreach (string helpAlias in KnownHelpAliases)
+            {
+                reservedAliases.Add(helpAlias);
+            }
             return reservedAliases;
         }
 
