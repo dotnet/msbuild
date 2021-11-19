@@ -27,7 +27,7 @@ namespace Microsoft.Build.Globbing
         /// </summary>
         /// <param name="globs">Children globs. Input gets shallow cloned</param>
         public CompositeGlob(IEnumerable<IMSBuildGlob> globs)
-            : this(globs is ImmutableArray<IMSBuildGlob> immutableGlobs ? immutableGlobs : globs.ToImmutableArray())
+            : this(globs.ToImmutableArray())
         {}
 
         /// <summary>
