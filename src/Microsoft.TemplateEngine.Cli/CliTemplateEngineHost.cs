@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -17,8 +16,6 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
         private string? _outputPath;
-
-        internal CliTemplateEngineHost(ITemplateEngineHost baseHost, INewCommandInput commandInput) : this(baseHost, commandInput.OutputPath) { }
 
         internal CliTemplateEngineHost(ITemplateEngineHost baseHost, string? outputPath)
         {
@@ -100,11 +97,6 @@ namespace Microsoft.TemplateEngine.Cli
         public void VirtualizeDirectory(string path)
         {
             _baseHost.VirtualizeDirectory(path);
-        }
-
-        internal void ResetCommand(INewCommandInput commandInput)
-        {
-            _outputPath = commandInput.OutputPath;
         }
 
         #region Obsolete

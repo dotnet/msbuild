@@ -4,7 +4,6 @@
 #nullable enable
 
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -37,9 +36,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             _templateList = templateList?.ToList() ?? throw new ArgumentNullException(nameof(templateList));
             HostSpecificDataLoader = hostSpecificDataLoader ?? throw new ArgumentNullException(nameof(hostSpecificDataLoader));
         }
-
-        //TODO: this property is no longer needed and will be removed
-        internal abstract IEnumerable<FilterOption> Filters { get; }
 
         protected IHostSpecificDataLoader HostSpecificDataLoader { get; }
 

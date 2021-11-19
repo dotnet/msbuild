@@ -25,8 +25,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         {
         }
 
-        internal override IEnumerable<CommandParsing.FilterOption> Filters => throw new NotImplementedException();
-
         internal override async Task<TemplateResolutionResult> ResolveTemplatesAsync(ListCommandArgs args, string? defaultLanguage, CancellationToken cancellationToken)
         {
             IEnumerable<TemplateGroup> templateGroups = await GetTemplateGroupsAsync(cancellationToken).ConfigureAwait(false);

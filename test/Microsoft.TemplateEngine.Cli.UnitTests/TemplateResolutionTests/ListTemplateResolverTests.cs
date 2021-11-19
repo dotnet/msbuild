@@ -5,7 +5,6 @@
 
 using System.CommandLine;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
@@ -283,8 +282,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     .WithTag("type", "project")
                     .WithClassifications("Common", "Test")
                     .WithBaselineInfo("app", "standard"));
-
-            INewCommandInput userInputs = new MockNewCommandInput().WithListOption().WithCommandOption("--tag", "Common");
 
             ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(

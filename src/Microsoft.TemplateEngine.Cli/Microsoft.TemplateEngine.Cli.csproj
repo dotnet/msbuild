@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="CommandParsing\BaseCommandInput.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
     <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Abstractions\Microsoft.TemplateEngine.Abstractions.csproj" />
     <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />

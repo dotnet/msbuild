@@ -5,7 +5,6 @@
 
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
 
@@ -253,73 +252,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 return null;
             }
             return (templates.Single().Info, templates.Single().GetValidTemplateParameters());
-        }
-
-        /// <summary>
-        /// Returns the invalid template specific parameters for the template group.
-        /// Invalid parameters can have: invalid name, invalid value (determined only for choice parameter symbols).
-        /// </summary>
-        /// <returns>The enumerator for invalid parameters in templates in the template group.</returns>
-        internal IEnumerable<InvalidParameterInfo> GetInvalidParameterList()
-        {
-            if (!_isTemplateParameterMatchEvaluated)
-            {
-                throw new NotSupportedException("Template parameter matches were not evaluated.");
-            }
-            List<InvalidParameterInfo> invalidParameterList = new List<InvalidParameterInfo>();
-
-            //collect the parameters with invalid names for all templates in the template group
-            IEnumerable<ParameterMatchInfo> parametersWithInvalidNames = _templateMatchInfos.SelectMany(
-                template => template.MatchDisposition
-                    .OfType<ParameterMatchInfo>()
-                    .Where(x => x.Kind == MatchKind.Mismatch && x.ParameterMismatchKind == ParameterMatchInfo.MismatchKind.InvalidName)).Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
-
-            foreach (ParameterMatchInfo parameter in parametersWithInvalidNames)
-            {
-                if (_templateMatchInfos.All(
-                    template => template.MatchDisposition
-                        .OfType<ParameterMatchInfo>()
-                        .Any(x => x.Kind == MatchKind.Mismatch && x.ParameterMismatchKind == ParameterMatchInfo.MismatchKind.InvalidName
-                                  && x.Name.Equals(parameter.Name, StringComparison.OrdinalIgnoreCase))))
-                {
-                    invalidParameterList.Add(new InvalidParameterInfo(
-                                                InvalidParameterInfo.Kind.InvalidParameterName,
-                                                parameter.InputFormat,
-                                                parameter.Value,
-                                                parameter.Name));
-                }
-            }
-
-            //if there are templates which have a match for all template specific parameters, only they to be analyzed
-            var filteredTemplates = _templateMatchInfos.Where(template => !template.HasInvalidParameterName());
-            if (!filteredTemplates.Any())
-            {
-                filteredTemplates = _templateMatchInfos;
-            }
-
-            //collect the choice parameters with invalid values
-            IEnumerable<ParameterMatchInfo> invalidParameterValuesForTemplates = filteredTemplates.SelectMany(
-                template => template.MatchDisposition
-                    .OfType<ParameterMatchInfo>()
-                    .Where(x => x.Kind == MatchKind.Mismatch && x.ParameterMismatchKind == ParameterMatchInfo.MismatchKind.InvalidValue))
-                .Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
-            foreach (ParameterMatchInfo parameter in invalidParameterValuesForTemplates)
-            {
-                if (filteredTemplates.All(
-                   template => template.MatchDisposition
-                        .OfType<ParameterMatchInfo>()
-                        .Any(x => x.Kind == MatchKind.Mismatch && x.ParameterMismatchKind == ParameterMatchInfo.MismatchKind.InvalidValue
-                                  && x.Name.Equals(parameter.Name, StringComparison.OrdinalIgnoreCase))))
-                {
-                    invalidParameterList.Add(new InvalidParameterInfo(
-                                                InvalidParameterInfo.Kind.InvalidParameterValue,
-                                                parameter.InputFormat,
-                                                parameter.Value,
-                                                parameter.Name));
-                }
-            }
-
-            return invalidParameterList;
         }
 
         /// <summary>
