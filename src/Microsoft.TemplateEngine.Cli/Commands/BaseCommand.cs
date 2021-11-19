@@ -102,8 +102,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal abstract class BaseCommand<TArgs> : BaseCommand, ICommandHandler where TArgs : GlobalArgs
     {
-        private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
-
         internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string name, string? description = null)
             : base(host, logger, callbacks, name, description)
         {
@@ -119,8 +117,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
 
             CancellationToken cancellationToken = context.GetCancellationToken();
-
-            using AsyncMutex? entryMutex = await EnsureEntryMutex(args, environmentSettings, cancellationToken).ConfigureAwait(false);
 
             try
             {
@@ -210,17 +206,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             this.AddOption(command.ColumnsAllOption);
             this.AddOption(command.ColumnsOption);
-        }
-
-        private static async Task<AsyncMutex?> EnsureEntryMutex(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken token)
-        {
-            // we don't need to acquire mutex in case of virtual settings
-            if (args.DebugVirtualizeSettings)
-            {
-                return null;
-            }
-            string entryMutexIdentity = $"Global\\{_entryMutexGuid}_{environmentSettings.Paths.HostVersionSettingsDir.Replace("\\", "_").Replace("/", "_")}";
-            return await AsyncMutex.WaitAsync(entryMutexIdentity, token).ConfigureAwait(false);
         }
 
         private static async Task HandleGlobalOptionsAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
