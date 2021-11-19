@@ -162,27 +162,45 @@ namespace Microsoft.Build.Graph
 
             HashSet<ProjectGraphNode> GetTransitiveProjectReferencesExcludingSelf(ParsedProject parsedProject)
             {
+                HashSet<ProjectGraphNode> references = new();
+                GetTransitiveProjectReferencesExcludingSelfHelper(parsedProject, references, null);
+                return references;
+            }
+
+            void GetTransitiveProjectReferencesExcludingSelfHelper(ParsedProject parsedProject, HashSet<ProjectGraphNode> transitiveReferences, HashSet<ProjectGraphNode> referencesFromHere)
+            {
                 if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> cachedTransitiveReferences))
                 {
-                    return cachedTransitiveReferences;
+                    transitiveReferences = transitiveReferences.Concat(cachedTransitiveReferences).ToHashSet();
                 }
                 else
                 {
-                    var transitiveReferences = new HashSet<ProjectGraphNode>();
-
-                    foreach (var referenceInfo in parsedProject.ReferenceInfos)
+                    HashSet<ProjectGraphNode> toCache = new();
+                    foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
                     {
-                        transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
-
-                        foreach (var transitiveReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
+                        if (transitiveReferences.Contains(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode))
                         {
-                            transitiveReferences.Add(transitiveReference);
+                            if (transitiveReferenceCache.TryGetValue(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode, out cachedTransitiveReferences))
+                            {
+                                toCache = toCache.Concat(cachedTransitiveReferences).ToHashSet();
+                            }
+                            else
+                            {
+                                toCache.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
+                            }
+                        }
+                        else
+                        {
+                            transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
+                            GetTransitiveProjectReferencesExcludingSelfHelper(allParsedProjects[referenceInfo.ReferenceConfiguration], transitiveReferences, toCache);
                         }
                     }
 
-                    transitiveReferenceCache.Add(parsedProject.GraphNode, transitiveReferences);
-
-                    return transitiveReferences;
+                    transitiveReferenceCache[parsedProject.GraphNode] = transitiveReferences;
+                    if (referencesFromHere is not null)
+                    {
+                        referencesFromHere = referencesFromHere.Concat(toCache).ToHashSet();
+                    }
                 }
             }
         }
