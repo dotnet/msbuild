@@ -334,13 +334,12 @@
   </data>
     <data name="OverrideUsingTaskElementCreated" xml:space="preserve">
     <value>MSB4194: Created an override using task: {0}</value>
-    <comment>
-    </comment>
   </data>
   <data name="DuplicateOverrideUsingTaskElement" xml:space="preserve">
     <value>MSB4194: Attempted to create multiple overrides of the same task: {0}</value>
-    <comment>
-    </comment>
+  </data>
+    <data name="OverriddenUsingTaskChosen" xml:space="preserve">
+    <value>MSB4194: Overridden task chosen when calling a task: {0}</value>
   </data>
   <data name="OverrideTasksFileFailure" xml:space="preserve">
     <value>MSB4194: The override tasks file could not be successfully loaded. {0}</value>
