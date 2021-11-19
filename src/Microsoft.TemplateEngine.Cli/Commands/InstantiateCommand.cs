@@ -132,7 +132,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (selectedTemplateGroup == null)
             {
                 Reporter.Error.WriteLine(
-                    string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, instantiateArgs.ShortName).Bold().Red());
+                    string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, $"'{instantiateArgs.ShortName}'").Bold().Red());
                 Reporter.Error.WriteLine();
 
                 Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
