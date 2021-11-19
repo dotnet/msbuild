@@ -38,7 +38,9 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("The template \"Console App\" was created successfully.");
         }
 
-        [Fact]
+#pragma warning disable xUnit1004 // Test methods should not be skipped
+        [Fact(Skip = "alias feature is not implemented yet")]
+#pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CanInstantiateTemplate_WithAlias()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
