@@ -34,7 +34,7 @@
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
     <SystemXmlXmlDocumentPackageVersion>4.3.0</SystemXmlXmlDocumentPackageVersion>
     <WebDeploymentPackageVersion>4.0.5</WebDeploymentPackageVersion>
-    <SystemTextJsonVersion>5.0.2</SystemTextJsonVersion>
+    <SystemTextJsonVersion>6.0.0</SystemTextJsonVersion>
     <SystemReflectionMetadataLoadContextVersion>7.0.0-alpha.1.21567.1</SystemReflectionMetadataLoadContextVersion>
     <DeploymentReleasesVersion>1.0.0-preview1.1.21112.1</DeploymentReleasesVersion>
     <SystemManagementPackageVersion>4.6.0</SystemManagementPackageVersion>
@@ -98,10 +98,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
-    <MicrosoftBuildPackageVersion>17.1.0-preview-21567-01</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>17.1.0-preview-21568-01</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
-    <MicrosoftBuildLocalizationPackageVersion>17.1.0-preview-21567-01</MicrosoftBuildLocalizationPackageVersion>
+    <MicrosoftBuildLocalizationPackageVersion>17.1.0-preview-21568-01</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildTasksCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildTasksCorePackageVersion>
     <MicrosoftBuildVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildVersion>
