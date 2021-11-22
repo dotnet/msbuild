@@ -59,9 +59,6 @@
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>Shared\BuildEnvironmentHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <Link>Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>Shared\CanonicalError.cs</Link>
     </Compile>

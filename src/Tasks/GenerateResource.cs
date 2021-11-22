@@ -3956,9 +3956,6 @@ namespace Microsoft.Build.Tasks
             private int lineNumber;
             private int column;
 
-            /// <summary>
-            /// Fxcop want to have the correct basic exception constructors implemented
-            /// </summary>
             private TextFileException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
