@@ -1575,9 +1575,8 @@ namespace Microsoft.Build.Execution
                     return true;
                 }
 
-                // Since both sides are this class, we know both sides support ITaskItem2.
-                ITaskItem2 thisAsITaskItem2 = this as ITaskItem2;
-                ITaskItem2 otherAsITaskItem2 = other as ITaskItem2;
+                ITaskItem2 thisAsITaskItem2 = this;
+                ITaskItem2 otherAsITaskItem2 = other;
 
                 // This is case-insensitive. See GetHashCode().
                 if (!MSBuildNameIgnoreCaseComparer.Default.Equals(thisAsITaskItem2.EvaluatedIncludeEscaped, otherAsITaskItem2.EvaluatedIncludeEscaped))
