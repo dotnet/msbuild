@@ -657,7 +657,8 @@ namespace Microsoft.Build.Execution
             string taskFactory,
             Dictionary<string, string> taskFactoryParameters,
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
-            ILoggingService loggingService, BuildEventContext context,
+            ILoggingService loggingService,
+            BuildEventContext context,
             ProjectUsingTaskElement projectUsingTaskInXml,
             bool overrideTask = false
         )

@@ -625,11 +625,64 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData("x64","true","x86","", "x64")] // override wins
         [InlineData("x64", "false", "x86", "true", "x86")] // override wins
-        [InlineData("x64","true","x86","true", "x64")] // first one wins
-        [InlineData("x86", "true", "x64", "true", "x86")] // first one wins
         public void OverriddenTask_AlwaysWins(string firstArch, string firstOverride, string secondArch, string secondOverride, string expectedArch)
         {
             Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
+
+            List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+            ProjectRootElement project = ProjectRootElement.Create();
+
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
+            element.Architecture = firstArch;
+            element.Override = firstOverride;
+            elementList.Add(element);
+
+            ProjectUsingTaskElement secondElement = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
+            secondElement.Architecture = secondArch;
+            secondElement.Override = secondOverride;
+            elementList.Add(secondElement);
+
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+
+            // no parameters
+            RetrieveAndValidateRegisteredTaskRecord
+                (
+                    registry,
+                    exactMatchRequired: false,
+                    runtime: null,
+                    architecture: null,
+                    shouldBeRetrieved: true,
+                    shouldBeRetrievedFromCache: false,
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    expectedArchitecture: expectedArch
+                );
+
+            // no parameters, fuzzy match
+            RetrieveAndValidateRegisteredTaskRecord
+                (
+                    registry,
+                    exactMatchRequired: false,
+                    runtime: null,
+                    architecture: null,
+                    shouldBeRetrieved: true,
+                    shouldBeRetrievedFromCache: false,
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    expectedArchitecture: expectedArch
+                );
+        }
+
+        [Theory]
+        [InlineData("x64", "true", "x86", "true", "x64")]
+        [InlineData("x86", "true", "x64", "true", "x86")]
+        public void OverriddenTask_MultipleOverridesCauseWarnings(string firstArch, string firstOverride, string secondArch, string secondOverride, string expectedArch)
+        {
+            using (var env = TestEnvironment.Create())
+            using (var collection = new ProjectCollection())
+            using (var manager = new BuildManager())
+            {
+
+            }
+                Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
 
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
