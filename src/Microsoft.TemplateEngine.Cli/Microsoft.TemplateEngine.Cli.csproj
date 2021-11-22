@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" />
     <PackageReference Include="NuGet.Credentials" />
     <PackageReference Include="System.Diagnostics.Process" />
     <PackageReference Include="Newtonsoft.Json" />
