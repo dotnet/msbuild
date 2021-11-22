@@ -206,7 +206,7 @@ namespace Microsoft.TemplateEngine.Cli
                 "Microsoft.Common.Console", //console
                 "Microsoft.Common.WPF", //wpf
                 "Microsoft.Common.WinForms", //winforms
-                "Microsoft.Web.Blazor.Wasm", //blazorwasm
+                "Microsoft.Web.Blazor.Server", //blazorserver
                 "Microsoft.Web.RazorPages" //webapp
             };
 
