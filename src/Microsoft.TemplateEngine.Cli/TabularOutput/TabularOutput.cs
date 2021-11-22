@@ -198,24 +198,6 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             return this;
         }
 
-        private static string ShrinkTextToLength(string text, int maxLength)
-        {
-            if (text.GetUnicodeLength() <= maxLength)
-            {
-                // The text is short enough, so return it
-                return text;
-            }
-            // If the text is too long, shorten it enough to allow room for the ellipsis, then add the ellipsis
-
-            int desiredLength = maxLength - ShrinkReplacement.Length;
-            int possibleLength = 1;
-            while (text.Substring(0, possibleLength).GetUnicodeLength() <= desiredLength)
-            {
-                possibleLength++;
-            }
-            return text.Substring(0, possibleLength - 1) + ShrinkReplacement;
-        }
-
         private void CalculateColumnWidth(IReadOnlyDictionary<int, int> columnWidthLookup)
         {
             int maxAllowedGridWidth = _settings.ConsoleBufferWidth;
@@ -424,13 +406,20 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
 
             private string ShrinkTextToLength(string text, int maxLength)
             {
-                if (text.Length <= maxLength)
+                if (text.GetUnicodeLength() <= maxLength)
                 {
                     // The text is short enough, so return it
                     return text;
                 }
                 // If the text is too long, shorten it enough to allow room for the ellipsis, then add the ellipsis
-                return text.Substring(0, Math.Max(0, maxLength - _shrinkReplacement.Length)) + _shrinkReplacement;
+
+                int desiredLength = maxLength - _shrinkReplacement.Length;
+                int possibleLength = 1;
+                while (text.Substring(0, possibleLength).GetUnicodeLength() <= desiredLength)
+                {
+                    possibleLength++;
+                }
+                return text.Substring(0, possibleLength - 1) + _shrinkReplacement;
             }
         }
     }

@@ -3,7 +3,7 @@
 
 #nullable enable
 
-namespace Microsoft.TemplateEngine.Cli.TableOutput
+namespace Microsoft.TemplateEngine.Cli.TabularOutput
 {
     internal static class UnicodeLength
     {
