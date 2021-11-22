@@ -638,12 +638,12 @@ namespace Microsoft.Build.Utilities
             // New style environment overrides
             if (_environmentVariablePairs != null)
             {
-                foreach (KeyValuePair<object, object> variable in _environmentVariablePairs)
+                foreach (KeyValuePair<string, string> variable in _environmentVariablePairs)
                 {
 #if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
-                    startInfo.Environment[(string)variable.Key] = (string)variable.Value;
+                    startInfo.Environment[variable.Key] = variable.Value;
 #else
-                    startInfo.EnvironmentVariables[(string)variable.Key] = (string)variable.Value;
+                    startInfo.EnvironmentVariables[variable.Key] = variable.Value;
 #endif
                 }
             }
@@ -902,7 +902,7 @@ namespace Microsoft.Build.Utilities
                             break;
 
                         default:
-                            ErrorUtilities.VerifyThrow(false, "Unknown tool notification.");
+                            ErrorUtilities.ThrowInternalError("Unknown tool notification.");
                             break;
                     }
                 }
@@ -1306,7 +1306,7 @@ namespace Microsoft.Build.Utilities
 
             if (EnvironmentVariables != null)
             {
-                _environmentVariablePairs = new List<KeyValuePair<object, object>>(EnvironmentVariables.Length);
+                _environmentVariablePairs = new List<KeyValuePair<string, string>>(EnvironmentVariables.Length);
 
                 foreach (string entry in EnvironmentVariables)
                 {
@@ -1318,7 +1318,7 @@ namespace Microsoft.Build.Utilities
                         return false;
                     }
 
-                    _environmentVariablePairs.Add(new KeyValuePair<object, object>((object)nameValuePair[0], (object)nameValuePair[1]));
+                    _environmentVariablePairs.Add(new KeyValuePair<string, string>(nameValuePair[0], nameValuePair[1]));
                 }
             }
 
@@ -1470,9 +1470,9 @@ namespace Microsoft.Build.Utilities
                 // New style environment overrides
                 if (_environmentVariablePairs != null)
                 {
-                    foreach (KeyValuePair<object, object> variable in _environmentVariablePairs)
+                    foreach (KeyValuePair<string, string> variable in _environmentVariablePairs)
                     {
-                        alreadyLoggedEnvironmentHeader = LogEnvironmentVariable(alreadyLoggedEnvironmentHeader, (string)variable.Key, (string)variable.Value);
+                        alreadyLoggedEnvironmentHeader = LogEnvironmentVariable(alreadyLoggedEnvironmentHeader, variable.Key, variable.Value);
                     }
                 }
 
@@ -1696,9 +1696,8 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// List of name, value pairs to be passed to the spawned tool's environment.
         /// May be null.
-        /// Object is used instead of string to avoid NGen/JIT FXcop flagging.
         /// </summary>
-        private List<KeyValuePair<object, object>> _environmentVariablePairs;
+        private List<KeyValuePair<string, string>> _environmentVariablePairs;
 
         /// <summary>
         /// Enumeration which indicates what kind of queue is being passed

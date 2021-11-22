@@ -1950,26 +1950,30 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+
         /// <summary>
-        /// Verify the method correctly returns the 4.5 reference assembly location information if .net 4.5 and
+        /// Verify the method correctly returns the 4.8 reference assembly location information if .net 4.8 and
         /// its corresponding reference assemblies are installed.
-        /// If they are not installed, the test should be ignored.
+        /// .NET 4.8 should always be installed for our tests. We cannot validly verify on Windows that by adding a check
+        /// that ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48)
+        /// returns something reasonable because later versions of the framework overwrote the current version in
+        /// place, which means it just looks for a folder starting with v4.0 in the right spot for any higher version.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
-        public void GetPathToReferenceAssembliesDefaultLocation45()
+        public void GetPathToReferenceAssembliesDefaultLocation48()
         {
-            if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45) != null)
+            if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48) != null)
             {
-                FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(".NETFramework", new Version("4.5"));
+                FrameworkNameVersioning frameworkName = new(".NETFramework", new Version("4.8"));
                 IList<string> directories = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName);
                 directories.Count.ShouldBe(1); // "Expected the method to return one path."
 
-                string referenceAssemblyPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
+                string referenceAssemblyPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48);
                 directories[0].ShouldBe(referenceAssemblyPath, StringCompareShould.IgnoreCase);
             }
             // else
-            // "Ignored because v4.5 did not seem to be installed"
+            // "Ignored because v4.8 did not seem to be installed"
         }
 
         /// <summary>

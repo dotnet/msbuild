@@ -709,7 +709,7 @@ namespace Microsoft.Build.BackEnd
                 catch (ArgumentException e)
                 {
                     // handle errors in string-->bool conversion
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(false, _taskNode.ContinueOnErrorLocation, "InvalidContinueOnErrorAttribute", _taskNode.Name, e.Message);
+                    ProjectErrorUtilities.ThrowInvalidProject(_taskNode.ContinueOnErrorLocation, "InvalidContinueOnErrorAttribute", _taskNode.Name, e.Message);
                 }
             }
 
@@ -740,7 +740,7 @@ namespace Microsoft.Build.BackEnd
             if (!taskExecutionHost.SetTaskParameters(_taskNode.ParametersForBuild))
             {
                 // The task cannot be initialized.
-                ProjectErrorUtilities.VerifyThrowInvalidProject(false, _targetChildInstance.Location, "TaskParametersError", _taskNode.Name, String.Empty);
+                ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskParametersError", _taskNode.Name, String.Empty);
             }
             else
             {

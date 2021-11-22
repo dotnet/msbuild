@@ -52,13 +52,16 @@ namespace Microsoft.Build.Tasks.UnitTests
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsWindows))]
         public void AssemblyAttributesLocation()
         {
-            var expectedCompileItems = "a.cs;" + Path.Combine("obj", "Debug", ".NETFramework,Version=v4.0.AssemblyAttributes.cs");
+            var expectedCompileItems = "a.cs;" + Path.Combine("obj", "Debug", ".NETFramework,Version=v4.8.AssemblyAttributes.cs");
 
             var project = ObjectModelHelpers.CreateInMemoryProject($@"
 <Project>
   <Import Project=""$(MSBuildToolsPath)\Microsoft.Common.props"" />
+  <PropertyGroup>
+    <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
+  </PropertyGroup>
   <ItemGroup>
-    <Compile Include=""a.cs""/>       
+    <Compile Include=""a.cs""/>
   </ItemGroup>
   <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 

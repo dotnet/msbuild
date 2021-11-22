@@ -33,7 +33,7 @@ namespace Microsoft.Build.Exceptions
         /// <exception cref="InvalidOperationException"></exception>
         public InternalLoggerException()
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(false, "InternalLoggerExceptionOnlyThrownByEngine");
+            ErrorUtilities.ThrowInvalidOperation("InternalLoggerExceptionOnlyThrownByEngine");
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Exceptions
         public InternalLoggerException(string message)
             : base(message)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(false, "InternalLoggerExceptionOnlyThrownByEngine");
+            ErrorUtilities.ThrowInvalidOperation("InternalLoggerExceptionOnlyThrownByEngine");
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Exceptions
         public InternalLoggerException(string message, Exception innerException)
             : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(false, "InternalLoggerExceptionOnlyThrownByEngine");
+            ErrorUtilities.ThrowInvalidOperation("InternalLoggerExceptionOnlyThrownByEngine");
         }
 
         #endregion

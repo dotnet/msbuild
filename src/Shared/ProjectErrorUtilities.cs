@@ -57,7 +57,7 @@ namespace Microsoft.Build.Shared
             T1 arg0
         )
         {
-            VerifyThrowInvalidProject(false, null, elementLocation, resourceName, arg0);
+            ThrowInvalidProject(null, elementLocation, resourceName, arg0);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Microsoft.Build.Shared
             T2 arg1
         )
         {
-            VerifyThrowInvalidProject(false, null, elementLocation, resourceName, arg0, arg1);
+            ThrowInvalidProject(null, elementLocation, resourceName, arg0, arg1);
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Shared
             T3 arg2
         )
         {
-            VerifyThrowInvalidProject(false, null, elementLocation, resourceName, arg0, arg1, arg2);
+            ThrowInvalidProject(null, elementLocation, resourceName, arg0, arg1, arg2);
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Shared
             T4 arg3
         )
         {
-            VerifyThrowInvalidProject(false, null, elementLocation, resourceName, arg0, arg1, arg2, arg3);
+            ThrowInvalidProject(null, elementLocation, resourceName, arg0, arg1, arg2, arg3);
         }
 
         /// <summary>
@@ -396,16 +396,9 @@ namespace Microsoft.Build.Shared
 
             ResourceUtilities.VerifyResourceStringExists(resourceName);
 #endif
-            string errorSubCategory = null;
+            string errorSubCategory = errorSubCategoryResourceName is null ? null : AssemblyResources.GetString(errorSubCategoryResourceName);
 
-            if (errorSubCategoryResourceName != null)
-            {
-                errorSubCategory = AssemblyResources.GetString(errorSubCategoryResourceName);
-            }
-
-            string errorCode;
-            string helpKeyword;
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, args);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, resourceName, args);
 
             throw new InvalidProjectFileException(elementLocation.File, elementLocation.Line, elementLocation.Column, 0 /* Unknown end line */, 0 /* Unknown end column */, message, errorSubCategory, errorCode, helpKeyword);
         }
