@@ -214,6 +214,14 @@ namespace Microsoft.Build.Tasks
 
                     // ...falling through and relying on the targetAssemblyName==null behavior below...
                 }
+                catch (BadImageFormatException)
+                {
+                    // As above, this is weird: there's a valid reference to an assembly with a file on disk
+                    // that isn't a valid .NET assembly. Might be the result of mid-build corruption, but
+                    // could just be a name collision on one of the possible resolution paths.
+
+                    // as above, fall through.
+                }
 
                 if (searchLocation != null)
                 {

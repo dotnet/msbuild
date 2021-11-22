@@ -27,14 +27,15 @@ namespace Microsoft.Build.Globbing
         /// </summary>
         /// <param name="globs">Children globs. Input gets shallow cloned</param>
         public CompositeGlob(IEnumerable<IMSBuildGlob> globs)
-            : this(globs is ImmutableArray<IMSBuildGlob> immutableGlobs ? immutableGlobs : globs.ToImmutableArray())
+            : this(globs.ToImmutableArray())
         {}
 
         /// <summary>
         ///     Constructor
         /// </summary>
         /// <param name="globs">Children globs. Input gets shallow cloned</param>
-        public CompositeGlob(params IMSBuildGlob[] globs) : this(globs.ToImmutableArray())
+        public CompositeGlob(params IMSBuildGlob[] globs)
+            : this(ImmutableArray.Create(globs))
         {}
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace Microsoft.Build.Globbing
             // Threadpools are a scarce resource in Visual Studio, do not use them.
             //return Globs.AsParallel().Any(g => g.IsMatch(stringToMatch));
 
-            return _globs.Any(g => g.IsMatch(stringToMatch));
+            return _globs.Any(static (glob, str) => glob.IsMatch(str), stringToMatch);
         }
 
         /// <summary>

@@ -249,6 +249,9 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// <code>true</code> to wait for a debugger to be attached, otherwise <code>false</code>.
         /// </summary>
+        [SuppressMessage("ApiDesign",
+            "RS0016:Add public types and members to the declared API",
+            Justification = "Only available in the Debug configuration.")]
         public static bool WaitForDebugger { get; set; }
 #endif
 

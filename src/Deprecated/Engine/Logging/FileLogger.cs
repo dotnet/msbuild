@@ -136,15 +136,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>KieranMo</owner>
         public override void Shutdown()
         {
-            try
-            {
-                // Do, or do not, there is no try.
-            }
-            finally
-            {
-                // Keep FxCop happy by closing in a Finally.
-                fileWriter?.Close();
-            }
+            fileWriter?.Close();
         }
 
         /// <summary>
