@@ -1653,7 +1653,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
         <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
-        <target state="needs-review-translation">"{0}" existe et a été envisagé, mais il ne comporte aucune identité valide. Il ne s'agit peut-être pas d'un assembly.</target>
+        <target state="new">Considered "{0}", which existed but did not appear to be a valid .NET assembly.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
