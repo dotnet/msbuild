@@ -10,9 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class TabCompletionTests
     {
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact (Skip = "not working for now")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void Instantiate_CanSuggestTemplateOption_StartsWith()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
@@ -24,9 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Contains("--langVersion", suggestions);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "not working for now")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void RootCommand_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
@@ -38,6 +34,30 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Contains("install", result);
             Assert.DoesNotContain("--install", result);
             Assert.Contains("console", result);
+        }
+
+        [Fact]
+        public void Install_GetAllSuggestions()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse("new install ");
+            var result = parseResult.CommandResult.Command.GetSuggestions(parseResult).ToArray();
+
+            Assert.Contains("--nuget-source", result);
+        }
+
+        [Fact]
+        public void Install_GetSuggestionsAfterInteractive()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse("new install --interactive ");
+            var result = parseResult.CommandResult.Command.GetSuggestions(parseResult).ToArray();
+
+            Assert.Contains("--nuget-source", result);
         }
     }
 }

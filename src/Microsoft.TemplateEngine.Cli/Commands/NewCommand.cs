@@ -7,7 +7,6 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -34,48 +33,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IsHidden = true
         };
 
-        protected override IEnumerable<string> GetSuggestions(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
+        protected internal override IEnumerable<string> GetSuggestions(ParseResult parseResult, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
         {
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            var templates = templatePackageManager.GetTemplatesAsync(CancellationToken.None).Result;
+            NewCommandArgs args = ParseContext(parseResult);
+            InstantiateCommand command = InstantiateCommand.FromNewCommand(this);
+            ParseResult reparseResult = ParserFactory.CreateParser(command).Parse(args.Tokens);
+            foreach (string suggestion in command.GetSuggestions(reparseResult, environmentSettings, textToMatch))
+            {
+                yield return suggestion;
+            }
 
-            return Array.Empty<string>();
-
-            //TODO: implement correct logic
-            //if (!string.IsNullOrEmpty(args.ShortName))
-            //{
-            //    var matchingTemplates = templates.Where(template => template.ShortNameList.Contains(args.ShortName));
-            //    HashSet<string> distinctSuggestions = new HashSet<string>();
-
-            //    foreach (var template in matchingTemplates)
-            //    {
-            //        var templateGroupCommand = new TemplateGroupCommand(this, environmentSettings, template);
-            //        var parsed = templateGroupCommand.Parse(args.Arguments ?? Array.Empty<string>());
-            //        foreach (var suggestion in templateGroupCommand.GetSuggestions(parsed, textToMatch))
-            //        {
-            //            if (distinctSuggestions.Add(suggestion))
-            //            {
-            //                yield return suggestion;
-            //            }
-            //        }
-            //    }
-            //    yield break;
-            //}
-            //else
-            //{
-            //    foreach (var template in templates)
-            //    {
-            //        foreach (var suggestion in template.ShortNameList)
-            //        {
-            //            yield return suggestion;
-            //        }
-            //    }
-            //}
-
-            //foreach (var suggestion in base.GetSuggestions(args, environmentSettings, textToMatch))
-            //{
-            //    yield return suggestion;
-            //}
+            foreach (string suggestion in base.GetSuggestions(parseResult, environmentSettings, textToMatch))
+            {
+                yield return suggestion;
+            }
         }
 
         protected override Task<NewCommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)

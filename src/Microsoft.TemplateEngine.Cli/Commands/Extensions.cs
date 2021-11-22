@@ -32,24 +32,24 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         /// <returns></returns>
         internal static string GetNewCommandName(this ParseResult parseResult)
         {
-            var command = parseResult.CommandResult.Command;
+            var commandResult = parseResult.CommandResult;
 
-            while (command != null && command is not NewCommand)
+            while (commandResult?.Command != null && commandResult.Command is not NewCommand)
             {
-                command = (parseResult.CommandResult.Parent as CommandResult)?.Command;
+                commandResult = (commandResult.Parent as CommandResult);
             }
 
             //if new command is not found, search for instantiate command
             //in instantiation workflow via new command (dotnet new template) NewCommand is replaced by InstantiateCommand
-            if (string.IsNullOrWhiteSpace(command?.Name))
+            if (string.IsNullOrWhiteSpace(commandResult?.Command?.Name))
             {
-                command = parseResult.CommandResult.Command;
-                while (command != null && command is not InstantiateCommand)
+                commandResult = parseResult.CommandResult;
+                while (commandResult?.Command != null && commandResult.Command is not InstantiateCommand)
                 {
-                    command = (parseResult.CommandResult.Parent as CommandResult)?.Command;
+                    commandResult = (commandResult.Parent as CommandResult);
                 }
             }
-            return command?.Name ?? string.Empty;
+            return commandResult?.Command?.Name ?? string.Empty;
         }
     }
 }

@@ -13,7 +13,7 @@ using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class InstantiateCommand : BaseCommand<InstantiateCommandArgs>
+    internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>
     {
         private NewCommand? _parentCommand;
 

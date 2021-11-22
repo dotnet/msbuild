@@ -168,14 +168,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 return base.GetSuggestions(parseResult, textToMatch);
             }
-            TArgs args = ParseContext(parseResult);
+            GlobalArgs args = new GlobalArgs(this, parseResult);
             IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, parseResult);
-            return GetSuggestions(args, environmentSettings, textToMatch);
+            return GetSuggestions(parseResult, environmentSettings, textToMatch);
         }
 
-        protected virtual IEnumerable<string> GetSuggestions(TArgs args, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
+        protected internal virtual IEnumerable<string> GetSuggestions(ParseResult parseResult, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
         {
-            return base.GetSuggestions(args.ParseResult, textToMatch);
+            return base.GetSuggestions(parseResult, textToMatch);
         }
 
         protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
