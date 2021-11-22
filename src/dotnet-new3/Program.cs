@@ -23,6 +23,18 @@ namespace Dotnet_new3
 
         public static int Main(string[] args)
         {
+            //setting output encoding is not available on those platforms
+            if (!OperatingSystem.IsIOS() && !OperatingSystem.IsAndroid() && !OperatingSystem.IsTvOS())
+            {
+                //if output is redirected, force encoding to utf-8;
+                //otherwise the caller may not decode it correctly
+                //see guideline in https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/4236/Character-Encoding-Issues?anchor=stdout
+                if (Console.IsOutputRedirected)
+                {
+                    Console.OutputEncoding = Encoding.UTF8;
+                }
+            }
+
             Command new3Command = new New3Command();
             ParseResult preParseResult = ParserFactory.CreateParser(new3Command, disableHelp: true).Parse(args);
 
