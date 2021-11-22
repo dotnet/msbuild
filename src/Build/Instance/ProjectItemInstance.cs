@@ -794,7 +794,7 @@ namespace Microsoft.Build.Execution
             /// Creates an instance of this class given the item-spec.
             /// </summary>
             internal TaskItem(string includeEscaped, string definingFileEscaped)
-                : this(includeEscaped, includeEscaped, null, null, null, /* mutable */ false, definingFileEscaped)
+                : this(includeEscaped, includeEscaped, null, null, null, immutable: false, definingFileEscaped)
             {
             }
 
