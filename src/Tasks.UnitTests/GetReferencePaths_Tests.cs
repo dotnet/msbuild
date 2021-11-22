@@ -23,9 +23,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestGeneralFrameworkMonikerGood()
         {
-            string targetFrameworkMoniker = ".NetFramework, Version=v4.5";
-            MockEngine engine = new MockEngine();
-            GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+            string targetFrameworkMoniker = ".NetFramework, Version=v4.8";
+            MockEngine engine = new();
+            GetReferenceAssemblyPaths getReferencePaths = new();
             getReferencePaths.BuildEngine = engine;
             getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
             getReferencePaths.Execute();

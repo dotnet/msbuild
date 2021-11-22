@@ -1,5 +1,104 @@
 # MSBuild Changelog
 
+## MSBuild 17.0.0
+
+This version of MSBuild shipped with Visual Studio 2022 version 17.0.0 and .NET SDK 6.0.100.
+
+### What's new
+
+* MSBuild now reports its version as `17` and uses Visual Studio 2022 versions of tasks where appropriate.
+* MSBuild now targets .NET Framework 4.7.2 and .NET 6.0.
+* 64-bit MSBuild is now used for builds from Visual Studio.
+* Binary logs are smaller and have more information.
+* `MSBuildCopyContentTransitively` is now on by default, ensuring consistency in output folders on incremental builds.
+* The method `GetType()` can no longer be called in property functions.
+
+### Detailed release notes
+
+#### Added
+
+* Intrinsic tasks now log their location (#6397). Thanks, @KirillOsenkov!
+* `TargetSkippedEventArgs` now has `TargetSkipReason` and `OriginalBuildEventContext` (#6402, #6577). Thanks, @KirillOsenkov!
+* `TaskStarted` events now log line and column (#6399). Thanks, @KirillOsenkov!
+* ETW trace events for PerformDependencyAnalysis (#6658), WriteLinesToFile (#6670), CopyUpToDate (#6661).
+* If the environment variable `MSBuildDebugEngine` is set, MSBuild will create binary logs for all operations to `MSBUILDDEBUGPATH` regardless of how it is called (#6639, #6792).
+* `ProjectReference`s can now negotiate `Platform` (#6655, #6724, #6889).
+* Tasks can now call `TaskLoggingHelper.LogsMessagesOfImportance` to determine if any attached logger would preserve a log message before constructing it (to save time in the not-being-logged case) (#6381, #6737).
+* Support referencing assemblies with generic attributes (#6735). Thanks, @davidwrighton!
+* XSD-based MSBuild IntelliSense now supports `ImplicitUsings` and `Using` items (#6755), `InternalsVisibleTo` (#6778), Windows Forms properties (#6860), `DebugType` (#6849), and `SatelliteResourceLanguages` (#6861). Thanks, @pranavkm, @DamianEdwards, @RussKie, and @drewnoakes!
+* Tasks can now call `TaskLoggingHelper.IsTaskInputLoggingEnabled` and avoid redundant logging of inputs (#6803).
+* Support extracting resource namespace from C# source that uses file-scoped namespaces (#6881).
+
+#### Changed
+
+* The on-disk format of serialized caches has changed (#6350, #6324, #6490, #6674).
+* MSBuild is now [signed with a new certificate](https://github.com/dotnet/announcements/issues/184) (#6448).
+* `BuildParameters.DisableInprocNode` now applies to more processes (#6400).
+* `VCTargetsPath` now defaults to `v170` (#6550).
+* MSBuild no longer logs `Building with tools version "Current"` (#6627). Thanks, @KirillOsenkov!
+* Text loggers now log properties and items at the end of evaluation (#6535).
+* `MSBuildCopyContentTransitively` is now on by default, ensuring consistency in output folders on incremental builds (#6622, #6703).
+* MSBuild on .NET 6 has improved task-assembly-reference fallback behavior (#6558).
+* MSBuild features gated on the 16.8 changewave are now nonconfigurable (#6634).
+* The deprecated import of `$(CoreCrossTargetingTargetsPath)` was removed (#6668). Thanks, @Nirmal4G!
+* Improved error message for `MSB4213` (#6640).
+* The method `GetType()` can no longer be called in property functions (#6769).
+* MSBuild is now fully NGENed by Visual Studio setup (#6764).
+* MSBuild (and Visual Studio) now reference `System.Text.Json` 5.0.2 (#6784). Thanks, @JakeRadMSFT!
+* Default to SHA2 digest for ClickOnce manifest when certificate signing algorithm is sha256/384/512 (#6882).
+
+#### Fixed
+
+* Solution builds should work when using the secret environment variable `MSBUILDNOINPROCNODE` (#6385).
+* Solution extensions can now use `BeforeTargets="ValidateSolutionConfiguration"` (#6454).
+* Performance improvements (#6529, #6556, #6598, #6632, #6669, #6671, #6666, #6678, #6680, #6705, #6595, #6716, #6786, #6816, #6832, #6845).
+* Single-file ClickOnce publish includes file association icons (#6578).
+* Improved robustness in error handling of libraries without resources (#6546).
+* Fixed missing information in `Project`'s `DebuggerDisplay` (#6650).
+* `ResolveAssemblyReferences` output paths are now output in normalized form (#6533).
+* Improved handling of satellite assemblies in ClickOnce (#6665).
+* Roslyn code analyzers are no longer run during XAML precompilation (#6676). Thanks, @jlaanstra!
+* 64-bit API callers no longer need to set `MSBUILD_EXE_PATH` (#6683, #6746).
+* `EvaluateStop` ETW events are now automatically correlated with `EvaluateStart` (#6725).
+* Evaluation time is included in text performance traces (#6725).
+* Add PackageDescription to `Microsoft.NET.StringTools` (#6740).
+* Fixed deadlock between `ExecuteSubmission` and `LoggingService` (#6717).
+* Narrowed conditions where MSBuild would blame NuGet for SDK resolution problems (#6742).
+* `CombineTargetFrameworkInfoProperties` no longer fails on portable framework names (#6699).
+* Avoid needless builds of `GenerateBindingRedirects` (#6726).
+* The solution configuration is now passed to experimental cache plugins (#6738).
+* Clearer errors when SDK resolvers throw exceptions (#6763).
+* Improved errors from `InternableString.ExpensiveConvertToString` (#6798).
+* Binding redirects for all `System.*` assemblies updated (#6830).
+* Fixed deadlock between `BuildManager` and `LoggingService` (#6837).
+* Log message arguments for warnings and errors (#6804). Thanks, @KirillOsenkov!
+* Use static CoreClrAssemblyLoader for SDK resolvers (#6864). Thanks, @marcin-krystianc!
+* Avoid break caused by fix and workaround for AL path colliding (#6884).
+* Support private-use area Unicode characters in paths passed to `XslTransformation` (#6863, #6946). Thanks, @lanfeust69!
+* Use the correct .NET host when called from a .NET 6.0 application (#6890).
+
+#### Infrastructure
+
+* This repo now builds with Arcade 6.0 (#6143).
+* Use newer Ubuntu versions for Linux CI builds (#6488).
+* MSBuild now uses [Arcade-powered source build](https://github.com/dotnet/source-build/tree/ba0b33e9f96354b8d07317c3cdf406ce666921f8/Documentation/planning/arcade-powered-source-build) (#6387).
+* Improved repo issue templates and automation (#6557).
+* Whitespace cleanup (#6565).
+* This repo no longer needs to double-specify the SDK version (#6596).
+* Simplify references to `TargetFramework` using new intrinsics (#5799).
+* Reference the `Microsoft.DotNet.XUnitExtensions` package from Arcade instead of our fork (#6638).
+* Use [`BannedApiAnalyzers`](https://www.nuget.org/packages/Microsoft.CodeAnalysis.BannedApiAnalyzers/) (#6675).
+* Enable analyzers for the MSBuild repo with rules similar to `dotnet/runtime` (#5656). Thanks, @elachlan!
+* Improved internal OptProf training scenarios (#6758).
+* Delete Unreachable code (#6805). Thanks, @KirillOsenkov!
+* Upgrade System.Net.Http package version used in tests (#6879).
+
+#### Documentation
+
+* Use GitHub-generated Markdown tables of contents (#6760).
+* Fixed validation issues in docs build (#6744).
+* Descriptions of labels in use in this repo (#6873).
+
 ## MSBuild 16.11.0
 
 This version of MSBuild shipped with Visual Studio 2019 version 16.11.0 and .NET SDK 5.0.400.

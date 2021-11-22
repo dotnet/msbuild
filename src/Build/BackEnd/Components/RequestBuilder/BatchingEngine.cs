@@ -156,8 +156,7 @@ namespace Microsoft.Build.BackEnd
                         // to really loop here... it's just that the foreach is the only way I can
                         // figure out how to get data out of the hashtable without knowing any of the
                         // keys!
-                        ProjectErrorUtilities.VerifyThrowInvalidProject(false,
-                            elementLocation, "CannotReferenceItemMetadataWithoutItemName", unqualifiedMetadataName);
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotReferenceItemMetadataWithoutItemName", unqualifiedMetadataName);
                     }
                 }
                 else
@@ -410,7 +409,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     catch (InvalidOperationException e)
                     {
-                        ProjectErrorUtilities.VerifyThrowInvalidProject(false, elementLocation,
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation,
                             "CannotEvaluateItemMetadata", metadataName, e.Message);
                     }
                 }

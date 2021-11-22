@@ -2091,7 +2091,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
 
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
-                    if (publicKey?.Equals(publicKeyAttribute.Value, StringComparison.OrdinalIgnoreCase) == false)
+                    // Skip this check if the public key attribute is "0", as this means we're expecting the public key
+                    // comparison to be skipped at install time because the file is signed by an MS trusted cert.
+                    if (publicKeyAttribute.Value.Equals("0", StringComparison.OrdinalIgnoreCase) == false &&
+                        publicKey?.Equals(publicKeyAttribute.Value, StringComparison.OrdinalIgnoreCase) == false)
                     {
                         results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", PUBLICKEY_ATTRIBUTE, builder.Name, fileSource));
                     }

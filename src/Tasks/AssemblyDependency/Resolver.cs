@@ -52,13 +52,13 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
+        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;
             this.fileExists = fileExists;
             this.getRuntimeVersion = getRuntimeVersion;
-            this.targetedRuntimeVersion = targetedRuntimeVesion;
+            this.targetedRuntimeVersion = targetedRuntimeVersion;
             this.targetProcessorArchitecture = targetedProcessorArchitecture;
             this.compareProcessorArchitecture = compareProcessorArchitecture;
         }
