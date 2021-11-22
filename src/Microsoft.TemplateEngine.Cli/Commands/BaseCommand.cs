@@ -236,14 +236,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             environmentSettings.Host.FileSystem.CreateDirectory(environmentSettings.Paths.HostVersionSettingsDir);
         }
 
-        private static Task HandleDebugRebuildCacheAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        private static async Task HandleDebugRebuildCacheAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
         {
             if (!args.DebugRebuildCache)
             {
-                return Task.FromResult(0);
+                return;
             }
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            return templatePackageManager.RebuildTemplateCacheAsync(cancellationToken);
+            //need to await, otherwise template package manager is disposed too early - before the task is completed
+            await templatePackageManager.RebuildTemplateCacheAsync(cancellationToken).ConfigureAwait(true);
         }
 
         private static void HandleDebugShowConfig(TArgs args, IEngineEnvironmentSettings environmentSettings)
