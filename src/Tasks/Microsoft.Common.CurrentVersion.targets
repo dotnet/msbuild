@@ -616,8 +616,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             (3) The hintpath from the referenced item itself, indicated by {HintPathFromItem}.
             (4) The directory of MSBuild's "target" runtime from GetFrameworkPath.
                 The "target" runtime folder is the folder of the runtime that MSBuild is a part of.
-            (5) Registered assembly folders, indicated by {Registry:*,*,*}
-            (6) Assembly folders from AssemblyFolders.config file (provided by Visual Studio Dev15+).
+            (5) Assembly folders from AssemblyFolders.config file (provided by Visual Studio Dev15+).
+            (6) Registered assembly folders, indicated by {Registry:*,*,*}
             (7) Legacy registered assembly folders, indicated by {AssemblyFolders}
             (8) Resolve to the GAC.
             (9) Treat the reference's Include as if it were a real file name.
