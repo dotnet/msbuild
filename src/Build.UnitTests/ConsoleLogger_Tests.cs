@@ -1480,6 +1480,8 @@ namespace Microsoft.Build.UnitTests
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+            EventSourceSink es = new EventSourceSink();
+            cl2.Initialize(es);
 
             WriteAndValidateProperties(cl2, sc, true);
         }
@@ -1535,6 +1537,8 @@ namespace Microsoft.Build.UnitTests
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
+            EventSourceSink es = new EventSourceSink();
+            cl2.Initialize(es);
             cl2.Parameters = "ShowEnvironment";
             cl2.ParseParameters();
 
@@ -1553,6 +1557,8 @@ namespace Microsoft.Build.UnitTests
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+            EventSourceSink es = new EventSourceSink();
+            cl2.Initialize(es);
             WriteEnvironment(cl2, sc, true);
         }
 
@@ -1589,6 +1595,8 @@ namespace Microsoft.Build.UnitTests
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
+            EventSourceSink es = new EventSourceSink();
+            cl2.Initialize(es);
             cl2.Parameters = "ShowEnvironment";
             cl2.ParseParameters();
 
@@ -1827,6 +1835,8 @@ namespace Microsoft.Build.UnitTests
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+            EventSourceSink es = new EventSourceSink();
+            cl2.Initialize(es);
 
             WriteAndValidateItems(cl2, sc, true);
         }
