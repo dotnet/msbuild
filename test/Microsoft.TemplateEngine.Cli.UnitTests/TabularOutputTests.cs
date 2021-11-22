@@ -208,15 +208,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact]
         public void CanCalculateWidthCorrectly()
         {
-            IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
-            {
-                Environment = new MockEnvironment()
-                {
-                    ConsoleBufferWidth = 100, 
-                }
-            };
-
-            INewCommandInput command = new MockNewCommandInput();
+            TabularOutputSettings outputSettings = new(
+                            new MockEnvironment()
+                            {
+                                ConsoleBufferWidth = 100
+                            });
 
             IEnumerable<Tuple<string, string>> data = new List<Tuple<string, string>>()
             {
@@ -235,15 +231,11 @@ Dotnet 本地工具清单文件  tool-manifest
 类库                     classlib     
 ";
 
-            HelpFormatter<Tuple<string, string>> formatter =
-             HelpFormatter
+            TabularOutput<Tuple<string, string>> formatter =
+             TabularOutput.TabularOutput
                  .For(
-                     environmentSettings,
-                     command,
-                     data,
-                     columnPadding: 2,
-                     headerSeparator: '-',
-                     blankLineBetweenRows: false)
+                     outputSettings,
+                     data)
                  .DefineColumn(t => t.Item1, "模板名")
                  .DefineColumn(t => t.Item2, "短名称");
 
@@ -254,15 +246,11 @@ Dotnet 本地工具清单文件  tool-manifest
         [Fact]
         public void CanShrinkWideCharsCorrectly()
         {
-            IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
-            {
-                Environment = new MockEnvironment()
-                {
-                    ConsoleBufferWidth = 30,
-                }
-            };
-
-            INewCommandInput command = new MockNewCommandInput();
+            TabularOutputSettings outputSettings = new(
+                            new MockEnvironment()
+                            {
+                                ConsoleBufferWidth = 30
+                            });
 
             IEnumerable<Tuple<string, string>> data = new List<Tuple<string, string>>()
             {
@@ -281,15 +269,11 @@ Dotnet 本地...  tool-manifest
 类库            classlib     
 ";
 
-            HelpFormatter<Tuple<string, string>> formatter =
-             HelpFormatter
+            TabularOutput<Tuple<string, string>> formatter =
+             TabularOutput.TabularOutput
                  .For(
-                     environmentSettings,
-                     command,
-                     data,
-                     columnPadding: 2,
-                     headerSeparator: '-',
-                     blankLineBetweenRows: false)
+                     outputSettings,
+                     data)
                  .DefineColumn(t => t.Item1, "模板名", shrinkIfNeeded: true)
                  .DefineColumn(t => t.Item2, "短名称");
 

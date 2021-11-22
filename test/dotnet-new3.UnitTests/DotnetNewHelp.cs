@@ -21,8 +21,10 @@ namespace Dotnet_new3.IntegrationTests
             _log = log;
             _fixture = fixture;
         }
-        
-        [Fact]
+
+#pragma warning disable xUnit1004 // Test methods should not be skipped
+        [Fact (Skip = "Help is not implemented yet")]
+#pragma warning restore xUnit1004 // Test methods should not be skipped
         public void WontShowLanguageHintInCaseOfOneLang()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();

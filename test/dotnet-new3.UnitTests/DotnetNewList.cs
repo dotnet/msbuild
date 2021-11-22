@@ -97,10 +97,10 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Theory]
-        [InlineData("application --list --tag Common")]
-        [InlineData("application -l --tag Common")]
-        [InlineData("--list application --tag Common")]
-        [InlineData("list application --tag Common")]
+        [InlineData("app --list --tag Common")]
+        [InlineData("app -l --tag Common")]
+        [InlineData("--list app --tag Common")]
+        [InlineData("list app --tag Common")]
         public void CanFilterTags_WithNameCriteria(string command)
         {
             new DotnetNewCommand(_log, command.Split(" "))
@@ -109,7 +109,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining($"These templates matched your input: 'application', --tag='Common'")
+                .And.HaveStdOutContaining($"These templates matched your input: 'app', --tag='Common'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
                 .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
