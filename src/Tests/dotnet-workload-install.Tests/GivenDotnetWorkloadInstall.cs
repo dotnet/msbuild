@@ -419,6 +419,42 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             string.Join(" ", _reporter.Lines).Should().Contain("Invalid rollback definition");
         }
 
+        [Fact]
+        public void GivenWorkloadInstallItWarnsWhenTheWorkloadIsAlreadyInstalled()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            var tmpDir = Path.Combine(testDirectory, "tmp");
+            var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), dotnetRoot, false, userProfileDir);
+            var manifestUpdater = new MockWorkloadManifestUpdater();
+            var sdkFeatureVersion = "6.0.100";
+            var workloadId = "mock-1";
+
+            // Successfully install a workload
+            var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", workloadId });
+            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            installCommand.Execute()
+                .Should().Be(0);
+            _reporter.Clear();
+
+            // Install again, this time it should tell you that you already have the workload installed
+            installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", workloadId, "mock-2" });
+            installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            installCommand.Execute()
+                .Should().Be(0);
+            
+            // Install command warns
+            string.Join(" ", _reporter.Lines).Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadAlreadyInstalled, workloadId));
+
+            // Both workloads are installed
+            var installRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads");
+            Directory.GetFiles(installRecordPath).Count().Should().Be(2);
+        }
+
         private string AppendForUserLocal(string identifier, bool userLocal)
         {
             if (!userLocal)
