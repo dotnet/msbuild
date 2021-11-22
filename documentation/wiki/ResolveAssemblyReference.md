@@ -145,6 +145,21 @@ There were recent fixes made to RAR to alleviate the situation. You can control 
     DoNotCopyLocalIfInGac="$(DoNotCopyLocalIfInGac)"
 ```
 
+## AssemblySearchPaths
+There are two ways to customize the list of paths RAR will search in attempting to locate an assembly. To fully customize the list, the property `AssemblySearchPaths` can be set ahead of time. Note that the order matters; if an assembly is in two locations, RAR will stop after it finds it at the first location.
+
+By default, there are ten locations RAR will search (four if using the .NET SDK), and each can be disabled by setting the relevant flag to false:
+1. Searching files from the current project is disabled by setting the `AssemblySearchPathUseCandidateAssemblyFiles` property to false.
+2. Searching the reference path property (from a .user file) is disabled by setting the `AssemblySearchPathUseReferencePath` property to false.
+3. Using the hint path from the item is disabled by setting the `AssemblySearchPathUseHintPathFromItem` property to false.
+4. Using the directory with MSBuild's target runtime is disabled by setting the `AssemblySearchPathUseTargetFrameworkDirectory` property to false.
+5. Searching assembly folders from AssemblyFolders.config is disabled by setting the `AssemblySearchPathUseAssemblyFoldersConfigFileSearchPath` property to false.
+6. Searching the registry is disabled by setting the `AssemblySearchPathUseRegistry` property to false.
+7. Searching legacy registered assembly folders is disabled by setting the `AssemblySearchPathUseAssemblyFolders` property to false.
+8. Looking in the GAC is disabled by setting the `AssemblySearchPathUseGAC` property to false.
+9. Treating the reference's Include as a real file name is disabled by setting the `AssemblySearchPathUseRawFileName` property to false.
+10. Checking the application's output folder is disabled by setting the `AssemblySearchPathUseOutDir` property to false.
+
 ## There was a conflict
 
 A common situation is MSBuild gives a warning about different versions of the same assembly being used by different references. The solution often involves adding a binding redirect to the app.config file. 
