@@ -61,7 +61,7 @@ Sometimes it's useful to patch your copy of Visual Studio in order to test or de
 To break into the [main method](https://github.com/dotnet/msbuild/blob/bd00d6cba24d41efd6f54699c3fdbefb9f5034a1/src/MSBuild/XMake.cs#L493-L506) of MSBuild.exe: set the environment variable `MSBUILDDEBUGONSTART` to 1 (uses `Debugger.Launch()`) or 2 (waits until debugger is attached).
 
 To break into MSBuild's [BuildManager.BeginBuild](https://github.com/dotnet/msbuild/blob/bd00d6cba24d41efd6f54699c3fdbefb9f5034a1/src/Build/BackEnd/BuildManager/BuildManager.cs#L414) set the environment variable `MSBuildDebugBuildManagerOnStart` to 1 (uses `Debugger.Launch()`) or 2 (waits until debugger is attached).
-This is useful for debugging MSBuild when it is called from other apps that use its APIs instead of its executable (for example Visual Studio). You can also filter which processes trigger the breakpoint by setting `MSBuildDebugProcessName` to a substring of the process name. For example, to trigger the breakpoing only under Visual Studio's top level process you would set `MSBuildDebugProcessName` to the value `devenv`.
+This is useful for debugging MSBuild when it is called from other apps that use its APIs instead of its executable (for example Visual Studio). You can also filter which processes trigger the breakpoint by setting `MSBuildDebugProcessName` to a substring of the process name. For example, to trigger the breakpoint only under Visual Studio's top level process you would set `MSBuildDebugProcessName` to the value `devenv`.
 
 #### Logs
 You can set the environment variable `MSBuildDebugEngine` to 1 to have MSBuild dump all of its possible debugging logs (for example, scheduler state, node communication).
