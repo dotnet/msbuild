@@ -32,7 +32,7 @@
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
     <SystemXmlXmlDocumentPackageVersion>4.3.0</SystemXmlXmlDocumentPackageVersion>
     <WebDeploymentPackageVersion>4.0.5</WebDeploymentPackageVersion>
-    <SystemTextJsonVersion>5.0.2</SystemTextJsonVersion>
+    <SystemTextJsonVersion>6.0.0</SystemTextJsonVersion>
     <SystemReflectionMetadataLoadContextVersion>6.0.0</SystemReflectionMetadataLoadContextVersion>
     <MicrosoftDeploymentDotNetReleasesVersion>1.0.0-preview1.1.21112.1</MicrosoftDeploymentDotNetReleasesVersion>
     <SystemManagementPackageVersion>4.6.0</SystemManagementPackageVersion>
