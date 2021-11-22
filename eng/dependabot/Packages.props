@@ -11,7 +11,6 @@
     <PackageReference Update="BenchmarkDotNet" Version="0.12.1" />
     <PackageReference Update="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
     <PackageReference Update="LargeAddressAware" Version="1.0.5" />
-    <PackageReference Update="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.2" />
     <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
     <PackageReference Update="Microsoft.CodeQuality.Analyzers" Version="3.3.0" PrivateAssets="all" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
@@ -23,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
-    <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="$(MicrosoftCodeAnalysisBannedApiAnalyzersVersion)" />
+    <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.2" />
   </ItemGroup>
 
   <ItemGroup>
