@@ -194,7 +194,7 @@ namespace Microsoft.DotNet.Cli
                         }
                         return null;
                     };
-                    builder.Customize(option, description: descriptionCallback);
+                    builder.Customize(option, secondColumnText: descriptionCallback);
                 }
             }
 
