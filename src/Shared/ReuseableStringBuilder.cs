@@ -172,9 +172,9 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Made up limit beyond which we won't share the builder
             /// because we could otherwise hold a huge builder indefinitely.
-            /// This size seems reasonable for MSBuild uses (mostly expression expansion)
+            /// This was picked empirically so 95% percentile of data String Builder needs is reused.
             /// </summary>
-            private const int MaxBuilderSize = 10*1024*1024;
+            private const int MaxBuilderSize = 512 * 1024; // 0.5 MB
 
             /// <summary>
             /// The shared builder.
@@ -236,7 +236,7 @@ namespace Microsoft.Build.Shared
                     Interlocked.Increment(ref s_misses);
 #endif
                     // Currently loaned out so return a new one
-                    returned = new StringBuilder(capacity);
+                    returned = new StringBuilder(Math.Min(MaxBuilderSize, capacity));
                     MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity:capacity, oldCapacity:0, type:"missed");
                 }
                 else if (returned.Capacity < capacity)
@@ -284,7 +284,7 @@ namespace Microsoft.Build.Shared
                 // (or we refuse it here because it's too big) the next user will
                 // get given a new one, and then return it soon after. 
                 // So the shared builder will be "replaced".
-                if (returningBuilder.Capacity < MaxBuilderSize)
+                if (returningBuilder.Capacity <= MaxBuilderSize)
                 {
                     // ErrorUtilities.VerifyThrow(handouts.TryRemove(returningBuilder, out dummy), "returned but not loaned");
                     returningBuilder.Clear(); // Clear before pooling
