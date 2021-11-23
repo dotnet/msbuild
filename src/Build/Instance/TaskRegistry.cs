@@ -387,7 +387,7 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
-            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, loggingService, buildEventContext, projectUsingTaskXml, overrideUsingTask.Equals("true", StringComparison.OrdinalIgnoreCase));
+            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, loggingService, buildEventContext, projectUsingTaskXml, ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
