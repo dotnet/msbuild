@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.2">
-      <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha />
-    </Dependency>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21566.8">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>958161a35309eed8a0ab8658573a07f6dd4dfbe0</Sha>
@@ -21,10 +17,6 @@
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.21566.8">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>958161a35309eed8a0ab8658573a07f6dd4dfbe0</Sha>
-    </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3">
-      <Uri>dotnet/roslyn-analyzers</Uri>
-      <Sha />
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
