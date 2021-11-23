@@ -1,1 +1,24 @@
+Microsoft.Build.Tasks.LC
+Microsoft.Build.Tasks.LC.LC() -> void
+Microsoft.Build.Tasks.LC.LicenseTarget.get -> Microsoft.Build.Framework.ITaskItem
+Microsoft.Build.Tasks.LC.LicenseTarget.set -> void
+Microsoft.Build.Tasks.LC.NoLogo.get -> bool
+Microsoft.Build.Tasks.LC.NoLogo.set -> void
+Microsoft.Build.Tasks.LC.OutputDirectory.get -> string
+Microsoft.Build.Tasks.LC.OutputDirectory.set -> void
+Microsoft.Build.Tasks.LC.OutputLicense.get -> Microsoft.Build.Framework.ITaskItem
+Microsoft.Build.Tasks.LC.OutputLicense.set -> void
+Microsoft.Build.Tasks.LC.ReferencedAssemblies.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.LC.ReferencedAssemblies.set -> void
+Microsoft.Build.Tasks.LC.SdkToolsPath.get -> string
+Microsoft.Build.Tasks.LC.SdkToolsPath.set -> void
+Microsoft.Build.Tasks.LC.Sources.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.LC.Sources.set -> void
+Microsoft.Build.Tasks.LC.TargetFrameworkVersion.get -> string
+Microsoft.Build.Tasks.LC.TargetFrameworkVersion.set -> void
+override Microsoft.Build.Tasks.LC.AddCommandLineCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) -> void
+override Microsoft.Build.Tasks.LC.AddResponseFileCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) -> void
 override Microsoft.Build.Tasks.LC.Execute() -> bool
+override Microsoft.Build.Tasks.LC.GenerateFullPathToTool() -> string
+override Microsoft.Build.Tasks.LC.ToolName.get -> string
+override Microsoft.Build.Tasks.LC.ValidateParameters() -> bool

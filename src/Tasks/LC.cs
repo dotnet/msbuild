@@ -12,6 +12,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// The License Compiler task
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0022:Constructor make noninheritable base class inheritable", Justification = "Class structure has existed for a long time and shouldn't be adjusted.")]
     public class LC : ToolTaskExtension
     {
         #region Input/output properties
