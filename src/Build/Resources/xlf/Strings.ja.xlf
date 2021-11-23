@@ -225,14 +225,14 @@
         <note />
       </trans-unit>
       <trans-unit id="OverriddenUsingTaskElementChosen">
-        <source>MSB4277: Overridden task chosen when calling task: {0}</source>
-        <target state="new">MSB4277: Overridden task chosen when calling task: {0}</target>
-        <note>{StrBegin="MSB4277: "}</note>
+        <source>Overridden task chosen when calling task: {0}</source>
+        <target state="new">Overridden task chosen when calling task: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
-        <source>MSB4275: Created an override using task: {0}</source>
-        <target state="new">MSB4275: Created an override using task: {0}</target>
-        <note>{StrBegin="MSB4275: "}</note>
+        <source>Created an override using task: {0}</source>
+        <target state="new">Created an override using task: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
