@@ -178,21 +178,17 @@ namespace Microsoft.Build.Graph
                     HashSet<ProjectGraphNode> toCache = new();
                     foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
                     {
-                        if (transitiveReferences.Contains(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode))
+                        if (transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode))
                         {
-                            if (transitiveReferenceCache.TryGetValue(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode, out cachedTransitiveReferences))
-                            {
-                                toCache = toCache.Concat(cachedTransitiveReferences).ToHashSet();
-                            }
-                            else
-                            {
-                                toCache.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
-                            }
+                            GetTransitiveProjectReferencesExcludingSelfHelper(allParsedProjects[referenceInfo.ReferenceConfiguration], transitiveReferences, toCache);
+                        }
+                        else if (transitiveReferenceCache.TryGetValue(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode, out cachedTransitiveReferences))
+                        {
+                            toCache = toCache.Concat(cachedTransitiveReferences).ToHashSet();
                         }
                         else
                         {
-                            transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
-                            GetTransitiveProjectReferencesExcludingSelfHelper(allParsedProjects[referenceInfo.ReferenceConfiguration], transitiveReferences, toCache);
+                            toCache.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
                         }
                     }
 
