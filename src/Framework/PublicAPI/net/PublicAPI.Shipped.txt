@@ -270,7 +270,6 @@ Microsoft.Build.Framework.LazyFormattedBuildEventArgs
 Microsoft.Build.Framework.LazyFormattedBuildEventArgs.LazyFormattedBuildEventArgs() -> void
 Microsoft.Build.Framework.LazyFormattedBuildEventArgs.LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName) -> void
 Microsoft.Build.Framework.LazyFormattedBuildEventArgs.LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) -> void
-Microsoft.Build.Framework.LazyFormattedBuildEventArgs.locker -> object
 Microsoft.Build.Framework.LoadInSeparateAppDomainAttribute
 Microsoft.Build.Framework.LoadInSeparateAppDomainAttribute.LoadInSeparateAppDomainAttribute() -> void
 Microsoft.Build.Framework.LoggerException

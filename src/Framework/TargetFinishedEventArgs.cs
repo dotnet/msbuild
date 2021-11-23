@@ -183,13 +183,7 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
-                    {
-                        if (RawMessage == null)
-                        {
-                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword(Succeeded ? "TargetFinishedSuccess" : "TargetFinishedFailure", targetName, Path.GetFileName(projectFile));
-                        }
-                    }
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword(Succeeded ? "TargetFinishedSuccess" : "TargetFinishedFailure", targetName, Path.GetFileName(projectFile));
                 }
 
                 return RawMessage;

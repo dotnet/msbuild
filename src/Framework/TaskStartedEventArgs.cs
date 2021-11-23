@@ -143,13 +143,7 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
-                    {
-                        if (RawMessage == null)
-                        {
-                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskStarted", TaskName);
-                        }
-                    }
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskStarted", TaskName);
                 }
 
                 return RawMessage;
