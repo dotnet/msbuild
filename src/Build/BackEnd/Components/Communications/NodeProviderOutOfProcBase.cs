@@ -355,7 +355,7 @@ namespace Microsoft.Build.BackEnd
         private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
         {
             // Try and connect to the process.
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + nodeProcessId);
+            string pipeName = NamedPipeUtil.GetPipeNameOrPath(nodeProcessId);
 
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
@@ -590,7 +590,7 @@ namespace Microsoft.Build.BackEnd
 #if RUNTIME_TYPE_NETCORE || MONO
             if (CurrentHost == null)
             {
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, 2),
+                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
                     NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
                 if (File.Exists(dotnetExe))
                 {

@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.Net.Http" />
@@ -36,18 +37,13 @@
     <Compile Include="..\Shared\FileUtilities.cs" />
     <Compile Include="..\Shared\TempFileUtilities.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
-    <Compile Include="..\Shared\NativeMethodsShared.cs" />
     <Compile Include="..\Shared\EscapingUtilities.cs" />
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs" />
-    <Compile Include="..\Shared\AssemblyUtilities.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
-    <Compile Include="..\Shared\InternalErrorException.cs" />
     <Compile Include="..\Shared\ExceptionHandling.cs" />
-    <Compile Include="..\Shared\VisualStudioLocationHelper.cs" />
     <Compile Include="..\Shared\StringBuilderCache.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
     <Compile Include="..\Shared\UnitTests\AssemblyResources.cs" />
-    <Compile Include="..\Shared\Traits.cs" />
   </ItemGroup>
 
   <ItemGroup>

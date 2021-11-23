@@ -126,7 +126,6 @@
     <Compile Include="Errors\InvalidToolsetDefinitionException.cs" />
     <Compile Include="Errors\RegistryException.cs" />
     <Compile Include="Errors\RemoteErrorException.cs" />
-    <Compile Include="FxCopExclusions\Microsoft.Build.Engine.Suppressions.cs" />
     <Compile Include="Introspector\Introspector.cs" />
     <Compile Include="Introspector\NodeStatus.cs" />
     <Compile Include="Introspector\TargetCycleDetector.cs" />

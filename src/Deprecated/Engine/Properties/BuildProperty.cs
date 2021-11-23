@@ -344,19 +344,6 @@ namespace Microsoft.Build.BuildEngine
         {
         }
 
-        /// <summary>
-        /// Default constructor.  This is not allowed because it leaves the
-        /// property in a bad state -- without a name or value.  But we have to
-        /// have it, otherwise FXCop complains.
-        /// </summary>
-        /// <owner>sumedhk</owner>
-        private BuildProperty
-            (
-            )
-        {
-            // not allowed.
-        }
-
         #endregion
 
         #region Properties

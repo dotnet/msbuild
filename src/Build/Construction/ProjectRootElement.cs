@@ -1810,7 +1810,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <remarks>
         /// This is sealed because it is virtual and called in a constructor; by sealing it we
-        /// satisfy FXCop that nobody will override it to do something that would rely on
+        /// satisfy the rule that nobody will override it to do something that would rely on
         /// unconstructed state.
         /// Should be protected+internal.
         /// </remarks>

@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Utilities;
 
@@ -76,7 +77,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
 
-            if (_nodeContexts.Count == ComponentHost.BuildParameters.MaxNodeCount)
+            if (_nodeContexts.Count >= ComponentHost.BuildParameters.MaxNodeCount)
             {
                 ErrorUtilities.ThrowInternalError("All allowable nodes already created ({0}).", _nodeContexts.Count);
                 return false;

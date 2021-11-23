@@ -15,7 +15,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
@@ -612,9 +611,7 @@ namespace Microsoft.Build.CommandLine
             // Snapshot the current environment
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
-            string pipeName = "MSBuild" + Process.GetCurrentProcess().Id;
-
-            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(pipeName);
+            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost();
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 

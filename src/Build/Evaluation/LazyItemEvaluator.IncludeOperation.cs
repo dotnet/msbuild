@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -19,7 +20,7 @@ namespace Microsoft.Build.Evaluation
         class IncludeOperation : LazyItemOperation
         {
             readonly int _elementOrder;
-            
+
             readonly string _rootDirectory;
 
             readonly ImmutableSegmentedList<string> _excludes;
@@ -113,7 +114,8 @@ namespace Microsoft.Build.Evaluation
                                 includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                     _rootDirectory,
                                     glob,
-                                    excludePatternsForGlobs
+                                    excludePatternsForGlobs,
+                                    fileMatcher: FileMatcher
                                 );
                             }
                             if (MSBuildEventSource.Log.IsEnabled())

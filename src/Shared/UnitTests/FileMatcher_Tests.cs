@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using System;
@@ -12,6 +13,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -1244,13 +1246,20 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // Nothing's too long for Unix
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
-        public void IllegalTooLongPath()
+        public void IllegalTooLongPathOptOutWave17_0()
         {
-            string longString = new string('X', 500) + "*"; // need a wildcard to do anything
-            string[] result = FileMatcher.Default.GetFiles(@"c:\", longString);
+            using (var env = TestEnvironment.Create())
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_0.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-            Assert.Equal(longString, result[0]); // Does not throw
+                string longString = new string('X', 500) + "*"; // need a wildcard to do anything
+                string[] result = FileMatcher.Default.GetFiles(@"c:\", longString);
 
+                Assert.Equal(longString, result[0]); // Does not throw
+                ChangeWaves.ResetStateForTests();
+            }
             // Not checking that GetFileSpecMatchInfo returns the illegal-path flag,
             // not certain that won't break something; this fix is merely to avoid a crash.
         }

@@ -106,19 +106,6 @@ namespace Microsoft.Build.BuildEngine
             this.taskName = taskElement.Name;
         }
 
-        /// <summary>
-        /// Default constructor.  This is not allowed, because it leaves the
-        /// BuildTask in a bad state. But we have to have it, otherwise FXCop
-        /// complains.
-        /// </summary>
-        /// <owner>rgoel</owner>
-        private BuildTask
-            (
-            )
-        {
-            // Not allowed.
-        }
-
         #endregion
 
         #region Properties

@@ -459,6 +459,8 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _keepMetadataLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _removeMetadataLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _keepDuplicatesLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _matchOnMetadataLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _matchOnMetadataOptionsLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _metadata, ProjectItemGroupTaskMetadataInstance.FactoryForDeserialization);
         }

@@ -26,3 +26,7 @@ If you encounter errors, see [Something's wrong in my build](Something's-wrong-i
 The best way to get Mono MSBuild for OSX/macOS is to get the official [Mono package](http://www.mono-project.com/download/#download-mac). After installing it, you can run `msbuild`.
 <br/>
 For Linux, you can install mono and msbuild from [here](http://www.mono-project.com/download/#download-lin).
+
+## Debugging
+
+See debugging options [here](./Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md#Debugging-MSBuild).

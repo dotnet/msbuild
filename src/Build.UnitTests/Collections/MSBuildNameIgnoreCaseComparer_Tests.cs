@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using Xunit;

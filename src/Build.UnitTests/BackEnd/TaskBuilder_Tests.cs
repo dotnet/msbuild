@@ -22,6 +22,7 @@ using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using System.Threading;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -105,6 +106,63 @@ namespace Microsoft.Build.UnitTests.BackEnd
             project.Build("t", loggers);
 
             logger.AssertLogContains("Made it");
+        }
+
+        [Fact]
+        public void CanceledTasksDoNotLogMSB4181()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_testOutput))
+            {
+                BuildManager manager = new BuildManager();
+                ProjectCollection collection = new ProjectCollection();
+
+                string contents = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion ='Current'>
+                     <Target Name='test'>
+                        <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+                     </Target>
+                    </Project>";
+
+                MockLogger logger = new MockLogger(_testOutput);
+
+                var project = new Project(XmlReader.Create(new StringReader(contents)), null, MSBuildConstants.CurrentToolsVersion, collection)
+                {
+                    FullPath = env.CreateFile().Path
+                };
+
+                var _parameters = new BuildParameters
+                {
+                    ShutdownInProcNodeOnBuildFinish = true,
+                    Loggers = new ILogger[] { logger },
+                    EnableNodeReuse = false
+                };
+                ;
+
+                BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" }, collection.HostServices);
+                manager.BeginBuild(_parameters);
+                BuildSubmission asyncResult = manager.PendBuildRequest(data);
+                asyncResult.ExecuteAsync(null, null);
+                Thread.Sleep(500);
+                manager.CancelAllSubmissions();
+                asyncResult.WaitHandle.WaitOne();
+                BuildResult result = asyncResult.BuildResult;
+                manager.EndBuild();
+
+                // No errors from cancelling a build.
+                logger.ErrorCount.ShouldBe(0);
+                // Warn because the task is being cancelled.
+                // NOTE: This assertion will fail when debugging into it because "waiting on exec to cancel" warning will be logged.
+                logger.WarningCount.ShouldBe(1);
+                // Build failed because it was cancelled.
+                result.OverallResult.ShouldBe(BuildResultCode.Failure);
+                // Should log "Cmd being cancelled because build was cancelled" warning
+                logger.AssertLogContains("MSB5021");
+                // Should NOT log "exec failed without logging error"
+                logger.AssertLogDoesntContain("MSB4181");
+
+                collection.Dispose();
+                manager.Dispose();
+            }
         }
 
         /// <summary>

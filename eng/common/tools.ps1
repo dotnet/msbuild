@@ -301,31 +301,44 @@ function InstallDotNet([string] $dotnetRoot,
   if ($skipNonVersionedFiles) { $installParameters.SkipNonVersionedFiles = $skipNonVersionedFiles }
   if ($noPath) { $installParameters.NoPath = $True }
 
-  try {
-    & $installScript @installParameters
-  }
-  catch {
-    if ($runtimeSourceFeed -or $runtimeSourceFeedKey) {
-      Write-Host "Failed to install dotnet from public location. Trying from '$runtimeSourceFeed'"
-      if ($runtimeSourceFeed) { $installParameters.AzureFeed = $runtimeSourceFeed }
+  $variations = @()
+  $variations += @($installParameters)
 
-      if ($runtimeSourceFeedKey) {
-        $decodedBytes = [System.Convert]::FromBase64String($runtimeSourceFeedKey)
-        $decodedString = [System.Text.Encoding]::UTF8.GetString($decodedBytes)
-        $installParameters.FeedCredential = $decodedString
-      }
+  $dotnetBuilds = $installParameters.Clone()
+  $dotnetbuilds.AzureFeed = "https://dotnetbuilds.azureedge.net/public"
+  $variations += @($dotnetBuilds)
 
-      try {
-        & $installScript @installParameters
-      }
-      catch {
-        Write-PipelineTelemetryError -Category 'InitializeToolset' -Message "Failed to install dotnet from custom location '$runtimeSourceFeed'."
-        ExitWithExitCode 1
-      }
-    } else {
-      Write-PipelineTelemetryError -Category 'InitializeToolset' -Message "Failed to install dotnet from public location."
-      ExitWithExitCode 1
+  if ($runtimeSourceFeed) {
+    $runtimeSource = $installParameters.Clone()
+    $runtimeSource.AzureFeed = $runtimeSourceFeed
+    if ($runtimeSourceFeedKey) {
+      $decodedBytes = [System.Convert]::FromBase64String($runtimeSourceFeedKey)
+      $decodedString = [System.Text.Encoding]::UTF8.GetString($decodedBytes)
+      $runtimeSource.FeedCredential = $decodedString
     }
+    $variations += @($runtimeSource)
+  }
+
+  $installSuccess = $false
+  foreach ($variation in $variations) {
+    if ($variation | Get-Member AzureFeed) {
+      $location = $variation.AzureFeed
+    } else {
+      $location = "public location";
+    }
+    Write-Host "Attempting to install dotnet from $location."
+    try {
+      & $installScript @variation
+      $installSuccess = $true
+      break
+    }
+    catch {
+      Write-Host "Failed to install dotnet from $location."
+    }
+  }
+  if (-not $installSuccess) {
+    Write-PipelineTelemetryError -Category 'InitializeToolset' -Message "Failed to install dotnet from any of the specified locations."
+    ExitWithExitCode 1
   }
 }
 
@@ -709,14 +722,7 @@ function MSBuild() {
       Write-PipelineSetVariable -Name 'NUGET_PLUGIN_REQUEST_TIMEOUT_IN_SECONDS' -Value '20'
     }
 
-    if ($ci) {
-      $env:NUGET_ENABLE_EXPERIMENTAL_HTTP_RETRY = 'true'
-      $env:NUGET_EXPERIMENTAL_MAX_NETWORK_TRY_COUNT = 6
-      $env:NUGET_EXPERIMENTAL_NETWORK_RETRY_DELAY_MILLISECONDS = 1000
-      Write-PipelineSetVariable -Name 'NUGET_ENABLE_EXPERIMENTAL_HTTP_RETRY' -Value 'true'
-      Write-PipelineSetVariable -Name 'NUGET_EXPERIMENTAL_MAX_NETWORK_TRY_COUNT' -Value '6'
-      Write-PipelineSetVariable -Name 'NUGET_EXPERIMENTAL_NETWORK_RETRY_DELAY_MILLISECONDS' -Value '1000'
-    }
+    Enable-Nuget-EnhancedRetry
 
     $toolsetBuildProject = InitializeToolset
     $basePath = Split-Path -parent $toolsetBuildProject
@@ -763,6 +769,8 @@ function MSBuild-Core() {
       ExitWithExitCode 1
     }
   }
+
+  Enable-Nuget-EnhancedRetry
 
   $buildTool = InitializeBuildTool
 
@@ -902,5 +910,20 @@ function Try-LogClientIpAddress()
     catch
     {
         Write-Host "Unable to get this machine's effective IP address for logging: $_"
+    }
+}
+
+#
+# If $ci flag is set, turn on (and log that we did) special environment variables for improved Nuget client retry logic.
+#
+function Enable-Nuget-EnhancedRetry() {
+    if ($ci) {
+      Write-Host "Setting NUGET enhanced retry environment variables"
+      $env:NUGET_ENABLE_EXPERIMENTAL_HTTP_RETRY = 'true'
+      $env:NUGET_EXPERIMENTAL_MAX_NETWORK_TRY_COUNT = 6
+      $env:NUGET_EXPERIMENTAL_NETWORK_RETRY_DELAY_MILLISECONDS = 1000
+      Write-PipelineSetVariable -Name 'NUGET_ENABLE_EXPERIMENTAL_HTTP_RETRY' -Value 'true'
+      Write-PipelineSetVariable -Name 'NUGET_EXPERIMENTAL_MAX_NETWORK_TRY_COUNT' -Value '6'
+      Write-PipelineSetVariable -Name 'NUGET_EXPERIMENTAL_NETWORK_RETRY_DELAY_MILLISECONDS' -Value '1000'
     }
 }

@@ -53,7 +53,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (!(e is BuildStartedEventArgs) && !(e is BuildFinishedEventArgs))
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(false, "Should not receive any events other than build started or finished");
+                ErrorUtilities.ThrowInvalidOperation("Should not receive any events other than build started or finished");
             }
         }
 

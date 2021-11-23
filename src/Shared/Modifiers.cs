@@ -599,7 +599,7 @@ namespace Microsoft.Build.Shared
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    ErrorUtilities.VerifyThrowInvalidOperation(false, "Shared.InvalidFilespecForTransform", modifier, itemSpec, e.Message);
+                    ErrorUtilities.ThrowInvalidOperation("Shared.InvalidFilespecForTransform", modifier, itemSpec, e.Message);
                 }
 
                 return modifiedItemSpec;

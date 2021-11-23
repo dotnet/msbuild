@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
@@ -504,6 +506,11 @@ namespace Microsoft.Build.Shared
             RunningInVisualStudio = runningInVisualStudio;
             CurrentMSBuildExePath = currentMSBuildExePath;
             VisualStudioInstallRootDirectory = visualStudioPath;
+
+#if !NO_FRAMEWORK_IVT
+            Framework.BuildEnvironmentState.s_runningTests = true;
+            Framework.BuildEnvironmentState.s_runningInVisualStudio = runningInVisualStudio;
+#endif
 
             if (!string.IsNullOrEmpty(currentMSBuildExePath))
             {

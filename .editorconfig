@@ -157,6 +157,11 @@ csharp_space_between_square_brackets = false
 dotnet_code_quality.ca1802.api_surface = private, internal
 dotnet_code_quality.ca2208.api_surface = public
 
+# RS0037: Enable tracking of nullability of reference types in the declared API
+# Our API is not annotated but new classes get nullable enabled so disable this.
+# We'd be happy if everything was annotated and this could be removed.
+dotnet_diagnostic.RS0037.severity = none
+
 # License header
 file_header_template = Licensed to the .NET Foundation under one or more agreements.\nThe .NET Foundation licenses this file to you under the MIT license.\n
 

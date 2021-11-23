@@ -90,7 +90,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             "../d/e/**",
             "a/b/d/e"
             )]
-        public void GlobWithRelativeFixedDirectoryPartShouldMissmatchTheGlobRoot(string globRoot, string filespec, string expectedFixedDirectoryPart)
+        public void GlobWithRelativeFixedDirectoryPartShouldMismatchTheGlobRoot(string globRoot, string filespec, string expectedFixedDirectoryPart)
         {
             var glob = MSBuildGlob.Parse(globRoot, filespec);
 

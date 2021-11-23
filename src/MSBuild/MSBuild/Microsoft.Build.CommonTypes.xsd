@@ -720,7 +720,15 @@ elementFormDefault="qualified">
                                     <xs:documentation><!-- _locID_text="Compile_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="CopyToOutputDirectory"/>
+                            <xs:element name="CopyToOutputDirectory">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="Never" />
+                                        <xs:enumeration value="Always" />
+                                        <xs:enumeration value="PreserveNewest" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
                             <xs:element name="VBMyExtensionTemplateID"/>
                         </xs:choice>
                     </xs:sequence>
@@ -729,6 +737,16 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="Compile_Include" _locComment="" -->Semi-colon separated list of source files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
+                    </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
                     </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
@@ -770,7 +788,15 @@ elementFormDefault="qualified">
                                 </xs:annotation>
                             </xs:element>
                             <xs:element name="SubType"/>
-                            <xs:element name="CopyToOutputDirectory"/>
+                            <xs:element name="CopyToOutputDirectory">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="Never" />
+                                        <xs:enumeration value="Always" />
+                                        <xs:enumeration value="PreserveNewest" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
                             <xs:element name="LogicalName"/>
                         </xs:choice>
                     </xs:sequence>
@@ -779,6 +805,16 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="EmbeddedResource_Include" _locComment="" -->Semi-colon separated list of resource files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
+                    </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
                     </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
@@ -819,15 +855,29 @@ elementFormDefault="qualified">
                                 </xs:annotation>
                             </xs:element>
                             <xs:element name="SubType"/>
-                            <xs:element name="CopyToOutputDirectory" type="msb:boolean">
+                            <xs:element name="CopyToOutputDirectory">
                                 <xs:annotation>
-                                    <xs:documentation><!-- _locID_text="Content_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
+                                    <xs:documentation><!-- _locID_text="Content_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, default Never)</xs:documentation>
                                 </xs:annotation>
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="Never" />
+                                        <xs:enumeration value="Always" />
+                                        <xs:enumeration value="PreserveNewest" />
+                                    </xs:restriction>
+                                </xs:simpleType>
                             </xs:element>
-                            <xs:element name="CopyToPublishDirectory" type="msb:boolean">
+                            <xs:element name="CopyToPublishDirectory">
                                 <xs:annotation>
-                                    <xs:documentation><!-- _locID_text="Content_CopyToPublishDirectory" _locComment="" -->Copy file to publish directory (optional, boolean, default false)</xs:documentation>
+                                    <xs:documentation><!-- _locID_text="Content_CopyToPublishDirectory" _locComment="" -->Copy file to publish directory (optional, default Never)</xs:documentation>
                                 </xs:annotation>
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="Never" />
+                                        <xs:enumeration value="Always" />
+                                        <xs:enumeration value="PreserveNewest" />
+                                    </xs:restriction>
+                                </xs:simpleType>
                             </xs:element>
                         </xs:choice>
                     </xs:sequence>
@@ -836,6 +886,16 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="Content_Include" _locComment="" -->Semi-colon separated list of content files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
+                    </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
                     </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
@@ -865,10 +925,17 @@ elementFormDefault="qualified">
                             </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="SubType"/>
-                            <xs:element name="CopyToOutputDirectory" type="msb:boolean">
+                            <xs:element name="CopyToOutputDirectory">
                                 <xs:annotation>
-                                    <xs:documentation><!-- _locID_text="Page_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
+                                    <xs:documentation><!-- _locID_text="Page_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, Never, PreserveNewest or Always, default Never)</xs:documentation>
                                 </xs:annotation>
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="Never" />
+                                        <xs:enumeration value="Always" />
+                                        <xs:enumeration value="PreserveNewest" />
+                                    </xs:restriction>
+                                </xs:simpleType>
                             </xs:element>
                         </xs:choice>
                     </xs:sequence>
@@ -877,6 +944,16 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="Page_Include" _locComment="" -->Semi-colon separated list of XAML files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
+                    </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
                     </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
@@ -906,10 +983,17 @@ elementFormDefault="qualified">
                             </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="SubType"/>
-                            <xs:element name="CopyToOutputDirectory" type="msb:boolean">
+                            <xs:element name="CopyToOutputDirectory">
                                 <xs:annotation>
-                                    <xs:documentation><!-- _locID_text="Resource_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
+                                    <xs:documentation><!-- _locID_text="Resource_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, default Never)</xs:documentation>
                                 </xs:annotation>
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="Never" />
+                                        <xs:enumeration value="Always" />
+                                        <xs:enumeration value="PreserveNewest" />
+                                    </xs:restriction>
+                                </xs:simpleType>
                             </xs:element>
                         </xs:choice>
                     </xs:sequence>
@@ -918,6 +1002,16 @@ elementFormDefault="qualified">
                         <xs:annotation>
                             <xs:documentation><!-- _locID_text="Resource_Include" _locComment="" -->Semi-colon separated list of files (wildcards are allowed)</xs:documentation>
                         </xs:annotation>
+                    </xs:attribute>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
                     </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
@@ -947,13 +1041,30 @@ elementFormDefault="qualified">
                             </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="SubType"/>
-                            <xs:element name="CopyToOutputDirectory" type="msb:boolean">
+                            <xs:element name="CopyToOutputDirectory">
                                 <xs:annotation>
-                                    <xs:documentation><!-- _locID_text="ApplicationDefinition_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
+                                    <xs:documentation><!-- _locID_text="ApplicationDefinition_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, default Never)</xs:documentation>
                                 </xs:annotation>
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="Never" />
+                                        <xs:enumeration value="Always" />
+                                        <xs:enumeration value="PreserveNewest" />
+                                    </xs:restriction>
+                                </xs:simpleType>
                             </xs:element>
                         </xs:choice>
                     </xs:sequence>
+                    <!-- metadata may be defined as nested elements (as above) or as attributes (as below), so we duplicate these entries -->
+                    <xs:attribute name="CopyToOutputDirectory">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Never" />
+                                <xs:enumeration value="Always" />
+                                <xs:enumeration value="PreserveNewest" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -985,7 +1096,15 @@ elementFormDefault="qualified">
                                     <xs:documentation><!-- _locID_text="None_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="CopyToOutputDirectory"/>
+                            <xs:element name="CopyToOutputDirectory">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:enumeration value="Never" />
+                                        <xs:enumeration value="Always" />
+                                        <xs:enumeration value="PreserveNewest" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
                 </xs:extension>
@@ -1164,9 +1283,11 @@ elementFormDefault="qualified">
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
-          <xs:enumeration value="Default" />
-          <xs:enumeration value="AllEnabledByDefault" />
-          <xs:enumeration value="AllDisabledByDefault" />
+          <xs:enumeration value="none" />
+          <xs:enumeration value="default" />
+          <xs:enumeration value="minimum" />
+          <xs:enumeration value="recommended" />
+          <xs:enumeration value="all" />
         </xs:restriction>
       </xs:simpleType>
     </xs:element>
@@ -1608,7 +1729,32 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="InstallFrom" _locComment="" -->Web, Unc, or Disk</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="AnalysisLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AnalysisLevel" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AnalysisLevel" _locComment="" -->Customizes the set of rules that are enabled by default.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="none" />
+          <xs:enumeration value="latest" />
+          <xs:enumeration value="latest-minimum" />
+          <xs:enumeration value="latest-recommended" />
+          <xs:enumeration value="latest-all" />
+          <xs:enumeration value="preview" />
+          <xs:enumeration value="preview-minimum" />
+          <xs:enumeration value="preview-recommended" />
+          <xs:enumeration value="preview-all" />
+          <xs:enumeration value="5.0" />
+          <xs:enumeration value="5.0-minimum" />
+          <xs:enumeration value="5.0-recommended" />
+          <xs:enumeration value="5.0-all" />
+          <xs:enumeration value="6.0" />
+          <xs:enumeration value="6.0-minimum" />
+          <xs:enumeration value="6.0-recommended" />
+          <xs:enumeration value="6.0-all" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
     <xs:element name="InstallUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="IsCodeSharingProject" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="IsPackable" type="msb:boolean" substitutionGroup="msb:Property">
@@ -3019,6 +3165,33 @@ elementFormDefault="qualified">
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
+    </xs:element>
+    <xs:element name="AssemblySearchPaths" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation>
+                Semicolon-delimited ordered list of paths to search when the ResolveAssemblyReference task looks for an assembly. Some non-path locations like the Global Assembly Cache can also be searched using curly braces: {GAC}.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseCandidateAssemblyFiles" type="msb:boolean" substitutionGroup="msb:Property">
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseReferencePath" type="msb:boolean" substitutionGroup="msb:Property">
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseHintPathFromItem" type="msb:boolean" substitutionGroup="msb:Property">
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseTargetFrameworkDirectory" type="msb:boolean" substitutionGroup="msb:Property">
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseAssemblyFoldersConfigFileSearchPath" type="msb:boolean" substitutionGroup="msb:Property">
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseRegistry" type="msb:boolean" substitutionGroup="msb:Property">
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseAssemblyFolders" type="msb:boolean" substitutionGroup="msb:Property">
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseGAC" type="msb:boolean" substitutionGroup="msb:Property">
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseRawFileName" type="msb:boolean" substitutionGroup="msb:Property">
+    </xs:element>
+    <xs:element name="AssemblySearchPathUseOutDir" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
     <xs:element name="ResolveAssemblyReference" substitutionGroup="msb:Task">
         <xs:complexType>

@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
@@ -260,7 +261,7 @@ namespace Microsoft.Build.Globbing
         /// <summary>
         ///     Return type of <see cref="MSBuildGlob.MatchInfo" />
         /// </summary>
-        public struct MatchInfoResult
+        public readonly struct MatchInfoResult
         {
             /// <summary>
             ///     Whether the <see cref="MSBuildGlob.MatchInfo" /> argument was matched against the glob

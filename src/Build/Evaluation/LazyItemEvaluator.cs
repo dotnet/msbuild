@@ -6,7 +6,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
-using Microsoft.Build.Internal;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
@@ -40,22 +40,22 @@ namespace Microsoft.Build.Evaluation
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
-        protected IFileSystem FileSystem { get; }
+        protected EvaluationContext EvaluationContext { get; }
 
-        protected EngineFileUtilities EngineFileUtilities { get; }
+        protected IFileSystem FileSystem => EvaluationContext.FileSystem;
+        protected FileMatcher FileMatcher => EvaluationContext.FileMatcher;
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
-            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext.FileSystem);
+            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext);
             _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext.FileSystem);
+            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
 
-            FileSystem = evaluationContext.FileSystem;
-            EngineFileUtilities = evaluationContext.EngineFileUtilities;
+            EvaluationContext = evaluationContext;
         }
 
         private ImmutableList<I> GetItems(string itemType)
@@ -278,13 +278,13 @@ namespace Microsoft.Build.Evaluation
                 // Cache results only on the LazyItemOperations whose results are required by an external caller (via GetItems). This means:
                 //   - Callers of GetItems who have announced ahead of time that they would reference an operation (via MarkAsReferenced())
                 // This includes: item references (Include="@(foo)") and metadata conditions (Condition="@(foo->Count()) == 0")
-                // Without ahead of time notifications more computation is done than needed when the results of a future operation are requested 
+                // Without ahead of time notifications more computation is done than needed when the results of a future operation are requested
                 // The future operation is part of another item list referencing this one (making this operation part of the tail).
                 // The future operation will compute this list but since no ahead of time notifications have been made by callers, it won't cache the
                 // intermediary operations that would be requested by those callers.
                 //   - Callers of GetItems that cannot announce ahead of time. This includes item referencing conditions on
                 // Item Groups and Item Elements. However, those conditions are performed eagerly outside of the LazyItemEvaluator, so they will run before
-                // any item referencing operations from inside the LazyItemEvaluator. This 
+                // any item referencing operations from inside the LazyItemEvaluator. This
                 //
                 // If the head of this LazyItemList is uncached, then the tail may contain cached and un-cached nodes.
                 // In this case we have to compute the head plus the part of the tail up to the first cached operation.
@@ -303,7 +303,7 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // tell the cache that this operation's result is needed by an external caller
-                    // this is required for callers that cannot tell the item list ahead of time that 
+                    // this is required for callers that cannot tell the item list ahead of time that
                     // they would be using an operation
                     MarkAsReferenced();
 

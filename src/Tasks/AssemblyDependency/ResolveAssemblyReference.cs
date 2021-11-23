@@ -3153,23 +3153,26 @@ namespace Microsoft.Build.Tasks
         {
             return Execute
             (
-                new FileExists(p => FileUtilities.FileExistsNoThrow(p)),
-                new DirectoryExists(p => FileUtilities.DirectoryExistsNoThrow(p)),
-                new GetDirectories(Directory.GetDirectories),
-                new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
-                new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),
+                p => FileUtilities.FileExistsNoThrow(p),
+                p => FileUtilities.DirectoryExistsNoThrow(p),
+                (p, searchPattern) => Directory.GetDirectories(p, searchPattern),
+                p => AssemblyNameExtension.GetAssemblyNameEx(p),
+                (string path, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache, out AssemblyNameExtension[] dependencies, out string[] scatterFiles, out FrameworkNameVersioning frameworkName)
+                    => AssemblyInformation.GetAssemblyMetadata(path, assemblyMetadataCache, out dependencies, out scatterFiles, out frameworkName),
 #if FEATURE_WIN32_REGISTRY
-                new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames),
-                new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue),
+                (baseKey, subkey) => RegistryHelper.GetSubKeyNames(baseKey, subkey),
+                (baseKey, subkey) => RegistryHelper.GetDefaultValue(baseKey, subkey),
 #endif
-                new GetLastWriteTime(NativeMethodsShared.GetLastWriteFileUtcTime),
-                new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion),
+                p => NativeMethodsShared.GetLastWriteFileUtcTime(p),
+                p => AssemblyInformation.GetRuntimeVersion(p),
 #if FEATURE_WIN32_REGISTRY
-                new OpenBaseKey(RegistryHelper.OpenBaseKey),
+                (hive, view) => RegistryHelper.OpenBaseKey(hive, view),
 #endif
-                new GetAssemblyPathInGac(GetAssemblyPathInGac),
-                new IsWinMDFile(AssemblyInformation.IsWinMDFile),
-                new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader)
+                (assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists, fullFusionName, specificVersion)
+                    => GetAssemblyPathInGac(assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists, fullFusionName, specificVersion),
+                (string fullPath, GetAssemblyRuntimeVersion getAssemblyRuntimeVersion, FileExists fileExists, out string imageRuntimeVersion, out bool isManagedWinmd)
+                    => AssemblyInformation.IsWinMDFile(fullPath, getAssemblyRuntimeVersion, fileExists, out imageRuntimeVersion, out isManagedWinmd),
+                p => ReferenceTable.ReadMachineTypeFromPEHeader(p)
             );
         }
 

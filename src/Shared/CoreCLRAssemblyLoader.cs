@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using System;
@@ -164,12 +165,10 @@ namespace Microsoft.Build.Shared
                     }
 
                     AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                    if (candidateAssemblyName.Version != assemblyName.Version)
+                    if (candidateAssemblyName.Version >= assemblyName.Version)
                     {
-                        continue;
+                        return LoadAndCache(context, candidatePath);
                     }
-
-                    return LoadAndCache(context, candidatePath);
                 }
             }
 

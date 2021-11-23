@@ -17,7 +17,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using Microsoft.Build.Utilities;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
@@ -903,7 +903,7 @@ namespace Microsoft.Build.Shared
                 fileSystem ??= DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
-                    ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.DirectoryExists)
+                    ? FileExistenceCache.GetOrAdd(fullPath, fullPath => fileSystem.DirectoryExists(fullPath))
                     : fileSystem.DirectoryExists(fullPath);
             }
             catch
@@ -927,7 +927,7 @@ namespace Microsoft.Build.Shared
                 fileSystem ??= DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
-                    ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.FileExists)
+                    ? FileExistenceCache.GetOrAdd(fullPath, fullPath => fileSystem.FileExists(fullPath))
                     : fileSystem.FileExists(fullPath);
             }
             catch
@@ -951,7 +951,7 @@ namespace Microsoft.Build.Shared
                 fileSystem ??= DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
-                    ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.FileOrDirectoryExists)
+                    ? FileExistenceCache.GetOrAdd(fullPath, fullPath => fileSystem.FileOrDirectoryExists(fullPath))
                     : fileSystem.FileOrDirectoryExists(fullPath);
             }
             catch
@@ -1061,7 +1061,7 @@ namespace Microsoft.Build.Shared
             {
                 return ".";
             }
-            
+
             // If the paths have no component in common, the only valid relative path is the full path.
             if (index == 0)
             {

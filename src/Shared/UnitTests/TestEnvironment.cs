@@ -17,7 +17,6 @@ using Xunit.Abstractions;
 
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {

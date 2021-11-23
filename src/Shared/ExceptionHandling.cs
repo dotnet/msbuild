@@ -22,7 +22,7 @@ using System.Runtime.Serialization;
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
 #endif
-using Microsoft.Build.Utilities;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 #endif

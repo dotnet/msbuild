@@ -352,7 +352,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     return LoggerVerbosity.Detailed;
 
                 default:
-                    ErrorUtilities.VerifyThrow(false, "Impossible");
+                    ErrorUtilities.ThrowInternalError("Impossible");
                     lightenText = false;
                     return LoggerVerbosity.Detailed;
             }
@@ -1003,7 +1003,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 eventSource.CustomEventRaised += CustomEventHandler;
                 eventSource.StatusEventRaised += StatusEventHandler;
 
-                bool logPropertiesAndItemsAfterEvaluation = Utilities.Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
+                bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
                 if (logPropertiesAndItemsAfterEvaluation && eventSource is IEventSource4 eventSource4)
                 {
                     eventSource4.IncludeEvaluationPropertiesAndItems();
