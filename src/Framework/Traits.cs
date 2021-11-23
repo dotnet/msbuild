@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Utilities
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     ///     Represents toggleable features of the MSBuild engine
@@ -16,7 +16,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                if (BuildEnvironmentHelper.Instance.RunningTests)
+                if (BuildEnvironmentState.s_runningTests)
                 {
                     return new Traits();
                 }
@@ -343,7 +343,7 @@ namespace Microsoft.Build.Utilities
                 return result;
             }
 
-            ErrorUtilities.ThrowInternalError($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
+            ThrowInternalError($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
 
             return null;
         }
@@ -367,7 +367,7 @@ namespace Microsoft.Build.Utilities
                 return ProjectInstanceTranslationMode.Partial;
             }
 
-            ErrorUtilities.ThrowInternalError($"Invalid escape hatch for project instance translation: {mode}");
+            ThrowInternalError($"Invalid escape hatch for project instance translation: {mode}");
 
             return null;
         }
@@ -407,7 +407,7 @@ namespace Microsoft.Build.Utilities
                 return SdkReferencePropertyExpansionMode.ExpandLeaveEscaped;
             }
 
-            ErrorUtilities.ThrowInternalError($"Invalid escape hatch for SdkReference property expansion: {mode}");
+            ThrowInternalError($"Invalid escape hatch for SdkReference property expansion: {mode}");
 
             return null;
         }
@@ -424,6 +424,31 @@ namespace Microsoft.Build.Utilities
             DefaultExpand,
             ExpandUnescape,
             ExpandLeaveEscaped
+        }
+
+        /// <summary>
+        /// Emergency escape hatch. If a customer hits a bug in the shipped product causing an internal exception,
+        /// and fortuitously it happens that ignoring the VerifyThrow allows execution to continue in a reasonable way,
+        /// then we can give them this undocumented environment variable as an immediate workaround.
+        /// </summary>
+        /// <remarks>
+        /// Clone from ErrorUtilities which isn't (yet?) available in Framework.
+        /// </remarks>
+
+        private static readonly bool s_throwExceptions = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDONOTTHROWINTERNAL"));
+
+        /// <summary>
+        /// Throws InternalErrorException.
+        /// </summary>
+        /// <remarks>
+        /// Clone of ErrorUtilities.ThrowInternalError which isn't (yet?) available in Framework.
+        /// </remarks>
+        internal static void ThrowInternalError(string message)
+        {
+            if (s_throwExceptions)
+            {
+                throw new InternalErrorException(message);
+            }
         }
     }
 }

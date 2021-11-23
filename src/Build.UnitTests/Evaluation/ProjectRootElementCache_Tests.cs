@@ -6,6 +6,7 @@ using System;
 using System.IO;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -99,7 +100,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             GC.Collect();
 
             Assert.Null(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet(projectPath));
-        }   
+        }
 
         /// <summary>
         /// Cache should not return a ProjectRootElement if the file it was loaded from has since changed -

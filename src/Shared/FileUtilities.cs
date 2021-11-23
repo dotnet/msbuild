@@ -17,7 +17,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using Microsoft.Build.Utilities;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
@@ -1061,7 +1061,7 @@ namespace Microsoft.Build.Shared
             {
                 return ".";
             }
-            
+
             // If the paths have no component in common, the only valid relative path is the full path.
             if (index == 0)
             {

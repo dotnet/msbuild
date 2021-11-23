@@ -5,25 +5,19 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// This exception is to be thrown whenever an assumption we have made in the code turns out to be false. Thus, if this
     /// exception ever gets thrown, it is because of a bug in our own code, not because of something the user or project author
     /// did wrong.
-    /// 
-    /// !~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~
-    /// WARNING: When this file is shared into multiple assemblies each assembly will view this as a different type.
-    ///          Don't throw this exception from one assembly and catch it in another.
-    /// !~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~
-    ///     
     /// </summary>
     [Serializable]
     internal sealed class InternalErrorException : Exception
     {
         /// <summary>
         /// Default constructor.
-        /// SHOULD ONLY BE CALLED BY DESERIALIZER. 
+        /// SHOULD ONLY BE CALLED BY DESERIALIZER.
         /// SUPPLY A MESSAGE INSTEAD.
         /// </summary>
         internal InternalErrorException() : base()
@@ -76,21 +70,21 @@ namespace Microsoft.Build.Shared
         #region ConsiderDebuggerLaunch
         /// <summary>
         /// A fatal internal error due to a bug has occurred. Give the dev a chance to debug it, if possible.
-        /// 
+        ///
         /// Will in all cases launch the debugger, if the environment variable "MSBUILDLAUNCHDEBUGGER" is set.
-        /// 
+        ///
         /// In DEBUG build, will always launch the debugger, unless we are in razzle (_NTROOT is set) or in NUnit,
         /// or MSBUILDDONOTLAUNCHDEBUGGER is set (that could be useful in suite runs).
         /// We don't launch in retail or LKG so builds don't jam; they get a callstack, and continue or send a mail, etc.
         /// We don't launch in NUnit as tests often intentionally cause InternalErrorExceptions.
-        /// 
-        /// Because we only call this method from this class, just before throwing an InternalErrorException, there is 
+        ///
+        /// Because we only call this method from this class, just before throwing an InternalErrorException, there is
         /// no danger that this suppression will cause a bug to only manifest itself outside NUnit
         /// (which would be most unfortunate!). Do not make this non-private.
-        /// 
+        ///
         /// Unfortunately NUnit can't handle unhandled exceptions like InternalErrorException on anything other than
         /// the main test thread. However, there's still a callstack displayed before it quits.
-        /// 
+        ///
         /// If it is going to launch the debugger, it first does a Debug.Fail to give information about what needs to
         /// be debugged -- the exception hasn't been thrown yet. This automatically displays the current callstack.
         /// </summary>
@@ -120,7 +114,7 @@ namespace Microsoft.Build.Shared
             Debug.Fail(message, innerMessage);
             Debugger.Launch();
 #else
-            Console.WriteLine("MSBuild Failure: " + message);    
+            Console.WriteLine("MSBuild Failure: " + message);
             if (!string.IsNullOrEmpty(innerMessage))
             {
                 Console.WriteLine(innerMessage);
@@ -134,6 +128,6 @@ namespace Microsoft.Build.Shared
         }
         #endregion
 
-        private static bool RunningTests() => BuildEnvironmentHelper.Instance.RunningTests;
+        private static bool RunningTests() => BuildEnvironmentState.s_runningTests;
     }
 }

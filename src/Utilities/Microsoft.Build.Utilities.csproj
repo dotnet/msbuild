@@ -101,9 +101,6 @@
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>Shared\IConstrainedEqualityComparer.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\InternalErrorException.cs">
-      <Link>Shared\InternalErrorException.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\IKeyed.cs">
       <Link>Shared\IKeyed.cs</Link>
     </Compile>
@@ -112,12 +109,6 @@
     </Compile>
     <Compile Include="..\Shared\Modifiers.cs">
       <Link>Shared\Modifiers.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\NativeMethodsShared.cs">
-      <Link>Shared\NativeMethodsShared.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyUtilities.cs">
-      <Link>Shared\AssemblyUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>Shared\InprocTrackingNativeMethods.cs</Link>
@@ -160,12 +151,6 @@
     </Compile>
     <Compile Include="..\Shared\ToolsetElement.cs">
       <Link>Shared\ToolsetElement.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
-      <Link>Shared\VisualStudioLocationHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Traits.cs">
-      <Link>Shared\Traits.cs</Link>
     </Compile>
   </ItemGroup>
 

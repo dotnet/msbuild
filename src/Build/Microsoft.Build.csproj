@@ -102,9 +102,6 @@
     <Compile Include="..\Shared\StringBuilderCache.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\Traits.cs">
-      <Link>SharedUtilities\Traits.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
@@ -145,9 +142,6 @@
     </Compile>
     <Compile Include="..\Shared\ReuseableStringBuilder.cs" />
     <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
-    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
-      <Link>SharedUtilities\VisualStudioLocationHelper.cs</Link>
-    </Compile>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
@@ -724,19 +718,8 @@
     <Compile Include="..\Shared\IElementLocation.cs">
       <Link>SharedUtilities\IElementLocation.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\InternalErrorException.cs">
-      <Link>Errors\InternalErrorException.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\LoadedType.cs">
       <Link>SharedUtilities\LoadedType.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\NativeMethodsShared.cs">
-      <Link>SharedUtilities\NativeMethodsShared.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyUtilities.cs">
-      <Link>SharedUtilities\AssemblyUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">

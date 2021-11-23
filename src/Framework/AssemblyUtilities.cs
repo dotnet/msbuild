@@ -6,6 +6,8 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
+using Microsoft.Build.Framework;
+
 // Declare this to get init properties. See https://github.com/dotnet/roslyn/issues/45510#issuecomment-694977239
 namespace System.Runtime.CompilerServices
 {
@@ -148,7 +150,7 @@ namespace Microsoft.Build.Shared
 #else
             var getEntryAssembly = typeof(Assembly).GetMethod("GetEntryAssembly");
 
-            ErrorUtilities.VerifyThrowInternalNull(getEntryAssembly, "Assembly does not have the method GetEntryAssembly");
+            FrameworkErrorUtilities.VerifyThrowInternalNull(getEntryAssembly, "Assembly does not have the method GetEntryAssembly");
 
             return (Assembly) getEntryAssembly.Invoke(null, Array.Empty<object>());
 #endif
@@ -159,7 +161,7 @@ namespace Microsoft.Build.Shared
         {
             var cultureTypesType = s_cultureInfoGetCultureMethod?.GetParameters().FirstOrDefault()?.ParameterType;
 
-            ErrorUtilities.VerifyThrow(cultureTypesType?.Name == "CultureTypes" &&
+            FrameworkErrorUtilities.VerifyThrow(cultureTypesType?.Name == "CultureTypes" &&
                                        Enum.IsDefined(cultureTypesType, "AllCultures"),
                                        "GetCulture is expected to accept CultureTypes.AllCultures");
 
@@ -167,7 +169,7 @@ namespace Microsoft.Build.Shared
 
             var cultures = s_cultureInfoGetCultureMethod.Invoke(null, new[] {allCulturesEnumValue}) as CultureInfo[];
 
-            ErrorUtilities.VerifyThrowInternalNull(cultures, "CultureInfo.GetCultures should work if all reflection checks pass");
+            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures, "CultureInfo.GetCultures should work if all reflection checks pass");
 
             return cultures;
         }

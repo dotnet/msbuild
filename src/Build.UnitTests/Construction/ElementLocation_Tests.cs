@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
 using Microsoft.Build.UnitTests.BackEnd;

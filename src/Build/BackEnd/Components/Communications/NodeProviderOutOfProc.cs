@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Utilities;
 

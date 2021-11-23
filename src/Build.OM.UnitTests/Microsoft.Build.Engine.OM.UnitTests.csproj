@@ -11,7 +11,7 @@
     <AssemblyName>Microsoft.Build.Engine.OM.UnitTests</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_OM_UNITTESTS</DefineConstants>
+    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_OM_UNITTESTS;NO_FRAMEWORK_IVT</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -37,9 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\Constants.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\EncodingStringWriter.cs">
       <Link>EncodingStringWriter.cs</Link>
     </Compile>
@@ -61,29 +58,14 @@
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\Traits.cs">
-      <Link>SharedTraits.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs">
       <Link>EngineTestEnvironment.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
-      <Link>VisualStudioLocationHelper.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\InternalErrorException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\NativeMethodsShared.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\TempFileUtilities.cs" />
     <Compile Include="..\Shared\FileUtilities.cs">

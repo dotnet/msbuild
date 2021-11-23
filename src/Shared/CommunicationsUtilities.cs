@@ -11,9 +11,9 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
-using Microsoft.Build.Utilities;
 
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
@@ -218,8 +218,8 @@ namespace Microsoft.Build.Internal
                         // Copy strings out, parsing into pairs and inserting into the table.
                         // The first few environment variable entries start with an '='!
                         // The current working directory of every drive (except for those drives
-                        // you haven't cd'ed into in your DOS window) are stored in the 
-                        // environment block (as =C:=pwd) and the program's exit code is 
+                        // you haven't cd'ed into in your DOS window) are stored in the
+                        // environment block (as =C:=pwd) and the program's exit code is
                         // as well (=ExitCode=00000000)  Skip all that start with =.
                         // Read docs about Environment Blocks on MSDN's CreateProcess page.
 
@@ -233,8 +233,8 @@ namespace Microsoft.Build.Internal
                             int startKey = i;
 
                             // Skip to key
-                            // On some old OS, the environment block can be corrupted. 
-                            // Some lines will not have '=', so we need to check for '\0'. 
+                            // On some old OS, the environment block can be corrupted.
+                            // Some lines will not have '=', so we need to check for '\0'.
                             while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
                             {
                                 i++;
@@ -311,7 +311,7 @@ namespace Microsoft.Build.Internal
                     }
                 }
 
-                // Then, make sure the old ones have their old values. 
+                // Then, make sure the old ones have their old values.
                 foreach (KeyValuePair<string, string> entry in newEnvironment)
                 {
                     Environment.SetEnvironmentVariable(entry.Key, entry.Value);

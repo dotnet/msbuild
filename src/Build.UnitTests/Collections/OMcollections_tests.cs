@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using System;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using System.Collections;
 using System.Linq;
 using Microsoft.Build.Execution;
