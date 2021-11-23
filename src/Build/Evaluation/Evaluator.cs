@@ -1845,7 +1845,7 @@ namespace Microsoft.Build.Evaluation
 
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", sdkReference.ToString());
                 }
-
+                List<ProjectRootElement> projectList = null;
                 if (sdkResult.Path != null)
                 {
                     ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(sdkResult.Path, project),
@@ -1853,15 +1853,11 @@ namespace Microsoft.Build.Evaluation
 
                     if (projects?.Count > 0)
                     {
-                        projects = new List<ProjectRootElement>(projects);
+                        projectList = new List<ProjectRootElement>(projects);
                     }
 
                     if (sdkResult.AdditionalPaths != null)
                     {
-                        if (projects == null && sdkResult.AdditionalPaths.Count > 0)
-                        {
-                            projects = new List<ProjectRootElement>();
-                        }
 
                         foreach (var additionalPath in sdkResult.AdditionalPaths)
                         {
@@ -1870,7 +1866,8 @@ namespace Microsoft.Build.Evaluation
 
                             if (additionalProjects?.Count > 0)
                             {
-                                projects.AddRange(additionalProjects);
+                                projectList ??= new List<ProjectRootElement>();
+                                projectList.AddRange(additionalProjects);
                             }
                         }
                     }
@@ -1879,12 +1876,14 @@ namespace Microsoft.Build.Evaluation
                 if ((sdkResult.PropertiesToAdd?.Any() == true) ||
                     (sdkResult.ItemsToAdd?.Any() == true))
                 {
-                    projects ??= new List<ProjectRootElement>();
+                    projectList ??= new List<ProjectRootElement>();
 
                     //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
                     //  any projects from paths returned by the SDK Resolver.
-                    projects.Insert(0, CreateProjectForSdkResult(sdkResult));
+                    projectList.Insert(0, CreateProjectForSdkResult(sdkResult));
                 }
+
+                projects = projectList;
             }
             else
             {
