@@ -9,7 +9,6 @@
      -->
   <ItemGroup>
     <PackageReference Update="BenchmarkDotNet" Version="0.12.1" />
-    <PackageReference Update="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
     <PackageReference Update="LargeAddressAware" Version="1.0.5" />
     <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
     <PackageReference Update="Microsoft.CodeQuality.Analyzers" Version="3.3.0" PrivateAssets="all" />
