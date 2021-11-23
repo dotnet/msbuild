@@ -1,0 +1,1 @@
+override Microsoft.Build.Tasks.LC.Execute() -> bool

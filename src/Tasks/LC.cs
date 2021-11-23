@@ -88,6 +88,21 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkVersion { get; set; }
         #endregion
 
+#if !NETFRAMEWORK
+        /// <summary>
+        /// Override of Execute that errors, since <see cref="LC"/> is not expected to get
+        /// .NET Core support.
+        /// </summary>
+        /// <remarks>
+        /// See https://github.com/dotnet/winforms/issues/1462.
+        /// </remarks>
+        public override bool Execute()
+        {
+            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(LC));
+            return false;
+        }
+#endif
+
         #region Class properties
 
         /// <summary>
