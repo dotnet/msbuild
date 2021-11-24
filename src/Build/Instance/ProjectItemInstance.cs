@@ -1156,7 +1156,7 @@ namespace Microsoft.Build.Execution
                             }
                             else
                             {
-                                Debug.Fail($"metadatum from {_itemDefinitions[i]} is null, see https://github.com/microsoft/msbuild/issues/5267");
+                                Debug.Fail($"metadatum from {_itemDefinitions[i]} is null, see https://github.com/dotnet/msbuild/issues/5267");
                             }
                         }
                     }
@@ -1172,7 +1172,7 @@ namespace Microsoft.Build.Execution
                             }
                             else
                             {
-                                Debug.Fail("metadatum in _directMetadata is null, see https://github.com/microsoft/msbuild/issues/5267");
+                                Debug.Fail("metadatum in _directMetadata is null, see https://github.com/dotnet/msbuild/issues/5267");
                             }
                         }
                     }
