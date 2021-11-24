@@ -114,6 +114,31 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.Equal(new[] { "val1", "val2" }, result);
         }
 
+#pragma warning disable xUnit1004 // Test methods should not be skipped
+        [Fact (Skip = "not working, text to match is not considered")]
+#pragma warning restore xUnit1004 // Test methods should not be skipped
+        public void CanCompleteChoice_FromSingleTemplate_InTheMiddle()
+        {
+            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                .WithChoiceParameter("testChoice", "val1", "val2", "boo");
+
+            var templateGroups = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()));
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
+            var parseResult = instantiateCommand.Parse($" new foo --testChoice v --name test");
+            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+
+            var result = instantiateCommand.GetSuggestions(args, templateGroups, settings, packageManager, "v");
+
+            Assert.Equal(new[] { "val1", "val2" }, result);
+        }
+
         [Fact]
         public void CanCompleteChoice_FromMultipleTemplates()
         {
