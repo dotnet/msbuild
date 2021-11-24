@@ -15,7 +15,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Execution
@@ -113,7 +112,7 @@ namespace Microsoft.Build.Execution
 
             if (directMetadata?.GetEnumerator().MoveNext() == true)
             {
-                metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(directMetadata.FastCountOrZero());
+                metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                 foreach (KeyValuePair<string, string> metadatum in directMetadata)
                 {
                     metadata.Set(new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
@@ -600,7 +599,7 @@ namespace Microsoft.Build.Execution
         internal static void SetMetadata(IEnumerable<KeyValuePair<string, string>> metadataList, IEnumerable<ProjectItemInstance> items)
         {
             // Set up a single dictionary that can be applied to all the items
-            CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(metadataList.FastCountOrZero());
+            CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
             foreach (KeyValuePair<string, string> metadatum in metadataList)
             {
                 metadata.Set(new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
@@ -1143,7 +1142,7 @@ namespace Microsoft.Build.Execution
                         return (_directMetadata == null) ? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>() : _directMetadata.DeepClone(); // copy on write!
                     }
 
-                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> allMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(_itemDefinitions.Count + (_directMetadata?.Count ?? 0));
+                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> allMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
 
                     // Next, any inherited item definitions. Front of the list is highest priority,
                     // so walk backwards.
@@ -1716,7 +1715,7 @@ namespace Microsoft.Build.Execution
                     if (translator.TranslateNullable(_directMetadata))
                     {
                         int count = translator.Reader.ReadInt32();
-                        _directMetadata = (count == 0) ? null : new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(count);
+                        _directMetadata = (count == 0) ? null : new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                         for (int i = 0; i < count; i++)
                         {
                             int key = translator.Reader.ReadInt32();
@@ -1971,7 +1970,7 @@ namespace Microsoft.Build.Execution
                 public void SetMetadata(IEnumerable<Pair<ProjectMetadataElement, string>> metadataList, IEnumerable<ProjectItemInstance> destinationItems)
                 {
                     // Set up a single dictionary that can be applied to all the items
-                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(metadataList.FastCountOrZero());
+                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                     foreach (Pair<ProjectMetadataElement, string> metadatum in metadataList)
                     {
                         metadata.Set(new ProjectMetadataInstance(metadatum.Key.Name, metadatum.Value));

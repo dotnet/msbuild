@@ -36,14 +36,14 @@ namespace Microsoft.Build.Collections
         /// used as the basis of new dictionaries with that comparer to avoid
         /// allocating new comparers objects.
         /// </summary>
-        private readonly static ImmutableDictionary<string, V> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>((IEqualityComparer<string>)MSBuildNameIgnoreCaseComparer.Default);
+        private readonly static ImmutableDictionary<string, V> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>(MSBuildNameIgnoreCaseComparer.Default);
 
         /// <summary>
         /// Empty dictionary with <see cref="StringComparer.OrdinalIgnoreCase" />,
         /// used as the basis of new dictionaries with that comparer to avoid
         /// allocating new comparers objects.
         /// </summary>
-        private readonly static ImmutableDictionary<string, V> OrdinalIgnoreCaseComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>((IEqualityComparer<string>)StringComparer.OrdinalIgnoreCase);
+        private readonly static ImmutableDictionary<string, V> OrdinalIgnoreCaseComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>(StringComparer.OrdinalIgnoreCase);
 #endif
 
 
@@ -62,25 +62,9 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Constructor taking an initial capacity
-        /// </summary>
-        internal CopyOnWriteDictionary(int capacity)
-            : this(capacity, null)
-        {
-        }
-
-        /// <summary>
         /// Constructor taking a specified comparer for the keys
         /// </summary>
-        internal CopyOnWriteDictionary(IEqualityComparer<string> keyComparer)
-            : this(0, keyComparer)
-        {
-        }
-
-        /// <summary>
-        /// Constructor taking a specified comparer for the keys and an initial capacity
-        /// </summary>
-        internal CopyOnWriteDictionary(int capacity, IEqualityComparer<string>? keyComparer)
+        internal CopyOnWriteDictionary(IEqualityComparer<string>? keyComparer)
         {
             _backing = GetInitialDictionary(keyComparer);
         }
