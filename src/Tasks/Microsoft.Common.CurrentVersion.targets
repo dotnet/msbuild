@@ -625,16 +625,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             (9) Treat the reference's Include as if it were a real file name.
             (10) Look in the application's output folder (like bin\debug)
         -->
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseCandidateAssemblyFiles) != 'false'">{CandidateAssemblyFiles}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseReferencePath) != 'false'">$(AssemblySearchPaths);$(ReferencePath)</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseHintPathFromItem) != 'false'">$(AssemblySearchPaths);{HintPathFromItem}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseTargetFrameworkDirectory) != 'false'">$(AssemblySearchPaths);{TargetFrameworkDirectory}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseAssemblyFoldersConfigFileSearchPath) != 'false'">$(AssemblySearchPaths);$(AssemblyFoldersConfigFileSearchPath)</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseRegistry) != 'false'">$(AssemblySearchPaths);{Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseAssemblyFolders) != 'false'">$(AssemblySearchPaths);{AssemblyFolders}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseGAC) != 'false'">$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseRawFileName) != 'false'">$(AssemblySearchPaths);{RawFileName}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseOutDir) != 'false'">$(AssemblySearchPaths);$(OutDir)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseCandidateAssemblyFiles)' != 'false'">{CandidateAssemblyFiles}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseReferencePath)' != 'false'">$(AssemblySearchPaths);$(ReferencePath)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseHintPathFromItem)' != 'false'">$(AssemblySearchPaths);{HintPathFromItem}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseTargetFrameworkDirectory)' != 'false'">$(AssemblySearchPaths);{TargetFrameworkDirectory}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseAssemblyFoldersConfigFileSearchPath)' != 'false'">$(AssemblySearchPaths);$(AssemblyFoldersConfigFileSearchPath)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseRegistry)' != 'false'">$(AssemblySearchPaths);{Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseAssemblyFolders)' != 'false'">$(AssemblySearchPaths);{AssemblyFolders}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseGAC)' != 'false'">$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseRawFileName)' != 'false'">$(AssemblySearchPaths);{RawFileName}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseOutDir)' != 'false'">$(AssemblySearchPaths);$(OutDir)</AssemblySearchPaths>
   </PropertyGroup>
 
   <!-- ContinueOnError takes 3 values:  WarnAndContinue (true), ErrorAndStop (false), and ErrorAndContinue.
