@@ -302,7 +302,7 @@ namespace Microsoft.Build.Graph
 
             IReadOnlyCollection<ProjectInSolution> GetBuildableProjects(SolutionFile solutionFile)
             {
-                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat).ToImmutableArray();
+                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat && solutionFile.ProjectShouldBuild(p.RelativePath)).ToImmutableArray();
             }
 
             SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, ImmutableDictionary<string, string> globalProperties)
