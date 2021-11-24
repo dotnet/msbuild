@@ -7,7 +7,6 @@ using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
@@ -24,8 +23,8 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 {
     internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
-		DirectoryPath? nonGlobalLocation = null,
-		IEnumerable<string> forwardRestoreArguments = null);
+        DirectoryPath? nonGlobalLocation = null,
+        IEnumerable<string> forwardRestoreArguments = null);
 
     internal class ToolInstallGlobalOrToolPathCommand : CommandBase
     {
@@ -67,7 +66,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _architectureOption = parseResult.GetValueForOption(ToolInstallCommandParser.ArchitectureOption);
 
             _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;
-			_forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand());
+            _forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand());
 
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
@@ -134,9 +133,20 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         versionRange: versionRange,
                         targetFramework: _framework, verbosity: _verbosity);
 
-                    var framework = string.IsNullOrEmpty(_framework) && package.Frameworks.Count() > 0  ?
-                        package.Frameworks.Where(f => f.Version < (new NuGetVersion(Product.Version)).Version).MaxBy(f => f.Version) :
-                        null;
+                    NuGetFramework framework;
+                    if (string.IsNullOrEmpty(_framework) && package.Frameworks.Count() > 0)
+                    {
+                        framework = package.Frameworks
+                            .Where(f => f.Version < (new NuGetVersion(Product.Version)).Version)
+                            .MaxBy(f => f.Version);
+                    }
+                    else
+                    {
+                        framework = string.IsNullOrEmpty(_framework)  ?
+                            null :
+                            NuGetFramework.Parse(_framework);
+                    }
+
                     string appHostSourceDirectory = _shellShimTemplateFinder.ResolveAppHostSourceDirectoryAsync(_architectureOption, framework, RuntimeInformation.ProcessArchitecture).Result;
                     IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolPath);
 
@@ -170,7 +180,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             {
                 throw new GracefulException(
                     messages: InstallToolCommandLowLevelErrorConverter.GetUserFacingMessages(ex, _packageId),
-                    verboseMessages: new[] {ex.ToString()},
+                    verboseMessages: new[] { ex.ToString() },
                     isUserError: false);
             }
         }
