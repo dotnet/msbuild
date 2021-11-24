@@ -26,6 +26,17 @@ namespace Microsoft.DotNet.Cli
 
         public static int Main(string[] args)
         {
+            //setting output encoding is not available on those platforms
+            if (!OperatingSystem.IsIOS() && !OperatingSystem.IsAndroid() && !OperatingSystem.IsTvOS())
+            {
+                //if output is redirected, force encoding to utf-8;
+                //otherwise the caller may not decode it correctly
+                if (Console.IsOutputRedirected)
+                {
+                    Console.OutputEncoding = Encoding.UTF8;
+                }
+            }
+
             DebugHelper.HandleDebugSwitch(ref args);
 
             // Capture the current timestamp to calculate the host overhead.
