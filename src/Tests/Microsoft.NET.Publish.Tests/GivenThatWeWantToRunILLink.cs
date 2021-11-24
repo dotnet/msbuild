@@ -1226,7 +1226,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Pass().And.HaveStdOutContainingIgnoreCase("https://aka.ms/dotnet-illink");
         }
 
-        [Fact(Skip = "https://github.com/aspnet/AspNetCore/issues/12064")]
+        [Fact()]
         public void ILLink_and_crossgen_process_razor_assembly()
         {
             var targetFramework = "netcoreapp3.0";
@@ -1365,13 +1365,10 @@ namespace Microsoft.NET.Publish.Tests
 
         static string unusedFrameworkAssembly = "System.IO";
 
-        private TestPackageReference GetPackageReference(TestProject project, string callingMethod, string identifier)
+        private TestAsset GetProjectReference(TestProject project, string callingMethod, string identifier)
         {
             var asset = _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier);
-            var pack = new PackCommand(Log, Path.Combine(asset.TestRoot, project.Name));
-            pack.Execute().Should().Pass();
-
-            return new TestPackageReference(project.Name, "1.0.0", pack.GetNuGetPackage(project.Name));
+            return asset;
         }
 
         private void AddRootDescriptor(XDocument project, string rootDescriptorFileName)
@@ -1772,11 +1769,8 @@ public class ClassLib
 
             if (usePackageReference)
             {
-                var packageReference = GetPackageReference(referenceProject, callingMethod, referenceProjectIdentifier ?? targetFramework);
-                testProject.PackageReferences.Add(packageReference);
-                testProject.AdditionalProperties.Add(
-                    "RestoreAdditionalProjectSources",
-                    "$(RestoreAdditionalProjectSources);" + Path.GetDirectoryName(packageReference.NupkgPath));
+                var referenceAsset = GetProjectReference(referenceProject, callingMethod, referenceProjectIdentifier ?? targetFramework);
+                testProject.ReferencedProjects.Add(referenceAsset.TestProject);
             }
             else
             {
