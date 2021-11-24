@@ -508,7 +508,7 @@ namespace Microsoft.Build.Shared
             VisualStudioInstallRootDirectory = visualStudioPath;
 
 #if !NO_FRAMEWORK_IVT
-            Framework.BuildEnvironmentState.s_runningTests = true;
+            Framework.BuildEnvironmentState.s_runningTests = runningTests;
             Framework.BuildEnvironmentState.s_runningInVisualStudio = runningInVisualStudio;
 #endif
 
