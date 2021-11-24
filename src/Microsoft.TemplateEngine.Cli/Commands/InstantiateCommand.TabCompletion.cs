@@ -20,14 +20,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             if (string.IsNullOrWhiteSpace(args.ShortName))
             {
-                return templateGroups.SelectMany(g => g.ShortNames).Distinct();
+                return templateGroups.SelectMany(g => g.ShortNames).Distinct().OrderBy(s => s, StringComparer.OrdinalIgnoreCase);
             }
             else
             {
                 //no exact match on short name
                 if (!templateGroups.Any(template => template.ShortNames.Contains(args.ShortName)))
                 {
-                    return templateGroups.SelectMany(g => g.ShortNames).Where(n => n.StartsWith(args.ShortName)).Distinct();
+                    return templateGroups.SelectMany(g => g.ShortNames).Where(n => n.StartsWith(args.ShortName)).Distinct().OrderBy(s => s, StringComparer.OrdinalIgnoreCase);
                 }
 
                 //if there is exact match do further reparsing
