@@ -267,11 +267,6 @@
         <target state="translated">Hiermit erstellen und verwalten Sie Entwicklungszertifikate.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server-Cache-Befehlszeilentools.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Hiermit verwalten Sie Benutzergeheimnisse zur Entwicklung.</target>

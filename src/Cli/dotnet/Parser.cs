@@ -115,6 +115,7 @@ namespace Microsoft.DotNet.Cli
             .UseParseDirective()
             .UseSuggestDirective()
             .DisablePosixBinding()
+            .EnableLegacyDoubleDashBehavior()
             .Build();
 
         private static void ExceptionHandler(Exception exception, InvocationContext context)
@@ -194,7 +195,7 @@ namespace Microsoft.DotNet.Cli
                         }
                         return null;
                     };
-                    builder.Customize(option, description: descriptionCallback);
+                    builder.Customize(option, secondColumnText: descriptionCallback);
                 }
             }
 

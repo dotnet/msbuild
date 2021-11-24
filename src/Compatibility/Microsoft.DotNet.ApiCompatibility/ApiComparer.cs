@@ -20,16 +20,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         public bool IncludeInternalSymbols { get; set; }
 
         /// <summary>
-        /// Comma separated list to ignore diagnostic IDs.
-        /// </summary>
-        public string NoWarn { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Array of diagnosticId and memberId to ignore those differences.
-        /// </summary>
-        public (string diagnosticId, string memberId)[] IgnoredDifferences { get; set; }
-
-        /// <summary>
         /// Flag indicating whether we should run on strict mode or not.
         /// If StrictMode is set, the behavior of some rules will change and some other rules will be
         /// executed when getting the differences. This is useful when you want both sides we are comparing
@@ -73,9 +63,9 @@ namespace Microsoft.DotNet.ApiCompatibility
             mapper.AddElement(left, ElementSide.Left);
             mapper.AddElement(right, ElementSide.Right);
 
-            DifferenceVisitor visitor = new(noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
+            DifferenceVisitor visitor = new();
             visitor.Visit(mapper);
-            return visitor.DiagnosticBags.First().Differences;
+            return visitor.DiagnosticCollections.First();
         }
 
         /// <summary>
@@ -101,9 +91,9 @@ namespace Microsoft.DotNet.ApiCompatibility
             mapper.AddElement(left, ElementSide.Left);
             mapper.AddElement(right, ElementSide.Right);
 
-            DifferenceVisitor visitor = new(noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
+            DifferenceVisitor visitor = new();
             visitor.Visit(mapper);
-            return visitor.DiagnosticBags.First().Differences;
+            return visitor.DiagnosticCollections.First();
         }
 
         /// <summary>
@@ -145,15 +135,15 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             mapper.Settings = GetComparingSettingsCore(left.MetadataInformation.DisplayString, rightNames);
 
-            DifferenceVisitor visitor = new(rightCount: rightCount, noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
+            DifferenceVisitor visitor = new(rightCount: rightCount);
             visitor.Visit(mapper);
 
             (MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[] result = new (MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[rightCount];
 
             int count = 0;
-            foreach (DiagnosticBag<CompatDifference> bag in visitor.DiagnosticBags)
+            foreach (IEnumerable<CompatDifference> collection in visitor.DiagnosticCollections)
             {
-                result[count] = (left.MetadataInformation, right[count].MetadataInformation, bag.Differences);
+                result[count] = (left.MetadataInformation, right[count].MetadataInformation, collection);
                 count++;
             }
             

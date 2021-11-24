@@ -135,23 +135,13 @@ jobs:
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
-      - script: eng/runTestsCannotRunOnHelix.sh
-                  --configuration $(_BuildConfig)
-                  --ci
-                  $(_OfficialBuildIdArgs)
-        displayName: Run Tests Cannot Run On Helix
-        env:
-          BuildConfig: $(_BuildConfig)
-      - script: eng/common/build.sh
-              --configuration $(_BuildConfig)
-              --prepareMachine
-              --ci
-              --restore
-              --test
-              --projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
-              /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TestInHelix.binlog
-              /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
-        displayName: Run Tests in Helix
+      - powershell: eng/runHelixAndNonHelixInParallelNonWindows.ps1
+                -configuration $(_BuildConfig)
+                -buildSourcesDirectory $(Build.SourcesDirectory)
+                -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
+                -officialBuildIdArgs "$(_OfficialBuildIdArgs)"
+                $(_Test)
+        displayName: Run Tests in Helix and non Helix in parallel
         condition: succeededOrFailed()
         env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)

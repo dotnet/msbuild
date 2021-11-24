@@ -27,10 +27,8 @@ namespace Microsoft.DotNet.PackageValidation
         private string _leftPackagePath;
         private string _rightPackagePath;
 
-        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, ICompatibilityLogger log, Dictionary<string, HashSet<string>> referencePaths)
+        public ApiCompatRunner(bool enableStrictMode, ICompatibilityLogger log, Dictionary<string, HashSet<string>> referencePaths)
         {
-            _differ.NoWarn = noWarn;
-            _differ.IgnoredDifferences = ignoredDifferences;
             _differ.StrictMode = enableStrictMode;
             _log = log;
             _referencePaths = referencePaths ?? new();
@@ -116,7 +114,7 @@ namespace Microsoft.DotNet.PackageValidation
                 resolvedReferences = true;
                 loader.AddReferenceSearchDirectories(referencePathForTFM);
             }
-            else if (!_isBaselineSuppression && _referencePaths.Count != 0 && ShouldLogDiagnosticId(ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm))
+            else if (!_isBaselineSuppression && _referencePaths.Count != 0)
             {
                 _log.LogWarning(
                     new Suppression()
@@ -180,22 +178,6 @@ namespace Microsoft.DotNet.PackageValidation
                 ms.Seek(0, SeekOrigin.Begin);
             }
             return ms;
-        }
-
-        private bool ShouldLogDiagnosticId(string diagnosticId)
-        {
-            if (!string.IsNullOrEmpty(_differ.NoWarn))
-            {
-                foreach (var noWarn in _differ.NoWarn.Split(';'))
-                {
-                    if (StringComparer.InvariantCultureIgnoreCase.Equals(noWarn, diagnosticId))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
         }
     }
 }

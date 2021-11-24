@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             // First we run without references. Without references, ApiCompat should not be able to see that class First
             // removed an interface due to it's base class removing that implementation. We validate that APICompat doesn't
             // log errors when not using references.
-            new CompatibleFrameworkInPackageValidator("CP1003", null, false, log, null).Validate(package);
+            new CompatibleFrameworkInPackageValidator(false, log, null).Validate(package);
             Assert.Empty(log.errors);
 
             // Now we do pass in references. With references, ApiCompat should now detect that an interface was removed in a
@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
                 { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
                 { "net5.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0") } }
             };
-            new CompatibleFrameworkInPackageValidator("CP1002", null, false, log, references).Validate(package);
+            new CompatibleFrameworkInPackageValidator(false, log, references).Validate(package);
             Assert.NotEmpty(log.errors);
 
             Assert.Contains($"CP0008 Type 'PackageValidationTests.First' does not implement interface 'PackageValidationTests.IBaseInterface' on lib/net5.0/{asset.TestProject.Name}.dll but it does on lib/netstandard2.0/{asset.TestProject.Name}.dll" ,log.errors);
@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             // First we run without references. Without references, ApiCompat should not be able to see that class First
             // removed an interface due to it's base class removing that implementation. We validate that APICompat doesn't
             // log errors when not using references.
-            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, log, useReferences ? references : null).Validate(package);
+            new CompatibleFrameworkInPackageValidator(false, log, useReferences ? references : null).Validate(package);
             if (shouldLogError)
                 Assert.Contains($"CP1002 Could not find matching assembly: '{testDummyDependency.Name}.dll' in any of the search directories.", log.errors);
             else
@@ -249,7 +249,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             if (deleteFile)
                 File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0", $"{dependency.Name}.dll"));
 
-            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, log, useReferences ? references : null).Validate(package);
+            new CompatibleFrameworkInPackageValidator(false, log, useReferences ? references : null).Validate(package);
 
             if (expectCP0001)
                 Assert.Contains($"CP0001 Type 'PackageValidationTests.MyForwardedType' exists on lib/netstandard2.0/{testProject.Name}.dll but not on lib/net5.0/{testProject.Name}.dll", log.errors);
@@ -294,7 +294,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
 
             File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0", $"{dependency.Name}.dll"));
 
-            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, log, references).Validate(package);
+            new CompatibleFrameworkInPackageValidator(false, log, references).Validate(package);
 
             Assert.Single(log.errors.Where(e => e.Contains("CP1002")));
         }
@@ -318,7 +318,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
                 { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } }
             };
 
-            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, log, useReferences ? references : null).Validate(package);
+            new CompatibleFrameworkInPackageValidator(false, log, useReferences ? references : null).Validate(package);
 
             if (!useReferences)
                 Assert.Empty(log.errors.Where(e => e.Contains("CP1003")));
