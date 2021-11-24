@@ -1,0 +1,7 @@
+﻿[
+  --add-source,
+  --check-only,
+  --dry-run,
+  --interactive,
+  --nuget-source
+]

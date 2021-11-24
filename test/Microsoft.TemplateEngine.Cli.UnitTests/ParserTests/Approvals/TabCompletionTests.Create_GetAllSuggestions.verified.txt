@@ -1,0 +1,11 @@
+﻿[
+  gitignore,
+  globaljson,
+  nugetconfig,
+  sln,
+  tool-manifest,
+  webconfig,
+  classlib,
+  console,
+  editorconfig
+]

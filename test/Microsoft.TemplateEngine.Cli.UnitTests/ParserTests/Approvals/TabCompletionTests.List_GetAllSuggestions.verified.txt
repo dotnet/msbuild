@@ -1,0 +1,9 @@
+﻿[
+  --author,
+  --columns,
+  --columns-all,
+  --language,
+  --tag,
+  --type,
+  -lang
+]

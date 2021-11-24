@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="FakeItEasy" />
+    <PackageReference Include="Verify.XUnit" Version="14.2.0" />
+    
   </ItemGroup>
 
   <ItemGroup>

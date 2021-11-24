@@ -1,0 +1,16 @@
+﻿[
+  --add-source,
+  --check-only,
+  --dry-run,
+  --interactive,
+  --nuget-source,
+  gitignore,
+  globaljson,
+  nugetconfig,
+  sln,
+  tool-manifest,
+  webconfig,
+  classlib,
+  console,
+  editorconfig
+]

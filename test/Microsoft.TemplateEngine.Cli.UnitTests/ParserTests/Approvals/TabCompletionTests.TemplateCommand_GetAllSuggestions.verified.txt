@@ -1,0 +1,21 @@
+﻿[
+  --dry-run,
+  --force,
+  --framework,
+  --help,
+  --language,
+  --langVersion,
+  --name,
+  --no-restore,
+  --no-update-check,
+  --output,
+  --type,
+  -?,
+  -f,
+  -h,
+  -lang,
+  -n,
+  -o,
+  /?,
+  /h
+]

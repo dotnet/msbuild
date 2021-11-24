@@ -1,0 +1,5 @@
+﻿[
+  --add-source,
+  --interactive,
+  --nuget-source
+]
