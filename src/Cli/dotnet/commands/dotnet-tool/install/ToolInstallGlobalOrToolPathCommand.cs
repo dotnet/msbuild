@@ -134,9 +134,20 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         versionRange: versionRange,
                         targetFramework: _framework, verbosity: _verbosity);
 
-                    var framework = string.IsNullOrEmpty(_framework) && package.Frameworks.Count() > 0  ?
-                        package.Frameworks.Where(f => f.Version < new Version(Product.Version)).MaxBy(f => f.Version) :
-                        NuGetFramework.Parse(_framework);
+                    NuGetFramework framework;
+                    if (string.IsNullOrEmpty(_framework) && package.Frameworks.Count() > 0)
+                    {
+                        framework = package.Frameworks
+                            .Where(f => f.Version < (new NuGetVersion(Product.Version)).Version)
+                            .MaxBy(f => f.Version);
+                    }
+                    else
+                    {
+                        framework = string.IsNullOrEmpty(_framework)  ?
+                            null :
+                            NuGetFramework.Parse(_framework);
+                    }
+
                     string appHostSourceDirectory = _shellShimTemplateFinder.ResolveAppHostSourceDirectoryAsync(_architectureOption, framework, RuntimeInformation.ProcessArchitecture).Result;
                     IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolPath);
 
