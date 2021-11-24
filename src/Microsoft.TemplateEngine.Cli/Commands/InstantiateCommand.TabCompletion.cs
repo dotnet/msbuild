@@ -24,6 +24,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             else
             {
+                //no exact match on short name
+                if (!templateGroups.Any(template => template.ShortNames.Contains(args.ShortName)))
+                {
+                    return templateGroups.SelectMany(g => g.ShortNames).Where(n => n.StartsWith(args.ShortName)).Distinct();
+                }
+
+                //if there is exact match do further reparsing
                 HashSet<string> distinctSuggestions = new HashSet<string>();
                 foreach (TemplateGroup templateGroup in templateGroups.Where(template => template.ShortNames.Contains(args.ShortName)))
                 {

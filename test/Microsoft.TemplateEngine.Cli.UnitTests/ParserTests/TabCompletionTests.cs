@@ -69,6 +69,19 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
         [Fact]
+        public void Instantiate_CanSuggestTemplate_StartsWith()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse("new co");
+            var suggestions = parseResult.GetSuggestions().ToArray();
+
+            Assert.Single(suggestions);
+            Assert.Equal("console", suggestions.Single());
+        }
+
+        [Fact]
         public void CanCompleteChoice_FromSingleTemplate()
         {
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
