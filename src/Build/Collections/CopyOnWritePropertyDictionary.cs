@@ -69,7 +69,16 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Accessor for the list of property names
         /// </summary>
-        ICollection<string> IDictionary<string, T>.Keys => PropertyNames;
+        ICollection<string> IDictionary<string, T>.Keys
+        {
+            get
+            {
+                lock (_properties)
+                {
+                    return _properties.Keys;
+                }
+            }
+        }
 
         /// <summary>
         /// Accessor for the list of properties
@@ -114,20 +123,6 @@ namespace Microsoft.Build.Collections
                 lock (_properties)
                 {
                     return _properties.Count;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Retrieves a collection containing the names of all the properties present in the dictionary.
-        /// </summary>
-        internal ICollection<string> PropertyNames
-        {
-            get
-            {
-                lock (_properties)
-                {
-                    return _properties.Keys;
                 }
             }
         }
@@ -178,15 +173,6 @@ namespace Microsoft.Build.Collections
                 ErrorUtilities.VerifyThrow(String.Equals(name, value.Key, StringComparison.OrdinalIgnoreCase), "Key must match value's key");
                 Set(value);
             }
-        }
-
-        /// <summary>
-        /// Returns an enumerable which clones the properties 
-        /// </summary>
-        /// <returns>Returns a cloning enumerable.</returns>
-        public IEnumerable<T> GetCopyOnReadEnumerable()
-        {
-            return new CopyOnReadEnumerable<T>(this, _properties);
         }
 
         /// <summary>
@@ -436,38 +422,6 @@ namespace Microsoft.Build.Collections
             {
                 Set(property);
             }
-        }
-
-        /// <summary>
-        /// Removes the specified properties from this dictionary
-        /// </summary>
-        /// <param name="other">An enumerator over the properties to remove.</param>
-        internal void RemoveProperties(IEnumerable<T> other)
-        {
-            // Properties are locked in the remove method
-            foreach (T property in other)
-            {
-                Remove(property.Key);
-            }
-        }
-
-        /// <summary>
-        /// Helper to convert into a read-only dictionary of string, string.
-        /// </summary>
-        internal IDictionary<string, string> ToDictionary()
-        {
-            Dictionary<string, string> dictionary;
-
-            lock (_properties)
-            {
-                dictionary = new Dictionary<string, string>(_properties.Count, StringComparer.OrdinalIgnoreCase);
-                foreach (T property in this)
-                {
-                    dictionary[property.Key] = property.EscapedValue;
-                }
-            }
-
-            return dictionary;
         }
 
         /// <summary>
