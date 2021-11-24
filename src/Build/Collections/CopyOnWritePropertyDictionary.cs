@@ -95,28 +95,14 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Returns the number of properties in the collection
-        /// </summary>
-        int ICollection<KeyValuePair<string, T>>.Count
-        {
-            get
-            {
-                lock (_properties)
-                {
-                    return _properties.Count;
-                }
-            }
-        }
-
-        /// <summary>
         /// Whether the collection is read-only.
         /// </summary>
         bool ICollection<KeyValuePair<string, T>>.IsReadOnly => false;
 
         /// <summary>
-        /// Returns the number of property in the collection.
+        /// Returns the number of properties in the collection.
         /// </summary>
-        internal int Count
+        public int Count
         {
             get
             {
@@ -136,23 +122,7 @@ namespace Microsoft.Build.Collections
         /// This better matches the semantics of property, which are considered to have a blank value if they
         /// are not defined.
         /// </remarks>
-        T IDictionary<string, T>.this[string name]
-        {
-            // The backing properties dictionary is locked in the indexor
-            get => this[name];
-            set => this[name] = value;
-        }
-
-        /// <summary>
-        /// Get the property with the specified name, or null if none exists.
-        /// Sets the property with the specified name, overwriting it if already exists.
-        /// </summary>
-        /// <remarks>
-        /// Unlike Dictionary&lt;K,V&gt;[K], the getter returns null instead of throwing if the key does not exist.
-        /// This better matches the semantics of property, which are considered to have a blank value if they
-        /// are not defined.
-        /// </remarks>
-        internal T this[string name]
+        public T this[string name]
         {
             get
             {
@@ -280,15 +250,6 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Removes a property
-        /// </summary>
-        bool IDictionary<string, T>.Remove(string key)
-        {
-            // Backing properties are locked in the remove method
-            return Remove(key);
-        }
-
-        /// <summary>
         /// Attempts to retrieve the a property.
         /// </summary>
         bool IDictionary<string, T>.TryGetValue(string key, out T value)
@@ -308,14 +269,6 @@ namespace Microsoft.Build.Collections
         void ICollection<KeyValuePair<string, T>>.Add(KeyValuePair<string, T> item)
         {
             ((IDictionary<string, T>)this).Add(item.Key, item.Value);
-        }
-
-        /// <summary>
-        /// Clears the property collection
-        /// </summary>
-        void ICollection<KeyValuePair<string, T>>.Clear()
-        {
-            Clear();
         }
 
         /// <summary>
@@ -348,7 +301,7 @@ namespace Microsoft.Build.Collections
         bool ICollection<KeyValuePair<string, T>>.Remove(KeyValuePair<string, T> item)
         {
             ErrorUtilities.VerifyThrow(item.Key == item.Value.Key, "Key must match value's key");
-            return ((IDictionary<string, T>)this).Remove(item.Key);
+            return Remove(item.Key);
         }
 
         #endregion
@@ -372,7 +325,7 @@ namespace Microsoft.Build.Collections
         /// Removes any property with the specified name.
         /// Returns true if the property was in the collection, otherwise false.
         /// </summary>
-        internal bool Remove(string name)
+        public bool Remove(string name)
         {
             ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
