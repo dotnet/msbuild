@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Eventing;
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// A StringBuilder lookalike that reuses its internal storage.
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Shared
         {
             if (_borrowedBuilder == null)
             {
-                // TODO: merge when rebaed to Rainer changes
+                // TODO: enable once rebased to ErrorUtilities in Framework
                 //ErrorUtilities.VerifyThrow(_capacity != -1, "Reusing after dispose");
 
                 _borrowedBuilder = ReuseableStringBuilderFactory.Get(_capacity);
