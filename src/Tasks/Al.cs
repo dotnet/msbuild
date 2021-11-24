@@ -310,7 +310,7 @@ namespace Microsoft.Build.Tasks
                                         Platform.Equals("x64", StringComparison.OrdinalIgnoreCase) ? ProcessorArchitecture.AMD64 : // x64 maps to AMD64 in GeneratePathToTool
                                         ProcessorArchitecture.CurrentProcessArchitecture;
 
-                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, archToLookFor, SdkToolsPath, ToolExe, Log, true);
+                pathToTool = SdkToolsPathUtility.GeneratePathToTool(f => SdkToolsPathUtility.FileInfoExists(f), archToLookFor, SdkToolsPath, ToolExe, Log, true);
             }
 
             return pathToTool;
