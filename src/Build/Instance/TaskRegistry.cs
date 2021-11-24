@@ -688,7 +688,7 @@ namespace Microsoft.Build.Execution
             {
                 if (overriddenTasks.ContainsKey(taskName))
                 {
-                    loggingService.LogWarning(context, null, new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
+                    loggingService.LogError(context, null, new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
                 }
                 else
                 {
