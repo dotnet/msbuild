@@ -29,6 +29,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
+        [Fact (Skip = "doesn't work at the moment; it matches with legacy --language option which cannot be completed; to discuss how to avoid that")]
+#pragma warning restore xUnit1004 // Test methods should not be skipped
+        public void Instantiate_CanSuggestLanguages()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse("new console --language ");
+            var suggestions = parseResult.GetSuggestions().ToArray();
+
+            Assert.Contains("C#", suggestions);
+            Assert.Contains("F#", suggestions);
+            Assert.Contains("VB", suggestions);
+        }
+
+#pragma warning disable xUnit1004 // Test methods should not be skipped
         [Fact(Skip = "not valid behavior for parser, should suggest --nuget-source")]
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Install_GetSuggestionsAfterInteractive()

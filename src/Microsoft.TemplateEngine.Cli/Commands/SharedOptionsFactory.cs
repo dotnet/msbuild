@@ -32,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new(new[] { "--author" })
             {
-                Arity = new ArgumentArity(0, 1),
+                Arity = new ArgumentArity(1, 1),
                 Description = LocalizableStrings.OptionDescriptionAuthorFilter
             };
         }
@@ -41,7 +41,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new(new[] { "--baseline" })
             {
-                Arity = new ArgumentArity(0, 1),
+                Arity = new ArgumentArity(1, 1),
                 Description = LocalizableStrings.OptionDescriptionBaseline,
                 IsHidden = true
             };
@@ -51,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new(new[] { "--language", "-lang" })
             {
-                Arity = new ArgumentArity(0, 1),
+                Arity = new ArgumentArity(1, 1),
                 Description = LocalizableStrings.OptionDescriptionLanguageFilter
             };
         }
@@ -60,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new(new[] { "--type" })
             {
-                Arity = new ArgumentArity(0, 1),
+                Arity = new ArgumentArity(1, 1),
                 Description = LocalizableStrings.OptionDescriptionTypeFilter
             };
         }
@@ -69,7 +69,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new(new[] { "--tag" })
             {
-                Arity = new ArgumentArity(0, 1),
+                Arity = new ArgumentArity(1, 1),
                 Description = LocalizableStrings.OptionDescriptionTagFilter
             };
         }
@@ -78,7 +78,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new(new[] { "--package" })
             {
-                Arity = new ArgumentArity(0, 1),
+                Arity = new ArgumentArity(1, 1),
                 Description = LocalizableStrings.OptionDescriptionPackageFilter
             };
         }
@@ -96,7 +96,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             Option<IReadOnlyList<string>> option = new(new[] { "--columns" }, ParseCommaSeparatedValues)
             {
-                Arity = new ArgumentArity(0, 4),
+                Arity = new ArgumentArity(1, 4),
                 Description = LocalizableStrings.OptionDescriptionColumns,
                 AllowMultipleArgumentsPerToken = true,
             };
