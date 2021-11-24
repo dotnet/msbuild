@@ -5,7 +5,7 @@
  * [Target Maps](Target-Maps.md)
 
 # MSBuild Source Code
- * [https://github.com/Microsoft/MSBuild](https://github.com/Microsoft/MSBuild)
+ * [https://github.com/dotnet/msbuild](https://github.com/dotnet/msbuild)
  * [https://source.dot.net](https://source.dot.net)
  * Use [http://referencesource.microsoft.com](http://referencesource.microsoft.com) or [http://source.roslyn.io](http://source.roslyn.io) to browse Microsoft MSBuild targets. Examples:
    * search for "[_FindDependencies MSBuildProperty](http://referencesource.microsoft.com/#q=_FindDependencies%20MSBuildProperty)"

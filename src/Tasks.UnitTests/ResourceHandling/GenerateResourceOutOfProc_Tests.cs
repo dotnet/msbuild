@@ -2354,7 +2354,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
         [Fact]
         //FIXME: mono: looks for csc.exe
-        // https://github.com/Microsoft/msbuild/issues/677
+        // https://github.com/dotnet/msbuild/issues/677
         [Trait("Category", "mono-osx-failing")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
@@ -2532,7 +2532,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// </summary>
         [Fact]
         //FIXME: mono: looks for csc.exe
-        // https://github.com/Microsoft/msbuild/issues/677
+        // https://github.com/dotnet/msbuild/issues/677
         [Trait("Category", "mono-osx-failing")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {

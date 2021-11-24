@@ -3670,7 +3670,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// based on the default sub-toolset version -- base toolset if Dev10 is installed, or lowest (numerically
         /// sorted) toolset if it's not.
         /// </summary>
-        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/4363")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4363")]
         public void VerifyDefaultSubToolsetPropertiesAreEvaluated()
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -4337,7 +4337,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Test regression reported at https://github.com/Microsoft/msbuild/issues/2228
+        /// Test regression reported at https://github.com/dotnet/msbuild/issues/2228
         /// </summary>
         [Fact]
         public void ThrownInvalidProjectExceptionProperlyHandled()
@@ -4399,7 +4399,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         ///
         /// The first condition is false so the second condition is not evaluated.  But in some cases we double evaluate the condition to log it.  The second evaluation will fail because it evaluates the whole string.
         ///
-        /// https://github.com/Microsoft/msbuild/issues/2259
+        /// https://github.com/dotnet/msbuild/issues/2259
         /// </summary>
         [Theory]
         [InlineData("<Target Name=\"Build\" /><Import Project=\"$(NonExistentProperty)\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" />")]

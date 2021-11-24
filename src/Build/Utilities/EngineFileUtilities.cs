@@ -185,7 +185,7 @@ namespace Microsoft.Build.Internal
 
         private static bool IsValidExclude(string exclude)
         {
-            // TODO: assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
+            // TODO: assumption on legal path characters: https://github.com/dotnet/msbuild/issues/781
             // Excludes that have both wildcards and non escaped wildcards will never be matched on Windows, because
             // wildcard characters are invalid in Windows paths.
             // Filtering these excludes early keeps the glob expander simpler. Otherwise unescaping logic would reach all the way down to
@@ -217,7 +217,7 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
+        // TODO: assumption on file system case sensitivity: https://github.com/dotnet/msbuild/issues/781
         private static readonly Lazy<ConcurrentDictionary<string, bool>> _regexMatchCache = new Lazy<ConcurrentDictionary<string, bool>>(() => new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase));
 
         private static bool MatchesLazyWildcard(string fileSpec)

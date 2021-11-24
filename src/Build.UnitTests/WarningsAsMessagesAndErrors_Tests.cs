@@ -32,7 +32,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// https://github.com/dotnet/msbuild/issues/2667
         /// </summary>
         [Fact]
         public void TreatWarningsAsErrorsWhenBuildingSameProjectMultipleTimes()
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// https://github.com/dotnet/msbuild/issues/2667
         /// </summary>
         [Fact]
         public void TreatWarningsAsMessagesWhenBuildingSameProjectMultipleTimes()

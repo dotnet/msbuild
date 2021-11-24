@@ -20,12 +20,12 @@ namespace Microsoft.Build.BackEnd
     internal static class ItemGroupLoggingHelper
     {
         /// <summary>
-        /// The default character limit for logging parameters. 10k is somewhat arbitrary, see https://github.com/microsoft/msbuild/issues/4907.
+        /// The default character limit for logging parameters. 10k is somewhat arbitrary, see https://github.com/dotnet/msbuild/issues/4907.
         /// </summary>
         internal static int parameterCharacterLimit = 40_000;
 
         /// <summary>
-        /// The default parameter limit for logging. 200 is somewhat arbitrary, see https://github.com/microsoft/msbuild/pull/5210.
+        /// The default parameter limit for logging. 200 is somewhat arbitrary, see https://github.com/dotnet/msbuild/pull/5210.
         /// </summary>
         internal static int parameterLimit = 200;
 

@@ -428,7 +428,7 @@ namespace Microsoft.Build.UnitTests
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/4363")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/4363")]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>
@@ -527,7 +527,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_LEGACY_GETFULLPATH
-        [Fact(Skip="https://github.com/Microsoft/msbuild/issues/4205")]
+        [Fact(Skip="https://github.com/dotnet/msbuild/issues/4205")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadGlobalroot()
         {
@@ -702,7 +702,7 @@ namespace Microsoft.Build.UnitTests
             // Run these tests only when we're not on Windows
             return !NativeMethodsShared.IsWindows ||
             // OR we're on Windows and long paths aren't enabled
-            // https://github.com/Microsoft/msbuild/issues/4241
+            // https://github.com/dotnet/msbuild/issues/4241
                    NativeMethodsShared.IsMaxPathLegacyWindows();
         }
 

@@ -70,12 +70,12 @@ namespace Microsoft.Build.Shared
         /// This defines the order and precedence for various methods of discovering MSBuild and associated toolsets.
         /// At a high level, an install under Visual Studio is preferred as the user may have SDKs installed to a
         /// specific instance of Visual Studio and build will only succeed if we can discover those. See
-        /// https://github.com/Microsoft/msbuild/issues/1461 for details.
+        /// https://github.com/dotnet/msbuild/issues/1461 for details.
         /// </remarks>
         /// <returns>Build environment.</returns>
         private static BuildEnvironment Initialize()
         {
-            // See https://github.com/Microsoft/msbuild/issues/1461 for specification of ordering and details.
+            // See https://github.com/dotnet/msbuild/issues/1461 for specification of ordering and details.
             var possibleLocations = new Func<BuildEnvironment>[]
             {
                 TryFromEnvironmentVariable,

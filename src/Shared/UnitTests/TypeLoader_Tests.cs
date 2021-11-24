@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/325")]
+        [Fact (Skip = "https://github.com/dotnet/msbuild/issues/325")]
         public void LoadInsideAssemblyWhenGivenOutsideAssemblyWithSameName()
         {
             using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))

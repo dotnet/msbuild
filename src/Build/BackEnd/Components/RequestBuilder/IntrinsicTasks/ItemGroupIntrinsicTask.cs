@@ -427,7 +427,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // The expression is not of the form "@(X)". Treat as string
 
-                    // Pass the non wildcard expanded excludes here to fix https://github.com/Microsoft/msbuild/issues/2621
+                    // Pass the non wildcard expanded excludes here to fix https://github.com/dotnet/msbuild/issues/2621
                     string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(
                         Project.Directory,
                         includeSplit,

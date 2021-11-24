@@ -830,7 +830,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Make sure that if an after target fails that the build result is reported as failed.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
         public void AfterTargetsShouldReportFailedBuild()
         {
             // Since we're creating our own BuildManager, we need to make sure that the default 

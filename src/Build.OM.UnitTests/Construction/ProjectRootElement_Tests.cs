@@ -1576,7 +1576,7 @@ true, true, true)]
 </Project>");
 
             var changedProjectContents2 = ObjectModelHelpers.CleanupFileContents(
-// spurious comment placement issue: https://github.com/Microsoft/msbuild/issues/1503
+// spurious comment placement issue: https://github.com/dotnet/msbuild/issues/1503
 @"
 <!-- changed comment -->
 <Project xmlns=`msbuildnamespace`>

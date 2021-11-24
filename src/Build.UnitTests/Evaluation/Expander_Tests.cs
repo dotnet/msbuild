@@ -589,7 +589,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/4363")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/4363")]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -4150,7 +4150,7 @@ $(
             TestPropertyFunction("$(prop.TrimEnd('a'))", "prop", "netaa", "net");
         }
 
-        // https://github.com/Microsoft/msbuild/issues/2882
+        // https://github.com/dotnet/msbuild/issues/2882
         [Fact]
         public void PropertyFunctionMathMaxOverflow()
         {

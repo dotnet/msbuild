@@ -114,7 +114,7 @@ namespace Microsoft.Build.Framework
         public readonly bool DoNotSendDeferredMessagesToBuildManager = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildDoNotSendDeferredMessagesToBuildManager"));
 
         /// <summary>
-        /// https://github.com/microsoft/msbuild/pull/4975 started expanding qualified metadata in Update operations. Before they'd expand to empty strings.
+        /// https://github.com/dotnet/msbuild/pull/4975 started expanding qualified metadata in Update operations. Before they'd expand to empty strings.
         /// This escape hatch turns back the old empty string behavior.
         /// </summary>
         public readonly bool DoNotExpandQualifiedMetadataInUpdateOperation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation"));
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// MSBUILDUSECASESENSITIVEITEMNAMES is an escape hatch for the fix
-        /// for https://github.com/Microsoft/msbuild/issues/1751. It should
+        /// for https://github.com/dotnet/msbuild/issues/1751. It should
         /// be removed (permanently set to false) after establishing that
         /// it's unneeded (at least by the 16.0 timeframe).
         /// </summary>
@@ -302,7 +302,7 @@ namespace Microsoft.Build.Framework
         /// Use the original, string-only resx parsing in .NET Core scenarios.
         /// </summary>
         /// <remarks>
-        /// Escape hatch for problems arising from https://github.com/microsoft/msbuild/pull/4420.
+        /// Escape hatch for problems arising from https://github.com/dotnet/msbuild/pull/4420.
         /// </remarks>
         public readonly bool UseMinimalResxParsingInCoreScenarios = Environment.GetEnvironmentVariable("MSBUILDUSEMINIMALRESX") == "1";
 

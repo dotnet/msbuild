@@ -1089,7 +1089,7 @@ internal static class NativeMethods
     /// <returns>The last write time of the file, or DateTime.MinValue if the file does not exist.</returns>
     /// <remarks>
     /// This is the most accurate timestamp-extraction mechanism, but it is too slow to use all the time.
-    /// See https://github.com/Microsoft/msbuild/issues/2052.
+    /// See https://github.com/dotnet/msbuild/issues/2052.
     /// </remarks>
     private static DateTime GetContentLastWriteFileUtcTime(string fullPath)
     {

@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests
                 if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
                 {
                     // Short file paths not supported, this test will fail.
-                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    // See: https://github.com/dotnet/msbuild/issues/1803
                     return;
                 }
 
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests
                 if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
                 {
                     // Short file paths not supported, this test will fail.
-                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    // See: https://github.com/dotnet/msbuild/issues/1803
                     return;
                 }
 
@@ -395,7 +395,7 @@ namespace Microsoft.Build.UnitTests
                 if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
                 {
                     // Short file paths not supported, this test will fail.
-                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    // See: https://github.com/dotnet/msbuild/issues/1803
                     return;
                 }
 
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests
                 if (NativeMethodsShared.GetShortFilePath(newTmp) == newTmp)
                 {
                     // Short file paths not supported, this test will fail.
-                    // See: https://github.com/Microsoft/msbuild/issues/1803
+                    // See: https://github.com/dotnet/msbuild/issues/1803
                     return;
                 }
 

@@ -2245,7 +2245,7 @@ namespace Microsoft.Build.Execution
             }
             else if (unresolvedConfiguration.Project != null && resolvedConfiguration.Project == null)
             {
-                // Workaround for https://github.com/Microsoft/msbuild/issues/1748
+                // Workaround for https://github.com/dotnet/msbuild/issues/1748
                 // If the submission has a project instance but the existing configuration does not, it probably means that the project was
                 // built on another node (e.g. the project was encountered as a p2p reference and scheduled to a node).
                 // Add a dummy property to force cache invalidation in the scheduler and the nodes.

@@ -149,9 +149,9 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1250")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1250")]
 #else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/2569")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/2569")]
 #endif
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetUnversionedSDKUnionMetadataLocation()
@@ -730,7 +730,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/722")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/722")]
 #else
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -918,7 +918,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_REGISTRY_SDKS
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/995")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/995")]
 #else
         [Fact (Skip="Registry SDKs not supported")]
 #endif
@@ -1090,7 +1090,7 @@ namespace Microsoft.Build.UnitTests
                                     }
   ";
 
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/995")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/995")]
         public void VerifyToolsetAndToolLocationHelperAgree()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"

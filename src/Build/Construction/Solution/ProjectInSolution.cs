@@ -335,7 +335,7 @@ namespace Microsoft.Build.Construction
                     // This is a bit of a special case, but an rptproj file will contain a Project with no schema that is
                     // not an MSBuild file. It will however have ToolsVersion="2.0" which is not supported with an empty
                     // schema. This is not a great solution, but it should cover the customer reported issue. See:
-                    // https://github.com/Microsoft/msbuild/issues/2064
+                    // https://github.com/dotnet/msbuild/issues/2064
                     if (emptyNamespace && !projectElementInvalid && mainProjectElement.GetAttribute("ToolsVersion") != "2.0")
                     {
                         _canBeMSBuildProjectFile = true;

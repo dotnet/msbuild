@@ -1257,7 +1257,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that low priority builds actually execute with low priority.
         /// </summary>
-        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/5229")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/5229")]
         public void LowPriorityBuild()
         {
             RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low");
@@ -1266,7 +1266,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that normal builds execute with normal priority.
         /// </summary>
-        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/5229")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/5229")]
         public void NormalPriorityBuild()
         {
             // In case we are already running at a  different priority, validate
@@ -2174,7 +2174,7 @@ $@"<Project>
         }
 
         /// <summary>
-        /// We check if there is only one target name specified and this logic caused a regression: https://github.com/Microsoft/msbuild/issues/3317
+        /// We check if there is only one target name specified and this logic caused a regression: https://github.com/dotnet/msbuild/issues/3317
         /// </summary>
         [Fact]
         public void MultipleTargetsDoesNotCrash()
@@ -2238,7 +2238,7 @@ $@"<Project>
         }
 
         /// <summary>
-        /// Regression test for https://github.com/microsoft/msbuild/issues/4631
+        /// Regression test for https://github.com/dotnet/msbuild/issues/4631
         /// </summary>
         [Fact]
         public void BinaryLogContainsImportedFiles()

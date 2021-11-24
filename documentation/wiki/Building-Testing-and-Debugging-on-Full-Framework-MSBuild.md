@@ -31,7 +31,7 @@ The CI does two builds. In the second build, it uses the binaries from the first
 
 ## Contributing
 
-Please see [Contributing Code](https://github.com/Microsoft/msbuild/blob/master/documentation/wiki/Contributing-Code.md) for details on contributing changes back to the code. Please read this carefully and engage with us early to ensure work is not wasted.
+Please see [Contributing Code](https://github.com/dotnet/msbuild/blob/master/documentation/wiki/Contributing-Code.md) for details on contributing changes back to the code. Please read this carefully and engage with us early to ensure work is not wasted.
 
 ## Walkthroughs
 

@@ -889,7 +889,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 new EventArgsEqualityComparer<BuildStartedEventArgs>());
         }
 
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/437")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/437")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]

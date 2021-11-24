@@ -169,7 +169,7 @@ Note that graph cycles are disallowed, even if they're using disconnected target
 
 #### APIs
 
-[BuildManager.PendBuildRequest(GraphBuildRequestData requestData)](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/BuildManager/BuildManager.cs#L676)
+[BuildManager.PendBuildRequest(GraphBuildRequestData requestData)](https://github.com/dotnet/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/BuildManager/BuildManager.cs#L676)
 
 ### Inferring which targets to run for a project within the graph
 In the classic traversal, the referencing project chooses which targets to call on the referenced projects and may call into a project multiple times with different target lists and global properties (examples in [project reference protocol](../ProjectReference-Protocol.md)). When building a graph, where projects are built before the projects that reference them, we have to determine the target list to execute on each project statically.
@@ -378,9 +378,9 @@ These incremental builds could be extended to the entire graph by keeping a proj
 Details on how isolation and cache files are implemented in MSBuild can be found [here](./static-graph-implementation-details.md).
 
 #### APIs
-Cache file information is provided via [BuildParameters](https://github.com/Microsoft/msbuild/blob/2d4dc592a638b809944af10ad1e48e7169e40808/src/Build/BackEnd/BuildManager/BuildParameters.cs#L746-L764). Input caches are applied in `BuildManager.BeginBuild`. Output cache files are written in `BuildManager.EndBuild`. Thus, the scope of the caches are one BuildManager BeginBuild/EndBuild session.
+Cache file information is provided via [BuildParameters](https://github.com/dotnet/msbuild/blob/2d4dc592a638b809944af10ad1e48e7169e40808/src/Build/BackEnd/BuildManager/BuildParameters.cs#L746-L764). Input caches are applied in `BuildManager.BeginBuild`. Output cache files are written in `BuildManager.EndBuild`. Thus, the scope of the caches are one BuildManager BeginBuild/EndBuild session.
 
-Isolation constraints are turned on via [BuildParameters.IsolateProjects](https://github.com/microsoft/msbuild/blob/b111470ae61eba02c6102374c2b7d62aebe45f5b/src/Build/BackEnd/BuildManager/BuildParameters.cs#L742). Isolation constraints are also automatically turned on if either input or output cache files are used.
+Isolation constraints are turned on via [BuildParameters.IsolateProjects](https://github.com/dotnet/msbuild/blob/b111470ae61eba02c6102374c2b7d62aebe45f5b/src/Build/BackEnd/BuildManager/BuildParameters.cs#L742). Isolation constraints are also automatically turned on if either input or output cache files are used.
 
 #### Command line
 Caches are provided to MSBuild.exe via the multi value `/inputResultsCaches` and the single value `/outputResultsCache`.

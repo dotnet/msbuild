@@ -939,7 +939,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1576")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1576")]
         [InlineData(
             "../**/*.cs", // include string
             "a.cs", // exclude string
@@ -2176,9 +2176,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// See comment for details: https://github.com/Microsoft/msbuild/issues/1475#issuecomment-275520394
+        /// See comment for details: https://github.com/dotnet/msbuild/issues/1475#issuecomment-275520394
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1616")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1616")]
         public void RemoveWithConditionShouldNotApplyOnItemsIgnoringCondition()
         {
             var projectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2568,10 +2568,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// See comment for details: https://github.com/Microsoft/msbuild/issues/1475#issuecomment-275520394
+        /// See comment for details: https://github.com/dotnet/msbuild/issues/1475#issuecomment-275520394
         /// Conditions on metadata on appear to be respected even for items ignoring condition (don't know why, but that's what the code does).
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1616")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1616")]
         public void UpdateWithConditionShouldNotApplyOnItemsIgnoringCondition()
         {
             string projectContents = @"<i Include='a;b;c;d'>

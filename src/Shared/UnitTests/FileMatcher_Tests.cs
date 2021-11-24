@@ -408,7 +408,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 };
 
-                // Regression test for https://github.com/Microsoft/msbuild/issues/4175
+                // Regression test for https://github.com/dotnet/msbuild/issues/4175
                 yield return new object[]
                 {
                     new GetFilesComplexGlobbingMatchingInfo
@@ -426,7 +426,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 };
 
-                // Regression test for https://github.com/Microsoft/msbuild/issues/6502
+                // Regression test for https://github.com/dotnet/msbuild/issues/6502
                 yield return new object[]
                 {
                     new GetFilesComplexGlobbingMatchingInfo

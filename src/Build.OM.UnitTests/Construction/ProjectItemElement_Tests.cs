@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemGroup>
                     </Project>
                 ")]
-        // https://github.com/Microsoft/msbuild/issues/900
+        // https://github.com/dotnet/msbuild/issues/900
         //[InlineData(@"
         //            <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
         //                <Target Name='t'>
