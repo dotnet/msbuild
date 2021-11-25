@@ -502,7 +502,12 @@ namespace Microsoft.Build.Eventing
             WriteEvent(69, hash, returningCapacity, returningLength, type);
         }
 
+        [Event(70, Keywords = Keywords.All)]
+        public void ReusableStringBuilderFactoryReplace(int oldHash, int newHash)
+        {
+            WriteEvent(70, oldHash, newHash);
+        }
 
-        #endregion
+#endregion
     }
 }

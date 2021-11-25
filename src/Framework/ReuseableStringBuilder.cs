@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Eventing;
@@ -24,6 +22,11 @@ namespace Microsoft.Build.Framework
         /// Captured string builder.
         /// </summary>
         private StringBuilder _borrowedBuilder;
+
+        /// <summary>
+        /// Capacity of borrowed string builder at the time of borrowing.
+        /// </summary>
+        private int _borrowedWithCapacity;
 
         /// <summary>
         /// Capacity to initialize the builder with.
@@ -73,7 +76,7 @@ namespace Microsoft.Build.Framework
         {
             if (_borrowedBuilder != null)
             {
-                ReuseableStringBuilderFactory.Release(_borrowedBuilder);
+                ReuseableStringBuilderFactory.Release(this);
                 _borrowedBuilder = null;
                 _capacity = -1;
             }
@@ -157,6 +160,7 @@ namespace Microsoft.Build.Framework
                 FrameworkErrorUtilities.VerifyThrow(_capacity != -1, "Reusing after dispose");
 
                 _borrowedBuilder = ReuseableStringBuilderFactory.Get(_capacity);
+                _borrowedWithCapacity = _borrowedBuilder.Capacity;
             }
         }
 
@@ -172,51 +176,40 @@ namespace Microsoft.Build.Framework
             /// <summary>
             /// Made up limit beyond which we won't share the builder
             /// because we could otherwise hold a huge builder indefinitely.
-            /// This was picked empirically so 95% percentile of data String Builder needs is reused.
+            /// This was picked empirically to save at least 95% of allocated data size.
+            /// This constant has to exactly 2^n (power of 2) where n = 4 ... 32
             /// </summary>
-            private const int MaxBuilderSize = 512 * 1024; // 0.5 MB
+            /// <remarks>
+            /// This constant might looks huge, but rather that lowering this constant,
+            ///   we shall focus on eliminating of code which requires to create such huge strings.
+            /// </remarks>
+            private const int MaxBuilderSizeBytes = 2 * 1024 * 1024; // ~1M chars
+            private const int MaxBuilderSizeCapacity = MaxBuilderSizeBytes / 2;
+
+            private static readonly IReadOnlyList<int> s_capacityBrackets;
+
+            static ReuseableStringBuilderFactory()
+            {
+                var brackets = new List<int>();
+
+                int bytes = 0x200; // Minimal capacity is 256 (512 bytes) as this was, according to captured traces, mean required capacity
+                while (bytes <= MaxBuilderSizeBytes)
+                {
+                    // Allocation of arrays is optimized in byte[bytes] => bytes = 2^n.
+                    // StringBuilder allocates chars[capacity] and each char is 2 bytes so lets have capacity brackets computed as `bytes/2` 
+                    brackets.Add(bytes/2); 
+                    bytes <<= 1;
+                }
+                Debug.Assert((bytes >> 1) == MaxBuilderSizeBytes, "MaxBuilderSizeBytes has to be 2^n (power of 2)");
+
+                s_capacityBrackets = brackets;
+            }
 
             /// <summary>
             /// The shared builder.
             /// </summary>
-            private static StringBuilder s_sharedBuilder = new(MaxBuilderSize);
+            private static StringBuilder s_sharedBuilder;
 
-#if DEBUG
-            /// <summary>
-            /// Count of successful reuses
-            /// </summary>
-            private static int s_hits = 0;
-
-            /// <summary>
-            /// Count of failed reuses - a new builder was created
-            /// </summary>
-            private static int s_misses = 0;
-
-            /// <summary>
-            /// Count of times the builder capacity was raised to satisfy the caller's request
-            /// </summary>
-            private static int s_upsizes = 0;
-
-            /// <summary>
-            /// Count of times the returned builder was discarded because it was too large
-            /// </summary>
-            private static int s_discards = 0;
-
-            /// <summary>
-            /// Count of times the builder was returned.
-            /// </summary>
-            private static int s_accepts = 0;
-
-            /// <summary>
-            /// Aggregate capacity saved (aggregate midpoints of requested and returned)
-            /// </summary>
-            private static int s_saved = 0;
-
-            /// <summary>
-            /// Callstacks of those handed out and not returned yet
-            /// </summary>
-            private static ConcurrentDictionary<StringBuilder, string> s_handouts = new ConcurrentDictionary<StringBuilder, string>();
-#endif
             /// <summary>
             /// Obtains a string builder which may or may not already
             /// have been used. 
@@ -224,46 +217,34 @@ namespace Microsoft.Build.Framework
             /// </summary>
             internal static StringBuilder Get(int capacity)
             {
-#if DEBUG
-                bool missed = false;
-#endif
                 var returned = Interlocked.Exchange(ref s_sharedBuilder, null);
 
                 if (returned == null)
                 {
+                    // Currently loaned out so return a new one with capacity in given bracket.
+                    // If user wants bigger capacity that maximum capacity respect it.
+                    returned = new StringBuilder(SelectBracketedCapacity(capacity));
 #if DEBUG
-                    missed = true;
-                    Interlocked.Increment(ref s_misses);
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity:capacity, oldCapacity:0, type:"miss");
 #endif
-                    // Currently loaned out so return a new one
-                    returned = new StringBuilder(Math.Min(MaxBuilderSize, capacity));
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity:capacity, oldCapacity:0, type:"missed");
                 }
                 else if (returned.Capacity < capacity)
                 {
-#if DEBUG
-                    Interlocked.Increment(ref s_upsizes);
-#endif
                     // It's essential we guarantee the capacity because this
                     // may be used as a buffer to a PInvoke call.
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: capacity, oldCapacity: returned.Capacity, type: "reused-inflated");
-                    returned.Capacity = capacity;
+                    int newCapacity = SelectBracketedCapacity(capacity);
+#if DEBUG
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: newCapacity, oldCapacity: returned.Capacity, type: "miss-need-bigger");
+#endif
+                    // Let the current StringBuilder be collected and create new with bracketed capacity. This way it allocates only char[newCapacity]
+                    //   otherwise it would allocate char[new_capacity_of_last_chunk] (in set_Capacity) and char[newCapacity] (in Clear).
+                    returned = new StringBuilder(SelectBracketedCapacity(newCapacity));
                 }
                 else
                 {
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: capacity, oldCapacity: returned.Capacity, type: "reused");
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: capacity, oldCapacity: returned.Capacity, type: "hit");
                 }
 
-#if DEBUG
-                Interlocked.Increment(ref s_hits);
-
-                if (!missed)
-                {
-                    Interlocked.Add(ref s_saved, (capacity + returned.Capacity) / 2);
-                }
-
-                // handouts.TryAdd(returned, Environment.StackTrace);
-#endif
                 return returned;
             }
 
@@ -271,8 +252,9 @@ namespace Microsoft.Build.Framework
             /// Returns the shared builder for the next caller to use.
             /// ** CALLERS, DO NOT USE THE BUILDER AFTER RELEASING IT HERE! **
             /// </summary>
-            internal static void Release(StringBuilder returningBuilder)
+            internal static void Release(ReuseableStringBuilder returning)
             {
+                StringBuilder returningBuilder = returning._borrowedBuilder;
                 int returningLength = returningBuilder.Length;
 
                 // It's possible for someone to cause the builder to
@@ -284,45 +266,58 @@ namespace Microsoft.Build.Framework
                 // (or we refuse it here because it's too big) the next user will
                 // get given a new one, and then return it soon after. 
                 // So the shared builder will be "replaced".
-                if (returningBuilder.Capacity <= MaxBuilderSize)
+                if (returningBuilder.Capacity > MaxBuilderSizeCapacity)
                 {
-                    // ErrorUtilities.VerifyThrow(handouts.TryRemove(returningBuilder, out dummy), "returned but not loaned");
-                    returningBuilder.Clear(); // Clear before pooling
-
-                    var oldSharedBuilder = Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, returningLength: returningLength, type: oldSharedBuilder == null ? "returned-set" : "returned-replace");
-
+                    // In order to free memory usage by huge string builder, do not pull this one and let it be collected.
 #if DEBUG
-                    Interlocked.Increment(ref s_accepts);
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, returningLength: returningLength, type: "discard");
 #endif
                 }
                 else
                 {
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, returningLength: returningLength, type: "discarded");
-#if DEBUG
-                    Interlocked.Increment(ref s_discards);
-#endif
+                    if (returningBuilder.Capacity != returning._borrowedWithCapacity)
+                    {
+                        Debug.Assert(returningBuilder.Capacity > returning._borrowedWithCapacity, "Capacity can only increase");
 
+                        // This builder used more that pre-allocated capacity bracket.
+                        // Let this builder be collected and put new builder, with reflecting bracket capacity, into the pool.
+                        // If we would just return this builder into pool as is, it would allocated new array[capacity] anyway (current implementation of returningBuilder.Clear() does it)
+                        //   and that could lead to unpredictable amount of LOH allocations and eventual LOH fragmentation.
+                        // Bellow implementation have predictable max Log2(MaxBuilderSizeBytes) string builder array re-allocations during whole process lifetime - unless MaxBuilderSizeCapacity is reached frequently.
+                        int newCapacity = SelectBracketedCapacity(returningBuilder.Capacity);
+                        returningBuilder = new StringBuilder(newCapacity);
+                    }
+
+                    returningBuilder.Clear(); // Clear before pooling
+
+                    var oldSharedBuilder = Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
+                    if (oldSharedBuilder != null)
+                    {
+#if DEBUG
+                        // This can identify in-proper usage from multiple thread or bug in code - forgotten Dispose.
+                        // Look at stack traces of ETW events with reporter string builder hashes.
+                        MSBuildEventSource.Log.ReusableStringBuilderFactoryReplace(oldHash: oldSharedBuilder.GetHashCode(), newHash: returningBuilder.GetHashCode());
+#endif
+                    }
+#if DEBUG
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, returningLength: returningLength, type: returning._borrowedBuilder != returningBuilder ? "return-new" : "return");
+#endif
                 }
             }
 
-#if DEBUG
-            /// <summary>
-            /// Debugging dumping
-            /// </summary>
-            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Handy helper method that can be used to annotate ReuseableStringBuilder when debugging it, but is not hooked up usually for the sake of perf.")]
-            [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.String.Format(System.IFormatProvider,System.String,System.Object[])", Justification = "Handy string that can be used to annotate ReuseableStringBuilder when debugging it, but is not hooked up usually.")]
-            internal static void DumpUnreturned()
+            private static int SelectBracketedCapacity(int requiredCapacity)
             {
-                String.Format(CultureInfo.CurrentUICulture, "{0} Hits of which\n    {1} Misses (was on loan)\n    {2} Upsizes (needed bigger) \n\n{3} Returns=\n{4}    Discards (returned too large)+\n    {5} Accepts\n\n{6} estimated bytes saved", s_hits, s_misses, s_upsizes, s_discards + s_accepts, s_discards, s_accepts, s_saved);
-
-                Console.WriteLine("Unreturned string builders were allocated here:");
-                foreach (var entry in s_handouts.Values)
+                foreach (int bracket in s_capacityBrackets)
                 {
-                    Console.WriteLine(entry + "\n");
+                    if (requiredCapacity <= bracket)
+                    {
+                        return bracket;
+                    }
                 }
+
+                // If user wants bigger capacity than maximum respect it. It could be as buffer in p/invoke.
+                return requiredCapacity;
             }
-#endif
         }
     }
 }
