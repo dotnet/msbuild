@@ -154,8 +154,7 @@ namespace Microsoft.Build.Framework
         {
             if (_borrowedBuilder == null)
             {
-                // TODO: enable once rebased to ErrorUtilities in Framework
-                //ErrorUtilities.VerifyThrow(_capacity != -1, "Reusing after dispose");
+                FrameworkErrorUtilities.VerifyThrow(_capacity != -1, "Reusing after dispose");
 
                 _borrowedBuilder = ReuseableStringBuilderFactory.Get(_capacity);
             }
