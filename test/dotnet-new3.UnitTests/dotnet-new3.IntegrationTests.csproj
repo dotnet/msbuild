@@ -16,6 +16,9 @@
     <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.2.1" Version="5.0" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.3.1" Version="5.0" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.5.0" Version="5.0" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.2.1" Version="2.1.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.3.1" Version="3.1.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.5.0" Version="5.0.*" GeneratePathProperty="true" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -28,6 +31,9 @@ namespace Dotnet_new3.IntegrationTests
       public const string MicrosoftDotNetCommonProjectTemplates21Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_2_1)"%3B
       public const string MicrosoftDotNetCommonProjectTemplates31Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_3_1)"%3B
       public const string MicrosoftDotNetCommonProjectTemplates50Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_5_0)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates21Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_2_1)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates31Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_3_1)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates50Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_5_0)"%3B
   }
 }
       ]]>

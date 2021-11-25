@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using ApprovalTests;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
@@ -9,12 +10,12 @@ using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class AllWebProjectsWork : IClassFixture<AllProjectsWorkFixture>
+    public class AllWebProjectsWork : IClassFixture<WebProjectsFixture>
     {
-        private readonly AllProjectsWorkFixture _fixture;
+        private readonly WebProjectsFixture _fixture;
         private readonly ITestOutputHelper _log;
 
-        public AllWebProjectsWork(AllProjectsWorkFixture fixture, ITestOutputHelper log)
+        public AllWebProjectsWork(WebProjectsFixture fixture, ITestOutputHelper log)
         {
             _fixture = fixture;
             _log = log;
@@ -61,11 +62,64 @@ namespace Dotnet_new3.IntegrationTests
 
             Directory.Delete(workingDir, true);
         }
+
+        [Fact]
+        public void CanShowHelp_WebAPI()
+        {
+            var commandResult = new DotnetNewCommand(_log, "webapi", "-h")
+               .WithCustomHive(_fixture.HomeDirectory)
+               .WithWorkingDirectory(_fixture.BaseWorkingDirectory)
+               .Execute();
+
+            commandResult
+               .Should()
+               .ExitWith(0)
+               .And
+               .NotHaveStdErr();
+
+            Approvals.Verify(commandResult.StdOut);
+        }
+
+        [Fact]
+        public void CanShowHelp_Mvc()
+        {
+            var commandResult = new DotnetNewCommand(_log, "mvc", "-h")
+               .WithCustomHive(_fixture.HomeDirectory)
+               .WithWorkingDirectory(_fixture.BaseWorkingDirectory)
+               .Execute();
+
+            commandResult
+               .Should()
+               .ExitWith(0)
+               .And
+               .NotHaveStdErr();
+
+            Approvals.Verify(commandResult.StdOut);
+        }
+
+        [Theory]
+        [InlineData("webapp")]
+        [InlineData("razor")]
+        public void CanShowHelp_Webapp(string templateName)
+        {
+            var commandResult = new DotnetNewCommand(_log, templateName, "-h")
+               .WithCustomHive(_fixture.HomeDirectory)
+               .WithWorkingDirectory(_fixture.BaseWorkingDirectory)
+               .Execute();
+
+            commandResult
+               .Should()
+               .ExitWith(0)
+               .And
+               .NotHaveStdErr();
+
+            Approvals.Verify(commandResult.StdOut);
+        }
     }
 
-    public sealed class AllProjectsWorkFixture : SharedHomeDirectory
+    public sealed class WebProjectsFixture : SharedHomeDirectory
     {
-        public AllProjectsWorkFixture(IMessageSink messageSink) : base(messageSink)
+        public WebProjectsFixture(IMessageSink messageSink) : base(messageSink)
         {
             BaseWorkingDirectory = TestUtils.CreateTemporaryFolder(nameof(AllWebProjectsWork));
             // create nuget.config file with nuget.org listed
@@ -78,10 +132,11 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr();
 
-            InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0", BaseWorkingDirectory);
-            InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.3.1", BaseWorkingDirectory);
+            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates21Path, BaseWorkingDirectory);
+            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates31Path, BaseWorkingDirectory);
+            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates50Path, BaseWorkingDirectory);
         }
 
         internal string BaseWorkingDirectory { get; private set; }
-    }
+    } 
 }
