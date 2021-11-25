@@ -32,6 +32,7 @@
 ===========================================================*/
 
 using System;
+using System.Diagnostics;
 using System.Text;
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
 using Microsoft.Build.Eventing;
@@ -62,8 +63,8 @@ namespace Microsoft.Build.Framework
                     {
                         StringBuilderCache.t_cachedInstance = null;
                         sb.Length = 0; // Equivalent of sb.Clear() that works on .Net 3.5
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                        MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: sb.GetHashCode(), newCapacity: capacity, oldCapacity: sb.Capacity, type: "sbc-reused");
+#if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+                        MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: sb.GetHashCode(), newCapacity: capacity, oldCapacity: sb.Capacity, type: "sbc-hit");
 #endif
                         return sb;
                     }
@@ -71,8 +72,8 @@ namespace Microsoft.Build.Framework
             }
 
             StringBuilder stringBuilder = new StringBuilder(capacity);
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-            MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: stringBuilder.GetHashCode(), newCapacity: capacity, oldCapacity: stringBuilder.Capacity, type: "sbc-new");
+#if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+            MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: stringBuilder.GetHashCode(), newCapacity: capacity, oldCapacity: stringBuilder.Capacity, type: "sbc-miss");
 #endif
             return stringBuilder;
         }
@@ -81,10 +82,14 @@ namespace Microsoft.Build.Framework
         {
             if (sb.Capacity <= MAX_BUILDER_SIZE)
             {
+                // Assert we are not replacing another string builder. That could happen when Acquire is reentered.
+                // User of StringBuilderCache has to make sure that calling method call stacks do not also use StringBuilderCache.
+                Debug.Assert(StringBuilderCache.t_cachedInstance == null, "Unexpected replacing of other StringBuilder.");
+
                 StringBuilderCache.t_cachedInstance = sb;
             }
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-            MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: sb.GetHashCode(), returningCapacity: sb.Capacity, returningLength: sb.Length, type: sb.Capacity <= MAX_BUILDER_SIZE ? "sbc-returned" :  "sbc-discarded");
+#if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+            MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: sb.GetHashCode(), returningCapacity: sb.Capacity, returningLength: sb.Length, type: sb.Capacity <= MAX_BUILDER_SIZE ? "sbc-return" :  "sbc-discard");
 #endif
         }
 
