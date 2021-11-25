@@ -100,7 +100,7 @@ namespace Microsoft.Build.BuildEngine
                     return false;
                 }
 
-                HashSet<string> otherEntryMetadataNames = new HashSet<string>(otherEntry.BuildItems[i].GetAllCustomMetadataNames());
+                HashSet<string> otherEntryMetadataNames = new HashSet<string>(otherEntry.BuildItems[i].GetAllCustomMetadataNames(), StringComparer.Ordinal);
 
                 foreach (string metadataName in this.BuildItems[i].GetAllCustomMetadataNames())
                 {
