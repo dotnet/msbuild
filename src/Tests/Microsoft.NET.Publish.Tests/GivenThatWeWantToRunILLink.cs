@@ -1211,8 +1211,9 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
-        public void ILLink_displays_informational_warning(string targetFramework)
+        [InlineData("net5.0")]
+        [InlineData("netcoreapp3.1")]
+        public void ILLink_displays_informational_warning_up_to_net5_by_default(string targetFramework)
         {
             var projectName = "HelloWorld";
             var referenceProjectName = "ClassLibForILLink";
@@ -1222,8 +1223,65 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true")
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}")
                 .Should().Pass().And.HaveStdOutContainingIgnoreCase("https://aka.ms/dotnet-illink");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [MemberData(nameof(Net6Plus), MemberType = typeof(PublishTestUtils))]
+        public void ILLink_displays_informational_warning_when_trim_analysis_warnings_are_suppressed_on_net6plus(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}", "/p:SuppressTrimAnalysisWarnings=true")
+                .Should().Pass().And.HaveStdOutContainingIgnoreCase("https://aka.ms/dotnet-illink")
+                .And.HaveStdOutContainingIgnoreCase("This process might take a while");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [MemberData(nameof(Net6Plus), MemberType = typeof(PublishTestUtils))]
+        public void ILLink_dont_display_informational_warning_by_default_on_net6plus(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}")
+                .Should().Pass().And.NotHaveStdErrContaining("https://aka.ms/dotnet-illink")
+                .And.HaveStdOutContainingIgnoreCase("This process might take a while");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
+        public void ILLink_dont_display_time_awareness_message_on_incremental_build(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}")
+                .Should().Pass().And.HaveStdOutContainingIgnoreCase("This process might take a while");
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}")
+                .Should().Pass().And.NotHaveStdErrContaining("This process might take a while");
         }
 
         [Fact()]

@@ -449,9 +449,14 @@
         <target state="translated">NETSDK1102: não há suporte para a otimização de assemblies para tamanho na configuração de publicação selecionada. Verifique se você está publicando um aplicativo independente.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLink_Info">
-        <source>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">Otimizando assemblies para tamanho, o que pode alterar o comportamento do aplicativo. Não se esqueça de testar após a publicação. Confira: https://aka.ms/dotnet-illink</target>
+      <trans-unit id="ILLinkOptimizedAssemblies">
+        <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
+        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ILLinkRunning">
+        <source>Optimizing assemblies for size. This process might take a while.</source>
+        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">

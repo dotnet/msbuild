@@ -449,9 +449,14 @@
         <target state="translated">NETSDK1102: 선택한 게시 구성에서는 크기에 대한 어셈블리 최적화가 지원되지 않습니다. 자체 포함 앱을 게시하고 있는지 확인하세요.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLink_Info">
-        <source>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">크기에 대한 어셈블리 최적화로 앱의 동작이 변경될 수 있습니다. 게시 후 테스트하세요. 참조: https://aka.ms/dotnet-illink</target>
+      <trans-unit id="ILLinkOptimizedAssemblies">
+        <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
+        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ILLinkRunning">
+        <source>Optimizing assemblies for size. This process might take a while.</source>
+        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">

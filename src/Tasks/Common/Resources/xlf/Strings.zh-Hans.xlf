@@ -449,9 +449,14 @@
         <target state="translated">NETSDK1102: 所选发布配置不支持优化程序集的大小。请确保你发布的是独立应用。</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLink_Info">
-        <source>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">正在优化程序集的大小，这可能更改应用的行为。请务必在发布后进行测试。请参阅: https://aka.ms/dotnet-illink</target>
+      <trans-unit id="ILLinkOptimizedAssemblies">
+        <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
+        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ILLinkRunning">
+        <source>Optimizing assemblies for size. This process might take a while.</source>
+        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
