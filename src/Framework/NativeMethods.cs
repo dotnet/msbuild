@@ -1048,37 +1048,67 @@ internal static class NativeMethods
     /// </remarks>
     internal static DateTime GetLastWriteFileUtcTime(string fullPath)
     {
-        DateTime fileModifiedTime = DateTime.MinValue;
-
-        if (IsWindows)
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+        if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
         {
-            if (Traits.Instance.EscapeHatches.AlwaysUseContentTimestamp)
-            {
-                return GetContentLastWriteFileUtcTime(fullPath);
-            }
-
-            WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = GetFileAttributesEx(fullPath, 0, ref data);
-
-            if (success && (data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
-            {
-                long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
-                fileModifiedTime = DateTime.FromFileTimeUtc(dt);
-
-                // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp.
-                if ((data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT && !Traits.Instance.EscapeHatches.UseSymlinkTimeInsteadOfTargetTime)
-                {
-                    fileModifiedTime = GetContentLastWriteFileUtcTime(fullPath);
-                }
-            }
-
-            return fileModifiedTime;
+            return LastWriteFileUtcTime(fullPath);
         }
-        else
+
+        bool isNonModifiable = FileClassifier.Shared.IsNonModifiable(fullPath);
+        if (isNonModifiable)
         {
-            return File.Exists(fullPath)
-                    ? File.GetLastWriteTimeUtc(fullPath)
+            if (ImmutableFilesTimestampCache.Shared.TryGetValue(fullPath, out DateTime modifiedAt))
+            {
+                return modifiedAt;
+            }
+        }
+
+        DateTime modifiedTime = LastWriteFileUtcTime(fullPath);
+
+        if (isNonModifiable && modifiedTime != DateTime.MinValue)
+        {
+            ImmutableFilesTimestampCache.Shared.TryAdd(fullPath, modifiedTime);
+        }
+
+        return modifiedTime;
+#else
+        return LastWriteFileUtcTime(fullPath);
+#endif
+
+        DateTime LastWriteFileUtcTime(string path)
+        {
+            DateTime fileModifiedTime = DateTime.MinValue;
+
+            if (IsWindows)
+            {
+                if (Traits.Instance.EscapeHatches.AlwaysUseContentTimestamp)
+                {
+                    return GetContentLastWriteFileUtcTime(path);
+                }
+
+                WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = NativeMethods.GetFileAttributesEx(path, 0, ref data);
+
+                if (success && (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0)
+                {
+                    long dt = ((long) (data.ftLastWriteTimeHigh) << 32) | ((long) data.ftLastWriteTimeLow);
+                    fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+
+                    // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp.
+                    if ((data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT && !Traits.Instance.EscapeHatches.UseSymlinkTimeInsteadOfTargetTime)
+                    {
+                        fileModifiedTime = GetContentLastWriteFileUtcTime(path);
+                    }
+                }
+
+                return fileModifiedTime;
+            }
+            else
+            {
+                return File.Exists(path)
+                    ? File.GetLastWriteTimeUtc(path)
                     : DateTime.MinValue;
+            }
         }
     }
 

@@ -1144,6 +1144,9 @@ namespace Microsoft.Build.BackEnd
             //
             ConfigureWarningsAsErrorsAndMessages();
 
+            // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
+            ConfigureKnownImmutableFolders();
+
             // See comment on Microsoft.Build.Internal.Utilities.GenerateToolsVersionToUse
             _requestEntry.RequestConfiguration.RetrieveFromCache();
             if (_requestEntry.RequestConfiguration.Project.UsingDifferentToolsVersionFromProjectFile)
@@ -1352,6 +1355,18 @@ namespace Microsoft.Build.BackEnd
                 {
                     loggingService.AddWarningsAsMessages(buildEventContext, warningsAsMessages);
                 }
+            }
+        }
+
+        private void ConfigureKnownImmutableFolders()
+        {
+            ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
+            if (project != null)
+            {
+                // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
+                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("FrameworkPathOverride")?.Trim());
+                // example: C:\Program Files\dotnet\
+                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("NetCoreRoot")?.Trim());
             }
         }
 
