@@ -133,16 +133,16 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.0-alpha.1.21574.3</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>7.0.0-alpha.1.21574.3</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.0-alpha.1.21574.3</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.0-alpha.1.21574.3</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.0-alpha.1.21574.3</MicrosoftAspNetCoreAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreTestHostPackageVersion>7.0.0-alpha.1.21574.3</MicrosoftAspNetCoreTestHostPackageVersion>
-    <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>7.0.0-alpha.1.21574.3</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
-    <MicrosoftAspNetCoreRazorLanguageVersion>7.0.0-alpha.1.21574.3</MicrosoftAspNetCoreRazorLanguageVersion>
-    <MicrosoftCodeAnalysisRazorVersion>7.0.0-alpha.1.21574.3</MicrosoftCodeAnalysisRazorVersion>
-    <MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>7.0.0-alpha.1.21574.3</MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.0-alpha.1.21574.4</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>7.0.0-alpha.1.21574.4</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.0-alpha.1.21574.4</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.0-alpha.1.21574.4</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.0-alpha.1.21574.4</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreTestHostPackageVersion>7.0.0-alpha.1.21574.4</MicrosoftAspNetCoreTestHostPackageVersion>
+    <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>7.0.0-alpha.1.21574.4</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
+    <MicrosoftAspNetCoreRazorLanguageVersion>7.0.0-alpha.1.21574.4</MicrosoftAspNetCoreRazorLanguageVersion>
+    <MicrosoftCodeAnalysisRazorVersion>7.0.0-alpha.1.21574.4</MicrosoftCodeAnalysisRazorVersion>
+    <MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>7.0.0-alpha.1.21574.4</MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/wpf -->
