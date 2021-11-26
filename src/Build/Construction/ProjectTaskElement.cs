@@ -440,7 +440,7 @@ namespace Microsoft.Build.Construction
         {
             if (_parameters == null)
             {
-                _parameters = new CopyOnWriteDictionary<(string, ElementLocation)>(XmlElement.Attributes.Count, StringComparer.OrdinalIgnoreCase);
+                _parameters = new CopyOnWriteDictionary<(string, ElementLocation)>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (XmlAttributeWithLocation attribute in XmlElement.Attributes)
                 {

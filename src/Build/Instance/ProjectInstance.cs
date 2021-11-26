@@ -2909,7 +2909,7 @@ namespace Microsoft.Build.Execution
 
                 if (item.DirectMetadata != null)
                 {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(item.DirectMetadataCount);
+                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                     foreach (ProjectMetadata directMetadatum in item.DirectMetadata)
                     {
                         ProjectMetadataInstance directMetadatumInstance = new ProjectMetadataInstance(directMetadatum);

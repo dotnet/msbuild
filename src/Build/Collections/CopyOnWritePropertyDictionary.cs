@@ -59,15 +59,6 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Creates empty dictionary with specified initial capacity
-        /// </summary>
-        public CopyOnWritePropertyDictionary(int capacity)
-        {
-            // Tracing.Record("New COWD2");
-            _properties = new CopyOnWriteDictionary<T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
-        }
-
-        /// <summary>
         /// Cloning constructor, with deferred cloning semantics
         /// </summary>
         private CopyOnWritePropertyDictionary(CopyOnWritePropertyDictionary<T> that)
