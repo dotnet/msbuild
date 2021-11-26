@@ -1430,11 +1430,14 @@ namespace Microsoft.Build.Evaluation
             {
                 List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement, out var sdkResult);
 
-                foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
+                if (importedProjectRootElements != null)
                 {
-                    _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
+                    foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
+                    {
+                        _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
 
-                    PerformDepthFirstPass(importedProjectRootElement);
+                        PerformDepthFirstPass(importedProjectRootElement);
+                    }
                 }
             }
         }
@@ -1643,7 +1646,10 @@ namespace Microsoft.Build.Evaluation
                         return projects;
                     }
 
-                    allProjects.AddRange(projects);
+                    if (projects != null)
+                    {
+                        allProjects.AddRange(projects);
+                    }
                 }
 
                 if (result == LoadImportsResult.FoundFilesToImportButIgnored)
@@ -1658,7 +1664,10 @@ namespace Microsoft.Build.Evaluation
                         return projects;
                     }
 
-                    allProjects.AddRange(projects);
+                    if (projects != null)
+                    {
+                        allProjects.AddRange(projects);
+                    }
                 }
 
                 if (result == LoadImportsResult.TriedToImportButFileNotFound)
@@ -1703,6 +1712,7 @@ namespace Microsoft.Build.Evaluation
             out SdkResult sdkResult,
             bool throwOnFileNotExistsError = true)
         {
+            projects = null;
             sdkResult = null;
 
             if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties,
@@ -1731,7 +1741,7 @@ namespace Microsoft.Build.Evaluation
 
                     _evaluationLoggingContext.LogBuildEvent(eventArgs);
                 }
-                projects = new List<ProjectRootElement>();
+                
                 return;
             }
 
@@ -1830,31 +1840,35 @@ namespace Microsoft.Build.Evaluation
 
                         _evaluationLoggingContext.LogBuildEvent(eventArgs);
 
-                        projects = new List<ProjectRootElement>();
-
                         return;
                     }
 
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", sdkReference.ToString());
                 }
-
-                if (sdkResult.Path == null)
-                {
-                    projects = new List<ProjectRootElement>();
-                }
-                else
+                List<ProjectRootElement> projectList = null;
+                if (sdkResult.Path != null)
                 {
                     ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(sdkResult.Path, project),
                         throwOnFileNotExistsError, out projects);
 
+                    if (projects?.Count > 0)
+                    {
+                        projectList = new List<ProjectRootElement>(projects);
+                    }
+
                     if (sdkResult.AdditionalPaths != null)
                     {
+
                         foreach (var additionalPath in sdkResult.AdditionalPaths)
                         {
                             ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(additionalPath, project),
                                 throwOnFileNotExistsError, out var additionalProjects);
 
-                            projects.AddRange(additionalProjects);
+                            if (additionalProjects?.Count > 0)
+                            {
+                                projectList ??= new List<ProjectRootElement>();
+                                projectList.AddRange(additionalProjects);
+                            }
                         }
                     }
                 }
@@ -1862,10 +1876,14 @@ namespace Microsoft.Build.Evaluation
                 if ((sdkResult.PropertiesToAdd?.Any() == true) ||
                     (sdkResult.ItemsToAdd?.Any() == true))
                 {
+                    projectList ??= new List<ProjectRootElement>();
+
                     //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
                     //  any projects from paths returned by the SDK Resolver.
-                    projects.Insert(0, CreateProjectForSdkResult(sdkResult));
+                    projectList.Insert(0, CreateProjectForSdkResult(sdkResult));
                 }
+
+                projects = projectList;
             }
             else
             {
@@ -1973,7 +1991,7 @@ namespace Microsoft.Build.Evaluation
         private LoadImportsResult ExpandAndLoadImportsFromUnescapedImportExpression(string directoryOfImportingFile, ProjectImportElement importElement, string unescapedExpression,
                                             bool throwOnFileNotExistsError, out List<ProjectRootElement> imports)
         {
-            imports = new List<ProjectRootElement>();
+            imports = null;
 
             string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
             ElementLocation importLocationInProject = importElement.Location;
@@ -2171,6 +2189,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
+                            imports ??= new List<ProjectRootElement>();
                             imports.Add(importedProjectElement);
 
                             if (_lastModifiedProject == null || importedProjectElement.LastWriteTimeWhenRead > _lastModifiedProject.LastWriteTimeWhenRead)
@@ -2311,7 +2330,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            if (imports.Count > 0)
+            if (imports?.Count > 0)
             {
                 return LoadImportsResult.ProjectsImported;
             }
