@@ -42,10 +42,8 @@ namespace Microsoft.Build.Framework
 {
     internal static class StringBuilderCache
     {
-        // The value 360 was chosen in discussion with performance experts as a compromise between using
-        // as little memory (per thread) as possible and still covering a large part of short-lived
-        // StringBuilder creations on the startup path of VS designers.
-        private const int MAX_BUILDER_SIZE = 360;
+        // The value 512 was chosen empirically as 99% percentile by captured data.
+        private const int MAX_BUILDER_SIZE = 512;
 
         [ThreadStatic]
         private static StringBuilder t_cachedInstance;
@@ -55,13 +53,13 @@ namespace Microsoft.Build.Framework
             if (capacity <= MAX_BUILDER_SIZE)
             {
                 StringBuilder sb = StringBuilderCache.t_cachedInstance;
+                StringBuilderCache.t_cachedInstance = null;
                 if (sb != null)
                 {
                     // Avoid StringBuilder block fragmentation by getting a new StringBuilder
                     // when the requested size is larger than the current capacity
                     if (capacity <= sb.Capacity)
                     {
-                        StringBuilderCache.t_cachedInstance = null;
                         sb.Length = 0; // Equivalent of sb.Clear() that works on .Net 3.5
 #if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
                         MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: sb.GetHashCode(), newCapacity: capacity, oldCapacity: sb.Capacity, type: "sbc-hit");
