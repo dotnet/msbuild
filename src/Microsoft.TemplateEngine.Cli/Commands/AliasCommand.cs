@@ -13,8 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal AliasCommand(ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks) : base(host, telemetryLogger, callbacks, "alias")
         {
-            AliasCommandArgs.AddToCommand(this);
-
+            IsHidden = true;
             this.Add(new AliasAddCommand(host, telemetryLogger, callbacks));
             this.Add(new AliasShowCommand(host, telemetryLogger, callbacks));
         }
@@ -29,7 +28,5 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public AliasCommandArgs(AliasCommand command, ParseResult parseResult) : base(command, parseResult)
         {
         }
-
-        internal static void AddToCommand(AliasCommand aliasCommand) => throw new NotImplementedException();
     }
 }

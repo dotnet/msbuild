@@ -151,7 +151,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.Add(new LegacyUpdateApplyCommand(this, host, telemetryLogger, callbacks));
             this.Add(new LegacySearchCommand(this, host, telemetryLogger, callbacks));
             this.Add(new LegacyListCommand(this, host, telemetryLogger, callbacks));
-
+            this.Add(new LegacyAliasAddCommand(host, telemetryLogger, callbacks));
+            this.Add(new LegacyAliasShowCommand(host, telemetryLogger, callbacks));
         }
     }
 }

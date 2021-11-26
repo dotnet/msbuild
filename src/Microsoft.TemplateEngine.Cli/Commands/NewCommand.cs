@@ -25,6 +25,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.Add(new UpdateCommand(this, host, telemetryLogger, callbacks));
             this.Add(new SearchCommand(this, host, telemetryLogger, callbacks));
             this.Add(new ListCommand(this, host, telemetryLogger, callbacks));
+            this.Add(new AliasCommand(host, telemetryLogger, callbacks));
         }
 
         //TODO: this option is needed to intercept help. Discuss if there is a better option to do it.

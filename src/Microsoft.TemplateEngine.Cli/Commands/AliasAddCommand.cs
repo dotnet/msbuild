@@ -9,9 +9,27 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class AliasAddCommand : BaseCommand<AliasAddCommandArgs>
+    internal class AliasAddCommand : BaseAliasAddCommand
     {
-        internal AliasAddCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "add") { }
+        internal AliasAddCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "add")
+        {
+            IsHidden = true;
+        }
+    }
+
+    internal class LegacyAliasAddCommand : BaseAliasAddCommand
+    {
+        internal LegacyAliasAddCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "--alias")
+        {
+            AddAlias("-a");
+            IsHidden = true;
+        }
+    }
+
+    internal class BaseAliasAddCommand : BaseCommand<AliasAddCommandArgs>
+    {
+        internal BaseAliasAddCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName)
+            : base(host, logger, callbacks, commandName) { }
 
         protected override Task<NewCommandStatus> ExecuteAsync(AliasAddCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 
@@ -20,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class AliasAddCommandArgs : GlobalArgs
     {
-        public AliasAddCommandArgs(AliasAddCommand command, ParseResult parseResult) : base(command, parseResult)
+        public AliasAddCommandArgs(BaseAliasAddCommand command, ParseResult parseResult) : base(command, parseResult)
         {
         }
     }
