@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#define ASSERT_BALANCE
 
 using System;
 using System.Collections.Generic;
@@ -210,6 +211,14 @@ namespace Microsoft.Build.Framework
             /// </summary>
             private static StringBuilder s_sharedBuilder;
 
+#if DEBUG
+            /// <summary>
+            /// Balance between calling Get and Release.
+            /// Shall be always 0 as Get and 1 at Release.
+            /// </summary>
+            private static int s_getVsReleaseBalance;
+#endif
+
             /// <summary>
             /// Obtains a string builder which may or may not already
             /// have been used. 
@@ -217,6 +226,11 @@ namespace Microsoft.Build.Framework
             /// </summary>
             internal static StringBuilder Get(int capacity)
             {
+#if DEBUG && ASSERT_BALANCE
+                int balance = Interlocked.Increment(ref s_getVsReleaseBalance);
+                Debug.Assert(balance == 1, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
+#endif
+
                 var returned = Interlocked.Exchange(ref s_sharedBuilder, null);
 
                 if (returned == null)
@@ -242,7 +256,9 @@ namespace Microsoft.Build.Framework
                 }
                 else
                 {
+#if DEBUG
                     MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: capacity, oldCapacity: returned.Capacity, type: "hit");
+#endif
                 }
 
                 return returned;
@@ -254,6 +270,11 @@ namespace Microsoft.Build.Framework
             /// </summary>
             internal static void Release(ReuseableStringBuilder returning)
             {
+#if DEBUG && ASSERT_BALANCE
+                int balance = Interlocked.Decrement(ref s_getVsReleaseBalance);
+                Debug.Assert(balance == 0, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
+#endif
+
                 StringBuilder returningBuilder = returning._borrowedBuilder;
                 int returningLength = returningBuilder.Length;
 
@@ -294,8 +315,9 @@ namespace Microsoft.Build.Framework
                     if (oldSharedBuilder != null)
                     {
 #if DEBUG
-                        // This can identify in-proper usage from multiple thread or bug in code - forgotten Dispose.
-                        // Look at stack traces of ETW events with reporter string builder hashes.
+                        // This can identify in-proper usage from multiple thread or bug in code - Get was reentered before Release.
+                        // User of ReuseableStringBuilder has to make sure that calling method call stacks do not also use ReuseableStringBuilder.
+                        // Look at stack traces of ETW events which contains reported string builder hashes.
                         MSBuildEventSource.Log.ReusableStringBuilderFactoryReplace(oldHash: oldSharedBuilder.GetHashCode(), newHash: returningBuilder.GetHashCode());
 #endif
                     }
@@ -315,7 +337,7 @@ namespace Microsoft.Build.Framework
                     }
                 }
 
-                // If user wants bigger capacity than maximum respect it. It could be as buffer in p/invoke.
+                // If user wants bigger capacity than maximum respect it as it could be used as buffer in P/Invoke.
                 return requiredCapacity;
             }
         }
