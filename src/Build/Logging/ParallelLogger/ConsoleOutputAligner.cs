@@ -3,8 +3,8 @@
 
 #nullable enable
 using System;
-using System.Diagnostics;
 using System.Text;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Logging
@@ -20,7 +20,6 @@ namespace Microsoft.Build.BackEnd.Logging
     {
         internal const int ConsoleTabWidth = 8;
 
-        private readonly StringBuilder _reusedStringBuilder = new(1024);
         private readonly int _bufferWidth;
         private readonly bool _alignMessages;
 
@@ -52,9 +51,7 @@ namespace Microsoft.Build.BackEnd.Logging
             int i = 0;
             int j = message.IndexOfAny(MSBuildConstants.CrLf);
 
-            StringBuilder sb = _reusedStringBuilder;
-            // prepare reused StringBuilder instance for new use.
-            sb.Length = 0;
+            using ReuseableStringBuilder sb = new();
             // The string contains new lines, treat each new line as a different string to format and send to the console
             while (j >= 0)
             {
@@ -72,7 +69,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Append aligned and indented message lines into running <see cref="StringBuilder"/>.
         /// </summary>
-        private void AlignAndIndentLineOfMessage(StringBuilder sb, bool prefixAlreadyWritten, int prefixWidth, string message, int start, int count)
+        private void AlignAndIndentLineOfMessage(ReuseableStringBuilder sb, bool prefixAlreadyWritten, int prefixWidth, string message, int start, int count)
         {
             int bufferWidthMinusNewLine = _bufferWidth - 1;
 
@@ -122,7 +119,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     sb.Append(message, start + index, endIndex - index);
-                    sb.AppendLine();
+                    sb.Append(Environment.NewLine);
 
                     index = endIndex;
                 }
@@ -136,7 +133,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 sb.Append(message, start, count);
-                sb.AppendLine();
+                sb.Append(Environment.NewLine);
             }
         }
     }
