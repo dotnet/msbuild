@@ -1028,6 +1028,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1039: Multi-threaded value is not valid. {0}.</source>
+        <target state="new">MSBUILD : error MSB1039: Multi-threaded value is not valid. {0}.</target>
+        <note>{StrBegin="MSBUILD : error MSB1039: "}
+     UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+     This error is shown when a user specifies a node reuse value that is not equivilant to Boolean.TrueString or Boolean.FalseString.
+     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+  </note>
+      </trans-unit>
       <trans-unit id="InvalidNodeNumberValue">
         <source>MSBUILD : error MSB1033: Node number is not valid. {0}.</source>
         <target state="translated">MSBUILD : error MSB1033: 노드 번호가 잘못되었습니다. {0}.</target>

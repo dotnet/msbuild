@@ -15,7 +15,6 @@ using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
-using Microsoft.Build.Utilities;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -1477,8 +1476,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool CreateNewNodeIfPossible(List<ScheduleResponse> responses, IEnumerable<SchedulableRequest> requests)
         {
-            int availableNodesWithInProcAffinity = 1 - _currentInProcNodeCount;
-            int availableNodesWithOutOfProcAffinity = _componentHost.BuildParameters.MaxNodeCount - _currentOutOfProcNodeCount;
+            // We allow up to MaxNodeCount in-proc nodes when running multi-threaded.
+            int maxInProcNodeCount = _componentHost.BuildParameters.MultiThreaded ? _componentHost.BuildParameters.MaxNodeCount : 1;
+
+            int availableNodesWithInProcAffinity = maxInProcNodeCount - _currentInProcNodeCount;
+            int availableNodesWithOutOfProcAffinity = _componentHost.BuildParameters.MultiThreaded ? 0 : _componentHost.BuildParameters.MaxNodeCount - _currentOutOfProcNodeCount;
             int requestsWithOutOfProcAffinity = 0;
             int requestsWithAnyAffinityOnInProcNodes = 0;
 
@@ -1559,7 +1561,6 @@ namespace Microsoft.Build.BackEnd
                 // If we still want to create one, go ahead
                 if (inProcNodesToCreate > 0)
                 {
-                    ErrorUtilities.VerifyThrow(inProcNodesToCreate == 1, "We should never be trying to create more than one inproc node");
                     TraceScheduler("Requesting creation of new node satisfying affinity {0}", NodeAffinity.InProc);
                     responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.InProc, 1));
 

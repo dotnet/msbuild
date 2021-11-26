@@ -1,5 +1,7 @@
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.get -> Microsoft.Build.FileSystem.IDirectoryCacheFactory
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.set -> void
+Microsoft.Build.Execution.BuildParameters.MultiThreaded.get -> bool
+Microsoft.Build.Execution.BuildParameters.MultiThreaded.set -> void
 Microsoft.Build.FileSystem.FindPredicate
 Microsoft.Build.FileSystem.FindTransform<TResult>
 Microsoft.Build.FileSystem.IDirectoryCache

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Internal;
@@ -17,12 +18,40 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class NodeProviderInProc : INodeProvider, INodePacketFactory, IDisposable
     {
+        internal sealed class NodeContext
+        {
+            /// <summary>
+            /// The in-proc node.
+            /// </summary>
+            public INode _inProcNode;
+
+            /// <summary>
+            /// The in-proc node endpoint.
+            /// </summary>
+            public INodeEndpoint _inProcNodeEndpoint;
+
+            /// <summary>
+            /// The packet factory used to route packets from the node.
+            /// </summary>
+            public INodePacketFactory _packetFactory;
+
+            /// <summary>
+            /// The in-proc node thread.
+            /// </summary>
+            public Thread _inProcNodeThread;
+
+            /// <summary>
+            /// Event which is raised when the in-proc endpoint is connected.
+            /// </summary>
+            public AutoResetEvent _endpointConnectedEvent = new AutoResetEvent(false);
+        }
+
         #region Private Data
 
         /// <summary>
-        /// The invalid in-proc node id
+        /// A mapping of all the nodes managed by this provider.
         /// </summary>
-        private const int InvalidInProcNodeId = 0;
+        private Dictionary<int, NodeContext> _nodeContexts;
 
         /// <summary>
         /// Flag indicating we have disposed.
@@ -40,36 +69,6 @@ namespace Microsoft.Build.BackEnd
         private IBuildComponentHost _componentHost;
 
         /// <summary>
-        /// The in-proc node.
-        /// </summary>
-        private INode _inProcNode;
-
-        /// <summary>
-        /// The in-proc node endpoint.
-        /// </summary>
-        private INodeEndpoint _inProcNodeEndpoint;
-
-        /// <summary>
-        /// The packet factory used to route packets from the node.
-        /// </summary>
-        private INodePacketFactory _packetFactory;
-
-        /// <summary>
-        /// The in-proc node thread.
-        /// </summary>
-        private Thread _inProcNodeThread;
-
-        /// <summary>
-        /// Event which is raised when the in-proc endpoint is connected.
-        /// </summary>
-        private AutoResetEvent _endpointConnectedEvent;
-
-        /// <summary>
-        /// The ID of the in-proc node.
-        /// </summary>
-        private int _inProcNodeId = InvalidInProcNodeId;
-
-        /// <summary>
         /// Check to allow the inproc node to have exclusive ownership of the operating environment
         /// </summary>
         private bool _exclusiveOperatingEnvironment = false;
@@ -82,7 +81,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public NodeProviderInProc()
         {
-            _endpointConnectedEvent = new AutoResetEvent(false);
         }
 
         #endregion
@@ -110,12 +108,8 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                if (_inProcNodeId != InvalidInProcNodeId)
-                {
-                    return 0;
-                }
-
-                return 1;
+                int maxNodeCount = _componentHost.BuildParameters.MultiThreaded ? _componentHost.BuildParameters.MaxNodeCount : 1;
+                return maxNodeCount - _nodeContexts.Count;
             }
         }
 
@@ -128,6 +122,7 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             _componentHost = host;
+            _nodeContexts = new Dictionary<int, NodeContext>();
         }
 
         /// <summary>
@@ -135,8 +130,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
-            _componentHost = null;
-            _inProcNode = null;
         }
 
         #endregion
@@ -150,15 +143,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The data to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(nodeId == _inProcNodeId, "node");
             ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
 
-            if (_inProcNode == null)
+            if (_nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext))
             {
-                return;
+                nodeContext._inProcNodeEndpoint.SendData(packet);
             }
-
-            _inProcNodeEndpoint.SendData(packet);
         }
 
         /// <summary>
@@ -167,9 +157,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if the nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            if (_inProcNode != null)
+            foreach (NodeContext nodeContext in _nodeContexts.Values)
             {
-                _inProcNodeEndpoint.SendData(new NodeBuildComplete(enableReuse));
+                nodeContext._inProcNodeEndpoint.SendData(new NodeBuildComplete(enableReuse));
             }
         }
 
@@ -190,8 +180,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="configuration">The configuration for the node.</param>
         public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrow(nodeId != InvalidInProcNodeId, "Cannot create in-proc node.");
-
             // Attempt to get the operating environment semaphore if requested.
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
@@ -219,16 +207,15 @@ namespace Microsoft.Build.BackEnd
             }
 
             // If it doesn't already exist, create it.
-            if (_inProcNode == null)
+            if (!_nodeContexts.ContainsKey(nodeId))
             {
-                if (!InstantiateNode(factory))
+                if (!InstantiateNode(nodeId, factory))
                 {
                     return false;
                 }
             }
 
-            _inProcNodeEndpoint.SendData(configuration);
-            _inProcNodeId = nodeId;
+            _nodeContexts[nodeId]._inProcNodeEndpoint.SendData(configuration);
 
             return true;
         }
@@ -271,39 +258,35 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to route.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            INodePacketFactory factory = _packetFactory;
-
-            if (_inProcNodeId != InvalidInProcNodeId)
+            if (!_nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext))
             {
-                // If this was a shutdown packet, we are done with the node.  Release all context associated with it.  Do this here, rather
-                // than after we route the packet, because otherwise callbacks to the NodeManager to determine if we have available nodes
-                // will report that the in-proc node is still in use when it has actually shut down.
-                int savedInProcNodeId = _inProcNodeId;
-                if (packet.Type == NodePacketType.NodeShutdown)
+                return;
+            }
+
+            INodePacketFactory factory = nodeContext._packetFactory;
+
+            // If this was a shutdown packet, we are done with the node.  Release all context associated with it.  Do this here, rather
+            // than after we route the packet, because otherwise callbacks to the NodeManager to determine if we have available nodes
+            // will report that the in-proc node is still in use when it has actually shut down.
+            if (packet.Type == NodePacketType.NodeShutdown)
+            {
+                // Release the operating environment semaphore if we were holding it.
+                if ((_componentHost.BuildParameters.SaveOperatingEnvironment) &&
+                    (InProcNodeOwningOperatingEnvironment != null))
                 {
-                    _inProcNodeId = InvalidInProcNodeId;
-
-                    // Release the operating environment semaphore if we were holding it.
-                    if ((_componentHost.BuildParameters.SaveOperatingEnvironment) &&
-                        (InProcNodeOwningOperatingEnvironment != null))
-                    {
-                        InProcNodeOwningOperatingEnvironment.Release();
-                        InProcNodeOwningOperatingEnvironment.Dispose();
-                        InProcNodeOwningOperatingEnvironment = null;
-                    }
-
-                    if (!_componentHost.BuildParameters.EnableNodeReuse)
-                    {
-                        _inProcNode = null;
-                        _inProcNodeEndpoint = null;
-                        _inProcNodeThread = null;
-                        _packetFactory = null;
-                    }
+                    InProcNodeOwningOperatingEnvironment.Release();
+                    InProcNodeOwningOperatingEnvironment.Dispose();
+                    InProcNodeOwningOperatingEnvironment = null;
                 }
 
-                // Route the packet back to the NodeManager.
-                factory.RoutePacket(savedInProcNodeId, packet);
+                if (!_componentHost.BuildParameters.EnableNodeReuse)
+                {
+                    _nodeContexts.Remove(nodeId);
+                }
             }
+
+            // Route the packet back to the NodeManager.
+            factory.RoutePacket(nodeId, packet);
         }
 
         #endregion
@@ -331,42 +314,44 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates a new in-proc node.
         /// </summary>
-        private bool InstantiateNode(INodePacketFactory factory)
+        private bool InstantiateNode(int nodeId, INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(_inProcNode == null, "In Proc node already instantiated.");
-            ErrorUtilities.VerifyThrow(_inProcNodeEndpoint == null, "In Proc node endpoint already instantiated.");
+            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeId), "In Proc node already instantiated.");
 
-            NodeEndpointInProc.EndpointPair endpoints = NodeEndpointInProc.CreateInProcEndpoints(NodeEndpointInProc.EndpointMode.Synchronous, _componentHost);
+            NodeEndpointInProc.EndpointPair endpoints = NodeEndpointInProc.CreateInProcEndpoints(NodeEndpointInProc.EndpointMode.Synchronous, _componentHost, nodeId);
 
-            _inProcNodeEndpoint = endpoints.ManagerEndpoint;
-            _inProcNodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(InProcNodeEndpoint_OnLinkStatusChanged);
+            NodeContext nodeContext = new();
+            _nodeContexts[nodeId] = nodeContext;
 
-            _packetFactory = factory;
-            _inProcNode = new InProcNode(_componentHost, endpoints.NodeEndpoint);
+            nodeContext._inProcNodeEndpoint = endpoints.ManagerEndpoint;
+            nodeContext._inProcNodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(InProcNodeEndpoint_OnLinkStatusChanged);
+
+            nodeContext._packetFactory = factory;
+            nodeContext._inProcNode = new InProcNode(_componentHost, endpoints.NodeEndpoint, nodeId);
 #if FEATURE_THREAD_CULTURE
-            _inProcNodeThread = new Thread(InProcNodeThreadProc, BuildParameters.ThreadStackSize);
+            nodeContext._inProcNodeThread = new Thread(() => InProcNodeThreadProc(nodeContext._inProcNode), BuildParameters.ThreadStackSize);
 #else
                 CultureInfo culture = _componentHost.BuildParameters.Culture;
                 CultureInfo uiCulture = _componentHost.BuildParameters.UICulture;
-                _inProcNodeThread = new Thread(() =>
+                nodeContext._inProcNodeThread = new Thread(() =>
                 {
                     CultureInfo.CurrentCulture = culture;
                     CultureInfo.CurrentUICulture = uiCulture;
-                    InProcNodeThreadProc();
+                    InProcNodeThreadProc(nodeContext._inProcNode);
                 });
 #endif
-            _inProcNodeThread.Name = String.Format(CultureInfo.CurrentCulture, "In-proc Node ({0})", _componentHost.Name);
-            _inProcNodeThread.IsBackground = true;
+            nodeContext._inProcNodeThread.Name = String.Format(CultureInfo.CurrentCulture, "In-proc Node ({0})", _componentHost.Name);
+            nodeContext._inProcNodeThread.IsBackground = true;
 #if FEATURE_THREAD_CULTURE
-            _inProcNodeThread.CurrentCulture = _componentHost.BuildParameters.Culture;
-            _inProcNodeThread.CurrentUICulture = _componentHost.BuildParameters.UICulture;
+            nodeContext._inProcNodeThread.CurrentCulture = _componentHost.BuildParameters.Culture;
+            nodeContext._inProcNodeThread.CurrentUICulture = _componentHost.BuildParameters.UICulture;
 #endif
-            _inProcNodeThread.Start();
+            nodeContext._inProcNodeThread.Start();
 
-            _inProcNodeEndpoint.Connect(this);
+            nodeContext._inProcNodeEndpoint.Connect(this);
 
             int connectionTimeout = CommunicationsUtilities.NodeConnectionTimeout;
-            bool connected = _endpointConnectedEvent.WaitOne(connectionTimeout);
+            bool connected = nodeContext._endpointConnectedEvent.WaitOne(connectionTimeout);
             ErrorUtilities.VerifyThrow(connected, "In-proc node failed to start up within {0}ms", connectionTimeout);
             return true;
         }
@@ -374,10 +359,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Thread proc which runs the in-proc node.
         /// </summary>
-        private void InProcNodeThreadProc()
+        private void InProcNodeThreadProc(INode inProcNode)
         {
             Exception e;
-            NodeEngineShutdownReason reason = _inProcNode.Run(out e);
+            NodeEngineShutdownReason reason = inProcNode.Run(out e);
             InProcNodeShutdown(reason, e);
         }
 
@@ -390,10 +375,22 @@ namespace Microsoft.Build.BackEnd
         {
             if (status == LinkStatus.Active)
             {
-                // We don't verify this outside of the 'if' because we don't care about the link going down, which will occur
-                // after we have cleared the inProcNodeEndpoint due to shutting down the node.
-                ErrorUtilities.VerifyThrow(endpoint == _inProcNodeEndpoint, "Received link status event for a node other than our peer.");
-                _endpointConnectedEvent.Set();
+                bool foundEndpoint = false;
+                foreach (NodeContext nodeContext in _nodeContexts.Values)
+                {
+                    if (endpoint == nodeContext._inProcNodeEndpoint)
+                    {
+                        nodeContext._endpointConnectedEvent.Set();
+                        foundEndpoint = true;
+                    }
+                }
+
+                if (!foundEndpoint)
+                {
+                    // We don't verify this outside of the 'if' because we don't care about the link going down, which will occur
+                    // after we have cleared the inProcNodeEndpoint due to shutting down the node.
+                    ErrorUtilities.VerifyThrow(foundEndpoint, "Received link status event for a node other than our peer.");
+                }
             }
         }
 
@@ -426,10 +423,13 @@ namespace Microsoft.Build.BackEnd
             {
                 if (disposing)
                 {
-                    if (_endpointConnectedEvent != null)
+                    foreach (NodeContext nodeContext in _nodeContexts.Values)
                     {
-                        _endpointConnectedEvent.Dispose();
-                        _endpointConnectedEvent = null;
+                        if (nodeContext._endpointConnectedEvent != null)
+                        {
+                            nodeContext._endpointConnectedEvent.Dispose();
+                            nodeContext._endpointConnectedEvent = null;
+                        }
                     }
                 }
 

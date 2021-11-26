@@ -551,6 +551,7 @@ namespace Microsoft.Build.CommandLine
                 string schemaFile = null;
 #endif
                 int cpuCount = 1;
+                bool multiThreaded = false; 
 #if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
 #else
@@ -588,6 +589,7 @@ namespace Microsoft.Build.CommandLine
                         ref schemaFile,
 #endif
                         ref cpuCount,
+                        ref multiThreaded,
                         ref enableNodeReuse,
                         ref preprocessWriter,
                         ref targetsWriter,
@@ -667,6 +669,7 @@ namespace Microsoft.Build.CommandLine
                                     needToValidateProject, schemaFile,
 #endif
                                     cpuCount,
+                                    multiThreaded,
                                     enableNodeReuse,
                                     preprocessWriter,
                                     targetsWriter,
@@ -994,6 +997,7 @@ namespace Microsoft.Build.CommandLine
             string schemaFile,
 #endif
             int cpuCount,
+            bool multiThreaded,
             bool enableNodeReuse,
             TextWriter preprocessWriter,
             TextWriter targetsWriter,
@@ -1164,6 +1168,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #endif
                     parameters.MaxNodeCount = cpuCount;
+                    parameters.MultiThreaded = multiThreaded;
                     parameters.Loggers = projectCollection.Loggers;
                     parameters.ForwardingLoggers = remoteLoggerRecords;
                     parameters.ToolsetDefinitionLocations = Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry;
@@ -2101,6 +2106,7 @@ namespace Microsoft.Build.CommandLine
             ref string schemaFile,
 #endif
             ref int cpuCount,
+            ref bool multiThreaded,
             ref bool enableNodeReuse,
             ref TextWriter preprocessWriter,
             ref TextWriter targetsWriter,
@@ -2218,6 +2224,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref schemaFile,
 #endif
                                                                ref cpuCount,
+                                                               ref multiThreaded,
                                                                ref enableNodeReuse,
                                                                ref preprocessWriter,
                                                                ref targetsWriter,
@@ -2253,6 +2260,9 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
+
+                    // figure out if we should use in-proc nodes for parallel build, effectively running the build multi-threaded
+                    multiThreaded = ProcessMultiThreadedSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded]);
 
                     // figure out if we should reuse nodes
                     // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
@@ -2408,6 +2418,35 @@ namespace Microsoft.Build.CommandLine
             return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.InputResultsCaches)
                 ? commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.InputResultsCaches].Where(p => p != null).ToArray()
                 : null;
+        }
+
+        /// <summary>
+        /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
+        /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
+        /// will determine the node reuse setting for that case.
+        /// </summary>
+        internal static bool ProcessMultiThreadedSwitch(string[] parameters)
+        {
+            bool enableMultiThreading = false;
+
+            if (parameters.Length > 0)
+            {
+                try
+                {
+                    // There does not seem to be a localizable function for this
+                    enableMultiThreading = bool.Parse(parameters[parameters.Length - 1]);
+                }
+                catch (FormatException ex)
+                {
+                    CommandLineSwitchException.Throw("InvalidMultiThreadedValue", parameters[parameters.Length - 1], ex.Message);
+                }
+                catch (ArgumentNullException ex)
+                {
+                    CommandLineSwitchException.Throw("InvalidMultiThreadedValue", parameters[parameters.Length - 1], ex.Message);
+                }
+            }
+
+            return enableMultiThreading;
         }
 
         /// <summary>

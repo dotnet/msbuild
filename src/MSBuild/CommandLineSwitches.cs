@@ -104,6 +104,7 @@ namespace Microsoft.Build.CommandLine
             OutputResultsCache,
             LowPriority,
             DetailedSummary,
+            MultiThreaded,
             NumberOfParameterizedSwitches,
         }
 
@@ -273,6 +274,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "outputResultsCache", "orc" },         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true   ),
             new ParameterizedSwitchInfo(  new string[] { "lowpriority", "low" },                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "detailedsummary", "ds" },             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "multithreaded", "mt" },               ParameterizedSwitch.MultiThreaded,              null,                           false,          null,                                  true,   false  ),
         };
 
         /// <summary>
