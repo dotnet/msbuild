@@ -4205,7 +4205,7 @@ $(
         [Fact]
         public void PropertyFunctionMSBuildDivide()
         {
-            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", "6.5536");
+            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", (6.5536).ToString());
         }
 
         [Fact]
