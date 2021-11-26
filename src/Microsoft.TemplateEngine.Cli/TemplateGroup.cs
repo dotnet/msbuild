@@ -59,7 +59,7 @@ namespace Microsoft.TemplateEngine.Cli
             get
             {
                 HashSet<string> shortNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (ITemplateInfo template in Templates)
+                foreach (ITemplateInfo template in Templates.OrderByDescending(t => t.Precedence))
                 {
                     shortNames.UnionWith(template.ShortNameList);
                 }
