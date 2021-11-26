@@ -3595,7 +3595,7 @@ namespace Microsoft.Build.Evaluation
             /// bad for debugging experience and has a performance cost.
             /// A typical binding operation with exception can take ~1.500 ms; this call is ~0.050 ms
             /// (rough numbers just for comparison).
-            /// See https://github.com/Microsoft/msbuild/issues/2217.
+            /// See https://github.com/dotnet/msbuild/issues/2217.
             /// </summary>
             /// <param name="returnVal">The value returned from the function call.</param>
             /// <param name="objectInstance">Object that the function is called on.</param>
@@ -4961,7 +4961,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 catch (OverflowException)
                 {
-                    // https://github.com/Microsoft/msbuild/issues/2882
+                    // https://github.com/dotnet/msbuild/issues/2882
                     // test: PropertyFunctionMathMaxOverflow
                     return null;
                 }

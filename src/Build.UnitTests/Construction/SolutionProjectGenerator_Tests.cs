@@ -827,7 +827,7 @@ EndProject
         /// Generated project metaproj should declare its outputs for relay.
         /// Here B depends on C (via solution dep only) and D (via ProjectReference only)
         /// </summary>
-        /// <seealso href="https://github.com/Microsoft/msbuild/issues/69">
+        /// <seealso href="https://github.com/dotnet/msbuild/issues/69">
         /// MSBuild should generate metaprojects that relay the outputs of the individual MSBuild invocations
         /// </seealso>
         [Fact]
@@ -1958,7 +1958,7 @@ EndGlobal
         /// <summary>
         /// When we have a bad framework moniker we expect the build to fail.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
         public void BadFrameworkMonkierExpectBuildToFail()
         {
             string tmpFileName = FileUtilities.GetTemporaryFile();
@@ -2046,7 +2046,7 @@ EndGlobal
         /// When we have a bad framework moniker we expect the build to fail. In this case we are passing a poorly formatted framework moniker.
         /// This will test the exception path where the framework name is invalid rather than just not .netFramework
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/515")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
         public void BadFrameworkMonkierExpectBuildToFail2()
         {
             string tmpFileName = FileUtilities.GetTemporaryFile();

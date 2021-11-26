@@ -439,7 +439,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        // https://github.com/Microsoft/msbuild/issues/4002
+        // https://github.com/dotnet/msbuild/issues/4002
         // https://github.com/dotnet/corefx/issues/34008
         //
         // We do not use AssemblyReference.GetAssemblyName() here because its behavior

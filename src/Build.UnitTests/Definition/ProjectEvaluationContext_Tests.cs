@@ -640,7 +640,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ContextCachesCommonOutOfProjectCone(itemSpecPathIsRelative: false, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
         }
 
-        [Theory (Skip="https://github.com/Microsoft/msbuild/issues/3889")]
+        [Theory (Skip="https://github.com/dotnet/msbuild/issues/3889")]
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
         // projects should cache glob expansions when the __relative__ glob is shared between projects and points outside of project cone
         public void ContextCachesCommonOutOfProjectConeRelativeGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)

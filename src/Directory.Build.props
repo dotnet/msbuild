@@ -48,7 +48,7 @@
     <GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
 
     <!-- Work around issue where bootstrapped TaskHostTask seems to be loading the wrong assemblies.
-         https://github.com/Microsoft/msbuild/issues/2865-->
+         https://github.com/dotnet/msbuild/issues/2865-->
     <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
 

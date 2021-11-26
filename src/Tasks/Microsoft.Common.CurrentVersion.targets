@@ -4861,7 +4861,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_TargetsThatPrepareProjectReferences>_SplitProjectReferencesByFileExistence</_TargetsThatPrepareProjectReferences>
     <!--
-      GetCopyToOutputDirectoryItems depends on an unspecified dependency _SplitProjectReferencesByFileExistence -> AssignProjectConfiguration (https://github.com/microsoft/msbuild/issues/4677).
+      GetCopyToOutputDirectoryItems depends on an unspecified dependency _SplitProjectReferencesByFileExistence -> AssignProjectConfiguration (https://github.com/dotnet/msbuild/issues/4677).
       When the unspecified dependency does not happen by accident, content copying is only 1 level deep instead of transitive.
       This target enforces the dependency.
     -->
@@ -4881,10 +4881,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </GetCopyToOutputDirectoryItemsDependsOn>
 
     <!--
-      Mitigation for https://github.com/microsoft/msbuild/issues/4677
+      Mitigation for https://github.com/dotnet/msbuild/issues/4677
       When MSBuildCopyContentTransitively == true, all content copying is transitive.
       When MSBuildCopyContentTransitively == false, content copying is 1 level deep.
-      When MSBuildCopyContentTransitively != {true, false}, the legacy behaviour in https://github.com/microsoft/msbuild/issues/4677 manifests.
+      When MSBuildCopyContentTransitively != {true, false}, the legacy behaviour in https://github.com/dotnet/msbuild/issues/4677 manifests.
      -->
     <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
     <!-- Enforce 1 level deep content copying by replacing the recursive content target with the target that retrieves the content for the current project only. -->

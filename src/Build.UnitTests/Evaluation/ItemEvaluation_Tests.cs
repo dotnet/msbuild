@@ -543,7 +543,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(INCLUDE_COUNT, items.Count);
         }
 
-        // see https://github.com/Microsoft/msbuild/issues/2069
+        // see https://github.com/dotnet/msbuild/issues/2069
         [Fact]
         public void ImmutableListBuilderBug()
         {
@@ -658,7 +658,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        // see https://github.com/Microsoft/msbuild/issues/3460
+        // see https://github.com/dotnet/msbuild/issues/3460
         [Fact]
         public void MetadataPropertyFunctionBug()
         {

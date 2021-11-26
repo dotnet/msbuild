@@ -164,7 +164,7 @@ namespace Microsoft.Build.Evaluation
         /// Needed to provide a compat shim for numeric/version comparisons
         /// on MSBuildToolsVersion, which were fine when it was a number
         /// but now cause the project to throw InvalidProjectException when
-        /// ToolsVersion is "Current". https://github.com/Microsoft/msbuild/issues/4150
+        /// ToolsVersion is "Current". https://github.com/dotnet/msbuild/issues/4150
         /// </remarks>
         private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state)
         {

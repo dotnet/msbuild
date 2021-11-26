@@ -77,7 +77,7 @@ namespace Microsoft.Build.Evaluation
                                   .ToImmutableList();
             }
 
-            // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/Microsoft/msbuild/issues/2328
+            // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/dotnet/msbuild/issues/2328
             protected virtual void MutateItems(ImmutableList<I> items) { }
 
             protected virtual void SaveItems(ImmutableList<I> items, OrderedItemDataCollection.Builder listBuilder) { }

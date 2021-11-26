@@ -5,7 +5,7 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
-    /// This task was created for https://github.com/microsoft/msbuild/issues/2036
+    /// This task was created for https://github.com/dotnet/msbuild/issues/2036
     /// </summary>
     public class ReturnFailureWithoutLoggingErrorTask : Task
     {

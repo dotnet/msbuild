@@ -233,7 +233,7 @@ namespace Microsoft.Build.Evaluation
                         else if (EscapingUtilities.ContainsEscapedWildcards(splitEscaped))
                         {
                             // '*' is an illegal character to have in a filename.
-                            // todo: file-system assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
+                            // todo: file-system assumption on legal path characters: https://github.com/dotnet/msbuild/issues/781
                             // Just return the original string.
                             fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }

@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Verifies that when a user overrides the BaseIntermediateOutputPath that the build still works.
         /// </summary>
-        /// <remarks>This was written because of regression https://github.com/Microsoft/msbuild/issues/1509. </remarks>
+        /// <remarks>This was written because of regression https://github.com/dotnet/msbuild/issues/1509. </remarks>
         [Fact]
         public void OverrideBaseIntermediateOutputPathSucceeds()
         {
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         /// <summary>
-        /// Tests fix for https://github.com/microsoft/msbuild/issues/1479.
+        /// Tests fix for https://github.com/dotnet/msbuild/issues/1479.
         /// </summary>
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsWindows))]
         public void AssemblyAttributesLocation()

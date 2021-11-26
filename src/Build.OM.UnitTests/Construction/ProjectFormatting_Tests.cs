@@ -321,7 +321,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/362")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/362")]
         public void PreprocessorFormatting()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

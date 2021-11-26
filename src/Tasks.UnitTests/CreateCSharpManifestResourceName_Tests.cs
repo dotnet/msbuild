@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
         /// for different codepages.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/295")]
+        [Fact (Skip = "https://github.com/dotnet/msbuild/issues/295")]
 #else
         [Fact]
 #endif
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests
         ///
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/295")]
+        [Fact (Skip = "https://github.com/dotnet/msbuild/issues/295")]
 #else
         [Fact]
 #endif

@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             //e.AssertLogContains("Microsoft.Build.dll");
             Assert.Empty(t2.ResolvedFiles);
 
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Single(t1.ResolvedFiles);
         }
@@ -292,7 +292,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario"
             e.AssertLogContains("DependsOnMSBuild12");
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Empty(t2.ResolvedFiles);
 
@@ -304,7 +304,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario"
             e.AssertLogContains("DependsOnMSBuild12");
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Empty(t3.ResolvedFiles);
         }

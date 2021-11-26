@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A simple successful graph build.
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void SimpleGraphBuild()
         {
             string contents = CleanupFileContents(@"
@@ -316,18 +316,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// the system before this method was called.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1975")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1975")]
 #elif MONO
-        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
-        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/2057")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/2057")]
 #endif
         [InlineData(8, false)]
         public void ShutdownNodesAfterParallelBuild(int numberOfParallelProjectsToBuild, bool enbaleDebugComm)
         {
             // This test has previously been failing silently. With the addition of TestEnvironment the
             // failure is now noticed (worker node is crashing with "Pipe is broken" exception. See #2057:
-            // https://github.com/Microsoft/msbuild/issues/2057
+            // https://github.com/dotnet/msbuild/issues/2057
             _env.ClearTestInvariants();
 
             // Communications debug log enabled, picked up by TestEnvironment
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A simple successful build, out of process only.
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -409,7 +409,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A simple successful build, out of process only. Triggered by setting build parameters' DisableInProcNode to true.
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -459,7 +459,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -680,9 +680,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get only that value.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1976")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
 #elif MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -733,9 +733,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// and we have a list of properties to serialize that we do not crash. This is to prevent a regression of 826594
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1976")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
 #elif MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -804,7 +804,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get no properties
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -846,9 +846,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// collection
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/933")]
 #elif MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -909,7 +909,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get no properties
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -1809,7 +1809,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that the out-of-proc node won't lock the directory containing the target project.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/933")]
 #else
         [Fact]
 #endif
@@ -2127,7 +2127,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that disabling the in-proc node doesn't cause projects which don't require it to fail.
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2189,7 +2189,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Ensures that properties and items are transferred to the out-of-proc node when an instance is used to start the build.
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2254,7 +2254,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Ensures that a limited set of properties are transferred from a project instance to an OOP node.
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2553,9 +2553,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// its own on "A", that we still properly build.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/933")]
 #elif MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2654,7 +2654,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// executed the target, rather than skipping and continuing.
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2737,7 +2737,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// unsuccessful", it can assume that all other OnError targets have also already been run)
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2856,7 +2856,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// will continue executing (on the first request) or skipping (on the second)
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2946,7 +2946,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// exit as though the target that those targets run after has already run.
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -3233,7 +3233,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// node.
         /// </summary>
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1245")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1245")]
 #else
         [Fact]
 #endif
@@ -3955,7 +3955,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Regression test for https://github.com/Microsoft/msbuild/issues/3047
+        /// Regression test for https://github.com/dotnet/msbuild/issues/3047
         /// </summary>
         [Fact]
         [SkipOnMono("out-of-proc nodes not working on mono yet")]
@@ -4160,7 +4160,7 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildValid()
         {
             string project1 = _env.CreateFile(".proj").Path;
@@ -4201,7 +4201,7 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildInvalid()
         {
             string project1 = _env.CreateFile(".proj").Path;
@@ -4233,7 +4233,7 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildFail()
         {
             string project1 = _env.CreateFile(".proj").Path;
@@ -4276,7 +4276,7 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildCircular()
         {
             string project1 = _env.CreateFile(".proj").Path;

@@ -807,7 +807,7 @@ namespace Microsoft.Build.Tasks
 
                     // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases 
                     // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists. 
-                    // See: https://github.com/Microsoft/msbuild/issues/328
+                    // See: https://github.com/dotnet/msbuild/issues/328
                     Directory.CreateDirectory(Path.GetTempPath());
 
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);

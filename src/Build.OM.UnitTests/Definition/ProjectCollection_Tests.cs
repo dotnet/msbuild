@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #if FEATURE_INSTALLED_MSBUILD
         [Fact]
 #else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/276")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
 #endif
         public void GlobalPropertyInheritLoadFromFile2()
         {
@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #if FEATURE_INSTALLED_MSBUILD
         [Fact]
 #else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/276")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
 #endif
         public void GlobalPropertyInheritLoadFromFile3()
         {
@@ -1073,7 +1073,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #if FEATURE_INSTALLED_MSBUILD
         [Fact]
 #else
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/276")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
 #endif
         [Trait("Category", "mono-osx-failing")]
         public void DefaultToolsVersion2()

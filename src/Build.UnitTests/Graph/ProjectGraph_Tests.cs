@@ -20,7 +20,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Graph.UnitTests
 {
-    [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
     public class ProjectGraphTests : IDisposable
     {
         private TestEnvironment _env;
@@ -1851,7 +1851,7 @@ $@"
             AssertNonMultitargetingNode(innerBuildNode.ProjectReferences.First(), additionalGlobalProperties);
         }
 
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/4262")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4262")]
         public void InnerBuildsProducedByOuterBuildsCanBeReferencedByOtherInnerBuilds()
         {
             var referenceToInnerBuild = $@"<ItemGroup>

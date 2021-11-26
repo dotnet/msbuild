@@ -513,7 +513,7 @@ namespace Microsoft.Build.Tasks
                 var systemCmd = ToolLocationHelper.GetPathToSystemFile("cmd.exe");
 
 #if WORKAROUND_COREFX_19110
-                // Work around https://github.com/Microsoft/msbuild/issues/2273 and
+                // Work around https://github.com/dotnet/msbuild/issues/2273 and
                 // https://github.com/dotnet/corefx/issues/19110, which result in
                 // a bad path being returned above on Nano Server SKUs of Windows.
                 if (!FileSystems.Default.FileExists(systemCmd))

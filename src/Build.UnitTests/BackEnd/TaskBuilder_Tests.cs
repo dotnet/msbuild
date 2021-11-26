@@ -572,7 +572,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Regression test for https://github.com/microsoft/msbuild/issues/5080
+        /// Regression test for https://github.com/dotnet/msbuild/issues/5080
         /// </summary>
         [Fact]
         public void SameAssemblyFromDifferentRelativePathsSharesAssemblyLoadContext()

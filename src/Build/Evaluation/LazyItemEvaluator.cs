@@ -636,7 +636,7 @@ namespace Microsoft.Build.Evaluation
         {
             // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
             // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
-            // See: https://github.com/Microsoft/msbuild/issues/3460
+            // See: https://github.com/dotnet/msbuild/issues/3460
             const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
 
             // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and

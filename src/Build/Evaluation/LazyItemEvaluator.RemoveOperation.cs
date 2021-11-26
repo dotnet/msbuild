@@ -69,7 +69,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
+                // todo Perf: do not match against the globs: https://github.com/dotnet/msbuild/issues/2329
                 HashSet<I> items = null;
                 foreach (ItemData item in listBuilder)
                 {

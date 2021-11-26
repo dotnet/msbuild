@@ -299,7 +299,7 @@ namespace Microsoft.Build.Shared
             {
                 return false;
             }
-            // https://github.com/Microsoft/msbuild/issues/3060
+            // https://github.com/dotnet/msbuild/issues/3060
             // NOTE: Corefx matches loosely in three cases (in the absence of the * wildcard in the extension):
             // 1) if the extension ends with the ? wildcard, it matches files with shorter extensions also e.g. "file.tx?" would
             //    match both "file.txt" and "file.tx"
@@ -2035,7 +2035,7 @@ namespace Microsoft.Build.Shared
                     }
 
                     // increase the chance of cache hits when multiple relative globs refer to the same base directory
-                    // todo https://github.com/Microsoft/msbuild/issues/3889
+                    // todo https://github.com/dotnet/msbuild/issues/3889
                     //if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
                     //{
                     //    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
