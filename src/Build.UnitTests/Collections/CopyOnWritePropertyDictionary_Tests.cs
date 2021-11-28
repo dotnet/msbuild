@@ -3,6 +3,9 @@
 
 using System;
 using Microsoft.Build.Collections;
+
+using Shouldly;
+
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
@@ -17,23 +20,23 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             var dic = CreateInstance();
 
-            Assert.Equal(0, dic.Count);
+            dic.Count.ShouldBe(0);
 
             dic.Set(new("a"));
 
-            Assert.Equal(1, dic.Count);
+            dic.Count.ShouldBe(1);
 
             dic.Set(new("b"));
 
-            Assert.Equal(2, dic.Count);
+            dic.Count.ShouldBe(2);
 
             dic.Set(new("c"));
 
-            Assert.Equal(3, dic.Count);
+            dic.Count.ShouldBe(3);
 
             dic.Clear();
 
-            Assert.Equal(0, dic.Count);
+            dic.Count.ShouldBe(0);
         }
 
         [Fact]
@@ -44,18 +47,18 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             MockValue a = new("a");
             MockValue b = new("b");
 
-            Assert.Null(dic["a"]);
-            Assert.Null(dic["b"]);
+            dic["a"].ShouldBeNull();
+            dic["b"].ShouldBeNull();
 
             dic["a"] = a;
 
-            Assert.Same(a, dic["a"]);
-            Assert.Null(dic["b"]);
+            dic["a"].ShouldBeSameAs(a);
+            dic["b"].ShouldBeNull();
 
             dic["b"] = b;
 
-            Assert.Same(a, dic["a"]);
-            Assert.Same(b, dic["b"]);
+            dic["a"].ShouldBeSameAs(a);
+            dic["b"].ShouldBeSameAs(b);
 
             // Cannot set a null value
             Assert.ThrowsAny<Exception>(() => dic["a"] = null);
@@ -72,18 +75,18 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             MockValue a = new("a");
             MockValue b = new("b");
 
-            Assert.False(dic.Contains("a"));
-            Assert.False(dic.Contains("b"));
+            dic.Contains("a").ShouldBeFalse();
+            dic.Contains("b").ShouldBeFalse();
 
             dic["a"] = a;
 
-            Assert.True(dic.Contains("a"));
-            Assert.False(dic.Contains("b"));
+            dic.Contains("a").ShouldBeTrue();
+            dic.Contains("b").ShouldBeFalse();
 
             dic["b"] = b;
 
-            Assert.True(dic.Contains("a"));
-            Assert.True(dic.Contains("b"));
+            dic.Contains("a").ShouldBeTrue();
+            dic.Contains("b").ShouldBeTrue();
         }
 
         [Fact]
@@ -91,11 +94,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             var dic = CreateInstance("a", "b", "c");
 
-            Assert.Equal(3, dic.Count);
+            dic.Count.ShouldBe(3);
 
             dic.Clear();
 
-            Assert.Equal(0, dic.Count);
+            dic.Count.ShouldBe(0);
         }
 
         [Fact]
@@ -133,14 +136,14 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 if (expected)
                 {
                     // Test equality in both directions
-                    Assert.Equal(a, b);
-                    Assert.Equal(b, a);
+                    a.ShouldBe(b);
+                    b.ShouldBe(a);
                 }
                 else
                 {
                     // Test equality in both directions
-                    Assert.NotEqual(a, b);
-                    Assert.NotEqual(b, a);
+                    a.ShouldNotBe(b);
+                    b.ShouldNotBe(a);
                 }
             }
         }
@@ -150,14 +153,14 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             var dic = CreateInstance("a", "b", "c");
 
-            Assert.False(dic.Remove("ZZZ"));
+            dic.Remove("ZZZ").ShouldBeFalse();
 
-            Assert.True(dic.Remove("a"));
-            Assert.False(dic.Remove("a"));
-            Assert.True(dic.Remove("b"));
-            Assert.True(dic.Remove("c"));
+            dic.Remove("a").ShouldBeTrue();
+            dic.Remove("a").ShouldBeFalse();
+            dic.Remove("b").ShouldBeTrue();
+            dic.Remove("c").ShouldBeTrue();
 
-            Assert.Equal(0, dic.Count);
+            dic.Count.ShouldBe(0);
         }
 
         [Fact]
@@ -179,8 +182,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             CopyOnWritePropertyDictionary<MockValue> source = CreateInstance("a", "b", "c");
             CopyOnWritePropertyDictionary<MockValue> clone = source.DeepClone();
 
-            Assert.Equal(source, clone);
-            Assert.NotSame(source, clone);
+            source.ShouldBe(clone);
+            source.ShouldNotBeSameAs(clone);
         }
 
         private static CopyOnWritePropertyDictionary<MockValue> CreateInstance(params string[] values)
