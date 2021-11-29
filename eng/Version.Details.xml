@@ -6,9 +6,9 @@
       <Sha>958161a35309eed8a0ab8658573a07f6dd4dfbe0</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.1.0-preview.1.38">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.1.0-preview.1.47">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>a998efecd431ec8a41536b5ac0152c16f1e2e646</Sha>
+      <Sha>c14b85a00c03933c708c7d38fefeda9898a21488</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.1.0-2.21574.9">
       <Uri>https://github.com/dotnet/roslyn</Uri>
