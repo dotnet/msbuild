@@ -12,7 +12,7 @@
     <PackageReference Update="LargeAddressAware" Version="1.0.5" />
     <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
     <PackageReference Update="Microsoft.CodeQuality.Analyzers" Version="3.3.2" PrivateAssets="all" />
-    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
+    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" />
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.0.4492" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
     <PackageReference Update="Shouldly" Version="3.0.0" />
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 
 </Project>
