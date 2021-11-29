@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllBytes(Path.Combine(testFolder.Path, file), new byte[1]);
             }
 
-            string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.Path, pattern);
+            string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.Path, pattern).Item1;
 
             fileMatches.Length.ShouldBe(expectedMatchCount, $"Matches: '{String.Join("', '", fileMatches)}'");
         }
@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests
 
             void VerifyImpl(FileMatcher fileMatcher, string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
             {
-                string[] matchedFiles = fileMatcher.GetFiles(testFolder.Path, include, excludes?.ToList());
+                string[] matchedFiles = fileMatcher.GetFiles(testFolder.Path, include, excludes?.ToList()).Item1;
 
                 if (shouldHaveNoMatches)
                 {
@@ -1256,7 +1256,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 string longString = new string('X', 500) + "*"; // need a wildcard to do anything
-                string[] result = FileMatcher.Default.GetFiles(@"c:\", longString);
+                string[] result = FileMatcher.Default.GetFiles(@"c:\", longString).Item1;
 
                 Assert.Equal(longString, result[0]); // Does not throw
                 ChangeWaves.ResetStateForTests();
@@ -1298,7 +1298,7 @@ namespace Microsoft.Build.UnitTests
             Directory.CreateDirectory(workingPath);
             Directory.CreateDirectory(workingPathSubfolder);
 
-            files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
+            files = FileMatcher.Default.GetFiles(workingPath, offendingPattern).Item1;
         }
 
         [Fact]
@@ -1310,7 +1310,7 @@ namespace Microsoft.Build.UnitTests
 
             Directory.CreateDirectory(workingPath);
             File.WriteAllText(fileName, "Hello there.");
-            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
+            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern).Item1;
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
@@ -1330,7 +1330,7 @@ namespace Microsoft.Build.UnitTests
             Directory.CreateDirectory(workingPath);
             Directory.CreateDirectory(workingPathSubdir);
             File.AppendAllText(workingPathSubdirBing, "y");
-            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
+            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern).Item1;
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
@@ -1355,15 +1355,15 @@ namespace Microsoft.Build.UnitTests
 
                     var testProject = env.CreateTestProjectWithFiles(string.Empty, new[] {"a.cs", "b.cs", "c.cs"});
 
-                    var files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs");
+                    var files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs").Item1;
                     Array.Sort(files);
                     Assert.Equal(new []{"a.cs", "b.cs", "c.cs"}, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> {"a.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs"}).Item1;
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> {"a.cs", "c.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs", "c.cs"}).Item1;
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs" }, files);
                 }
@@ -2398,7 +2398,7 @@ namespace Microsoft.Build.UnitTests
                 String.Empty, /* we don't need project directory as we use mock filesystem */
                 filespec,
                 excludeFilespecs?.ToList()
-            );
+            ).Item1;
 
             Func<string[], string[]> normalizeAllFunc = (paths => normalizeAllPaths ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
             Func<string[], string[]> normalizeMatching = (paths => normalizeExpectedMatchingFiles ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);

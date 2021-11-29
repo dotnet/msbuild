@@ -315,6 +315,57 @@ namespace Microsoft.Build.UnitTests
             buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
             buildResult["TestTarget"].Exception?.Message.ShouldContain("this resulted in an attempted drive enumeration");
         }
+
+        /// <summary>
+        /// Logs warning when encountering wildcard drive enumeration during task item creation.
+        /// </summary>
+        [Fact]
+        public void CreateItemEvaluationResultingInLogWildcardDriveEnumeration()
+        {
+            using var env = TestEnvironment.Create(_testOutput);
+            env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "0");
+
+            string content =
+                @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Target Name =""TestTarget"" Returns=""@(Text)"">
+                      <CreateItem Include=""\**\*.txt"">
+                        <Output TaskParameter=""Include"" ItemName=""Text""/>
+                      </CreateItem>
+                    </Target>
+                  </Project>
+                ";
+
+            var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
+            var p = ProjectInstance.FromFile(testFile.Path, new ProjectOptions());
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildRequestData data = new BuildRequestData(p, new[] { "TestTarget" });
+            BuildParameters parameters = new BuildParameters();
+            BuildResult buildResult = buildManager.Build(parameters, data); // Issue: Results in unauthorized access exception
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+        }
+
+        /// <summary>
+        /// Logs warning when encountering wildcard drive enumeration during task item creation.
+        /// </summary>
+        [Fact]
+        public void WildcardDriveEnumerationTaskItemLogsWarning()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "0");
+                CreateItem t = new CreateItem();
+                MockEngine engine = new MockEngine();
+
+                t.BuildEngine = engine;
+                t.Include = new ITaskItem[] { new TaskItem(@"\**") }; // Issue: Results in unauthorized access exception
+
+                bool succeeded = t.Execute();
+
+                Assert.True(succeeded);
+                Assert.Equal(1, engine.Warnings);
+            }
+        }
     }
 }
 

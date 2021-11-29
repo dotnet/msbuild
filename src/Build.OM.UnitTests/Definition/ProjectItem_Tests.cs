@@ -757,6 +757,34 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
+        /// Project getter that renames an item to a wildcard that results in drive enumeration exception.
+        /// </summary>
+        [Fact]
+        public void ProjectGetterResultingInDriveEnumerationException()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
+                Project project = new Project();
+                Assert.Throws<InvalidProjectFileException>(() => { ProjectItem item = project.AddItem("i", "\\**\\*.log")[0]; });
+            }
+        }
+
+        /// <summary>
+        /// Project getter that renames an item to a wildcard that results in logging a warning for attempted drive enumeration.
+        /// </summary>
+        [Fact]
+        public void ProjectGetterResultingInDriveEnumerationWarning()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "0");
+                Project project = new Project();
+                ProjectItem item = project.AddItem("i", "\\**\\*.log")[0];
+            }
+        }
+
+        /// <summary>
         /// Throws exception when an included wildcard evaluates to a drive enumeration.
         /// </summary>
         [Fact]
@@ -795,6 +823,35 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
                 Should.Throw<InvalidProjectFileException>(() => { ProjectInstance.FromFile(testFile.Path, new ProjectOptions()); });
+            }
+        }
+
+        /// <summary>
+        /// Logs warning when an imported wildcard evaluates to a drive enumeration.
+        /// </summary>
+        [Fact]
+        public void ImportEvaluationResultingInLogDriveEnumeration()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "0");
+                string content =
+                @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Import Project=""$(Microsoft_WindowsAzure_EngSys)\**\*"" />
+                  </Project>
+                ";
+
+                var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
+                ProjectOptions options = new ProjectOptions();
+                options.ProjectCollection = new ProjectCollection();
+
+                MockLogger collectionLogger = new MockLogger();
+                options.ProjectCollection.RegisterLogger(collectionLogger);
+
+                ProjectInstance.FromFile(testFile.Path, options); // Issue: Unauthorized access exception
+
+                Assert.Equal(1, collectionLogger.WarningCount);
+                options.ProjectCollection.UnregisterAllLoggers();
             }
         }
 

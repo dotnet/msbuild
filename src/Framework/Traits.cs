@@ -43,7 +43,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
         public readonly bool LogExpandedWildcards = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGEXPANDEDWILDCARDS"));
-        public readonly bool ThrowOnWildcardDriveEnumeration = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration"));
+        public readonly bool ThrowOnWildcardDriveEnumeration = Environment.GetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration") == "1";
 
         /// <summary>
         /// Cache file existence for the entire process

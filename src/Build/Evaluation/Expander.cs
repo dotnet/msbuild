@@ -2244,10 +2244,12 @@ namespace Microsoft.Build.Evaluation
                             string[] fileListEscaped = null;
                             try
                             {
-                                fileListEscaped = EngineFileUtilities.GetFileListEscaped(
+                                (fileListEscaped, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListEscaped(
                                      item.ProjectDirectory,
                                      item.EvaluatedIncludeEscaped,
                                      forceEvaluate: true);
+
+                                // TODO: Log warning if return value is LogDriveEnumerationWildcard
                             }
                             catch (DriveEnumerationWildcardException ex)
                             {

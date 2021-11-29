@@ -22,8 +22,9 @@ namespace Microsoft.Build.Utilities
         /// Expand wildcards in the item list.
         /// </summary>
         /// <param name="expand"></param>
+        /// <param name="log"></param>
         /// <returns>Array of items expanded</returns>
-        public static ITaskItem[] ExpandWildcards(ITaskItem[] expand)
+        public static ITaskItem[] ExpandWildcards(ITaskItem[] expand, TaskLoggingHelper log)
         {
             if (expand == null)
             {
@@ -50,7 +51,11 @@ namespace Microsoft.Build.Utilities
                         }
                         else
                         {
-                            files = FileMatcher.Default.GetFiles(null, item.ItemSpec);
+                            (files, FileMatcher.SearchAction action) = FileMatcher.Default.GetFiles(null, item.ItemSpec);
+                            if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
+                            {
+                                log.LogWarning($"Drive enumeration was attempted while assisting with tracking dependencies during wildcard expansion, which relied on the item spec {item.ItemSpec}.");
+                            }
                         }
 
                         foreach (string file in files)

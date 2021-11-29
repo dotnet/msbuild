@@ -1942,7 +1942,7 @@ namespace Microsoft.Build.Shared
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The array of files.</returns>
-        internal string[] GetFiles
+        internal (string[], SearchAction) GetFiles
             (
             string projectDirectoryUnescaped,
             string filespecUnescaped,
@@ -1952,7 +1952,7 @@ namespace Microsoft.Build.Shared
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
             {
-                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), SearchAction.None);
             }
 
             if (_cachedGlobExpansions == null)
@@ -1966,6 +1966,8 @@ namespace Microsoft.Build.Shared
             var enumerationKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
             IReadOnlyList<string> files;
+            string[] getFilesList;
+            SearchAction action = SearchAction.None;
             if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
             {
                 // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
@@ -1974,14 +1976,14 @@ namespace Microsoft.Build.Shared
                 {
                     if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
                     {
-                        files =
-                            _cachedGlobExpansions.GetOrAdd(
-                                enumerationKey,
-                                (_) =>
-                                    GetFilesImplementation(
+                        (getFilesList, action) = GetFilesImplementation(
                                         projectDirectoryUnescaped,
                                         filespecUnescaped,
-                                        excludeSpecsUnescaped));
+                                        excludeSpecsUnescaped);
+
+                        files = _cachedGlobExpansions.GetOrAdd(
+                                enumerationKey,
+                                getFilesList);
                     }
                 }
             }
@@ -1989,7 +1991,7 @@ namespace Microsoft.Build.Shared
             // Copy the file enumerations to prevent outside modifications of the cache (e.g. sorting, escaping) and to maintain the original method contract that a new array is created on each call.
             var filesToReturn = files.ToArray();
 
-            return filesToReturn;
+            return (filesToReturn, action);
         }
 
         private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, List<string> excludes)
@@ -2067,12 +2069,14 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        enum SearchAction
+        public enum SearchAction
         {
+            None,
             RunSearch,
             ReturnFileSpec,
             ReturnEmptyList,
-            ReturnDriveEnumerationWildcard
+            ReturnThrowOnDriveEnumerationWildcard,
+            ReturnLogDriveEnumerationWildcard
         }
 
         private SearchAction GetFileSearchData(
@@ -2137,18 +2141,23 @@ namespace Microsoft.Build.Shared
             }
 
             /*
-             * If the fixed directory part contains the drive or simply '/', and the drive enumeration wildcard is set, then an
-             * exception should be thrown.
+             * If the fixed directory part contains the drive or simply '/', and the drive enumeration wildcard is set, then
+             * this should either be logged or an exception should be thrown.
              */
             int fixedDirectoryPartLength = fixedDirectoryPart.Length;
+            bool logDriveEnumerationWildcard = false;
             if (fixedDirectoryPartLength > 0 && wildcardDirectoryPart.Length >= 2)
             {
                 if (FileUtilities.IsAnySlash(fixedDirectoryPart[fixedDirectoryPartLength - 1]) && // ex: /**
                     wildcardDirectoryPart[0] == '*' &&
-                    wildcardDirectoryPart[1] == '*' &&
-                    Traits.Instance.ThrowOnWildcardDriveEnumeration)
+                    wildcardDirectoryPart[1] == '*')
                 {
-                    return SearchAction.ReturnDriveEnumerationWildcard;
+                    if (Traits.Instance.ThrowOnWildcardDriveEnumeration)
+                    {
+                        return SearchAction.ReturnThrowOnDriveEnumerationWildcard;
+                    }
+
+                    logDriveEnumerationWildcard = true;
                 }
             }
 
@@ -2199,6 +2208,11 @@ namespace Microsoft.Build.Shared
             result.SearchData = searchData;
             result.BaseDirectory = Normalize(fixedDirectoryPart);
             result.RemainingWildcardDirectory = Normalize(wildcardDirectoryPart);
+
+            if (logDriveEnumerationWildcard)
+            {
+                return SearchAction.ReturnLogDriveEnumerationWildcard;
+            }
 
             return SearchAction.RunSearch;
         }
@@ -2336,7 +2350,7 @@ namespace Microsoft.Build.Shared
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The array of files.</returns>
-        private string[] GetFilesImplementation(
+        private (string[], SearchAction) GetFilesImplementation(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string> excludeSpecsUnescaped)
@@ -2351,17 +2365,17 @@ namespace Microsoft.Build.Shared
 
             if (action == SearchAction.ReturnEmptyList)
             {
-                return Array.Empty<string>();
+                return (Array.Empty<string>(), action);
             }
             else if (action == SearchAction.ReturnFileSpec)
             {
-                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), action);
             }
-            else if (action == SearchAction.ReturnDriveEnumerationWildcard)
+            else if (action == SearchAction.ReturnThrowOnDriveEnumerationWildcard)
             {
                 throw new DriveEnumerationWildcardException(projectDirectoryUnescaped, filespecUnescaped);
             }
-            else if (action != SearchAction.RunSearch)
+            else if ((action != SearchAction.RunSearch) && (action != SearchAction.ReturnLogDriveEnumerationWildcard))
             {
                 // This means the enum value wasn't valid (or a new one was added without updating code correctly)
                 throw new NotSupportedException(action.ToString());
@@ -2552,12 +2566,17 @@ namespace Microsoft.Build.Shared
             // Catch exceptions that are thrown inside the Parallel.ForEach
             catch (AggregateException ex) when (InnerExceptionsAreAllIoRelated(ex))
             {
-                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+                // Flatten to get exceptions than are thrown inside a nested Parallel.ForEach
+                if (ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException))
+                {
+                    return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), action);
+                }
+                throw;
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
                 // Assume it's not meant to be a path
-                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), action);
             }
 
             /*
@@ -2567,7 +2586,7 @@ namespace Microsoft.Build.Shared
                 ? listOfFiles.SelectMany(list => list).Where(f => !resultsToExclude.Contains(f)).ToArray()
                 : listOfFiles.SelectMany(list => list).ToArray();
 
-            return files;
+            return (files, action);
         }
 
         private bool InnerExceptionsAreAllIoRelated(AggregateException ex)

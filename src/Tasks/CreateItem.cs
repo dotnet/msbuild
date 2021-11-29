@@ -61,8 +61,19 @@ namespace Microsoft.Build.Tasks
             }
 
             // Expand wild cards.
-            Include = ExpandWildcards(Include);
-            Exclude = ExpandWildcards(Exclude);
+            (Include, FileMatcher.SearchAction includeAction, string includeFileSpec) = ExpandWildcards(Include);
+            (Exclude, FileMatcher.SearchAction excludeAction, string excludeFileSpec) = ExpandWildcards(Exclude);
+
+            // Log potential drive enumeration glob anomalies when applicable.
+            if (includeAction == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
+            {
+                Log.LogWarning($"Drive enumeration was detected during wildcard expansion in CreateItem for Include attribute with the filespec {includeFileSpec}");
+            }
+
+            if (excludeAction == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
+            {
+                Log.LogWarning($"Drive enumeration was detected during wildcard expansion in CreateItem for Exclude attribute with the filespec {excludeFileSpec}");
+            }
 
             // Simple case:  no additional attribute to add and no Exclude.  In this case the
             // ouptuts are simply the inputs.
@@ -131,14 +142,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Expand wildcards in the item list.
         /// </summary>
-        private static ITaskItem[] ExpandWildcards(ITaskItem[] expand)
+        private static (ITaskItem[], FileMatcher.SearchAction, string) ExpandWildcards(ITaskItem[] expand)
         {
             if (expand == null)
             {
-                return null;
+                return (null, FileMatcher.SearchAction.None, string.Empty);
             }
             else
             {
+                FileMatcher.SearchAction logDriveEnumerationAction = FileMatcher.SearchAction.None;
+                string logDriveEnumerationFileSpec = string.Empty;
                 var expanded = new List<ITaskItem>();
                 foreach (ITaskItem i in expand)
                 {
@@ -146,7 +159,13 @@ namespace Microsoft.Build.Tasks
                     {
                         try
                         {
-                            string[] files = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                            (string[] files, FileMatcher.SearchAction action) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                            if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
+                            {
+                                logDriveEnumerationAction = action;
+                                logDriveEnumerationFileSpec = i.ItemSpec;
+                            }
+
                             foreach (string file in files)
                             {
                                 TaskItem newItem = new TaskItem(i) { ItemSpec = file };
@@ -174,7 +193,7 @@ namespace Microsoft.Build.Tasks
                         expanded.Add(i);
                     }
                 }
-                return expanded.ToArray();
+                return (expanded.ToArray(), logDriveEnumerationAction, logDriveEnumerationFileSpec);
             }
         }
 

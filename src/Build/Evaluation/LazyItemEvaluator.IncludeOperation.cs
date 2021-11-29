@@ -116,7 +116,11 @@ namespace Microsoft.Build.Evaluation
                             {
                                 using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                                 {
-                                    includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob, excludePatternsForGlobs, fileMatcher: FileMatcher);
+                                    (includeSplitFilesEscaped, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob, excludePatternsForGlobs, fileMatcher: FileMatcher);
+                                    if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
+                                    {
+                                        _lazyEvaluator._loggingContext.LogWarning("InvalidAttributeValue", EscapingUtilities.UnescapeAll(glob), XMakeAttributes.include, XMakeElements.itemGroup);
+                                    }
                                 }
 
                                 if (MSBuildEventSource.Log.IsEnabled())

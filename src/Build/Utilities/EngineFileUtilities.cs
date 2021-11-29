@@ -48,7 +48,7 @@ namespace Microsoft.Build.Internal
         /// <param name="directoryEscaped">The directory to evaluate, escaped.</param>
         /// <param name="filespecEscaped">The filespec to evaluate, escaped.</param>
         /// <returns>Array of file paths, unescaped.</returns>
-        internal static string[] GetFileListUnescaped
+        internal static (string[], FileMatcher.SearchAction) GetFileListUnescaped
             (
             string directoryEscaped,
             string filespecEscaped
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Internal
         /// <param name="forceEvaluate">Whether to force file glob expansion when eager expansion is turned off</param>
         /// <param name="fileMatcher"></param>
         /// <returns>Array of file paths, escaped.</returns>
-        internal static string[] GetFileListEscaped
+        internal static (string[], FileMatcher.SearchAction) GetFileListEscaped
             (
             string directoryEscaped,
             string filespecEscaped,
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Internal
         /// <param name="excludeSpecsEscaped">The exclude specification, escaped.</param>
         /// <param name="fileMatcher"></param>
         /// <returns>Array of file paths.</returns>
-        private static string[] GetFileList
+        private static (string[], FileMatcher.SearchAction) GetFileList
             (
             string directoryEscaped,
             string filespecEscaped,
@@ -129,6 +129,7 @@ namespace Microsoft.Build.Internal
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
 
             string[] fileList;
+            FileMatcher.SearchAction action = FileMatcher.SearchAction.None;
 
             if (!FilespecHasWildcards(filespecEscaped) ||
                 FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards))
@@ -153,7 +154,7 @@ namespace Microsoft.Build.Internal
                 // as a relative path, we will get back a bunch of relative paths.
                 // If the filespec started out as an absolute path, we will get
                 // back a bunch of absolute paths.
-                fileList = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                (fileList, action) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
                 ErrorUtilities.VerifyThrow(fileList != null, "We must have a list of files here, even if it's empty.");
 
@@ -176,7 +177,7 @@ namespace Microsoft.Build.Internal
                 }
             }
 
-            return fileList;
+            return (fileList, action);
         }
 
         private static bool FilespecMatchesLazyWildcard(string filespecEscaped, bool forceEvaluateWildCards)

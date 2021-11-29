@@ -431,10 +431,15 @@ namespace Microsoft.Build.BackEnd
                         // The expression is not of the form "@(X)". Treat as string
 
                         // Pass the non wildcard expanded excludes here to fix https://github.com/Microsoft/msbuild/issues/2621
-                        string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(
+                        (string[] includeSplitFiles, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListEscaped(
                             Project.Directory,
                             includeSplit,
                             excludes);
+
+                        if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
+                        {
+                            LoggingContext.LogWarning($"Drive enumeration was detected during wildcard expansion, for the Include attribute, which relied on the file spec {includeSplit}.");
+                        }
 
                         foreach (string includeSplitFile in includeSplitFiles)
                         {
@@ -462,7 +467,11 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
+                    (string[] excludeSplitFiles, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
+                    if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
+                    {
+                        LoggingContext.LogWarning($"Drive enumeration was detected during wildcard expansion for Exclude attribute with the filespec {excludeSplit}.");
+                    }
 
                     foreach (string excludeSplitFile in excludeSplitFiles)
                     {
@@ -554,7 +563,11 @@ namespace Microsoft.Build.BackEnd
                     // Don't unescape wildcards just yet - if there were any escaped, the caller wants to treat them
                     // as literals. Everything else is safe to unescape at this point, since we're only matching
                     // against the file system.
-                    string[] fileList = EngineFileUtilities.GetFileListEscaped(Project.Directory, piece);
+                    (string[] fileList, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListEscaped(Project.Directory, piece);
+                    if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
+                    {
+                        LoggingContext.LogWarning($"Drive enumeration was detected during wildcard expansion, for the Exclude attribute, which relied on the file spec {piece}.");
+                    }
 
                     foreach (string file in fileList)
                     {
