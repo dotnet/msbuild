@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using System.Resources;
 
 using Microsoft.Build.Framework;
@@ -152,6 +153,21 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <returns>true, if successful</returns>
         public abstract bool Execute();
+
+        protected string MakePath(string path)
+        {
+            return MakePath(NativeMethodsShared.CurrentThreadWorkingDirectory, path);
+        }
+
+        protected string MakePath(string baseDirectory, string path)
+        {
+            return Path.Combine(baseDirectory, path);
+        }
+
+        protected string GetBasePath()
+        {
+            return NativeMethodsShared.CurrentThreadWorkingDirectory;
+        }
 
         #endregion
     }

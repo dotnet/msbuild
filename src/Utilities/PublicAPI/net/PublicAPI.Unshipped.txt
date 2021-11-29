@@ -1,0 +1,3 @@
+Microsoft.Build.Utilities.Task.GetBasePath() -> string
+Microsoft.Build.Utilities.Task.MakePath(string baseDirectory, string path) -> string
+Microsoft.Build.Utilities.Task.MakePath(string path) -> string

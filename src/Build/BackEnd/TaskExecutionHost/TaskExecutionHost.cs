@@ -237,6 +237,8 @@ namespace Microsoft.Build.BackEnd
             IsOutOfProc = isOutOfProc;
         }
 
+        private object _locker = new object();
+
         /// <summary>
         /// Ask the task host to find its task in the registry and get it ready for initializing the batch
         /// </summary>
@@ -245,7 +247,10 @@ namespace Microsoft.Build.BackEnd
         {
             if (_taskFactoryWrapper == null)
             {
-                _taskFactoryWrapper = FindTaskInRegistry(taskIdentityParameters);
+                lock (_locker)
+                {
+                    _taskFactoryWrapper = FindTaskInRegistry(taskIdentityParameters);
+                }
             }
 
             if (_taskFactoryWrapper == null)

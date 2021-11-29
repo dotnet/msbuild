@@ -83,7 +83,8 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(File.ItemSpec));
+                    var spec = MakePath(File.ItemSpec);
+                    var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(spec));
                     if (Overwrite)
                     {
                         Directory.CreateDirectory(directoryPath);
@@ -95,15 +96,15 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
                             try
                             {
-                                if (FileUtilities.FileExistsNoThrow(File.ItemSpec))
+                                if (FileUtilities.FileExistsNoThrow(spec))
                                 {
-                                    string existingContents = System.IO.File.ReadAllText(File.ItemSpec);
+                                    string existingContents = System.IO.File.ReadAllText(spec);
                                     if (existingContents.Length == buffer.Length)
                                     {
                                         if (existingContents.Equals(contentsAsString))
                                         {
                                             Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
-                                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, true);
+                                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(spec, true);
                                             return true;
                                         }
                                     }
@@ -116,7 +117,7 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
 
-                        System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
+                        System.IO.File.WriteAllText(spec, contentsAsString, encoding);
                     }
                     else
                     {

@@ -69,6 +69,8 @@ namespace Microsoft.Build.Tasks
         private static string RemovingReadOnlyAttribute;
         private static string SymbolicLinkComment;
 
+        private string _currentDirectory;
+
         #region Properties
 
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
@@ -300,7 +302,7 @@ namespace Microsoft.Build.Tasks
                 string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
 
-                File.Copy(sourceFileState.Name, destinationFileState.Name, true);
+                File.Copy(MakePath(_currentDirectory, sourceFileState.Name), MakePath(_currentDirectory, destinationFileState.Name), true);
             }
             
             // Files were successfully copied or linked. Those are equivalent here.
@@ -919,6 +921,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
+            _currentDirectory = GetBasePath();
             return Execute(CopyFileWithLogging, s_parallelism);
         }
 
