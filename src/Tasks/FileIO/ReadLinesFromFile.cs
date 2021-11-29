@@ -7,6 +7,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using System.IO;
 
 namespace Microsoft.Build.Tasks
 {

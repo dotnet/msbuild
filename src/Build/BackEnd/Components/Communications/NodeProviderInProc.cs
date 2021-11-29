@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
+using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -108,8 +109,11 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                int maxNodeCount = _componentHost.BuildParameters.MultiThreaded ? _componentHost.BuildParameters.MaxNodeCount : 1;
-                return maxNodeCount - _nodeContexts.Count;
+                lock (_nodeContexts)
+                {
+                    int maxNodeCount = _componentHost.BuildParameters.MultiThreaded ? _componentHost.BuildParameters.MaxNodeCount : 1;
+                    return maxNodeCount - _nodeContexts.Count;
+                }
             }
         }
 
@@ -145,9 +149,12 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
 
-            if (_nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext))
+            lock (_nodeContexts)
             {
-                nodeContext._inProcNodeEndpoint.SendData(packet);
+                if (_nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext))
+                {
+                    nodeContext._inProcNodeEndpoint.SendData(packet);
+                }
             }
         }
 
@@ -157,9 +164,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if the nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            foreach (NodeContext nodeContext in _nodeContexts.Values)
+            lock (_nodeContexts)
             {
-                nodeContext._inProcNodeEndpoint.SendData(new NodeBuildComplete(enableReuse));
+                foreach (NodeContext nodeContext in _nodeContexts.Values)
+                {
+                    nodeContext._inProcNodeEndpoint.SendData(new NodeBuildComplete(enableReuse));
+                }
             }
         }
 
@@ -206,8 +216,14 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            bool nodeExists = _nodeContexts.ContainsKey(nodeId);
+            lock (_nodeContexts)
+            {
+                nodeExists = _nodeContexts.ContainsKey(nodeId);
+            }
+
             // If it doesn't already exist, create it.
-            if (!_nodeContexts.ContainsKey(nodeId))
+            if (!nodeExists)
             {
                 if (!InstantiateNode(nodeId, factory))
                 {
@@ -215,7 +231,10 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            _nodeContexts[nodeId]._inProcNodeEndpoint.SendData(configuration);
+            lock (_nodeContexts)
+            {
+                _nodeContexts[nodeId]._inProcNodeEndpoint.SendData(configuration);
+            }
 
             return true;
         }
@@ -258,35 +277,38 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to route.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            if (!_nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext))
+            lock (_nodeContexts)
             {
-                return;
-            }
-
-            INodePacketFactory factory = nodeContext._packetFactory;
-
-            // If this was a shutdown packet, we are done with the node.  Release all context associated with it.  Do this here, rather
-            // than after we route the packet, because otherwise callbacks to the NodeManager to determine if we have available nodes
-            // will report that the in-proc node is still in use when it has actually shut down.
-            if (packet.Type == NodePacketType.NodeShutdown)
-            {
-                // Release the operating environment semaphore if we were holding it.
-                if ((_componentHost.BuildParameters.SaveOperatingEnvironment) &&
-                    (InProcNodeOwningOperatingEnvironment != null))
+                if (!_nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext))
                 {
-                    InProcNodeOwningOperatingEnvironment.Release();
-                    InProcNodeOwningOperatingEnvironment.Dispose();
-                    InProcNodeOwningOperatingEnvironment = null;
+                    return;
                 }
 
-                if (!_componentHost.BuildParameters.EnableNodeReuse)
-                {
-                    _nodeContexts.Remove(nodeId);
-                }
-            }
+                INodePacketFactory factory = nodeContext._packetFactory;
 
-            // Route the packet back to the NodeManager.
-            factory.RoutePacket(nodeId, packet);
+                // If this was a shutdown packet, we are done with the node.  Release all context associated with it.  Do this here, rather
+                // than after we route the packet, because otherwise callbacks to the NodeManager to determine if we have available nodes
+                // will report that the in-proc node is still in use when it has actually shut down.
+                if (packet.Type == NodePacketType.NodeShutdown)
+                {
+                    // Release the operating environment semaphore if we were holding it.
+                    if ((_componentHost.BuildParameters.SaveOperatingEnvironment) &&
+                        (InProcNodeOwningOperatingEnvironment != null))
+                    {
+                        InProcNodeOwningOperatingEnvironment.Release();
+                        InProcNodeOwningOperatingEnvironment.Dispose();
+                        InProcNodeOwningOperatingEnvironment = null;
+                    }
+
+                    if (!_componentHost.BuildParameters.EnableNodeReuse)
+                    {
+                        _nodeContexts.Remove(nodeId);
+                    }
+                }
+
+                // Route the packet back to the NodeManager.
+                factory.RoutePacket(nodeId, packet);
+            }
         }
 
         #endregion
@@ -321,7 +343,10 @@ namespace Microsoft.Build.BackEnd
             NodeEndpointInProc.EndpointPair endpoints = NodeEndpointInProc.CreateInProcEndpoints(NodeEndpointInProc.EndpointMode.Synchronous, _componentHost, nodeId);
 
             NodeContext nodeContext = new();
-            _nodeContexts[nodeId] = nodeContext;
+            lock (_nodeContexts)
+            {
+                _nodeContexts[nodeId] = nodeContext;
+            }
 
             nodeContext._inProcNodeEndpoint = endpoints.ManagerEndpoint;
             nodeContext._inProcNodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(InProcNodeEndpoint_OnLinkStatusChanged);
@@ -329,7 +354,7 @@ namespace Microsoft.Build.BackEnd
             nodeContext._packetFactory = factory;
             nodeContext._inProcNode = new InProcNode(_componentHost, endpoints.NodeEndpoint, nodeId);
 #if FEATURE_THREAD_CULTURE
-            nodeContext._inProcNodeThread = new Thread(() => InProcNodeThreadProc(nodeContext._inProcNode), BuildParameters.ThreadStackSize);
+            nodeContext._inProcNodeThread = new Thread(() => InProcNodeThreadProc(nodeId, nodeContext._inProcNode), BuildParameters.ThreadStackSize);
 #else
                 CultureInfo culture = _componentHost.BuildParameters.Culture;
                 CultureInfo uiCulture = _componentHost.BuildParameters.UICulture;
@@ -337,7 +362,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     CultureInfo.CurrentCulture = culture;
                     CultureInfo.CurrentUICulture = uiCulture;
-                    InProcNodeThreadProc(nodeContext._inProcNode);
+                    InProcNodeThreadProc(nodeId, nodeContext._inProcNode);
                 });
 #endif
             nodeContext._inProcNodeThread.Name = String.Format(CultureInfo.CurrentCulture, "In-proc Node ({0})", _componentHost.Name);
@@ -359,7 +384,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Thread proc which runs the in-proc node.
         /// </summary>
-        private void InProcNodeThreadProc(INode inProcNode)
+        private void InProcNodeThreadProc(int nodeId, INode inProcNode)
         {
             Exception e;
             NodeEngineShutdownReason reason = inProcNode.Run(out e);
@@ -376,12 +401,15 @@ namespace Microsoft.Build.BackEnd
             if (status == LinkStatus.Active)
             {
                 bool foundEndpoint = false;
-                foreach (NodeContext nodeContext in _nodeContexts.Values)
+                lock (_nodeContexts)
                 {
-                    if (endpoint == nodeContext._inProcNodeEndpoint)
+                    foreach (NodeContext nodeContext in _nodeContexts.Values)
                     {
-                        nodeContext._endpointConnectedEvent.Set();
-                        foundEndpoint = true;
+                        if (endpoint == nodeContext._inProcNodeEndpoint)
+                        {
+                            nodeContext._endpointConnectedEvent.Set();
+                            foundEndpoint = true;
+                        }
                     }
                 }
 

@@ -42,6 +42,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private IDictionary<string, TaskPropertyInfo> _propertyInfoCache;
 
+        private object _locker = new object();
+
         /// <summary>
         /// The name of the task this factory can create.
         /// </summary>
@@ -260,12 +262,18 @@ namespace Microsoft.Build.Execution
 
                     try
                     {
-                        if (_propertyInfoCache == null)
+                        lock (_locker)
                         {
-                            _propertyInfoCache = new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
-                        }
+                            if (_propertyInfoCache == null)
+                            {
+                                _propertyInfoCache = new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
+                            }
 
-                        _propertyInfoCache.Add(propertyInfo.Name, propertyInfo);
+                            if (!_propertyInfoCache.ContainsKey(propertyInfo.Name))
+                            {
+                                _propertyInfoCache.Add(propertyInfo.Name, propertyInfo);
+                            }
+                        }
                     }
                     catch (ArgumentException)
                     {

@@ -355,7 +355,7 @@ namespace Microsoft.Build.BackEnd
                         // On the other hand, if this is not the inproc node, we want to make sure that our copy of this configuration
                         // knows that its results are no longer on this node.  Since we don't know enough here to know where the
                         // results are going, we satisfy ourselves with marking that they are simply "not here".
-                        if (_componentHost.BuildParameters.NodeId != Scheduler.InProcNodeId)
+                        if (!_componentHost.BuildParameters.MultiThreaded && _componentHost.BuildParameters.NodeId != Scheduler.InProcNodeId)
                         {
                             config.ResultsNodeId = Scheduler.ResultsTransferredId;
                         }
