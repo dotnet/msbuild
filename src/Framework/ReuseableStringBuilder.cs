@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-#define ASSERT_BALANCE
+
+//#define ASSERT_BALANCE
 
 using System;
 using System.Collections.Generic;
@@ -221,7 +222,7 @@ namespace Microsoft.Build.Framework
             /// </summary>
             private static StringBuilder s_sharedBuilder;
 
-#if DEBUG
+#if DEBUG && ASSERT_BALANCE
             /// <summary>
             /// Balance between calling Get and Release.
             /// Shall be always 0 as Get and 1 at Release.
