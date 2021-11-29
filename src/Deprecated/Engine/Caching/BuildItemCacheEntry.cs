@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Microsoft.Build.BuildEngine
@@ -100,7 +100,7 @@ namespace Microsoft.Build.BuildEngine
                     return false;
                 }
 
-                ArrayList otherEntryMetadataNames = new ArrayList(otherEntry.BuildItems[i].GetAllCustomMetadataNames());
+                HashSet<string> otherEntryMetadataNames = new HashSet<string>(otherEntry.BuildItems[i].GetAllCustomMetadataNames(), StringComparer.Ordinal);
 
                 foreach (string metadataName in this.BuildItems[i].GetAllCustomMetadataNames())
                 {
