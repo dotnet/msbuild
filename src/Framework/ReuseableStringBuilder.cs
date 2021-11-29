@@ -114,16 +114,6 @@ namespace Microsoft.Build.Framework
             return this;
         }
 
-        /// <summary>
-        /// Appends a specified number of copies of the string representation of a Unicode character to this instance.
-        /// </summary>
-        internal ReuseableStringBuilder Append(char value, int repeatCount)
-        {
-            LazyPrepare();
-            _borrowedBuilder.Append(value, repeatCount);
-            return this;
-        }
-
         public ReuseableStringBuilder AppendSeparated(char separator, ICollection<string> strings)
         {
             LazyPrepare();
