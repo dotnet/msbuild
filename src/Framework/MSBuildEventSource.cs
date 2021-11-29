@@ -503,7 +503,7 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(70, Keywords = Keywords.All)]
-        public void ReusableStringBuilderFactoryReplace(int oldHash, int newHash)
+        public void ReusableStringBuilderFactoryUnbalanced(int oldHash, int newHash)
         {
             WriteEvent(70, oldHash, newHash);
         }
