@@ -545,22 +545,39 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="nodeBuildEventContext">The event context of the node which is spawning this project.</param>
         /// <param name="submissionId">The id of the submission.</param>
-        /// <param name="projectInstanceId">Id of the project instance which is being started</param>
+        /// <param name="configurationId">The id of the project configuration which is about to start</param>
         /// <param name="parentBuildEventContext">BuildEventContext of the project who is requesting "projectFile" to build</param>
         /// <param name="projectFile">Project file to build</param>
         /// <param name="targetNames">Target names to build</param>
         /// <param name="properties">Initial property list</param>
         /// <param name="items">Initial items list</param>
         /// <param name="evaluationId">EvaluationId of the project instance</param>
+        /// <param name="projectContextId">The project context id</param>
         /// <returns>The build event context for the project.</returns>
         /// <exception cref="InternalErrorException">parentBuildEventContext is null</exception>
         /// <exception cref="InternalErrorException">projectBuildEventContext is null</exception>
-        public BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectInstanceId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items, int evaluationId = BuildEventContext.InvalidEvaluationId)
+        public BuildEventContext LogProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId)
         {
             lock (_lockObject)
             {
                 ErrorUtilities.VerifyThrow(nodeBuildEventContext != null, "Need a nodeBuildEventContext");
-                BuildEventContext projectBuildEventContext = new BuildEventContext(submissionId, nodeBuildEventContext.NodeId, evaluationId, projectInstanceId, NextProjectId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+
+                if (projectContextId == BuildEventContext.InvalidProjectContextId)
+                {
+                    projectContextId = NextProjectId;
+                }
+
+                BuildEventContext projectBuildEventContext = new BuildEventContext(submissionId, nodeBuildEventContext.NodeId, evaluationId, configurationId, projectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
 
                 // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
                 if (_projectFileMap.ContainsKey(projectBuildEventContext.ProjectContextId))
@@ -572,8 +589,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 ErrorUtilities.VerifyThrow(parentBuildEventContext != null, "Need a parentBuildEventContext");
 
-                ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectInstanceId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
-                var buildRequestConfiguration = _configCache.Value[projectInstanceId];
+                ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(configurationId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
+                var buildRequestConfiguration = _configCache.Value[configurationId];
 
                 // Always log GlobalProperties on ProjectStarted
                 // See https://github.com/dotnet/msbuild/issues/6341 for details
@@ -581,7 +598,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 var buildEvent = new ProjectStartedEventArgs
                     (
-                        projectInstanceId,
+                        configurationId,
                         message: null,
                         helpKeyword: null,
                         projectFile,

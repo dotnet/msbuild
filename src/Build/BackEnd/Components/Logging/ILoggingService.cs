@@ -477,15 +477,26 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="nodeBuildEventContext">The logging context of the node which is building this project.</param>
         /// <param name="submissionId">The id of the build submission.</param>
-        /// <param name="projectId">The id of the project instance which is about to start</param>
+        /// <param name="configurationId">The id of the project configuration which is about to start</param>
         /// <param name="parentBuildEventContext">The build context of the parent project which asked this project to build</param>
         /// <param name="projectFile">The project file path of the project about to be built</param>
         /// <param name="targetNames">The entrypoint target names for this project</param>
         /// <param name="properties">The initial properties of the project</param>
         /// <param name="items">The initial items of the project</param>
         /// <param name="evaluationId">EvaluationId of the project instance</param>
+        /// <param name="projectContextId">The project context id</param>
         /// <returns>The BuildEventContext to use for this project.</returns>
-        BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items, int evaluationId = BuildEventContext.InvalidEvaluationId);
+        BuildEventContext LogProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId);
 
         /// <summary>
         /// Log that the project has finished
