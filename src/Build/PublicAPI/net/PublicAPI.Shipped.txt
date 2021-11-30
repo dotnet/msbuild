@@ -263,6 +263,9 @@ Microsoft.Build.Construction.ProjectImportElement.ProjectLocation.get -> Microso
 Microsoft.Build.Construction.ProjectImportElement.Sdk.get -> string
 Microsoft.Build.Construction.ProjectImportElement.Sdk.set -> void
 Microsoft.Build.Construction.ProjectImportElement.SdkLocation.get -> Microsoft.Build.Construction.ElementLocation
+Microsoft.Build.Construction.ProjectImportElement.SdkOptions.get -> string
+Microsoft.Build.Construction.ProjectImportElement.SdkOptions.set -> void
+Microsoft.Build.Construction.ProjectImportElement.SdkOptionsLocation.get -> Microsoft.Build.Construction.ElementLocation
 Microsoft.Build.Construction.ProjectImportElement.Version.get -> string
 Microsoft.Build.Construction.ProjectImportElement.Version.set -> void
 Microsoft.Build.Construction.ProjectImportGroupElement

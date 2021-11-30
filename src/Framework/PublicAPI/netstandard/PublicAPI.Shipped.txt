@@ -434,6 +434,8 @@ Microsoft.Build.Framework.SdkResolver
 Microsoft.Build.Framework.SdkResolver.SdkResolver() -> void
 Microsoft.Build.Framework.SdkResolverContext
 Microsoft.Build.Framework.SdkResolverContext.SdkResolverContext() -> void
+Microsoft.Build.Framework.SdkResolverContext2
+Microsoft.Build.Framework.SdkResolverContext2.SdkResolverContext2() -> void
 Microsoft.Build.Framework.SdkResult
 Microsoft.Build.Framework.SdkResult.SdkResult() -> void
 Microsoft.Build.Framework.SdkResultFactory
@@ -614,6 +616,8 @@ virtual Microsoft.Build.Framework.SdkResolverContext.SolutionFilePath.get -> str
 virtual Microsoft.Build.Framework.SdkResolverContext.SolutionFilePath.set -> void
 virtual Microsoft.Build.Framework.SdkResolverContext.State.get -> object
 virtual Microsoft.Build.Framework.SdkResolverContext.State.set -> void
+virtual Microsoft.Build.Framework.SdkResolverContext2.Options.get -> string
+virtual Microsoft.Build.Framework.SdkResolverContext2.Options.set -> void
 virtual Microsoft.Build.Framework.SdkResult.AdditionalPaths.get -> System.Collections.Generic.IList<string>
 virtual Microsoft.Build.Framework.SdkResult.AdditionalPaths.set -> void
 virtual Microsoft.Build.Framework.SdkResult.ItemsToAdd.get -> System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem>

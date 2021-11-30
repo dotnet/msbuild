@@ -128,6 +128,11 @@ namespace Microsoft.Build.Construction
         public ElementLocation SdkLocation => GetAttributeLocation(XMakeAttributes.sdk);
 
         /// <summary>
+        /// Location of the Options attribute
+        /// </summary>
+        public ElementLocation SdkOptionsLocation => GetAttributeLocation(XMakeAttributes.sdkOptions);
+
+        /// <summary>
         /// Gets the <see cref="ImplicitImportLocation"/> of the import.  This indicates if the import was implicitly
         /// added because of the <see cref="ProjectRootElement.Sdk"/> attribute and the location where the project was
         /// imported.
