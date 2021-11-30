@@ -22,8 +22,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly IReporter _reporter;
         private readonly TestAssetsManager _testAssets;
 
-        private static string DotNetHostPath => TestContext.Current.ToolsetUnderTest.DotNetHostPath;
-
         public MsBuildFileSetFactoryTest(ITestOutputHelper output)
         {
             _reporter = new TestReporter(output);
@@ -328,7 +326,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var output = new OutputSink();
             var options = GetWatchOptions();
-            var filesetFactory = new MsBuildFileSetFactory(options, DotNetHostPath, _reporter, projectA, output, waitOnError: false, trace: true);
+            var filesetFactory = new MsBuildFileSetFactory(options, _reporter, projectA, output, waitOnError: false, trace: true);
 
             var fileset = await GetFileSet(filesetFactory);
 
@@ -363,10 +361,10 @@ namespace Microsoft.DotNet.Watcher.Tools
         private Task<FileSet> GetFileSet(string projectPath)
         {
             DotNetWatchOptions options = GetWatchOptions();
-            return GetFileSet(new MsBuildFileSetFactory(options, DotNetHostPath, _reporter, projectPath, new OutputSink(), waitOnError: false, trace: false));
+            return GetFileSet(new MsBuildFileSetFactory(options, _reporter, projectPath, new OutputSink(), waitOnError: false, trace: false));
         }
 
-        private static DotNetWatchOptions GetWatchOptions() => 
+        private static DotNetWatchOptions GetWatchOptions() =>
             new DotNetWatchOptions(false, false, false, false, false);
 
         private static string GetTestProjectPath(TestAsset target) => Path.Combine(GetTestProjectDirectory(target), target.TestProject.Name + ".csproj");

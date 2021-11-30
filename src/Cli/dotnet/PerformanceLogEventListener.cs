@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.IO;
 using System.Text;
@@ -27,7 +26,6 @@ namespace Microsoft.DotNet.Cli.Utils
         };
 
         private const char EventDelimiter = '\n';
-        private string _processIDStr;
         private StreamWriter _writer;
 
         [ThreadStatic]
@@ -70,10 +68,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         internal void Initialize(IFileSystem fileSystem, string logDirectory)
         {
-            _processIDStr = Process.GetCurrentProcess().Id.ToString();
-
             // Use a GUID disambiguator to make sure that we have a unique file name.
-            string logFilePath = Path.Combine(logDirectory, $"perf-{_processIDStr}-{Guid.NewGuid().ToString("N")}.log");
+            string logFilePath = Path.Combine(logDirectory, $"perf-{Environment.ProcessId}-{Guid.NewGuid().ToString("N")}.log");
 
             Stream outputStream = fileSystem.File.OpenFile(
                 logFilePath,
@@ -134,7 +130,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     s_builder.Clear();
                 }
 
-                s_builder.Append($"[{DateTime.UtcNow.ToString("o")}] Event={eventData.EventSource.Name}/{eventData.EventName} ProcessID={_processIDStr} ThreadID={System.Threading.Thread.CurrentThread.ManagedThreadId}\t ");
+                s_builder.Append($"[{DateTime.UtcNow.ToString("o")}] Event={eventData.EventSource.Name}/{eventData.EventName} ProcessID={Environment.ProcessId} ThreadID={System.Threading.Thread.CurrentThread.ManagedThreadId}\t ");
                 for (int i = 0; i < eventData.PayloadNames.Count; i++)
                 {
                     s_builder.Append($"{eventData.PayloadNames[i]}=\"{eventData.Payload[i]}\" ");
