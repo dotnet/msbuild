@@ -31,8 +31,6 @@
 **
 ===========================================================*/
 
-//#define ASSERT_BALANCE
-
 using System;
 using System.Diagnostics;
 using System.Text;
@@ -82,12 +80,9 @@ namespace Microsoft.Build.Framework
         {
             if (sb.Capacity <= MAX_BUILDER_SIZE)
             {
-#if ASSERT_BALANCE
                 // Assert we are not replacing another string builder. That could happen when Acquire is reentered.
                 // User of StringBuilderCache has to make sure that calling method call stacks do not also use StringBuilderCache.
                 Debug.Assert(StringBuilderCache.t_cachedInstance == null, "Unexpected replacing of other StringBuilder.");
-#endif
-
                 StringBuilderCache.t_cachedInstance = sb;
             }
 #if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
