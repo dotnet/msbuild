@@ -114,7 +114,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Initializes a build request with a parent context.
+        /// Initializes a build request with proxy targets.
         /// </summary>
         /// <param name="submissionId">The id of the build submission.</param>
         /// <param name="nodeRequestId">The id of the node issuing the request</param>
