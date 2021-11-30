@@ -372,8 +372,8 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="translated">Polecenia tworzenia wystąpień szablonów w przypadku interfejsu wiersza polecenia platformy .NET Core</target>
+        <source>Template Instantiation Commands for .NET CLI</source>
+        <target state="needs-review-translation">Polecenia tworzenia wystąpień szablonów w przypadku interfejsu wiersza polecenia platformy .NET Core</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">

@@ -6,7 +6,7 @@
   ],
   "name": "global.json file",
   "generatorVersions": "[1.0.0.0-*)",
-  "description": "A file for selecting the .NET Core SDK version.",
+  "description": "A file for selecting the .NET SDK version.",
   "tags": {
     "type": "item"
   },
@@ -29,7 +29,7 @@
     "SdkVersion": {
       "type": "parameter",
       "datatype": "string",
-      "description": "The version of the .NET Core SDK to use.",
+      "description": "The version of the .NET SDK to use.",
       "displayName": "SDK version"
     },
     "dotnet-cli-version": {

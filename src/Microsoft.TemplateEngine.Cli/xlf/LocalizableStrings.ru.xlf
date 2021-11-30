@@ -372,8 +372,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="translated">Команды создания экземпляра шаблона для .NET Core CLI</target>
+        <source>Template Instantiation Commands for .NET CLI</source>
+        <target state="needs-review-translation">Команды создания экземпляра шаблона для .NET Core CLI</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">

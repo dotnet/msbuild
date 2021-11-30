@@ -372,8 +372,8 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="translated">Comandos de Instanciação de Modelo para CLI do .NET Core</target>
+        <source>Template Instantiation Commands for .NET CLI</source>
+        <target state="needs-review-translation">Comandos de Instanciação de Modelo para CLI do .NET Core</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">

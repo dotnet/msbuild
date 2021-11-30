@@ -372,8 +372,8 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="translated">Comandi di creazione di istanze dei modelli per interfaccia della riga di comando di .NET Core</target>
+        <source>Template Instantiation Commands for .NET CLI</source>
+        <target state="needs-review-translation">Comandi di creazione di istanze dei modelli per interfaccia della riga di comando di .NET Core</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">

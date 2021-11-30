@@ -1,6 +1,6 @@
 ﻿Class Library (C#)
 Author: Microsoft
-Description: A project for creating a class library that targets .NET Standard or .NET Core
+Description: A project for creating a class library that targets .NET or .NET Standard
 Options:                                                                             
   -f|--framework  The target framework for the project.                              
                       net7.0            - Target net7.0                              

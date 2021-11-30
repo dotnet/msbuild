@@ -1,6 +1,6 @@
 ﻿Console App (F#)
 Author: Microsoft
-Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
+Description: A project for creating a command-line application that can run on .NET on Windows, Linux and macOS
 Options:                                                                             
   -f|--framework  The target framework for the project.                              
                       net7.0           - Target net7.0                               

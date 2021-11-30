@@ -707,7 +707,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Template Instantiation Commands for .NET Core CLI.
+        ///   Looks up a localized string similar to Template Instantiation Commands for .NET CLI.
         /// </summary>
         internal static string CommandDescription {
             get {

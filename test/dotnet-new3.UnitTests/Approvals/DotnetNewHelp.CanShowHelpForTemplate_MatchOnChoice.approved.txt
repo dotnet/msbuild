@@ -1,6 +1,6 @@
 ﻿Console App (C#)
 Author: Microsoft
-Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
+Description: A project for creating a command-line application that can run on .NET on Windows, Linux and macOS
 Options:                                                                            
   --langVersion  Sets the LangVersion property in the created project file          
                  text - Optional                                                    

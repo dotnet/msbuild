@@ -372,8 +372,8 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="translated">Vorlageninstanziierungsbefehle für .NET Core-CLI</target>
+        <source>Template Instantiation Commands for .NET CLI</source>
+        <target state="needs-review-translation">Vorlageninstanziierungsbefehle für .NET Core-CLI</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">

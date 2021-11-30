@@ -136,7 +136,7 @@
     <value>Change</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Template Instantiation Commands for .NET Core CLI</value>
+    <value>Template Instantiation Commands for .NET CLI</value>
   </data>
   <data name="ConfiguredValue" xml:space="preserve">
     <value>Configured Value: {0}</value>

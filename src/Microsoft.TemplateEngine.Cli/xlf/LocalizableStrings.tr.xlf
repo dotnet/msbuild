@@ -372,8 +372,8 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="translated">.NET Core CLI için Şablon Örneği Oluşturma Komutları</target>
+        <source>Template Instantiation Commands for .NET CLI</source>
+        <target state="needs-review-translation">.NET Core CLI için Şablon Örneği Oluşturma Komutları</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">
