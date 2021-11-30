@@ -47,6 +47,7 @@ namespace Microsoft.Build.Shared
         internal const string sdkName = "Name";
         internal const string sdkVersion = "Version";
         internal const string sdkMinimumVersion = "MinimumVersion";
+        internal const string sdkOptions = "Options";
         internal const string toolsVersion = "ToolsVersion";
         internal const string runtime = "Runtime";
         internal const string msbuildRuntime = "MSBuildRuntime";

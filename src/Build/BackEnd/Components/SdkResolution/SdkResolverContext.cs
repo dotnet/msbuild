@@ -3,16 +3,16 @@
 
 using System;
 
-using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
+using SdkResolverContextBase2 = Microsoft.Build.Framework.SdkResolverContext2;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
-    /// An internal implementation of <see cref="Framework.SdkResolverContext"/>.
+    /// An internal implementation of <see cref="Framework.SdkResolverContext2"/>.
     /// </summary>
-    internal sealed class SdkResolverContext : SdkResolverContextBase
+    internal sealed class SdkResolverContext : SdkResolverContextBase2
     {
-        public SdkResolverContext(Framework.SdkLogger logger, string projectFilePath, string solutionPath, Version msBuildVersion, bool interactive, bool isRunningInVisualStudio)
+        public SdkResolverContext(Framework.SdkLogger logger, string projectFilePath, string solutionPath, Version msBuildVersion, bool interactive, bool isRunningInVisualStudio, string options)
         {
             Logger = logger;
             ProjectFilePath = projectFilePath;
@@ -20,6 +20,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             MSBuildVersion = msBuildVersion;
             Interactive = interactive;
             IsRunningInVisualStudio = isRunningInVisualStudio;
+            Options = options;
         }
     }
 }

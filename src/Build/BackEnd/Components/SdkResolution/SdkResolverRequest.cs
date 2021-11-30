@@ -22,13 +22,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         private string _version;
         private bool _interactive;
         private bool _isRunningInVisualStudio;
+        private string _sdkOptions;
 
         public SdkResolverRequest(ITranslator translator)
         {
             Translate(translator);
         }
 
-        private SdkResolverRequest(int submissionId, string name, string version, string minimumVersion, BuildEventContext buildEventContext, ElementLocation elementLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
+        private SdkResolverRequest(int submissionId, string name, string version, string minimumVersion, BuildEventContext buildEventContext, ElementLocation elementLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, string sdkOptions)
         {
             _buildEventContext = buildEventContext;
             _submissionId = submissionId;
@@ -40,6 +41,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _version = version;
             _interactive = interactive;
             _isRunningInVisualStudio = isRunningInVisualStudio;
+            _sdkOptions = sdkOptions;
         }
 
         public BuildEventContext BuildEventContext => _buildEventContext;
@@ -54,6 +56,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public string Name => _name;
 
+        public string SdkOptions => _sdkOptions;
+
         public int NodeId { get; set; }
 
         public string ProjectPath => _projectPath;
@@ -66,9 +70,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public string Version => _version;
 
-        public static SdkResolverRequest Create(int submissionId, SdkReference sdkReference, BuildEventContext buildEventContext, ElementLocation elementLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
+        public static SdkResolverRequest Create(int submissionId, SdkReference sdkReference, BuildEventContext buildEventContext, ElementLocation elementLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, string sdkOptions)
         {
-            return new SdkResolverRequest(submissionId, sdkReference.Name, sdkReference.Version, sdkReference.MinimumVersion, buildEventContext, elementLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+            return new SdkResolverRequest(submissionId, sdkReference.Name, sdkReference.Version, sdkReference.MinimumVersion, buildEventContext, elementLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, sdkOptions);
         }
 
         public static INodePacket FactoryForDeserialization(ITranslator translator)
@@ -88,6 +92,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             translator.Translate(ref _version);
             translator.Translate(ref _interactive);
             translator.Translate(ref _isRunningInVisualStudio);
+            translator.Translate(ref _sdkOptions);
         }
     }
 }

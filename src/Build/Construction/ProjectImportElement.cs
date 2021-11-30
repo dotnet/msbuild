@@ -111,6 +111,18 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Gets or sets the SDK options to be ussed by SDK Resolver when creating this import.
+        /// </summary>
+        public string SdkOptions
+        {
+            get => GetAttributeValue(XMakeAttributes.sdkOptions);
+            set
+            {
+                SetOrRemoveAttribute(XMakeAttributes.sdkOptions, value, "Set Import SDK Options {0}", value);
+            }
+        }
+
+        /// <summary>
         /// Location of the Sdk attribute
         /// </summary>
         public ElementLocation SdkLocation => GetAttributeLocation(XMakeAttributes.sdk);

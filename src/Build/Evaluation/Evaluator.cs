@@ -1809,10 +1809,18 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
+                // Evaluate options if they are specified
+                string evaluatedOptions = null;
+                if(importElement.SdkOptions != null)
+                {
+                    evaluatedOptions = _expander.ExpandIntoStringAndUnescape(importElement.SdkOptions, ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, importElement.SdkOptionsLocation);
+                }
+
                 // Combine SDK path with the "project" relative path
                 try
                 {
-                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
+                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath,
+                        _interactive, _isRunningInVisualStudio, evaluatedOptions);
                 }
                 catch (SdkResolverException e)
                 {

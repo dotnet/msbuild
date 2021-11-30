@@ -201,7 +201,7 @@ namespace Microsoft.Build.Graph
         public BuildRequestDataFlags Flags { get; }
 
         /// <summary>
-        /// Options for how the graph should be built.
+        /// SdkOptions for how the graph should be built.
         /// </summary>
         public GraphBuildOptions GraphBuildOptions { get; }
 

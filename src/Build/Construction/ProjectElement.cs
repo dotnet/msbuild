@@ -282,6 +282,13 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ElementLocation LabelLocation => GetAttributeLocation(XMakeAttributes.label);
 
+
+        /// <summary>
+        /// Location of the "Condition" attribute on this element, if any.
+        /// If there is no such attribute, returns null.
+        /// </summary>
+        public virtual ElementLocation SdkOptionsLocation => GetAttributeLocation(XMakeAttributes.sdkOptions);
+
         /// <summary>
         /// Location of the corresponding Xml element.
         /// May not be correct if file is not saved, or 
