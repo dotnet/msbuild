@@ -1,4 +1,4 @@
-﻿#if (A)
+#if (A)
 # comment foo
 foo
 #endif
