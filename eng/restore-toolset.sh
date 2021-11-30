@@ -21,8 +21,6 @@ function InitializeCustomSDKToolset {
 
   InitializeDotNetCli true
   
-  cp "$DOTNET_INSTALL_DIR/dotnet" "$DOTNET_INSTALL_DIR/dotnet.bak"
-
   if [[ "$DISTRO" != "ubuntu" || "$MAJOR_VERSION" -le 16 ]]; then
     InstallDotNetSharedFramework "1.0.5"
     InstallDotNetSharedFramework "1.1.2"
@@ -31,9 +29,6 @@ function InitializeCustomSDKToolset {
   InstallDotNetSharedFramework "2.2.8"
   InstallDotNetSharedFramework "3.1.0"
   InstallDotNetSharedFramework "5.0.0"
-
-  rm "$DOTNET_INSTALL_DIR/dotnet"
-  mv "$DOTNET_INSTALL_DIR/dotnet.bak" "$DOTNET_INSTALL_DIR/dotnet"
 
   CreateBuildEnvScript
 }
@@ -48,7 +43,7 @@ function InstallDotNetSharedFramework {
     GetDotNetInstallScript "$dotnet_root"
     local install_script=$_GetDotNetInstallScript
 
-    bash "$install_script" --version $version --install-dir "$dotnet_root" --runtime "dotnet"
+    bash "$install_script" --version $version --install-dir "$dotnet_root" --runtime "dotnet" --skip-non-versioned-files
     local lastexitcode=$?
 
     if [[ $lastexitcode != 0 ]]; then
