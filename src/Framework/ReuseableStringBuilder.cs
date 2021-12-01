@@ -312,12 +312,10 @@ namespace Microsoft.Build.Framework
                     var oldSharedBuilder = Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
                     if (oldSharedBuilder != null)
                     {
-#if DEBUG
                         // This can identify improper usage from multiple thread or bug in code - Get was reentered before Release.
                         // User of ReuseableStringBuilder has to make sure that calling method call stacks do not also use ReuseableStringBuilder.
                         // Look at stack traces of ETW events which contains reported string builder hashes.
                         MSBuildEventSource.Log.ReusableStringBuilderFactoryUnbalanced(oldHash: oldSharedBuilder.GetHashCode(), newHash: returningBuilder.GetHashCode());
-#endif
                     }
 #if DEBUG
                     MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, returningLength: returningLength, type: returning._borrowedBuilder != returningBuilder ? "return-new" : "return");
