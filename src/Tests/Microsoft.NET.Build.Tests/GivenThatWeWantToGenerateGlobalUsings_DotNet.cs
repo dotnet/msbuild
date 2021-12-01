@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_can_generate_global_usings_and_builds_successfully()
         {
-            var tfm = "net6.0";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var testProject = CreateTestProject(tfm);
             testProject.AdditionalProperties["ImplicitUsings"] = "enable";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -52,7 +52,7 @@ global using global::System.Threading.Tasks;
         [Fact]
         public void Implicit_Usings_Are_Not_Enabled_By_Default()
         {
-            var tfm = "net6.0";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var testProject = CreateTestProject(tfm);
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var globalUsingsFileName = $"{testAsset.TestProject.Name}.GlobalUsings.g.cs";
@@ -71,7 +71,7 @@ global using global::System.Threading.Tasks;
         [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_can_remove_specific_usings_in_project_file()
         {
-            var tfm = "net6.0";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var testProject = CreateTestProject(tfm);
             testProject.AdditionalProperties["ImplicitUsings"] = "enable";
             testProject.AddItem("Using", new Dictionary<string, string> { ["Remove"] = "System.IO" });
@@ -103,7 +103,7 @@ global using global::System.Threading.Tasks;
         [Fact]
         public void It_can_generate_custom_usings()
         {
-            var tfm = "net6.0";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var testProject = CreateTestProject(tfm);
             testProject.ProjectChanges.Add(projectXml =>
             {
@@ -141,7 +141,7 @@ global using static global::TestStaticNamespace;
         [Fact]
         public void It_considers_switches_when_deduping()
         {
-            var tfm = "net6.0";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var testProject = CreateTestProject(tfm);
             testProject.ProjectChanges.Add(projectXml =>
             {
@@ -187,7 +187,7 @@ global using static global::TestStaticNamespace;
         public void It_can_persist_generatedfile_between_cleans()
         {
             // Regression test for https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1405579
-            var tfm = "net6.0";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var testProject = CreateTestProject(tfm);
             testProject.AdditionalProperties["ImplicitUsings"] = "enable";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
