@@ -288,6 +288,7 @@ namespace Microsoft.Build.Framework
                 int balance = Interlocked.Decrement(ref s_getVsReleaseBalance);
                 Debug.Assert(balance == 0, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
 #endif
+                FrameworkErrorUtilities.VerifyThrowInternalNull(returning._borrowedBuilder, nameof(returning._borrowedBuilder) + " can not be null.");
 
                 StringBuilder returningBuilder = returning._borrowedBuilder!;
                 int returningLength = returningBuilder.Length;
@@ -339,6 +340,9 @@ namespace Microsoft.Build.Framework
                     MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, returningLength: returningLength, type: returning._borrowedBuilder != returningBuilder ? "return-new" : "return");
 #endif
                 }
+
+                // Ensure ReuseableStringBuilder can no longer use _borrowedBuilder
+                returning._borrowedBuilder = null;
             }
 
             private static int SelectBracketedCapacity(int requiredCapacity)
