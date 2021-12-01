@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a project logging context.
         /// </summary>
-        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry, BuildEventContext parentBuildEventContext)
+        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry)
             : this
             (
             nodeLoggingContext,
@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd.Logging
             requestEntry.RequestConfiguration.ToolsVersion,
             requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
             requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
-            parentBuildEventContext,
+            requestEntry.Request.ParentBuildEventContext,
             requestEntry.RequestConfiguration.Project.EvaluationId
             )
         {
@@ -51,7 +51,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a project logging context.
         /// </summary>
-        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequest request, string projectFullPath, string toolsVersion, BuildEventContext parentBuildEventContext, int evaluationId = BuildEventContext.InvalidEvaluationId)
+        internal ProjectLoggingContext(
+            NodeLoggingContext nodeLoggingContext,
+            BuildRequest request,
+            string projectFullPath,
+            string toolsVersion,
+            int evaluationId = BuildEventContext.InvalidEvaluationId)
             : this
             (
             nodeLoggingContext,
@@ -60,9 +65,9 @@ namespace Microsoft.Build.BackEnd.Logging
             projectFullPath,
             request.Targets,
             toolsVersion,
-            null,
-            null,
-            parentBuildEventContext,
+            projectProperties: null,
+            projectItems: null,
+            request.ParentBuildEventContext,
             evaluationId
             )
         {
