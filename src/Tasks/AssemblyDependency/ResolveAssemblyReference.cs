@@ -1088,7 +1088,7 @@ namespace Microsoft.Build.Tasks
                             StringBuilder logConflict = StringBuilderCache.Acquire();
                             LogConflict(conflictCandidate, fusionName, logConflict);
 
-                            // If we logging warnings append it into existing StringBuilder, otherwise build details by new StringBuilder.
+                            // If we are logging warnings append it into existing StringBuilder, otherwise build details by new StringBuilder.
                             // Remark: There is no point to use StringBuilderCache.Acquire() here as at this point StringBuilderCache already rent StringBuilder for this thread
                             StringBuilder logDependencies = logWarning ? logConflict.AppendLine() : new StringBuilder();
 
