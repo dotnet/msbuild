@@ -42,7 +42,7 @@ namespace Microsoft.Build.Framework
 {
     internal static class StringBuilderCache
     {
-        // The value 512 was chosen empirically as 95% percentile
+        // The value 512 was chosen empirically as 95% percentile of returning string length.
         private const int MAX_BUILDER_SIZE = 512;
 
         [ThreadStatic]
