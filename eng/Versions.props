@@ -38,7 +38,7 @@
     <SystemReflectionMetadataLoadContextVersion>7.0.0-alpha.1.21579.5</SystemReflectionMetadataLoadContextVersion>
     <DeploymentReleasesVersion>1.0.0-preview1.1.21112.1</DeploymentReleasesVersion>
     <SystemManagementPackageVersion>4.6.0</SystemManagementPackageVersion>
-    <SystemCommandLineVersion>2.0.0-beta1.21579.1</SystemCommandLineVersion>
+    <SystemCommandLineVersion>2.0.0-beta1.21580.1</SystemCommandLineVersion>
     <MicrosoftDeploymentDotNetReleasesVersion>1.0.0-preview2.6.21561.1</MicrosoftDeploymentDotNetReleasesVersion>
   </PropertyGroup>
   <PropertyGroup>
