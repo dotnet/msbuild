@@ -203,23 +203,6 @@ namespace Microsoft.Build.Framework
             private const int MaxBuilderSizeBytes = 2 * 1024 * 1024; // ~1M chars
             private const int MaxBuilderSizeCapacity = MaxBuilderSizeBytes / sizeof(char);
 
-            private static readonly IReadOnlyList<int> s_capacityBrackets;
-
-            static ReuseableStringBuilderFactory()
-            {
-                var brackets = new List<int>();
-
-                int bytes = 0x200; // Minimal capacity is 256 (512 bytes) as this was, according to captured traces, mean returning capacity
-                while (bytes <= MaxBuilderSizeBytes)
-                {
-                    brackets.Add(bytes / sizeof(char)); 
-                    bytes <<= 1;
-                }
-                Debug.Assert((bytes >> 1) == MaxBuilderSizeBytes, "MaxBuilderSizeBytes has to be 2^n (power of 2)");
-
-                s_capacityBrackets = brackets;
-            }
-
             /// <summary>
             /// The shared builder.
             /// </summary>
@@ -347,16 +330,27 @@ namespace Microsoft.Build.Framework
 
             private static int SelectBracketedCapacity(int requiredCapacity)
             {
-                foreach (int bracket in s_capacityBrackets)
-                {
-                    if (requiredCapacity <= bracket)
-                    {
-                        return bracket;
-                    }
-                }
+                const int minimumCapacity = 0x100; // 256 characters, 512 bytes
+
+                if (requiredCapacity <= minimumCapacity)
+                    return minimumCapacity;
 
                 // If user wants bigger capacity than maximum respect it as it could be used as buffer in P/Invoke.
-                return requiredCapacity;
+                if (requiredCapacity >= MaxBuilderSizeCapacity)
+                    return requiredCapacity;
+
+                // Find next power of two http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+                int v = requiredCapacity;
+
+                v--;
+                v |= v >> 1;
+                v |= v >> 2;
+                v |= v >> 4;
+                v |= v >> 8;
+                v |= v >> 16;
+                v++;
+
+                return v;
             }
         }
     }
