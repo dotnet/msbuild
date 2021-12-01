@@ -24,14 +24,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private string _projectFullPath;
 
         /// <summary>
-        /// The parent node logging context this context was derived from.
-        /// </summary>
-        private NodeLoggingContext _nodeLoggingContext;
-
-        /// <summary>
         /// Constructs a project logging context.
         /// </summary>
-        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry, BuildEventContext parentBuildEventContext)
+        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry)
             : this
             (
             nodeLoggingContext,
@@ -42,7 +37,7 @@ namespace Microsoft.Build.BackEnd.Logging
             requestEntry.RequestConfiguration.ToolsVersion,
             requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
             requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
-            parentBuildEventContext,
+            requestEntry.Request.ParentBuildEventContext,
             requestEntry.RequestConfiguration.Project.EvaluationId
             )
         {
@@ -51,7 +46,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a project logging context.
         /// </summary>
-        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequest request, string projectFullPath, string toolsVersion, BuildEventContext parentBuildEventContext, int evaluationId = BuildEventContext.InvalidEvaluationId)
+        internal ProjectLoggingContext(
+            NodeLoggingContext nodeLoggingContext,
+            BuildRequest request,
+            string projectFullPath,
+            string toolsVersion,
+            int evaluationId = BuildEventContext.InvalidEvaluationId)
             : this
             (
             nodeLoggingContext,
@@ -60,9 +60,9 @@ namespace Microsoft.Build.BackEnd.Logging
             projectFullPath,
             request.Targets,
             toolsVersion,
-            null,
-            null,
-            parentBuildEventContext,
+            projectProperties: null,
+            projectItems: null,
+            request.ParentBuildEventContext,
             evaluationId
             )
         {
@@ -74,7 +74,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, int submissionId, int configurationId, string projectFullPath, List<string> targets, string toolsVersion, PropertyDictionary<ProjectPropertyInstance> projectProperties, ItemDictionary<ProjectItemInstance> projectItems, BuildEventContext parentBuildEventContext, int evaluationId = BuildEventContext.InvalidEvaluationId)
             : base(nodeLoggingContext)
         {
-            _nodeLoggingContext = nodeLoggingContext;
             _projectFullPath = projectFullPath;
 
             ProjectPropertyInstanceEnumeratorProxy properties = null;
@@ -143,17 +142,6 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             this.IsValid = true;
-        }
-
-        /// <summary>
-        /// Retrieves the node logging context.
-        /// </summary>
-        internal NodeLoggingContext NodeLoggingContext
-        {
-            get
-            {
-                return _nodeLoggingContext;
-            }
         }
 
         /// <summary>
