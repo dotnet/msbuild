@@ -72,7 +72,11 @@ namespace Microsoft.DotNet.NativeWrapper
 
             if (string.IsNullOrWhiteSpace(dotnetExe))
             {
+#if NET6_0_OR_GREATER
+                dotnetExe = Environment.ProcessPath;
+#else
                 dotnetExe = Process.GetCurrentProcess().MainModule.FileName;
+#endif
             }
 
             return Path.GetDirectoryName(dotnetExe);

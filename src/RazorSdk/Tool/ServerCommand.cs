@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -148,7 +147,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             // <pipename>
 
             const int DefaultBufferSize = 4096;
-            var processId = Process.GetCurrentProcess().Id;
+            var processId = Environment.ProcessId;
             var fileName = $"rzc-{processId}";
 
             // Make sure the directory exists.
