@@ -111,7 +111,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject()
             {
-                TargetFrameworks = "net6.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
             testProject.AdditionalProperties["RuntimeIdentifiers"] = "android-arm;android-arm64;android-x86;android-x64";

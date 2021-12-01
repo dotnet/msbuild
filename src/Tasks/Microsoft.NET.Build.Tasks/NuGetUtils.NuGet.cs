@@ -96,8 +96,8 @@ namespace Microsoft.NET.Build.Tasks
 
             string bestMatch = null;
 
-            HashSet<string> availableRids = new HashSet<string>(availableRuntimeIdentifiers);
-            HashSet<string> excludedRids = runtimeIdentifiersToExclude switch { null => null, _ => new HashSet<string>(runtimeIdentifiersToExclude) };
+            HashSet<string> availableRids = new HashSet<string>(availableRuntimeIdentifiers, StringComparer.Ordinal);
+            HashSet<string> excludedRids = runtimeIdentifiersToExclude switch { null => null, _ => new HashSet<string>(runtimeIdentifiersToExclude, StringComparer.Ordinal) };
             foreach (var candidateRuntimeIdentifier in runtimeGraph.ExpandRuntime(runtimeIdentifier))
             {
                 if (bestMatch == null && availableRids.Contains(candidateRuntimeIdentifier))
@@ -112,7 +112,6 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            //  No compatible RID found in availableRuntimeIdentifiers
             return bestMatch;
         }
     }
