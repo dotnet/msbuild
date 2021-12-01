@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Eventing;
@@ -21,7 +23,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Captured string builder.
         /// </summary>
-        private StringBuilder _borrowedBuilder;
+        private StringBuilder? _borrowedBuilder;
 
         /// <summary>
         /// Capacity of borrowed string builder at the time of borrowing.
@@ -48,7 +50,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public int Length
         {
-            get { return (_borrowedBuilder == null) ? 0 : _borrowedBuilder.Length; }
+            get { return _borrowedBuilder?.Length ?? 0; }
             set
             {
                 LazyPrepare();
@@ -72,7 +74,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Dispose, indicating you are done with this builder.
         /// </summary>
-        void IDisposable.Dispose()
+        public void Dispose()
         {
             if (_borrowedBuilder != null)
             {
@@ -153,6 +155,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Grab a backing builder if necessary.
         /// </summary>
+        [MemberNotNull(nameof(_borrowedBuilder))]
         private void LazyPrepare()
         {
             if (_borrowedBuilder == null)
@@ -221,7 +224,7 @@ namespace Microsoft.Build.Framework
             /// <summary>
             /// The shared builder.
             /// </summary>
-            private static StringBuilder s_sharedBuilder;
+            private static StringBuilder? s_sharedBuilder;
 
 #if DEBUG && ASSERT_BALANCE
             /// <summary>
@@ -243,7 +246,7 @@ namespace Microsoft.Build.Framework
                 Debug.Assert(balance == 1, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
 #endif
 
-                var returned = Interlocked.Exchange(ref s_sharedBuilder, null);
+                StringBuilder? returned = Interlocked.Exchange(ref s_sharedBuilder, null);
 
                 if (returned == null)
                 {
@@ -287,7 +290,7 @@ namespace Microsoft.Build.Framework
                 Debug.Assert(balance == 0, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
 #endif
 
-                StringBuilder returningBuilder = returning._borrowedBuilder;
+                StringBuilder returningBuilder = returning._borrowedBuilder!;
                 int returningLength = returningBuilder.Length;
 
                 // It's possible for someone to cause the builder to
