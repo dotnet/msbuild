@@ -38,9 +38,8 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal ReuseableStringBuilder(int capacity = 16) // StringBuilder default is 16
         {
-            _capacity = capacity;
-
             // lazy initialization of the builder
+            _capacity = capacity;
         }
 
         /// <summary>
@@ -195,8 +194,8 @@ namespace Microsoft.Build.Framework
             ///         value: sum of returningLength
             /// </remarks>
             /// <remarks>
-            /// This constant might looks huge, but rather that lowering this constant,
-            ///   we shall focus on eliminating of code which requires to create such huge strings.
+            /// This constant might looks huge, but rather than lowering this constant,
+            /// we shall focus on eliminating code which requires creating such huge strings.
             /// </remarks>
             private const int MaxBuilderSizeBytes = 2 * 1024 * 1024; // ~1M chars
             private const int MaxBuilderSizeCapacity = MaxBuilderSizeBytes / sizeof(char);
@@ -248,7 +247,7 @@ namespace Microsoft.Build.Framework
                 if (returned == null)
                 {
                     // Currently loaned out so return a new one with capacity in given bracket.
-                    // If user wants bigger capacity that maximum capacity respect it.
+                    // If user wants bigger capacity than maximum capacity, respect it.
                     returned = new StringBuilder(SelectBracketedCapacity(capacity));
 #if DEBUG
                     MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity:capacity, oldCapacity:0, type:"miss");
@@ -264,7 +263,7 @@ namespace Microsoft.Build.Framework
 #endif
                     // Let the current StringBuilder be collected and create new with bracketed capacity. This way it allocates only char[newCapacity]
                     //   otherwise it would allocate char[new_capacity_of_last_chunk] (in set_Capacity) and char[newCapacity] (in Clear).
-                    returned = new StringBuilder(SelectBracketedCapacity(newCapacity));
+                    returned = new StringBuilder(newCapacity);
                 }
                 else
                 {
@@ -301,7 +300,7 @@ namespace Microsoft.Build.Framework
                 // So the shared builder will be "replaced".
                 if (returningBuilder.Capacity > MaxBuilderSizeCapacity)
                 {
-                    // In order to free memory usage by huge string builder, do not pull this one and let it be collected.
+                    // In order to free memory usage by huge string builder, do not pool this one and let it be collected.
 #if DEBUG
                     MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: returningBuilder.GetHashCode(), returningCapacity: returningBuilder.Capacity, returningLength: returningLength, type: "discard");
 #endif
@@ -312,11 +311,11 @@ namespace Microsoft.Build.Framework
                     {
                         Debug.Assert(returningBuilder.Capacity > returning._borrowedWithCapacity, "Capacity can only increase");
 
-                        // This builder used more that pre-allocated capacity bracket.
+                        // This builder used more than pre-allocated capacity bracket.
                         // Let this builder be collected and put new builder, with reflecting bracket capacity, into the pool.
                         // If we would just return this builder into pool as is, it would allocated new array[capacity] anyway (current implementation of returningBuilder.Clear() does it)
                         //   and that could lead to unpredictable amount of LOH allocations and eventual LOH fragmentation.
-                        // Bellow implementation have predictable max Log2(MaxBuilderSizeBytes) string builder array re-allocations during whole process lifetime - unless MaxBuilderSizeCapacity is reached frequently.
+                        // Below implementation has predictable max Log2(MaxBuilderSizeBytes) string builder array re-allocations during whole process lifetime - unless MaxBuilderSizeCapacity is reached frequently.
                         int newCapacity = SelectBracketedCapacity(returningBuilder.Capacity);
                         returningBuilder = new StringBuilder(newCapacity);
                     }
@@ -327,7 +326,7 @@ namespace Microsoft.Build.Framework
                     if (oldSharedBuilder != null)
                     {
 #if DEBUG
-                        // This can identify in-proper usage from multiple thread or bug in code - Get was reentered before Release.
+                        // This can identify improper usage from multiple thread or bug in code - Get was reentered before Release.
                         // User of ReuseableStringBuilder has to make sure that calling method call stacks do not also use ReuseableStringBuilder.
                         // Look at stack traces of ETW events which contains reported string builder hashes.
                         MSBuildEventSource.Log.ReusableStringBuilderFactoryUnbalanced(oldHash: oldSharedBuilder.GetHashCode(), newHash: returningBuilder.GetHashCode());
