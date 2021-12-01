@@ -11,6 +11,7 @@ using Microsoft.Build.Framework;
 using System.IO;
 using Xunit;
 using Microsoft.Build.BackEnd;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -197,7 +198,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
-            project.Build("Build", new ILogger[] { logger });
+            project.Build("Build", new ILogger[] { logger }).ShouldBeTrue();
 
             logger.AssertLogContains("[i1m1]");
             logger.AssertLogContains("[i1m2]");
@@ -254,7 +255,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
-            project.Build("Build", new ILogger[] { logger });
+            project.Build("Build", new ILogger[] { logger }).ShouldBeTrue();
 
             logger.AssertLogContains("[i1m1]");
             logger.AssertLogContains("[i1m2]");
@@ -292,7 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
-            project.Build("Build", new ILogger[] { logger });
+            project.Build("Build", new ILogger[] { logger }).ShouldBeTrue();
 
             logger.AssertLogContains("i1%2ai2");
         }
