@@ -38,9 +38,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "not working")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CanDoTabCompletionAtGivenPosition()
         {
             string homeDir = TestUtils.CreateTemporaryFolder();

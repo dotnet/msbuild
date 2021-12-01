@@ -42,11 +42,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 yield return suggestion;
             }
-
-            foreach (string suggestion in base.GetSuggestions(parseResult, environmentSettings, textToMatch))
-            {
-                yield return suggestion;
-            }
         }
 
         protected override Task<NewCommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
