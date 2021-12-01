@@ -82,6 +82,7 @@
     <Dependency Name="dotnet-format" Version="7.0.257701">
       <Uri>https://github.com/dotnet/format</Uri>
       <Sha>d43e7e57f765a063a135884b1ddd19dc79df1cdb</Sha>
+      <SourceBuildTarball RepoName="format" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.0.1-1.21573.5">
       <Uri>https://github.com/dotnet/roslyn</Uri>
@@ -258,6 +259,11 @@
     <Dependency Name="System.CommandLine" Version="2.0.0-beta1.21580.1">
       <Uri>https://github.com/dotnet/command-line-api</Uri>
       <Sha>804c6e3e08570e3f303dded19edae4b3e32786ee</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.command-line-api" Version="0.1.257901">
+      <Uri>https://github.com/dotnet/command-line-api</Uri>
+      <Sha>de978c68b470123a2df3891f98ee9974c323c41f</Sha>
+      <SourceBuild RepoName="command-line-api" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build" Version="0.1.0-alpha.1.21475.1">
       <Uri>https://github.com/dotnet/source-build</Uri>
