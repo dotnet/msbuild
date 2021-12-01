@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-//#define ASSERT_BALANCE
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -179,14 +177,29 @@ namespace Microsoft.Build.Framework
             /// Made up limit beyond which we won't share the builder
             /// because we could otherwise hold a huge builder indefinitely.
             /// This was picked empirically to save at least 95% of allocated data size.
-            /// This constant has to exactly 2^n (power of 2) where n = 4 ... 32
+            /// This constant has to be exactly 2^n (power of 2) where n = 4 ... 32 as GC is optimized to work with such block sizes.
+            /// Same approach is used in ArrayPool or RecyclableMemoryStream so having same uniform allocation sizes will
+            ///   reduce likelihood of heaps fragmentation.
             /// </summary>
+            /// <remarks>
+            /// In order to collect and analyze ETW ReusableStringBuilderFactory events developer could follow these steps:
+            ///   - With compiled as Debug capture events by perfview; example: "perfview collect /NoGui /OnlyProviders=*Microsoft-Build"
+            ///   - Open Events view and filter for ReusableStringBuilderFactory and pick ReusableStringBuilderFactory/Stop
+            ///   - Display columns: returning length, type
+            ///   - Set MaxRet limit to 1_000_000
+            ///   - Right click and Open View in Excel
+            ///   - Use Excel data analytic tools to extract required data from it. I recommend to use
+            ///       Pivot Table/Chart with
+            ///         filter: type=[return-se,discarder];
+            ///         rows: returningLength grouped (right click and Group... into sufficient size bins)
+            ///         value: sum of returningLength
+            /// </remarks>
             /// <remarks>
             /// This constant might looks huge, but rather that lowering this constant,
             ///   we shall focus on eliminating of code which requires to create such huge strings.
             /// </remarks>
             private const int MaxBuilderSizeBytes = 2 * 1024 * 1024; // ~1M chars
-            private const int MaxBuilderSizeCapacity = MaxBuilderSizeBytes / 2;
+            private const int MaxBuilderSizeCapacity = MaxBuilderSizeBytes / sizeof(char);
 
             private static readonly IReadOnlyList<int> s_capacityBrackets;
 
@@ -194,12 +207,10 @@ namespace Microsoft.Build.Framework
             {
                 var brackets = new List<int>();
 
-                int bytes = 0x200; // Minimal capacity is 256 (512 bytes) as this was, according to captured traces, mean required capacity
+                int bytes = 0x200; // Minimal capacity is 256 (512 bytes) as this was, according to captured traces, mean returning capacity
                 while (bytes <= MaxBuilderSizeBytes)
                 {
-                    // Allocation of arrays is optimized in byte[bytes] => bytes = 2^n.
-                    // StringBuilder allocates chars[capacity] and each char is 2 bytes so lets have capacity brackets computed as `bytes/2` 
-                    brackets.Add(bytes/2); 
+                    brackets.Add(bytes / sizeof(char)); 
                     bytes <<= 1;
                 }
                 Debug.Assert((bytes >> 1) == MaxBuilderSizeBytes, "MaxBuilderSizeBytes has to be 2^n (power of 2)");
@@ -271,7 +282,7 @@ namespace Microsoft.Build.Framework
             /// </summary>
             internal static void Release(ReuseableStringBuilder returning)
             {
-#if DEBUG && ASSERT_BALANCE
+#if DEBUG && ASSERT_BALANCE // Please define ASSERT_BALANCE if you need to analyze where we have cross thread competing usage of ReuseableStringBuilder
                 int balance = Interlocked.Decrement(ref s_getVsReleaseBalance);
                 Debug.Assert(balance == 0, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
 #endif
