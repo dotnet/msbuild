@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TaskItem right = new TaskItem("foo", "bar.proj");
 
             Assert.Equal(left, right);
-            Assert.Equal(left, right);
+            Assert.Equal(right, left);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             right.SetMetadata("a", "b");
 
             Assert.Equal(left, right);
-            Assert.Equal(left, right);
+            Assert.Equal(right, left);
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             right.SetMetadata("a", "c");
 
             Assert.NotEqual(left, right);
-            Assert.NotEqual(left, right);
+            Assert.NotEqual(right, left);
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             right.SetMetadata("b", "b");
 
             Assert.NotEqual(left, right);
-            Assert.NotEqual(left, right);
+            Assert.NotEqual(right, left);
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TaskItem right = new TaskItem("foo", "bar.proj");
 
             Assert.NotEqual(left, right);
-            Assert.NotEqual(left, right);
+            Assert.NotEqual(right, left);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             right.SetMetadata("c", "d");
 
             Assert.NotEqual(left, right);
-            Assert.NotEqual(left, right);
+            Assert.NotEqual(right, left);
         }
 
         /// <summary>
@@ -149,6 +149,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             TaskItem clone = parent.DeepClone();
             Assert.True(parent.Equals(clone)); // "The parent and the clone should be equal"
+            Assert.True(clone.Equals(parent)); // "The parent and the clone should be equal"
             Assert.False(object.ReferenceEquals(parent, clone)); // "The parent and the child should not be the same object"
         }
 
