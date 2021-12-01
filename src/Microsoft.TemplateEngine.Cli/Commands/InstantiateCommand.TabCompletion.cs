@@ -39,7 +39,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         foreach (CliTemplateInfo template in templateGrouping)
                         {
                             TemplateCommand command = new TemplateCommand(this, environmentSettings, templatePackageManager, templateGroup, template);
-                            Parser parser = ParserFactory.CreateTemplateParser(command);
+                            Parser parser = ParserFactory.CreateParser(command);
                             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
 
                             //TODO:

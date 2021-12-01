@@ -16,8 +16,9 @@ namespace Dotnet_new3
             var builder = new CommandLineBuilder(command)
             //.UseExceptionHandler(ExceptionHandler)
             //.UseLocalizationResources(new CommandLineValidationMessages())
-            .UseParseDirective()
-            .UseSuggestDirective()
+            //TODO: decide if it's needed to implement it; and implement if needed
+            //.UseParseDirective()
+            //.UseSuggestDirective()
             .UseParseErrorReporting()//TODO: discuss with SDK if it is possible to use it.
             //TODO: implement when help is done
             //.UseHelpBuilder((context) =>
@@ -31,7 +32,6 @@ namespace Dotnet_new3
             if (!disableHelp)
             {
                 builder = builder.UseHelp();
-                //.UseHelpBuilder(context => DotnetHelpBuilder.Instance.Value)
             }
             return builder.Build();
         }

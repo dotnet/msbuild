@@ -11,23 +11,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal static class ParserFactory
     {
-        internal static Parser CreateTemplateParser(Command command)
+        internal static Parser CreateParser(Command command, bool disableHelp = false)
         {
-            return new CommandLineBuilder(command)
-            .UseHelp()
-            .UseParseErrorReporting()
-            .UseParseDirective()
-            .UseSuggestDirective()
-            .DisablePosixBundling()
-            .Build();
-        }
+            var builder = new CommandLineBuilder(command)
+                .UseParseErrorReporting()
+                //TODO: decide if it's needed to implement it; and implement if needed
+                //.UseParseDirective()
+                //.UseSuggestDirective()
+                .DisablePosixBundling();
 
-        internal static Parser CreateParser(Command command)
-        {
-            return new CommandLineBuilder(command)
-            .UseParseErrorReporting()
-            .DisablePosixBundling()
-            .Build();
+            if (!disableHelp)
+            {
+                builder = builder.UseHelp();
+            }
+            return builder.Build();
         }
 
         private static CommandLineBuilder DisablePosixBundling(this CommandLineBuilder builder)

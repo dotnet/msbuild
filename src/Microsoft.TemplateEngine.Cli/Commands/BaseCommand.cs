@@ -92,7 +92,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             };
 
             ParseResult reparseResult = ParserFactory
-                .CreateParser(helperCommand)
+                .CreateParser(helperCommand, disableHelp: true)
                 .Parse(commandParseResult.Tokens.Select(t => t.Value).ToArray());
 
             return reparseResult.GetValueForOption<string>(outputOption);

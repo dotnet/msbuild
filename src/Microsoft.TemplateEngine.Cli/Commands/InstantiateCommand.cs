@@ -196,7 +196,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             foreach (CliTemplateInfo template in templatesToReparse)
             {
                 TemplateCommand command = new TemplateCommand(this, environmentSettings, templatePackageManager, templateGroup, template);
-                Parser parser = ParserFactory.CreateTemplateParser(command);
+                Parser parser = ParserFactory.CreateParser(command);
                 ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
 
                 languageOptionSpecified = command.LanguageOption != null
@@ -226,7 +226,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     templateGroup,
                     templateCommand.Template,
                     buildDefaultLanguageValidation: true);
-                Parser parser = ParserFactory.CreateTemplateParser(command);
+                Parser parser = ParserFactory.CreateParser(command);
                 ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
 
                 if (!parseResult.Errors.Any())
