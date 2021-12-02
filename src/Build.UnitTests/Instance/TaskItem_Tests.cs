@@ -190,7 +190,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             item.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(new[] { "a", "b" }.Concat(s_builtInMetadataNames));
             item.MetadataCount.ShouldBe(s_builtInMetadataNames.Length + 2);
-            item.CustomMetadataNames.Cast<string>().ShouldBeSetEquivalentTo(new[] { "a", "b" });
             item.DirectMetadataCount.ShouldBe(1);
 
             CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;

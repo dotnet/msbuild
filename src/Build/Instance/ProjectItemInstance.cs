@@ -928,7 +928,12 @@ namespace Microsoft.Build.Execution
             {
                 get
                 {
-                    List<string> names = new List<string>((List<string>)CustomMetadataNames);
+                    List<string> names = new List<string>();
+
+                    foreach (ProjectMetadataInstance metadatum in MetadataCollection)
+                    {
+                        names.Add(metadatum.Name);
+                    }
 
                     foreach (string name in FileUtilities.ItemSpecModifiers.All)
                     {
@@ -946,27 +951,6 @@ namespace Microsoft.Build.Execution
             public int MetadataCount
             {
                 get { return MetadataNames.Count; }
-            }
-
-            /// <summary>
-            /// Gets the names of custom metadata on the item.
-            /// If there is none, returns an empty collection.
-            /// Does not include built-in metadata.
-            /// Computed, not necessarily fast.
-            /// </summary>
-            public ICollection CustomMetadataNames
-            {
-                get
-                {
-                    List<string> names = new List<string>();
-
-                    foreach (ProjectMetadataInstance metadatum in MetadataCollection)
-                    {
-                        names.Add(metadatum.Name);
-                    }
-
-                    return names;
-                }
             }
 
             /// <summary>
