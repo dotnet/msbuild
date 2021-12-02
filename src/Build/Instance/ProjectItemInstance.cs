@@ -1081,7 +1081,7 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    return Array.Empty<KeyValuePair<string, string>>();
+                    return Enumerable.Empty<KeyValuePair<string, string>>();
                 }
             }
 

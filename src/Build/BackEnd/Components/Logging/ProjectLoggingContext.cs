@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
 using System.Collections;
+using System.Linq;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Collections;
@@ -80,8 +81,8 @@ namespace Microsoft.Build.BackEnd.Logging
             ProjectPropertyInstanceEnumeratorProxy properties = null;
             ProjectItemInstanceEnumeratorProxy items = null;
 
-            IEnumerable<ProjectPropertyInstance> projectPropertiesEnumerator = projectProperties == null ? Array.Empty<ProjectPropertyInstance>() : null;
-            IEnumerable<ProjectItemInstance> projectItemsEnumerator = projectItems == null ? Array.Empty<ProjectItemInstance>() : null;
+            IEnumerable<ProjectPropertyInstance> projectPropertiesEnumerator = projectProperties == null ? Enumerable.Empty<ProjectPropertyInstance>() : null;
+            IEnumerable<ProjectItemInstance> projectItemsEnumerator = projectItems == null ? Enumerable.Empty<ProjectItemInstance>() : null;
 
             string[] propertiesToSerialize = LoggingService.PropertiesToSerialize;
 
