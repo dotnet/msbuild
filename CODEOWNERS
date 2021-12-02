@@ -18,9 +18,8 @@
 /src/Assets/TestProjects/BlazorHostedRID/ @captainsafia, @pranavkm, @mkArtakMSFT
 /src/Assets/TestProjects/BlazorWasmMinimal/ @captainsafia, @pranavkm, @mkArtakMSFT
 /src/Assets/TestProjects/BlazorWasmWithLibrary/ @captainsafia, @pranavkm, @mkArtakMSFT
-
-# Area-AspNetCore
 /src/RazorSdk/ @captainsafia, @pranavkm, @mkArtakMSFT
+/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests/ @pranavkm, @mkArtakMSFT, @TanayParikh, @javiercn
 /src/Tests/Microsoft.NET.Sdk.Razor.Tests/ @captainsafia, @pranavkm, @mkArtakMSFT
 /src/Tests/Microsoft.NET.Sdk.Razor.Tool.Tests/ @captainsafia, @pranavkm, @mkArtakMSFT
 /src/Assets/TestPackages/PackageLibraryDirectDependency/ @captainsafia, @pranavkm, @mkArtakMSFT

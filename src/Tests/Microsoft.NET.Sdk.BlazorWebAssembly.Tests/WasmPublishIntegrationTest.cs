@@ -3,26 +3,22 @@
 
 using System.IO;
 using System.IO.Compression;
-using System.Text.Json;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Text.Json;
 using System.Xml.Linq;
-using Microsoft.NET.Sdk.BlazorWebAssembly;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.Utilities;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.NET.Sdk.BlazorWebAssembly.Tests.ServiceWorkerAssert;
-using ResourceHashesByNameDictionary = System.Collections.Generic.Dictionary<string, string>;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
-    public class WasmPublishIntegrationTest : AspNetSdkTest
+    public class WasmPublishIntegrationTest : WasmPublishIntegrationTestBase
     {
         public WasmPublishIntegrationTest(ITestOutputHelper log) : base(log) { }
 
@@ -1331,44 +1327,6 @@ public class TestReference
             // Make sure it's a the correct copy.
             fileInWwwroot.Length.Should().Be(referenceAssemblyPath.Length);
             Assert.Equal(File.ReadAllBytes(referenceAssemblyPath.FullName), File.ReadAllBytes(fileInWwwroot.FullName));
-        }
-
-        private static void VerifyBootManifestHashes(TestAsset testAsset, string blazorPublishDirectory)
-        {
-            var bootManifestResolvedPath = Path.Combine(blazorPublishDirectory, "_framework", "blazor.boot.json");
-            var bootManifestJson = File.ReadAllText(bootManifestResolvedPath);
-            var bootManifest = JsonSerializer.Deserialize<BootJsonData>(bootManifestJson);
-
-            VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.assembly);
-            VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.runtime);
-
-            if (bootManifest.resources.pdb != null)
-            {
-                VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.pdb);
-            }
-
-            if (bootManifest.resources.satelliteResources != null)
-            {
-                foreach (var resourcesForCulture in bootManifest.resources.satelliteResources.Values)
-                {
-                    VerifyBootManifestHashes(testAsset, blazorPublishDirectory, resourcesForCulture);
-                }
-            }
-
-            static void VerifyBootManifestHashes(TestAsset testAsset, string blazorPublishDirectory, ResourceHashesByNameDictionary resources)
-            {
-                foreach (var (name, hash) in resources)
-                {
-                    var relativePath = Path.Combine(blazorPublishDirectory, "_framework", name);
-                    new FileInfo(Path.Combine(testAsset.TestRoot, relativePath)).Should().HashEquals(ParseWebFormattedHash(hash));
-                }
-            }
-
-            static string ParseWebFormattedHash(string webFormattedHash)
-            {
-                Assert.StartsWith("sha256-", webFormattedHash);
-                return webFormattedHash.Substring(7);
-            }
         }
 
         private void VerifyTypeGranularTrimming(string blazorPublishDirectory)

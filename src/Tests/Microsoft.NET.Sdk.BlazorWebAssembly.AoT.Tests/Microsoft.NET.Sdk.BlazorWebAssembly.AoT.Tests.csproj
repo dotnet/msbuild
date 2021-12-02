@@ -10,7 +10,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <PackageId>testSdkBlazorWasm</PackageId>
+    <PackageId>testSdkBlazorWasmAoT</PackageId>
+    <BuildHelixPayload Condition="'$(RunAoTTests)' != 'true'">false</BuildHelixPayload>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,8 +23,9 @@
       <_Parameter1>AspNetTestTfm</_Parameter1>
       <_Parameter2>$(SdkTargetFramework)</_Parameter2>
     </AssemblyAttribute>
-    <!-- We use these to templatize the output from our build/publish tests to ensure the right set of
-         files gets published in all circumstances.
+    <!-- 
+      We use these to templatize the output from our build/publish tests to ensure the right set of
+      files gets published in all circumstances.
     -->
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>NetCoreAppRuntimePackageVersion</_Parameter1>
@@ -36,7 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\AspNetSdkBaselineTest.cs" Link="AspNetSdkBaselineTest.cs" />
+    <Compile Include="..\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\WasmPublishIntegrationTestBase.cs" Link="WasmPublishIntegrationTestBase.cs" />
+    <Compile Include="..\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\ServiceWorkerAssert.cs" Link="ServiceWorkerAssert.cs" />
   </ItemGroup>
   
   <ItemGroup>
@@ -50,13 +53,5 @@
     <ProjectReference Include="..\..\..\src\BlazorWasmSdk\Tasks\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.csproj" SkipGetTargetFrameworkProperties="true" />
     <ProjectReference Include="..\..\RazorSdk\Tasks\Microsoft.NET.Sdk.Razor.Tasks.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="StaticWebAssetsBaselines\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="StaticWebAssetsBaselines\" />
   </ItemGroup>
 </Project>
