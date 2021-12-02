@@ -7,6 +7,8 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

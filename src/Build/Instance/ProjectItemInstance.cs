@@ -17,6 +17,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

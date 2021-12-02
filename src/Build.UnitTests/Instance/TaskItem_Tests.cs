@@ -12,6 +12,8 @@ using System.IO;
 using Xunit;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>

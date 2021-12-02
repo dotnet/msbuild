@@ -40,6 +40,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

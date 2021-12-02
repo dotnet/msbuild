@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
     static class NameUtilities

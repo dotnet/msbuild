@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

@@ -5,6 +5,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>

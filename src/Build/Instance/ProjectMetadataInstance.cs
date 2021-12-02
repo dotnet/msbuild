@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

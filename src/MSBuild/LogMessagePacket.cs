@@ -10,6 +10,8 @@ using Microsoft.Build.Shared;
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>

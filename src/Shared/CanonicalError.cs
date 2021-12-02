@@ -5,6 +5,8 @@ using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

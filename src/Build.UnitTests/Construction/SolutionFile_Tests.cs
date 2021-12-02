@@ -12,6 +12,8 @@ using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     public class SolutionFile_Tests

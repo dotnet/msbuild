@@ -4,6 +4,8 @@
 using System;
 using Microsoft.Build.Construction;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal abstract class ProjectRootElementCacheBase

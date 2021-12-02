@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.Tracing;
 
+#nullable disable
+
 namespace Microsoft.Build.Eventing
 {
     /// <summary>

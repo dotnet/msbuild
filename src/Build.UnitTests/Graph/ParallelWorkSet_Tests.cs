@@ -6,6 +6,8 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph.UnitTests
 {
     public class ParallelWorkSet_Tests

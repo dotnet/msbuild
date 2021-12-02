@@ -10,6 +10,8 @@ using System.Diagnostics;
 
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

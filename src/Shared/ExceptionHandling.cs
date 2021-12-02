@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #if BUILDINGAPPXTASKS
+#nullable disable
+
 namespace Microsoft.Build.AppxPackage.Shared
 #else
 using System;
@@ -23,6 +25,8 @@ using System.Runtime.Serialization;
 using Microsoft.Build.Shared.Debugging;
 #endif
 using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 #endif

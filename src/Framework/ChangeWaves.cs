@@ -4,6 +4,8 @@
 using System;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     internal enum ChangeWaveConversionState
