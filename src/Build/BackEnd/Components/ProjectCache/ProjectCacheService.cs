@@ -217,18 +217,23 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             Task.Run(async () =>
             {
+                var buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
+                    cacheRequest.Submission.SubmissionId,
+                    evaluationId: cacheRequest.Configuration.Project.EvaluationId,
+                    projectInstanceId: cacheRequest.Configuration.ConfigurationId);
+
                 try
                 {
-                    var cacheResult = await ProcessCacheRequest(cacheRequest);
-                    _buildManager.PostCacheResult(cacheRequest, cacheResult);
+                    var cacheResult = await ProcessCacheRequest(cacheRequest, buildEventContext);
+                    _buildManager.PostCacheResult(cacheRequest, cacheResult, buildEventContext.ProjectContextId);
                 }
                 catch (Exception e)
                 {
-                    _buildManager.PostCacheResult(cacheRequest, CacheResult.IndicateException(e));
+                    _buildManager.PostCacheResult(cacheRequest, CacheResult.IndicateException(e), buildEventContext.ProjectContextId);
                 }
             }, _cancellationToken);
 
-            async Task<CacheResult> ProcessCacheRequest(CacheRequest request)
+            async Task<CacheResult> ProcessCacheRequest(CacheRequest request, BuildEventContext buildEventContext)
             {
                 // Prevent needless evaluation if design time builds detected.
                 if (_projectCacheDescriptor.VsWorkaround && DesignTimeBuildsDetected)
@@ -286,10 +291,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     _projectCacheDescriptor.VsWorkaround && LateInitializationForVSWorkaroundCompleted.Task.IsCompleted,
                     "Completion source should be null when this is not the VS workaround");
 
-                return await GetCacheResultAsync(
-                    new BuildRequestData(
-                        request.Configuration.Project,
-                        request.Submission.BuildRequestData.TargetNames.ToArray()));
+                BuildRequestData buildRequest = new BuildRequestData(
+                    cacheRequest.Configuration.Project,
+                    cacheRequest.Submission.BuildRequestData.TargetNames.ToArray());
+                return await GetCacheResultAsync(buildRequest, buildEventContext);
             }
 
             static bool IsDesignTimeBuild(ProjectInstance project)
@@ -448,7 +453,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 ConversionUtilities.ConvertStringToBool(msbuildString, nullOrWhitespaceIsFalse: true);
         }
 
-        private async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest)
+        private async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildEventContext buildEventContext)
         {
             lock (this)
             {
@@ -467,8 +472,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
                                    $"\n\tTargets:[{string.Join(", ", buildRequest.TargetNames)}]" +
                                    $"\n\tGlobal Properties: {{{string.Join(",", buildRequest.GlobalProperties.Select(kvp => $"{kvp.Name}={kvp.EvaluatedValue}"))}}}";
 
-            // TODO: Get a valid BuildEventContext to correcctly associate cache-related log events with the build
-            var buildEventContext = BuildEventContext.Invalid;
             var buildEventFileInfo = new BuildEventFileInfo(buildRequest.ProjectFullPath);
             var logger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,

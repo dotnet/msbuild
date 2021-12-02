@@ -477,7 +477,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             => new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
 
         /// <inheritdoc />
-        public BuildEventContext CreateProjectCacheBuildEventContext(int nodeId, int submissionId, int evaluationId, int projectInstanceId)
+        public BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId)
             => new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
 
         /// <inheritdoc />

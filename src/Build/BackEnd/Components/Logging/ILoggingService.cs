@@ -447,6 +447,15 @@ namespace Microsoft.Build.BackEnd.Logging
         BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId);
 
         /// <summary>
+        /// Create a project cache context, by generating a new project context id.
+        /// </summary>
+        /// <param name="submissionId">The submission id</param>
+        /// <param name="evaluationId">The evaluation id</param>
+        /// <param name="projectInstanceId">The project instance id</param>
+        /// <returns></returns>
+        BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId);
+
+        /// <summary>
         /// Logs that a project evaluation has started
         /// </summary>
         /// <param name="eventContext">The event context to use for logging</param>

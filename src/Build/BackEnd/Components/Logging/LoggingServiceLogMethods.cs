@@ -483,9 +483,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
-        {
-            return new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-        }
+            => new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+
+        /// <inheritdoc />
+        public BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId)
+            // Because the project cache runs in the BuildManager, it makes some sense to associate logging with the in-proc node.
+            // If a invalid node id is used the messages become deferred in the console logger and spit out at the end.
+            => new BuildEventContext(submissionId, Scheduler.InProcNodeId, evaluationId, projectInstanceId, NextProjectId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
 
         /// <inheritdoc />
         public void LogProjectEvaluationStarted(BuildEventContext projectEvaluationEventContext, string projectFile)

@@ -38,7 +38,7 @@ namespace Microsoft.Build.BackEnd.Logging
             requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
             requestEntry.Request.ParentBuildEventContext,
             requestEntry.RequestConfiguration.Project.EvaluationId,
-            requestEntry.Request.BuildEventContext.ProjectContextId // TODO: Bad
+            requestEntry.Request.ProjectContextId
             )
         {
         }
@@ -51,8 +51,7 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildRequest request,
             string projectFullPath,
             string toolsVersion,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId)
+            int evaluationId = BuildEventContext.InvalidEvaluationId)
             : this
             (
             nodeLoggingContext,
@@ -65,7 +64,7 @@ namespace Microsoft.Build.BackEnd.Logging
             projectItems: null,
             request.ParentBuildEventContext,
             evaluationId,
-            projectContextId
+            request.ProjectContextId
             )
         {
         }
