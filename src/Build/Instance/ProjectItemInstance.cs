@@ -834,13 +834,6 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Constructor for deserialization only.
-            /// </summary>
-            private TaskItem()
-            {
-            }
-
-            /// <summary>
             /// Creates an instance of this class given the backing item.
             /// Does not copy immutability, since there is no connection with the original.
             /// </summary>
