@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -442,6 +442,9 @@
     <Compile Include="InvalidParameterValueException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="LC.cs" Condition="'$(MonoBuild)' != 'true'">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="ListOperators\FindUnderPath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -492,6 +495,7 @@
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCodeType.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryTaskInfo.cs" />
+    <Compile Include="SdkToolsPathUtility.cs" />
     <Compile Include="SGen.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -601,9 +605,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="RCWForCurrentContext.cs" />
-    <Compile Include="LC.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="PiaReference.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -618,7 +619,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveSDKReference.cs" />
-    <Compile Include="SdkToolsPathUtility.cs" />
     <Compile Include="RequiresFramework35SP1Assembly.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
