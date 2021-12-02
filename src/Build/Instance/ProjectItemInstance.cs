@@ -928,9 +928,11 @@ namespace Microsoft.Build.Execution
             {
                 get
                 {
-                    List<string> names = new List<string>();
+                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadataCollection = MetadataCollection;
 
-                    foreach (ProjectMetadataInstance metadatum in MetadataCollection)
+                    List<string> names = new List<string>(capacity: metadataCollection.Count + FileUtilities.ItemSpecModifiers.All.Length);
+
+                    foreach (ProjectMetadataInstance metadatum in metadataCollection)
                     {
                         names.Add(metadatum.Name);
                     }
