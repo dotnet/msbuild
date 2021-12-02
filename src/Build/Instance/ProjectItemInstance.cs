@@ -937,10 +937,7 @@ namespace Microsoft.Build.Execution
                         names.Add(metadatum.Name);
                     }
 
-                    foreach (string name in FileUtilities.ItemSpecModifiers.All)
-                    {
-                        names.Add(name);
-                    }
+                    names.AddRange(FileUtilities.ItemSpecModifiers.All);
 
                     return names;
                 }
