@@ -970,16 +970,6 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Gets the number of custom metadata set on the item.
-            /// Does not include built-in metadata.
-            /// Computed, not necessarily fast.
-            /// </summary>
-            public int CustomMetadataCount
-            {
-                get { return CustomMetadataNames.Count; }
-            }
-
-            /// <summary>
             /// Gets the evaluated include for this item, unescaped.
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -1584,13 +1574,33 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
-                if (this.CustomMetadataCount != other.CustomMetadataCount)
+                var thisNames = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+
+                if (_itemDefinitions is not null)
                 {
-                    return false;
+                    foreach (ProjectItemDefinitionInstance itemDefinition in _itemDefinitions)
+                    {
+                        thisNames.UnionWith(itemDefinition.MetadataNames);
+                    }
                 }
 
-                foreach (string name in this.CustomMetadataNames)
+                if (_directMetadata is not null)
                 {
+                    foreach (ProjectMetadataInstance metadatum in _directMetadata)
+                    {
+                        thisNames.Add(metadatum.Name);
+                    }
+                }
+
+                foreach (ProjectMetadataInstance metadatum in other.MetadataCollection)
+                {
+                    string name = metadatum.Name;
+
+                    if (!thisNames.Remove(name))
+                    {
+                        return false;
+                    }
+
                     // This is case-insensitive, so that for example "en-US" and "en-us" match and are bucketed together.
                     // In this respect, therefore, we have to consider item metadata value case as not significant.
                     if (!String.Equals
@@ -1606,7 +1616,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 // Do not consider mutability for equality comparison
-                return true;
+                return thisNames.Count == 0;
             }
 
 #endregion
