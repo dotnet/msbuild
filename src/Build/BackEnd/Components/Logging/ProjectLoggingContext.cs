@@ -102,8 +102,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 var propertyEnumerable = projectProperties?.GetCopyOnReadEnumerable();
                 var itemsEnumerable = projectItems?.GetCopyOnReadEnumerable();
 
-                properties = propertyEnumerable?.Select(property => new DictionaryEntry(property.Name, property.EvaluatedValue));
-                items = itemsEnumerable?.Select(item => new DictionaryEntry(item.ItemType, new TaskItem(item)));
+                properties = propertyEnumerable?.Select(property => new DictionaryEntry(property.Name, property.EvaluatedValue)) ?? Array.Empty<DictionaryEntry>();
+                items = itemsEnumerable?.Select(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? Array.Empty<DictionaryEntry>();
             }
 
             if (projectProperties != null &&
@@ -134,8 +134,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 parentBuildEventContext,
                 projectFullPath,
                 string.Join(";", targets),
-                properties ?? Array.Empty<DictionaryEntry>(),
-                items ?? Array.Empty<DictionaryEntry>(),
+                properties,
+                items,
                 evaluationId);
 
             // No need to log a redundant message in the common case
