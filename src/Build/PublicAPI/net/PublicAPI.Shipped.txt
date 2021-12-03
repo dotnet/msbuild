@@ -1047,6 +1047,10 @@ Microsoft.Build.Execution.BuildRequestData.ProjectInstance.get -> Microsoft.Buil
 Microsoft.Build.Execution.BuildRequestData.PropertiesToTransfer.get -> System.Collections.Generic.IEnumerable<string>
 Microsoft.Build.Execution.BuildRequestData.RequestedProjectState.get -> Microsoft.Build.Execution.RequestedProjectState
 Microsoft.Build.Execution.BuildRequestData.TargetNames.get -> System.Collections.Generic.ICollection<string>
+Microsoft.Build.Execution.BuildRequestData.InputResultsCacheFiles.get -> string[]
+Microsoft.Build.Execution.BuildRequestData.InputResultsCacheFiles.set -> void
+Microsoft.Build.Execution.BuildRequestData.OutputResultsCacheFile.get -> string
+Microsoft.Build.Execution.BuildRequestData.OutputResultsCacheFile.set -> void
 Microsoft.Build.Execution.BuildRequestDataFlags
 Microsoft.Build.Execution.BuildRequestDataFlags.ClearCachesAfterBuild = 8 -> Microsoft.Build.Execution.BuildRequestDataFlags
 Microsoft.Build.Execution.BuildRequestDataFlags.FailOnUnresolvedSdk = 128 -> Microsoft.Build.Execution.BuildRequestDataFlags
@@ -1370,6 +1374,7 @@ Microsoft.Build.Globbing.MSBuildGlobWithGaps.IsMatch(string stringToMatch) -> bo
 Microsoft.Build.Globbing.MSBuildGlobWithGaps.MainGlob.get -> Microsoft.Build.Globbing.IMSBuildGlob
 Microsoft.Build.Globbing.MSBuildGlobWithGaps.MSBuildGlobWithGaps(Microsoft.Build.Globbing.IMSBuildGlob mainGlob, params Microsoft.Build.Globbing.IMSBuildGlob[] gaps) -> void
 Microsoft.Build.Globbing.MSBuildGlobWithGaps.MSBuildGlobWithGaps(Microsoft.Build.Globbing.IMSBuildGlob mainGlob, System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> gaps) -> void
+Microsoft.Build.Graph.GraphBuildCacheFilePathDelegate
 Microsoft.Build.Graph.GraphBuildOptions
 Microsoft.Build.Graph.GraphBuildOptions.Build.get -> bool
 Microsoft.Build.Graph.GraphBuildOptions.Build.init -> void
@@ -1379,6 +1384,7 @@ Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildOptions.get -> Microsoft.B
 Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildRequestData(Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.ICollection<string> targetsToBuild) -> void
 Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildRequestData(Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices) -> void
 Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildRequestData(Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags) -> void
+Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildRequestData(Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags, System.Collections.Generic.ICollection<Microsoft.Build.Graph.ProjectGraphNode> startingNodes, Microsoft.Build.Graph.ProjectGraphNodeDirection direction = Microsoft.Build.Graph.ProjectGraphNodeDirection.Current, Microsoft.Build.Graph.GraphBuildCacheFilePathDelegate graphBuildCacheFilePathDelegate = null) -> void
 Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildRequestData(Microsoft.Build.Graph.ProjectGraphEntryPoint projectGraphEntryPoint, System.Collections.Generic.ICollection<string> targetsToBuild) -> void
 Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildRequestData(Microsoft.Build.Graph.ProjectGraphEntryPoint projectGraphEntryPoint, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices) -> void
 Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildRequestData(Microsoft.Build.Graph.ProjectGraphEntryPoint projectGraphEntryPoint, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags) -> void
@@ -1392,6 +1398,10 @@ Microsoft.Build.Graph.GraphBuildRequestData.HostServices.get -> Microsoft.Build.
 Microsoft.Build.Graph.GraphBuildRequestData.ProjectGraph.get -> Microsoft.Build.Graph.ProjectGraph
 Microsoft.Build.Graph.GraphBuildRequestData.ProjectGraphEntryPoints.get -> System.Collections.Generic.IEnumerable<Microsoft.Build.Graph.ProjectGraphEntryPoint>
 Microsoft.Build.Graph.GraphBuildRequestData.TargetNames.get -> System.Collections.Generic.ICollection<string>
+Microsoft.Build.Graph.GraphBuildRequestData.StartingGraphNodes.get -> System.Collections.Generic.ICollection<Microsoft.Build.Graph.ProjectGraphNode>
+Microsoft.Build.Graph.GraphBuildRequestData.ProjectGraphNodeDirection.get -> Microsoft.Build.Graph.ProjectGraphNodeDirection
+Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildCacheFilePath.get -> Microsoft.Build.Graph.GraphBuildCacheFilePathDelegate
+Microsoft.Build.Graph.GraphBuildRequestData.IsolateProjects.get -> bool
 Microsoft.Build.Graph.GraphBuildResult
 Microsoft.Build.Graph.GraphBuildResult.CircularDependency.get -> bool
 Microsoft.Build.Graph.GraphBuildResult.Exception.get -> System.Exception
@@ -1448,6 +1458,13 @@ Microsoft.Build.Graph.ProjectGraphNode
 Microsoft.Build.Graph.ProjectGraphNode.ProjectInstance.get -> Microsoft.Build.Execution.ProjectInstance
 Microsoft.Build.Graph.ProjectGraphNode.ProjectReferences.get -> System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode>
 Microsoft.Build.Graph.ProjectGraphNode.ReferencingProjects.get -> System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode>
+Microsoft.Build.Graph.ProjectGraphVisitor
+Microsoft.Build.Graph.ProjectGraphVisitor.ProjectGraphVisitor() -> void
+Microsoft.Build.Graph.ProjectGraphVisitor.FindAll(Microsoft.Build.Graph.ProjectGraphNode graphNode, Microsoft.Build.Graph.ProjectGraphNodeDirection direction) -> System.Collections.Generic.IEnumerable<Microsoft.Build.Graph.ProjectGraphNode>
+Microsoft.Build.Graph.ProjectGraphNodeDirection
+Microsoft.Build.Graph.ProjectGraphNodeDirection.Current = 0 -> Microsoft.Build.Graph.ProjectGraphNodeDirection
+Microsoft.Build.Graph.ProjectGraphNodeDirection.Down = 1 -> Microsoft.Build.Graph.ProjectGraphNodeDirection
+Microsoft.Build.Graph.ProjectGraphNodeDirection.Up = 2 -> Microsoft.Build.Graph.ProjectGraphNodeDirection
 Microsoft.Build.Logging.BinaryLogger
 Microsoft.Build.Logging.BinaryLogger.BinaryLogger() -> void
 Microsoft.Build.Logging.BinaryLogger.CollectProjectImports.get -> Microsoft.Build.Logging.BinaryLogger.ProjectImportsCollectionMode

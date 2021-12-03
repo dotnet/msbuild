@@ -765,6 +765,9 @@ namespace Microsoft.Build.Execution
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
                 ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
                 VerifyStateInternal(BuildManagerState.Building);
+                // Make sure that if we schedule a graph build request with isolate projects (caching)
+                // the build parameters should be configured accordingly
+                ErrorUtilities.VerifyThrowInvalidOperation(_buildParameters.IsolateProjects == requestData.IsolateProjects, "InvalidIsolateBetweenGraphBuildRequestDataAndBuildParameters", _buildParameters.IsolateProjects, requestData.IsolateProjects);
 
                 var newSubmission = new GraphBuildSubmission(this, GetNextSubmissionId(), requestData);
                 _graphBuildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -1655,7 +1658,11 @@ namespace Microsoft.Build.Execution
                 BuildEventContext.Invalid,
                 null,
                 submission.BuildRequestData.Flags,
-                submission.BuildRequestData.RequestedProjectState);
+                submission.BuildRequestData.RequestedProjectState)
+            {
+                InputResultsCacheFiles = submission.BuildRequestData.InputResultsCacheFiles,
+                OutputResultsCacheFile = submission.BuildRequestData.OutputResultsCacheFile,
+            };
         }
 
         private static void AddProxyBuildRequestToSubmission(BuildSubmission submission, int configurationId, ProxyTargets proxyTargets)
@@ -1667,7 +1674,11 @@ namespace Microsoft.Build.Execution
                 proxyTargets,
                 submission.BuildRequestData.HostServices,
                 submission.BuildRequestData.Flags,
-                submission.BuildRequestData.RequestedProjectState);
+                submission.BuildRequestData.RequestedProjectState)
+            {
+                InputResultsCacheFiles = submission.BuildRequestData.InputResultsCacheFiles,
+                OutputResultsCacheFile = submission.BuildRequestData.OutputResultsCacheFile,
+            };
         }
 
         /// <summary>
@@ -1921,8 +1932,51 @@ namespace Microsoft.Build.Execution
             var waitHandle = new AutoResetEvent(true);
             var graphBuildStateLock = new object();
 
-            var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
+            var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
             var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
+
+            // Collect starting nodes or all nodes
+            var startingNodes = graphBuildRequestData.StartingGraphNodes;
+            if (startingNodes != null && startingNodes.Count > 0)
+            {
+                var direction = graphBuildRequestData.ProjectGraphNodeDirection;
+
+                var collector = new ProjectGraphVisitor();
+                foreach (var startingNode in startingNodes)
+                {
+                    if (direction != ProjectGraphNodeDirection.Current)
+                    {
+                        // Collect all the projects downward that we need to compile
+                        foreach (var project in collector.FindAll(startingNode, direction))
+                        {
+                            blockedNodes.Add(project);
+                        }
+                    }
+
+                    // if we want to recompile upward or current, tag the downward projects as finished
+                    if (direction != ProjectGraphNodeDirection.Down)
+                    {
+                        foreach (var project in collector.FindAll(startingNode, ProjectGraphNodeDirection.Down))
+                        {
+                            finishedNodes.Add(project);
+                        }
+                    }
+
+                    // Always recompile the current node 
+                    blockedNodes.Add(startingNode);
+                }
+            }
+            else
+            {
+                // Else we visit the entire graph
+                foreach (var node in projectGraph.ProjectNodes)
+                {
+                    blockedNodes.Add(node);
+                }
+            }
+
+            var getResultsCacheFilePath = graphBuildRequestData.GraphBuildCacheFilePath;
+
             var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
             var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
             Exception submissionException = null;
@@ -1963,6 +2017,21 @@ namespace Microsoft.Build.Execution
                             graphBuildRequestData.HostServices,
                             graphBuildRequestData.Flags);
 
+
+                        if (getResultsCacheFilePath != null)
+                        {
+                            // We don't store a cache for the root project
+                            if (node.ReferencingProjects.Count != 0)
+                            {
+                                request.OutputResultsCacheFile = getResultsCacheFilePath(node);
+                            }
+
+                            if (node.ProjectReferences.Count > 0)
+                            {
+                                request.InputResultsCacheFiles = node.ProjectReferences.Select(x => getResultsCacheFilePath(x)).ToArray();
+                            }
+                        }
+
                         // TODO Tack onto the existing submission instead of pending a whole new submission for every node
                         // Among other things, this makes BuildParameters.DetailedSummary produce a summary for each node, which is not desirable.
                         // We basically want to submit all requests to the scheduler all at once and describe dependencies by requests being blocked by other requests.
@@ -1985,6 +2054,13 @@ namespace Microsoft.Build.Execution
                                 buildingNodes.Remove(finishedBuildSubmission);
 
                                 resultsPerNode.Add(finishedNode, finishedBuildSubmission.BuildResult);
+
+                                // TODO: Do we want to cache results?
+                                //// If we are handling cache, we store 
+                                //if (getResultsCacheFilePath != null)
+                                //{
+                                //    _resultsCache.AddResult(finishedBuildSubmission.BuildResult);
+                                //}
                             }
 
                             waitHandle.Set();

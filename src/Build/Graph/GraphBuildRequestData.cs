@@ -57,6 +57,34 @@ namespace Microsoft.Build.Graph
         }
 
         /// <summary>
+        /// Constructs a GraphBuildRequestData for build requests based on a project graph.
+        /// </summary>
+        /// <param name="projectGraph">The graph to build.</param>
+        /// <param name="targetsToBuild">The targets to build.</param>
+        /// <param name="hostServices">The host services to use, if any.  May be null.</param>
+        /// <param name="flags">Flags controlling this build request.</param>
+        /// <param name="startingNodes">The nodes to start visiting from.</param>
+        /// <param name="direction">The direction to compute the requested graph from the starting nodes.</param>
+        /// <param name="graphBuildCacheFilePathDelegate">The delegate to compute the cache filepath from a graph node.</param>
+        public GraphBuildRequestData(ProjectGraph projectGraph, ICollection<string> targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags, ICollection<ProjectGraphNode> startingNodes, ProjectGraphNodeDirection direction = ProjectGraphNodeDirection.Current, GraphBuildCacheFilePathDelegate graphBuildCacheFilePathDelegate = null)
+            : this(targetsToBuild, hostServices, flags)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(projectGraph, nameof(projectGraph));
+            ErrorUtilities.VerifyThrowArgumentNull(startingNodes, nameof(startingNodes));
+            StartingGraphNodes = new List<ProjectGraphNode>(startingNodes);
+            ProjectGraphNodeDirection = direction;
+            ProjectGraph = projectGraph;
+            GraphBuildCacheFilePath = graphBuildCacheFilePathDelegate;
+
+            // Verify that all nodes are part of the project graph
+            var allNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
+            foreach (var startingGraphNode in StartingGraphNodes)
+            {
+                ErrorUtilities.VerifyThrowArgument(allNodes.Contains(startingGraphNode), $"The node {startingGraphNode.ProjectInstance.FullPath} is not part of the project graph");
+            }
+        }
+
+        /// <summary>
         /// Constructs a GraphBuildRequestData for build requests based on project files.
         /// </summary>
         /// <param name="projectFullPath">The full path to the project file.</param>
@@ -209,5 +237,28 @@ namespace Microsoft.Build.Graph
         /// Gets the HostServices object for this request.
         /// </summary>
         public HostServices HostServices { get; }
+
+        /// <summary>
+        /// Gets the starting nodes used to visit the graph.
+        /// May be null.
+        /// </summary>
+        public ICollection<ProjectGraphNode> StartingGraphNodes { get; }
+
+        /// <summary>
+        /// Gets the starting nodes used to visit the graph.
+        /// May be null.
+        /// </summary>
+        public ProjectGraphNodeDirection ProjectGraphNodeDirection { get; }
+
+        /// <summary>
+        /// Gets the delegate to compute the cache filepath from a graph node.
+        /// May be null.
+        /// </summary>
+        public GraphBuildCacheFilePathDelegate GraphBuildCacheFilePath { get; }
+
+        /// <summary>
+        /// Gets a boolean indicating if this request requires isolate projects (if <see cref="GraphBuildCacheFilePath"/> is not null)
+        /// </summary>
+        public bool IsolateProjects => GraphBuildCacheFilePath != null;
     }
 }

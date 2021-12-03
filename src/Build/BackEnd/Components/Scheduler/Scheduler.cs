@@ -1655,7 +1655,9 @@ namespace Microsoft.Build.BackEnd
         private void HandleRequestBlockedOnResultsTransfer(SchedulableRequest parentRequest, List<ScheduleResponse> responses)
         {
             // Create the new request which will go to the configuration's results node.
-            BuildRequest newRequest = new BuildRequest(parentRequest.BuildRequest.SubmissionId, BuildRequest.ResultsTransferNodeRequestId, parentRequest.BuildRequest.ConfigurationId, Array.Empty<string>(), null, parentRequest.BuildRequest.BuildEventContext, parentRequest.BuildRequest, parentRequest.BuildRequest.BuildRequestDataFlags);
+            BuildRequest newRequest =
+                new BuildRequest(parentRequest.BuildRequest.SubmissionId, BuildRequest.ResultsTransferNodeRequestId, parentRequest.BuildRequest.ConfigurationId, Array.Empty<string>(), null, parentRequest.BuildRequest.BuildEventContext,
+                    parentRequest.BuildRequest, parentRequest.BuildRequest.BuildRequestDataFlags) { InputResultsCacheFiles = parentRequest.BuildRequest.InputResultsCacheFiles, OutputResultsCacheFile = parentRequest.BuildRequest.OutputResultsCacheFile, };
 
             // Assign a new global request id - always different from any other.
             newRequest.GlobalRequestId = _nextGlobalRequestId;

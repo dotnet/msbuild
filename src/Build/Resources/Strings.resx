@@ -142,6 +142,9 @@
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
+  <data name="InvalidIsolateBetweenGraphBuildRequestDataAndBuildParameters" xml:space="preserve">
+    <value>The operation cannot be completed because IsolateProjects is different between BuildParameters ({0}) and the GraphBuildRequestData ({1}).</value>
+  </data>
   <data name="SubmissionAlreadyComplete" xml:space="preserve">
     <value>The operation cannot be completed because the submission has already been executed.</value>
   </data>

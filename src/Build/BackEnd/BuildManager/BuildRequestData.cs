@@ -304,5 +304,17 @@ namespace Microsoft.Build.Execution
         /// Returns the global properties as a dictionary.
         /// </summary>
         internal PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary { get; }
+
+        /// <summary>
+        /// Input cache files that MSBuild will use to read build results from.
+        /// Setting this also turns on isolated builds.
+        /// </summary>
+        public string[] InputResultsCacheFiles { get; set; }
+
+        /// <summary>
+        /// Output cache file where MSBuild will write the contents of its build result caches during EndBuild.
+        /// Setting this also turns on isolated builds.
+        /// </summary>
+        public string OutputResultsCacheFile { get; set; }
     }
 }

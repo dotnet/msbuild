@@ -1178,6 +1178,16 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(_requestEntry.RequestConfiguration.ResultsNodeId == _componentHost.BuildParameters.NodeId, "Results for configuration {0} were not retrieved from node {1}", _requestEntry.RequestConfiguration.ConfigurationId, _requestEntry.RequestConfiguration.ResultsNodeId);
             }
 
+
+            // Make sure that we mark specify that we work in isolation if input/output cache files are specified
+            if (!_componentHost.BuildParameters.IsolateProjects && (_requestEntry.Request.InputResultsCacheFiles != null || _requestEntry.Request.OutputResultsCacheFile != null))
+            {
+                _projectLoggingContext.LogErrorFromText(null, null, null, BuildEventFileInfo.Empty, "Error. IsolateProjects is set to false while the request has input/output results cache files");
+            }
+
+            // Update the cache of the entry request
+            UpdateCacheFromInputResultsCacheFiles();
+
             // Build the targets
             BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this, allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
@@ -1185,6 +1195,13 @@ namespace Microsoft.Build.BackEnd
                 ? result
                 : CopyTargetResultsFromProxyTargetsToRealTargets(result);
 
+
+            // Only cache when we had a success
+            if (result.OverallResult == BuildResultCode.Success && _requestEntry.Request.OutputResultsCacheFile != null)
+            {
+                WriteOutputResultsCacheFile(result, allTargets);
+            }
+            
             if (MSBuildEventSource.Log.IsEnabled())
             {
                 MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
@@ -1377,6 +1394,79 @@ namespace Microsoft.Build.BackEnd
             }
 
             return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+        }
+
+
+        private void UpdateCacheFromInputResultsCacheFiles()
+        {
+            var inputCacheFiles = _requestEntry.Request.InputResultsCacheFiles;
+
+            if (inputCacheFiles == null || inputCacheFiles.Length == 0)
+            {
+                return;
+            }
+
+            if (inputCacheFiles.Any(f => !File.Exists(f)))
+            {
+                _projectLoggingContext.LogError(BuildEventFileInfo.Empty, "InputCacheFilesDoNotExist", string.Join(";", inputCacheFiles.Where(f => !File.Exists(f))));
+                return;
+            }
+
+            var globalConfigCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
+            var globalResultCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
+
+            foreach (var inputCacheFile in inputCacheFiles)
+            {
+                var (configCache, resultsCache, exception) = CacheSerialization.DeserializeCaches(inputCacheFile);
+
+                if (exception != null)
+                {
+                    _projectLoggingContext.LogError(BuildEventFileInfo.Empty, "ErrorReadingCacheFile", inputCacheFile, exception.Message);
+                    return;
+                }
+
+                var configs = configCache.GetEnumerator().ToArray();
+                var results = resultsCache.GetEnumerator().ToArray();
+                ErrorUtilities.VerifyThrow(configs.Length == results.Length, "Assuming 1-to-1 mapping between configs and results. Otherwise it means the caches are either not minimal or incomplete");
+
+                // Make sure that the config is matching the result
+                foreach (var config in configs)
+                {
+                    ErrorUtilities.VerifyThrow(resultsCache.GetResultsForConfiguration(config.ConfigurationId) != null, "Input caches should not contain entries for the same configuration");
+                }
+
+                foreach (var config in configs)
+                {
+                    if (!globalConfigCache.HasConfiguration(config.ConfigurationId))
+                    {
+                        globalConfigCache.AddConfiguration(config);
+#if DEBUG
+                        ErrorUtilities.VerifyThrow(globalResultCache.GetResultsForConfiguration(config.ConfigurationId) == null, "Invalid result already stored for a not ");
+#endif
+                        globalResultCache.AddResult(resultsCache.GetResultsForConfiguration(config.ConfigurationId));
+                    }
+                }
+            }
+        }
+
+        private void WriteOutputResultsCacheFile(BuildResult buildResult, string[] targetNames)
+        {
+            IConfigCache existingConfigCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
+
+            // Extract only the configuration and result for the current request
+            var localConfigCache = new ConfigCache();
+            localConfigCache.AddConfiguration(existingConfigCache[buildResult.ConfigurationId]);
+
+            var localResultCache = new ResultsCache();
+            // Filter the results with the requested targetNames
+            var result = new BuildResult(_requestEntry.Request, buildResult, targetNames, null);
+            localResultCache.AddResult(result);
+
+            var errorMessage = CacheSerialization.SerializeCaches(localConfigCache, localResultCache, _requestEntry.Request.OutputResultsCacheFile);
+            if (errorMessage != null)
+            {
+                _projectLoggingContext.LogErrorFromText(null, null, null, BuildEventFileInfo.Empty, errorMessage);
+            }
         }
 
         private sealed class DedicatedThreadsTaskScheduler : TaskScheduler

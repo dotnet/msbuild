@@ -122,6 +122,11 @@
         <target state="translated">MSB4255: Los siguientes archivos de caché de resultados de entrada no existen: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidIsolateBetweenGraphBuildRequestDataAndBuildParameters">
+        <source>The operation cannot be completed because IsolateProjects is different between BuildParameters ({0}) and the GraphBuildRequestData ({1}).</source>
+        <target state="new">The operation cannot be completed because IsolateProjects is different between BuildParameters ({0}) and the GraphBuildRequestData ({1}).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">La cadena de versión no tenía el formato correcto.</target>

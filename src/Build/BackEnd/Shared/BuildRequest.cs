@@ -349,6 +349,26 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Input cache files that MSBuild will use to read build results from.
+        /// Setting this also turns on isolated builds.
+        /// </summary>
+        public string[] InputResultsCacheFiles
+        {
+            get => _inputResultsCacheFiles;
+            set => _inputResultsCacheFiles = value;
+        }
+
+        /// <summary>
+        /// Output cache file where MSBuild will write the contents of its build result caches during EndBuild.
+        /// Setting this also turns on isolated builds.
+        /// </summary>
+        public string OutputResultsCacheFile
+        {
+            get => _outputResultsCacheFile;
+            set => _outputResultsCacheFile = value;
+        }
+
+        /// <summary>
         /// The route for host-aware tasks back to the host
         /// </summary>
         internal HostServices HostServices
@@ -359,6 +379,8 @@ namespace Microsoft.Build.BackEnd
         }
 
         private HostServices _hostServices;
+        private string[] _inputResultsCacheFiles;
+        private string _outputResultsCacheFile;
 
         /// <summary>
         /// Returns true if this is a root request (one which has no parent.)
@@ -406,6 +428,8 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _requestedProjectState);
             translator.Translate(ref _hostServices);
             translator.Translate(ref _proxyTargets, ProxyTargets.FactoryForDeserialization);
+            translator.Translate(ref _inputResultsCacheFiles);
+            translator.Translate(ref _outputResultsCacheFile);
 
             // UNDONE: (Compat) Serialize the host object.
         }
