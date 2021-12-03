@@ -675,7 +675,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
         [Fact]
-        public void TestsFromCsprojAndArchSwitchShouldFlowToVsTestConsole()
+        public void TestsFromCsprojAndArchSwitchShouldFlowToMsBuild()
         {
             string testAppName = "VSTestCore";
             var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
