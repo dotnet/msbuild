@@ -55,7 +55,14 @@ namespace Microsoft.NET.Build.Tasks
 
                 bool selfContainedIsGlobalProperty = BuildEngine6.GetGlobalProperties().ContainsKey("SelfContained");
 
-                if (selfContainedIsGlobalProperty && project.GetBooleanMetadata("AcceptsRuntimeIdentifier") == true)
+                bool projectAcceptsRuntimeIdentifier = false;
+                if (projectAdditionalProperties.TryGetValue("AcceptsRuntimeIdentifier", out string acceptsRID) &&
+                    bool.TryParse(acceptsRID, out bool acceptsRIDParseResult))
+                {
+                    projectAcceptsRuntimeIdentifier = acceptsRIDParseResult;
+                }
+
+                if (selfContainedIsGlobalProperty && projectAcceptsRuntimeIdentifier)
                 {
                     //  If AcceptsRuntimeIdentifier is true for the project, and SelfContained was set as a global property,
                     //  then the SelfContained value will flow across the project reference when we go to build it, despite the
