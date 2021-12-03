@@ -28,6 +28,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                     enumerator.MoveNext();
                     enumerator.Current.ShouldBe(i);
                 }
+                enumerator.MoveNext().ShouldBeFalse();
             }
         }
 
@@ -38,22 +39,18 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             CopyOnReadEnumerable<string> enumerable = new CopyOnReadEnumerable<string>(values, values);
 
-            int count1 = 0;
-            using (IEnumerator<string> enumerator = values.GetEnumerator())
-            {
-                count1++;
-            }
-            count1.ShouldBe(values.Count);
+            int expectedCount = values.Count;
+            var enumerator = enumerable.GetEnumerator();
 
             // The list has been copied and adding to it has no effect on the enumerable.
             values.Add("d");
 
-            int count2 = 0;
-            using (IEnumerator<string> enumerator = values.GetEnumerator())
+            int actualCount = 0;
+            while (enumerator.MoveNext())
             {
-                count2++;
+                actualCount++;
             }
-            count2.ShouldBe(count1);
+            actualCount.ShouldBe(expectedCount);
         }
     }
 }
