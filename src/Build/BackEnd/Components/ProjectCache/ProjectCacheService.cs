@@ -217,29 +217,24 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             Task.Run(async () =>
             {
-                var buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
-                    cacheRequest.Submission.SubmissionId,
-                    evaluationId: cacheRequest.Configuration.Project.EvaluationId,
-                    projectInstanceId: cacheRequest.Configuration.ConfigurationId);
-
                 try
                 {
-                    var cacheResult = await ProcessCacheRequest(cacheRequest, buildEventContext);
-                    _buildManager.PostCacheResult(cacheRequest, cacheResult, buildEventContext.ProjectContextId);
+                    (CacheResult cacheResult, int projectContextId) = await ProcessCacheRequest(cacheRequest);
+                    _buildManager.PostCacheResult(cacheRequest, cacheResult, projectContextId);
                 }
                 catch (Exception e)
                 {
-                    _buildManager.PostCacheResult(cacheRequest, CacheResult.IndicateException(e), buildEventContext.ProjectContextId);
+                    _buildManager.PostCacheResult(cacheRequest, CacheResult.IndicateException(e), BuildEventContext.InvalidProjectContextId);
                 }
             }, _cancellationToken);
 
-            async Task<CacheResult> ProcessCacheRequest(CacheRequest request, BuildEventContext buildEventContext)
+            async Task<(CacheResult Result, int ProjectContextId)> ProcessCacheRequest(CacheRequest request)
             {
                 // Prevent needless evaluation if design time builds detected.
                 if (_projectCacheDescriptor.VsWorkaround && DesignTimeBuildsDetected)
                 {
                     // The BuildManager should disable the cache when it finds its servicing design time builds.
-                    return CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss);
+                    return (CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss), BuildEventContext.InvalidProjectContextId);
                 }
 
                 EvaluateProjectIfNecessary(request);
@@ -262,7 +257,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     if (DesignTimeBuildsDetected)
                     {
                         // The BuildManager should disable the cache when it finds its servicing design time builds.
-                        return CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss);
+                        return (CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss), BuildEventContext.InvalidProjectContextId);
                     }
                 }
 
@@ -294,7 +289,24 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 BuildRequestData buildRequest = new BuildRequestData(
                     cacheRequest.Configuration.Project,
                     cacheRequest.Submission.BuildRequestData.TargetNames.ToArray());
-                return await GetCacheResultAsync(buildRequest, buildEventContext);
+                BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
+                    cacheRequest.Submission.SubmissionId,
+                    evaluationId: cacheRequest.Configuration.Project.EvaluationId,
+                    projectInstanceId: cacheRequest.Configuration.ConfigurationId,
+                    projectFile: cacheRequest.Configuration.Project.FullPath);
+
+                CacheResult cacheResult;
+                try
+                {
+                    cacheResult = await GetCacheResultAsync(buildRequest, buildEventContext);
+                }
+                catch (Exception ex)
+                {
+                    // Wrap the exception here so we can preserve the ProjectContextId
+                    cacheResult = CacheResult.IndicateException(ex);
+                }
+
+                return (cacheResult, buildEventContext.ProjectContextId);
             }
 
             static bool IsDesignTimeBuild(ProjectInstance project)

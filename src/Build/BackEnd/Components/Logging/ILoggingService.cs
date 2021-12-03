@@ -452,8 +452,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="submissionId">The submission id</param>
         /// <param name="evaluationId">The evaluation id</param>
         /// <param name="projectInstanceId">The project instance id</param>
+        /// <param name="projectFile">Project file being built</param>
         /// <returns></returns>
-        BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId);
+        BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId, string projectFile);
 
         /// <summary>
         /// Logs that a project evaluation has started
