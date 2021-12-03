@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli
             ["--list-tests"] = "--listtests",
             ["--test-adapter-path"] = "--testadapterpath",
             ["--results-directory"] = "--resultsdirectory",
-            ["--arch"] = "--platform",
+            ["--arch"] = "--platform"
         };
 
         private readonly Dictionary<string, string> VerbosityMapping = new Dictionary<string, string>
