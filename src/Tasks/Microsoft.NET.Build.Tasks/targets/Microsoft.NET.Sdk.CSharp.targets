@@ -34,6 +34,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefineConstants>$(DefineConstants);$(VersionlessImplicitFrameworkDefine);$(ImplicitFrameworkDefine);$(BackwardsCompatFrameworkDefine)</DefineConstants>
   </PropertyGroup>
 
+  <!--
+    When DisableDiagnosticTracing is true, TRACE will not be defined.
+  -->
+  <PropertyGroup Condition="'$(DisableDiagnosticTracing)' == 'true'">
+    <!-- Ensure semicolon at the end -->
+    <_NormalizedDefineConstants>$(DefineConstants.TrimEnd(';'));</_NormalizedDefineConstants>
+    <DefineConstants>$(_NormalizedDefineConstants.Replace('TRACE;', '').TrimEnd(';'))</DefineConstants>
+  </PropertyGroup>
+
   <!-- Enable hot reload in 6.0 and newer C# projects -->
   <ItemGroup Condition="'$(SupportsHotReload)' != 'false' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
     <ProjectCapability Include="SupportsHotReload" />
