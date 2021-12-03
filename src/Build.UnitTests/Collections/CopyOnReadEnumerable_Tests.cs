@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
@@ -13,11 +14,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
     /// </summary>
     public class CopyOnReadEnumerable_Tests
     {
-        /// <summary>
-        /// Verify basic case
-        /// </summary>
         [Fact]
-        public void NonCloneableBackingCollection()
+        public void EnumeratesBackingCollection()
         {
             List<int> values = new List<int>(new int[] { 1, 2, 3 });
 
@@ -28,48 +26,34 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 foreach (int i in enumerable)
                 {
                     enumerator.MoveNext();
-                    Assert.Equal(i, enumerator.Current);
+                    enumerator.Current.ShouldBe(i);
                 }
             }
         }
 
-        /// <summary>
-        /// Verify cloning case
-        /// </summary>
         [Fact]
-        public void CloneableBackingCollection()
+        public void CopiesBackingCollection()
         {
-            List<Cloneable> values = new List<Cloneable>(new Cloneable[] { new Cloneable(), new Cloneable(), new Cloneable() });
+            List<string> values = new List<string>(new string[] { "a", "b", "c" });
 
-            CopyOnReadEnumerable<Cloneable> enumerable = new CopyOnReadEnumerable<Cloneable>(values, values);
+            CopyOnReadEnumerable<string> enumerable = new CopyOnReadEnumerable<string>(values, values);
 
-            using (IEnumerator<Cloneable> enumerator = values.GetEnumerator())
+            int count1 = 0;
+            using (IEnumerator<string> enumerator = values.GetEnumerator())
             {
-                foreach (Cloneable i in enumerable)
-                {
-                    enumerator.MoveNext();
-                    Assert.False(Object.ReferenceEquals(i, enumerator.Current)); // "Enumerator copied references."
-                }
+                count1++;
             }
-        }
+            count1.ShouldBe(values.Count);
 
-        /// <summary>
-        /// A class used for testing cloneable backing collections.
-        /// </summary>
-        private class Cloneable : IDeepCloneable<Cloneable>
-        {
-            #region IDeepCloneable<Cloneable> Members
+            // The list has been copied and adding to it has no effect on the enumerable.
+            values.Add("d");
 
-            /// <summary>
-            /// Clones the object.
-            /// </summary>
-            /// <returns>The new instance.</returns>
-            public Cloneable DeepClone()
+            int count2 = 0;
+            using (IEnumerator<string> enumerator = values.GetEnumerator())
             {
-                return new Cloneable();
+                count2++;
             }
-
-            #endregion
+            count2.ShouldBe(count1);
         }
     }
 }

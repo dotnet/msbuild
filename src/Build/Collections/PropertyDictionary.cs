@@ -203,9 +203,8 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Returns an enumerable which clones the properties 
+        /// Returns an enumerable which copies the underlying data on read.
         /// </summary>
-        /// <returns>Returns a cloning enumerable.</returns>
         public IEnumerable<T> GetCopyOnReadEnumerable()
         {
             return new CopyOnReadEnumerable<T>(this, _properties);

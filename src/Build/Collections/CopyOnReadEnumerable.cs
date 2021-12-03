@@ -8,11 +8,9 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
-    /// A class which implements IEnumerable by creating an optionally-deep copy of the backing collection.
+    /// A class which implements IEnumerable by creating a copy of the backing collection.
     /// </summary>
     /// <remarks>
-    /// If the type contained in the collection implements IDeepCloneable then the copies will be deep clones instead
-    /// of mere reference copies.
     /// <see cref="GetEnumerator()"/> is thread safe for concurrent access.
     /// </remarks>
     /// <typeparam name="T">The type contained in the backing collection.</typeparam>
@@ -51,36 +49,10 @@ namespace Microsoft.Build.Collections
         public IEnumerator<T> GetEnumerator()
         {
             List<T> list;
-            if (_backingEnumerable is ICollection backingCollection)
-            {
-                list = new List<T>(backingCollection.Count);
-            }
-            else
-            {
-                list = new List<T>();
-            }
-
-            bool isCloneable = false;
-            bool checkForCloneable = true;
             lock (_syncRoot)
             {
-                foreach (T item in _backingEnumerable)
-                {
-                    if (checkForCloneable)
-                    {
-                        if (item is IDeepCloneable<T>)
-                        {
-                            isCloneable = true;
-                        }
-
-                        checkForCloneable = false;
-                    }
-
-                    T copiedItem = isCloneable ? (item as IDeepCloneable<T>).DeepClone() : item;
-                    list.Add(copiedItem);
-                }
+                list = new List<T>(_backingEnumerable);
             }
-
             return list.GetEnumerator();
         }
 
