@@ -110,6 +110,12 @@ namespace Microsoft.Build.Construction
         private readonly Dictionary<string, ProjectConfigurationInSolution> _projectConfigurations;
         private IReadOnlyDictionary<string, ProjectConfigurationInSolution> _projectConfigurationsReadOnly;
 
+        /// <summary>
+        /// A list of strings representing relative paths from the solution file to loose items.
+        /// </summary>
+        private readonly List<string> _solutionItems;
+        private IReadOnlyList<string> _solutionItemsAsReadOnly;
+
         #endregion
 
         #region Constructors
@@ -132,6 +138,7 @@ namespace Microsoft.Build.Construction
             AspNetConfigurations = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
             _projectConfigurations = new Dictionary<string, ProjectConfigurationInSolution>(StringComparer.OrdinalIgnoreCase);
+            _solutionItems = new List<string>();
         }
 
         #endregion
@@ -214,6 +221,15 @@ namespace Microsoft.Build.Construction
         public IReadOnlyList<string> Dependencies => _dependenciesAsReadonly ?? (_dependenciesAsReadonly = _dependencies.AsReadOnly());
 
         /// <summary>
+        /// List of relative paths mapping to loose folders or files, as defined in the solution file.
+        /// </summary>
+        /// <remarks>
+        /// There is no grouping or ordering inherent in this list (nor is there in the solution file itself), so callers
+        /// should enforce their own grouping or ordering before using this.
+        /// </remarks>
+        public IReadOnlyList<string> SolutionItems => _solutionItemsAsReadOnly ?? (_solutionItemsAsReadOnly = _solutionItems.AsReadOnly());
+
+        /// <summary>
         /// Configurations for this project, keyed off the configuration's full name, e.g. "Debug|x86"
         /// They contain only the project configurations from the solution file that fully matched (configuration and platform) against the solution configurations.
         /// </summary>
@@ -261,6 +277,15 @@ namespace Microsoft.Build.Construction
         {
             _dependencies.Add(referencedProjectGuid);
             _dependenciesAsReadonly = null;
+        }
+
+        /// <summary>
+        /// Add the relative path to the solution item to our solution items list.
+        /// </summary>
+        internal void AddSolutionItem(string relativeFilePath)
+        {
+            _solutionItems.Add(relativeFilePath);
+            _solutionItemsAsReadOnly = null;
         }
 
         /// <summary>

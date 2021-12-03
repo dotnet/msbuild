@@ -845,6 +845,33 @@ namespace Microsoft.Build.Construction
                         line = ReadLine();
                     }
                 }
+                else if (line.StartsWith("ProjectSection(SolutionItems)", StringComparison.Ordinal))
+                {
+                    // Example section:
+                    // ProjectSection(SolutionItems) = preProject
+                    //   docs\README.md = docs\README.md
+                    // EndProjectSection
+
+                    // We have a SolutionItems section.  Each subsequent line should identify
+                    // a solution item.
+                    line = ReadLine();
+                    while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
+                    {
+                        proj.ProjectType = SolutionProjectType.SolutionFolder;
+
+                        // This should be a solution item, aka a file. The key and value should
+                        // be the same, both are the relative path from the solution file to the
+                        // solution item.
+                        Match match = s_crackPropertyLine.Value.Match(line);
+                        if (match.Success)
+                        {
+                            string relativeFilePath = match.Groups["PROPERTYNAME"].Value.Trim();
+                            proj.AddSolutionItem(relativeFilePath);
+                        }
+
+                        line = ReadLine();
+                    }
+                }
                 else if (line.StartsWith("Project(", StringComparison.Ordinal))
                 {
                     // Another Project spotted instead of EndProject for the current one - solution file is malformed

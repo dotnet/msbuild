@@ -1,3 +1,4 @@
+Microsoft.Build.Construction.ProjectInSolution.SolutionItems.get -> System.Collections.Generic.IReadOnlyList<string>
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.get -> Microsoft.Build.FileSystem.IDirectoryCacheFactory
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.set -> void
 Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase.PluginLoggerBase() -> void
