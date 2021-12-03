@@ -492,16 +492,19 @@ namespace Microsoft.Build.BackEnd.Logging
             int projectInstanceId,
             string projectFile)
         {
-            int projectContextId = NextProjectId;
+            lock (_lockObject)
+            {
+                int projectContextId = NextProjectId;
 
-            // In the future if some LogProjectCacheStarted event is created, move this there to align with evaluation and build execution.
-            _projectFileMap[projectContextId] = projectFile;
+                // In the future if some LogProjectCacheStarted event is created, move this there to align with evaluation and build execution.
+                _projectFileMap[projectContextId] = projectFile;
 
-            // Because the project cache runs in the BuildManager, it makes some sense to associate logging with the in-proc node.
-            // If a invalid node id is used the messages become deferred in the console logger and spit out at the end.
-            int nodeId = Scheduler.InProcNodeId;
+                // Because the project cache runs in the BuildManager, it makes some sense to associate logging with the in-proc node.
+                // If a invalid node id is used the messages become deferred in the console logger and spit out at the end.
+                int nodeId = Scheduler.InProcNodeId;
 
-            return new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                return new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            }
         }
 
         /// <inheritdoc />
