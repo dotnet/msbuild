@@ -55,6 +55,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test LogBuildevent by logging a number of events with both OnlyLogCriticalEvents On and Off
         /// </summary>
@@ -105,6 +106,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternlErrorException is thrown when an empty MessageResourceName is passed in.
         /// </summary>
@@ -118,6 +120,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a message is logged when all of the parameters are filled out correctly.
         /// </summary>
@@ -155,6 +158,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an exception is thrown when a null Invalid ProjectFile exception is passed in
         /// </summary>
@@ -168,6 +172,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a message is logged when both parameters are good and
         /// the exception has not been logged yet. Verify with and without OnlyLogCriticalEvents.
@@ -216,6 +221,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when fileInfo is null
         /// </summary>
@@ -229,6 +235,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a error message is correctly logged when  the exception is null.
         /// </summary>
@@ -261,6 +268,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when messageResourceName is empty
         /// </summary>
@@ -275,6 +283,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
@@ -335,6 +344,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
@@ -375,6 +385,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException when a null FileInfo is passed in
         /// </summary>
@@ -388,6 +399,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
@@ -401,6 +413,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test LogErrorFromText with a number of different inputs
         /// </summary>
@@ -510,6 +523,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when taskName is empty
         /// </summary>
@@ -524,6 +538,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a LogTaskWarningFromException with a null exception and a non null exception
         /// with all of the other fields properly filled out.
@@ -567,6 +582,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an exception is when a empty MessageResourceName is passed in.
         /// </summary>
@@ -580,6 +596,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a message is logged when all of the parameters are filled out
         /// </summary>
@@ -607,6 +624,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null fileInfo is passed in
         /// </summary>
@@ -620,6 +638,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
@@ -633,6 +652,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test LogWarningFromText with a number of different inputs
         /// </summary>
@@ -677,6 +697,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when a empty messageResource name is passed in
         /// </summary>
@@ -690,6 +711,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify LogComment by testing it with OnlyLogCriticalEvents On and Off when the rest of the fields are
         /// valid inputs.
@@ -730,6 +752,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a message is logged when an empty message is passed in
         /// </summary>
@@ -753,6 +776,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Make sure we can log a comment when everything should be working correctly
         /// </summary>
@@ -793,6 +817,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
@@ -807,6 +832,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the case where ProjectFile is good and TargetNames is null.
         /// Expect an event to be logged
@@ -844,6 +870,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             service.ResetProcessedBuildEvent();
         }
+
         /// <summary>
         /// Expect the returned BuildEventContext to have the provided ProjectContextId
         /// </summary>
@@ -881,6 +908,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 projectContextId: projectCacheBuildEventContext.ProjectContextId);
             projectStartedBuildEventContext.ProjectContextId.ShouldBe(projectCacheBuildEventContext.ProjectContextId);
         }
+
         /// <summary>
         /// Expect an exception to be thrown if an unknown project context id is passed in for the in-proc node
         /// </summary>
@@ -917,6 +945,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     projectContextId: ProjectContextId);
             });
         }
+
         /// <summary>
         /// Expect an unknown project context id to be accepted on an out-of-proc node.
         /// </summary>
@@ -973,6 +1002,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the project finished event
         /// </summary>
@@ -998,7 +1028,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void LogBuildStarted()
         {
             ProcessBuildEventHelper service =
-                (ProcessBuildEventHelper) ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
 
             service.LogBuildStarted();
 
@@ -1009,7 +1039,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     service.ProcessedBuildEvent.Timestamp);
 
             Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
-            Assert.Equal(buildEvent, (BuildStartedEventArgs) service.ProcessedBuildEvent,
+            Assert.Equal(buildEvent, (BuildStartedEventArgs)service.ProcessedBuildEvent,
                 new EventArgsEqualityComparer<BuildStartedEventArgs>());
         }
 
@@ -1020,7 +1050,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void LogBuildStartedCriticalOnly()
         {
             ProcessBuildEventHelper service =
-                (ProcessBuildEventHelper) ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.OnlyLogCriticalEvents = true;
             service.LogBuildStarted();
 
@@ -1030,7 +1060,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     null /* no help keyword */);
 
             Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
-            Assert.Equal(buildEvent, (BuildStartedEventArgs) service.ProcessedBuildEvent,
+            Assert.Equal(buildEvent, (BuildStartedEventArgs)service.ProcessedBuildEvent,
                 new EventArgsEqualityComparer<BuildStartedEventArgs>());
         }
 
@@ -1089,6 +1119,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the case where TaskName
         /// </summary>
@@ -1124,6 +1155,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the case where TaskName is null.
         /// </summary>
@@ -1164,6 +1196,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the target started event with a null target name.
         /// </summary>
@@ -1212,6 +1245,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the case where TargetName is null.
         /// </summary>
