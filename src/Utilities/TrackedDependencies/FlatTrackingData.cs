@@ -268,11 +268,11 @@ namespace Microsoft.Build.Utilities
                 };
             }
 
-            ITaskItem[] expandedTlogFiles = TrackedDependencies.ExpandWildcards(tlogFilesLocal, _log);
+            ITaskItem[] expandedTlogFiles = TrackedDependencies.ExpandWildcards(tlogFilesLocal);
 
             if (tlogFilesToIgnore != null)
             {
-                ITaskItem[] expandedTlogFilesToIgnore = TrackedDependencies.ExpandWildcards(tlogFilesToIgnore, _log);
+                ITaskItem[] expandedTlogFilesToIgnore = TrackedDependencies.ExpandWildcards(tlogFilesToIgnore);
 
                 if (expandedTlogFilesToIgnore.Length > 0)
                 {

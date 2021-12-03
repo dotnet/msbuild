@@ -3609,35 +3609,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.Equal(originalNewest, data.NewestFileTimeUtc); // "Timestamp changed when no tracked files changed."
         }
 
-        /// <summary>
-        /// Throws exception upon creation of a new FlatTrackingData object with a task item,
-        /// which has an invalid item spec that attempts to enumerate the drive.
-        /// </summary>
-        [Fact]
-        public void ThrowExceptionOnDriveEnumerationDuringWildcardExpansion()
-        {
-            Console.WriteLine("Test: ThrowExceptionOnDriveEnumerationDuringWildcardExpansion");
-
-            using var env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
-
-            // Get the newest time w/o any exclude paths
-            Dictionary<string, DateTime> sharedLastWriteTimeUtcCache = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
-
-            // Adds wildcard that attempts drive enumeration in task item
-            Assert.Throws<DriveEnumerationWildcardException>(() =>
-            {
-                FlatTrackingData data = new FlatTrackingData
-                (
-                    DependencyTestHelper.ItemArray(new TaskItem(@"\**\*.log")),
-                    null,
-                    DateTime.MinValue,
-                    null,
-                    sharedLastWriteTimeUtcCache
-                );
-            });
-        }
-
         [Fact]
         public void TrackingDataCacheResetOnTlogChange()
         {

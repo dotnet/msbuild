@@ -3477,11 +3477,15 @@ namespace Microsoft.Build.Evaluation
 
                 var itemFactory = new ProjectItemFactory(Owner, renamedItemElement);
 
-                (List<ProjectItem> items, FileMatcher.SearchAction action, string fileSpecEscaped) = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, renamedItemElement, itemFactory, renamedItemElement.Include, _data.Expander);
-                if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-                {
-                    LoggingService.LogWarning(s_buildEventContext, "", new BuildEventFileInfo(FullPath), "InvalidAttributeValue", EscapingUtilities.UnescapeAll(fileSpecEscaped), XMakeAttributes.include, XMakeElements.itemGroup);
-                }
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                    DirectoryPath,
+                    renamedItemElement,
+                    itemFactory,
+                    renamedItemElement.Include,
+                    _data.Expander,
+                    LoggingService,
+                    FullPath,
+                    s_buildEventContext);
 
                 if (items.Count != 1)
                 {
@@ -3541,11 +3545,15 @@ namespace Microsoft.Build.Evaluation
             {
                 var itemFactory = new ProjectItemFactory(Owner, itemElement);
 
-                (List<ProjectItem> items, FileMatcher.SearchAction action, string fileSpecEscaped) = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, itemElement, itemFactory, unevaluatedInclude, _data.Expander);
-                if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-                {
-                    LoggingService.LogWarning(s_buildEventContext, "", new BuildEventFileInfo(FullPath), "InvalidAttributeValue", EscapingUtilities.UnescapeAll(fileSpecEscaped), XMakeAttributes.include, XMakeElements.itemGroup);
-                }
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                    DirectoryPath,
+                    itemElement,
+                    itemFactory,
+                    unevaluatedInclude,
+                    _data.Expander,
+                    LoggingService,
+                    FullPath,
+                    s_buildEventContext);
 
                 foreach (ProjectItem item in items)
                 {

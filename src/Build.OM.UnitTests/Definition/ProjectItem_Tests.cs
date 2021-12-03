@@ -11,6 +11,7 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -32,6 +33,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>
                 ";
+
         internal const string ItemWithIncludeUpdateAndRemove = @"
                     <Project>
                         <ItemGroup>
@@ -43,6 +45,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                             </i>
                             <i Remove='{2}'/>
                         </ItemGroup>
+                    </Project>
+                ";
+
+        internal const string ImportProjectElement = @"
+                    <Project>
+                        <Import Project='{0}'/>
                     </Project>
                 ";
 
@@ -757,101 +765,216 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Project getter that renames an item to a wildcard that results in drive enumeration exception.
+        /// Project getter that renames an item to a drive enumerating wildcard that results in an exception.
         /// </summary>
-        [Fact]
-        public void ProjectGetterResultingInDriveEnumerationException()
+        [Theory]
+        [InlineData(@"\**\*.log")]
+        [InlineData(@"$(empty)\**\*.log")]
+        [InlineData(@"\$(empty)**\*.log")]
+        [InlineData(@"\*$(empty)*\*.log")]
+        public void ProjectGetterResultsInDriveEnumerationException(string unevaluatedInclude)
         {
             using (var env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
-                Project project = new Project();
-                Assert.Throws<InvalidProjectFileException>(() => { ProjectItem item = project.AddItem("i", "\\**\\*.log")[0]; });
+                try
+                {
+                    // Setup
+                    Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "1");
+                    Project project = new Project();
+
+                    // Add item and verify
+                    Should.Throw<InvalidProjectFileException>(() => { _ = project.AddItem("i", unevaluatedInclude); });
+                }
+                finally
+                {
+                    ChangeWaves.ResetStateForTests();
+                }
             }
         }
 
         /// <summary>
-        /// Project getter that renames an item to a wildcard that results in logging a warning for attempted drive enumeration.
+        /// Project getter that renames an item to a drive enumerating wildcard that results in a logged warning.
         /// </summary>
-        [Fact]
-        public void ProjectGetterResultingInDriveEnumerationWarning()
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(@"z:\**\*.log")]
+        [InlineData(@"z:$(empty)\**\*.log")]
+        [InlineData(@"z:\**")]
+        [InlineData(@"z:\\**")]
+        [InlineData(@"z:\\\\\\\\**")]
+        [InlineData(@"z:\**\*.cs")]
+        public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
+        {
+            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
+        }
+
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        [InlineData(@"/**/*.log")]
+        [InlineData(@"$(empty)/**/*.log")]
+        [InlineData(@"/$(empty)**/*.log")]
+        [InlineData(@"/*$(empty)*/*.log")]
+        public void ProjectGetterResultsInUnixDriveEnumerationWarning(string unevaluatedInclude)
+        {
+            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
+        }
+
+        private static void ProjectGetterResultsInDriveEnumerationWarning(string unevaluatedInclude)
         {
             using (var env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "0");
-                Project project = new Project();
-                ProjectItem item = project.AddItem("i", "\\**\\*.log")[0];
+                try
+                {
+                    // Reset state
+                    Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
+
+                    // Setup
+                    ProjectCollection projectCollection = new ProjectCollection();
+                    MockLogger collectionLogger = new MockLogger();
+                    projectCollection.RegisterLogger(collectionLogger);
+                    Project project = new Project(projectCollection);
+
+                    // Add item
+                    _= project.AddItem("i", unevaluatedInclude);
+
+                    // Verify
+                    collectionLogger.WarningCount.ShouldBe(1);
+                    collectionLogger.AssertLogContains("MSB5029");
+                    projectCollection.UnregisterAllLoggers();
+                }
+                finally
+                {
+                    ChangeWaves.ResetStateForTests();
+                }
             }
         }
 
         /// <summary>
-        /// Throws exception when an included wildcard evaluates to a drive enumeration.
+        /// Project instance created from a file that contains a drive enumerating wildcard results in a thrown exception.
         /// </summary>
-        [Fact]
-        public void PropertyEvaluationResultingInDriveEnumeration()
-        {
-            using (var env = TestEnvironment.Create())
-            {
-                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
-                string content =
-                @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-                    <ItemGroup>
-                        <FilesToCopy Include=""$(Microsoft_WindowsAzure_EngSys)\**\*"" Exclude=""$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*"" />
-                    </ItemGroup>
-                  </Project>
-                ";
+        [Theory]
+        [InlineData(
+            ImportProjectElement,
+            @"$(Microsoft_WindowsAzure_EngSys)\**\*",
+            null)]
 
-                var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
-                Should.Throw<InvalidProjectFileException>(() => { ProjectInstance.FromFile(testFile.Path, new ProjectOptions()); });
-            }
+        // LazyItem.IncludeOperation
+        [InlineData(
+            ItemWithIncludeAndExclude,
+            @"$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
+
+        // LazyItem.IncludeOperation for Exclude
+        [InlineData(
+            ItemWithIncludeAndExclude,
+            @"$(EmptyProperty)\*.cs",
+            @"$(Microsoft_WindowsAzure_EngSys)\**")]
+        public void ThrowExceptionUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
+        {
+            content = string.Format(content, placeHolder, excludePlaceHolder);
+            CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, true);
         }
 
         /// <summary>
-        /// Throws exception when an imported wildcard evaluates to a drive enumeration.
+        /// Project instance created from a file that contains a drive enumerating wildcard results in a logged warning on the Windows platform.
         /// </summary>
-        [Fact]
-        public void ImportEvaluationResultingInDriveEnumeration()
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(
+            ImportProjectElement,
+            @"z:\**\*.targets",
+            null)]
+
+        // LazyItem.IncludeOperation
+        [InlineData(
+            ItemWithIncludeAndExclude,
+            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
+
+        // LazyItem.IncludeOperation for Exclude
+        [InlineData(
+            ItemWithIncludeAndExclude,
+            @"$(EmptyProperty)\*.cs",
+            @"z:\$(Microsoft_WindowsAzure_EngSys)**")]
+        public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
+        {
+            content = string.Format(content, placeHolder, excludePlaceHolder);
+            CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
+        }
+
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        [InlineData(
+            ImportProjectElement,
+            @"\**\*.targets",
+            null)]
+
+        // LazyItem.IncludeOperation
+        [InlineData(
+            ItemWithIncludeAndExclude,
+            @"$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
+
+        // LazyItem.IncludeOperation for Exclude
+        [InlineData(
+            ItemWithIncludeAndExclude,
+            @"$(EmptyProperty)\*.cs",
+            @"$(Microsoft_WindowsAzure_EngSys)\**")]
+        public void LogWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
+        {
+            content = string.Format(content, placeHolder, excludePlaceHolder);
+                CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
+        }
+
+        private static void CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(string content, bool throwException)
         {
             using (var env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
-                string content =
-                @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-                    <Import Project=""$(Microsoft_WindowsAzure_EngSys)\**\*"" />
-                  </Project>
-                ";
+                // Clean file contents by replacing single quotes with double quotes, etc.
+                content = ObjectModelHelpers.CleanupFileContents(content);
+                var testProject = env.CreateTestProjectWithFiles(content.Cleanup());
 
-                var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
-                Should.Throw<InvalidProjectFileException>(() => { ProjectInstance.FromFile(testFile.Path, new ProjectOptions()); });
+                // Setup and create project instance from file
+                CreateProjectInstanceFromFileWithDriveEnumeratingWildcard(env, testProject.ProjectFile, throwException);
             }
         }
 
-        /// <summary>
-        /// Logs warning when an imported wildcard evaluates to a drive enumeration.
-        /// </summary>
-        [Fact]
-        public void ImportEvaluationResultingInLogDriveEnumeration()
+        private static void CreateProjectInstanceFromFileWithDriveEnumeratingWildcard(TestEnvironment env, string testProjectFile, bool throwException)
         {
-            using (var env = TestEnvironment.Create())
+            try
             {
-                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "0");
-                string content =
-                @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-                    <Import Project=""$(Microsoft_WindowsAzure_EngSys)\**\*"" />
-                  </Project>
-                ";
+                // Reset state 
+                Helpers.ResetStateForDriveEnumeratingWildcardTests(env, throwException ? "1" : "0");
 
-                var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
-                ProjectOptions options = new ProjectOptions();
-                options.ProjectCollection = new ProjectCollection();
+                if (throwException)
+                {
+                    // Verify
+                    Should.Throw<InvalidProjectFileException>(() => { ProjectInstance.FromFile(testProjectFile, new ProjectOptions()); });
+                }
+                else
+                {
+                    // Setup
+                    MockLogger collectionLogger = new MockLogger();
+                    ProjectOptions options = new ProjectOptions();
+                    options.ProjectCollection = new ProjectCollection();
+                    options.ProjectCollection.RegisterLogger(collectionLogger);
 
-                MockLogger collectionLogger = new MockLogger();
-                options.ProjectCollection.RegisterLogger(collectionLogger);
+                    // Action
+                    ProjectInstance.FromFile(testProjectFile, options);
 
-                ProjectInstance.FromFile(testFile.Path, options); // Issue: Unauthorized access exception
-
-                Assert.Equal(1, collectionLogger.WarningCount);
-                options.ProjectCollection.UnregisterAllLoggers();
+                    // Verify
+                    collectionLogger.WarningCount.ShouldBe(1);
+                    collectionLogger.AssertLogContains("MSB5029");
+                    options.ProjectCollection.UnregisterAllLoggers();
+                }
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
             }
         }
 
@@ -1009,7 +1132,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(
             "../a.cs;b.cs", // include string
             "**/*.cs", // exclude string
-            new[] { "a.cs", "ProjectDir/b.cs" }, // files to create relative to the test root dir
+            new[] {"a.cs", "ProjectDir/b.cs"}, // files to create relative to the test root dir
             "ProjectDir", // relative path from test root to project
             new[] { "../a.cs" } // expected items
             )]

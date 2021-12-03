@@ -22,9 +22,8 @@ namespace Microsoft.Build.Utilities
         /// Expand wildcards in the item list.
         /// </summary>
         /// <param name="expand"></param>
-        /// <param name="log"></param>
         /// <returns>Array of items expanded</returns>
-        public static ITaskItem[] ExpandWildcards(ITaskItem[] expand, TaskLoggingHelper log)
+        public static ITaskItem[] ExpandWildcards(ITaskItem[] expand)
         {
             if (expand == null)
             {
@@ -36,36 +35,25 @@ namespace Microsoft.Build.Utilities
             {
                 if (FileMatcher.HasWildcards(item.ItemSpec))
                 {
-                    try
+                    string[] files;
+                    string directoryName = Path.GetDirectoryName(item.ItemSpec);
+                    string searchPattern = Path.GetFileName(item.ItemSpec);
+
+                    // Very often with TLog files we're talking about
+                    // a directory and a simply wildcarded filename
+                    // Optimize for that case here.
+                    if (!FileMatcher.HasWildcards(directoryName) && FileSystems.Default.DirectoryExists(directoryName))
                     {
-                        string[] files;
-                        string directoryName = Path.GetDirectoryName(item.ItemSpec);
-                        string searchPattern = Path.GetFileName(item.ItemSpec);
-
-                        // Very often with TLog files we're talking about
-                        // a directory and a simply wildcarded filename
-                        // Optimize for that case here.
-                        if (!FileMatcher.HasWildcards(directoryName) && FileSystems.Default.DirectoryExists(directoryName))
-                        {
-                            files = Directory.GetFiles(directoryName, searchPattern);
-                        }
-                        else
-                        {
-                            (files, FileMatcher.SearchAction action) = FileMatcher.Default.GetFiles(null, item.ItemSpec);
-                            if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-                            {
-                                log.LogWarning($"Drive enumeration was attempted while assisting with tracking dependencies during wildcard expansion, which relied on the item spec {item.ItemSpec}.");
-                            }
-                        }
-
-                        foreach (string file in files)
-                        {
-                            expanded.Add(new TaskItem(item) { ItemSpec = file });
-                        }
+                        files = Directory.GetFiles(directoryName, searchPattern);
                     }
-                    catch (DriveEnumerationWildcardException)
+                    else
                     {
-                        throw;
+                        files = FileMatcher.Default.GetFiles(null, item.ItemSpec).FileList;
+                    }
+
+                    foreach (string file in files)
+                    {
+                        expanded.Add(new TaskItem(item) { ItemSpec = file });
                     }
                 }
                 else

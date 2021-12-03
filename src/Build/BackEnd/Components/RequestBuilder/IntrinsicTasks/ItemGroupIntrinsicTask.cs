@@ -371,7 +371,7 @@ namespace Microsoft.Build.BackEnd
             ISet<string> removeMetadata
         )
         {
-            //todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
+            // todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(keepMetadata != null && removeMetadata != null), originalItem.KeepMetadataLocation, "KeepAndRemoveMetadataMutuallyExclusive");
             List<ProjectItemInstance> items = new List<ProjectItemInstance>();
 
@@ -426,36 +426,28 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    try
+                    // The expression is not of the form "@(X)". Treat as string
+
+                    // Pass the non wildcard expanded excludes here to fix https://github.com/dotnet/msbuild/issues/2621
+                    string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(
+                        Project.Directory,
+                        includeSplit,
+                        excludes,
+                        loggingMechanism: LoggingContext,
+                        includeLocation: originalItem.IncludeLocation,
+                        excludeLocation: originalItem.ExcludeLocation,
+                        disableExcludeDriveEnumerationWarning: true);
+
+                    foreach (string includeSplitFile in includeSplitFiles)
                     {
-                        // The expression is not of the form "@(X)". Treat as string
-
-                        // Pass the non wildcard expanded excludes here to fix https://github.com/Microsoft/msbuild/issues/2621
-                        (string[] includeSplitFiles, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListEscaped(
-                            Project.Directory,
-                            includeSplit,
-                            excludes);
-
-                        if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-                        {
-                            LoggingContext.LogWarning($"Drive enumeration was detected during wildcard expansion, for the Include attribute, which relied on the file spec {includeSplit}.");
-                        }
-
-                        foreach (string includeSplitFile in includeSplitFiles)
-                        {
-                            items.Add(new ProjectItemInstance(
-                                Project,
-                                originalItem.ItemType,
-                                includeSplitFile,
-                                includeSplit /* before wildcard expansion */,
-                                null,
-                                null,
-                                originalItem.Location.File));
-                        }
-                    }
-                    catch (DriveEnumerationWildcardException ex)
-                    {
-                        ProjectErrorUtilities.ThrowInvalidProject(originalItem.IncludeLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(includeSplit), XMakeAttributes.include, XMakeElements.itemGroup, ex.Message);
+                        items.Add(new ProjectItemInstance(
+                            Project,
+                            originalItem.ItemType,
+                            includeSplitFile,
+                            includeSplit /* before wildcard expansion */,
+                            null,
+                            null,
+                            originalItem.Location.File));
                     }
                 }
             }
@@ -465,22 +457,15 @@ namespace Microsoft.Build.BackEnd
 
             foreach (string excludeSplit in excludes)
             {
-                try
-                {
-                    (string[] excludeSplitFiles, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
-                    if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-                    {
-                        LoggingContext.LogWarning($"Drive enumeration was detected during wildcard expansion for Exclude attribute with the filespec {excludeSplit}.");
-                    }
+                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
+                    Project.Directory,
+                    excludeSplit,
+                    loggingMechanism: LoggingContext,
+                    excludeLocation: originalItem.ExcludeLocation);
 
-                    foreach (string excludeSplitFile in excludeSplitFiles)
-                    {
-                        excludesUnescapedForComparison.Add(excludeSplitFile);
-                    }
-                }
-                catch (DriveEnumerationWildcardException ex)
+                foreach (string excludeSplitFile in excludeSplitFiles)
                 {
-                    ProjectErrorUtilities.ThrowInvalidProject(originalItem.ExcludeLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(excludeSplit), XMakeAttributes.exclude, XMakeElements.itemGroup, ex.Message);
+                    excludesUnescapedForComparison.Add(excludeSplitFile);
                 }
             }
 
@@ -558,28 +543,22 @@ namespace Microsoft.Build.BackEnd
                 // wildcards.  Then loop through each file returned, and add it
                 // to our hashtable.
 
-                try
-                {
-                    // Don't unescape wildcards just yet - if there were any escaped, the caller wants to treat them
-                    // as literals. Everything else is safe to unescape at this point, since we're only matching
-                    // against the file system.
-                    (string[] fileList, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListEscaped(Project.Directory, piece);
-                    if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-                    {
-                        LoggingContext.LogWarning($"Drive enumeration was detected during wildcard expansion, for the Exclude attribute, which relied on the file spec {piece}.");
-                    }
+                // Don't unescape wildcards just yet - if there were any escaped, the caller wants to treat them
+                // as literals. Everything else is safe to unescape at this point, since we're only matching
+                // against the file system.
+                string[] fileList = EngineFileUtilities.GetFileListEscaped(
+                    Project.Directory,
+                    piece,
+                    loggingMechanism: LoggingContext,
+                    includeLocation: specificationLocation,
+                    excludeLocation: specificationLocation);
 
-                    foreach (string file in fileList)
-                    {
-                        // Now unescape everything, because this is the end of the road for this filename.
-                        // We're just going to compare it to the unescaped include path to filter out the
-                        // file excludes.
-                        specificationsToFind.Add(EscapingUtilities.UnescapeAll(file));
-                    }
-                }
-                catch (DriveEnumerationWildcardException ex)
+                foreach (string file in fileList)
                 {
-                    ProjectErrorUtilities.ThrowInvalidProject(specificationLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(piece), XMakeAttributes.exclude, XMakeElements.itemGroup, ex.Message);
+                    // Now unescape everything, because this is the end of the road for this filename.
+                    // We're just going to compare it to the unescaped include path to filter out the
+                    // file excludes.
+                    specificationsToFind.Add(EscapingUtilities.UnescapeAll(file));
                 }
             }
 

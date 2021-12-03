@@ -151,7 +151,7 @@ namespace Microsoft.Build.Utilities
                 };
             }
 
-            _tlogFiles = TrackedDependencies.ExpandWildcards(tlogFiles, _log);
+            _tlogFiles = TrackedDependencies.ExpandWildcards(tlogFiles);
             _tlogAvailable = TrackedDependencies.ItemsExist(_tlogFiles);
             _sourceFiles = sourceFiles;
             _outputs = outputs;

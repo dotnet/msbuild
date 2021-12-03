@@ -1976,7 +1976,7 @@ namespace Microsoft.Build.Evaluation
                     Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, expressionCapture);
 
                     // iterate over the tranform chain, creating the final items from its results
-                    foreach (Pair<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemPairEnumerable(itemsOfType, elementLocation)))
+                    foreach (Pair<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemPairEnumerable(itemsOfType)))
                     {
                         if (!string.IsNullOrEmpty(itemTuple.Key) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
                         {
@@ -2234,34 +2234,20 @@ namespace Microsoft.Build.Evaluation
                 /// Create an enumerator from a base IEnumerable of items into an enumerable
                 /// of transformation result which includes the new itemspec and the base item.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> GetItemPairEnumerable(IEnumerable<S> itemsOfType, IElementLocation elementLocation)
+                internal static IEnumerable<Pair<string, S>> GetItemPairEnumerable(IEnumerable<S> itemsOfType)
                 {
                     // iterate over the items, and yield out items in the tuple format
                     foreach (var item in itemsOfType)
                     {
                         if (Traits.Instance.UseLazyWildCardEvaluation)
                         {
-                            string[] fileListEscaped = null;
-                            try
+                            foreach (var resultantItem in
+                                EngineFileUtilities.GetFileListEscaped(
+                                    item.ProjectDirectory,
+                                    item.EvaluatedIncludeEscaped,
+                                    forceEvaluate: true))
                             {
-                                (fileListEscaped, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListEscaped(
-                                     item.ProjectDirectory,
-                                     item.EvaluatedIncludeEscaped,
-                                     forceEvaluate: true);
-
-                                // TODO: Log warning if return value is LogDriveEnumerationWildcard
-                            }
-                            catch (DriveEnumerationWildcardException ex)
-                            {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(item.EvaluatedIncludeEscaped), XMakeAttributes.include, XMakeElements.itemGroup, ex.Message);
-                            }
-
-                            if (fileListEscaped != null)
-                            {
-                                foreach (var resultantItem in fileListEscaped)
-                                {
-                                    yield return new Pair<string, S>(resultantItem, item);
-                                }
+                                yield return new Pair<string, S>(resultantItem, item);
                             }
                         }
                         else

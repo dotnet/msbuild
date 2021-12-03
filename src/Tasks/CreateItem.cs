@@ -61,18 +61,13 @@ namespace Microsoft.Build.Tasks
             }
 
             // Expand wild cards.
-            (Include, FileMatcher.SearchAction includeAction, string includeFileSpec) = ExpandWildcards(Include);
-            (Exclude, FileMatcher.SearchAction excludeAction, string excludeFileSpec) = ExpandWildcards(Exclude);
+            (Include, bool expandedInclude) = TryExpandingWildcards(Include, XMakeAttributes.include);
+            (Exclude, bool expandedExclude) = TryExpandingWildcards(Exclude, XMakeAttributes.exclude);
 
-            // Log potential drive enumeration glob anomalies when applicable.
-            if (includeAction == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
+            // Execution stops if wildcard expansion fails due to drive enumeration and related env var is set.
+            if (!(expandedInclude && expandedExclude))
             {
-                Log.LogWarning($"Drive enumeration was detected during wildcard expansion in CreateItem for Include attribute with the filespec {includeFileSpec}");
-            }
-
-            if (excludeAction == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-            {
-                Log.LogWarning($"Drive enumeration was detected during wildcard expansion in CreateItem for Exclude attribute with the filespec {excludeFileSpec}");
+                return false;
             }
 
             // Simple case:  no additional attribute to add and no Exclude.  In this case the
@@ -140,52 +135,81 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Attempts to expand wildcards and logs warnings or errors for attempted drive enumeration.
+        /// </summary>
+        private (ITaskItem[] Element, bool NoLoggedErrors) TryExpandingWildcards(ITaskItem[] expand, string attributeType)
+        {
+            const string CreateItemTask = nameof(CreateItem);
+
+            string fileSpec;
+            FileMatcher.SearchAction searchAction;
+
+            (expand, searchAction, fileSpec) = ExpandWildcards(expand);
+
+            // Log potential drive enumeration glob anomalies when applicable.
+            if (searchAction == FileMatcher.SearchAction.LogDriveEnumeratingWildcard)
+            {
+                Log.LogWarningWithCodeFromResources(
+                    "WildcardResultsInDriveEnumeration",
+                    EscapingUtilities.UnescapeAll(fileSpec),
+                    attributeType,
+                    CreateItemTask);
+            }
+            else if (searchAction == FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard)
+            {
+                Log.LogErrorWithCodeFromResources(
+                    "WildcardResultsInDriveEnumeration",
+                    EscapingUtilities.UnescapeAll(fileSpec),
+                    attributeType,
+                    CreateItemTask);
+            }
+
+            return (expand, !Log.HasLoggedErrors);
+        }
+
+        /// <summary>
         /// Expand wildcards in the item list.
         /// </summary>
-        private static (ITaskItem[], FileMatcher.SearchAction, string) ExpandWildcards(ITaskItem[] expand)
+        private static (ITaskItem[] Element, FileMatcher.SearchAction Action, string FileSpec) ExpandWildcards(ITaskItem[] expand)
         {
+            // Used to detect and log drive enumerating wildcard patterns.
+            string[] files;
+            FileMatcher.SearchAction action = FileMatcher.SearchAction.None;
+            string itemSpec = string.Empty;
+
             if (expand == null)
             {
-                return (null, FileMatcher.SearchAction.None, string.Empty);
+                return (null, action, itemSpec);
             }
             else
             {
-                FileMatcher.SearchAction logDriveEnumerationAction = FileMatcher.SearchAction.None;
-                string logDriveEnumerationFileSpec = string.Empty;
                 var expanded = new List<ITaskItem>();
                 foreach (ITaskItem i in expand)
                 {
                     if (FileMatcher.HasWildcards(i.ItemSpec))
                     {
-                        try
+                        (files, action, _) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                        itemSpec = i.ItemSpec;
+                        if (action == FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard)
                         {
-                            (string[] files, FileMatcher.SearchAction action) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
-                            if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-                            {
-                                logDriveEnumerationAction = action;
-                                logDriveEnumerationFileSpec = i.ItemSpec;
-                            }
-
-                            foreach (string file in files)
-                            {
-                                TaskItem newItem = new TaskItem(i) { ItemSpec = file };
-
-                                // Compute the RecursiveDir portion.
-                                FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
-                                if (match.isLegalFileSpec && match.isMatch)
-                                {
-                                    if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
-                                    {
-                                        newItem.SetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir, match.wildcardDirectoryPart);
-                                    }
-                                }
-
-                                expanded.Add(newItem);
-                            }
+                            return (expanded.ToArray(), action, itemSpec);
                         }
-                        catch (DriveEnumerationWildcardException)
+
+                        foreach (string file in files)
                         {
-                            throw;
+                            TaskItem newItem = new TaskItem(i) { ItemSpec = file };
+
+                            // Compute the RecursiveDir portion.
+                            FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
+                            if (match.isLegalFileSpec && match.isMatch)
+                            {
+                                if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
+                                {
+                                    newItem.SetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir, match.wildcardDirectoryPart);
+                                }
+                            }
+
+                            expanded.Add(newItem);
                         }
                     }
                     else
@@ -193,7 +217,7 @@ namespace Microsoft.Build.Tasks
                         expanded.Add(i);
                     }
                 }
-                return (expanded.ToArray(), logDriveEnumerationAction, logDriveEnumerationFileSpec);
+                return (expanded.ToArray(), action, itemSpec);
             }
         }
 

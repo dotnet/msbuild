@@ -341,14 +341,12 @@ namespace Microsoft.Build.Evaluation
         /// Helper that creates a list of ProjectItem's given an unevaluated Include and a ProjectRootElement.
         /// Used by both Evaluator.EvaluateItemElement and by Project.AddItem.
         /// </summary>
-        internal static (List<I>, FileMatcher.SearchAction, string) CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander)
+        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string buildEventFileInfoFullPath, BuildEventContext buildEventContext)
         {
             ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, nameof(unevaluatedIncludeEscaped));
 
             List<I> items = new List<I>();
             itemFactory.ItemElement = itemElement;
-            FileMatcher.SearchAction action = FileMatcher.SearchAction.None;
-            string fileSpecEscaped = string.Empty;
 
             // STEP 1: Expand properties in Include
             string evaluatedIncludeEscaped = expander.ExpandIntoStringLeaveEscaped(unevaluatedIncludeEscaped, ExpanderOptions.ExpandProperties, itemElement.IncludeLocation);
@@ -375,31 +373,29 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // The expression is not of the form "@(X)". Treat as string
-                        try
-                        {
-                            (string[] includeSplitFilesEscaped, action) = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped, excludeSpecsEscaped: null, forceEvaluate: false, fileMatcher: expander.EvaluationContext?.FileMatcher);
-                            if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-                            {
-                                fileSpecEscaped = includeSplitEscaped;
-                            }
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                            rootDirectory,
+                            includeSplitEscaped,
+                            excludeSpecsEscaped: null,
+                            forceEvaluate: false,
+                            fileMatcher: expander.EvaluationContext?.FileMatcher,
+                            loggingMechanism: loggingService,
+                            includeLocation: itemElement.IncludeLocation,
+                            buildEventFileInfoFullPath: buildEventFileInfoFullPath,
+                            buildEventContext: buildEventContext);
 
-                            if (includeSplitFilesEscaped.Length > 0)
-                            {
-                                foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
-                                {
-                                    items.Add(itemFactory.CreateItem(includeSplitFileEscaped, includeSplitEscaped, itemElement.ContainingProject.FullPath));
-                                }
-                            }
-                        }
-                        catch (DriveEnumerationWildcardException ex)
+                        if (includeSplitFilesEscaped.Length > 0)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(itemElement.IncludeLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(includeSplitEscaped), XMakeAttributes.include, XMakeElements.itemGroup, ex.Message);
+                            foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
+                            {
+                                items.Add(itemFactory.CreateItem(includeSplitFileEscaped, includeSplitEscaped, itemElement.ContainingProject.FullPath));
+                            }
                         }
                     }
                 }
             }
 
-            return (items, action, fileSpecEscaped);
+            return items;
         }
 
         /// <summary>
@@ -2055,15 +2051,13 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
-                    (importFilesEscaped, FileMatcher.SearchAction action) = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true, fileMatcher: _evaluationContext.FileMatcher);
-                    if (action == FileMatcher.SearchAction.ReturnLogDriveEnumerationWildcard)
-                    {
-                        _evaluationLoggingContext.LogWarning("InvalidAttributeValue", EscapingUtilities.UnescapeAll(importExpressionEscapedItem), XMakeAttributes.project, XMakeElements.import);
-                    }
-                }
-                catch (DriveEnumerationWildcardException ex)
-                {
-                    ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(importExpressionEscapedItem), XMakeAttributes.project, XMakeElements.import, ex.Message);
+                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                        directoryOfImportingFile,
+                        importExpressionEscapedItem,
+                        forceEvaluate: true,
+                        fileMatcher: _evaluationContext.FileMatcher,
+                        loggingMechanism: _evaluationLoggingContext,
+                        importLocation: importLocationInProject);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
