@@ -71,6 +71,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             {
                 new object[] { @"-h", "--help" },
                 new object[] { @"sometest.dll -s test.settings", @"sometest.dll --settings:test.settings" },
+                new object[] { @"sometest.dll -a x86", @"sometest.dll --platform:x86" },
                 new object[] { @"sometest.dll -t", @"sometest.dll --listtests" },
                 new object[] { @"sometest.dll --list-tests", @"sometest.dll --listtests" },
                 new object[] { @"sometest.dll --filter", @"sometest.dll --testcasefilter" },
