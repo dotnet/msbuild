@@ -8,7 +8,7 @@ MSBuild implements an actual language (... MSBuildian?). For syntax it uses XML.
 
 MSBuild has two data structures:
 - [properties](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-properties): single valued, scalars. Like `string foo` in C#
-- [items](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-items): multi valued, vectors. Like `string[] foo` in C#.
+- [items](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-items): multi valued, arrays. Like `string[] foo` in C#. Except that each array has a name called an `item-type`, and each element may not only have a value, but also have associated key-value pairs known as metadata.
 
 Typewise, everything is a string in MSBuild.
 
