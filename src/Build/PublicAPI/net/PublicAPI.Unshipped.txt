@@ -1,5 +1,9 @@
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.get -> Microsoft.Build.FileSystem.IDirectoryCacheFactory
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.set -> void
+Microsoft.Build.Evaluation.ProjectCollection.ProjectCollection(System.Collections.Generic.IDictionary<string, string> globalProperties, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers, System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> remoteLoggers, Microsoft.Build.Evaluation.ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, Microsoft.Build.Evaluation.ProjectCollectionRootElementCache projectCollectionRootElementCache) -> void
+Microsoft.Build.Evaluation.ProjectCollection.ProjectCollectionRootElementCache.get -> Microsoft.Build.Evaluation.ProjectCollectionRootElementCache
+Microsoft.Build.Evaluation.ProjectCollectionRootElementCache
+Microsoft.Build.Evaluation.ProjectCollectionRootElementCache.ProjectCollectionRootElementCache(bool loadProjectsReadOnly, bool autoReloadFromDisk = false) -> void
 Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase.PluginLoggerBase() -> void
 Microsoft.Build.FileSystem.FindPredicate
 Microsoft.Build.FileSystem.FindTransform<TResult>

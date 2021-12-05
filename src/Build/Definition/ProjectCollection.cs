@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Xml;
 
@@ -300,20 +301,35 @@ namespace Microsoft.Build.Evaluation
         /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
-        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount,
+            bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
+            : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, null)
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a project collection with specified global properties and loggers and using the
+        /// specified toolset locations, node count, and setting of onlyLogCriticalEvents.
+        /// Global properties and loggers may be null.
+        /// Throws InvalidProjectFileException if any of the global properties are reserved.
+        /// May throw InvalidToolsetDefinitionException.
+        /// </summary>
+        /// <param name="globalProperties">The default global properties to use. May be null.</param>
+        /// <param name="loggers">The loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="remoteLoggers">Any remote loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
+        /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
+        /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
+        /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
+        /// <param name="projectCollectionRootElementCache">An existing project collection cache from which it will get the same cache for ProjectRootElement. May be null and in that case it will create a new one.</param>
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, ProjectCollectionRootElementCache projectCollectionRootElementCache)
         {
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
             MaxNodeCount = maxNodeCount;
 
-            if (Traits.Instance.UseSimpleProjectRootElementCacheConcurrency)
-            {
-                ProjectRootElementCache = new SimpleProjectRootElementCache();
-            }
-            else
-            {
-                ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk: false, loadProjectsReadOnly);
-            }
+            ProjectCollectionRootElementCache = projectCollectionRootElementCache ?? new ProjectCollectionRootElementCache(loadProjectsReadOnly);
+            ProjectRootElementCache = ProjectCollectionRootElementCache.ProjectRootElementCache;
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
 
             try
@@ -401,6 +417,11 @@ namespace Microsoft.Build.Evaluation
         /// This event is NOT raised for direct project XML changes via the construction model.
         /// </remarks>
         public event EventHandler<ProjectChangedEventArgs> ProjectChanged;
+
+        /// <summary>
+        /// Gets the cache used for <see cref="ProjectRootElement"/>
+        /// </summary>
+        public ProjectCollectionRootElementCache ProjectCollectionRootElementCache { get; }
 
         /// <summary>
         /// Retrieves the global project collection object.
