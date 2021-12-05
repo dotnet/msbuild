@@ -768,6 +768,8 @@ namespace Microsoft.Build.Execution
                 // Make sure that if we schedule a graph build request with isolate projects (caching)
                 // the build parameters should be configured accordingly
                 ErrorUtilities.VerifyThrowInvalidOperation(_buildParameters.IsolateProjects == requestData.IsolateProjects, "InvalidIsolateBetweenGraphBuildRequestDataAndBuildParameters", _buildParameters.IsolateProjects, requestData.IsolateProjects);
+                // A request using caches requires that BuildParameters.ResetCaches is false
+                ErrorUtilities.VerifyThrowInvalidOperation(requestData.GraphBuildCacheFilePath == null || !_buildParameters.ResetCaches, "InvalidGraphBuildRequestDataWithResetCaches");
 
                 var newSubmission = new GraphBuildSubmission(this, GetNextSubmissionId(), requestData);
                 _graphBuildSubmissions.Add(newSubmission.SubmissionId, newSubmission);

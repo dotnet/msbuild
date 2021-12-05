@@ -122,6 +122,11 @@
         <target state="translated">MSB4255: Następujące pliki wejściowej pamięci podręcznej wyników nie istnieją: „{0}”</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidGraphBuildRequestDataWithResetCaches">
+        <source>The operation cannot be completed because request is requiring caches while the BuildParameters.ResetCaches is true.</source>
+        <target state="new">The operation cannot be completed because request is requiring caches while the BuildParameters.ResetCaches is true.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidIsolateBetweenGraphBuildRequestDataAndBuildParameters">
         <source>The operation cannot be completed because IsolateProjects is different between BuildParameters ({0}) and the GraphBuildRequestData ({1}).</source>
         <target state="new">The operation cannot be completed because IsolateProjects is different between BuildParameters ({0}) and the GraphBuildRequestData ({1}).</target>

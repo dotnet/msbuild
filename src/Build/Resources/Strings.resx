@@ -145,6 +145,9 @@
   <data name="InvalidIsolateBetweenGraphBuildRequestDataAndBuildParameters" xml:space="preserve">
     <value>The operation cannot be completed because IsolateProjects is different between BuildParameters ({0}) and the GraphBuildRequestData ({1}).</value>
   </data>
+  <data name="InvalidGraphBuildRequestDataWithResetCaches" xml:space="preserve">
+    <value>The operation cannot be completed because request is requiring caches while the BuildParameters.ResetCaches is true.</value>
+  </data>
   <data name="SubmissionAlreadyComplete" xml:space="preserve">
     <value>The operation cannot be completed because the submission has already been executed.</value>
   </data>
