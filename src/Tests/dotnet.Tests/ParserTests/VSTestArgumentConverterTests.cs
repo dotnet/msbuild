@@ -71,17 +71,17 @@ namespace Microsoft.DotNet.Tests.ParserTests
             {
                 new object[] { @"-h", "--help" },
                 new object[] { @"sometest.dll -s test.settings", @"sometest.dll --settings:test.settings" },
+                new object[] { @"sometest.dll -a x86", @"sometest.dll --platform:x86" },
                 new object[] { @"sometest.dll -t", @"sometest.dll --listtests" },
                 new object[] { @"sometest.dll --list-tests", @"sometest.dll --listtests" },
                 new object[] { @"sometest.dll --filter", @"sometest.dll --testcasefilter" },
                 new object[] { @"sometest.dll -l trx", @"sometest.dll --logger:trx" },
-                new object[] { @"sometest.dll -a c:\adapterpath\temp", @"sometest.dll --testadapterpath:c:\adapterpath\temp" },
                 new object[] { @"sometest.dll --test-adapter-path c:\adapterpath\temp", @"sometest.dll --testadapterpath:c:\adapterpath\temp" },
                 new object[] { @"sometest.dll -f net451", @"sometest.dll --framework:net451" },
                 new object[] { @"sometest.dll -d c:\temp\log.txt", @"sometest.dll --diag:c:\temp\log.txt" },
                 new object[] { @"sometest.dll --results-directory c:\temp\", @"sometest.dll --resultsdirectory:c:\temp\" },
-                new object[] { @"sometest.dll -s testsettings -t -a c:\path -f net451 -d log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
-                new object[] { @"sometest.dll -s:testsettings -t -a:c:\path -f:net451 -d:log.txt --results-directory:c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
+                new object[] { @"sometest.dll -s testsettings -t -f net451 -d log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
+                new object[] { @"sometest.dll -s:testsettings -t -f:net451 -d:log.txt --results-directory:c:\temp\", @"sometest.dll --settings:testsettings --listtests --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
                 new object[] { @"sometest.dll --settings testsettings -t --test-adapter-path c:\path --framework net451 --diag log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
                 new object[] { @"sometest.dll --blame", @"sometest.dll --blame" },
                 new object[] { @"sometest.dll --blame-crash", @"sometest.dll --blame:CollectDump" },                
@@ -126,13 +126,13 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 new object[] { "sometest.dll --no-restore", "sometest.dll", "--no-restore" },
 
                 new object[] {
-                    @"sometest.dll -s testsettings -t -a c:\path -f net451 -d log.txt --configuration Debug --output C:\foo --runtime win10-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
-                    @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\",
+                    @"sometest.dll -s testsettings -t -f net451 -d log.txt --configuration Debug --output C:\foo --runtime win10-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
+                    @"sometest.dll --settings:testsettings --listtests --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\",
                     @"--configuration Debug --output C:\foo --runtime win10-x64 --no-build --no-restore --interactive"
                 },
                 new object[] {
-                    @"sometest.dll --settings testsettings --list-tests -a c:\path -f net451 --diag log.txt --collect coverage --blame --configuration Debug --output C:\foo --runtime win10-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
-                    @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --collect:coverage --blame --resultsdirectory:c:\temp\",
+                    @"sometest.dll --settings testsettings --list-tests -f net451 --diag log.txt --collect coverage --blame --configuration Debug --output C:\foo --runtime win10-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
+                    @"sometest.dll --settings:testsettings --listtests --framework:net451 --diag:log.txt --collect:coverage --blame --resultsdirectory:c:\temp\",
                     @"--configuration Debug --output C:\foo --runtime win10-x64 --no-build --no-restore --interactive"
                 }
             };
