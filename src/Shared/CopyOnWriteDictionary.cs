@@ -185,21 +185,20 @@ namespace Microsoft.Build.Collections
             }
         }
 
-#nullable disable
         /// <summary>
         /// IDictionary implementation
         /// </summary>
-        object IDictionary.this[object key]
+        object? IDictionary.this[object key]
         {
             get
             {
-                TryGetValue((string) key, out V val);
+                TryGetValue((string) key, out V? val);
                 return val;
             }
-
+#nullable disable
             set => this[(string)key] = (V)value;
+#nullable enable
         }
-#nullable restore
 
         /// <summary>
         /// Adds a value to the dictionary.
@@ -241,6 +240,7 @@ namespace Microsoft.Build.Collections
             return initial != _backing; // whether the removal occured
         }
 
+#nullable disable
         /// <summary>
         /// Attempts to find the value for the specified key in the dictionary.
         /// </summary>
@@ -248,6 +248,7 @@ namespace Microsoft.Build.Collections
         {
             return _backing.TryGetValue(key, out value);
         }
+#nullable restore
 
         /// <summary>
         /// Adds an item to the collection.
@@ -309,6 +310,7 @@ namespace Microsoft.Build.Collections
             return ((IEnumerable<KeyValuePair<string, V>>)this).GetEnumerator();
         }
 
+#nullable disable
         /// <summary>
         /// IDictionary implementation.
         /// </summary>
@@ -316,6 +318,7 @@ namespace Microsoft.Build.Collections
         {
             Add((string)key, (V)value);
         }
+#nullable enable
 
         /// <summary>
         /// IDictionary implementation.
