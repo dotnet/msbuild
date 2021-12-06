@@ -2812,7 +2812,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CreateImportsSnapshot(IList<ResolvedImport> importClosure, IList<ResolvedImport> importClosureWithDuplicates)
         {
-            _importPaths = new List<string>(importClosure.Count - 1 /* outer project */);
+            _importPaths = new List<string>(Math.Max(0, importClosure.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosure)
             {
                 // Exclude outer project itself
@@ -2824,7 +2824,7 @@ namespace Microsoft.Build.Execution
 
             ImportPaths = _importPaths.AsReadOnly();
 
-            _importPathsIncludingDuplicates = new List<string>(importClosureWithDuplicates.Count - 1 /* outer project */);
+            _importPathsIncludingDuplicates = new List<string>(Math.Max(0, importClosureWithDuplicates.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosureWithDuplicates)
             {
                 // Exclude outer project itself

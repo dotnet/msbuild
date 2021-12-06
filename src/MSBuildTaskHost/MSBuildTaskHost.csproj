@@ -139,7 +139,7 @@
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>ResourceUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\StringBuilderCache.cs">
+    <Compile Include="..\Framework\StringBuilderCache.cs">
       <Link>StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">

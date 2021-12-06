@@ -1376,8 +1376,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                // If the metadata was all removed, toss the dictionary
-                _directMetadata?.Remove(metadataName, clearIfEmpty: true);
+                _directMetadata?.Remove(metadataName);
             }
 
             /// <summary>

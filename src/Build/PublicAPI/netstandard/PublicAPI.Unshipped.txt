@@ -1,5 +1,6 @@
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.get -> Microsoft.Build.FileSystem.IDirectoryCacheFactory
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.set -> void
+Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase.PluginLoggerBase() -> void
 Microsoft.Build.FileSystem.FindPredicate
 Microsoft.Build.FileSystem.FindTransform<TResult>
 Microsoft.Build.FileSystem.IDirectoryCache
