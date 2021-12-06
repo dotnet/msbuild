@@ -674,6 +674,32 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StartInfo.EnvironmentVariables[dotnetRoot].Should().Be(Path.GetDirectoryName(dotnet));
         }
 
+        [Fact]
+        public void TestsFromCsprojAndArchSwitchShouldFlowToMsBuild()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
+                .WithVersionVariables()
+                .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
+
+            var testProjectDirectory = testInstance.Path;
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--arch", "wrongArchitecture");
+
+            // Verify
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("error NETSDK1083: The specified RuntimeIdentifier");
+                result.StdOut.Should().Contain("wrongArchitecture");
+            }
+
+            result.ExitCode.Should().Be(1);
+        }
+
         private string CopyAndRestoreVSTestDotNetCoreTestApp([CallerMemberName] string callingMethod = "")
         {
             // Copy VSTestCore project in output directory of project dotnet-vstest.Tests
