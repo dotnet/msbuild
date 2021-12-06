@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Shouldly;
@@ -19,14 +18,14 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             List<int> values = new List<int>(new int[] { 1, 2, 3 });
 
-            CopyOnReadEnumerable<int> enumerable = new CopyOnReadEnumerable<int>(values, values);
+            CopyOnReadEnumerable<int, string> enumerable = new CopyOnReadEnumerable<int, string>(values, values, i => i.ToString());
 
             using (IEnumerator<int> enumerator = values.GetEnumerator())
             {
-                foreach (int i in enumerable)
+                foreach (string s in enumerable)
                 {
                     enumerator.MoveNext();
-                    enumerator.Current.ShouldBe(i);
+                    enumerator.Current.ToString().ShouldBe(s);
                 }
                 enumerator.MoveNext().ShouldBeFalse();
             }
@@ -37,7 +36,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             List<string> values = new List<string>(new string[] { "a", "b", "c" });
 
-            CopyOnReadEnumerable<string> enumerable = new CopyOnReadEnumerable<string>(values, values);
+            CopyOnReadEnumerable<string, string> enumerable = new CopyOnReadEnumerable<string, string>(values, values, s => s);
 
             int expectedCount = values.Count;
             var enumerator = enumerable.GetEnumerator();

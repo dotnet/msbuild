@@ -99,11 +99,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 !LoggingService.IncludeEvaluationPropertiesAndItems &&
                 (!LoggingService.RunningOnRemoteNode || LoggingService.SerializeAllProperties))
             {
-                var propertyEnumerable = projectProperties?.GetCopyOnReadEnumerable();
-                var itemsEnumerable = projectItems?.GetCopyOnReadEnumerable();
-
-                properties = propertyEnumerable?.Select(property => new DictionaryEntry(property.Name, property.EvaluatedValue)) ?? Array.Empty<DictionaryEntry>();
-                items = itemsEnumerable?.Select(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? Array.Empty<DictionaryEntry>();
+                properties = projectProperties?.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue)) ?? Array.Empty<DictionaryEntry>();
+                items = projectItems?.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? Array.Empty<DictionaryEntry>();
             }
 
             if (projectProperties != null &&

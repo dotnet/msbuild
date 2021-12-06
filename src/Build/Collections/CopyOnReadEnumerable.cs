@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
@@ -13,13 +15,14 @@ namespace Microsoft.Build.Collections
     /// <remarks>
     /// <see cref="GetEnumerator()"/> is thread safe for concurrent access.
     /// </remarks>
-    /// <typeparam name="T">The type contained in the backing collection.</typeparam>
-    internal class CopyOnReadEnumerable<T> : IEnumerable<T>
+    /// <typeparam name="TSource">The type contained in the backing collection.</typeparam>
+    /// <typeparam name="TResult">The type of items being enumerated.</typeparam>
+    internal class CopyOnReadEnumerable<TSource, TResult> : IEnumerable<TResult>
     {
         /// <summary>
         /// The backing collection.
         /// </summary>
-        private readonly IEnumerable<T> _backingEnumerable;
+        private readonly IEnumerable<TSource> _backingEnumerable;
 
         /// <summary>
         /// The object used to synchronize access for copying.
@@ -27,17 +30,24 @@ namespace Microsoft.Build.Collections
         private readonly object _syncRoot;
 
         /// <summary>
+        /// The function to translate items in the backing collection to the resulting type.
+        /// </summary>
+        private readonly Func<TSource, TResult> _selector;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="backingEnumerable">The collection which serves as a source for enumeration.</param>
         /// <param name="syncRoot">The object used to synchronize access for copying.</param>
-        public CopyOnReadEnumerable(IEnumerable<T> backingEnumerable, object syncRoot)
+        /// <param name="selector">function to translate items in the backing collection to the resulting type.</param>
+        public CopyOnReadEnumerable(IEnumerable<TSource> backingEnumerable, object syncRoot, Func<TSource, TResult> selector)
         {
             ErrorUtilities.VerifyThrowArgumentNull(backingEnumerable, nameof(backingEnumerable));
             ErrorUtilities.VerifyThrowArgumentNull(syncRoot, nameof(syncRoot));
 
             _backingEnumerable = backingEnumerable;
             _syncRoot = syncRoot;
+            _selector = selector;
         }
 
         #region IEnumerable<T> Members
@@ -46,13 +56,23 @@ namespace Microsoft.Build.Collections
         /// Returns an enumerator over the collection.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<TResult> GetEnumerator()
         {
-            List<T> list;
+            List<TResult> list;
+            if (_backingEnumerable is ICollection backingCollection)
+            {
+                list = new List<TResult>(backingCollection.Count);
+            }
+            else
+            {
+                list = new List<TResult>();
+            }
+
             lock (_syncRoot)
             {
-                list = new List<T>(_backingEnumerable);
+                list.AddRange(_backingEnumerable.Select(_selector));
             }
+
             return list.GetEnumerator();
         }
 
@@ -66,7 +86,7 @@ namespace Microsoft.Build.Collections
         /// <returns>The enumerator.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<T>)this).GetEnumerator();
+            return ((IEnumerable<TResult>)this).GetEnumerator();
         }
 
         #endregion

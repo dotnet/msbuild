@@ -205,9 +205,9 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns an enumerable which copies the underlying data on read.
         /// </summary>
-        public IEnumerable<T> GetCopyOnReadEnumerable()
+        public IEnumerable<TResult> GetCopyOnReadEnumerable<TResult>(Func<T, TResult> selector)
         {
-            return new CopyOnReadEnumerable<T>(this, _properties);
+            return new CopyOnReadEnumerable<T, TResult>(this, _properties, selector);
         }
 
         /// <summary>
