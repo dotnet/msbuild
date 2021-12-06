@@ -1644,7 +1644,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private static void AddBuildRequestToSubmission(BuildSubmission submission, int configurationId)
+        private static void AddBuildRequestToSubmission(BuildSubmission submission, int configurationId, int projectContextId = BuildEventContext.InvalidProjectContextId)
         {
             submission.BuildRequest = new BuildRequest(
                 submission.SubmissionId,
@@ -1652,13 +1652,18 @@ namespace Microsoft.Build.Execution
                 configurationId,
                 submission.BuildRequestData.TargetNames,
                 submission.BuildRequestData.HostServices,
-                BuildEventContext.Invalid,
-                null,
+                parentBuildEventContext: BuildEventContext.Invalid,
+                parentRequest: null,
                 submission.BuildRequestData.Flags,
-                submission.BuildRequestData.RequestedProjectState);
+                submission.BuildRequestData.RequestedProjectState,
+                projectContextId: projectContextId);
         }
 
-        private static void AddProxyBuildRequestToSubmission(BuildSubmission submission, int configurationId, ProxyTargets proxyTargets)
+        private static void AddProxyBuildRequestToSubmission(
+            BuildSubmission submission,
+            int configurationId,
+            ProxyTargets proxyTargets,
+            int projectContextId)
         {
             submission.BuildRequest = new BuildRequest(
                 submission.SubmissionId,
@@ -1667,7 +1672,8 @@ namespace Microsoft.Build.Execution
                 proxyTargets,
                 submission.BuildRequestData.HostServices,
                 submission.BuildRequestData.Flags,
-                submission.BuildRequestData.RequestedProjectState);
+                submission.BuildRequestData.RequestedProjectState,
+                projectContextId);
         }
 
         /// <summary>
@@ -2285,7 +2291,7 @@ namespace Microsoft.Build.Execution
             return newConfiguration;
         }
 
-        internal void PostCacheResult(CacheRequest cacheRequest, CacheResult cacheResult)
+        internal void PostCacheResult(CacheRequest cacheRequest, CacheResult cacheResult, int projectContextId)
         {
             _workQueue.Post(() =>
             {
@@ -2310,14 +2316,14 @@ namespace Microsoft.Build.Execution
                         if (cacheResult.ResultType != CacheResultType.CacheHit)
                         {
                             // Issue the real build request.
-                            AddBuildRequestToSubmission(submission, configuration.ConfigurationId);
+                            AddBuildRequestToSubmission(submission, configuration.ConfigurationId, projectContextId);
                             IssueBuildRequestForBuildSubmission(submission, configuration, allowMainThreadBuild: false);
                         }
                         else if (cacheResult.ResultType == CacheResultType.CacheHit && cacheResult.ProxyTargets != null)
                         {
                             // Setup submission.BuildRequest with proxy targets. The proxy request is built on the inproc node (to avoid
                             // ProjectInstance serialization). The proxy target results are used as results for the real targets.
-                            AddProxyBuildRequestToSubmission(submission, configuration.ConfigurationId, cacheResult.ProxyTargets);
+                            AddProxyBuildRequestToSubmission(submission, configuration.ConfigurationId, cacheResult.ProxyTargets, projectContextId);
                             IssueBuildRequestForBuildSubmission(submission, configuration, allowMainThreadBuild: false);
                         }
                         else if (cacheResult.ResultType == CacheResultType.CacheHit && cacheResult.BuildResult != null)
@@ -2325,7 +2331,7 @@ namespace Microsoft.Build.Execution
                             // Mark the build submission as complete with the provided results and return.
 
                             // There must be a build request for the results, so fake one.
-                            AddBuildRequestToSubmission(submission, configuration.ConfigurationId);
+                            AddBuildRequestToSubmission(submission, configuration.ConfigurationId, projectContextId);
                             var result = new BuildResult(submission.BuildRequest);
 
                             foreach (var cacheResult in cacheResult.BuildResult.ResultsByTarget)

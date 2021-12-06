@@ -2,14 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Execution;
 using System.Collections;
+using System.Collections.Generic;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -38,7 +37,8 @@ namespace Microsoft.Build.BackEnd.Logging
             requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
             requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
             requestEntry.Request.ParentBuildEventContext,
-            requestEntry.RequestConfiguration.Project.EvaluationId
+            requestEntry.RequestConfiguration.Project.EvaluationId,
+            requestEntry.Request.ProjectContextId
             )
         {
         }
@@ -63,7 +63,8 @@ namespace Microsoft.Build.BackEnd.Logging
             projectProperties: null,
             projectItems: null,
             request.ParentBuildEventContext,
-            evaluationId
+            evaluationId,
+            request.ProjectContextId
             )
         {
         }
@@ -71,7 +72,18 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a project logging contexts.
         /// </summary>
-        private ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, int submissionId, int configurationId, string projectFullPath, List<string> targets, string toolsVersion, PropertyDictionary<ProjectPropertyInstance> projectProperties, ItemDictionary<ProjectItemInstance> projectItems, BuildEventContext parentBuildEventContext, int evaluationId = BuildEventContext.InvalidEvaluationId)
+        private ProjectLoggingContext(
+            NodeLoggingContext nodeLoggingContext,
+            int submissionId,
+            int configurationId,
+            string projectFullPath,
+            List<string> targets,
+            string toolsVersion,
+            PropertyDictionary<ProjectPropertyInstance> projectProperties,
+            ItemDictionary<ProjectItemInstance> projectItems,
+            BuildEventContext parentBuildEventContext,
+            int evaluationId,
+            int projectContextId)
             : base(nodeLoggingContext)
         {
             _projectFullPath = projectFullPath;
@@ -130,10 +142,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 configurationId,
                 parentBuildEventContext,
                 projectFullPath,
-                String.Join(";", targets),
+                string.Join(";", targets),
                 properties,
                 items,
-                evaluationId);
+                evaluationId,
+                projectContextId
+                );
 
             // No need to log a redundant message in the common case
             if (toolsVersion != "Current")
