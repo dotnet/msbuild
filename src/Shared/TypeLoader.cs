@@ -363,7 +363,49 @@ namespace Microsoft.Build.Shared
                             foreach (TypeDefinitionHandle typeDefHandle in metadataReader.TypeDefinitions)
                             {
                                 TypeDefinition typeDef = metadataReader.GetTypeDefinition(typeDefHandle);
-                                foreach (var attr in typeDef.Attributes) ;
+                                if ((typeDef.Attributes & TypeAttributes.Public) == 0 || (typeDef.Attributes & TypeAttributes.Class) == 0)
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    string currentTypeName = metadataReader.GetString(typeDef.Name);
+                                    if (currentTypeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(currentTypeName, typeName))
+                                    {
+                                        // We found the right type! Now get its information.
+                                        foreach (CustomAttributeHandle customAttrHandle in typeDef.GetCustomAttributes())
+                                        {
+                                            CustomAttribute customAttribute = metadataReader.GetCustomAttribute(customAttrHandle);
+                                            MemberReference constructorReference = metadataReader.GetMemberReference((MemberReferenceHandle)customAttribute.Constructor);
+                                            if (constructorReference.Parent.Kind == HandleKind.TypeReference)
+                                            {
+                                                TypeReference typeReference = metadataReader.GetTypeReference((TypeReferenceHandle)constructorReference.Parent);
+                                                string customAttributeName = metadataReader.GetString(typeReference.Name);
+                                                switch (customAttributeName)
+                                                {
+                                                    case "STAAttribute":
+                                                        typeInformation.HasSTAThreadAttribute = true;
+                                                        break;
+                                                    case "LoadInSeparateAppDomainAttribute":
+                                                        typeInformation.HasLoadInSeparateAppDomainAttribute = true;
+                                                        break;
+                                                    case "IsMarshallByRef":
+                                                        typeInformation.IsMarshallByRef = true;
+                                                        break;
+                                                }
+                                            }
+                                        }
+
+                                        foreach (InterfaceImplementationHandle interfaceHandle in typeDef.GetInterfaceImplementations())
+                                        {
+                                            if (metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)metadataReader.GetInterfaceImplementation(interfaceHandle).Interface).Name).Equals("IGeneratedTask"))
+                                            {
+                                                typeInformation.ImplementsIGeneratedTask = true;
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }

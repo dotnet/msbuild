@@ -276,6 +276,7 @@ namespace Microsoft.Build.BackEnd
                 _taskName = taskName;
                 _typeInformation = _typeLoader.Load(taskName, loadInfo, taskHostFactoryExplicitlyRequested);
                 _typeInformation.LoadInfo = loadInfo;
+                _typeInformation.TypeName = taskName;
             }
             catch (TargetInvocationException e)
             {

@@ -11,7 +11,6 @@ namespace Microsoft.Build.Shared
     {
         internal AssemblyLoadInfo LoadInfo { get; set; }
         internal string TypeName { get; set; }
-        internal string AssemblyLocation { get; set; }
 
         internal LoadedType LoadedType { get; set; }
 
