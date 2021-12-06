@@ -90,7 +90,7 @@ namespace Microsoft.Build.Shared
             {
                 AssemblyName assemblyName = _type.GetTypeInfo().Assembly.GetName();
                 Version lastVersionToForce = new Version(3, 5);
-                if (assemblyName.Version.CompareTo(lastVersionToForce) > 0)
+                if (assemblyName.Version > lastVersionToForce)
                 {
                     if (String.Equals(assemblyName.Name, "PresentationBuildTasks", StringComparison.OrdinalIgnoreCase))
                     {

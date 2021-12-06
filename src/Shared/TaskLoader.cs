@@ -19,7 +19,7 @@ namespace Microsoft.Build.Shared
         /// For saving the assembly that was loaded by the TypeLoader
         /// We only use this when the assembly failed to load properly into the appdomain
         /// </summary>
-        private static LoadedType s_resolverLoadedType;
+        private static TypeInformation s_resolverTypeInformation;
 #endif
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Creates an ITask instance and returns it.  
         /// </summary>
-        internal static ITask CreateTask(LoadedType loadedType, string taskName, string taskLocation, int taskLine, int taskColumn, LogError logError
+        internal static ITask CreateTask(TypeInformation typeInformation, string taskName, string taskLocation, int taskLine, int taskColumn, LogError logError
 #if FEATURE_APPDOMAIN
             , AppDomainSetup appDomainSetup
 #endif
@@ -56,8 +56,8 @@ namespace Microsoft.Build.Shared
             )
         {
 #if FEATURE_APPDOMAIN
-            bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute();
-            s_resolverLoadedType = null;
+            bool separateAppDomain = typeInformation.HasLoadInSeparateAppDomainAttribute;
+            s_resolverTypeInformation = null;
             taskAppDomain = null;
             ITask taskInstanceInOtherAppDomain = null;
 #endif
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Shared
 #if FEATURE_APPDOMAIN
                 if (separateAppDomain)
                 {
-                    if (!loadedType.Type.GetTypeInfo().IsMarshalByRef)
+                    if (!typeInformation.IsMarshallByRef)
                     {
                         logError
                         (
@@ -104,13 +104,13 @@ namespace Microsoft.Build.Shared
                         }
 
                         AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
-                        s_resolverLoadedType = loadedType;
+                        s_resolverTypeInformation = typeInformation;
 
                         taskAppDomain = AppDomain.CreateDomain(isOutOfProc ? "taskAppDomain (out-of-proc)" : "taskAppDomain (in-proc)", null, appDomainInfo);
 
-                        if (loadedType.LoadedAssembly != null)
+                        if (typeInformation.LoadedType.LoadedAssembly != null)
                         {
-                            taskAppDomain.Load(loadedType.LoadedAssembly.GetName());
+                            taskAppDomain.Load(typeInformation.AssemblyName);
                         }
 
 #if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
@@ -124,13 +124,13 @@ namespace Microsoft.Build.Shared
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
-                    return (ITask)Activator.CreateInstance(loadedType.Type);
+                    return (ITask)Activator.CreateInstance(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.Assembly.AssemblyName, typeInformation.TypeName);
                 }
 
 #if FEATURE_APPDOMAIN
-                if (loadedType.Assembly.AssemblyFile != null)
+                if ((typeInformation.LoadInfo.AssemblyFile ?? typeInformation.LoadedType.Assembly.AssemblyFile) != null)
                 {
-                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceFromAndUnwrap(loadedType.Assembly.AssemblyFile, loadedType.Type.FullName);
+                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceFromAndUnwrap(typeInformation.LoadInfo.AssemblyFile ?? typeInformation.LoadedType.Assembly.AssemblyFile, typeInformation.TypeName);
 
                     // this will force evaluation of the task class type and try to load the task assembly
                     Type taskType = taskInstanceInOtherAppDomain.GetType();
@@ -146,8 +146,8 @@ namespace Microsoft.Build.Shared
                         taskLine,
                         taskColumn,
                         "ConflictingTaskAssembly",
-                        loadedType.Assembly.AssemblyFile,
-                        loadedType.Type.GetTypeInfo().Assembly.Location
+                        typeInformation.LoadInfo.AssemblyFile ?? typeInformation.LoadedType.Assembly.AssemblyFile,
+                        typeInformation.LoadInfo.AssemblyLocation ?? typeInformation.LoadedType.Type.GetTypeInfo().Assembly.Location
                         );
 
                         taskInstanceInOtherAppDomain = null;
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
+                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.Type.GetTypeInfo().Assembly.FullName, typeInformation.TypeName);
                 }
 
                 return taskInstanceInOtherAppDomain;
@@ -181,12 +181,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static Assembly AssemblyResolver(object sender, ResolveEventArgs args)
         {
-            if ((s_resolverLoadedType?.LoadedAssembly != null))
+            if ((s_resolverTypeInformation?.LoadedType?.LoadedAssembly != null))
             {
                 // Match the name being requested by the resolver with the FullName of the assembly we have loaded
-                if (args.Name.Equals(s_resolverLoadedType.LoadedAssembly.FullName, StringComparison.Ordinal))
+                if (args.Name.Equals(s_resolverTypeInformation.LoadedType.LoadedAssembly.FullName, StringComparison.Ordinal))
                 {
-                    return s_resolverLoadedType.LoadedAssembly;
+                    return s_resolverTypeInformation.LoadedType.LoadedAssembly;
                 }
             }
 
@@ -198,10 +198,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void RemoveAssemblyResolver()
         {
-            if (s_resolverLoadedType != null)
+            if (s_resolverTypeInformation != null)
             {
                 AppDomain.CurrentDomain.AssemblyResolve -= AssemblyResolver;
-                s_resolverLoadedType = null;
+                s_resolverTypeInformation = null;
             }
         }
 #endif

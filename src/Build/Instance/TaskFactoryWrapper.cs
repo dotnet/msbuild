@@ -60,13 +60,14 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates an instance of this class for the given type.
         /// </summary>
-        internal TaskFactoryWrapper(ITaskFactory taskFactory, LoadedType taskFactoryLoadInfo, string taskName, IDictionary<string, string> factoryIdentityParameters)
+        internal TaskFactoryWrapper(ITaskFactory taskFactory, TypeInformation taskFactoryLoadInfo, AssemblyLoadInfo taskFactoryAssemblyLoadInfo, string taskName, IDictionary<string, string> factoryIdentityParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskFactory, nameof(taskFactory));
             ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
             _taskFactory = taskFactory;
             _taskName = taskName;
-            TaskFactoryLoadedType = taskFactoryLoadInfo;
+            TaskFactoryTypeInformation = taskFactoryLoadInfo;
+            TaskFactoryAssemblyLoadInfo = taskFactoryAssemblyLoadInfo;
             _factoryIdentityParameters = factoryIdentityParameters;
         }
 
@@ -77,7 +78,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Load information about the task factory itself
         /// </summary>
-        public LoadedType TaskFactoryLoadedType
+        public TypeInformation TaskFactoryTypeInformation
+        {
+            get;
+            private set;
+        }
+
+        public AssemblyLoadInfo TaskFactoryAssemblyLoadInfo
         {
             get;
             private set;

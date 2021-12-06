@@ -434,7 +434,7 @@ namespace Microsoft.Build.Execution
                         targetLoggingContext.LogComment(MessageImportance.Low, "TaskFoundFromFactory", taskName, taskFactory.Name);
                     }
 
-                    if (taskFactory.TaskFactoryLoadedType.HasSTAThreadAttribute())
+                    if (taskFactory.TaskFactoryTypeInformation.HasSTAThreadAttribute)
                     {
                         targetLoggingContext.LogComment(MessageImportance.Low, "TaskNeedsSTA", taskName);
                     }
@@ -1287,7 +1287,7 @@ namespace Microsoft.Build.Execution
                     AssemblyLoadInfo taskFactoryLoadInfo = TaskFactoryAssemblyLoadInfo;
                     ErrorUtilities.VerifyThrow(taskFactoryLoadInfo != null, "TaskFactoryLoadInfo should never be null");
                     ITaskFactory factory = null;
-                    LoadedType loadedType = null;
+                    TypeInformation typeInformation = null;
 
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
@@ -1303,8 +1303,8 @@ namespace Microsoft.Build.Execution
                             );
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
-                        AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
+                        AssemblyTaskFactory taskFactory = new();
+                        typeInformation = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
                         factory = taskFactory;
                     }
                     else
@@ -1330,9 +1330,9 @@ namespace Microsoft.Build.Execution
                                 }
 
                                 // Make sure we only look for task factory classes when loading based on the name
-                                loadedType = s_taskFactoryTypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo);
+                                typeInformation = s_taskFactoryTypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo, false);
 
-                                if (loadedType == null)
+                                if (typeInformation == null)
                                 {
                                     // We could not find the type (this is what null means from the Load method) but there is no reason given so we can only log the fact that 
                                     // we could not find the name given in the task factory attribute in the class specified in the assembly File or assemblyName fields.
@@ -1375,9 +1375,9 @@ namespace Microsoft.Build.Execution
                                 // We have loaded the type, lets now try and construct it
                                 // Any exceptions from the constructor of the task factory will be caught lower down and turned into an InvalidProjectFileExceptions
 #if FEATURE_APPDOMAIN
-                                factory = (ITaskFactory)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
+                                factory = (ITaskFactory)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.Type.GetTypeInfo().Assembly.FullName, typeInformation.TypeName);
 #else
-                                factory = (ITaskFactory) Activator.CreateInstance(loadedType.Type);
+                                factory = (ITaskFactory) Activator.CreateInstance(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.LoadedAssembly.FullName, typeInformation.TypeName);
 #endif
                                 TaskFactoryLoggingHost taskFactoryLoggingHost = new TaskFactoryLoggingHost(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext);
 
@@ -1473,7 +1473,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters);
+                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, typeInformation, TaskFactoryAssemblyLoadInfo, RegisteredName, TaskFactoryParameters);
                 }
 
                 return true;

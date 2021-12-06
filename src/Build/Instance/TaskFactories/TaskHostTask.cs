@@ -13,6 +13,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
+using System.Linq;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -72,7 +73,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The type of the task that we are wrapping.  
         /// </summary>
-        private LoadedType _taskType;
+        private TypeInformation _taskType;
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -122,7 +123,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskHostTask(IElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskHostParameters, LoadedType taskType
+        public TaskHostTask(IElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskHostParameters, TypeInformation taskType
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup appDomainSetup
 #endif
@@ -210,7 +211,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                PropertyInfo parameter = _taskType.Type.GetProperty(property.Name, BindingFlags.Instance | BindingFlags.Public);
+                PropertyInfo parameter = _taskType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.Name.Equals(property.Name)).FirstOrDefault();
                 return parameter.GetValue(this, null);
             }
         }
@@ -242,7 +243,7 @@ namespace Microsoft.Build.BackEnd
             // log that we are about to spawn the task host
             string runtime = _taskHostParameters[XMakeAttributes.runtime];
             string architecture = _taskHostParameters[XMakeAttributes.architecture];
-            _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
+            _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.TypeName, _taskType.LoadInfo.AssemblyLocation ?? _taskType.LoadedType.LoadedAssembly.Location, runtime, architecture);
 
             // set up the node
             lock (_taskHostLock)
@@ -266,8 +267,8 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ColumnNumberOfTaskNode,
                         BuildEngine.ProjectFileOfTaskNode,
                         BuildEngine.ContinueOnError,
-                        _taskType.Type.FullName,
-                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
+                        _taskType.TypeName,
+                        _taskType.LoadInfo.AssemblyLocation ?? _taskType.LoadedType.LoadedAssembly.Location,
                         _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
@@ -463,8 +464,8 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    exceptionMessageArgs = new string[] { _taskType.Type.Name,
-                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
+                    exceptionMessageArgs = new string[] { _taskType.TypeName,
+                        _taskType.LoadInfo.AssemblyLocation ?? _taskType.LoadedType.LoadedAssembly.Location,
                         string.Empty };
                 }
 
@@ -556,11 +557,11 @@ namespace Microsoft.Build.BackEnd
 
             if (e == null)
             {
-                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostAcquireFailed", _taskType.Type.Name, runtime, architecture, msbuildLocation);
+                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostAcquireFailed", _taskType.TypeName, runtime, architecture, msbuildLocation);
             }
             else
             {
-                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostNodeFailedToLaunch", _taskType.Type.Name, runtime, architecture, msbuildLocation, e.ErrorCode, e.Message);
+                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostNodeFailedToLaunch", _taskType.TypeName, runtime, architecture, msbuildLocation, e.ErrorCode, e.Message);
             }
         }
     }

@@ -125,10 +125,11 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        internal LoadedType Load
+        internal TypeInformation Load
         (
             string typeName,
-            AssemblyLoadInfo assembly
+            AssemblyLoadInfo assembly,
+            bool taskHostFactoryExplicitlyRequested
         )
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
@@ -146,7 +147,7 @@ namespace Microsoft.Build.Shared
             AssemblyLoadInfo assembly
         )
         {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly);
+            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly).LoadedType;
         }
 
         /// <summary>
@@ -154,7 +155,7 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        private LoadedType GetLoadedType(Concurrent.ConcurrentDictionary<TypeFilter, Concurrent.ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly)
+        private TypeInformation GetLoadedType(Concurrent.ConcurrentDictionary<TypeFilter, Concurrent.ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which 
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
@@ -231,7 +232,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly
             /// </summary>
-            internal LoadedType GetLoadedTypeByTypeName(string typeName)
+            internal TypeInformation GetLoadedTypeByTypeName(string typeName)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
@@ -282,7 +283,7 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) : null;
+                return type != null ? new TypeInformation() { LoadedType = new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) } : null;
             }
 
             /// <summary>

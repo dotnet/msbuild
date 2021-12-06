@@ -176,7 +176,8 @@
     </Compile>
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\LoadedType.cs" />
-    <Compile Include="..\Shared\AssemblyLoadInfo.cs" />
+	<Compile Include="..\Shared\TypeInformation.cs" />
+	<Compile Include="..\Shared\AssemblyLoadInfo.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />

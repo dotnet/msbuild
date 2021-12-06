@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Threading;
 
 namespace Microsoft.Build.Shared
@@ -183,13 +185,14 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        internal LoadedType Load
+        internal TypeInformation Load
         (
             string typeName,
-            AssemblyLoadInfo assembly
+            AssemblyLoadInfo assembly,
+            bool taskHostFactoryExplicitlyRequested
         )
         {
-            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
+            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, taskHostFactoryExplicitlyRequested);
         }
 
         /// <summary>
@@ -204,7 +207,7 @@ namespace Microsoft.Build.Shared
             AssemblyLoadInfo assembly
         )
         {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly);
+            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, false).LoadedType;
         }
 
         /// <summary>
@@ -212,7 +215,11 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        private LoadedType GetLoadedType(ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly)
+        private TypeInformation GetLoadedType(
+            ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache,
+            string typeName,
+            AssemblyLoadInfo assembly,
+            bool taskHostFactoryExplicitlyRequested)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which 
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
@@ -223,7 +230,7 @@ namespace Microsoft.Build.Shared
             AssemblyInfoToLoadedTypes typeNameToType =
                 loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
 
-            return typeNameToType.GetLoadedTypeByTypeName(typeName);
+            return typeNameToType.GetLoadedTypeByTypeName(typeName, taskHostFactoryExplicitlyRequested);
         }
 
         /// <summary>
@@ -290,12 +297,11 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly
             /// </summary>
-            internal LoadedType GetLoadedTypeByTypeName(string typeName)
+            internal TypeInformation GetLoadedTypeByTypeName(string typeName, bool taskHostFactoryExplicitlyRequested)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
                 // Only one thread should be doing operations on this instance of the object at a time.
-
                 Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
                 {
                     if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
@@ -317,31 +323,56 @@ namespace Microsoft.Build.Shared
                         }
                     }
 
-                    if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
+                    if (!taskHostFactoryExplicitlyRequested)
                     {
-                        lock (_lockObject)
+                        if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
                         {
-                            if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
+                            lock (_lockObject)
                             {
-                                ScanAssemblyForPublicTypes();
-                                Interlocked.Exchange(ref _haveScannedPublicTypes, ~0);
+                                if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
+                                {
+                                    ScanAssemblyForPublicTypes();
+                                    Interlocked.Exchange(ref _haveScannedPublicTypes, ~0);
+                                }
                             }
                         }
-                    }
 
-                    foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
-                    {
-                        // if type matches partially on its name
-                        if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
+                        foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
                         {
-                            return desiredTypeInAssembly.Value;
+                            // if type matches partially on its name
+                            if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
+                            {
+                                return desiredTypeInAssembly.Value;
+                            }
                         }
                     }
 
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) : null;
+                if (type is null)
+                {
+                    TypeInformation typeInformation = new();
+                    if (_assemblyLoadInfo.AssemblyFile != null)
+                    {
+                        using (FileStream stream = File.OpenRead(_assemblyLoadInfo.AssemblyFile))
+                        using (PEReader peFile = new(stream))
+                        {
+                            MetadataReader metadataReader = peFile.GetMetadataReader();
+                            AssemblyDefinition assemblyDef = metadataReader.GetAssemblyDefinition();
+                            foreach (TypeDefinitionHandle typeDefHandle in metadataReader.TypeDefinitions)
+                            {
+                                TypeDefinition typeDef = metadataReader.GetTypeDefinition(typeDefHandle);
+                                foreach (var attr in typeDef.Attributes) ;
+                            }
+                        }
+                    }
+                    return typeInformation;
+                }
+                else
+                {
+                    return new TypeInformation() { LoadedType = new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) };
+                }
             }
 
             /// <summary>

@@ -255,12 +255,12 @@ namespace Microsoft.Build.BackEnd
 
             TaskRequirements requirements = TaskRequirements.None;
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute())
+            if (_taskFactoryWrapper.TaskFactoryTypeInformation.HasSTAThreadAttribute)
             {
                 requirements |= TaskRequirements.RequireSTAThread;
             }
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute())
+            if (_taskFactoryWrapper.TaskFactoryTypeInformation.HasLoadInSeparateAppDomainAttribute)
             {
                 requirements |= TaskRequirements.RequireSeparateAppDomain;
 
@@ -297,7 +297,7 @@ namespace Microsoft.Build.BackEnd
             if (_resolver == null)
             {
                 _resolver = new TaskEngineAssemblyResolver();
-                _resolver.Initialize(_taskFactoryWrapper.TaskFactoryLoadedType.Assembly.AssemblyFile);
+                _resolver.Initialize(_taskFactoryWrapper.TaskFactoryAssemblyLoadInfo.AssemblyFile);
                 _resolver.InstallHandler();
             }
 #endif
@@ -919,12 +919,12 @@ namespace Microsoft.Build.BackEnd
                 // Map to an intrinsic task, if necessary.
                 if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null)), _taskName, null);
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new TypeInformation(new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null))), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null)), _taskName, null);
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new TypeInformation(new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null))), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
             }
@@ -1095,30 +1095,15 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // flag an error if we find a parameter that has no .NET property equivalent
-                    if (_taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly is null)
-                    {
-                        _taskLoggingContext.LogError
-                            (
-                            new BuildEventFileInfo( parameterLocation ),
-                            "UnexpectedTaskAttribute",
-                            parameterName,
-                            _taskName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.Type.Assembly.FullName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.Type.Assembly.Location
-                            );
-                    }
-                    else
-                    {
-                        _taskLoggingContext.LogError
-                            (
-                            new BuildEventFileInfo( parameterLocation ),
-                            "UnexpectedTaskAttribute",
-                            parameterName,
-                            _taskName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.FullName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.Location
-                            );
-                    }
+                    _taskLoggingContext.LogError
+                        (
+                        new BuildEventFileInfo( parameterLocation ),
+                        "UnexpectedTaskAttribute",
+                        parameterName,
+                        _taskName,
+                        _taskFactoryWrapper.TaskFactoryAssemblyLoadInfo.AssemblyName,
+                        _taskFactoryWrapper.TaskFactoryAssemblyLoadInfo.AssemblyLocation
+                        );
                 }
             }
             catch (AmbiguousMatchException)

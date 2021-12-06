@@ -115,7 +115,7 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 TypeLoader typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
-                taskType = typeLoader.Load(taskName, AssemblyLoadInfo.Create(null, taskLocation));
+                taskType = typeLoader.Load(taskName, AssemblyLoadInfo.Create(null, taskLocation), false).LoadedType;
             }
             catch (Exception e)
             {
@@ -309,7 +309,7 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                wrappedTask = TaskLoader.CreateTask(taskType, taskName, taskFile, taskLine, taskColumn, new TaskLoader.LogError(LogErrorDelegate),
+                wrappedTask = TaskLoader.CreateTask(new TypeInformation(taskType), taskName, taskFile, taskLine, taskColumn, new TaskLoader.LogError(LogErrorDelegate),
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif

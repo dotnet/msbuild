@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -36,7 +35,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The loaded type (type, assembly name / file) of the task wrapped by the factory
         /// </summary>
-        private LoadedType _loadedType;
+        private TypeInformation _typeInformation;
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -82,7 +81,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                return _loadedType.Assembly.AssemblyLocation;
+                return _typeInformation.LoadInfo.AssemblyLocation ?? _typeInformation.LoadedType.LoadedAssembly.Location;
             }
         }
 
@@ -91,7 +90,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public Type TaskType
         {
-            get { return _loadedType.Type; }
+            get { return _typeInformation.LoadedType?.Type ?? Type.GetType(_typeInformation.TypeName, true, true); }
         }
 
         /// <summary>
@@ -145,7 +144,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
-            PropertyInfo[] infos = _loadedType.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            PropertyInfo[] infos = _typeInformation.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             var propertyInfos = new TaskPropertyInfo[infos.Length];
             for (int i = 0; i < infos.Length; i++)
             {
@@ -248,7 +247,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize the factory from the task registry
         /// </summary>
-        internal LoadedType InitializeFactory
+        internal TypeInformation InitializeFactory
             (
                 AssemblyLoadInfo loadInfo,
                 string taskName,
@@ -275,8 +274,8 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
-                _loadedType = _typeLoader.Load(taskName, loadInfo);
-                ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
+                _typeInformation = _typeLoader.Load(taskName, loadInfo, taskHostFactoryExplicitlyRequested);
+                _typeInformation.LoadInfo = loadInfo;
             }
             catch (TargetInvocationException e)
             {
@@ -312,7 +311,7 @@ namespace Microsoft.Build.BackEnd
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
 
-            return _loadedType;
+            return _typeInformation;
         }
 
         /// <summary>
@@ -365,7 +364,7 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
 
-                TaskHostTask task = new TaskHostTask(taskLocation, taskLoggingContext, buildComponentHost, mergedParameters, _loadedType
+                TaskHostTask task = new TaskHostTask(taskLocation, taskLoggingContext, buildComponentHost, mergedParameters, _typeInformation
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif
@@ -374,17 +373,13 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-#if FEATURE_APPDOMAIN
-                AppDomain taskAppDomain = null;
-#endif
-
-                ITask taskInstance = TaskLoader.CreateTask(_loadedType, _taskName, taskLocation.File, taskLocation.Line, taskLocation.Column, new TaskLoader.LogError(ErrorLoggingDelegate)
+                ITask taskInstance = TaskLoader.CreateTask(_typeInformation, _taskName, taskLocation.File, taskLocation.Line, taskLocation.Column, new TaskLoader.LogError(ErrorLoggingDelegate)
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif
                     , isOutOfProc
 #if FEATURE_APPDOMAIN
-                    , out taskAppDomain
+                    , out AppDomain taskAppDomain
 #endif
                     );
 
@@ -414,13 +409,13 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, "TaskName");
                 // Parameters match, so now we check to see if the task exists. 
-                return _typeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly) != null;
+                return _typeLoader.ReflectionOnlyLoad(taskName, _typeInformation.LoadInfo) != null;
             }
             catch (TargetInvocationException e)
             {
                 // Exception thrown by the called code itself
                 // Log the stack, so the task vendor can fix their code
-                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, Environment.NewLine + e.InnerException.ToString());
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _typeInformation.LoadInfo.AssemblyLocation ?? _typeInformation.LoadedType.Assembly.AssemblyLocation, Environment.NewLine + e.InnerException.ToString());
             }
             catch (ReflectionTypeLoadException e)
             {
@@ -429,16 +424,16 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (exception != null)
                     {
-                        targetLoggingContext.LogError(new BuildEventFileInfo(taskProjectFile), "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, exception.Message);
+                        targetLoggingContext.LogError(new BuildEventFileInfo(taskProjectFile), "TaskLoadFailure", taskName, _typeInformation.LoadInfo.AssemblyLocation ?? _typeInformation.LoadedType.Assembly.AssemblyLocation, exception.Message);
                     }
                 }
 
-                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _typeInformation.LoadInfo.AssemblyLocation ?? _typeInformation.LoadedType.Assembly.AssemblyLocation, e.Message);
             }
             catch (ArgumentNullException e)
             {
                 // taskName may be null
-                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _typeInformation.LoadInfo.AssemblyLocation ?? _typeInformation.LoadedType.Assembly.AssemblyLocation, e.Message);
             }
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
@@ -447,7 +442,7 @@ namespace Microsoft.Build.BackEnd
                     throw;
                 }
 
-                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _typeInformation.LoadInfo.AssemblyLocation ?? _typeInformation.LoadedType.Assembly.AssemblyLocation, e.Message);
             }
 
             return false;
