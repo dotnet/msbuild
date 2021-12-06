@@ -233,4 +233,3 @@ jobs:
     platform:
       name: 'Managed'
       container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
-`
