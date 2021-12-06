@@ -474,9 +474,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
-        {
-            return new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
-        }
+            => new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
+
+        /// <inheritdoc />
+        public BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId, string projectFile)
+            => new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
 
         /// <inheritdoc />
         public void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile)
@@ -499,7 +501,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Logs a project started event
         /// </summary>
-        public BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items, int evaluationId = BuildEventContext.InvalidEvaluationId)
+        public BuildEventContext LogProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId)
         {
             return new BuildEventContext(0, 0, 0, 0);
         }
