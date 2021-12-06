@@ -1005,6 +1005,80 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Load results from cached files. This method should be called only right after creating a <see cref="BuildManager"/>.
+        /// </summary>
+        /// <param name="cacheFiles">An array of paths to cache files.</param>
+        /// <returns>The results loaded from cached files.</returns>
+        public Dictionary<BuildRequestData, BuildResult> LoadCachedResults(string[] cacheFiles)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(cacheFiles, nameof(cacheFiles));
+
+            ErrorUtilities.VerifyThrow(
+                _scheduler == null && s_nextBuildRequestConfigurationId == 0,
+                "This method must be called before calling any other methods");
+
+            if (_configCache == null)
+            {
+                _configCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
+                _resultsCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
+            }
+            else
+            {
+                ErrorUtilities.VerifyThrow(
+                    !_configCache.Any() && !_resultsCache.Any(),
+                    "Cache must be empty before calling this method");
+            }
+
+            lock (_syncLock)
+            {
+                var configIds = new HashSet<int>();
+                var configAndResults = new List<(BuildRequestConfiguration, BuildResult)>();
+
+                foreach (var file in cacheFiles)
+                {
+                    var (configCache, resultsCache, exception) = CacheSerialization.DeserializeCaches(file);
+
+                    var configCount = configCache.Count();
+                    var resultsCount = resultsCache.Count();
+                    if (configCount != 1 || configCount != resultsCount)
+                    {
+                        ErrorUtilities.VerifyThrow(configCount == 1 && configCount == resultsCount,
+                            $"Invalid cache size. Expecting only 1 entry for both config and results but got {configCount} configs and {resultsCount} results.");
+                    }
+
+                    var result = resultsCache.First();
+                    var config = configCache[result.ConfigurationId];
+
+                    configAndResults.Add((config, result));
+                    var configAdded = configIds.Add(config.ConfigurationId);
+                    ErrorUtilities.VerifyThrow(configAdded, $"The file {file} has a duplicate configuration id {config.ConfigurationId}");
+                }
+
+                var results = new Dictionary<BuildRequestData, BuildResult>();
+                var previousConfigId = 0;
+                foreach (var (config, result) in configAndResults.OrderBy(x => x.Item1.ConfigurationId))
+                {
+                    _configCache.AddConfiguration(config);
+
+                    var buildRequestData = new BuildRequestData(config.ProjectFullPath,
+                        config.GlobalProperties.ToDictionary(),
+                        config.ToolsVersion,
+                        config.TargetNames != null ? config.TargetNames.ToArray() : Array.Empty<string>(), null);
+
+                    results.Add(buildRequestData, result);
+
+                    var currentConfigId = Interlocked.CompareExchange(ref s_nextBuildRequestConfigurationId,
+                        config.ConfigurationId,
+                        previousConfigId);
+                    ErrorUtilities.VerifyThrow(currentConfigId == previousConfigId, "The next configurationId cannot be updated while loading cached results.");
+
+                    previousConfigId = config.ConfigurationId;
+                }
+                return results;
+            }
+        }
+
+        /// <summary>
         /// Shuts down all idle MSBuild nodes on the machine
         /// </summary>
         public void ShutdownAllNodes()
@@ -2052,13 +2126,6 @@ namespace Microsoft.Build.Execution
                                 buildingNodes.Remove(finishedBuildSubmission);
 
                                 resultsPerNode.Add(finishedNode, finishedBuildSubmission.BuildResult);
-
-                                // TODO: Do we want to cache results?
-                                //// If we are handling cache, we store 
-                                //if (getResultsCacheFilePath != null)
-                                //{
-                                //    _resultsCache.AddResult(finishedBuildSubmission.BuildResult);
-                                //}
                             }
 
                             waitHandle.Set();
