@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -91,8 +92,8 @@ namespace Microsoft.Build.BackEnd.Logging
             ProjectPropertyInstanceEnumeratorProxy properties = null;
             ProjectItemInstanceEnumeratorProxy items = null;
 
-            IEnumerable<ProjectPropertyInstance> projectPropertiesEnumerator = projectProperties == null ? Array.Empty<ProjectPropertyInstance>() : null;
-            IEnumerable<ProjectItemInstance> projectItemsEnumerator = projectItems == null ? Array.Empty<ProjectItemInstance>() : null;
+            IEnumerable<ProjectPropertyInstance> projectPropertiesEnumerator = projectProperties == null ? Enumerable.Empty<ProjectPropertyInstance>() : null;
+            IEnumerable<ProjectItemInstance> projectItemsEnumerator = projectItems == null ? Enumerable.Empty<ProjectItemInstance>() : null;
 
             string[] propertiesToSerialize = LoggingService.PropertiesToSerialize;
 
