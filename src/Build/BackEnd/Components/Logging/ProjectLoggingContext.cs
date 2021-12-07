@@ -2,14 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Execution;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -24,14 +24,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private string _projectFullPath;
 
         /// <summary>
-        /// The parent node logging context this context was derived from.
-        /// </summary>
-        private NodeLoggingContext _nodeLoggingContext;
-
-        /// <summary>
         /// Constructs a project logging context.
         /// </summary>
-        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry, BuildEventContext parentBuildEventContext)
+        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry)
             : this
             (
             nodeLoggingContext,
@@ -42,8 +37,9 @@ namespace Microsoft.Build.BackEnd.Logging
             requestEntry.RequestConfiguration.ToolsVersion,
             requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
             requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
-            parentBuildEventContext,
-            requestEntry.RequestConfiguration.Project.EvaluationId
+            requestEntry.Request.ParentBuildEventContext,
+            requestEntry.RequestConfiguration.Project.EvaluationId,
+            requestEntry.Request.ProjectContextId
             )
         {
         }
@@ -51,7 +47,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a project logging context.
         /// </summary>
-        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequest request, string projectFullPath, string toolsVersion, BuildEventContext parentBuildEventContext, int evaluationId = BuildEventContext.InvalidEvaluationId)
+        internal ProjectLoggingContext(
+            NodeLoggingContext nodeLoggingContext,
+            BuildRequest request,
+            string projectFullPath,
+            string toolsVersion,
+            int evaluationId = BuildEventContext.InvalidEvaluationId)
             : this
             (
             nodeLoggingContext,
@@ -60,10 +61,11 @@ namespace Microsoft.Build.BackEnd.Logging
             projectFullPath,
             request.Targets,
             toolsVersion,
-            null,
-            null,
-            parentBuildEventContext,
-            evaluationId
+            projectProperties: null,
+            projectItems: null,
+            request.ParentBuildEventContext,
+            evaluationId,
+            request.ProjectContextId
             )
         {
         }
@@ -71,17 +73,27 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a project logging contexts.
         /// </summary>
-        private ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, int submissionId, int configurationId, string projectFullPath, List<string> targets, string toolsVersion, PropertyDictionary<ProjectPropertyInstance> projectProperties, ItemDictionary<ProjectItemInstance> projectItems, BuildEventContext parentBuildEventContext, int evaluationId = BuildEventContext.InvalidEvaluationId)
+        private ProjectLoggingContext(
+            NodeLoggingContext nodeLoggingContext,
+            int submissionId,
+            int configurationId,
+            string projectFullPath,
+            List<string> targets,
+            string toolsVersion,
+            PropertyDictionary<ProjectPropertyInstance> projectProperties,
+            ItemDictionary<ProjectItemInstance> projectItems,
+            BuildEventContext parentBuildEventContext,
+            int evaluationId,
+            int projectContextId)
             : base(nodeLoggingContext)
         {
-            _nodeLoggingContext = nodeLoggingContext;
             _projectFullPath = projectFullPath;
 
             ProjectPropertyInstanceEnumeratorProxy properties = null;
             ProjectItemInstanceEnumeratorProxy items = null;
 
-            IEnumerable<ProjectPropertyInstance> projectPropertiesEnumerator = projectProperties == null ? Array.Empty<ProjectPropertyInstance>() : null;
-            IEnumerable<ProjectItemInstance> projectItemsEnumerator = projectItems == null ? Array.Empty<ProjectItemInstance>() : null;
+            IEnumerable<ProjectPropertyInstance> projectPropertiesEnumerator = projectProperties == null ? Enumerable.Empty<ProjectPropertyInstance>() : null;
+            IEnumerable<ProjectItemInstance> projectItemsEnumerator = projectItems == null ? Enumerable.Empty<ProjectItemInstance>() : null;
 
             string[] propertiesToSerialize = LoggingService.PropertiesToSerialize;
 
@@ -131,10 +143,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 configurationId,
                 parentBuildEventContext,
                 projectFullPath,
-                String.Join(";", targets),
+                string.Join(";", targets),
                 properties,
                 items,
-                evaluationId);
+                evaluationId,
+                projectContextId
+                );
 
             // No need to log a redundant message in the common case
             if (toolsVersion != "Current")
@@ -143,17 +157,6 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             this.IsValid = true;
-        }
-
-        /// <summary>
-        /// Retrieves the node logging context.
-        /// </summary>
-        internal NodeLoggingContext NodeLoggingContext
-        {
-            get
-            {
-                return _nodeLoggingContext;
-            }
         }
 
         /// <summary>

@@ -1131,8 +1131,7 @@ namespace Microsoft.Build.BackEnd
                     _nodeLoggingContext,
                     _requestEntry.Request,
                     _requestEntry.RequestConfiguration.ProjectFullPath,
-                    _requestEntry.RequestConfiguration.ToolsVersion,
-                    _requestEntry.Request.ParentBuildEventContext
+                    _requestEntry.RequestConfiguration.ToolsVersion
                     );
 
                 throw;

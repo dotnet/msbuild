@@ -196,7 +196,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             metadata.Count.ShouldBe(2);
             metadata["a"].EvaluatedValue.ShouldBe("override");
             metadata["b"].EvaluatedValue.ShouldBe("base");
-            metadata.PropertyNames.ShouldBeSetEquivalentTo(new[] { "a", "b" });
 
             item.EnumerateMetadata().ShouldBeSetEquivalentTo(new KeyValuePair<string, string>[] { new("a", "override"), new("b", "base") });
 

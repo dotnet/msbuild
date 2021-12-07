@@ -1047,7 +1047,7 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    return Array.Empty<KeyValuePair<string, string>>();
+                    return Enumerable.Empty<KeyValuePair<string, string>>();
                 }
             }
 
@@ -1342,8 +1342,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                // If the metadata was all removed, toss the dictionary
-                _directMetadata?.Remove(metadataName, clearIfEmpty: true);
+                _directMetadata?.Remove(metadataName);
             }
 
             /// <summary>
