@@ -171,7 +171,7 @@ namespace Microsoft.Build.Graph
             {
                 if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> cachedTransitiveReferences))
                 {
-                    transitiveReferences = transitiveReferences.Concat(cachedTransitiveReferences).ToHashSet();
+                    transitiveReferences.UnionWith(cachedTransitiveReferences);
                 }
                 else
                 {
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Graph
                         }
                         else if (transitiveReferenceCache.TryGetValue(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode, out cachedTransitiveReferences))
                         {
-                            toCache = toCache.Concat(cachedTransitiveReferences).ToHashSet();
+                            toCache.UnionWith(cachedTransitiveReferences);
                         }
                         else
                         {
@@ -192,10 +192,10 @@ namespace Microsoft.Build.Graph
                         }
                     }
 
-                    transitiveReferenceCache[parsedProject.GraphNode] = transitiveReferences;
+                    transitiveReferenceCache[parsedProject.GraphNode] = toCache;
                     if (referencesFromHere is not null)
                     {
-                        referencesFromHere = referencesFromHere.Concat(toCache).ToHashSet();
+                        referencesFromHere.UnionWith(toCache);
                     }
                 }
             }
