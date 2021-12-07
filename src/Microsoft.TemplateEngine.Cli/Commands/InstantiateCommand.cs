@@ -98,18 +98,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected async override Task<NewCommandStatus> ExecuteAsync(InstantiateCommandArgs instantiateArgs, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
-            //TODO: revise this output
-            //help doesn't have argumentes defined at the moment though should
-            //help for dotnet new should have both arguments and commands present
-            if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName) && instantiateArgs.HelpRequested)
-            {
-                context.HelpBuilder.Write(
-                    instantiateArgs.ParseResult.CommandResult.Command,
-                    StandardStreamWriter.Create(context.Console.Out),
-                    instantiateArgs.ParseResult);
-                return NewCommandStatus.Success;
-            }
-
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             var hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
             if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
