@@ -205,12 +205,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
         [Theory]
+        //https://github.com/dotnet/command-line-api/issues/1503
         [InlineData("new search --columns author type", new[] { "author", "type" })]
         [InlineData("new search --columns author --columns type", new[] { "author", "type" })]
-        [InlineData("new search --columns author,type", new[] { "author", "type" })]
-        [InlineData("new search --columns author, type --columns tag", new[] { "author", "type", "tag" })]
+        //[InlineData("new search --columns author,type", new[] { "author", "type" })]
+        //[InlineData("new search --columns author, type --columns tag", new[] { "author", "type", "tag" })]
         [InlineData("new --search --columns author --columns type", new[] { "author", "type" })]
-        [InlineData("new --search --columns author,type", new[] { "author", "type" })]
+        //[InlineData("new --search --columns author,type", new[] { "author", "type" })]
         public void Search_CanParseColumns(string command, string[] expectedColumns)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
