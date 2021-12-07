@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_builds_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager
@@ -42,7 +42,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ToolsetInfo.CurrentTargetFramework}/Newtonsoft.Json.dll",
                 $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.deps.json",
                 $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp{EnvironmentInfo.ExecutableExtension}",
-                $"{ToolsetInfo.CurrentTargetFramework}/ref/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.pdb",
                 "netstandard1.5/NetStandardAndNetCoreApp.deps.json"

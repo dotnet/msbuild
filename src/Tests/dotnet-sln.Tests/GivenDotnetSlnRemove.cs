@@ -625,7 +625,7 @@ EndGlobal
                 SearchOption.AllDirectories);
             releaseDirectory.Count().Should().Be(1, $"App {reasonString}");
             Directory.EnumerateFiles(releaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
-                .Count().Should().Be(2, $"App {reasonString}");
+                .Count().Should().Be(1, $"App {reasonString}");
         }
 
         [Fact]
