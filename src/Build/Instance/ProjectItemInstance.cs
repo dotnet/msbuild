@@ -1550,6 +1550,11 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
+                // Metadata can come from both item definitions and direct values, and they must
+                // be applied in order, with later values overriding newer ones. Here we determine
+                // the set of metadata names on 'this', to avoid computing the full metadata collection
+                // of both 'this' and 'other'. Once we have the names for 'this', we enumerate 'other'
+                // and ensure the names we see there are set-equal to the names we produce here.
                 var thisNames = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
 
                 if (_itemDefinitions is not null)
