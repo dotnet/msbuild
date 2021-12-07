@@ -25,7 +25,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse("new console --framework net5.0 --l");
             var suggestions = parseResult.GetSuggestions().ToArray();
 
+            Assert.Equal(2, suggestions.Length);
             Assert.Contains("--langVersion", suggestions);
+            Assert.Contains("--language", suggestions);
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
@@ -39,6 +41,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse("new console --language ");
             var suggestions = parseResult.GetSuggestions().ToArray();
 
+            Assert.Equal(3, suggestions.Length);
             Assert.Contains("C#", suggestions);
             Assert.Contains("F#", suggestions);
             Assert.Contains("VB", suggestions);
@@ -55,6 +58,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse("new install --interactive ");
             var result = parseResult.GetSuggestions().ToArray();
 
+            Assert.Equal(2, result.Length);
             Assert.Contains("--nuget-source", result);
         }
 
@@ -81,6 +85,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse("new install --nuget-source me");
             var result = parseResult.GetSuggestions().ToArray();
 
+            Assert.Equal(1, result.Length);
             Assert.Contains("--interactive", result);
         }
 

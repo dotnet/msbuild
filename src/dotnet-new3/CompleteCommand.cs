@@ -9,6 +9,10 @@ using Microsoft.TemplateEngine.Edge;
 
 namespace Dotnet_new3
 {
+    /// <remark>
+    /// this implementation is for test purpose only.
+    /// Keep in sync with https://github.com/dotnet/sdk/blob/main/src/Cli/dotnet/commands/dotnet-complete/CompleteCommand.cs.
+    /// </remark>
     internal class CompleteCommand : Command
     {
         private static readonly Argument<string> PathArgument = new Argument<string>("path");
@@ -36,6 +40,8 @@ namespace Dotnet_new3
                 }
 
                 Command new3Command = new New3Command();
+
+                //help is disabled for pre-parsing and should be handled by NewCommand instead.
                 ParseResult preParseResult = ParserFactory
                     .CreateParser(new3Command, disableHelp: true)
                     .Parse(input);
