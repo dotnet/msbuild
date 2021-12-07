@@ -93,9 +93,9 @@
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
-        <source>MSB4276: Attempted to create multiple overrides of the same task: {0}</source>
-        <target state="new">MSB4276: Attempted to create multiple overrides of the same task: {0}</target>
-        <note>{StrBegin="MSB4276: "}</note>
+        <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
+        <target state="new">MSB4275: Attempted to create multiple overrides of the same task: {0}</target>
+        <note>{StrBegin="MSB4275: "}</note>
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
@@ -222,11 +222,6 @@
       <trans-unit id="OnlyOneCachePluginMustBeSpecified">
         <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
         <target state="translated">MSB4265: 只可指定單一專案快取外掛程式，但發現多個指定項目: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OverriddenUsingTaskElementChosen">
-        <source>Overridden task chosen when calling task: {0}</source>
-        <target state="new">Overridden task chosen when calling task: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
