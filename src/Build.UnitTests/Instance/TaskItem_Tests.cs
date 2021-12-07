@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Validate the presentation of metadata on a TaskItem, but of direct values and those inherited from
+        /// Validate the presentation of metadata on a TaskItem, both of direct values and those inherited from
         /// item definitions.
         /// </summary>
         [Fact]
