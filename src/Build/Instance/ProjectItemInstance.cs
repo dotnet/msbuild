@@ -1568,7 +1568,14 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                foreach (ProjectMetadataInstance metadatum in other.MetadataCollection)
+                CopyOnWritePropertyDictionary<ProjectMetadataInstance> otherMetadata = other.MetadataCollection;
+
+                if (otherMetadata.Count != thisNames.Count)
+                {
+                    return false;
+                }
+
+                foreach (ProjectMetadataInstance metadatum in otherMetadata)
                 {
                     string name = metadatum.Name;
 
