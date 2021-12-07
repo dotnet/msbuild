@@ -132,7 +132,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 string.Join(";", targets),
                 properties,
                 items,
-                evaluationId);
+                evaluationId,
+                projectContextId
+                );
 
             // No need to log a redundant message in the common case
             if (toolsVersion != "Current")
