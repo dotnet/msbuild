@@ -59,9 +59,16 @@ namespace Microsoft.Build.Collections
         public IEnumerator<TResult> GetEnumerator()
         {
             List<TResult> list;
+
+#if NETCOREAPP
+            if (_backingEnumerable.TryGetNonEnumeratedCount(out int count))
+            {
+#else
             if (_backingEnumerable is ICollection backingCollection)
             {
-                list = new List<TResult>(backingCollection.Count);
+                int count = backingCollection.Count;
+#endif
+                list = new List<TResult>(count);
             }
             else
             {
