@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,8 +98,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 !LoggingService.IncludeEvaluationPropertiesAndItems &&
                 (!LoggingService.RunningOnRemoteNode || LoggingService.SerializeAllProperties))
             {
-                properties = projectProperties?.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue)) ?? Array.Empty<DictionaryEntry>();
-                items = projectItems?.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? Array.Empty<DictionaryEntry>();
+                properties = projectProperties?.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue)) ?? Enumerable.Empty<DictionaryEntry>();
+                items = projectItems?.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? Enumerable.Empty<DictionaryEntry>();
             }
 
             if (projectProperties != null &&
