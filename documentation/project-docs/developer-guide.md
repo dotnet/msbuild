@@ -88,7 +88,7 @@ You can now run `dotnet` commands to test changes.
 Run the following commands from the root of the repository to setup the test environment:
 
 ```
-.\eng\dogfood.sh
+source ./eng/dogfood.sh
 ```
 
 Ensure the `dotnet` being used is from the artifacts directory:
