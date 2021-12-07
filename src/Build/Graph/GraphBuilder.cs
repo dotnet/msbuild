@@ -186,10 +186,7 @@ namespace Microsoft.Build.Graph
                         {
                             toCache.UnionWith(cachedTransitiveReferences);
                         }
-                        else
-                        {
-                            toCache.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
-                        }
+                        toCache.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
                     }
 
                     transitiveReferenceCache[parsedProject.GraphNode] = toCache;
