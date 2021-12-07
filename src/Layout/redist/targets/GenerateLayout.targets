@@ -36,11 +36,12 @@
       <AnalyzerAssembliesDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\analyzers</AnalyzerAssembliesDirectory>
       <AnalyzerTargetsDirectory>$(AnalyzerAssembliesDirectory)\build</AnalyzerTargetsDirectory>
       <AnalyzerConfigDirectory>$(AnalyzerTargetsDirectory)\config</AnalyzerConfigDirectory>
-      <CodeStyleAssembliesDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\codestyle</CodeStyleAssembliesDirectory>
-      <CodeStyleAssembliesCSharpDirectory>$(CodeStyleAssembliesDirectory)\cs</CodeStyleAssembliesCSharpDirectory>
-      <CodeStyleAssembliesVisualBasicDirectory>$(CodeStyleAssembliesDirectory)\vb</CodeStyleAssembliesVisualBasicDirectory>
-      <CodeStyleTargetsDirectory>$(CodeStyleAssembliesDirectory)\build</CodeStyleTargetsDirectory>
-      <CodeStyleConfigDirectory>$(CodeStyleTargetsDirectory)\config</CodeStyleConfigDirectory>
+      <CodeStyleAssembliesCSharpDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\codestyle\cs</CodeStyleAssembliesCSharpDirectory>
+      <CodeStyleAssembliesVisualBasicDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\codestyle\vb</CodeStyleAssembliesVisualBasicDirectory>
+      <CodeStyleCSharpTargetsDirectory>$(CodeStyleAssembliesCSharpDirectory)\build</CodeStyleCSharpTargetsDirectory>
+      <CodeStyleVisualBasicTargetsDirectory>$(CodeStyleAssembliesVisualBasicDirectory)\build</CodeStyleVisualBasicTargetsDirectory>
+      <CodeStyleCSharpConfigDirectory>$(CodeStyleCSharpTargetsDirectory)\config</CodeStyleCSharpConfigDirectory>
+      <CodeStyleVisualBasicConfigDirectory>$(CodeStyleVisualBasicTargetsDirectory)\config</CodeStyleVisualBasicConfigDirectory>
     </PropertyGroup>
     <ItemGroup>
       <AnalyzerAssemblies Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/cs/**/*.dll" />
@@ -54,20 +55,23 @@
 
       <CodeStyleCSharpAssemblies Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/analyzers/dotnet/cs/**/*.dll" />
       <CodeStyleVisualBasicAssemblies Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/analyzers/dotnet/vb/**/*.dll" />
-      <CodeStyleTargets Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/Microsoft.CodeAnalysis.CSharp.CodeStyle.props" />
-      <CodeStyleTargets Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/Microsoft.CodeAnalysis.CSharp.CodeStyle.targets" />
-      <CodeStyleTargets Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/build/Microsoft.CodeAnalysis.VisualBasic.CodeStyle.props" />
-      <CodeStyleTargets Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/build/Microsoft.CodeAnalysis.VisualBasic.CodeStyle.targets" />
+      <CodeStyleCSharpTargets Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/Microsoft.CodeAnalysis.CSharp.CodeStyle.props" />
+      <CodeStyleCSharpTargets Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/Microsoft.CodeAnalysis.CSharp.CodeStyle.targets" />
+      <CodeStyleVisualBasicTargets Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/build/Microsoft.CodeAnalysis.VisualBasic.CodeStyle.props" />
+      <CodeStyleVisualBasicTargets Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/build/Microsoft.CodeAnalysis.VisualBasic.CodeStyle.targets" />
       <!-- The files in the build/config folder are identical across packages -->
-      <CodeStyleConfig Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/config/**/*" />
+      <CodeStyleCSharpConfig Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/config/**/*" />
+      <CodeStyleVisualBasicConfig Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/build/config/**/*" />
     </ItemGroup>
     <Error Condition="'@(AnalyzerAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
     <Error Condition="'@(AnalyzerTargets)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
     <Error Condition="'@(AnalyzerConfig)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
     <Error Condition="'@(CodeStyleCSharpAssemblies)' == ''" Text="Something moved around in the C# Code style package, could not find assembles. Adjust code here accordingly. TFM change?" />
     <Error Condition="'@(CodeStyleVisualBasicAssemblies)' == ''" Text="Something moved around in the VB Code style package, could not find assembles. Adjust code here accordingly. TFM change?" />
-    <Error Condition="'@(CodeStyleTargets)' == ''" Text="Something moved around in Code style packeges, could not find targets/props. Adjust code here accordingly. TFM change?" />
-    <Error Condition="'@(CodeStyleConfig)' == ''" Text="Something moved around in Code style packeges, could not find globalconfig files. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleCSharpTargets)' == ''" Text="Something moved around in Code style packeges, could not find targets/props. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleVisualBasicTargets)' == ''" Text="Something moved around in Code style packeges, could not find targets/props. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleCSharpConfig)' == ''" Text="Something moved around in Code style packeges, could not find globalconfig files. Adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(CodeStyleVisualBasicConfig)' == ''" Text="Something moved around in Code style packeges, could not find globalconfig files. Adjust code here accordingly. TFM change?" />
     <Error Condition="'@(ILLinkAnalyzersTargets)' == ''" Text="Something moved around in ILLink Analyzers package, adjust code accordingly." />
     <Error Condition="'@(ILLinkAnalyzersAssemblies)' == ''" Text="Something moved around in ILLink Analyzers package, adjust code accordingly." />
 
@@ -76,8 +80,10 @@
     <Copy SourceFiles="@(AnalyzerConfig)" DestinationFiles="@(AnalyzerConfig->'$(AnalyzerConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(CodeStyleCSharpAssemblies)" DestinationFiles="@(CodeStyleCSharpAssemblies->'$(CodeStyleAssembliesCSharpDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(CodeStyleVisualBasicAssemblies)" DestinationFiles="@(CodeStyleVisualBasicAssemblies->'$(CodeStyleAssembliesVisualBasicDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(CodeStyleTargets)" DestinationFiles="@(CodeStyleTargets->'$(CodeStyleTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(CodeStyleConfig)" DestinationFiles="@(CodeStyleConfig->'$(CodeStyleConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleCSharpTargets)" DestinationFiles="@(CodeStyleCSharpTargets->'$(CodeStyleCSharpTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleVisualBasicTargets)" DestinationFiles="@(CodeStyleVisualBasicTargets->'$(CodeStyleVisualBasicTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleCSharpConfig)" DestinationFiles="@(CodeStyleCSharpConfig->'$(CodeStyleCSharpConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(CodeStyleVisualBasicConfig)" DestinationFiles="@(CodeStyleVisualBasicConfig->'$(CodeStyleVisualBasicConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(ILLinkAnalyzersTargets)" DestinationFiles="@(ILLinkAnalyzersTargets->'$(AnalyzerTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(ILLinkAnalyzersAssemblies)" DestinationFiles="@(ILLinkAnalyzersAssemblies->'$(AnalyzerAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>

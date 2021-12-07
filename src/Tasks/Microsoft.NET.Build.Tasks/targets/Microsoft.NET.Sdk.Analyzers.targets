@@ -94,14 +94,14 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.NET.ILLink.Analyzers.props"
           Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'" />
 
-  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.props"
+  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\cs\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.props"
           Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'" />
-  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.targets"
+  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\cs\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.targets"
           Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'" />
 
-  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\build\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.props"
+  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\vb\build\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.props"
           Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'VB'" />
-  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\build\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.targets"
+  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\vb\build\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.targets"
           Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'VB'" />
 
   <!-- .NET Analyzers -->
