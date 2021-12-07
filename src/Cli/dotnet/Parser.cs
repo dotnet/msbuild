@@ -199,8 +199,9 @@ namespace Microsoft.DotNet.Cli
                 }
             }
 
-            public override void Write(ICommand command, TextWriter writer, ParseResult parseResult)
+            public override void Write(HelpContext context)
             {
+                var command = context.Command;
                 var helpArgs = new string[] { "--help" };
                 if (command.Equals(RootCommand))
                 {
@@ -235,7 +236,7 @@ namespace Microsoft.DotNet.Cli
                         AddPackageParser.CmdPackageArgument.Suggestions.Clear();
                     }
 
-                    base.Write(command, writer, parseResult);
+                    base.Write(context);
                 }
             }
         }
