@@ -17,6 +17,7 @@ namespace LibraryWithRids
                 case "'osx.10.11-x64'": 
                 case "'osx.10.12-x64'":
                 case "'osx.10.14-x64'":
+                case "'osx.10.15-x64'":
                     return Marshal.PtrToStringAnsi(MacNativeMethods.sqlite3_libversion());
                 case "'win10-x64'":
                 case "'win81-x64'":
