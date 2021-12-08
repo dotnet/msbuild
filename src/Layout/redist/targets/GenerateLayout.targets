@@ -55,9 +55,8 @@
 
       <CodeStyleCSharpAssemblies Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/analyzers/dotnet/cs/**/*.dll" />
       <CodeStyleVisualBasicAssemblies Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/analyzers/dotnet/vb/**/*.dll" />
-      <CodeStyleCSharpTargets Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/Microsoft.CodeAnalysis.CSharp.CodeStyle.props" />
+      <!-- The props files from these packages explicitly say they should never be included in the SDK -->
       <CodeStyleCSharpTargets Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/Microsoft.CodeAnalysis.CSharp.CodeStyle.targets" />
-      <CodeStyleVisualBasicTargets Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/build/Microsoft.CodeAnalysis.VisualBasic.CodeStyle.props" />
       <CodeStyleVisualBasicTargets Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/build/Microsoft.CodeAnalysis.VisualBasic.CodeStyle.targets" />
       <!-- The files in the build/config folder are identical across packages -->
       <CodeStyleCSharpConfig Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/build/config/**/*" />
