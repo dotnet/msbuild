@@ -180,7 +180,8 @@ jobs:
       continueOnError: true	
       condition: always()
 
-- ${{ if in(parameters.agentOs, 'Windows_NT', 'Darwin') }}:
+# AoT Jobs
+- ${{ if and(in(parameters.agentOs, 'Windows_NT', 'Darwin'), or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest'))) }}:
   - template: /eng/common/templates/job/job.yml
     parameters:
       name: ${{ parameters.agentOs }}_AoT_Tests
@@ -225,7 +226,6 @@ jobs:
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
         - script: eng\CIBuild.cmd
                     -configuration $(_BuildConfig)
-                    $(_PublishArgs)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
                     /p:Test=false
