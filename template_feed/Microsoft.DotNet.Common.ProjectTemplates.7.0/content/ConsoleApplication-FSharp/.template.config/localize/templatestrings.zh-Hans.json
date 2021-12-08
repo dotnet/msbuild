@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Console App",
   "description": "一个用于创建可在 Windows、Linux 和 macOS 上的 .NET Core 上运行的命令行应用程序的项目",

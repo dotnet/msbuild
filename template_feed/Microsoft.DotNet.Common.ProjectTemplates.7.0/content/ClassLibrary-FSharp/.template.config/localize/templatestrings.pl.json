@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Biblioteka klas",
   "description": "Projekt służący do tworzenia biblioteki klas przeznaczonej dla platformy .NET Standard lub .NET Core",
@@ -16,5 +16,5 @@
   "symbols/skipRestore/displayName": "Pomiń przywracanie",
   "postActions/restore/description": "Przywróć pakiety NuGet wymagane przez ten projekt.",
   "postActions/restore/manualInstructions/default/text": "Uruchom polecenie \"dotnet restore\"",
-  "postActions/open-file/description": "Otwiera bibliotekę Library.fs w edytorze"
+  "postActions/open-file/description": "Otwiera bibliotekę Library.fs w\u00A0edytorze"
 }

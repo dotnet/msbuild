@@ -1,6 +1,6 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Konfigurowanie NuGet",
   "description": "Plik na potrzeby konfigurowania lokalizacji NuGet będzie wyszukiwać pakietów",
-  "postActions/open-file/description": "Otwiera plik nuget.config w edytorze"
+  "postActions/open-file/description": "Otwiera plik nuget.config w\u00A0edytorze"
 }

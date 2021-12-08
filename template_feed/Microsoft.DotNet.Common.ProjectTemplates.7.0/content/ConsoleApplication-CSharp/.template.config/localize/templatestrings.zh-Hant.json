@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Console App",
   "description": "專案，用於建立可在 Windows、Linux 及 macOS 於 .NET Core 執行的命令列應用程式",

@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "global.json ファイル",
   "description": ".NET Core SDK のバージョンを選択するためのファイルです。",

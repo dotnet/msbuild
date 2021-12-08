@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Файл global.json",
   "description": "Файл для выбора версии пакета SDK для .NET Core.",

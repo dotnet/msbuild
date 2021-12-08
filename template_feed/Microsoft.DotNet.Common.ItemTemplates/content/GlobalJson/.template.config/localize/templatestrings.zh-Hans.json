@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "global.json file",
   "description": "用于选择 .NET Core SDK 版本的文件。",

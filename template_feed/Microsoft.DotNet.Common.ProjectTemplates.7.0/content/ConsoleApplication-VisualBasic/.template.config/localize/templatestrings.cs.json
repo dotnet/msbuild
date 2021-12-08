@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Console App",
   "description": "Projekt pro vytvoření aplikace příkazového řádku, která běží na platformě .NET Core v systémech Windows, Linux a macOS",

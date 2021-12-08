@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Console App",
   "description": "Um projeto para criar um aplicativo de linha de comando que pode ser executado no .NET Core no Windows, Linux e macOS",

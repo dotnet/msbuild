@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "plik global.json",
   "description": "Plik służący do wybierania wersji zestaw .SDLK NET Core.",
@@ -25,5 +25,5 @@
   "symbols/RollForward/choices/latestMajor/displayName": "Latest major",
   "symbols/RollForward/choices/disable/description": "Doesn't roll forward. Exact match required.",
   "symbols/RollForward/choices/disable/displayName": "Disable roll-forward",
-  "postActions/open-file/description": "Otwiera plik global.json w edytorze"
+  "postActions/open-file/description": "Otwiera plik global.json w\u00A0edytorze"
 }

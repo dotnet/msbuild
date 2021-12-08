@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Console App",
   "description": "Projekt służący do tworzenia aplikacji wiersza polecenia, którą można uruchomić na platformie .NET Core w systemach Windows, Linux i macOS.",
@@ -14,5 +14,5 @@
   "symbols/skipRestore/displayName": "Pomiń przywracanie",
   "postActions/restore/description": "Przywróć pakiety NuGet wymagane przez ten projekt.",
   "postActions/restore/manualInstructions/default/text": "Uruchom polecenie \"dotnet restore\"",
-  "postActions/open-file/description": "Otwiera plik Program.vb w edytorze"
+  "postActions/open-file/description": "Otwiera plik Program.vb w\u00A0edytorze"
 }

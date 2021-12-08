@@ -6,6 +6,7 @@
         <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
         <OutputPath>$(TemplatesDir)</OutputPath>
         <EnableDefaultItems>False</EnableDefaultItems>
+        <UsingToolTemplateLocalizer>true</UsingToolTemplateLocalizer>
         <!-- .NET 6 template package is shipped with the preview / RC since .NET 6 is not released yet -->
         <!-- if the package should be shipped for servicing, set <IsPackable> to true for explicit version here -->
         <IsPackable>false</IsPackable>
