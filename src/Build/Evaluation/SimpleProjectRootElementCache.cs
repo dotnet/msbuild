@@ -61,8 +61,12 @@ namespace Microsoft.Build.Evaluation
             {
                 ProjectRootElement rootElement = openFunc(key, this);
                 ErrorUtilities.VerifyThrowInternalNull(rootElement, "projectRootElement");
-                ErrorUtilities.VerifyThrow(rootElement.FullPath.Equals(key, StringComparison.OrdinalIgnoreCase),
-                    "Got project back with incorrect path");
+                ErrorUtilities.VerifyThrow(
+                    rootElement.FullPath.Equals(key, StringComparison.OrdinalIgnoreCase),
+                    "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
+                    key,
+                    rootElement.FullPath
+                );
 
                 AddEntry(rootElement);
 

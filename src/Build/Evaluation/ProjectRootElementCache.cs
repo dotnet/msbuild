@@ -275,7 +275,12 @@ namespace Microsoft.Build.Evaluation
 
                 projectRootElement = openProjectRootElement(projectFile, this);
                 ErrorUtilities.VerifyThrowInternalNull(projectRootElement, "projectRootElement");
-                ErrorUtilities.VerifyThrow(projectRootElement.FullPath == projectFile, "Got project back with incorrect path");
+                ErrorUtilities.VerifyThrow(
+                    projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
+                    "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
+                    projectFile,
+                    projectRootElement.FullPath
+                );
 
                 // An implicit load will never reset the explicit flag.
                 if (isExplicitlyLoaded)
