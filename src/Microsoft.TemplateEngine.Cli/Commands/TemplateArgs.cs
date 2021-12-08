@@ -40,7 +40,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             foreach (var opt in command.TemplateOptions)
             {
-                if (parseResult.FindResultFor(opt.Value) is { } result)
+                if (parseResult.FindResultFor(opt.Value.Option) is { } result)
                 {
                     _templateOptions[opt.Key] = result;
                 }
@@ -86,7 +86,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             if (_command.TemplateOptions.ContainsKey(canonicalName))
             {
-                alias = _command.TemplateOptions[canonicalName].Aliases.First();
+                alias = _command.TemplateOptions[canonicalName].Aliases[0];
                 return true;
             }
             alias = null;
@@ -106,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return null;
             }
 
-            var parameter = Template.GetParameters().FirstOrDefault(p => p.Name.Equals(parameterName, StringComparison.OrdinalIgnoreCase));
+            var parameter = Template.CliParameters.FirstOrDefault(p => p.Name.Equals(parameterName, StringComparison.OrdinalIgnoreCase));
             if (parameter == null)
             {
                 throw new InvalidOperationException($"Parameter {parameterName} is not defined for {Template.Identity}.");

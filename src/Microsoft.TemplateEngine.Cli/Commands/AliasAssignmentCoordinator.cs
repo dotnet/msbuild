@@ -7,9 +7,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class AliasAssignmentCoordinator
     {
-        internal static IEnumerable<(CliTemplateParameter Parameter, IEnumerable<string> Aliases, IEnumerable<string> Errors)> AssignAliasesForParameter(IEnumerable<CliTemplateParameter> parameters, HashSet<string> takenAliases)
+        internal static IReadOnlyList<(CliTemplateParameter Parameter, IReadOnlyList<string> Aliases, IReadOnlyList<string> Errors)> AssignAliasesForParameter(IEnumerable<CliTemplateParameter> parameters, HashSet<string> takenAliases)
         {
-            List<(CliTemplateParameter Parameter, IEnumerable<string> Aliases, IEnumerable<string> Errors)> result = new();
+            List<(CliTemplateParameter Parameter, IReadOnlyList<string> Aliases, IReadOnlyList<string> Errors)> result = new();
 
             List<string> predefinedLongOverrides = parameters.SelectMany(p => p.LongNameOverrides).Where(n => !string.IsNullOrEmpty(n)).Select(n => $"--{n}").ToList();
             List<string> predefinedShortOverrides = parameters.SelectMany(p => p.ShortNameOverrides).Where(n => !string.IsNullOrEmpty(n)).Select(n => $"-{n}").ToList();

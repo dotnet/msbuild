@@ -4,6 +4,7 @@
 #nullable enable
 
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -14,11 +15,33 @@ namespace Microsoft.TemplateEngine.Cli
     {
         private readonly ITemplateInfo _templateInfo;
         private readonly HostSpecificTemplateData _cliData;
+        private readonly IReadOnlyList<CliTemplateParameter> _parameters;
 
         internal CliTemplateInfo(ITemplateInfo templateInfo, HostSpecificTemplateData cliData)
         {
             _templateInfo = templateInfo ?? throw new ArgumentNullException(nameof(templateInfo));
             _cliData = cliData ?? throw new ArgumentNullException(nameof(cliData));
+
+            HashSet<string> processedParameters = new HashSet<string>();
+            List<CliTemplateParameter> parameters = new List<CliTemplateParameter>();
+
+            foreach (ITemplateParameter parameter in Parameters.Where(param => param.Type == "parameter"))
+            {
+                if (!processedParameters.Add(parameter.Name))
+                {
+                    //TODO:
+                    throw new Exception($"Template {Identity} defines {parameter.Name} twice.");
+                }
+                if (parameter.IsChoice())
+                {
+                    parameters.Add(new ChoiceTemplateParameter(parameter, CliData));
+                }
+                else
+                {
+                    parameters.Add(new CliTemplateParameter(parameter, CliData));
+                }
+            }
+            _parameters = parameters;
         }
 
         public string? Author => _templateInfo.Author;
@@ -73,6 +96,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal bool IsHidden => _cliData.IsHidden;
 
+        internal IEnumerable<CliTemplateParameter> CliParameters => _parameters;
+
         internal static IEnumerable<CliTemplateInfo> FromTemplateInfo(IEnumerable<ITemplateInfo> templateInfos, IHostSpecificDataLoader hostSpecificDataLoader)
         {
             if (templateInfos is null)
@@ -86,23 +111,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             return templateInfos.Select(templateInfo => new CliTemplateInfo(templateInfo, hostSpecificDataLoader.ReadHostSpecificTemplateData(templateInfo)));
-        }
-
-        internal IEnumerable<CliTemplateParameter> GetParameters()
-        {
-            HashSet<string> processedParameters = new HashSet<string>();
-            List<CliTemplateParameter> parameters = new List<CliTemplateParameter>();
-
-            foreach (ITemplateParameter parameter in Parameters.Where(param => param.Type == "parameter"))
-            {
-                if (!processedParameters.Add(parameter.Name))
-                {
-                    //TODO:
-                    throw new Exception($"Template {Identity} defines {parameter.Name} twice.");
-                }
-                parameters.Add(new CliTemplateParameter(parameter, CliData));
-            }
-            return parameters;
         }
     }
 }
