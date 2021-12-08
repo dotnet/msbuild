@@ -2022,11 +2022,7 @@ namespace Microsoft.Build.Execution
 
                         if (getResultsCacheFilePath != null)
                         {
-                            // We don't store a cache for the root project
-                            if (node.ReferencingProjects.Count != 0)
-                            {
-                                request.OutputResultsCacheFile = getResultsCacheFilePath(node);
-                            }
+                            request.OutputResultsCacheFile = getResultsCacheFilePath(node);
 
                             if (node.ProjectReferences.Count > 0)
                             {
