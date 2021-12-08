@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Tools.Common
 
         private static bool AreBuildConfigurationsApplicable(this SlnFile slnFile, string path)
         {
-            return !Path.GetExtension(path).Equals(".shproj", StringComparison.CurrentCultureIgnoreCase);
+            return !Path.GetExtension(path).Equals(".shproj", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void AddDefaultBuildConfigurations(this SlnFile slnFile)
