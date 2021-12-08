@@ -28,8 +28,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
-        <source>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="translated">.NET SDK が見つかりません。インストールされていることと、(存在する場合には) そのインストール済みバージョンが global.json で指定されたバージョンと一致していることをご確認ください。</target>
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="needs-review-translation">.NET SDK が見つかりません。インストールされていることと、(存在する場合には) そのインストール済みバージョンが global.json で指定されたバージョンと一致していることをご確認ください。</target>
         <note />
       </trans-unit>
     </body>
