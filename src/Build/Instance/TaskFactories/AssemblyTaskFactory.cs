@@ -93,6 +93,10 @@ namespace Microsoft.Build.BackEnd
             get { return _typeInformation.LoadedType?.Type ?? Type.GetType(_typeInformation.TypeName, true, true); }
         }
 
+        public TypeInformation TypeInformation { get { return _typeInformation; } }
+
+        public bool ImplementsIGeneratedTask { get { return _typeInformation?.ImplementsIGeneratedTask ?? false; } }
+
         /// <summary>
         /// Initializes this factory for instantiating tasks with a particular inline task block.
         /// </summary>

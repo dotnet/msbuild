@@ -22,7 +22,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The type of the generated tasks.
         /// </summary>
-        private Type _taskType;
+        private readonly Func<string, BindingFlags, PropertyInfo> getProperty;
+        private readonly string taskName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReflectableTaskPropertyInfo"/> class.
@@ -33,7 +34,16 @@ namespace Microsoft.Build.Execution
             : base(taskPropertyInfo.Name, taskPropertyInfo.PropertyType, taskPropertyInfo.Output, taskPropertyInfo.Required)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
-            _taskType = taskType;
+            getProperty = taskType.GetProperty;
+            taskName = taskType.FullName;
+        }
+
+        internal ReflectableTaskPropertyInfo(TaskPropertyInfo taskPropertyInfo, TypeInformation typeInformation)
+            : base(taskPropertyInfo.Name, taskPropertyInfo.PropertyType, taskPropertyInfo.Output, taskPropertyInfo.Required)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(typeInformation, nameof(typeInformation));
+            getProperty = typeInformation.GetProperty;
+            taskName = typeInformation.TypeName;
         }
 
         /// <summary>
@@ -59,8 +69,8 @@ namespace Microsoft.Build.Execution
             {
                 if (_propertyInfo == null)
                 {
-                    _propertyInfo = _taskType.GetProperty(Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
-                    ErrorUtilities.VerifyThrow(_propertyInfo != null, "Could not find property {0} on type {1} that the task factory indicated should exist.", Name, _taskType.FullName);
+                    _propertyInfo = getProperty(Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+                    ErrorUtilities.VerifyThrow(_propertyInfo != null, "Could not find property {0} on type {1} that the task factory indicated should exist.", Name, taskName);
                 }
 
                 return _propertyInfo;

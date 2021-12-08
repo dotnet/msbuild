@@ -403,6 +403,9 @@ namespace Microsoft.Build.Shared
                                                 typeInformation.ImplementsIGeneratedTask = true;
                                             }
                                         }
+
+                                        typeInformation.AssemblyName = _assemblyLoadInfo.AssemblyName is null ? new AssemblyName(Path.GetFileNameWithoutExtension(_assemblyLoadInfo.AssemblyFile)) : new AssemblyName(_assemblyLoadInfo.AssemblyName);
+
                                         break;
                                     }
                                 }

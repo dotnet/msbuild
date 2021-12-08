@@ -138,7 +138,8 @@ namespace Microsoft.Build.Shared
                     // If the types don't match, we have a problem. It means that our AppDomain was able to load
                     // a task assembly using Load, and loaded a different one. I don't see any other choice than
                     // to fail here.
-                    if (taskType != loadedType.Type)
+                    if (((typeInformation.LoadedType is not null) && taskType != typeInformation.LoadedType.Type) ||
+                            !taskType.Assembly.Location.Equals(typeInformation.LoadInfo.AssemblyLocation) || !taskType.Name.Equals(typeInformation.TypeName))
                     {
                         logError
                         (

@@ -1168,7 +1168,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskBuilderTestTask.TaskBuilderTestTaskFactory taskFactory = new TaskBuilderTestTask.TaskBuilderTestTaskFactory();
             taskFactory.ThrowOnExecute = throwOnExecute;
             string taskName = "TaskBuilderTestTask";
-            (_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(taskFactory, loadedType, loadInfo, taskName, null);
+            (_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(taskFactory, new TypeInformation(loadedType), loadInfo, taskName, null);
             _host.InitializeForTask
                 (
                 this,

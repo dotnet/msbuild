@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Execution
 {
@@ -251,7 +252,7 @@ namespace Microsoft.Build.Execution
         {
             if (_propertyInfoCache == null)
             {
-                bool taskTypeImplementsIGeneratedTask = typeof(IGeneratedTask).IsAssignableFrom(_taskFactory.TaskType);
+                bool taskTypeImplementsIGeneratedTask = _taskFactory is AssemblyTaskFactory assemblyTaskFactory ? assemblyTaskFactory.ImplementsIGeneratedTask : typeof(IGeneratedTask).IsAssignableFrom(_taskFactory.TaskType);
                 TaskPropertyInfo[] propertyInfos = _taskFactory.GetTaskParameters();
 
                 for (int i = 0; i < propertyInfos.Length; i++)
@@ -262,7 +263,7 @@ namespace Microsoft.Build.Execution
                     TaskPropertyInfo propertyInfo = propertyInfos[i];
                     if (!taskTypeImplementsIGeneratedTask)
                     {
-                        propertyInfo = new ReflectableTaskPropertyInfo(propertyInfo, _taskFactory.TaskType);
+                        propertyInfo = _taskFactory is AssemblyTaskFactory assemblyTaskFactory2 ? new ReflectableTaskPropertyInfo(propertyInfo, assemblyTaskFactory2.TypeInformation) : new ReflectableTaskPropertyInfo(propertyInfo, _taskFactory.TaskType);
                     }
 
                     try

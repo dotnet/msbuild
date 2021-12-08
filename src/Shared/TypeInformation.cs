@@ -19,7 +19,6 @@ namespace Microsoft.Build.Shared
         internal bool IsMarshallByRef { get; set; }
         internal bool ImplementsIGeneratedTask { get; set; }
         internal AssemblyName AssemblyName { get; set; }
-        internal Func<BindingFlags, PropertyInfo[]> GetProperties { get; set; }
 
         internal TypeInformation()
         {
@@ -37,7 +36,30 @@ namespace Microsoft.Build.Shared
             ImplementsIGeneratedTask = LoadedType.Type is IGeneratedTask;
 #endif
             AssemblyName = LoadedType.LoadedAssembly.GetName();
-            GetProperties = bindingAttr => LoadedType.Type.GetProperties(bindingAttr);
+        }
+
+        public PropertyInfo[] GetProperties(BindingFlags flags)
+        {
+            if (LoadedType is null)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                return LoadedType.Type.GetProperties(flags);
+            }
+        }
+
+        public PropertyInfo GetProperty(string name, BindingFlags flags)
+        {
+            if (LoadedType is null)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                return LoadedType.Type.GetProperty(name, flags);
+            }
         }
     }
 }
