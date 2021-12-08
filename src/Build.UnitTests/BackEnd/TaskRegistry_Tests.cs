@@ -676,7 +676,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void OverriddenTask_MultipleOverridesCauseMSB4276()
+        public void OverriddenTask_MultipleOverridesCauseMSB4275()
         {
             string proj =
                 $"<Project>" +
@@ -708,8 +708,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         parameters,
                         request);
 
-                    // We should see MSB4276: Multiple usingtask overrides with the same name
-                    logger.AssertLogContains("MSB4276");
+                    // We should see MSB4275: Multiple usingtask overrides with the same name
+                    logger.AssertLogContains("MSB4275");
                 }
             }
         }
