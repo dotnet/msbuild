@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Tests
                     .Should()
                     .Fail();
                 var warningString = "warning : Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.";
-                var errorString = "Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.";
+                var errorString = "Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.";
                 if (runningInVS)
                 {
                     result.And
