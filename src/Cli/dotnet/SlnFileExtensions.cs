@@ -75,11 +75,13 @@ namespace Microsoft.DotNet.Tools.Common
                 // section comes first we need to add it first. This doesn't affect correctness but does
                 // stop VS from re-ordering things later on. Since we are keeping the SlnFile class low-level
                 // it shouldn't care about the VS implementation details. That's why we handle this here.
-                slnFile.AddDefaultBuildConfigurations();
+                if (slnProject.AreBuildConfigurationsApplicable()) {
+                    slnFile.AddDefaultBuildConfigurations();
 
-                slnFile.MapSolutionConfigurationsToProject(
-                    projectInstance,
-                    slnFile.ProjectConfigurationsSection.GetOrCreatePropertySet(slnProject.Id));
+                    slnFile.MapSolutionConfigurationsToProject(
+                        projectInstance,
+                        slnFile.ProjectConfigurationsSection.GetOrCreatePropertySet(slnProject.Id));
+                }
 
                 SetupSolutionFolders(slnFile, solutionFolders, relativeProjectPath, slnProject);
 
