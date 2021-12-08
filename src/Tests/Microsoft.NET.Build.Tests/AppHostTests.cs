@@ -39,8 +39,6 @@ namespace Microsoft.NET.Build.Tests
             if (!string.IsNullOrEmpty(targetFramework))
             {
                 var parsedTargetFramework = NuGetFramework.Parse(targetFramework);
-                if (parsedTargetFramework.Version.Major >= 5)
-                    expectedFiles.Add($"ref/{testProjectName}.dll");
 
                 if (parsedTargetFramework.Version.Major < 6)
                     expectedFiles.Add($"{testProjectName}.runtimeconfig.dev.json");
@@ -53,7 +51,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.1.0.60101")]
         [InlineData("netcoreapp3.1")]
         [InlineData("net5.0")]
         [InlineData("net6.0")]
