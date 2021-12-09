@@ -106,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return $"dotnet {commandName} {templateName}";
         }
 
-        internal static string HelpCommandExample(string commandName, string? templateName = null, string? language = null)
+        internal static string HelpCommandExample(string commandName, string? templateName = null, string? language = null, string? type = null)
         {
             if (string.IsNullOrWhiteSpace(templateName))
             {
@@ -120,6 +120,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (!string.IsNullOrWhiteSpace(language))
             {
                 commandStr += $" --language {language}";
+            }
+            if (!string.IsNullOrWhiteSpace(type))
+            {
+                commandStr += $" --type {type}";
             }
             return commandStr;
         }

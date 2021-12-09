@@ -23,7 +23,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IsForceFlagSpecified = parseResult.GetValueForOption(command.ForceOption);
             IsDryRun = parseResult.GetValueForOption(command.DryRunOption);
             NoUpdateCheck = parseResult.GetValueForOption(command.NoUpdateCheckOption);
-            AllowScripts = parseResult.GetValueForOption(command.AllowScriptsOption);
 
             if (command.LanguageOption != null)
             {
@@ -36,6 +35,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (command.BaselineOption != null)
             {
                 BaselineName = parseResult.GetValueForOptionOrNull(command.BaselineOption);
+            }
+            if (command.AllowScriptsOption != null)
+            {
+                AllowScripts = parseResult.GetValueForOption(command.AllowScriptsOption);
             }
 
             foreach (var opt in command.TemplateOptions)

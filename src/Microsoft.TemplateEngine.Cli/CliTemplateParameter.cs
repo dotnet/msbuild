@@ -4,9 +4,12 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 using System.Globalization;
+using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.Commands;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -79,6 +82,25 @@ namespace Microsoft.TemplateEngine.Cli
             DataType = ParameterTypeToString(Type);
         }
 
+        /// <summary>
+        /// Copy constructor.
+        /// </summary>
+        internal CliTemplateParameter(CliTemplateParameter other)
+        {
+            Name = other.Name;
+            Type = other.Type;
+            Description = other.Description;
+            DataType = other.DataType;
+            DefaultValue = other.DefaultValue;
+            IsRequired = other.IsRequired;
+            IsHidden = other.IsHidden;
+            AlwaysShow = other.AlwaysShow;
+            _shortNameOverrides = other.ShortNameOverrides.ToList();
+            _longNameOverrides = other.LongNameOverrides.ToList();
+            DefaultIfOptionWithoutValue = other.DefaultIfOptionWithoutValue;
+
+        }
+
         internal string Name { get; private set; }
 
         internal string Description { get; private set; }
@@ -113,6 +135,26 @@ namespace Microsoft.TemplateEngine.Cli
             }
             option.Description = GetOptionDescription();
             return option;
+        }
+
+        /// <summary>
+        /// Returns a function to display option usage.
+        /// </summary>
+        internal virtual Func<HelpContext, string?>? GetCustomFirstColumnText(TemplateOption o)
+        {
+            //not customized
+            return null;
+        }
+
+        /// <summary>
+        /// Returns a function to display option description.
+        /// </summary>
+        internal Func<HelpContext, string?>? GetCustomSecondColumnText()
+        {
+            return (context) =>
+            {
+                return GetOptionDescription();
+            };
         }
 
         protected virtual Option GetBaseOption(IReadOnlyList<string> aliases)
@@ -287,7 +329,66 @@ namespace Microsoft.TemplateEngine.Cli
 
         private string GetOptionDescription()
         {
-            return Description;
+            StringBuilder displayValue = new StringBuilder(255);
+            displayValue.AppendLine(Description);
+
+            if (this is ChoiceTemplateParameter choice)
+            {
+                displayValue.AppendLine(string.Format(HelpStrings.RowHeader_Type, string.IsNullOrWhiteSpace(DataType) ? "choice" : DataType));
+                int longestChoiceLength = choice.Choices.Keys.Max(x => x.Length);
+                foreach (KeyValuePair<string, ParameterChoice> choiceInfo in choice.Choices)
+                {
+                    const string Indent = "  ";
+                    displayValue.Append(Indent + choiceInfo.Key.PadRight(longestChoiceLength + Indent.Length));
+                    if (!string.IsNullOrWhiteSpace(choiceInfo.Value.Description))
+                    {
+                        bool firstLine = true;
+                        foreach (string line in choiceInfo.Value.Description.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.TrimEntries))
+                        {
+                            if (!firstLine)
+                            {
+                                displayValue.Append(' ', longestChoiceLength + Indent.Length * 2);
+                            }
+                            else
+                            {
+                                firstLine = false;
+                            }
+                            displayValue.AppendLine(line);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                displayValue.AppendLine(string.Format(HelpStrings.RowHeader_Type, string.IsNullOrWhiteSpace(DataType) ? "string" : DataType));
+            }
+            //display the default value if there is one
+            if (!string.IsNullOrWhiteSpace(DefaultValue))
+            {
+                displayValue.AppendLine(string.Format(HelpStrings.RowHeader_DefaultValue, DefaultValue));
+            }
+
+            if (!string.IsNullOrWhiteSpace(DefaultIfOptionWithoutValue))
+            {
+                // default if option is provided without a value should not be displayed if:
+                // - it is bool parameter with "DefaultIfOptionWithoutValue": "true"
+                // - it is not bool parameter (int, string, etc) and default value coincides with "DefaultIfOptionWithoutValue"
+                if (Type == ParameterType.Boolean)
+                {
+                    if (!string.Equals(DefaultIfOptionWithoutValue, "true", StringComparison.OrdinalIgnoreCase))
+                    {
+                        displayValue.AppendLine(string.Format(HelpStrings.RowHeader_DefaultIfOptionWithoutValue, DefaultIfOptionWithoutValue));
+                    }
+                }
+                else
+                {
+                    if (!string.Equals(DefaultIfOptionWithoutValue, DefaultValue, StringComparison.Ordinal))
+                    {
+                        displayValue.AppendLine(string.Format(HelpStrings.RowHeader_DefaultIfOptionWithoutValue, DefaultIfOptionWithoutValue));
+                    }
+                }
+            }
+            return displayValue.ToString();
         }
     }
 }

@@ -15,6 +15,8 @@ namespace Microsoft.TemplateEngine.Cli
     /// </summary>
     internal class ChoiceTemplateParameter : CliTemplateParameter
     {
+        private Dictionary<string, ParameterChoice> _choices = new Dictionary<string, ParameterChoice>(StringComparer.OrdinalIgnoreCase);
+
         internal ChoiceTemplateParameter(ITemplateParameter parameter, HostSpecificTemplateData data) : base(parameter, data)
         {
             if (!parameter.DataType.Equals("choice", StringComparison.OrdinalIgnoreCase))
@@ -25,20 +27,39 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 throw new ArgumentException($"{nameof(parameter)} should have {nameof(parameter.Choices)}");
             }
-            RawChoices = parameter.Choices.ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase);
+            _choices = parameter.Choices.ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase);
         }
 
         internal ChoiceTemplateParameter(string name, IEnumerable<string>? shortNameOverrides = null, IEnumerable<string>? longNameOverrides = null)
             : base(name, ParameterType.Choice, shortNameOverrides, longNameOverrides)
         {
-            RawChoices = new Dictionary<string, ParameterChoice>(StringComparer.OrdinalIgnoreCase);
+            _choices = new Dictionary<string, ParameterChoice>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        internal ChoiceTemplateParameter(ChoiceTemplateParameter choiceTemplateParameter)
+           : base(choiceTemplateParameter)
+        {
+            _choices = choiceTemplateParameter.Choices.ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase);
         }
 
         internal override ParameterType Type => ParameterType.Choice;
 
-        internal virtual IReadOnlyDictionary<string, ParameterChoice> Choices => RawChoices;
+        internal virtual IReadOnlyDictionary<string, ParameterChoice> Choices => _choices;
 
-        protected IReadOnlyDictionary<string, ParameterChoice> RawChoices { get; }
+        //TODO: needs https://github.com/dotnet/command-line-api/pull/1527
+        //internal override Func<HelpContext, string?>? GetCustomFirstColumnText(TemplateOption o)
+        //{
+        //    return (context) =>
+        //    {
+        //        //string standardUsage = context.HelpBuilder.GetTwoColumnRow(o.Option, context).FirstColumnText;
+        //        //if (standardUsage.Length > context.MaxWidth / 3)
+        //        //{
+        //        //    o.Option.ArgumentHelpName = "choice";
+        //        //    return context.HelpBuilder.GetTwoColumnRow(o.Option, context).FirstColumnText;
+        //        //}
+        //        //return standardUsage;
+        //    };
+        //}
 
         protected override Option GetBaseOption(IReadOnlyList<string> aliases)
         {

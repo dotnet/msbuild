@@ -16,13 +16,8 @@ namespace Microsoft.TemplateEngine.Cli
     {
         private Dictionary<string, ParameterChoice> _combinedParameters = new Dictionary<string, ParameterChoice>(StringComparer.OrdinalIgnoreCase);
 
-        internal CombinedChoiceTemplateParameter(ITemplateParameter parameter, HostSpecificTemplateData data) : base(parameter, data)
+        internal CombinedChoiceTemplateParameter(ChoiceTemplateParameter parameter) : base(parameter)
         {
-            if (parameter.Choices == null)
-            {
-                throw new ArgumentException($"{nameof(parameter)} should have {nameof(parameter.Choices)}");
-            }
-
             foreach (var choice in parameter.Choices)
             {
                 if (!_combinedParameters.ContainsKey(choice.Key))

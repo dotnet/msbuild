@@ -10,7 +10,7 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal partial class NewCommand : BaseCommand<NewCommandArgs>
+    internal partial class NewCommand : BaseCommand<NewCommandArgs>, ICustomHelp
     {
         internal NewCommand(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks) : base(host, telemetryLogger, callbacks, commandName, LocalizableStrings.CommandDescription)
         {

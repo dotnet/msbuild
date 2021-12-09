@@ -51,7 +51,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(DryRunOption);
             this.AddOption(ForceOption);
             this.AddOption(NoUpdateCheckOption);
-            this.AddOption(AllowScriptsOption);
 
             string? templateLanguage = template.GetLanguage();
             string? defaultLanguage = environmentSettings.GetDefaultLanguage();
@@ -87,11 +86,21 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 this.AddOption(TypeOption);
             }
 
-            if (template.BaselineInfo.Any(b => string.IsNullOrWhiteSpace(b.Key)))
+            if (template.BaselineInfo.Any(b => !string.IsNullOrWhiteSpace(b.Key)))
             {
                 BaselineOption = SharedOptionsFactory.CreateBaselineOption();
                 BaselineOption.FromAmong(template.BaselineInfo.Select(b => b.Key).Where(b => !string.IsNullOrWhiteSpace(b)).ToArray());
                 this.AddOption(BaselineOption);
+            }
+
+            if (HasRunScriptPostActionDefined(template))
+            {
+                AllowScriptsOption = new Option<AllowRunScripts>("--allow-scripts")
+                {
+                    Description = SymbolStrings.TemplateCommand_Option_AllowScripts,
+                    Arity = new ArgumentArity(1, 1)
+                };
+                this.AddOption(AllowScriptsOption);
             }
 
             AddTemplateOptionsToCommand(template);
@@ -126,12 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(0, 1)
         };
 
-        internal Option<AllowRunScripts> AllowScriptsOption { get; } = new Option<AllowRunScripts>("--allow-scripts")
-        {
-            Description = LocalizableStrings.OptionDescriptionAllowScripts,
-            IsHidden = true,
-            Arity = new ArgumentArity(0, 1)
-        };
+        internal Option<AllowRunScripts>? AllowScriptsOption { get; }
 
         internal Option<string>? LanguageOption { get; }
 
@@ -168,6 +172,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return (int)await invoker.InvokeTemplateAsync(args, context.GetCancellationToken()).ConfigureAwait(false);
             }
         }
+
+        //TODO: implement this
+        private bool HasRunScriptPostActionDefined(CliTemplateInfo template) => false;
 
         private HashSet<string> GetReservedAliases()
         {

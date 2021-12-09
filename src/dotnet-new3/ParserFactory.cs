@@ -5,7 +5,9 @@
 
 using System.CommandLine;
 using System.CommandLine.Builder;
+using System.CommandLine.Help;
 using System.CommandLine.Parsing;
+using Microsoft.TemplateEngine.Cli.Commands;
 
 namespace Dotnet_new3
 {
@@ -20,20 +22,25 @@ namespace Dotnet_new3
             //.UseParseDirective()
             //.UseSuggestDirective()
             .UseParseErrorReporting()//TODO: discuss with SDK if it is possible to use it.
-            //TODO: implement when help is done
-            //.UseHelpBuilder((context) =>
-            //{
-            //    var hb = new HelpBuilder(LocalizationResources.Instance);
-            //    hb.Customize(command, (result) => )
-            //    return hb;
-            // })
             .DisablePosixBundling();
 
             if (!disableHelp)
             {
-                builder = builder.UseHelp();
+                builder = builder.UseHelp(ctx => ctx.HelpBuilder.CustomizeLayout(CustomHelpLayout));
             }
             return builder.Build();
+        }
+
+        private static IEnumerable<HelpSectionDelegate> CustomHelpLayout(HelpContext context)
+        {
+            if (context.ParseResult.CommandResult.Command is ICustomHelp custom)
+            {
+                return custom.CustomHelpLayout();
+            }
+            else
+            {
+                return HelpBuilder.DefaultLayout();
+            }
         }
 
         private static CommandLineBuilder DisablePosixBundling(this CommandLineBuilder builder)

@@ -4,8 +4,8 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Help;
 using System.CommandLine.Invocation;
-using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Extensions;
@@ -13,7 +13,7 @@ using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>
+    internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>, ICustomHelp
     {
         private NewCommand? _parentCommand;
 
@@ -96,10 +96,44 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new HashSet<TemplateCommand>();
         }
 
+        internal IEngineEnvironmentSettings GetEnvironmentSettingsFromArgs(InstantiateCommandArgs instantiateArgs)
+        {
+            return this.CreateEnvironmentSettings(instantiateArgs, instantiateArgs.ParseResult);
+        }
+
+        internal async Task<IEnumerable<TemplateGroup>> GetMatchingTemplateGroupsAsync(
+            InstantiateCommandArgs instantiateArgs,
+            TemplatePackageManager templatePackageManager,
+            HostSpecificDataLoader hostSpecificDataLoader,
+            CancellationToken cancellationToken)
+        {
+            var templates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            var templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
+            return templateGroups.Where(template => template.ShortNames.Contains(instantiateArgs.ShortName));
+        }
+
+        internal NewCommandStatus HandleNoMatchingTemplateGroup(InstantiateCommandArgs instantiateArgs)
+        {
+            Reporter.Error.WriteLine(
+                string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, $"'{instantiateArgs.ShortName}'").Bold().Red());
+            Reporter.Error.WriteLine();
+
+            Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
+            Reporter.Error.WriteCommand(CommandExamples.ListCommandExample(instantiateArgs.CommandName));
+
+            Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
+            Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(instantiateArgs.CommandName, instantiateArgs.ShortName));
+            Reporter.Error.WriteLine();
+            return NewCommandStatus.NotFound;
+        }
+
+        internal NewCommandStatus HandleAmbiguousTemplateGroup(InstantiateCommandArgs instantiateArgs) => throw new NotImplementedException();
+
         protected async override Task<NewCommandStatus> ExecuteAsync(InstantiateCommandArgs instantiateArgs, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
+            var cancellationToken = context.GetCancellationToken();
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            var hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
+            HostSpecificDataLoader hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
             if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
             {
                 TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
@@ -108,30 +142,29 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     hostSpecificDataLoader,
                     TelemetryLogger);
 
-                return await templateListCoordinator.DisplayCommandDescriptionAsync(instantiateArgs, default).ConfigureAwait(false);
+                return await templateListCoordinator.DisplayCommandDescriptionAsync(instantiateArgs, cancellationToken).ConfigureAwait(false);
             }
 
-            var templates = await templatePackageManager.GetTemplatesAsync(context.GetCancellationToken()).ConfigureAwait(false);
-            var templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
+            var selectedTemplateGroups = await GetMatchingTemplateGroupsAsync(
+                instantiateArgs,
+                templatePackageManager,
+                hostSpecificDataLoader,
+                cancellationToken).ConfigureAwait(false);
 
-            //TODO: decide what to do if there are more than 1 group.
-            var selectedTemplateGroup = templateGroups.FirstOrDefault(template => template.ShortNames.Contains(instantiateArgs.ShortName));
-
-            if (selectedTemplateGroup == null)
+            if (!selectedTemplateGroups.Any())
             {
-                Reporter.Error.WriteLine(
-                    string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, $"'{instantiateArgs.ShortName}'").Bold().Red());
-                Reporter.Error.WriteLine();
-
-                Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
-                Reporter.Error.WriteCommand(CommandExamples.ListCommandExample(instantiateArgs.CommandName));
-
-                Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
-                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(instantiateArgs.CommandName, instantiateArgs.ShortName));
-                Reporter.Error.WriteLine();
-                return NewCommandStatus.NotFound;
+                return HandleNoMatchingTemplateGroup(instantiateArgs);
             }
-            return await HandleTemplateInstantationAsync(instantiateArgs, environmentSettings, templatePackageManager, selectedTemplateGroup).ConfigureAwait(false);
+            if (selectedTemplateGroups.Count() > 1)
+            {
+                return HandleAmbiguousTemplateGroup(instantiateArgs);
+            }
+            return await HandleTemplateInstantationAsync(
+                instantiateArgs,
+                environmentSettings,
+                templatePackageManager,
+                selectedTemplateGroups.Single(),
+                cancellationToken).ConfigureAwait(false);
         }
 
         protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
@@ -140,13 +173,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            TemplateGroup templateGroup)
+            TemplateGroup templateGroup,
+            CancellationToken cancellationToken)
         {
             HashSet<TemplateCommand> candidates = GetTemplateCommand(args, environmentSettings, templatePackageManager, templateGroup);
             if (candidates.Count == 1)
             {
                 Command commandToRun = _parentCommand is null ? this : _parentCommand;
-
                 commandToRun.AddCommand(candidates.First());
                 return (NewCommandStatus)await commandToRun.InvokeAsync(args.TokensToInvoke).ConfigureAwait(false);
             }
@@ -155,7 +188,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return HandleAmbuguousResult();
             }
 
-            //TODO: handle it better
             Reporter.Error.WriteLine(
                 string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, args.ShortName).Bold().Red());
             Reporter.Error.WriteLine();
@@ -226,7 +258,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 ? languageAwareCandidates
                 : candidates;
         }
-
     }
 
     internal class InstantiateCommandArgs : GlobalArgs
@@ -249,8 +280,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal string? ShortName { get; }
 
         internal string[] RemainingArguments { get; }
-
-        internal bool HelpRequested { get; }
 
         internal string[] TokensToInvoke { get; }
     }

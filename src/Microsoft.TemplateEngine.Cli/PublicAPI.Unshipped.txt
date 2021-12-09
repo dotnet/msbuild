@@ -1,4 +1,6 @@
-﻿Microsoft.TemplateEngine.Cli.NewCommandCallbacks
+﻿Microsoft.TemplateEngine.Cli.Commands.ICustomHelp
+Microsoft.TemplateEngine.Cli.Commands.ICustomHelp.CustomHelpLayout() -> System.Collections.Generic.IEnumerable<System.CommandLine.Help.HelpSectionDelegate!>!
+Microsoft.TemplateEngine.Cli.NewCommandCallbacks
 Microsoft.TemplateEngine.Cli.NewCommandCallbacks.NewCommandCallbacks() -> void
 Microsoft.TemplateEngine.Cli.NewCommandFactory
 static Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(string! commandName, Microsoft.TemplateEngine.Abstractions.ITemplateEngineHost! host, Microsoft.TemplateEngine.Cli.ITelemetryLogger! telemetryLogger, Microsoft.TemplateEngine.Cli.NewCommandCallbacks! callbacks) -> System.CommandLine.Command!
@@ -9,6 +11,3 @@ static Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(string! commandName
 const Microsoft.TemplateEngine.Cli.TemplateSearch.CliHostSearchCacheData.DataName = "cliHostData" -> string!
 Microsoft.TemplateEngine.Cli.TemplateSearch.CliHostSearchCacheData
 static Microsoft.TemplateEngine.Cli.TemplateSearch.CliHostSearchCacheData.Reader.get -> System.Func<object!, object!>!
-
-
-
