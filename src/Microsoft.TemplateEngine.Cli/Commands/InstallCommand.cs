@@ -42,8 +42,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal abstract class BaseInstallCommand : BaseCommand<InstallCommandArgs>
     {
-        internal BaseInstallCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName)
-            : base(host, logger, callbacks, commandName, LocalizableStrings.InstallHelp)
+        internal BaseInstallCommand(
+            NewCommand parentCommand,
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks,
+            string commandName)
+            : base(host, logger, callbacks, commandName, SymbolStrings.Command_Install_Description)
         {
             ParentCommand = parentCommand;
             this.AddArgument(NameArgument);
@@ -51,9 +56,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(AddSourceOption);
         }
 
-        internal Argument<IReadOnlyList<string>> NameArgument { get; } = new("name")
+        internal Argument<IReadOnlyList<string>> NameArgument { get; } = new("package")
         {
-            Description = "Name of NuGet package or folder.",
+            Description = SymbolStrings.Command_Install_Argument_Package,
             Arity = new ArgumentArity(1, 99)
         };
 

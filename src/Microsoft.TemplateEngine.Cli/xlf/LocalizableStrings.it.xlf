@@ -191,19 +191,9 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">Consentire l'esecuzione degli script</target>
         <note />
       </trans-unit>
-      <trans-unit id="AmbiguousLanguageHint">
-        <source>Re-run the command specifying the language to use with --language option.</source>
-        <target state="translated">Eseguire di nuovo il comando specificando il linguaggio da utilizzare con l'opzione --lingua.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AmbiguousParameterDetail">
         <source>The value '{1}' is ambiguous for option {0}.</source>
         <target state="translated">Il valore '{1}' è ambiguo per l'opzione {0}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AmbiguousTemplateGroupListHeader">
-        <source>Unable to resolve the template, these templates matched your input:</source>
-        <target state="translated">Non è possibile risolvere il modello, questi modelli corrispondono all'input:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -239,11 +229,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       <trans-unit id="Assembly">
         <source>Assembly</source>
         <target state="translated">assembly</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Author">
-        <source>Author: {0}</source>
-        <target state="translated">Autore: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousBestPrecedence">
@@ -371,16 +356,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">La colonna {0} non è supportata, le colonne supportate sono: {1}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommandDescription">
-        <source>Template Instantiation Commands for .NET CLI</source>
-        <target state="needs-review-translation">Comandi di creazione di istanze dei modelli per interfaccia della riga di comando di .NET Core</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandDescriptionCreate">
-        <source>Instantiates a template with given short name.</source>
-        <target state="new">Instantiates a template with given short name.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
         <target state="translated">Comando non riuscito.</target>
@@ -433,24 +408,9 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">Configurazione corrente:</target>
         <note />
       </trans-unit>
-      <trans-unit id="DefaultIfOptionWithoutValue">
-        <source>Default if option is provided without a value: {0}</source>
-        <target state="translated">Impostazione predefinita se l'opzione è specificata senza un valore: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DefaultValue">
-        <source>Default: {0}</source>
-        <target state="translated">Impostazione predefinita: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
         <target state="translated">Eliminare</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Description">
-        <source>Description: {0}</source>
-        <target state="translated">Descrizione: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DestructiveChangesNotification">
@@ -520,11 +480,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
       </trans-unit>
-      <trans-unit id="InstallHelp">
-        <source>Installs a source or a template package.</source>
-        <target state="translated">Installa un pacchetto di origine o di modello.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
         <target state="translated">Errore: opzioni non valide:</target>
@@ -565,11 +520,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">Per elencare i modelli installati, eseguire:</target>
         <note />
       </trans-unit>
-      <trans-unit id="ListsTemplates">
-        <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
-        <target state="translated">Elenca i modelli contenenti il nome di modello specificato. Se non è stato specificato alcun nome, elenca tutti i modelli.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option {0} missing for template {1}.</source>
         <target state="translated">Manca l’opzione obbligatoria {0} per il modello {1}.</target>
@@ -603,98 +553,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">Nessun modello corrispondente trovato: {0}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionAllowScripts">
-        <source>Specify if post action scripts should run.</source>
-        <target state="new">Specify if post action scripts should run.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionAuthorFilter">
-        <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="translated">Filtra i modelli in base all'autore del modello. Applicabile solo con--search o --list | -l option.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionBaseline">
-        <source>Filters the templates based on baseline defined in the template.</source>
-        <target state="new">Filters the templates based on baseline defined in the template.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionCheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="new">Only check for updates and display the template packages to be updated without applying update.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionColumns">
-        <source>Comma separated list of columns to display in --list and --search output. 
-The supported columns are: language, tags, author, type.</source>
-        <target state="translated">Elenco di colonne separate da virgole da visualizzare in --list e --search output. 
-Le colonne supportate sono: lingua, tag, autore, tipo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionColumnsAll">
-        <source>Display all columns in --list and --search output.</source>
-        <target state="translated">Visualizza tutte le colonne in--list e --search output.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionDryRun">
-        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionForce">
-        <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="new">Forces content to be generated even if it would change existing files.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionInteractive">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionLanguageFilter">
-        <source>Filters templates based on language and specifies the language of the template to create.</source>
-        <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionName">
-        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionNoUpdateCheck">
-        <source>Disables checking for the template package updates when instantiating a template.</source>
-        <target state="translated">Disabilita il controllo degli aggiornamenti del pacchetto di modelli durante la creazione di un'istanza di un modello.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionNuGetSource">
-        <source>Specifies a NuGet source to use during install.</source>
-        <target state="new">Specifies a NuGet source to use during install.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionOutput">
-        <source>Location to place the generated output.</source>
-        <target state="new">Location to place the generated output.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionPackageFilter">
-        <source>Filters the templates based on NuGet package ID. Applies to --search.</source>
-        <target state="translated">Filtra i modelli basati sull'ID pacchetto NuGet. Si applica a--search.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionSearch">
-        <source>Searches for the templates on NuGet.org.</source>
-        <target state="translated">Cerca i modelli in NuGet.org.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionTagFilter">
-        <source>Filters the templates based on the tag. Applies to --search and --list.</source>
-        <target state="translated">Filtra i modelli in base al tag. Si applica a--search e--list.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionTypeFilter">
-        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -856,11 +714,6 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
         <source>Common templates are:</source>
         <target state="translated">Seguono dei modelli comuni:</target>
         <note />
-      </trans-unit>
-      <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
-        <source>To see help for other template languages ({0}), use --language option:</source>
-        <target state="translated">Per visualizzare la Guida relativa ad altri linguaggi del modello ({0}), usare l'opzione --language:</target>
-        <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
@@ -1059,7 +912,7 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="translated">Questo modello contiene tecnologie provenienti da entità diverse da Microsoft, vedere {0} per i dettagli.</target>
+        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">
@@ -1072,24 +925,9 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
         <target state="translated">Non è possibile applicare le autorizzazioni {0} a "{1}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallHelp">
-        <source>Uninstalls a source or a template package.</source>
-        <target state="translated">Disinstalla un pacchetto di origine o di modelli.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnknownChangeKind">
         <source>Unknown Change</source>
         <target state="translated">Modifica sconosciuta</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateApplyCommandHelp">
-        <source>Check the currently installed template packages for update, and install the updates.</source>
-        <target state="translated">Verificare i pacchetti di modelli attualmente installati per l'aggiornamento e installare gli aggiornamenti.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateCheckCommandHelp">
-        <source>Check the currently installed template packages for updates.</source>
-        <target state="translated">Controllare i pacchetti di modelli attualmente installati per gli aggiornamenti.</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">

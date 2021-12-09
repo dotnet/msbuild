@@ -69,7 +69,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             FilterOptionDefinition.PackageFilter
         };
 
-        internal BaseSearchCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName, LocalizableStrings.OptionDescriptionSearch)
+        internal BaseSearchCommand(
+            NewCommand parentCommand,
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks,
+            string commandName)
+            : base(host, logger, callbacks, commandName, SymbolStrings.Command_Search_Description)
         {
             ParentCommand = parentCommand;
             Filters = SetupFilterOptions(SupportedFilters);
@@ -86,7 +92,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal Argument<string> NameArgument { get; } = new("name")
         {
-            Description = "Name of the template to search for",
+            Description = SymbolStrings.Command_Search_Argument_Name,
             Arity = new ArgumentArity(0, 1)
         };
 

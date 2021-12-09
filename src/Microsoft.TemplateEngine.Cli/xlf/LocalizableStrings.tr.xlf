@@ -191,19 +191,9 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Betikleri çalıştırmaya izin ver</target>
         <note />
       </trans-unit>
-      <trans-unit id="AmbiguousLanguageHint">
-        <source>Re-run the command specifying the language to use with --language option.</source>
-        <target state="translated">--language seçeneğiyle kullanılacak dili belirterek komutu yeniden çalıştırın.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AmbiguousParameterDetail">
         <source>The value '{1}' is ambiguous for option {0}.</source>
         <target state="translated">'{1}' değeri {0} seçeneği için belirsiz.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AmbiguousTemplateGroupListHeader">
-        <source>Unable to resolve the template, these templates matched your input:</source>
-        <target state="translated">Şablon çözümlenemiyor. Şu şablonlar girdinizle eşleşiyor:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -239,11 +229,6 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       <trans-unit id="Assembly">
         <source>Assembly</source>
         <target state="translated">derleme</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Author">
-        <source>Author: {0}</source>
-        <target state="translated">Yazar: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousBestPrecedence">
@@ -371,16 +356,6 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">{0} sütunları desteklenmiyor. Desteklenen sütunlar şunlardır: {1}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommandDescription">
-        <source>Template Instantiation Commands for .NET CLI</source>
-        <target state="needs-review-translation">.NET Core CLI için Şablon Örneği Oluşturma Komutları</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandDescriptionCreate">
-        <source>Instantiates a template with given short name.</source>
-        <target state="new">Instantiates a template with given short name.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
         <target state="translated">Komut başarısız oldu.</target>
@@ -433,24 +408,9 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Geçerli yapılandırma:</target>
         <note />
       </trans-unit>
-      <trans-unit id="DefaultIfOptionWithoutValue">
-        <source>Default if option is provided without a value: {0}</source>
-        <target state="translated">Seçenek bir değer olmadan sağlanırsa varsayılan: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DefaultValue">
-        <source>Default: {0}</source>
-        <target state="translated">Varsayılan: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
         <target state="translated">Sil</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Description">
-        <source>Description: {0}</source>
-        <target state="translated">Açıklama: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DestructiveChangesNotification">
@@ -520,11 +480,6 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
       </trans-unit>
-      <trans-unit id="InstallHelp">
-        <source>Installs a source or a template package.</source>
-        <target state="translated">Bir kaynak veya şablon paketi yükler.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
         <target state="translated">Hata: Geçersiz seçenek(ler):</target>
@@ -565,11 +520,6 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Yüklü şablonları listelemek için şunu çalıştırın:</target>
         <note />
       </trans-unit>
-      <trans-unit id="ListsTemplates">
-        <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
-        <target state="translated">Belirtilen şablon adını içeren şablonları listeler. Ad belirtilmezse, tüm şablonları listeler.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option {0} missing for template {1}.</source>
         <target state="translated">{1} şablonunda zorunlu {0} seçeneği eksik.</target>
@@ -603,98 +553,6 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">Eşleşen şablon bulunamadı: {0}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionAllowScripts">
-        <source>Specify if post action scripts should run.</source>
-        <target state="new">Specify if post action scripts should run.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionAuthorFilter">
-        <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="translated">Şablonları şablon yazarına göre filtreler. Yalnızca “--search” veya “--list | -l” seçeneğiyle uygulanabilir.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionBaseline">
-        <source>Filters the templates based on baseline defined in the template.</source>
-        <target state="new">Filters the templates based on baseline defined in the template.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionCheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="new">Only check for updates and display the template packages to be updated without applying update.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionColumns">
-        <source>Comma separated list of columns to display in --list and --search output. 
-The supported columns are: language, tags, author, type.</source>
-        <target state="translated">“--list” ve “--search” çıkışında görüntülenecek virgülle ayrılmış sütun listesi. 
-Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionColumnsAll">
-        <source>Display all columns in --list and --search output.</source>
-        <target state="translated">Tüm sütunları “--list” ve “--search” çıkışında görüntüleyin.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionDryRun">
-        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionForce">
-        <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="new">Forces content to be generated even if it would change existing files.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionInteractive">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionLanguageFilter">
-        <source>Filters templates based on language and specifies the language of the template to create.</source>
-        <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionName">
-        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionNoUpdateCheck">
-        <source>Disables checking for the template package updates when instantiating a template.</source>
-        <target state="translated">Bir şablon örneği oluşturulurken şablon paketi güncelleştirmelerinin denetlenmesini devre dışı bırakır.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionNuGetSource">
-        <source>Specifies a NuGet source to use during install.</source>
-        <target state="new">Specifies a NuGet source to use during install.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionOutput">
-        <source>Location to place the generated output.</source>
-        <target state="new">Location to place the generated output.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionPackageFilter">
-        <source>Filters the templates based on NuGet package ID. Applies to --search.</source>
-        <target state="translated">Şablonları NuGet paketi kimliğine göre filtreler. “--search” için geçerlidir.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionSearch">
-        <source>Searches for the templates on NuGet.org.</source>
-        <target state="translated">NuGet.org sitesinde şablon arar.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionTagFilter">
-        <source>Filters the templates based on the tag. Applies to --search and --list.</source>
-        <target state="translated">Şablonları etiketlere göre filtreler. “--search” ve “--list” için geçerlidir.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionTypeFilter">
-        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -856,11 +714,6 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
         <source>Common templates are:</source>
         <target state="translated">Ortak şablonlar şunlardır:</target>
         <note />
-      </trans-unit>
-      <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
-        <source>To see help for other template languages ({0}), use --language option:</source>
-        <target state="translated">Diğer şablon dilleri ({0}) ile ilgili yardıma bakmak için --language seçeneğini kullanın:</target>
-        <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
@@ -1059,7 +912,7 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="translated">Bu şablon Microsoft dışındaki tarafların teknolojilerini içeriyor. Ayrıntılar için {0} sayfasına bakın.</target>
+        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">
@@ -1072,24 +925,9 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
         <target state="translated">{0} izinleri "{1}" öğesine uygulanamıyor.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallHelp">
-        <source>Uninstalls a source or a template package.</source>
-        <target state="translated">Bir kaynak veya şablon paketini kaldırır.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnknownChangeKind">
         <source>Unknown Change</source>
         <target state="translated">Bilinmeyen Değişiklik</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateApplyCommandHelp">
-        <source>Check the currently installed template packages for update, and install the updates.</source>
-        <target state="translated">Şu anda yüklü şablon paketleri için güncelleştirme olup olmadığını denetleyin ve güncelleştirmeleri yükleyin.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateCheckCommandHelp">
-        <source>Check the currently installed template packages for updates.</source>
-        <target state="translated">Şu anda yüklü şablon paketleri için güncelleştirmeler olup olmadığını denetleyin..</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">

@@ -191,19 +191,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">允许脚本运行</target>
         <note />
       </trans-unit>
-      <trans-unit id="AmbiguousLanguageHint">
-        <source>Re-run the command specifying the language to use with --language option.</source>
-        <target state="translated">使用 --语言选项重新运行指定要使用的语言的命令。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AmbiguousParameterDetail">
         <source>The value '{1}' is ambiguous for option {0}.</source>
         <target state="translated">值“{1}”对于选项 {0} 不明确。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AmbiguousTemplateGroupListHeader">
-        <source>Unable to resolve the template, these templates matched your input:</source>
-        <target state="translated">无法解析模板，这些模板匹配你的输入:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -239,11 +229,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       <trans-unit id="Assembly">
         <source>Assembly</source>
         <target state="translated">程序集</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Author">
-        <source>Author: {0}</source>
-        <target state="translated">作者: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousBestPrecedence">
@@ -371,16 +356,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">列 {0} 不受支持，支持的列为: {1}。</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommandDescription">
-        <source>Template Instantiation Commands for .NET CLI</source>
-        <target state="needs-review-translation">.NET Core CLI 的模板实例化命令</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandDescriptionCreate">
-        <source>Instantiates a template with given short name.</source>
-        <target state="new">Instantiates a template with given short name.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
         <target state="translated">命令失败。</target>
@@ -433,24 +408,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">当前配置:</target>
         <note />
       </trans-unit>
-      <trans-unit id="DefaultIfOptionWithoutValue">
-        <source>Default if option is provided without a value: {0}</source>
-        <target state="translated">如果提供的选项没有值，则默认为: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DefaultValue">
-        <source>Default: {0}</source>
-        <target state="translated">默认: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
         <target state="translated">删除</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Description">
-        <source>Description: {0}</source>
-        <target state="translated">说明: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DestructiveChangesNotification">
@@ -520,11 +480,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
       </trans-unit>
-      <trans-unit id="InstallHelp">
-        <source>Installs a source or a template package.</source>
-        <target state="translated">安装源或模板包。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
         <target state="translated">错误: 无效选项:</target>
@@ -565,11 +520,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">若要列出已安装的模板，请运行:</target>
         <note />
       </trans-unit>
-      <trans-unit id="ListsTemplates">
-        <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
-        <target state="translated">列出包含指定模板名称的模板。如果未指定任何名称，则列出所有模板。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option {0} missing for template {1}.</source>
         <target state="translated">模板 {1} 缺少必需的选项 {0}。</target>
@@ -603,98 +553,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">找不到匹配的模板: {0}。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionAllowScripts">
-        <source>Specify if post action scripts should run.</source>
-        <target state="new">Specify if post action scripts should run.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionAuthorFilter">
-        <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="translated">根据模板作者筛选模板。仅适用于 --搜索 或 --列出 | -l 选项。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionBaseline">
-        <source>Filters the templates based on baseline defined in the template.</source>
-        <target state="new">Filters the templates based on baseline defined in the template.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionCheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="new">Only check for updates and display the template packages to be updated without applying update.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionColumns">
-        <source>Comma separated list of columns to display in --list and --search output. 
-The supported columns are: language, tags, author, type.</source>
-        <target state="translated">要在 --列出 和 --搜索 输出中显示的以逗号分隔的列的列表。
-支持的列为: 语言、标记、作者和类型。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionColumnsAll">
-        <source>Display all columns in --list and --search output.</source>
-        <target state="translated">在 --列出 和 --搜索 中显示所有列。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionDryRun">
-        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionForce">
-        <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="new">Forces content to be generated even if it would change existing files.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionInteractive">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionLanguageFilter">
-        <source>Filters templates based on language and specifies the language of the template to create.</source>
-        <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionName">
-        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionNoUpdateCheck">
-        <source>Disables checking for the template package updates when instantiating a template.</source>
-        <target state="translated">在实例化模板时，禁用对模板包更新的检查。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionNuGetSource">
-        <source>Specifies a NuGet source to use during install.</source>
-        <target state="new">Specifies a NuGet source to use during install.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionOutput">
-        <source>Location to place the generated output.</source>
-        <target state="new">Location to place the generated output.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionPackageFilter">
-        <source>Filters the templates based on NuGet package ID. Applies to --search.</source>
-        <target state="translated">筛选基于 NuGet 包 ID 的模板。应用于 --搜索。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionSearch">
-        <source>Searches for the templates on NuGet.org.</source>
-        <target state="translated">在 NuGet.org 上搜索模板。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionTagFilter">
-        <source>Filters the templates based on the tag. Applies to --search and --list.</source>
-        <target state="translated">根据标记筛选模板。应用于 --搜索 和 --列出。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionDescriptionTypeFilter">
-        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -856,11 +714,6 @@ The supported columns are: language, tags, author, type.</source>
         <source>Common templates are:</source>
         <target state="translated">常用模板包括:</target>
         <note />
-      </trans-unit>
-      <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
-        <source>To see help for other template languages ({0}), use --language option:</source>
-        <target state="translated">要查看有关其他模板语言({0})的帮助，请使用 --language 选项:</target>
-        <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
@@ -1059,7 +912,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="translated">此模板包含除 Microsoft 以外其他方的技术，请参阅 {0} 以获取详细信息。</target>
+        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">
@@ -1072,24 +925,9 @@ The supported columns are: language, tags, author, type.</source>
         <target state="translated">无法将权限 {0} 应用于“{1}”。</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallHelp">
-        <source>Uninstalls a source or a template package.</source>
-        <target state="translated">卸载源或模板包。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnknownChangeKind">
         <source>Unknown Change</source>
         <target state="translated">未知更改</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateApplyCommandHelp">
-        <source>Check the currently installed template packages for update, and install the updates.</source>
-        <target state="translated">检查当前安装的模板包以获取更新，然后安装更新。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateCheckCommandHelp">
-        <source>Check the currently installed template packages for updates.</source>
-        <target state="translated">检查当前安装的模板包以获取更新。</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">

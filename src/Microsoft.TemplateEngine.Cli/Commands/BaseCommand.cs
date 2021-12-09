@@ -20,7 +20,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         private readonly ITemplateEngineHost _host;
 
-        protected BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string name, string? description = null) : base(name, description)
+        protected BaseCommand(
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks,
+            string name,
+            string description)
+            : base(name, description)
         {
             _host = host;
             TelemetryLogger = logger;
@@ -33,36 +39,42 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(DebugShowConfigOption);
         }
 
-        protected BaseCommand(BaseCommand baseCommand, string name, string? description = null)
+        protected BaseCommand(BaseCommand baseCommand, string name, string description)
              : this(baseCommand._host, baseCommand.TelemetryLogger, baseCommand.Callbacks, name, description) { }
 
-        internal Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive", "Sets custom settings location")
+        internal Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive")
         {
+            Description = SymbolStrings.Option_Debug_CustomSettings,
             IsHidden = true
         };
 
-        internal Option<bool> DebugVirtualizeSettingsOption { get; } = new("--debug:ephemeral-hive", "Use virtual settings")
+        internal Option<bool> DebugVirtualizeSettingsOption { get; } = new("--debug:ephemeral-hive")
         {
+            Description = SymbolStrings.Option_Debug_VirtualSettings,
             IsHidden = true
         };
 
-        internal Option<bool> DebugAttachOption { get; } = new("--debug:attach", "Allows to pause execution in order to attach to the process for debug purposes")
+        internal Option<bool> DebugAttachOption { get; } = new("--debug:attach")
         {
+            Description = SymbolStrings.Option_Debug_Attach,
             IsHidden = true
         };
 
-        internal Option<bool> DebugReinitOption { get; } = new("--debug:reinit", "Resets the settings")
+        internal Option<bool> DebugReinitOption { get; } = new("--debug:reinit")
         {
+            Description = SymbolStrings.Option_Debug_Reinit,
             IsHidden = true
         };
 
-        internal Option<bool> DebugRebuildCacheOption { get; } = new(new[] { "--debug:rebuild-cache", "--debug:rebuildcache" }, "Resets template cache")
+        internal Option<bool> DebugRebuildCacheOption { get; } = new(new[] { "--debug:rebuild-cache", "--debug:rebuildcache" })
         {
+            Description = SymbolStrings.Option_Debug_RebuildCache,
             IsHidden = true
         };
 
-        internal Option<bool> DebugShowConfigOption { get; } = new(new[] { "--debug:show-config", "--debug:showconfig" }, "Shows the template engine config")
+        internal Option<bool> DebugShowConfigOption { get; } = new(new[] { "--debug:show-config", "--debug:showconfig" })
         {
+            Description = SymbolStrings.Option_Debug_ShowConfig,
             IsHidden = true
         };
 
@@ -103,14 +115,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal abstract class BaseCommand<TArgs> : BaseCommand, ICommandHandler where TArgs : GlobalArgs
     {
-        internal BaseCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string name, string? description = null)
+        internal BaseCommand(
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks,
+            string name,
+            string description)
             : base(host, logger, callbacks, name, description)
         {
             this.Handler = this;
         }
 
         //command called via this constructor is not invokable
-        internal BaseCommand(BaseCommand parent, string name, string? description = null) : base(parent, name, description) { }
+        internal BaseCommand(BaseCommand parent, string name, string description)
+            : base(parent, name, description) { }
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {

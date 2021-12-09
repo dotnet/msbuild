@@ -27,8 +27,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class BaseAliasShowCommand : BaseCommand<AliasShowCommandArgs>
     {
-        internal BaseAliasShowCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName)
-            : base(host, logger, callbacks, commandName) { }
+        internal BaseAliasShowCommand(
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks,
+            string commandName)
+            : base(host, logger, callbacks, commandName, SymbolStrings.Command_AliasShow_Description) { }
 
         protected override Task<NewCommandStatus> ExecuteAsync(AliasShowCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
 

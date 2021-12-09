@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../HelpStrings.resx">
+    <body>
+      <trans-unit id="Hint_AmbiguousLanguage">
+        <source>Re-run the command specifying the language to use with --language option.</source>
+        <target state="new">Re-run the command specifying the language to use with --language option.</target>
+        <note>--language is an option name and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Hint_AmbiguousType">
+        <source>Re-run the command specifying the type to use with --type option.</source>
+        <target state="new">Re-run the command specifying the type to use with --type option.</target>
+        <note>--type is an option name and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Hint_HelpForOtherLanguages">
+        <source>To see help for other template languages ({0}), use --language option:</source>
+        <target state="new">To see help for other template languages ({0}), use --language option:</target>
+        <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Hint_HelpForOtherTypes">
+        <source>To see help for other template types ({0}), use --type option:</source>
+        <target state="new">To see help for other template types ({0}), use --type option:</target>
+        <note>{0} is comma-separated list of supported types by template. --type should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Info_TemplateThirdPartyNotice">
+        <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
+        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RowHeader_DefaultIfOptionWithoutValue">
+        <source>Default if option is provided without a value: {0}</source>
+        <target state="new">Default if option is provided without a value: {0}</target>
+        <note>{0} is default value if option was provided without a value</note>
+      </trans-unit>
+      <trans-unit id="RowHeader_DefaultValue">
+        <source>Default: {0}</source>
+        <target state="new">Default: {0}</target>
+        <note>{0} is default value for option</note>
+      </trans-unit>
+      <trans-unit id="RowHeader_Description">
+        <source>Description: {0}</source>
+        <target state="new">Description: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RowHeader_TemplateAuthor">
+        <source>Author: {0}</source>
+        <target state="new">Author: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RowHeader_Type">
+        <source>Type: {0}</source>
+        <target state="new">Type: {0}</target>
+        <note>{0} is option type (string, boolean, etc)</note>
+      </trans-unit>
+      <trans-unit id="SectionHeader_TemplateSpecificOptions">
+        <source>Template options:</source>
+        <target state="new">Template options:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TableHeader_AmbiguousTemplatesList">
+        <source>Unable to resolve the template, these templates matched your input:</source>
+        <target state="new">Unable to resolve the template, these templates matched your input:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Text_NoTemplateOptions">
+        <source>(No Parameters)</source>
+        <target state="new">(No Parameters)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Text_UsageTemplateOptionsPart">
+        <source>[template options]</source>
+        <target state="new">[template options]</target>
+        <note>this text will be used as part of command usage: dotnet new console [options] [template options]</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

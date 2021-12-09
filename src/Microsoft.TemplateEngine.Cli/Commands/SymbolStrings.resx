@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Command_AliasAdd_Description" xml:space="preserve">
+    <value>Creates an alias for instantiate command with a certain set of arguments.</value>
+  </data>
+  <data name="Command_AliasShow_Description" xml:space="preserve">
+    <value>Displays defined aliases.</value>
+  </data>
+  <data name="Command_Alias_Description" xml:space="preserve">
+    <value>Creates or displays defined aliases.</value>
+  </data>
+  <data name="Command_Install_Argument_Package" xml:space="preserve">
+    <value>NuGet package ID or path to folder or NuGet package to install. 
+To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
+</value>
+  </data>
+  <data name="Command_Install_Description" xml:space="preserve">
+    <value>Installs a template package.</value>
+  </data>
+  <data name="Command_Instantiate_Argument_ShortName" xml:space="preserve">
+    <value>A short name of the template to create.</value>
+  </data>
+  <data name="Command_Instantiate_Argument_TemplateOptions" xml:space="preserve">
+    <value>Template specific options to use.</value>
+  </data>
+  <data name="Command_Instantiate_Description" xml:space="preserve">
+    <value>Instantiates a template with given short name.</value>
+  </data>
+  <data name="Command_Legacy_Update_Check_Description" xml:space="preserve">
+    <value>Checks the currently installed template packages for updates.</value>
+  </data>
+  <data name="Command_List_Argument_Name" xml:space="preserve">
+    <value>If specified, only the templates matching the name will be shown.</value>
+  </data>
+  <data name="Command_List_Description" xml:space="preserve">
+    <value>Lists templates containing the specified template name. If no name is specified, lists all templates.</value>
+  </data>
+  <data name="Command_New_Description" xml:space="preserve">
+    <value>Template Instantiation Commands for .NET CLI.</value>
+  </data>
+  <data name="Command_Search_Argument_Name" xml:space="preserve">
+    <value>If specified, only the templates matching the name will be shown.</value>
+  </data>
+  <data name="Command_Search_Description" xml:space="preserve">
+    <value>Searches for the templates on NuGet.org.</value>
+  </data>
+  <data name="Command_Uninstall_Argument_Package" xml:space="preserve">
+    <value>NuGet package ID (without version) or path to folder to uninstall. 
+If command is specified without the argument, it lists all the template packages installed.</value>
+  </data>
+  <data name="Command_Uninstall_Description" xml:space="preserve">
+    <value>Uninstalls a template package.</value>
+  </data>
+  <data name="Command_Update_Description" xml:space="preserve">
+    <value>Checks the currently installed template packages for update, and install the updates.</value>
+  </data>
+  <data name="Command_Update_Option_CheckOnly" xml:space="preserve">
+    <value>Only check for updates and display the template packages to be updated without applying update.</value>
+  </data>
+  <data name="Option_AddSource" xml:space="preserve">
+    <value>Specifies a NuGet source to use during install.</value>
+  </data>
+  <data name="Option_AuthorFilter" xml:space="preserve">
+    <value>Filters the templates based on the template author.</value>
+  </data>
+  <data name="Option_BaselineFilter" xml:space="preserve">
+    <value>Filters the templates based on baseline defined in the template.</value>
+  </data>
+  <data name="Option_Columns" xml:space="preserve">
+    <value>Specifies the columns to display in the output. </value>
+  </data>
+  <data name="Option_ColumnsAll" xml:space="preserve">
+    <value>Display all columns in the output.</value>
+  </data>
+  <data name="Option_Debug_Attach" xml:space="preserve">
+    <value>Allows to pause execution in order to attach to the process for debug purposes.</value>
+  </data>
+  <data name="Option_Debug_CustomSettings" xml:space="preserve">
+    <value>Sets custom settings location.</value>
+  </data>
+  <data name="Option_Debug_RebuildCache" xml:space="preserve">
+    <value>If specified, removes the template cache prior to command execution.</value>
+  </data>
+  <data name="Option_Debug_Reinit" xml:space="preserve">
+    <value>If specified, resets the settings prior to command execution.</value>
+  </data>
+  <data name="Option_Debug_ShowConfig" xml:space="preserve">
+    <value>If specified, shows the template engine config prior to command execution.</value>
+  </data>
+  <data name="Option_Debug_VirtualSettings" xml:space="preserve">
+    <value>If specified, the settings will be not preserved on file system.</value>
+  </data>
+  <data name="Option_Interactive" xml:space="preserve">
+    <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
+  </data>
+  <data name="Option_LanguageFilter" xml:space="preserve">
+    <value>Filters templates based on language.</value>
+  </data>
+  <data name="Option_Output" xml:space="preserve">
+    <value>Location to place the generated output.</value>
+  </data>
+  <data name="Option_PackageFilter" xml:space="preserve">
+    <value>Filters the templates based on NuGet package ID.</value>
+  </data>
+  <data name="Option_TagFilter" xml:space="preserve">
+    <value>Filters the templates based on the tag.</value>
+  </data>
+  <data name="Option_TypeFilter" xml:space="preserve">
+    <value>Filters templates based on available types. Predefined values are "project" and "item".</value>
+    <comment>project and item should not be translated</comment>
+  </data>
+  <data name="TemplateCommand_Option_AllowScripts" xml:space="preserve">
+    <value>Specifies if post action scripts should run.</value>
+  </data>
+  <data name="TemplateCommand_Option_Baseline" xml:space="preserve">
+    <value>Specifies the baseline to instantiate.</value>
+  </data>
+  <data name="TemplateCommand_Option_DryRun" xml:space="preserve">
+    <value>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</value>
+  </data>
+  <data name="TemplateCommand_Option_Force" xml:space="preserve">
+    <value>Forces content to be generated even if it would change existing files.</value>
+  </data>
+  <data name="TemplateCommand_Option_Language" xml:space="preserve">
+    <value>Specifies the template language to instantiate.</value>
+  </data>
+  <data name="TemplateCommand_Option_Name" xml:space="preserve">
+    <value>The name for the output being created. If no name is specified, the name of the output directory is used.</value>
+  </data>
+  <data name="TemplateCommand_Option_NoUpdateCheck" xml:space="preserve">
+    <value>Disables checking for the template package updates when instantiating a template.</value>
+  </data>
+  <data name="TemplateCommand_Option_Type" xml:space="preserve">
+    <value>Specifies the template type to instantiate.</value>
+  </data>
+</root>

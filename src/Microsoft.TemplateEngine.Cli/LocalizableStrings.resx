@@ -129,14 +129,8 @@
   <data name="Assembly" xml:space="preserve">
     <value>Assembly</value>
   </data>
-  <data name="Author" xml:space="preserve">
-    <value>Author: {0}</value>
-  </data>
   <data name="Change" xml:space="preserve">
     <value>Change</value>
-  </data>
-  <data name="CommandDescription" xml:space="preserve">
-    <value>Template Instantiation Commands for .NET CLI</value>
   </data>
   <data name="ConfiguredValue" xml:space="preserve">
     <value>Configured Value: {0}</value>
@@ -151,14 +145,8 @@
   <data name="CurrentConfiguration" xml:space="preserve">
     <value>Current configuration:</value>
   </data>
-  <data name="DefaultValue" xml:space="preserve">
-    <value>Default: {0}</value>
-  </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
-  </data>
-  <data name="Description" xml:space="preserve">
-    <value>Description: {0}</value>
   </data>
   <data name="DestructiveChangesNotification" xml:space="preserve">
     <value>Creating this template will make changes to existing files:</value>
@@ -166,14 +154,8 @@
   <data name="DisplaysHelp" xml:space="preserve">
     <value>Displays help for this command.</value>
   </data>
-  <data name="OptionDescriptionForce" xml:space="preserve">
-    <value>Forces content to be generated even if it would change existing files.</value>
-  </data>
   <data name="Generators" xml:space="preserve">
     <value>Generators</value>
-  </data>
-  <data name="InstallHelp" xml:space="preserve">
-    <value>Installs a source or a template package.</value>
   </data>
   <data name="InvalidParameterDetail" xml:space="preserve">
     <value>'{1}' is not a valid value for {0}.</value>
@@ -184,20 +166,11 @@
   <data name="ColumnNameLanguage" xml:space="preserve">
     <value>Language</value>
   </data>
-  <data name="OptionDescriptionLanguageFilter" xml:space="preserve">
-    <value>Filters templates based on language and specifies the language of the template to create.</value>
-  </data>
-  <data name="ListsTemplates" xml:space="preserve">
-    <value>Lists templates containing the specified template name. If no name is specified, lists all templates.</value>
-  </data>
   <data name="MissingRequiredParameter" xml:space="preserve">
     <value>Mandatory option {0} missing for template {1}.</value>
   </data>
   <data name="MountPointFactories" xml:space="preserve">
     <value>Mount Point Factories</value>
-  </data>
-  <data name="OptionDescriptionName" xml:space="preserve">
-    <value>The name for the output being created. If no name is specified, the name of the output directory is used.</value>
   </data>
   <data name="NoItems" xml:space="preserve">
     <value>(No Items)</value>
@@ -214,9 +187,6 @@
   <data name="Options" xml:space="preserve">
     <value>Options:</value>
   </data>
-  <data name="OptionDescriptionOutput" xml:space="preserve">
-    <value>Location to place the generated output.</value>
-  </data>
   <data name="Overwrite" xml:space="preserve">
     <value>Overwrite</value>
   </data>
@@ -231,9 +201,6 @@
   </data>
   <data name="ShowsAllTemplates" xml:space="preserve">
     <value>Shows all templates.</value>
-  </data>
-  <data name="OptionDescriptionTypeFilter" xml:space="preserve">
-    <value>Filters templates based on available types. Predefined values are "project" and "item".</value>
   </data>
   <data name="ColumnNameTags" xml:space="preserve">
     <value>Tags</value>
@@ -289,9 +256,6 @@
   <data name="ProcessingPostActions" xml:space="preserve">
     <value>Processing post-creation actions...</value>
   </data>
-  <data name="OptionDescriptionAllowScripts" xml:space="preserve">
-    <value>Specify if post action scripts should run.</value>
-  </data>
   <data name="AllowScriptsNoChoice" xml:space="preserve">
     <value>Do not allow scripts to run</value>
   </data>
@@ -312,9 +276,6 @@
   </data>
   <data name="ThirdPartyNotices" xml:space="preserve">
     <value>This template contains technologies from parties other than Microsoft, see {0} for details.</value>
-  </data>
-  <data name="UninstallHelp" xml:space="preserve">
-    <value>Uninstalls a source or a template package.</value>
   </data>
   <data name="TemplatePackageCoordinator_Uninstall_Error_GenericError" xml:space="preserve">
     <value>Failed to uninstall {0}, reason: {1}.</value>
@@ -450,15 +411,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="Authoring_AmbiguousChoiceParameterValue" xml:space="preserve">
     <value>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</value>
   </data>
-  <data name="OptionDescriptionNuGetSource" xml:space="preserve">
-    <value>Specifies a NuGet source to use during install.</value>
-  </data>
-  <data name="DefaultIfOptionWithoutValue" xml:space="preserve">
-    <value>Default if option is provided without a value: {0}</value>
-  </data>
-  <data name="OptionDescriptionDryRun" xml:space="preserve">
-    <value>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</value>
-  </data>
   <data name="ActionWouldHaveBeenTakenAutomatically" xml:space="preserve">
     <value>Action would have been taken automatically:</value>
   </data>
@@ -492,15 +444,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="CliTemplateSearchCoordinator_Info_MatchesFromSource" xml:space="preserve">
     <value>Matches from template source: {0}</value>
   </data>
-  <data name="UpdateApplyCommandHelp" xml:space="preserve">
-    <value>Check the currently installed template packages for update, and install the updates.</value>
-  </data>
-  <data name="UpdateCheckCommandHelp" xml:space="preserve">
-    <value>Check the currently installed template packages for updates.</value>
-  </data>
-  <data name="OptionDescriptionInteractive" xml:space="preserve">
-    <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
-  </data>
   <data name="TemplatesNotValidGivenTheSpecifiedFilter" xml:space="preserve">
     <value>{0} template(s) partially matched, but failed on {1}.</value>
   </data>
@@ -519,27 +462,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="ColumnNameType" xml:space="preserve">
     <value>Type</value>
   </data>
-  <data name="OptionDescriptionColumns" xml:space="preserve">
-    <value>Comma separated list of columns to display in --list and --search output. 
-The supported columns are: language, tags, author, type.</value>
-  </data>
-  <data name="OptionDescriptionColumnsAll" xml:space="preserve">
-    <value>Display all columns in --list and --search output.</value>
-  </data>
-  <data name="OptionDescriptionSearch" xml:space="preserve">
-    <value>Searches for the templates on NuGet.org.</value>
-  </data>
   <data name="CliTemplateSearchCoordinator_Error_NoSources" xml:space="preserve">
     <value>No remoted sources defined to search for the templates.</value>
   </data>
   <data name="CliTemplateSearchCoordinator_Error_NotFound" xml:space="preserve">
     <value>Template '{0}' was not found.</value>
-  </data>
-  <data name="OptionDescriptionAuthorFilter" xml:space="preserve">
-    <value>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</value>
-  </data>
-  <data name="OptionDescriptionPackageFilter" xml:space="preserve">
-    <value>Filters the templates based on NuGet package ID. Applies to --search.</value>
   </data>
   <data name="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort" xml:space="preserve">
     <value>Search failed: template name is too short, minimum 2 characters are required.</value>
@@ -558,9 +485,6 @@ The supported columns are: language, tags, author, type.</value>
   </data>
   <data name="AmbiguousParameterDetail" xml:space="preserve">
     <value>The value '{1}' is ambiguous for option {0}.</value>
-  </data>
-  <data name="AmbiguousTemplateGroupListHeader" xml:space="preserve">
-    <value>Unable to resolve the template, these templates matched your input:</value>
   </data>
   <data name="AmbiguousTemplateGroupListHint" xml:space="preserve">
     <value>Re-run the command using the template's exact short name.</value>
@@ -586,9 +510,6 @@ The supported columns are: language, tags, author, type.</value>
   <data name="PossibleValuesHeader" xml:space="preserve">
     <value>The possible values are:</value>
   </data>
-  <data name="AmbiguousLanguageHint" xml:space="preserve">
-    <value>Re-run the command specifying the language to use with --language option.</value>
-  </data>
   <data name="TemplatePackageCoordinator_lnstall_Error_DownloadFailed" xml:space="preserve">
     <value>{0} could not be installed, download failed.</value>
   </data>
@@ -609,9 +530,6 @@ The supported columns are: language, tags, author, type.</value>
   </data>
   <data name="GenericWarning" xml:space="preserve">
     <value>Warning: {0}</value>
-  </data>
-  <data name="OptionDescriptionTagFilter" xml:space="preserve">
-    <value>Filters the templates based on the tag. Applies to --search and --list.</value>
   </data>
   <data name="TemplatePackageCoordinator_Error_PackageNameContainsTemplates" xml:space="preserve">
     <value>{0} (contains {1} templates)</value>
@@ -694,9 +612,6 @@ The supported columns are: language, tags, author, type.</value>
   <data name="TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader" xml:space="preserve">
     <value>To update the package use:</value>
   </data>
-  <data name="OptionDescriptionNoUpdateCheck" xml:space="preserve">
-    <value>Disables checking for the template package updates when instantiating a template.</value>
-  </data>
   <data name="PostActionDispatcher_Error_NotSupported" xml:space="preserve">
     <value>The post action {0} is not supported.</value>
   </data>
@@ -742,10 +657,6 @@ The supported columns are: language, tags, author, type.</value>
   <data name="Generic_ExamplesHeader" xml:space="preserve">
     <value>Examples:</value>
   </data>
-  <data name="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint" xml:space="preserve">
-    <value>To see help for other template languages ({0}), use --language option:</value>
-    <comment>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</comment>
-  </data>
   <data name="Generic_Empty" xml:space="preserve">
     <value>(empty)</value>
     <comment>shown when there is no data to show</comment>
@@ -766,17 +677,8 @@ The supported columns are: language, tags, author, type.</value>
     <value>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</value>
     <comment>{0} - template short name, {1} - file path to host data.</comment>
   </data>
-  <data name="OptionDescriptionBaseline" xml:space="preserve">
-    <value>Filters the templates based on baseline defined in the template.</value>
-  </data>
-  <data name="OptionDescriptionCheckOnly" xml:space="preserve">
-    <value>Only check for updates and display the template packages to be updated without applying update.</value>
-  </data>
   <data name="Commands_Validator_WrongTokens" xml:space="preserve">
     <value>Unrecognized command or argument(s): {0}</value>
     <comment>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</comment>
-  </data>
-  <data name="CommandDescriptionCreate" xml:space="preserve">
-    <value>Instantiates a template with given short name.</value>
   </data>
 </root>

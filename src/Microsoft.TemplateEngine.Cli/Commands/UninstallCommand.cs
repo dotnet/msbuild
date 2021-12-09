@@ -42,14 +42,19 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class BaseUninstallCommand : BaseCommand<UninstallCommandArgs>
     {
-        internal BaseUninstallCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName, LocalizableStrings.UninstallHelp)
+        internal BaseUninstallCommand(
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks,
+            string commandName)
+            : base(host, logger, callbacks, commandName, SymbolStrings.Command_Uninstall_Description)
         {
             this.AddArgument(NameArgument);
         }
 
-        internal Argument<IReadOnlyList<string>> NameArgument { get; } = new("name")
+        internal Argument<IReadOnlyList<string>> NameArgument { get; } = new("package")
         {
-            Description = "Name of NuGet package or folder to uninstall",
+            Description = SymbolStrings.Command_Uninstall_Argument_Package,
             Arity = new ArgumentArity(0, 99)
         };
 

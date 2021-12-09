@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 ITemplateEngineHost host,
                 ITelemetryLogger logger,
                 NewCommandCallbacks callbacks)
-            : base(parentCommand, host, logger, callbacks, "update")
+            : base(parentCommand, host, logger, callbacks, "update", SymbolStrings.Command_Update_Description)
         {
             parentCommand.AddNoLegacyUsageValidators(this);
             this.AddOption(CheckOnlyOption);
@@ -26,7 +26,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal Option<bool> CheckOnlyOption { get; } = new(new[] { "--check-only", "--dry-run" })
         {
-            Description = LocalizableStrings.OptionDescriptionCheckOnly
+            Description = SymbolStrings.Command_Update_Option_CheckOnly
         };
     }
 
@@ -37,7 +37,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ITemplateEngineHost host,
             ITelemetryLogger logger,
             NewCommandCallbacks callbacks)
-            : base(parentCommand, host, logger, callbacks, "--update-apply")
+            : base(parentCommand, host, logger, callbacks, "--update-apply", SymbolStrings.Command_Legacy_Update_Check_Description)
         {
             this.IsHidden = true;
             parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });
@@ -50,8 +50,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class LegacyUpdateCheckCommand : BaseUpdateCommand
     {
-        public LegacyUpdateCheckCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
-            : base(parentCommand, host, logger, callbacks, "--update-check")
+        public LegacyUpdateCheckCommand(
+            NewCommand parentCommand,
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks)
+            : base(parentCommand, host, logger, callbacks, "--update-check", SymbolStrings.Command_Update_Description)
         {
             this.IsHidden = true;
             parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });
@@ -64,7 +68,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
     internal class BaseUpdateCommand : BaseCommand<UpdateCommandArgs>
     {
-        internal BaseUpdateCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName, LocalizableStrings.UpdateApplyCommandHelp)
+        internal BaseUpdateCommand(
+            NewCommand parentCommand,
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks,
+            string commandName,
+            string description)
+            : base(host, logger, callbacks, commandName, description)
         {
             ParentCommand = parentCommand;
             this.AddOption(InteractiveOption);

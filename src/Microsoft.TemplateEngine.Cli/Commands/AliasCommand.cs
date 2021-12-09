@@ -11,7 +11,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class AliasCommand : BaseCommand<AliasCommandArgs>
     {
-        internal AliasCommand(ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks) : base(host, telemetryLogger, callbacks, "alias")
+        internal AliasCommand(
+            ITemplateEngineHost host,
+            ITelemetryLogger telemetryLogger,
+            NewCommandCallbacks callbacks)
+            : base(host, telemetryLogger, callbacks, "alias", SymbolStrings.Command_Alias_Description)
         {
             IsHidden = true;
             this.Add(new AliasAddCommand(host, telemetryLogger, callbacks));

@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new Option<bool>("--interactive")
             {
                 Arity = new ArgumentArity(0, 1),
-                Description = LocalizableStrings.OptionDescriptionInteractive
+                Description = SymbolStrings.Option_Interactive
             };
         }
 
@@ -22,8 +22,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new(new[] { "--add-source", "--nuget-source" })
             {
-                Arity = new ArgumentArity(0, 99),
-                Description = LocalizableStrings.OptionDescriptionNuGetSource,
+                Arity = new ArgumentArity(1, 99),
+                Description = SymbolStrings.Option_AddSource,
                 AllowMultipleArgumentsPerToken = true,
             };
         }
@@ -33,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new(new[] { "--author" })
             {
                 Arity = new ArgumentArity(1, 1),
-                Description = LocalizableStrings.OptionDescriptionAuthorFilter
+                Description = SymbolStrings.Option_AuthorFilter
             };
         }
 
@@ -42,7 +42,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new(new[] { "--baseline" })
             {
                 Arity = new ArgumentArity(1, 1),
-                Description = LocalizableStrings.OptionDescriptionBaseline,
+                Description = SymbolStrings.Option_BaselineFilter,
                 IsHidden = true
             };
         }
@@ -52,7 +52,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new(new[] { "--language", "-lang" })
             {
                 Arity = new ArgumentArity(1, 1),
-                Description = LocalizableStrings.OptionDescriptionLanguageFilter
+                Description = SymbolStrings.Option_LanguageFilter
             };
         }
 
@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new(new[] { "--type" })
             {
                 Arity = new ArgumentArity(1, 1),
-                Description = LocalizableStrings.OptionDescriptionTypeFilter
+                Description = SymbolStrings.Option_TypeFilter
             };
         }
 
@@ -70,7 +70,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new(new[] { "--tag" })
             {
                 Arity = new ArgumentArity(1, 1),
-                Description = LocalizableStrings.OptionDescriptionTagFilter
+                Description = SymbolStrings.Option_TagFilter
             };
         }
 
@@ -79,7 +79,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new(new[] { "--package" })
             {
                 Arity = new ArgumentArity(1, 1),
-                Description = LocalizableStrings.OptionDescriptionPackageFilter
+                Description = SymbolStrings.Option_PackageFilter
             };
         }
 
@@ -88,7 +88,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new(new[] { "--columns-all" })
             {
                 Arity = new ArgumentArity(0, 1),
-                Description = LocalizableStrings.OptionDescriptionColumnsAll
+                Description = SymbolStrings.Option_ColumnsAll
             };
         }
 
@@ -97,7 +97,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Option<IReadOnlyList<string>> option = new(new[] { "--columns" }, ParseCommaSeparatedValues)
             {
                 Arity = new ArgumentArity(1, 4),
-                Description = LocalizableStrings.OptionDescriptionColumns,
+                Description = SymbolStrings.Option_Columns,
                 AllowMultipleArgumentsPerToken = true,
             };
             option.FromAmong(
@@ -112,7 +112,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new Option<string>(new string[] { "-o", "--output" })
             {
-                Description = LocalizableStrings.OptionDescriptionOutput,
+                Description = SymbolStrings.Option_Output,
                 IsRequired = false,
                 Arity = new ArgumentArity(1, 1)
             };

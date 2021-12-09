@@ -383,29 +383,11 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Re-run the command specifying the language to use with --language option..
-        /// </summary>
-        internal static string AmbiguousLanguageHint {
-            get {
-                return ResourceManager.GetString("AmbiguousLanguageHint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The value &apos;{1}&apos; is ambiguous for option {0}..
         /// </summary>
         internal static string AmbiguousParameterDetail {
             get {
                 return ResourceManager.GetString("AmbiguousParameterDetail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to resolve the template, these templates matched your input:.
-        /// </summary>
-        internal static string AmbiguousTemplateGroupListHeader {
-            get {
-                return ResourceManager.GetString("AmbiguousTemplateGroupListHeader", resourceCulture);
             }
         }
         
@@ -469,15 +451,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string Assembly {
             get {
                 return ResourceManager.GetString("Assembly", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Author: {0}.
-        /// </summary>
-        internal static string Author {
-            get {
-                return ResourceManager.GetString("Author", resourceCulture);
             }
         }
         
@@ -707,24 +680,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Template Instantiation Commands for .NET CLI.
-        /// </summary>
-        internal static string CommandDescription {
-            get {
-                return ResourceManager.GetString("CommandDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Instantiates a template with given short name..
-        /// </summary>
-        internal static string CommandDescriptionCreate {
-            get {
-                return ResourceManager.GetString("CommandDescriptionCreate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Command failed..
         /// </summary>
         internal static string CommandFailed {
@@ -816,38 +771,11 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Default if option is provided without a value: {0}.
-        /// </summary>
-        internal static string DefaultIfOptionWithoutValue {
-            get {
-                return ResourceManager.GetString("DefaultIfOptionWithoutValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Default: {0}.
-        /// </summary>
-        internal static string DefaultValue {
-            get {
-                return ResourceManager.GetString("DefaultValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         internal static string Delete {
             get {
                 return ResourceManager.GetString("Delete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Description: {0}.
-        /// </summary>
-        internal static string Description {
-            get {
-                return ResourceManager.GetString("Description", resourceCulture);
             }
         }
         
@@ -970,15 +898,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Installs a source or a template package..
-        /// </summary>
-        internal static string InstallHelp {
-            get {
-                return ResourceManager.GetString("InstallHelp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error: Invalid option(s):.
         /// </summary>
         internal static string InvalidCommandOptions {
@@ -1038,15 +957,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string InvalidSyntax {
             get {
                 return ResourceManager.GetString("InvalidSyntax", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Lists templates containing the specified template name. If no name is specified, lists all templates..
-        /// </summary>
-        internal static string ListsTemplates {
-            get {
-                return ResourceManager.GetString("ListsTemplates", resourceCulture);
             }
         }
         
@@ -1128,169 +1038,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string OptionalWorkloadsSyncFailed {
             get {
                 return ResourceManager.GetString("OptionalWorkloadsSyncFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify if post action scripts should run..
-        /// </summary>
-        internal static string OptionDescriptionAllowScripts {
-            get {
-                return ResourceManager.GetString("OptionDescriptionAllowScripts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Filters the templates based on the template author. Applicable only with --search or --list | -l option..
-        /// </summary>
-        internal static string OptionDescriptionAuthorFilter {
-            get {
-                return ResourceManager.GetString("OptionDescriptionAuthorFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Filters the templates based on baseline defined in the template..
-        /// </summary>
-        internal static string OptionDescriptionBaseline {
-            get {
-                return ResourceManager.GetString("OptionDescriptionBaseline", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Only check for updates and display the template packages to be updated without applying update..
-        /// </summary>
-        internal static string OptionDescriptionCheckOnly {
-            get {
-                return ResourceManager.GetString("OptionDescriptionCheckOnly", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Comma separated list of columns to display in --list and --search output. 
-        ///The supported columns are: language, tags, author, type..
-        /// </summary>
-        internal static string OptionDescriptionColumns {
-            get {
-                return ResourceManager.GetString("OptionDescriptionColumns", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Display all columns in --list and --search output..
-        /// </summary>
-        internal static string OptionDescriptionColumnsAll {
-            get {
-                return ResourceManager.GetString("OptionDescriptionColumnsAll", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Displays a summary of what would happen if the given command line were run if it would result in a template creation..
-        /// </summary>
-        internal static string OptionDescriptionDryRun {
-            get {
-                return ResourceManager.GetString("OptionDescriptionDryRun", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Forces content to be generated even if it would change existing files..
-        /// </summary>
-        internal static string OptionDescriptionForce {
-            get {
-                return ResourceManager.GetString("OptionDescriptionForce", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Allows the command to stop and wait for user input or action (for example to complete authentication)..
-        /// </summary>
-        internal static string OptionDescriptionInteractive {
-            get {
-                return ResourceManager.GetString("OptionDescriptionInteractive", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Filters templates based on language and specifies the language of the template to create..
-        /// </summary>
-        internal static string OptionDescriptionLanguageFilter {
-            get {
-                return ResourceManager.GetString("OptionDescriptionLanguageFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The name for the output being created. If no name is specified, the name of the output directory is used..
-        /// </summary>
-        internal static string OptionDescriptionName {
-            get {
-                return ResourceManager.GetString("OptionDescriptionName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Disables checking for the template package updates when instantiating a template..
-        /// </summary>
-        internal static string OptionDescriptionNoUpdateCheck {
-            get {
-                return ResourceManager.GetString("OptionDescriptionNoUpdateCheck", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specifies a NuGet source to use during install..
-        /// </summary>
-        internal static string OptionDescriptionNuGetSource {
-            get {
-                return ResourceManager.GetString("OptionDescriptionNuGetSource", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Location to place the generated output..
-        /// </summary>
-        internal static string OptionDescriptionOutput {
-            get {
-                return ResourceManager.GetString("OptionDescriptionOutput", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Filters the templates based on NuGet package ID. Applies to --search..
-        /// </summary>
-        internal static string OptionDescriptionPackageFilter {
-            get {
-                return ResourceManager.GetString("OptionDescriptionPackageFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Searches for the templates on NuGet.org..
-        /// </summary>
-        internal static string OptionDescriptionSearch {
-            get {
-                return ResourceManager.GetString("OptionDescriptionSearch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Filters the templates based on the tag. Applies to --search and --list..
-        /// </summary>
-        internal static string OptionDescriptionTagFilter {
-            get {
-                return ResourceManager.GetString("OptionDescriptionTagFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Filters templates based on available types. Predefined values are &quot;project&quot; and &quot;item&quot;..
-        /// </summary>
-        internal static string OptionDescriptionTypeFilter {
-            get {
-                return ResourceManager.GetString("OptionDescriptionTypeFilter", resourceCulture);
             }
         }
         
@@ -1570,15 +1317,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string TemplateInformationCoordinator_DotnetNew_TemplatesHeader {
             get {
                 return ResourceManager.GetString("TemplateInformationCoordinator_DotnetNew_TemplatesHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to To see help for other template languages ({0}), use --language option:.
-        /// </summary>
-        internal static string TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint {
-            get {
-                return ResourceManager.GetString("TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint", resourceCulture);
             }
         }
         
@@ -1961,38 +1699,11 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uninstalls a source or a template package..
-        /// </summary>
-        internal static string UninstallHelp {
-            get {
-                return ResourceManager.GetString("UninstallHelp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Unknown Change.
         /// </summary>
         internal static string UnknownChangeKind {
             get {
                 return ResourceManager.GetString("UnknownChangeKind", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Check the currently installed template packages for update, and install the updates..
-        /// </summary>
-        internal static string UpdateApplyCommandHelp {
-            get {
-                return ResourceManager.GetString("UpdateApplyCommandHelp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Check the currently installed template packages for updates..
-        /// </summary>
-        internal static string UpdateCheckCommandHelp {
-            get {
-                return ResourceManager.GetString("UpdateCheckCommandHelp", resourceCulture);
             }
         }
         

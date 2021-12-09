@@ -17,14 +17,19 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         private NewCommand? _parentCommand;
 
-        internal InstantiateCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "create", LocalizableStrings.CommandDescriptionCreate)
+        internal InstantiateCommand(
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks)
+            : base(host, logger, callbacks, "create", SymbolStrings.Command_Instantiate_Description)
         {
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
             IsHidden = true;
         }
 
-        private InstantiateCommand(NewCommand parentCommand, string name, string? description = null) : base(parentCommand, name, description)
+        private InstantiateCommand(NewCommand parentCommand, string name, string description)
+            : base(parentCommand, name, description)
         {
             _parentCommand = parentCommand;
             this.AddArgument(ShortNameArgument);
@@ -33,17 +38,22 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
         {
+            Description = SymbolStrings.Command_Instantiate_Argument_ShortName,
             Arity = new ArgumentArity(0, 1)
         };
 
         internal Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
         {
+            Description = SymbolStrings.Command_Instantiate_Argument_TemplateOptions,
             Arity = new ArgumentArity(0, 999)
         };
 
         internal static InstantiateCommand FromNewCommand(NewCommand parentCommand)
         {
-            InstantiateCommand command = new InstantiateCommand(parentCommand, parentCommand.Name, parentCommand.Description);
+            InstantiateCommand command = new InstantiateCommand(
+                parentCommand,
+                parentCommand.Name,
+                parentCommand.Description ?? SymbolStrings.Command_New_Description);
             //subcommands are re-added just for the sake of proper help display
             foreach (var subcommand in parentCommand.Children.OfType<Command>())
             {

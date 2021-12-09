@@ -57,6 +57,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (!string.IsNullOrWhiteSpace(templateLanguage))
             {
                 LanguageOption = SharedOptionsFactory.CreateLanguageOption();
+                LanguageOption.Description = SymbolStrings.TemplateCommand_Option_Language;
                 LanguageOption.FromAmong(templateLanguage);
 
                 if (!string.IsNullOrWhiteSpace(defaultLanguage)
@@ -82,6 +83,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (!string.IsNullOrWhiteSpace(templateType))
             {
                 TypeOption = SharedOptionsFactory.CreateTypeOption();
+                TypeOption.Description = SymbolStrings.TemplateCommand_Option_Type;
                 TypeOption.FromAmong(templateType);
                 this.AddOption(TypeOption);
             }
@@ -89,6 +91,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (template.BaselineInfo.Any(b => !string.IsNullOrWhiteSpace(b.Key)))
             {
                 BaselineOption = SharedOptionsFactory.CreateBaselineOption();
+                BaselineOption.Description = SymbolStrings.TemplateCommand_Option_Baseline;
                 BaselineOption.FromAmong(template.BaselineInfo.Select(b => b.Key).Where(b => !string.IsNullOrWhiteSpace(b)).ToArray());
                 this.AddOption(BaselineOption);
             }
@@ -113,25 +116,25 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal Option<string> NameOption { get; } = new Option<string>(new string[] { "-n", "--name" })
         {
-            Description = LocalizableStrings.OptionDescriptionName,
-            Arity = new ArgumentArity(0, 1)
+            Description = SymbolStrings.TemplateCommand_Option_Name,
+            Arity = new ArgumentArity(1, 1)
         };
 
         internal Option<bool> DryRunOption { get; } = new Option<bool>("--dry-run")
         {
-            Description = LocalizableStrings.OptionDescriptionDryRun,
+            Description = SymbolStrings.TemplateCommand_Option_DryRun,
             Arity = new ArgumentArity(0, 1)
         };
 
         internal Option<bool> ForceOption { get; } = new Option<bool>("--force")
         {
-            Description = LocalizableStrings.OptionDescriptionForce,
+            Description = SymbolStrings.TemplateCommand_Option_Force,
             Arity = new ArgumentArity(0, 1)
         };
 
         internal Option<bool> NoUpdateCheckOption { get; } = new Option<bool>("--no-update-check")
         {
-            Description = LocalizableStrings.OptionDescriptionNoUpdateCheck,
+            Description = SymbolStrings.TemplateCommand_Option_NoUpdateCheck,
             Arity = new ArgumentArity(0, 1)
         };
 

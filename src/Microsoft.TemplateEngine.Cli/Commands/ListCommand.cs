@@ -67,7 +67,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             FilterOptionDefinition.TagFilter
         };
 
-        internal BaseListCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks, string commandName) : base(host, logger, callbacks, commandName, LocalizableStrings.ListsTemplates)
+        internal BaseListCommand(
+            NewCommand parentCommand,
+            ITemplateEngineHost host,
+            ITelemetryLogger logger,
+            NewCommandCallbacks callbacks,
+            string commandName)
+            : base(host, logger, callbacks, commandName, SymbolStrings.Command_List_Description)
         {
             ParentCommand = parentCommand;
             Filters = SetupFilterOptions(SupportedFilters);
@@ -84,7 +90,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal Argument<string> NameArgument { get; } = new("name")
         {
-            Description = "Name of template to filter for",
+            Description = SymbolStrings.Command_List_Argument_Name,
             Arity = new ArgumentArity(0, 1)
         };
 

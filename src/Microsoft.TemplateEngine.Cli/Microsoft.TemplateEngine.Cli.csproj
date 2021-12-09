@@ -36,6 +36,16 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Compile Update="Commands\HelpStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>HelpStrings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Commands\SymbolStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SymbolStrings.resx</DependentUpon>
+    </Compile>
     <Compile Update="LocalizableStrings.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -44,17 +54,25 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Commands\HelpStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>HelpStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Commands\SymbolStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SymbolStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="LocalizableStrings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LocalizableStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="CopyExternalSourceFilesIntoProject" BeforeTargets="BeforeBuild" >
+  <Target Name="CopyExternalSourceFilesIntoProject" BeforeTargets="BeforeBuild">
     <ItemGroup>
       <WcwidthFiles Include="$(PkgWcwidth_Sources)\contentFiles\cs\net5.0\External\**\*" />
     </ItemGroup>
-    <Copy SourceFiles="@(WcwidthFiles)" DestinationFolder="$(BaseIntermediateOutputPath)/External/%(RecursiveDir)"/>
+    <Copy SourceFiles="@(WcwidthFiles)" DestinationFolder="$(BaseIntermediateOutputPath)/External/%(RecursiveDir)" />
     <ItemGroup>
       <Compile Include="$(BaseIntermediateOutputPath)/External/**/*.cs" />
     </ItemGroup> 
