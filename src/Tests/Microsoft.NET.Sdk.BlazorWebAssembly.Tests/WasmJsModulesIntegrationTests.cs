@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/38844")]
+        [Fact]
         public void Build_DoesNotGenerateManifestJson_IncludesJSModulesOnBlazorBootJsonManifest()
         {
             // Arrange
@@ -53,7 +53,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(outputPath, "wwwroot", "blazorwasm-minimal.modules.json")).Should().NotExist();
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/38844")]
+        [Fact]
         public void JSModules_ManifestIncludesModuleTargetPaths()
         {
             // Arrange

@@ -26,7 +26,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             DotNet5JSTemplate = $"dotnet.{RuntimeVersion}.js";
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/38844")]
+        [Fact]
         public void StaticWebAssets_BuildMinimal_Works()
         {
             // Arrange
@@ -90,7 +90,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 intermediateOutputPath);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/38844")]
+        [Fact]
         public void StaticWebAssets_Build_Hosted_Works()
         {
             // Arrange

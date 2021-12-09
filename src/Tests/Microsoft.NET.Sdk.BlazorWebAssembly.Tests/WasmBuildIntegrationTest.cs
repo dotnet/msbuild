@@ -432,7 +432,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "_bin", "blazorwasm.dll")).Should().NotExist();
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/38844")]
+        [Fact]
         public void Build_SatelliteAssembliesAreCopiedToBuildOutput()
         {
             // Arrange
