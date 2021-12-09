@@ -4,14 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -37,8 +38,10 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
         /// <summary>
         /// Test that a solution filter file excludes projects not covered by its list of projects or their dependencies.
         /// </summary>
-        [Fact]
-        public void SolutionFilterFiltersProjects()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SolutionFilterFiltersProjects(bool graphBuild)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -114,22 +117,31 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                 }
                 ");
                 Directory.GetCurrentDirectory().ShouldNotBe(Path.GetDirectoryName(filterFile.Path));
-                SolutionFile solution = SolutionFile.Parse(filterFile.Path);
-                ILoggingService mockLogger = CreateMockLoggingService();
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, mockLogger);
-                instances.ShouldHaveSingleItem();
+                if (graphBuild)
+                {
+                    ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
+                    MockLogger logger = new();
+                    logger.Verbosity = LoggerVerbosity.Diagnostic;
+                    projectCollection.RegisterLogger(logger);
+                    ProjectGraphEntryPoint entryPoint = new(filterFile.Path, new Dictionary<string, string>());
+                    ProjectGraph graphFromSolution = new(entryPoint, projectCollection);
+                    logger.AssertNoErrors();
+                    graphFromSolution.ProjectNodes.ShouldHaveSingleItem();
+                    graphFromSolution.ProjectNodes.Single().ProjectInstance.ProjectFileLocation.LocationString.ShouldBe(simpleProject.Path);
+                }
+                else
+                {
+                    SolutionFile solution = SolutionFile.Parse(filterFile.Path);
+                    ILoggingService mockLogger = CreateMockLoggingService();
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, mockLogger);
+                    instances.ShouldHaveSingleItem();
 
-                // Check that dependencies are built, and non-dependencies in the .sln are not.
-                MockLogger logger = new(output);
-                instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
-                logger.AssertLogContains(new string[] { "SimpleProjectBuilt" });
-                logger.AssertLogDoesntContain("ClassLibraryBuilt");
-
-                // Test that the same works for graph builds
-                string log = RunnerUtilities.ExecMSBuild(filterFile.Path + " -graph", out bool success);
-                success.ShouldBeTrue();
-                log.ShouldContain("SimpleProjectBuilt");
-                log.ShouldNotContain("ClassLibraryBuild");
+                    // Check that dependencies are built, and non-dependencies in the .sln are not.
+                    MockLogger logger = new(output);
+                    instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
+                    logger.AssertLogContains(new string[] { "SimpleProjectBuilt" });
+                    logger.AssertLogDoesntContain("ClassLibraryBuilt");
+                }
             }
         }
 
