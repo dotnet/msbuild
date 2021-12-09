@@ -15,5 +15,23 @@ namespace Microsoft.Build.Framework
         /// <param name="message">Message string.</param>
         /// <param name="messageImportance">Optional message importances. Default to low.</param>
         public abstract void LogMessage(string message, MessageImportance messageImportance = MessageImportance.Low);
+
+        /// <summary>
+        /// Logs that an event.
+        /// </summary>
+        /// <param name="args">An array of arguments to log with the event.</param>
+        public abstract void LogEvent(params object[] args);
+
+        /// <summary>
+        /// Logs that an event when an operation has started.
+        /// </summary>
+        /// <param name="args">An array of arguments to log with the event.</param>
+        public abstract void LogEventStart(params object[] args);
+
+        /// <summary>
+        /// Logs that an event when an operation has completed.
+        /// </summary>
+        /// <param name="args">An array of arguments to log with the event.</param>
+        public abstract void LogEventStop(params object[] args);
     }
 }

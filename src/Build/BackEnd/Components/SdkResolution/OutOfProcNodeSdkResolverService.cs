@@ -4,6 +4,7 @@
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
@@ -26,7 +27,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// The cache of responses which is cleared between builds.
         /// </summary>
-        private readonly ConcurrentDictionary<string, SdkResult> _responseCache = new ConcurrentDictionary<string, SdkResult>(MSBuildNameIgnoreCaseComparer.Default);
+        private readonly ConcurrentDictionary<string, Lazy<SdkResult>> _responseCache = new ConcurrentDictionary<string, Lazy<SdkResult>>(MSBuildNameIgnoreCaseComparer.Default);
 
         /// <summary>
         /// An event to signal when a response has been received.
@@ -64,13 +65,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
             // Get a cached response if possible, otherwise send the request
-            var sdkResult = _responseCache.GetOrAdd(
+            Lazy<SdkResult> sdkResultLazy = _responseCache.GetOrAdd(
                 sdk.Name,
-                key =>
-                {
-                    var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
-                    return result;
-                });
+                key => new Lazy<SdkResult>(() => RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio)));
+
+            if (sdkResultLazy.IsValueCreated)
+            {
+                MSBuildEventSource.Log.OutOfProcSdkResolverServiceResolveSdkFromCache(submissionId, sdk.Name, solutionPath, projectPath, sdkResultLazy.Value.Success);
+            }
+
+            SdkResult sdkResult = sdkResultLazy.Value;
 
             if (sdkResult.Version != null && !SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
             {
@@ -105,6 +109,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         private SdkResult RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
+            MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(submissionId, sdk.Name, solutionPath, projectPath);
+
             // Clear out the last response for good measure
             _lastResponse = null;
 
@@ -118,6 +124,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             // Keep track of the element location of the reference
             _lastResponse.ElementLocation = sdkReferenceLocation;
+
+            MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(submissionId, sdk.Name, solutionPath, projectPath, _lastResponse.Success);
 
             // Return the response which was set by another thread.  In the case of shutdown, it should be null.
             return _lastResponse;
