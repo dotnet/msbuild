@@ -12,11 +12,12 @@ namespace Dotnet_new3.IntegrationTests
 {
     public partial class DotnetNewHelp
     {
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Theory(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Theory]
         [InlineData("-h")]
+        [InlineData("/h")]
         [InlineData("--help")]
+        [InlineData("-?")]
+        [InlineData("/?")]
         public void CanShowHelp(string command)
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -32,9 +33,97 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Theory(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Theory]
+        [InlineData("-h")]
+        [InlineData("--help")]
+        public void CanShowHelp_Install(string option)
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            var commandResult = new DotnetNewCommand(_log, "install", option)
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult.Should().ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Approvals.Verify(commandResult.StdOut);
+        }
+
+        [Theory]
+        [InlineData("-h")]
+        [InlineData("--help")]
+        public void CanShowHelp_Update(string option)
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            var commandResult = new DotnetNewCommand(_log, "update", option)
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult.Should().ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Approvals.Verify(commandResult.StdOut);
+        }
+
+        [Theory]
+        [InlineData("-h")]
+        [InlineData("--help")]
+        public void CanShowHelp_Uninstall(string option)
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            var commandResult = new DotnetNewCommand(_log, "uninstall", option)
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult.Should().ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Approvals.Verify(commandResult.StdOut);
+        }
+
+        [Theory]
+        [InlineData("-h")]
+        [InlineData("--help")]
+        public void CanShowHelp_List(string option)
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            var commandResult = new DotnetNewCommand(_log, "list", option)
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult.Should().ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Approvals.Verify(commandResult.StdOut);
+        }
+
+        [Theory]
+        [InlineData("-h")]
+        [InlineData("--help")]
+        public void CanShowHelp_Search(string option)
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            var commandResult = new DotnetNewCommand(_log, "search", option)
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult.Should().ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Approvals.Verify(commandResult.StdOut);
+        }
+
+        [Theory]
         [InlineData("console -h")]
         [InlineData("console --help")]
         public void CanShowHelpForTemplate_Console(string command)
@@ -55,9 +144,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Theory(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Theory]
         [InlineData("classlib -h")]
         [InlineData("classlib --help")]
         public void CanShowHelpForTemplate_Classlib(string command)
@@ -78,8 +165,28 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
+        [Theory]
+        [InlineData("globaljson -h")]
+        public void CanShowHelpForTemplate_GlobalJson(string command)
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            var commandResult = new DotnetNewCommand(_log, command.Split(" "))
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.NotHaveStdOutContaining("Usage: new3 [options]");
+
+            Approvals.Verify(commandResult.StdOut);
+        }
+
 #pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
+        [Fact(Skip = "TODO: does not fail now, check if can fail")]
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CannotShowHelpForTemplate_PartialNameMatch()
         {
@@ -96,7 +203,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
+        [Fact(Skip = "TODO: does not fail now, check if can fail")]
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CannotShowHelpForTemplate_FullNameMatch()
         {
@@ -113,7 +220,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
+        [Fact(Skip = "TODO: does not fail now, check if can fail")]
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CannotShowHelpForTemplate_WhenAmbiguousLanguageChoice()
         {
@@ -131,9 +238,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdErr);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CanShowHelpForTemplate_MatchOnChoice()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -189,9 +294,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdErr);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CanShowHelpForTemplate_MatchOnNonChoiceParam()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -209,9 +312,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CanShowHelpForTemplate_MatchOnLanguage()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();

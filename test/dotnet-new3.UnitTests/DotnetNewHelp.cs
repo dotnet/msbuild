@@ -22,9 +22,7 @@ namespace Dotnet_new3.IntegrationTests
             _fixture = fixture;
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact (Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void WontShowLanguageHintInCaseOfOneLang()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -35,6 +33,7 @@ namespace Dotnet_new3.IntegrationTests
                     .Execute()
                     .Should().Pass()
                     .And.NotHaveStdErr()
+                    .And.HaveStdOutContaining("global.json file")
                     .And.NotHaveStdOutContaining("To see help for other template languages");
         }
     }

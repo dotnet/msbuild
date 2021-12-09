@@ -63,9 +63,7 @@ namespace Dotnet_new3.IntegrationTests
             Directory.Delete(workingDir, true);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CanShowHelp_WebAPI()
         {
             var commandResult = new DotnetNewCommand(_log, "webapi", "-h")
@@ -82,9 +80,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CanShowHelp_Mvc()
         {
             var commandResult = new DotnetNewCommand(_log, "mvc", "-h")
@@ -101,9 +97,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Theory(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Theory]
         [InlineData("webapp")]
         [InlineData("razor")]
         public void CanShowHelp_Webapp(string templateName)

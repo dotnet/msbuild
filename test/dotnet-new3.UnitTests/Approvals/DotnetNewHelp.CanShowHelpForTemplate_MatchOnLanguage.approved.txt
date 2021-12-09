@@ -1,17 +1,31 @@
 ﻿Console App (F#)
 Author: Microsoft
-Description: A project for creating a command-line application that can run on .NET on Windows, Linux and macOS
-Options:                                                                             
-  -f|--framework  The target framework for the project.                              
-                      net7.0           - Target net7.0                               
-                      net5.0           - Target net5.0                               
-                      netcoreapp3.1    - Target netcoreapp3.1                        
-                  Default: net7.0                                                    
+Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
 
-  --no-restore    If specified, skips the automatic restore of the project on create.
-                  bool - Optional                                                    
-                  Default: false                                                     
+Usage:
+  new3 console [options] [template options]
 
+Options:
+  -n, --name <name>       The name for the output being created. If no name is specified, the name of the output directory is used.
+  -o, --output <output>   Location to place the generated output.
+  --dry-run               Displays a summary of what would happen if the given command line were run if it would result in a template creation.
+  --force                 Forces content to be generated even if it would change existing files.
+  --no-update-check       Disables checking for the template package updates when instantiating a template.
+  -lang, --language <F#>  Specifies the template language to instantiate.
+  --type <project>        Specifies the template type to instantiate.
+
+Template options:
+  -f, --framework <net5.0|net7.0|netcoreapp3.1>  The target framework for the project.
+                                                 Type: choice
+                                                   net7.0         Target net7.0
+                                                   net5.0         Target net5.0
+                                                   netcoreapp3.1  Target netcoreapp3.1
+                                                 Default: net7.0
+  
+  --no-restore                                   If specified, skips the automatic restore of the project on create.
+                                                 Type: bool
+                                                 Default: false
+  
 
 To see help for other template languages (C#, VB), use --language option:
    dotnet new3 console -h --language C#

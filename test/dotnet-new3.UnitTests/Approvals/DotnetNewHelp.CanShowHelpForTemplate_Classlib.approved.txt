@@ -1,22 +1,36 @@
 ﻿Class Library (C#)
 Author: Microsoft
-Description: A project for creating a class library that targets .NET or .NET Standard
-Options:                                                                             
-  -f|--framework  The target framework for the project.                              
-                      net7.0            - Target net7.0                              
-                      netstandard2.1    - Target netstandard2.1                      
-                      netstandard2.0    - Target netstandard2.0                      
-                      net5.0            - Target net5.0                              
-                      netcoreapp3.1     - Target netcoreapp3.1                       
-                  Default: net7.0                                                    
+Description: A project for creating a class library that targets .NET Standard or .NET Core
 
-  --langVersion   Sets the LangVersion property in the created project file          
-                  text - Optional                                                    
+Usage:
+  new3 classlib [options] [template options]
 
-  --no-restore    If specified, skips the automatic restore of the project on create.
-                  bool - Optional                                                    
-                  Default: false                                                     
+Options:
+  -n, --name <name>       The name for the output being created. If no name is specified, the name of the output directory is used.
+  -o, --output <output>   Location to place the generated output.
+  --dry-run               Displays a summary of what would happen if the given command line were run if it would result in a template creation.
+  --force                 Forces content to be generated even if it would change existing files.
+  --no-update-check       Disables checking for the template package updates when instantiating a template.
+  -lang, --language <C#>  Specifies the template language to instantiate.
+  --type <project>        Specifies the template type to instantiate.
 
+Template options:
+  -f, --framework <net5.0|net7.0|netcoreapp3.1|netstandard2.0|netstandard2.1>  The target framework for the project.
+                                                                               Type: choice
+                                                                                 net7.0          Target net7.0
+                                                                                 netstandard2.1  Target netstandard2.1
+                                                                                 netstandard2.0  Target netstandard2.0
+                                                                                 net5.0          Target net5.0
+                                                                                 netcoreapp3.1   Target netcoreapp3.1
+                                                                               Default: net7.0
+  
+  --langVersion <langVersion>                                                  Sets the LangVersion property in the created project file
+                                                                               Type: text
+  
+  --no-restore                                                                 If specified, skips the automatic restore of the project on create.
+                                                                               Type: bool
+                                                                               Default: false
+  
 
 To see help for other template languages (F#, VB), use --language option:
    dotnet new3 classlib -h --language F#

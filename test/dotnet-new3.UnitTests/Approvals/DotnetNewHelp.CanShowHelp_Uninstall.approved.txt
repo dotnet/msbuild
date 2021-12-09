@@ -1,0 +1,12 @@
+﻿Description:
+  Uninstalls a template package.
+
+Usage:
+  new3 uninstall [<package>...] [options]
+
+Arguments:
+  <package>  NuGet package ID (without version) or path to folder to uninstall. 
+             If command is specified without the argument, it lists all the template packages installed.
+
+Options:
+  -?, -h, --help  Show help and usage information

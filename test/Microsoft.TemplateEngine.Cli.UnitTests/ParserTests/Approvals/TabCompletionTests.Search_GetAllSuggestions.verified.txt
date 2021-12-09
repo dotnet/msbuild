@@ -4,44 +4,42 @@
     Kind: Keyword,
     SortText: --author,
     InsertText: --author,
-    Detail: Filters the templates based on the template author. Applicable only with --search or --list | -l option.
+    Detail: Filters the templates based on the template author.
   },
   {
     Label: --columns,
     Kind: Keyword,
     SortText: --columns,
     InsertText: --columns,
-    Detail:
-Comma separated list of columns to display in --list and --search output. 
-The supported columns are: language, tags, author, type.
+    Detail: Specifies the columns to display in the output. 
   },
   {
     Label: --columns-all,
     Kind: Keyword,
     SortText: --columns-all,
     InsertText: --columns-all,
-    Detail: Display all columns in --list and --search output.
+    Detail: Display all columns in the output.
   },
   {
     Label: --language,
     Kind: Keyword,
     SortText: --language,
     InsertText: --language,
-    Detail: Filters templates based on language and specifies the language of the template to create.
+    Detail: Filters templates based on language.
   },
   {
     Label: --package,
     Kind: Keyword,
     SortText: --package,
     InsertText: --package,
-    Detail: Filters the templates based on NuGet package ID. Applies to --search.
+    Detail: Filters the templates based on NuGet package ID.
   },
   {
     Label: --tag,
     Kind: Keyword,
     SortText: --tag,
     InsertText: --tag,
-    Detail: Filters the templates based on the tag. Applies to --search and --list.
+    Detail: Filters the templates based on the tag.
   },
   {
     Label: --type,
@@ -55,6 +53,6 @@ The supported columns are: language, tags, author, type.
     Kind: Keyword,
     SortText: -lang,
     InsertText: -lang,
-    Detail: Filters templates based on language and specifies the language of the template to create.
+    Detail: Filters templates based on language.
   }
 ]

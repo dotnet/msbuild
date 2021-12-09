@@ -18,7 +18,12 @@
     Kind: Keyword,
     SortText: --framework,
     InsertText: --framework,
-    Detail: The target framework for the project.
+    Detail:
+The target framework for the project.
+Type: choice
+  net7.0  Target net7.0
+Default: net7.0
+
   },
   {
     Label: --help,
@@ -32,14 +37,17 @@
     Kind: Keyword,
     SortText: --language,
     InsertText: --language,
-    Detail: Filters templates based on language and specifies the language of the template to create.
+    Detail: Specifies the template language to instantiate.
   },
   {
     Label: --langVersion,
     Kind: Keyword,
     SortText: --langVersion,
     InsertText: --langVersion,
-    Detail: Sets the LangVersion property in the created project file
+    Detail:
+Sets the LangVersion property in the created project file
+Type: text
+
   },
   {
     Label: --name,
@@ -53,7 +61,11 @@
     Kind: Keyword,
     SortText: --no-restore,
     InsertText: --no-restore,
-    Detail: If specified, skips the automatic restore of the project on create.
+    Detail:
+If specified, skips the automatic restore of the project on create.
+Type: bool
+Default: false
+
   },
   {
     Label: --no-update-check,
@@ -74,7 +86,7 @@
     Kind: Keyword,
     SortText: --type,
     InsertText: --type,
-    Detail: Filters templates based on available types. Predefined values are "project" and "item".
+    Detail: Specifies the template type to instantiate.
   },
   {
     Label: -?,
@@ -88,7 +100,12 @@
     Kind: Keyword,
     SortText: -f,
     InsertText: -f,
-    Detail: The target framework for the project.
+    Detail:
+The target framework for the project.
+Type: choice
+  net7.0  Target net7.0
+Default: net7.0
+
   },
   {
     Label: -h,
@@ -102,7 +119,7 @@
     Kind: Keyword,
     SortText: -lang,
     InsertText: -lang,
-    Detail: Filters templates based on language and specifies the language of the template to create.
+    Detail: Specifies the template language to instantiate.
   },
   {
     Label: -n,

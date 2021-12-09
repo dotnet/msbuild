@@ -1,0 +1,47 @@
+﻿global.json file
+Author: Microsoft
+Description: A file for selecting the .NET Core SDK version.
+
+Usage:
+  new3 globaljson [options] [template options]
+
+Options:
+  -n, --name <name>      The name for the output being created. If no name is specified, the name of the output directory is used.
+  -o, --output <output>  Location to place the generated output.
+  --dry-run              Displays a summary of what would happen if the given command line were run if it would result in a template creation.
+  --force                Forces content to be generated even if it would change existing files.
+  --no-update-check      Disables checking for the template package updates when instantiating a template.
+  --type <item>          Specifies the template type to instantiate.
+
+Template options:
+  --sdk-version <sdk-version>                                                                           The version of the .NET Core SDK to use.
+                                                                                                        Type: string
+  
+  --roll-forward <disable|feature|latestFeature|latestMajor|latestMinor|latestPatch|major|minor|patch>  The roll-forward policy to use when selecting an SDK version.
+                                                                                                        Type: choice
+                                                                                                          patch          Uses the specified version.
+                                                                                                                         If not found, rolls forward to the latest patch level.
+                                                                                                                         If not found, fails.
+                                                                                                                         This value is the legacy behavior from the earlier versions of the SDK.
+                                                                                                          feature        Uses the latest patch level for the specified major, minor, and feature band.
+                                                                                                                         If not found, rolls forward to the next higher feature band within the same major/minor and uses the latest patch level for that feature band.
+                                                                                                                         If not found, fails.
+                                                                                                          minor          Uses the latest patch level for the specified major, minor, and feature band.
+                                                                                                                         If not found, rolls forward to the next higher feature band within the same major/minor version and uses the latest patch level for that feature band.
+                                                                                                                         If not found, rolls forward to the next higher minor and feature band within the same major and uses the latest patch level for that feature band.
+                                                                                                                         If not found, fails.
+                                                                                                          major          Uses the latest patch level for the specified major, minor, and feature band.
+                                                                                                                         If not found, rolls forward to the next higher feature band within the same major/minor version and uses the latest patch level for that feature band.
+                                                                                                                         If not found, rolls forward to the next higher minor and feature band within the same major and uses the latest patch level for that feature band.
+                                                                                                                         If not found, rolls forward to the next higher major, minor, and feature band and uses the latest patch level for that feature band.
+                                                                                                                         If not found, fails.
+                                                                                                          latestPatch    Uses the latest installed patch level that matches the requested major, minor, and feature band with a patch level and that is greater or equal than the specified value.
+                                                                                                                         If not found, fails.
+                                                                                                          latestFeature  Uses the highest installed feature band and patch level that matches the requested major and minor with a feature band and patch level that is greater or equal than the specified value.
+                                                                                                                         If not found, fails.
+                                                                                                          latestMinor    Uses the highest installed minor, feature band, and patch level that matches the requested major with a minor, feature band, and patch level that is greater or equal than the specified value.
+                                                                                                                         If not found, fails.
+                                                                                                          latestMajor    Uses the highest installed .NET SDK with a version that is greater or equal than the specified value.
+                                                                                                                         If not found, fail.
+                                                                                                          disable        Doesn't roll forward. Exact match required.
+  

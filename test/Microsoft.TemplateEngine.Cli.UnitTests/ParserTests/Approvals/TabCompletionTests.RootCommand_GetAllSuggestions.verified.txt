@@ -102,7 +102,7 @@
     Kind: Keyword,
     SortText: install,
     InsertText: install,
-    Detail: Installs a source or a template package.
+    Detail: Installs a template package.
   },
   {
     Label: list,
@@ -123,13 +123,13 @@
     Kind: Keyword,
     SortText: uninstall,
     InsertText: uninstall,
-    Detail: Uninstalls a source or a template package.
+    Detail: Uninstalls a template package.
   },
   {
     Label: update,
     Kind: Keyword,
     SortText: update,
     InsertText: update,
-    Detail: Check the currently installed template packages for update, and install the updates.
+    Detail: Checks the currently installed template packages for update, and install the updates.
   }
 ]

@@ -1,0 +1,11 @@
+﻿Description:
+  Checks the currently installed template packages for update, and install the updates.
+
+Usage:
+  new3 update [options]
+
+Options:
+  --interactive                                Allows the command to stop and wait for user input or action (for example to complete authentication).
+  --add-source, --nuget-source <nuget-source>  Specifies a NuGet source to use during install.
+  --check-only, --dry-run                      Only check for updates and display the template packages to be updated without applying update.
+  -?, -h, --help                               Show help and usage information
