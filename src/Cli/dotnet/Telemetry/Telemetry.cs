@@ -112,9 +112,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 var persistenceChannel = new PersistenceChannel.PersistenceChannel(sendersCount: _senderCount);
                 persistenceChannel.SendingInterval = TimeSpan.FromMilliseconds(1);
-                TelemetryConfiguration.Active.TelemetryChannel = persistenceChannel;
 
-                _client = new TelemetryClient();
+                var config = TelemetryConfiguration.CreateDefault();
+                config.TelemetryChannel = persistenceChannel;
+                _client = new TelemetryClient(config);
                 _client.InstrumentationKey = InstrumentationKey;
                 _client.Context.Session.Id = CurrentSessionId;
                 _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
