@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 using Microsoft.Build.BackEnd;
@@ -1258,7 +1259,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return Array.Empty<DictionaryEntry>();
+                return Enumerable.Empty<DictionaryEntry>();
             }
 
             var list = new ArrayList(count);
@@ -1280,7 +1281,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return Array.Empty<DictionaryEntry>();
+                return Enumerable.Empty<DictionaryEntry>();
             }
 
             var list = new ArrayList(count);

@@ -683,18 +683,24 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
+                    // Framework and Utilities are default references but are often
+                    // specified in the UsingTask anyway; if so just ignore them.
+                    //
+                    // Do this with an explicit upfront check rather than loading the
+                    // assembly and then checking its name, because that can cause
+                    // the loader to have multiple copies of these assemblies as in
+                    // https://github.com/dotnet/msbuild/issues/7108.
+
+                    string name = AssemblyName.GetAssemblyName(assemblyFile).FullName;
+                    if (name == _msbuildFrameworkName ||
+                        name == _msbuildUtilitiesName)
+                    {
+                        return false;
+                    }
+
                     Assembly candidateAssembly = Assembly.UnsafeLoadFrom(assemblyFile);
                     if (candidateAssembly != null)
                     {
-                        string name = candidateAssembly.FullName;
-                        if (name == _msbuildFrameworkName ||
-                            name == _msbuildUtilitiesName)
-                        {
-                            // Framework and Utilities are default references but are often
-                            // specified in the UsingTask anyway; if so just ignore them.
-                            return false;
-                        }
-
                         candidateAssemblyLocation = candidateAssembly.Location;
                         s_knownReferenceAssemblies[candidateAssembly.FullName] = candidateAssembly;
                     }
