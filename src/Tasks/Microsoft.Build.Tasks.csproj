@@ -128,6 +128,9 @@
     <Compile Include="..\Shared\FileMatcher.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\DriveEnumerationWildcardException.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\Modifiers.cs">
       <Link>Modifiers.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

@@ -857,7 +857,7 @@ namespace Microsoft.Build.Shared
             Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs,
             TaskOptions taskOptions)
         {
-            ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec== null) || (recursionState.SearchData.RegexFileMatch == null),
+            ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
                 "File-spec overrides the regular expression -- pass null for file-spec if you want to use the regular expression.");
 
             ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec != null) || (recursionState.SearchData.RegexFileMatch != null),
@@ -1034,7 +1034,7 @@ namespace Microsoft.Build.Shared
             {
                 Parallel.ForEach(
                     _getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false),
-                    new ParallelOptions {MaxDegreeOfParallelism = dop},
+                    new ParallelOptions { MaxDegreeOfParallelism = dop },
                     processSubdirectory);
             }
             if (dop <= 0)
@@ -2072,6 +2072,7 @@ namespace Microsoft.Build.Shared
             RunSearch,
             ReturnFileSpec,
             ReturnEmptyList,
+            ReturnDriveEnumerationWildcard
         }
 
         private SearchAction GetFileSearchData(
@@ -2135,6 +2136,22 @@ namespace Microsoft.Build.Shared
                 return SearchAction.ReturnEmptyList;
             }
 
+            /*
+             * If the fixed directory part contains the drive or simply '/', and the drive enumeration wildcard is set, then an
+             * exception should be thrown.
+             */
+            int fixedDirectoryPartLength = fixedDirectoryPart.Length;
+            if (fixedDirectoryPartLength > 0 && wildcardDirectoryPart.Length >= 2)
+            {
+                if (FileUtilities.IsAnySlash(fixedDirectoryPart[fixedDirectoryPartLength - 1]) && // ex: /**
+                    wildcardDirectoryPart[0] == '*' &&
+                    wildcardDirectoryPart[1] == '*' &&
+                    Traits.Instance.ThrowOnWildcardDriveEnumeration)
+                {
+                    return SearchAction.ReturnDriveEnumerationWildcard;
+                }
+            }
+
             string directoryPattern = null;
             if (wildcardDirectoryPart.Length > 0)
             {
@@ -2143,6 +2160,7 @@ namespace Microsoft.Build.Shared
                 // "**/.*/**" for example, and is worth special-casing so it doesn't fall into the slow regex logic.
                 string wildcard = wildcardDirectoryPart.TrimTrailingSlashes();
                 int wildcardLength = wildcard.Length;
+
                 if (wildcardLength > 6 &&
                     wildcard[0] == '*' &&
                     wildcard[1] == '*' &&
@@ -2338,6 +2356,10 @@ namespace Microsoft.Build.Shared
             else if (action == SearchAction.ReturnFileSpec)
             {
                 return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+            }
+            else if (action == SearchAction.ReturnDriveEnumerationWildcard)
+            {
+                throw new DriveEnumerationWildcardException(projectDirectoryUnescaped, filespecUnescaped);
             }
             else if (action != SearchAction.RunSearch)
             {

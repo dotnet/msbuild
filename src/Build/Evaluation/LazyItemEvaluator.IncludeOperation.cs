@@ -111,23 +111,27 @@ namespace Microsoft.Build.Evaluation
                             {
                                 MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
                             }
-                            using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
-                            {
-                                includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
-                                    _rootDirectory,
-                                    glob,
-                                    excludePatternsForGlobs,
-                                    fileMatcher: FileMatcher
-                                );
-                            }
-                            if (MSBuildEventSource.Log.IsEnabled())
-                            {
-                                MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
-                            }
 
-                            foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
+                            try
                             {
-                                itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
+                                using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
+                                {
+                                    includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(_rootDirectory, glob, excludePatternsForGlobs, fileMatcher: FileMatcher);
+                                }
+
+                                if (MSBuildEventSource.Log.IsEnabled())
+                                {
+                                    MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
+                                }
+
+                                foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
+                                {
+                                    itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
+                                }
+                            }
+                            catch (DriveEnumerationWildcardException ex)
+                            {
+                                ProjectErrorUtilities.ThrowInvalidProject(_itemElement.IncludeLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(glob), XMakeAttributes.include, XMakeElements.itemGroup, ex.Message);
                             }
                         }
                     }

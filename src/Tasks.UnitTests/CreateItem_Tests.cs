@@ -3,8 +3,10 @@
 
 using System.IO;
 using System.Collections.Generic;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
@@ -260,6 +262,58 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(success);
             Assert.Equal("SomeOverwriteValue", t.Include[0].GetMetadata("MyMetaData"));
+        }
+
+        /// <summary>
+        /// Throw exception when encountering wildcard drive enumeration during task item creation.
+        /// </summary>
+        [Fact]
+        public void WildcardDriveEnumerationTaskItemThrowsException()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
+                CreateItem t = new CreateItem();
+                t.BuildEngine = new MockEngine();
+
+                t.Include = new ITaskItem[] { new TaskItem(@"\**") };
+
+                Assert.Throws<DriveEnumerationWildcardException>(() =>
+                {
+                    t.Execute();
+                });
+            }
+        }
+
+        /// <summary>
+        /// Using the CreateItem task to expand wildcards and result in a failure due to
+        /// attempted drive enumeration.
+        /// </summary>
+        [Fact]
+        public void CreateItemEvaluationResultingInWildcardDriveEnumeration()
+        {
+            using var env = TestEnvironment.Create(_testOutput);
+            env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
+
+            string content =
+                @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Target Name =""TestTarget"" Returns=""@(Text)"">
+                      <CreateItem Include=""\**\*.txt"">
+                        <Output TaskParameter=""Include"" ItemName=""Text""/>
+                      </CreateItem>
+                    </Target>
+                  </Project>
+                ";
+
+            var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
+            var p = ProjectInstance.FromFile(testFile.Path, new ProjectOptions());
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildRequestData data = new BuildRequestData(p, new[] { "TestTarget" });
+            BuildParameters parameters = new BuildParameters();
+            BuildResult buildResult = buildManager.Build(parameters, data);
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult["TestTarget"].Exception?.Message.ShouldContain("this resulted in an attempted drive enumeration");
         }
     }
 }

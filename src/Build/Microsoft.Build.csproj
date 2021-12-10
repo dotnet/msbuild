@@ -695,6 +695,10 @@
       <Link>SharedUtilities\FileMatcher.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\DriveEnumerationWildcardException.cs">
+      <Link>SharedUtilities\DriveEnumerationWildcardException.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>SharedUtilities\FileUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

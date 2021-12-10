@@ -371,8 +371,7 @@ namespace Microsoft.Build.BackEnd
             ISet<string> removeMetadata
         )
         {
-            // todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
-
+            //todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(keepMetadata != null && removeMetadata != null), originalItem.KeepMetadataLocation, "KeepAndRemoveMetadataMutuallyExclusive");
             List<ProjectItemInstance> items = new List<ProjectItemInstance>();
 
@@ -427,24 +426,31 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    // The expression is not of the form "@(X)". Treat as string
-
-                    // Pass the non wildcard expanded excludes here to fix https://github.com/dotnet/msbuild/issues/2621
-                    string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(
-                        Project.Directory,
-                        includeSplit,
-                        excludes);
-
-                    foreach (string includeSplitFile in includeSplitFiles)
+                    try
                     {
-                        items.Add(new ProjectItemInstance(
-                            Project,
-                            originalItem.ItemType,
-                            includeSplitFile,
-                            includeSplit /* before wildcard expansion */,
-                            null,
-                            null,
-                            originalItem.Location.File));
+                        // The expression is not of the form "@(X)". Treat as string
+
+                        // Pass the non wildcard expanded excludes here to fix https://github.com/Microsoft/msbuild/issues/2621
+                        string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(
+                            Project.Directory,
+                            includeSplit,
+                            excludes);
+
+                        foreach (string includeSplitFile in includeSplitFiles)
+                        {
+                            items.Add(new ProjectItemInstance(
+                                Project,
+                                originalItem.ItemType,
+                                includeSplitFile,
+                                includeSplit /* before wildcard expansion */,
+                                null,
+                                null,
+                                originalItem.Location.File));
+                        }
+                    }
+                    catch (DriveEnumerationWildcardException ex)
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(originalItem.IncludeLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(includeSplit), XMakeAttributes.include, XMakeElements.itemGroup, ex.Message);
                     }
                 }
             }
@@ -454,11 +460,18 @@ namespace Microsoft.Build.BackEnd
 
             foreach (string excludeSplit in excludes)
             {
-                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
-
-                foreach (string excludeSplitFile in excludeSplitFiles)
+                try
                 {
-                    excludesUnescapedForComparison.Add(excludeSplitFile);
+                    string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
+
+                    foreach (string excludeSplitFile in excludeSplitFiles)
+                    {
+                        excludesUnescapedForComparison.Add(excludeSplitFile);
+                    }
+                }
+                catch (DriveEnumerationWildcardException ex)
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(originalItem.ExcludeLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(excludeSplit), XMakeAttributes.exclude, XMakeElements.itemGroup, ex.Message);
                 }
             }
 
@@ -536,17 +549,24 @@ namespace Microsoft.Build.BackEnd
                 // wildcards.  Then loop through each file returned, and add it
                 // to our hashtable.
 
-                // Don't unescape wildcards just yet - if there were any escaped, the caller wants to treat them
-                // as literals. Everything else is safe to unescape at this point, since we're only matching
-                // against the file system.
-                string[] fileList = EngineFileUtilities.GetFileListEscaped(Project.Directory, piece);
-
-                foreach (string file in fileList)
+                try
                 {
-                    // Now unescape everything, because this is the end of the road for this filename.
-                    // We're just going to compare it to the unescaped include path to filter out the
-                    // file excludes.
-                    specificationsToFind.Add(EscapingUtilities.UnescapeAll(file));
+                    // Don't unescape wildcards just yet - if there were any escaped, the caller wants to treat them
+                    // as literals. Everything else is safe to unescape at this point, since we're only matching
+                    // against the file system.
+                    string[] fileList = EngineFileUtilities.GetFileListEscaped(Project.Directory, piece);
+
+                    foreach (string file in fileList)
+                    {
+                        // Now unescape everything, because this is the end of the road for this filename.
+                        // We're just going to compare it to the unescaped include path to filter out the
+                        // file excludes.
+                        specificationsToFind.Add(EscapingUtilities.UnescapeAll(file));
+                    }
+                }
+                catch (DriveEnumerationWildcardException ex)
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(specificationLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(piece), XMakeAttributes.exclude, XMakeElements.itemGroup, ex.Message);
                 }
             }
 

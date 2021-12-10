@@ -7,6 +7,7 @@ using System.IO;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -15,6 +16,7 @@ using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 using System.Linq;
+using Shouldly;
 
 #nullable disable
 
@@ -835,6 +837,37 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal("0", items[0].GetMetadataValue("m0"));
             Assert.Equal("1", items[0].GetMetadataValue("m1"));
             Assert.Equal(String.Empty, items[0].GetMetadataValue("m2"));
+        }
+
+        /// <summary>
+        /// Tests item inclusion of drive enumeration wildcard within a target.
+        /// </summary>
+        [Fact]
+        public void TargetItemEvaluationResultingInDriveEnumeration()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
+                string content =
+                @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Target Name=""TestTarget"">
+                        <ItemGroup>
+                            <FilesToCopy Include=""$(Microsoft_WindowsAzure_EngSys)\**\*"" Exclude=""$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*"" />
+                        </ItemGroup>
+                    </Target>
+                  </Project>
+                ";
+
+                var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
+                var p = ProjectInstance.FromFile(testFile.Path, new ProjectOptions());
+
+                BuildManager buildManager = BuildManager.DefaultBuildManager;
+                BuildRequestData data = new BuildRequestData(p, new[] { "TestTarget" });
+                BuildParameters parameters = new BuildParameters();
+                BuildResult buildResult = buildManager.Build(parameters, data);
+                buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+                buildResult["TestTarget"].Exception?.Message.ShouldContain("this resulted in an attempted drive enumeration");
+            }
         }
 
         [Fact]

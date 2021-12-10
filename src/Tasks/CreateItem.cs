@@ -144,22 +144,29 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FileMatcher.HasWildcards(i.ItemSpec))
                     {
-                        string[] files = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
-                        foreach (string file in files)
+                        try
                         {
-                            TaskItem newItem = new TaskItem(i) { ItemSpec = file };
-
-                            // Compute the RecursiveDir portion.
-                            FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
-                            if (match.isLegalFileSpec && match.isMatch)
+                            string[] files = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                            foreach (string file in files)
                             {
-                                if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
-                                {
-                                    newItem.SetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir, match.wildcardDirectoryPart);
-                                }
-                            }
+                                TaskItem newItem = new TaskItem(i) { ItemSpec = file };
 
-                            expanded.Add(newItem);
+                                // Compute the RecursiveDir portion.
+                                FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
+                                if (match.isLegalFileSpec && match.isMatch)
+                                {
+                                    if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
+                                    {
+                                        newItem.SetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir, match.wildcardDirectoryPart);
+                                    }
+                                }
+
+                                expanded.Add(newItem);
+                            }
+                        }
+                        catch (DriveEnumerationWildcardException)
+                        {
+                            throw;
                         }
                     }
                     else

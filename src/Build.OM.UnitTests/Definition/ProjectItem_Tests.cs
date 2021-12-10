@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -753,6 +754,48 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             expectedInclude = expectedInclude.Select(p => setSlashes(p, Path.DirectorySeparatorChar)).ToArray();
 
             TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, "");
+        }
+
+        /// <summary>
+        /// Throws exception when an included wildcard evaluates to a drive enumeration.
+        /// </summary>
+        [Fact]
+        public void PropertyEvaluationResultingInDriveEnumeration()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
+                string content =
+                @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <ItemGroup>
+                        <FilesToCopy Include=""$(Microsoft_WindowsAzure_EngSys)\**\*"" Exclude=""$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*"" />
+                    </ItemGroup>
+                  </Project>
+                ";
+
+                var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
+                Should.Throw<InvalidProjectFileException>(() => { ProjectInstance.FromFile(testFile.Path, new ProjectOptions()); });
+            }
+        }
+
+        /// <summary>
+        /// Throws exception when an imported wildcard evaluates to a drive enumeration.
+        /// </summary>
+        [Fact]
+        public void ImportEvaluationResultingInDriveEnumeration()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
+                string content =
+                @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Import Project=""$(Microsoft_WindowsAzure_EngSys)\**\*"" />
+                  </Project>
+                ";
+
+                var testFile = env.CreateFile(env.CreateFolder(), "a.csproj", content);
+                Should.Throw<InvalidProjectFileException>(() => { ProjectInstance.FromFile(testFile.Path, new ProjectOptions()); });
+            }
         }
 
         private static void TestIncludeExcludeWithDifferentSlashes(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false)

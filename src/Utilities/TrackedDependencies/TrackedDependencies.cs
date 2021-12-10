@@ -35,25 +35,32 @@ namespace Microsoft.Build.Utilities
             {
                 if (FileMatcher.HasWildcards(item.ItemSpec))
                 {
-                    string[] files;
-                    string directoryName = Path.GetDirectoryName(item.ItemSpec);
-                    string searchPattern = Path.GetFileName(item.ItemSpec);
+                    try
+                    {
+                        string[] files;
+                        string directoryName = Path.GetDirectoryName(item.ItemSpec);
+                        string searchPattern = Path.GetFileName(item.ItemSpec);
 
-                    // Very often with TLog files we're talking about
-                    // a directory and a simply wildcarded filename
-                    // Optimize for that case here.
-                    if (!FileMatcher.HasWildcards(directoryName) && FileSystems.Default.DirectoryExists(directoryName))
-                    {
-                        files = Directory.GetFiles(directoryName, searchPattern);
-                    }
-                    else
-                    {
-                        files = FileMatcher.Default.GetFiles(null, item.ItemSpec);
-                    }
+                        // Very often with TLog files we're talking about
+                        // a directory and a simply wildcarded filename
+                        // Optimize for that case here.
+                        if (!FileMatcher.HasWildcards(directoryName) && FileSystems.Default.DirectoryExists(directoryName))
+                        {
+                            files = Directory.GetFiles(directoryName, searchPattern);
+                        }
+                        else
+                        {
+                            files = FileMatcher.Default.GetFiles(null, item.ItemSpec);
+                        }
 
-                    foreach (string file in files)
+                        foreach (string file in files)
+                        {
+                            expanded.Add(new TaskItem(item) { ItemSpec = file });
+                        }
+                    }
+                    catch (DriveEnumerationWildcardException)
                     {
-                        expanded.Add(new TaskItem(item) { ItemSpec = file });
+                        throw;
                     }
                 }
                 else

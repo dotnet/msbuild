@@ -1375,6 +1375,21 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void DriveEnumerationWildcardThrowsException()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration", "1");
+
+                Assert.Throws<DriveEnumerationWildcardException>(() => { FileMatcher.Default.GetFiles(string.Empty, NativeMethodsShared.IsWindows ? @"c:\**\*.cs" : "/**/*.cs"); });
+
+                Assert.Throws<DriveEnumerationWildcardException>(() => { FileMatcher.Default.GetFiles(string.Empty, NativeMethodsShared.IsWindows ? @"c:\**" : "/**"); });
+
+                Assert.Throws<DriveEnumerationWildcardException>(() => { FileMatcher.Default.GetFiles(string.Empty, NativeMethodsShared.IsWindows ? @"\**" : "/**"); });
+            }
+        }
+
+        [Fact]
         public void RemoveProjectDirectory()
         {
             string[] strings = new string[1] { NativeMethodsShared.IsWindows ? "c:\\1.file" : "/1.file" };

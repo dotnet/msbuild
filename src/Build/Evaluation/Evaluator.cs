@@ -373,14 +373,21 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // The expression is not of the form "@(X)". Treat as string
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped, excludeSpecsEscaped: null, forceEvaluate: false, fileMatcher: expander.EvaluationContext?.FileMatcher);
-
-                        if (includeSplitFilesEscaped.Length > 0)
+                        try
                         {
-                            foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
+                            string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped, excludeSpecsEscaped: null, forceEvaluate: false, fileMatcher: expander.EvaluationContext?.FileMatcher);
+
+                            if (includeSplitFilesEscaped.Length > 0)
                             {
-                                items.Add(itemFactory.CreateItem(includeSplitFileEscaped, includeSplitEscaped, itemElement.ContainingProject.FullPath));
+                                foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
+                                {
+                                    items.Add(itemFactory.CreateItem(includeSplitFileEscaped, includeSplitEscaped, itemElement.ContainingProject.FullPath));
+                                }
                             }
+                        }
+                        catch (DriveEnumerationWildcardException ex)
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(itemElement.IncludeLocation, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(includeSplitEscaped), XMakeAttributes.include, XMakeElements.itemGroup, ex.Message);
                         }
                     }
                 }
@@ -2043,6 +2050,10 @@ namespace Microsoft.Build.Evaluation
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
                     importFilesEscaped = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true, fileMatcher: _evaluationContext.FileMatcher);
+                }
+                catch (DriveEnumerationWildcardException ex)
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValueWithException", EscapingUtilities.UnescapeAll(importExpressionEscapedItem), XMakeAttributes.project, XMakeElements.import, ex.Message);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {

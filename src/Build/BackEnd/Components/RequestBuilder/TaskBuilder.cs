@@ -399,8 +399,19 @@ namespace Microsoft.Build.BackEnd
             // If this is an Intrinsic task, it gets handled in a special fashion.
             if (_taskNode == null)
             {
-                ExecuteIntrinsicTask(bucket);
-                taskResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
+                try
+                {
+                    ExecuteIntrinsicTask(bucket);
+                    taskResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
+                }
+                catch (InvalidProjectFileException e)
+                {
+                    // Make sure the Invalid Project error gets logged *before* TaskFinished.  Otherwise,
+                    // the log is confusing.
+                    _targetLoggingContext.LogInvalidProjectFileError(e);
+                    _continueOnError = ContinueOnError.ErrorAndStop;
+                    taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, e);
+                }
             }
             else
             {
@@ -461,6 +472,7 @@ namespace Microsoft.Build.BackEnd
                             // the log is confusing.
                             taskLoggingContext.LogInvalidProjectFileError(e);
                             _continueOnError = ContinueOnError.ErrorAndStop;
+                            taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, e);
                         }
                         finally
                         {
@@ -894,6 +906,10 @@ namespace Microsoft.Build.BackEnd
                     }
                     else if (type == typeof(Exception) || type.GetTypeInfo().IsSubclassOf(typeof(Exception)))
                     {
+                        if ((Environment.GetEnvironmentVariable("MsBuildCheckWildcardDriveEnumeration") == "1") && (taskException.Message.Contains("resulted in an attempted drive enumeration")))
+                        {
+                            throw new InvalidProjectFileException("Failed to execute task object for given project instance as this resulted in an attempted drive enumeration.", taskException);
+                        }
                         // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with 
                         // a debugger attached to break on 2nd chance exceptions.
                         // That requires that there needs to be a way to not catch here, by setting an environment variable.
