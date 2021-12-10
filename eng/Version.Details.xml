@@ -211,21 +211,21 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>7672ca91ab13b0a9f0f94388ddda79e8642831d4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="7.0.0-alpha.1.21603.1">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="7.0.0-alpha.1.21609.2">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>b13121d96030766f3c308f083a2f62573fb5533d</Sha>
+      <Sha>7c41711efc6560f14a5bc28e44dd492ffafa4646</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.Razor" Version="7.0.0-alpha.1.21603.1">
+    <Dependency Name="Microsoft.CodeAnalysis.Razor" Version="7.0.0-alpha.1.21609.2">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>b13121d96030766f3c308f083a2f62573fb5533d</Sha>
+      <Sha>7c41711efc6560f14a5bc28e44dd492ffafa4646</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Razor.Language" Version="7.0.0-alpha.1.21603.1">
+    <Dependency Name="Microsoft.AspNetCore.Razor.Language" Version="7.0.0-alpha.1.21609.2">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>b13121d96030766f3c308f083a2f62573fb5533d</Sha>
+      <Sha>7c41711efc6560f14a5bc28e44dd492ffafa4646</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Razor.Internal.SourceGenerator.Transport" Version="7.0.0-alpha.1.21603.1">
+    <Dependency Name="Microsoft.AspNetCore.Razor.Internal.SourceGenerator.Transport" Version="7.0.0-alpha.1.21609.2">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>b13121d96030766f3c308f083a2f62573fb5533d</Sha>
+      <Sha>7c41711efc6560f14a5bc28e44dd492ffafa4646</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.0-alpha.1.21609.4">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
