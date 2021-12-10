@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
         <source>Installed Workload Ids</source>
-        <target state="new">Installed Workload Ids</target>
+        <target state="translated">IDs de carga de trabalho instaladas</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadListFooter">
