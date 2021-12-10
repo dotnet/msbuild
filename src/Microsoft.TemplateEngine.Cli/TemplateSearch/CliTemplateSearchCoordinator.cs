@@ -144,7 +144,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     .For(
                         environmentSettings,
                         commandInput,
-                        data,
+                        data
+                          .OrderByDescending(d => d.TotalDownloads, SearchResultTableRow.TotalDownloadsComparer)
+                          .ThenBy(d => d.TemplateGroupInfo.Name, StringComparer.CurrentCultureIgnoreCase),
                         columnPadding: 2,
                         headerSeparator: '-',
                         blankLineBetweenRows: false)
@@ -155,8 +157,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     .DefineColumn(r => r.TemplateGroupInfo.Type, LocalizableStrings.ColumnNameType, BaseCommandInput.TypeColumnFilter, defaultColumn: false)
                     .DefineColumn(r => r.TemplateGroupInfo.Classifications, LocalizableStrings.ColumnNameTags, BaseCommandInput.TagsColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(r => r.PackageName, out object packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
-                    .DefineColumn(r => r.PrintableTotalDownloads, LocalizableStrings.ColumnNameTotalDownloads, showAlways: true, rightAlign: true)
-                    .OrderBy(nameColumn, StringComparer.CurrentCultureIgnoreCase);
+                    .DefineColumn(r => r.PrintableTotalDownloads, out object downloadsColumn, LocalizableStrings.ColumnNameTotalDownloads, showAlways: true, rightAlign: true);
 
             Reporter.Output.WriteLine(formatter.Layout());
         }
@@ -203,14 +204,19 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         /// <summary>
         /// Represents a table row for the template with the package information.
         /// </summary>
-        private class SearchResultTableRow
+        internal class SearchResultTableRow
         {
+            private const string MinimumDownloadCount = "<1k";
+            private const char ThousandsChar = 'k';
+
             internal SearchResultTableRow(TemplateGroupTableRow templateGroupTableRow, string packageName, long downloads = 0)
             {
                 TemplateGroupInfo = templateGroupTableRow;
                 PackageName = packageName;
                 TotalDownloads = downloads;
             }
+
+            internal static IComparer<long> TotalDownloadsComparer { get; } = new ThousandComparer();
 
             internal string PackageName { get; private set; }
 
@@ -224,11 +230,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     }
                     else if (TotalDownloads < 1000)
                     {
-                        return "<1k";
+                        return MinimumDownloadCount;
                     }
                     else
                     {
-                        return $"{(TotalDownloads / 1000):N0}k";
+                        return $"{(TotalDownloads / 1000):N0}{ThousandsChar}";
                     }
                 }
             }
@@ -236,6 +242,28 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             internal TemplateGroupTableRow TemplateGroupInfo { get; private set; }
 
             internal long TotalDownloads { get; private set; }
+
+            private class ThousandComparer : IComparer<long>
+            {
+                public int Compare(long x, long y)
+                {
+                    if (x == y || x < 1 && y < 1)
+                    {
+                        return 0;
+                    }
+                    if (x < 1)
+                    {
+                        return -1;
+                    }
+                    if (y < 1)
+                    {
+                        return 1;
+                    }
+                    return (x / 1000).CompareTo(y / 1000);
+                }
+            }
         }
     }
 }
+
+

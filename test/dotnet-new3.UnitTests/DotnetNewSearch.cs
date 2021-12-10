@@ -391,7 +391,7 @@ Examples:
         }
 
         [Fact]
-        public void CanSortByName()
+        public void CanSortByDownloadCountAndThenByName()
         {
             var commandResult = new DotnetNewCommand(_log, "console", "--search")
                 .WithCustomHive(_sharedHome.HomeDirectory)
@@ -412,13 +412,19 @@ Examples:
             // rows can be shrunk: ML.NET Console App for Training and ML.NET Console App for Train...
             // in this case ML.NET Console App for Training < ML.NET Console App for Train...
             // therefore use custom comparer 
-            var comparer = new ShrinkAwareOrdinalStringComparer();
-            //first row is the header
-            for (int i = 2; i < tableOutput.Count; i++)
+            var nameComparer = new ShrinkAwareOrdinalStringComparer();
+            var downloadCountComparer = new DownloadCountComparer();
+
+            var orderedRows = tableOutput
+                .Skip(1)
+                .Select(x => new { name = x[0], count = x[5] })
+                .OrderByDescending(x => x.count, downloadCountComparer)
+                .ThenBy(x => x.name, nameComparer);
+
+            for (int i = 1; i < tableOutput.Count; i++)
             {
-                Assert.True(
-                    comparer.Compare(tableOutput[i - 1][0], tableOutput[i][0]) <= 0,
-                    $"the following entries of the table are not sorted alphabetically by first column: {tableOutput[i - 1][0]} and {tableOutput[i][0]}.");
+                Assert.Equal(orderedRows.ElementAt(i - 1).name, tableOutput[i][0]);
+                Assert.Equal(orderedRows.ElementAt(i - 1).count, tableOutput[i][5]);
             }
         }
 
@@ -823,9 +829,11 @@ Examples:
             StringBuilder columnBuilder = new(capacity: 16);
             int processedCharCount = 0;
 
+            int inputLength = input.Aggregate(0, (aggr, next) => aggr + Wcwidth.UnicodeCalculator.GetWidth(next));
+
             for (int j = 0; j < indexes.Length; j++)
             {
-                int unfilledColumnWidth = (j == indexes.Length - 1 ? input.Length : indexes[j + 1]) - indexes[j];
+                int unfilledColumnWidth = (j == indexes.Length - 1 ? inputLength : indexes[j + 1]) - indexes[j];
                 columnBuilder.Clear();
 
                 while (unfilledColumnWidth > 0)
@@ -875,6 +883,37 @@ Examples:
                     return 1;
                 }
                 return string.Compare(left, right, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private class DownloadCountComparer : IComparer<string>
+        {
+            public int Compare(string? x, string? y)
+            {
+                if (x == y || string.IsNullOrWhiteSpace(x) && string.IsNullOrWhiteSpace(y))
+                {
+                    return 0;
+                }
+                if (string.IsNullOrWhiteSpace(x))
+                {
+                    return -1;
+                }
+                if (string.IsNullOrWhiteSpace(y))
+                {
+                    return 1;
+                }
+                int xInt = 0;
+                int yInt = 0;
+
+                if (x != "<1k")
+                {
+                    int.TryParse(x.Trim().Substring(0, x.Length - 1), out xInt);
+                }
+                if (y != "<1k")
+                {
+                    int.TryParse(y.Trim().Substring(0, y.Length - 1), out yInt);
+                }
+                return xInt.CompareTo(yInt);
             }
         }
     }

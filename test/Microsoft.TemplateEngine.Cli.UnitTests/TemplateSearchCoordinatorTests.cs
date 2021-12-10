@@ -410,6 +410,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             }
         }
 
+        [Theory]
+        [InlineData(12489, 3198, 1)]
+        [InlineData(3198, 12489, -1)]
+        [InlineData(124, 3198, -1)]
+        [InlineData(3198, 124, 1)]
+        [InlineData(0, 0, 0)]
+        [InlineData(-10, 0, 0)]
+        [InlineData(987, 0, 1)]
+        [InlineData(0, 10, -1)]
+        [InlineData(987, 1, 0)]
+        [InlineData(123, 345, 0)]
+        public void TestCompare(long x, long y, int expectedOutcome)
+        {
+            Assert.Equal(expectedOutcome, CliTemplateSearchCoordinator.SearchResultTableRow.TotalDownloadsComparer.Compare(x, y));
+        }
+
 #pragma warning disable CS0618 // Type or member is obsolete
         private static string SetupDiscoveryMetadata(string fileLocation, bool includehostData = false)
 
