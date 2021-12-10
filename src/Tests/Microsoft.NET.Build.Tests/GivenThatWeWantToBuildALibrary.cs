@@ -665,7 +665,7 @@ class Program
                     WorkingDirectory = testAsset.TestRoot
                 };
 
-                dotnetCommand.Execute("new", "sln")
+                dotnetCommand.Execute("new", "sln", "--debug:ephemeral-hive")
                     .Should()
                     .Pass();
 
