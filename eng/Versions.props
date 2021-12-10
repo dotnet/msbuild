@@ -139,10 +139,10 @@
     <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.0-alpha.1.21608.5</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
     <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.0-alpha.1.21608.5</MicrosoftAspNetCoreAnalyzersPackageVersion>
     <MicrosoftAspNetCoreTestHostPackageVersion>7.0.0-alpha.1.21608.5</MicrosoftAspNetCoreTestHostPackageVersion>
-    <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>7.0.0-alpha.1.21603.1</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
-    <MicrosoftAspNetCoreRazorLanguageVersion>7.0.0-alpha.1.21603.1</MicrosoftAspNetCoreRazorLanguageVersion>
-    <MicrosoftCodeAnalysisRazorVersion>7.0.0-alpha.1.21603.1</MicrosoftCodeAnalysisRazorVersion>
-    <MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>7.0.0-alpha.1.21603.1</MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>
+    <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>7.0.0-alpha.1.21609.2</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
+    <MicrosoftAspNetCoreRazorLanguageVersion>7.0.0-alpha.1.21609.2</MicrosoftAspNetCoreRazorLanguageVersion>
+    <MicrosoftCodeAnalysisRazorVersion>7.0.0-alpha.1.21609.2</MicrosoftCodeAnalysisRazorVersion>
+    <MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>7.0.0-alpha.1.21609.2</MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/wpf -->
