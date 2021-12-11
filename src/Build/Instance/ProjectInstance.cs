@@ -89,6 +89,7 @@ namespace Microsoft.Build.Execution
         private List<string> _initialTargets;
 
         private List<string> _importPaths;
+        private List<ProjectImportInstance> _imports;
 
         private List<string> _importPathsIncludingDuplicates;
 
@@ -430,6 +431,8 @@ namespace Microsoft.Build.Execution
             _isImmutable = projectToInheritFrom._isImmutable;
             _importPaths = projectToInheritFrom._importPaths;
             ImportPaths = _importPaths.AsReadOnly();
+            _imports = projectToInheritFrom._imports;
+            Imports = _imports.AsReadOnly();
             _importPathsIncludingDuplicates = projectToInheritFrom._importPathsIncludingDuplicates;
             ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
 
@@ -618,6 +621,8 @@ namespace Microsoft.Build.Execution
                 _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
                 _importPaths = that._importPaths;
                 ImportPaths = _importPaths.AsReadOnly();
+                _imports = that._imports;
+                Imports = _imports.AsReadOnly();
                 _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
                 ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
 
@@ -903,6 +908,10 @@ namespace Microsoft.Build.Execution
         /// The outer ProjectRootElement that maps to this project instance itself is not included.
         /// </summary>
         public IReadOnlyList<string> ImportPaths { get; private set; }
+
+
+        public IReadOnlyList<ProjectImportInstance> Imports { get; private set; }
+
 
         /// <summary>
         /// This list will contain duplicate imports if an import is imported multiple times. However, only the first import was used in evaluation.
@@ -1507,6 +1516,7 @@ namespace Microsoft.Build.Execution
             SdkResult sdkResult)
         {
             _importPaths.Add(import.FullPath);
+            _imports.Add(new ProjectImportInstance(import.FullPath, import.LastWriteTimeWhenRead));
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).RecordImportWithDuplicates(importElement, import, versionEvaluated);
         }
 
@@ -2681,7 +2691,9 @@ namespace Microsoft.Build.Execution
             _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
             _importPaths = new List<string>();
+            _imports = new List<ProjectImportInstance>();
             ImportPaths = _importPaths.AsReadOnly();
+            Imports = _imports.AsReadOnly();
             _importPathsIncludingDuplicates = new List<string>();
             ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>((globalProperties == null) ? 0 : globalProperties.Count);
@@ -2813,16 +2825,19 @@ namespace Microsoft.Build.Execution
         private void CreateImportsSnapshot(IList<ResolvedImport> importClosure, IList<ResolvedImport> importClosureWithDuplicates)
         {
             _importPaths = new List<string>(Math.Max(0, importClosure.Count - 1) /* outer project */);
+            _imports = new List<ProjectImportInstance>(_importPaths.Count);
             foreach (var resolvedImport in importClosure)
             {
                 // Exclude outer project itself
                 if (resolvedImport.ImportingElement != null)
                 {
                     _importPaths.Add(resolvedImport.ImportedProject.FullPath);
+                    _imports.Add(new ProjectImportInstance(resolvedImport.ImportedProject.FullPath, resolvedImport.ImportedProject.LastWriteTimeWhenRead));
                 }
             }
 
             ImportPaths = _importPaths.AsReadOnly();
+            Imports = _imports.AsReadOnly();
 
             _importPathsIncludingDuplicates = new List<string>(Math.Max(0, importClosureWithDuplicates.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosureWithDuplicates)
