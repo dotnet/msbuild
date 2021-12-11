@@ -133,12 +133,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.0-alpha.1.21610.4</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>7.0.0-alpha.1.21610.4</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.0-alpha.1.21610.4</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.0-alpha.1.21610.4</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.0-alpha.1.21610.4</MicrosoftAspNetCoreAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreTestHostPackageVersion>7.0.0-alpha.1.21610.4</MicrosoftAspNetCoreTestHostPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.0-alpha.1.21611.1</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>7.0.0-alpha.1.21611.1</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.0-alpha.1.21611.1</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.0-alpha.1.21611.1</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.0-alpha.1.21611.1</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreTestHostPackageVersion>7.0.0-alpha.1.21611.1</MicrosoftAspNetCoreTestHostPackageVersion>
     <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>7.0.0-alpha.1.21609.2</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
     <MicrosoftAspNetCoreRazorLanguageVersion>7.0.0-alpha.1.21609.2</MicrosoftAspNetCoreRazorLanguageVersion>
     <MicrosoftCodeAnalysisRazorVersion>7.0.0-alpha.1.21609.2</MicrosoftCodeAnalysisRazorVersion>
