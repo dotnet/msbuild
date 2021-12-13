@@ -64,15 +64,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
+            bool wasResultCached = false;
+
+            MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(submissionId, sdk.Name, solutionPath, projectPath);
+
             // Get a cached response if possible, otherwise send the request
             Lazy<SdkResult> sdkResultLazy = _responseCache.GetOrAdd(
                 sdk.Name,
                 key => new Lazy<SdkResult>(() => RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio)));
 
-            if (sdkResultLazy.IsValueCreated)
-            {
-                MSBuildEventSource.Log.OutOfProcSdkResolverServiceResolveSdkFromCache(submissionId, sdk.Name, solutionPath, projectPath, sdkResultLazy.Value.Success);
-            }
+            wasResultCached = sdkResultLazy.IsValueCreated;
 
             SdkResult sdkResult = sdkResultLazy.Value;
 
@@ -81,6 +82,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.
                 loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, sdkResult.Version, sdkResult.ElementLocation, sdk.Version);
             }
+
+            MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(submissionId, sdk.Name, solutionPath, projectPath, _lastResponse.Success, wasResultCached);
 
             return sdkResult;
         }
@@ -109,8 +112,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         private SdkResult RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
-            MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(submissionId, sdk.Name, solutionPath, projectPath);
-
             // Clear out the last response for good measure
             _lastResponse = null;
 
@@ -124,8 +125,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             // Keep track of the element location of the reference
             _lastResponse.ElementLocation = sdkReferenceLocation;
-
-            MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(submissionId, sdk.Name, solutionPath, projectPath, _lastResponse.Success);
 
             // Return the response which was set by another thread.  In the case of shutdown, it should be null.
             return _lastResponse;

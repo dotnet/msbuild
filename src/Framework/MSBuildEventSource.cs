@@ -485,9 +485,9 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(67, Keywords = Keywords.All)]
-        public void CachedSdkResolverServiceResolveSdkStop(string sdkName, string solutionPath, string projectPath, bool success)
+        public void CachedSdkResolverServiceResolveSdkStop(string sdkName, string solutionPath, string projectPath, bool success, bool wasResultCached)
         {
-            WriteEvent(67, sdkName, solutionPath, projectPath, success);
+            WriteEvent(67, sdkName, solutionPath, projectPath, success, wasResultCached);
         }
 
         /// <remarks>
@@ -538,27 +538,15 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(74, Keywords = Keywords.All)]
-        public void CachedSdkResolverServiceResolveSdkFromCache(string sdkName, string solutionPath, string projectPath, bool success)
+        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(int submissionId, string sdkName, string solutionPath, string projectPath)
         {
-            WriteEvent(74, sdkName, solutionPath, projectPath, success);
+            WriteEvent(74, submissionId, sdkName, solutionPath, projectPath);
         }
 
         [Event(75, Keywords = Keywords.All)]
-        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(int submissionId, string sdkName, string solutionPath, string projectPath)
+        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(int submissionId, string sdkName, string solutionPath, string projectPath, bool success, bool wasResultCached)
         {
-            WriteEvent(75, submissionId, sdkName, solutionPath, projectPath);
-        }
-
-        [Event(76, Keywords = Keywords.All)]
-        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(int submissionId, string sdkName, string solutionPath, string projectPath, bool success)
-        {
-            WriteEvent(76, submissionId, sdkName, solutionPath, projectPath, success);
-        }
-
-        [Event(77, Keywords = Keywords.All)]
-        public void OutOfProcSdkResolverServiceResolveSdkFromCache(int submissionId, string sdkName, string solutionPath, string projectPath, bool success)
-        {
-            WriteEvent(77, submissionId, sdkName, solutionPath, projectPath, success);
+            WriteEvent(75, submissionId, sdkName, solutionPath, projectPath, success, wasResultCached);
         }
 
         #endregion

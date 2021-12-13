@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Eventing;
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -20,18 +22,27 @@ namespace Microsoft.Build.Framework
         /// Logs that an event.
         /// </summary>
         /// <param name="args">An array of arguments to log with the event.</param>
-        public abstract void LogEvent(params object[] args);
+        public virtual void LogEvent(params object[] args)
+        {
+            MSBuildEventSource.Log.SdkResolverEvent(args);
+        }
 
         /// <summary>
         /// Logs that an event when an operation has started.
         /// </summary>
         /// <param name="args">An array of arguments to log with the event.</param>
-        public abstract void LogEventStart(params object[] args);
+        public virtual void LogEventStart(params object[] args)
+        {
+            MSBuildEventSource.Log.SdkResolverEventStart(args);
+        }
 
         /// <summary>
         /// Logs that an event when an operation has completed.
         /// </summary>
         /// <param name="args">An array of arguments to log with the event.</param>
-        public abstract void LogEventStop(params object[] args);
+        public virtual void LogEventStop(params object[] args)
+        {
+            MSBuildEventSource.Log.SdkResolverEventStop(args);
+        }
     }
 }
