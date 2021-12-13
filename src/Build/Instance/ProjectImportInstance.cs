@@ -9,7 +9,7 @@ namespace Microsoft.Build.Execution;
 /// <summary>
 /// Defines an import from a specific path and that was read at a specified time.
 /// </summary>
-public struct ProjectImportInstance
+public record struct ProjectImportInstance
 {
     /// <summary>
     /// Constructor of this instance.

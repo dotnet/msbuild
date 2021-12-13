@@ -909,9 +909,12 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public IReadOnlyList<string> ImportPaths { get; private set; }
 
-
+        /// <summary>
+        /// The full list of <see cref="ProjectImportInstance"/> of all the files that during evaluation contributed to this project instance.
+        /// This does not include projects that were never imported because a condition on an Import element was false.
+        /// The outer ProjectRootElement that maps to this project instance itself is not included.
+        /// </summary>
         public IReadOnlyList<ProjectImportInstance> Imports { get; private set; }
-
 
         /// <summary>
         /// This list will contain duplicate imports if an import is imported multiple times. However, only the first import was used in evaluation.

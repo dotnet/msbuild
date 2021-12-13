@@ -857,6 +857,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     : expectedImportPaths;
 
                 Helpers.AssertListsValueEqual(expectedImportPaths, projectInstance.ImportPaths.ToList());
+                var expectedImports = expectedImportPaths.Select(x => new ProjectImportInstance(x, File.GetLastWriteTime(x))).ToList();
+                Helpers.AssertListsValueEqual(expectedImports, projectInstance.Imports.ToList());
                 Helpers.AssertListsValueEqual(expectedImportPathsIncludingDuplicates, projectInstance.ImportPathsIncludingDuplicates.ToList());
             }
             finally
