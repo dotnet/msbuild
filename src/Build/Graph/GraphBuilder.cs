@@ -169,38 +169,42 @@ namespace Microsoft.Build.Graph
 
             // transitiveReferences contains all of the references we've found so far from the initial GetTransitiveProjectReferencesExcludingSelf call.
             // referencesFromHere is essentially "reset" at each level of the recursion.
-            // The first is important because if we find a cycle at some point, we need to know not to keep recursing. We wouldn't have added to a cache yet, since we haven't finished
+            // The first is important because if we find a cycle at some point, we need to know not to keep recursing. We wouldn't have added to transitiveReferenceCache yet, since we haven't finished
             // finding all the transitive references yet.
             // On the other hand, the second is important to help us fill that cache afterwards. The cache is from a particular node to all of its references, including transitive references
             // but not including itself, which means we can't include parents as we would if we used transitiveReferences. You can see that for any particular call, it creates a new "toCache"
             // HashSet that we fill with direct references and pass as referencesFromHere in recursive calls to fill it with transitive references. It is then used to populate the cache.
             // Meanwhile, we avoid going into the recursive step at all if transitiveReferences already includes a particular node to avoid a StackOverflowException if there's a loop.
-            void GetTransitiveProjectReferencesExcludingSelfHelper(ParsedProject parsedProject, HashSet<ProjectGraphNode> transitiveReferences, HashSet<ProjectGraphNode> referencesFromHere)
+            void GetTransitiveProjectReferencesExcludingSelfHelper(ParsedProject parsedProject, HashSet<ProjectGraphNode> traversedReferences, HashSet<ProjectGraphNode> incompleteReferencesOfDirectlyReferencingNode)
             {
                 if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> cachedTransitiveReferences))
                 {
-                    transitiveReferences.UnionWith(cachedTransitiveReferences);
+                    traversedReferences.UnionWith(cachedTransitiveReferences);
                 }
                 else
                 {
-                    HashSet<ProjectGraphNode> toCache = new();
+                    HashSet<ProjectGraphNode> referencesFromThisNode = new();
                     foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
                     {
-                        if (transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode))
+                        if (traversedReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode))
                         {
-                            GetTransitiveProjectReferencesExcludingSelfHelper(allParsedProjects[referenceInfo.ReferenceConfiguration], transitiveReferences, toCache);
+                            GetTransitiveProjectReferencesExcludingSelfHelper(allParsedProjects[referenceInfo.ReferenceConfiguration], traversedReferences, referencesFromThisNode);
                         }
                         else if (transitiveReferenceCache.TryGetValue(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode, out cachedTransitiveReferences))
                         {
-                            toCache.UnionWith(cachedTransitiveReferences);
+                            referencesFromThisNode.UnionWith(cachedTransitiveReferences);
                         }
-                        toCache.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
+                        referencesFromThisNode.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
                     }
 
-                    transitiveReferenceCache[parsedProject.GraphNode] = toCache;
-                    if (referencesFromHere is not null)
+                    // We've returned from recursing through all transitive references
+                    // of this node, so add that set to the cache
+                    transitiveReferenceCache[parsedProject.GraphNode] = referencesFromThisNode;
+                    if (incompleteReferencesOfDirectlyReferencingNode is not null)
                     {
-                        referencesFromHere.UnionWith(toCache);
+                        // Also add it to the set of transitive dependencies of
+                        // the referencing node (which are probably still incomplete)
+                        incompleteReferencesOfDirectlyReferencingNode.UnionWith(referencesFromThisNode);
                     }
                 }
             }
