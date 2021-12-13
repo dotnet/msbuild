@@ -15,6 +15,10 @@ using System.Globalization;
 using Microsoft.Build.Internal;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
+#if DEBUG
+using System.Threading;
+#endif
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -83,6 +87,15 @@ namespace Microsoft.Build.Evaluation
         /// Value shall be true only in case of testing. Outside QA tests it shall be false.
         /// </remarks>
         private static bool s_сheckFileContent;
+
+#if DEBUG
+        /// <summary>
+        /// Number of entries into Get function of the ProjectRootElementCache.
+        /// Shall be always 0 or 1. Reentrance to the Get function (value > 1) could lead to race condition.
+        /// </summary>
+        [ThreadStatic]
+        private static int s_getEntriesNumber = 0;
+#endif
 
         /// <summary>
         /// The map of weakly-held ProjectRootElement's
@@ -209,13 +222,22 @@ namespace Microsoft.Build.Evaluation
         /// If item is found, boosts it to the top of the strong cache.
         /// </remarks>
         /// <param name="projectFile">The project file which contains the ProjectRootElement.  Must be a full path.</param>
-        /// <param name="openProjectRootElement">The delegate to use to load if necessary. May be null. Must not update the cache.</param>
+        /// <param name="loadProjectRootElement">The delegate to use to load if necessary. May be null. Must not update the cache.</param>
         /// <param name="isExplicitlyLoaded"><code>true</code> if the project is explicitly loaded, otherwise <code>false</code>.</param>
         /// <param name="preserveFormatting"><code>true</code> to the project was loaded with the formated preserved, otherwise <code>false</code>.</param>
         /// <returns>The ProjectRootElement instance if one exists.  Null otherwise.</returns>
-        internal override ProjectRootElement Get(string projectFile, OpenProjectRootElement openProjectRootElement, bool isExplicitlyLoaded,
+        internal override ProjectRootElement Get(string projectFile, OpenProjectRootElement loadProjectRootElement, bool isExplicitlyLoaded,
             bool? preserveFormatting)
         {
+#if DEBUG
+            // Verify that loadProjectRootElement delegate does not call ProjectRootElementCache.Get().
+            Interlocked.Increment(ref s_getEntriesNumber);
+            ErrorUtilities.VerifyThrow(
+                s_getEntriesNumber == 1,
+                "Reentrance to the ProjectRootElementCache.Get function detected."
+            );
+#endif
+
             // Should already have been canonicalized
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
 
@@ -253,15 +275,21 @@ namespace Microsoft.Build.Evaluation
                 ForgetEntryIfExists(projectRootElement);
             }
 
-            if (openProjectRootElement == null)
+            if (loadProjectRootElement == null)
             {
                 if (projectRootElement == null || projectRootElementIsInvalid)
                 {
+#if DEBUG
+                    Interlocked.Decrement(ref s_getEntriesNumber);
+#endif
                     return null;
                 }
                 else
                 {
                     DebugTraceCache("Satisfied from XML cache: ", projectFile);
+#if DEBUG
+                    Interlocked.Decrement(ref s_getEntriesNumber);
+#endif
                     return projectRootElement;
                 }
             }
@@ -271,9 +299,9 @@ namespace Microsoft.Build.Evaluation
             {
                 // We do not lock loading with common _locker of the cache, to avoid lock contention.
                 // Decided also not to lock this section with the key specific locker to avoid the overhead and code overcomplication, as
-                // it is not likely that two threads would use Get function for the same project simulteniously and it is not a big deal if in some cases we load the same project twice.
+                // it is not likely that two threads would use Get function for the same project simultaneously and it is not a big deal if in some cases we load the same project twice.
 
-                projectRootElement = openProjectRootElement(projectFile, this);
+                projectRootElement = loadProjectRootElement(projectFile, this);
                 ErrorUtilities.VerifyThrowInternalNull(projectRootElement, "projectRootElement");
                 ErrorUtilities.VerifyThrow(
                     projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
@@ -299,6 +327,9 @@ namespace Microsoft.Build.Evaluation
                 DebugTraceCache("Satisfied from XML cache: ", projectFile);
             }
 
+#if DEBUG
+            Interlocked.Decrement(ref s_getEntriesNumber);
+#endif
             return projectRootElement;
         }
 
@@ -345,7 +376,7 @@ namespace Microsoft.Build.Evaluation
         {
             ProjectRootElement result = Get(
                 projectFile,
-                openProjectRootElement: null, // no delegate to load it
+                loadProjectRootElement: null, // no delegate to load it
                 isExplicitlyLoaded: false, // Since we are not creating a PRE this can be true or false
                 preserveFormatting: preserveFormatting);
 
