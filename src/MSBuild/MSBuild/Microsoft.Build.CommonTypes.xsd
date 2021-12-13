@@ -210,7 +210,7 @@ elementFormDefault="qualified">
               <xs:element name="GeneratePathProperty">
                 <xs:annotation>
                   <xs:documentation>
-                    <!-- _locID_text="PackageReference_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents
+                    <!-- _locID_text="PackageReference_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents. If unset, does not create the property.
                   </xs:documentation>
                 </xs:annotation>
               </xs:element>
