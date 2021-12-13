@@ -318,6 +318,14 @@ namespace Microsoft.Build.BackEnd
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
 
+            if (TaskInstance is IConcurrentTask concurrentTask)
+            {
+                concurrentTask.ConfigureForConcurrentExecution(new TaskExecutionContext(
+                    NativeMethodsShared.CurrentThreadWorkingDirectory,
+                    null,
+                    CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture));
+            }
+
             return true;
         }
 
