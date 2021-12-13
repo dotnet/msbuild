@@ -121,9 +121,10 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                 {
                     ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
                     MockLogger logger = new();
-                    logger.Verbosity = LoggerVerbosity.Diagnostic;
                     projectCollection.RegisterLogger(logger);
                     ProjectGraphEntryPoint entryPoint = new(filterFile.Path, new Dictionary<string, string>());
+
+                    // We only need to construct the graph, since that tells us what would build if we were to build it.
                     ProjectGraph graphFromSolution = new(entryPoint, projectCollection);
                     logger.AssertNoErrors();
                     graphFromSolution.ProjectNodes.ShouldHaveSingleItem();
