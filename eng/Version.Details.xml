@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.200-alpha.1.21609.2">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.200-alpha.1.21609.4">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>7c35333b66a97deaa23c519889de11069cf22504</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.200-alpha.1.21609.2">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.200-alpha.1.21609.4">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>7c35333b66a97deaa23c519889de11069cf22504</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.200-alpha.1.21609.2">
+    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.200-alpha.1.21609.4">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>7c35333b66a97deaa23c519889de11069cf22504</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.200-alpha.1.21609.2">
+    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.200-alpha.1.21609.4">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>7c35333b66a97deaa23c519889de11069cf22504</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.200-alpha.1.21609.2">
+    <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.200-alpha.1.21609.4">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>7c35333b66a97deaa23c519889de11069cf22504</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.200-alpha.1.21609.2">
+    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.200-alpha.1.21609.4">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>7c35333b66a97deaa23c519889de11069cf22504</Sha>
     </Dependency>
