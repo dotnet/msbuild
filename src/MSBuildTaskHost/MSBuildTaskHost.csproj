@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
        a .props file that prevents building the project from doing much of anything. -->
@@ -210,7 +210,6 @@
   <ItemGroup>
     <!-- Disabled PdbGit because of warnings; it could/should be brought back.
     <PackageReference Include="PdbGit" /> -->
-    <PackageReference Include="SourceLink.Create.CommandLine" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
