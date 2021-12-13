@@ -3316,7 +3316,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
+                null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, new TaskExecutionContext());
 
             AssemblyNameExtension assemblyNameExtension = new AssemblyNameExtension(new AssemblyName("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
             TaskItem taskItem = new TaskItem("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
@@ -6821,7 +6821,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
+                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, new TaskExecutionContext());
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
             Dictionary<string, string> blackList;
@@ -6999,7 +6999,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
+                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, new TaskExecutionContext());
             return referenceTable;
         }
 

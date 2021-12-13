@@ -144,6 +144,8 @@ namespace Microsoft.Build.Tasks
 
         private readonly ConcurrentDictionary<string, AssemblyMetadata> _assemblyMetadataCache;
 
+        private readonly TaskExecutionContext _executionContext;
+
         /// <summary>
         /// When we exclude an assembly from resolution because it is part of out exclusion list we need to let the user know why this is.
         /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different black list. We need to log a specific message
@@ -184,6 +186,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="openBaseKey"></param>
         /// <param name="unresolveFrameworkAssembliesFromHigherFrameworks"></param>
         /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
+        /// <param name="executionContext">Execution context: current directory, culture, etc.</param>
         /// <param name="allowedAssemblyExtensions"></param>
         /// <param name="getRuntimeVersion"></param>
         /// <param name="targetedRuntimeVersion">Version of the runtime to target.</param>
@@ -222,6 +225,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
         /// <param name="unresolveFrameworkAssembliesFromHigherFrameworks"></param>
         /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
+        /// <param name="executionContext">Execution context: current directory, culture, etc.</param>
         /// <param name="allowedAssemblyExtensions"></param>
         /// <param name="getRuntimeVersion"></param>
         /// <param name="targetedRuntimeVersion">Version of the runtime to target.</param>
@@ -278,7 +282,8 @@ namespace Microsoft.Build.Tasks
             WarnOrErrorOnTargetArchitectureMismatchBehavior warnOrErrorOnTargetArchitectureMismatch,
             bool ignoreFrameworkAttributeVersionMismatch,
             bool unresolveFrameworkAssembliesFromHigherFrameworks,
-            ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache)
+            ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
+            TaskExecutionContext executionContext)
         {
             _log = log;
             _findDependencies = findDependencies;
@@ -311,6 +316,7 @@ namespace Microsoft.Build.Tasks
             _warnOrErrorOnTargetArchitectureMismatch = warnOrErrorOnTargetArchitectureMismatch;
             _ignoreFrameworkAttributeVersionMismatch = ignoreFrameworkAttributeVersionMismatch;
             _assemblyMetadataCache = assemblyMetadataCache;
+            _executionContext = executionContext;
 
             // Set condition for when to check assembly version against the target framework version 
             _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
@@ -351,7 +357,8 @@ namespace Microsoft.Build.Tasks
                     getRuntimeVersion,
                     targetedRuntimeVersion,
                     getAssemblyPathInGac,
-                    log
+                    log,
+                    executionContext
                 );
         }
 
@@ -1267,8 +1274,7 @@ namespace Microsoft.Build.Tasks
         (
             AssemblyNameExtension assemblyName,
             string rawFileNameCandidate,
-            Reference reference
-        )
+            Reference reference)
         {
             // Now, resolve this reference.
             string resolvedPath = null;
@@ -1295,14 +1301,14 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion) });
+                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion, _executionContext) });
             }
             else
             {
                 // Do not probe near dependees if the reference is primary and resolved externally. If resolved externally, the search paths should have been specified in such a way to point to the assembly file.
                 if (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name))
                 {
-                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
+                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion, _executionContext));
                 }
 
                 jaggedResolvers.Add(Resolvers);
@@ -1344,7 +1350,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (!Path.IsPathRooted(resolvedPath))
                 {
-                    resolvedPath = Path.GetFullPath(resolvedPath);
+                    resolvedPath = Path.GetFullPath(_executionContext.GetFullPath(resolvedPath));
                 }
 
                 reference.FullPath = resolvedPath;

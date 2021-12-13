@@ -76,10 +76,10 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         public AssemblyFoldersFromConfigResolver(string searchPathElement, GetAssemblyName getAssemblyName,
             FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion,
             ProcessorArchitecture targetProcessorArchitecture, bool compareProcessorArchitecture,
-            IBuildEngine buildEngine, TaskLoggingHelper log)
+            IBuildEngine buildEngine, TaskLoggingHelper log, TaskExecutionContext executionContext)
             : base(
                 searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion,
-                targetProcessorArchitecture, compareProcessorArchitecture)
+                targetProcessorArchitecture, compareProcessorArchitecture, executionContext)
         {
             _buildEngine = buildEngine as IBuildEngine4;
             _taskLogger = log;
@@ -102,7 +102,9 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             if (match.Success)
             {
                 _targetRuntimeVersion = match.Groups["TARGETRUNTIMEVERSION"].Value.Trim();
+
                 _assemblyFolderConfigFile = match.Groups["ASSEMBLYFOLDERCONFIGFILE"].Value.Trim();
+                _assemblyFolderConfigFile = executionContext.GetFullPath(_assemblyFolderConfigFile);
 
                 if (_targetRuntimeVersion.Length != 0)
                 {
@@ -115,7 +117,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                     _wasMatch = true;
 
                     bool useCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
-                    string key = "6f7de854-47fe-4ae2-9cfe-9b33682abd91" + searchPathElement;
+                    string key = _assemblyFolderConfigFile + "6f7de854-47fe-4ae2-9cfe-9b33682abd91" + _targetRuntimeVersion;
                     
                     if (useCache && _buildEngine != null)
                     {
@@ -132,7 +134,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                         try
                         {
                             AssemblyFoldersFromConfig assemblyFolders = new AssemblyFoldersFromConfig(_assemblyFolderConfigFile, _targetRuntimeVersion, targetProcessorArchitecture);
-                            _assemblyFoldersCache = new AssemblyFoldersFromConfigCache(assemblyFolders, fileExists);
+                            _assemblyFoldersCache = new AssemblyFoldersFromConfigCache(assemblyFolders, fileExists, executionContext);
                             if (useCache)
                             {
                                 _buildEngine?.RegisterTaskObject(key, _assemblyFoldersCache, RegisteredTaskObjectLifetime.Build, true /* dispose early ok*/);

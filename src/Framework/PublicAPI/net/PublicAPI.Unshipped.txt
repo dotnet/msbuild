@@ -1,0 +1,10 @@
+Microsoft.Build.Framework.IConcurrentTask
+Microsoft.Build.Framework.IConcurrentTask.ConfigureForConcurrentExecution(Microsoft.Build.Framework.TaskExecutionContext executionContext) -> void
+Microsoft.Build.Framework.TaskExecutionContext
+Microsoft.Build.Framework.TaskExecutionContext.BuildProcessEnvironment.get -> System.Collections.Generic.Dictionary<string, string>
+Microsoft.Build.Framework.TaskExecutionContext.Culture.get -> System.Globalization.CultureInfo
+Microsoft.Build.Framework.TaskExecutionContext.GetFullPath(string path) -> string
+Microsoft.Build.Framework.TaskExecutionContext.StartupDirectory.get -> string
+Microsoft.Build.Framework.TaskExecutionContext.TaskExecutionContext() -> void
+Microsoft.Build.Framework.TaskExecutionContext.TaskExecutionContext(string startupDirectory, System.Collections.Generic.Dictionary<string, string> buildProcessEnvironment, System.Globalization.CultureInfo culture, System.Globalization.CultureInfo uiCulture) -> void
+Microsoft.Build.Framework.TaskExecutionContext.UICulture.get -> System.Globalization.CultureInfo

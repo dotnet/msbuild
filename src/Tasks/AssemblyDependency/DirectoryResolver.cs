@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -15,8 +16,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public DirectoryResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
+        public DirectoryResolver(
+            string searchPathElement,
+            GetAssemblyName getAssemblyName,
+            FileExists fileExists,
+            GetAssemblyRuntimeVersion getRuntimeVersion,
+            Version targetedRuntimeVesion,
+            TaskExecutionContext executionContext
+        )
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, executionContext)
         {
         }
 
@@ -53,8 +61,8 @@ namespace Microsoft.Build.Tasks
             foundPath = null;
             userRequestedSpecificFile = false;
 
-            // Resolve to the given path.
-            string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, assembliesConsideredAndRejected);
+            string directory = FullSearchPath;
+            string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directory, assembliesConsideredAndRejected);
             if (resolvedPath != null)
             {
                 foundPath = resolvedPath;

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -16,8 +17,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public RawFilenameResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
+        public RawFilenameResolver(
+            string searchPathElement,
+            GetAssemblyName getAssemblyName,
+            FileExists fileExists,
+            GetAssemblyRuntimeVersion getRuntimeVersion,
+            Version targetedRuntimeVesion,
+            TaskExecutionContext executionContext
+        )
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false, executionContext)
         {
         }
 
@@ -54,8 +62,11 @@ namespace Microsoft.Build.Tasks
             foundPath = null;
             userRequestedSpecificFile = false;
 
-            if (rawFileNameCandidate != null)
-            {
+            if (rawFileNameCandidate is object)
+            {  
+
+                rawFileNameCandidate = executionContext.GetFullPath(rawFileNameCandidate);
+
                 // {RawFileName} was passed in.
                 if (fileExists(rawFileNameCandidate))
                 {
