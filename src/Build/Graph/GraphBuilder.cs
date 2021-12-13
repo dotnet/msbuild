@@ -186,15 +186,16 @@ namespace Microsoft.Build.Graph
                     HashSet<ProjectGraphNode> referencesFromThisNode = new();
                     foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
                     {
-                        if (traversedReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode))
+                        ParsedProject reference = allParsedProjects[referenceInfo.ReferenceConfiguration];
+                        if (traversedReferences.Add(reference.GraphNode))
                         {
-                            GetTransitiveProjectReferencesExcludingSelfHelper(allParsedProjects[referenceInfo.ReferenceConfiguration], traversedReferences, referencesFromThisNode);
+                            GetTransitiveProjectReferencesExcludingSelfHelper(reference, traversedReferences, referencesFromThisNode);
                         }
-                        else if (transitiveReferenceCache.TryGetValue(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode, out cachedTransitiveReferences))
+                        else if (transitiveReferenceCache.TryGetValue(reference.GraphNode, out cachedTransitiveReferences))
                         {
                             referencesFromThisNode.UnionWith(cachedTransitiveReferences);
                         }
-                        referencesFromThisNode.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
+                        referencesFromThisNode.Add(reference.GraphNode);
                     }
 
                     // We've returned from recursing through all transitive references
