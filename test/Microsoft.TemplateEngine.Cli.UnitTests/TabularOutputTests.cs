@@ -287,7 +287,7 @@ Dotnet 本地...  tool-manifest
             var columnOption = SharedOptionsFactory.CreateColumnsOption();
 
             //Gets suggestions defined in column options
-            var suggestedValues = columnOption.GetSuggestions().ToList();
+            var suggestedValues = columnOption.GetCompletions().Select(c => c.Label).ToList();
             suggestedValues.Sort();
 
             //Gets constants defined in TabularOutputSettings.ColumnNams

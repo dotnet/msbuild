@@ -3,7 +3,7 @@
 
 #nullable enable
 
-using System.CommandLine;
+using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
@@ -28,21 +28,24 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.Add(new AliasCommand(host, telemetryLogger, callbacks));
         }
 
-        //TODO: this option is needed to intercept help. Discuss if there is a better option to do it.
-        internal Option HelpOption { get; } = new Option(new string[] { "-h", "--help", "-?" })
+        protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {
-            IsHidden = true
-        };
-
-        protected internal override IEnumerable<string> GetSuggestions(ParseResult parseResult, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
-        {
-            NewCommandArgs args = ParseContext(parseResult);
-            InstantiateCommand command = InstantiateCommand.FromNewCommand(this);
-            ParseResult reparseResult = ParserFactory.CreateParser(command).Parse(args.Tokens);
-            foreach (string suggestion in command.GetSuggestions(reparseResult, environmentSettings, textToMatch))
+            if (context is not TextCompletionContext textCompletionContext)
             {
-                yield return suggestion;
+                foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings))
+                {
+                    yield return completion;
+                }
+                yield break;
             }
+
+            InstantiateCommand command = InstantiateCommand.FromNewCommand(this);
+            CompletionContext reparsedContext = ParserFactory.CreateParser(command).Parse(textCompletionContext.CommandLineText).GetCompletionContext();
+            foreach (CompletionItem completion in command.GetCompletions(reparsedContext, environmentSettings))
+            {
+                yield return completion;
+            }
+
         }
 
         protected override Task<NewCommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)

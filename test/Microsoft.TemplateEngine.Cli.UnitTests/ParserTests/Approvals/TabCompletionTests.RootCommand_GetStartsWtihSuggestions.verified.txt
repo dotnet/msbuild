@@ -1,0 +1,23 @@
+﻿[
+  {
+    Label: classlib,
+    Kind: Value,
+    SortText: classlib,
+    InsertText: classlib,
+    Documentation: A project for creating a class library that targets .NET Standard or .NET Core
+  },
+  {
+    Label: console,
+    Kind: Value,
+    SortText: console,
+    InsertText: console,
+    Documentation: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
+  },
+  {
+    Label: search,
+    Kind: Keyword,
+    SortText: search,
+    InsertText: search,
+    Detail: Searches for the templates on NuGet.org.
+  }
+]

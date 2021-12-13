@@ -27,7 +27,19 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new ");
-            var result = parseResult.GetSuggestions().ToArray();
+            var result = parseResult.GetCompletions().ToArray();
+
+            return Verifier.Verify(result, _verifySettings.Settings);
+        }
+
+        [Fact]
+        public Task RootCommand_GetStartsWtihSuggestions()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse("new c");
+            var result = parseResult.GetCompletions().ToArray();
 
             return Verifier.Verify(result, _verifySettings.Settings);
         }
@@ -39,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new install ");
-            var result = parseResult.GetSuggestions().ToArray();
+            var result = parseResult.GetCompletions().ToArray();
 
             return Verifier.Verify(result, _verifySettings.Settings);
         }
@@ -51,21 +63,19 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new uninstall ");
-            var result = parseResult.GetSuggestions().ToArray();
+            var result = parseResult.GetCompletions().ToArray();
 
             return Verifier.Verify(result, _verifySettings.Settings);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact (Skip = "https://github.com/dotnet/command-line-api/blob/main/src/System.CommandLine/Parsing/ParseResultExtensions.cs#L285-L289; the tab completion also contains the results from parent command")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public Task Update_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
             var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new update ");
-            var result = parseResult.GetSuggestions().ToArray();
+            var result = parseResult.GetCompletions().ToArray();
 
             return Verifier.Verify(result, _verifySettings.Settings);
         }
@@ -77,7 +87,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new list ");
-            var result = parseResult.GetSuggestions().ToArray();
+            var result = parseResult.GetCompletions().ToArray();
 
             return Verifier.Verify(result, _verifySettings.Settings);
         }
@@ -89,7 +99,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new search ");
-            var result = parseResult.GetSuggestions().ToArray();
+            var result = parseResult.GetCompletions().ToArray();
 
             return Verifier.Verify(result, _verifySettings.Settings);
         }
@@ -101,21 +111,19 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new create ");
-            var result = parseResult.GetSuggestions().ToArray();
+            var result = parseResult.GetCompletions().ToArray();
 
             return Verifier.Verify(result, _verifySettings.Settings);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "https://github.com/dotnet/command-line-api/blob/main/src/System.CommandLine/Parsing/ParseResultExtensions.cs#L285-L289; the tab completion also contains the results from parent command")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public Task TemplateCommand_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
             var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new console ");
-            var result = parseResult.GetSuggestions().ToArray();
+            var result = parseResult.GetCompletions().ToArray();
 
             return Verifier.Verify(result, _verifySettings.Settings);
         }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Cli;
@@ -23,11 +24,11 @@ namespace Dotnet_new3
         {
             this.AddArgument(PathArgument);
             this.AddOption(PositionOption);
-            this.Handler = CommandHandler.Create<ParseResult>(Run);
+            this.Handler = CommandHandler.Create((context) => Run(context.ParseResult));
             this.IsHidden = true;
         }
 
-        public int Run(ParseResult result)
+        public Task<int> Run(ParseResult result)
         {
             try
             {
@@ -54,16 +55,16 @@ namespace Dotnet_new3
 
                 //TODO: discuss rawInput requirement
                 ParseResult newCommandResult = ParserFactory.CreateParser(newCommand).Parse(remainingArgs, rawInput: input);
-                foreach (var suggestion in newCommandResult.GetSuggestions(position).Distinct())
+                foreach (CompletionItem suggestion in newCommandResult.GetCompletions(position).Distinct())
                 {
-                    Console.WriteLine(suggestion);
+                    Console.WriteLine(suggestion.Label);
                 }
             }
             catch (Exception)
             {
-                return 1;
+                return Task.FromResult(1);
             }
-            return 0;
+            return Task.FromResult(0);
         }
     }
 }

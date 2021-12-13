@@ -1,11 +1,65 @@
 ﻿[
-  classlib,
-  console,
-  editorconfig,
-  gitignore,
-  globaljson,
-  nugetconfig,
-  sln,
-  tool-manifest,
-  webconfig
+  {
+    Label: classlib,
+    Kind: Value,
+    SortText: classlib,
+    InsertText: classlib,
+    Documentation: A project for creating a class library that targets .NET Standard or .NET Core
+  },
+  {
+    Label: console,
+    Kind: Value,
+    SortText: console,
+    InsertText: console,
+    Documentation: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
+  },
+  {
+    Label: editorconfig,
+    Kind: Value,
+    SortText: editorconfig,
+    InsertText: editorconfig,
+    Documentation: Creates an .editorconfig file for configuring code style preferences.
+  },
+  {
+    Label: gitignore,
+    Kind: Value,
+    SortText: gitignore,
+    InsertText: gitignore,
+    Documentation: Creates a gitignore file for a dotnet project.
+  },
+  {
+    Label: globaljson,
+    Kind: Value,
+    SortText: globaljson,
+    InsertText: globaljson,
+    Documentation: A file for selecting the .NET Core SDK version.
+  },
+  {
+    Label: nugetconfig,
+    Kind: Value,
+    SortText: nugetconfig,
+    InsertText: nugetconfig,
+    Documentation: A file for configuring the locations NuGet will search for packages
+  },
+  {
+    Label: sln,
+    Kind: Value,
+    SortText: sln,
+    InsertText: sln,
+    Documentation: Create an empty solution containing no projects
+  },
+  {
+    Label: tool-manifest,
+    Kind: Value,
+    SortText: tool-manifest,
+    InsertText: tool-manifest,
+    Documentation: The file that defines available dotnet tools.
+  },
+  {
+    Label: webconfig,
+    Kind: Value,
+    SortText: webconfig,
+    InsertText: webconfig,
+    Documentation: A file used to configure Web Application settings
+  }
 ]

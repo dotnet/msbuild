@@ -1,21 +1,135 @@
 ﻿[
-  --dry-run,
-  --force,
-  --framework,
-  --help,
-  --language,
-  --langVersion,
-  --name,
-  --no-restore,
-  --no-update-check,
-  --output,
-  --type,
-  -?,
-  -f,
-  -h,
-  -lang,
-  -n,
-  -o,
-  /?,
-  /h
+  {
+    Label: --dry-run,
+    Kind: Keyword,
+    SortText: --dry-run,
+    InsertText: --dry-run,
+    Detail: Displays a summary of what would happen if the given command line were run if it would result in a template creation.
+  },
+  {
+    Label: --force,
+    Kind: Keyword,
+    SortText: --force,
+    InsertText: --force,
+    Detail: Forces content to be generated even if it would change existing files.
+  },
+  {
+    Label: --framework,
+    Kind: Keyword,
+    SortText: --framework,
+    InsertText: --framework,
+    Detail: The target framework for the project.
+  },
+  {
+    Label: --help,
+    Kind: Keyword,
+    SortText: --help,
+    InsertText: --help,
+    Detail: Show help and usage information
+  },
+  {
+    Label: --language,
+    Kind: Keyword,
+    SortText: --language,
+    InsertText: --language,
+    Detail: Filters templates based on language and specifies the language of the template to create.
+  },
+  {
+    Label: --langVersion,
+    Kind: Keyword,
+    SortText: --langVersion,
+    InsertText: --langVersion,
+    Detail: Sets the LangVersion property in the created project file
+  },
+  {
+    Label: --name,
+    Kind: Keyword,
+    SortText: --name,
+    InsertText: --name,
+    Detail: The name for the output being created. If no name is specified, the name of the output directory is used.
+  },
+  {
+    Label: --no-restore,
+    Kind: Keyword,
+    SortText: --no-restore,
+    InsertText: --no-restore,
+    Detail: If specified, skips the automatic restore of the project on create.
+  },
+  {
+    Label: --no-update-check,
+    Kind: Keyword,
+    SortText: --no-update-check,
+    InsertText: --no-update-check,
+    Detail: Disables checking for the template package updates when instantiating a template.
+  },
+  {
+    Label: --output,
+    Kind: Keyword,
+    SortText: --output,
+    InsertText: --output,
+    Detail: Location to place the generated output.
+  },
+  {
+    Label: --type,
+    Kind: Keyword,
+    SortText: --type,
+    InsertText: --type,
+    Detail: Filters templates based on available types. Predefined values are "project" and "item".
+  },
+  {
+    Label: -?,
+    Kind: Keyword,
+    SortText: -?,
+    InsertText: -?,
+    Detail: Show help and usage information
+  },
+  {
+    Label: -f,
+    Kind: Keyword,
+    SortText: -f,
+    InsertText: -f,
+    Detail: The target framework for the project.
+  },
+  {
+    Label: -h,
+    Kind: Keyword,
+    SortText: -h,
+    InsertText: -h,
+    Detail: Show help and usage information
+  },
+  {
+    Label: -lang,
+    Kind: Keyword,
+    SortText: -lang,
+    InsertText: -lang,
+    Detail: Filters templates based on language and specifies the language of the template to create.
+  },
+  {
+    Label: -n,
+    Kind: Keyword,
+    SortText: -n,
+    InsertText: -n,
+    Detail: The name for the output being created. If no name is specified, the name of the output directory is used.
+  },
+  {
+    Label: -o,
+    Kind: Keyword,
+    SortText: -o,
+    InsertText: -o,
+    Detail: Location to place the generated output.
+  },
+  {
+    Label: /?,
+    Kind: Keyword,
+    SortText: /?,
+    InsertText: /?,
+    Detail: Show help and usage information
+  },
+  {
+    Label: /h,
+    Kind: Keyword,
+    SortText: /h,
+    InsertText: /h,
+    Detail: Show help and usage information
+  }
 ]

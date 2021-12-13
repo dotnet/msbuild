@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System.CommandLine.Completions;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -11,27 +12,36 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>
     {
-        internal IEnumerable<string> GetSuggestions(
+        internal IEnumerable<CompletionItem> GetCompletions(
             InstantiateCommandArgs args,
             IEnumerable<TemplateGroup> templateGroups,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            string? textToMatch)
+            TextCompletionContext context)
         {
             if (string.IsNullOrWhiteSpace(args.ShortName))
             {
-                return templateGroups.SelectMany(g => g.ShortNames).Distinct().OrderBy(s => s, StringComparer.OrdinalIgnoreCase);
+                return templateGroups
+                    .SelectMany(g => g.ShortNames, (g, shortName) => new CompletionItem(shortName, documentation: g.Description))
+                    .Distinct()
+                    .OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase)
+                    .Concat(base.GetCompletions(context, environmentSettings));
             }
             else
             {
                 //no exact match on short name
                 if (!templateGroups.Any(template => template.ShortNames.Contains(args.ShortName)))
                 {
-                    return templateGroups.SelectMany(g => g.ShortNames).Where(n => n.StartsWith(args.ShortName)).Distinct().OrderBy(s => s, StringComparer.OrdinalIgnoreCase);
+                    return templateGroups
+                        .SelectMany(g => g.ShortNames, (g, shortName) => new CompletionItem(shortName, documentation: g.Description))
+                        .Where(c => c.Label.StartsWith(args.ShortName))
+                        .Distinct()
+                        .OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase)
+                        .Concat(base.GetCompletions(context, environmentSettings));
                 }
 
                 //if there is exact match do further reparsing
-                HashSet<string> distinctSuggestions = new HashSet<string>();
+                HashSet<CompletionItem> distinctCompletions = new HashSet<CompletionItem>();
                 foreach (TemplateGroup templateGroup in templateGroups.Where(template => template.ShortNames.Contains(args.ShortName)))
                 {
                     foreach (IGrouping<int, CliTemplateInfo> templateGrouping in templateGroup.Templates.GroupBy(g => g.Precedence).OrderByDescending(g => g.Key))
@@ -40,30 +50,26 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         {
                             TemplateCommand command = new TemplateCommand(this, environmentSettings, templatePackageManager, templateGroup, template);
                             Parser parser = ParserFactory.CreateParser(command);
-                            ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-
-                            //TODO:
-                            // command.GetSuggestions does not work for arguments
-                            // parseResult.GetSuggestions does not work with textToMatch, only position
-                            // discuss options here
-                            //foreach (string? suggestion in command.GetSuggestions(templateParseResult, textToMatch))
-                            foreach (string? suggestion in templateParseResult.GetSuggestions())
+                            ParseResult templateParseResult = parser.Parse(context.CommandLineText);
+                            foreach (CompletionItem completion in templateParseResult.GetCompletions(context.CursorPosition))
                             {
-                                if (!string.IsNullOrWhiteSpace(suggestion))
-                                {
-                                    distinctSuggestions.Add(suggestion);
-                                }
+                                distinctCompletions.Add(completion);
                             }
                         }
                     }
                 }
-                return distinctSuggestions;
+                return distinctCompletions.OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase);
             }
         }
 
-        protected internal override IEnumerable<string> GetSuggestions(ParseResult parseResult, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
+        protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {
-            InstantiateCommandArgs args = ParseContext(parseResult);
+            if (context is not TextCompletionContext textCompletionContext)
+            {
+                return base.GetCompletions(context, environmentSettings);
+            }
+
+            InstantiateCommandArgs args = ParseContext(context.ParseResult);
 
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             HostSpecificDataLoader? hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
@@ -74,8 +80,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
 
-            return GetSuggestions(args, templateGroups, environmentSettings, templatePackageManager, textToMatch)
-                .Concat(base.GetSuggestions(parseResult, environmentSettings, textToMatch));
+            return GetCompletions(args, templateGroups, environmentSettings, templatePackageManager, textCompletionContext);
         }
     }
 }

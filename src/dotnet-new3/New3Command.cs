@@ -32,7 +32,7 @@ namespace Dotnet_new3
             this.AddOption(DebugDisableBuiltInTemplatesOption);
             this.AddArgument(RemainingTokensArgument);
             this.AddCommand(new CompleteCommand());
-            this.Handler = CommandHandler.Create<ParseResult>(Run);
+            this.Handler = CommandHandler.Create((context) => Run(context.ParseResult));
         }
 
         internal static Option<bool> DebugEmitTelemetryOption => _debugEmitTelemetryOption;

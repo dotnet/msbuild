@@ -1,21 +1,135 @@
 ﻿[
-  classlib,
-  console,
-  editorconfig,
-  gitignore,
-  globaljson,
-  nugetconfig,
-  sln,
-  tool-manifest,
-  webconfig,
-  --help,
-  -?,
-  -h,
-  /?,
-  /h,
-  install,
-  list,
-  search,
-  uninstall,
-  update
+  {
+    Label: classlib,
+    Kind: Value,
+    SortText: classlib,
+    InsertText: classlib,
+    Documentation: A project for creating a class library that targets .NET Standard or .NET Core
+  },
+  {
+    Label: console,
+    Kind: Value,
+    SortText: console,
+    InsertText: console,
+    Documentation: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
+  },
+  {
+    Label: editorconfig,
+    Kind: Value,
+    SortText: editorconfig,
+    InsertText: editorconfig,
+    Documentation: Creates an .editorconfig file for configuring code style preferences.
+  },
+  {
+    Label: gitignore,
+    Kind: Value,
+    SortText: gitignore,
+    InsertText: gitignore,
+    Documentation: Creates a gitignore file for a dotnet project.
+  },
+  {
+    Label: globaljson,
+    Kind: Value,
+    SortText: globaljson,
+    InsertText: globaljson,
+    Documentation: A file for selecting the .NET Core SDK version.
+  },
+  {
+    Label: nugetconfig,
+    Kind: Value,
+    SortText: nugetconfig,
+    InsertText: nugetconfig,
+    Documentation: A file for configuring the locations NuGet will search for packages
+  },
+  {
+    Label: sln,
+    Kind: Value,
+    SortText: sln,
+    InsertText: sln,
+    Documentation: Create an empty solution containing no projects
+  },
+  {
+    Label: tool-manifest,
+    Kind: Value,
+    SortText: tool-manifest,
+    InsertText: tool-manifest,
+    Documentation: The file that defines available dotnet tools.
+  },
+  {
+    Label: webconfig,
+    Kind: Value,
+    SortText: webconfig,
+    InsertText: webconfig,
+    Documentation: A file used to configure Web Application settings
+  },
+  {
+    Label: --help,
+    Kind: Keyword,
+    SortText: --help,
+    InsertText: --help,
+    Detail: Show help and usage information
+  },
+  {
+    Label: -?,
+    Kind: Keyword,
+    SortText: -?,
+    InsertText: -?,
+    Detail: Show help and usage information
+  },
+  {
+    Label: -h,
+    Kind: Keyword,
+    SortText: -h,
+    InsertText: -h,
+    Detail: Show help and usage information
+  },
+  {
+    Label: /?,
+    Kind: Keyword,
+    SortText: /?,
+    InsertText: /?,
+    Detail: Show help and usage information
+  },
+  {
+    Label: /h,
+    Kind: Keyword,
+    SortText: /h,
+    InsertText: /h,
+    Detail: Show help and usage information
+  },
+  {
+    Label: install,
+    Kind: Keyword,
+    SortText: install,
+    InsertText: install,
+    Detail: Installs a source or a template package.
+  },
+  {
+    Label: list,
+    Kind: Keyword,
+    SortText: list,
+    InsertText: list,
+    Detail: Lists templates containing the specified template name. If no name is specified, lists all templates.
+  },
+  {
+    Label: search,
+    Kind: Keyword,
+    SortText: search,
+    InsertText: search,
+    Detail: Searches for the templates on NuGet.org.
+  },
+  {
+    Label: uninstall,
+    Kind: Keyword,
+    SortText: uninstall,
+    InsertText: uninstall,
+    Detail: Uninstalls a source or a template package.
+  },
+  {
+    Label: update,
+    Kind: Keyword,
+    SortText: update,
+    InsertText: update,
+    Detail: Check the currently installed template packages for update, and install the updates.
+  }
 ]

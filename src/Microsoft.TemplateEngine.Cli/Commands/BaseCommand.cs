@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Reflection;
@@ -162,20 +163,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        public override IEnumerable<string> GetSuggestions(ParseResult? parseResult = null, string? textToMatch = null)
+        public override IEnumerable<CompletionItem> GetCompletions(CompletionContext context)
         {
-            if (parseResult == null)
+            if (context.ParseResult == null)
             {
-                return base.GetSuggestions(parseResult, textToMatch);
+                return base.GetCompletions(context);
             }
-            GlobalArgs args = new GlobalArgs(this, parseResult);
-            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, parseResult);
-            return GetSuggestions(parseResult, environmentSettings, textToMatch);
+            GlobalArgs args = new GlobalArgs(this, context.ParseResult);
+            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
+            return GetCompletions(context, environmentSettings);
         }
 
-        protected internal virtual IEnumerable<string> GetSuggestions(ParseResult parseResult, IEngineEnvironmentSettings environmentSettings, string? textToMatch)
+        protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {
-            return base.GetSuggestions(parseResult, textToMatch);
+            return base.GetCompletions(context);
         }
 
         protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);

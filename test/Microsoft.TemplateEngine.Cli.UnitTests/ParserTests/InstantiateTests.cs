@@ -389,28 +389,27 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public static IEnumerable<object?[]> CanDetectParseErrorsTemplateOptionsData =>
             new object?[][]
             {
-                // some tests are disabled due to https://github.com/dotnet/command-line-api/issues/1505
                 //bool
                 new object?[] { "foo", "bool", "bool", true, null, null, "Option '--bool' is required." },
                 new object?[] { "foo -b text", "bool", "bool", true, null, null, "Unrecognized command or argument 'text'" },
                 new object?[] { "foo --bool 0", "bool", "bool", true, null, null, "Unrecognized command or argument '0'" },
                 //text
-                //new object?[] { "foo --text", "text", "string", false, null, null, "Required argument missing for option: --text." },
+                new object?[] { "foo --text", "text", "string", false, null, null, "Required argument missing for option: --text" },
                 new object?[] { "foo", "text", "string", true, null, null, "Option '--text' is required." },
                 //int
                 new object?[] { "foo --int text", "int", "int", false, null, null, "Cannot parse argument 'text' for option '--int' as expected type Int64." },
-                //new object?[] { "foo --int", "int", "int", false, null, null, "Required argument missing for option: --int." },
+                new object?[] { "foo --int", "int", "int", false, null, null, "Required argument missing for option: --int" },
                 new object?[] { "foo", "int", "int", true, null, null, "Option '--int' is required." },
                 new object?[] { "foo --int", "int", "int", true, null, "not-int", "Cannot parse default if option without value 'not-int' for option '--int' as expected type Int64." },
                 //float
                 new object?[] { "foo --float text", "float", "float", false, null, null, "Cannot parse argument 'text' for option '--float' as expected type Double." },
-                //new object?[] { "foo --float", "float", "float", false, null, null, "Required argument missing for option: --float." },
+                new object?[] { "foo --float", "float", "float", false, null, null, "Required argument missing for option: --float" },
                 new object?[] { "foo", "float", "float", true, null, null, "Option '--float' is required." },
                 new object?[] { "foo --float", "float", "float", true, null, "not-float", "Cannot parse default if option without value 'not-float' for option '--float' as expected type Double." },
 
                 //hex
                 new object?[] { "foo --hex text", "hex", "hex", false, null, null, "Cannot parse argument 'text' for option '--hex' as expected type Int64." },
-                //new object?[] { "foo --hex", "hex", "hex", false, null, null, "Required argument missing for option: --hex." },
+                new object?[] { "foo --hex", "hex", "hex", false, null, null, "Required argument missing for option: --hex" },
                 new object?[] { "foo", "hex", "hex", true, null, null, "Option '--hex' is required." },
                 new object?[] { "foo --hex", "hex", "hex", true, null, "not-hex", "Cannot parse default if option without value 'not-hex' for option '--hex' as expected type Int64." },
 
@@ -454,8 +453,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             new object?[][]
             {
                 new object?[] { "foo --framework netcoreapp3.1", "framework", "net5.0|net6.0", false, null, null, "Argument 'netcoreapp3.1' not recognized. Must be one of:\n\t'net5.0'\n\t'net6.0'" },
-                //https://github.com/dotnet/command-line-api/issues/1505
-                //new object?[] { "foo --framework", "framework", "net5.0|net6.0", false, null, null, "Required argument missing for option: --framework." },
+                new object?[] { "foo --framework", "framework", "net5.0|net6.0", false, null, null, "Required argument missing for option: --framework" },
                 new object?[] { "foo", "framework", "net5.0|net6.0", true, null, null, "Option '--framework' is required." },
                 new object?[] { "foo --framework", "framework", "net5.0|net6.0", true, null, "netcoreapp2.1", "Cannot parse default if option without value 'netcoreapp2.1' for option '--framework' as expected type 'choice': value 'netcoreapp2.1' is not allowed, allowed values are: 'net5.0','net6.0'." }
             };

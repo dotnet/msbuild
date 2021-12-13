@@ -12,11 +12,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public NewCommandArgs(NewCommand command, ParseResult parseResult) : base(command, parseResult)
         {
             Tokens = parseResult.Tokens.Select(t => t.Value).ToArray();
-            HelpRequested = parseResult.GetValueForOption<bool>(command.HelpOption);
         }
 
         internal string[] Tokens { get; }
-
-        internal bool HelpRequested { get; }
     }
 }
