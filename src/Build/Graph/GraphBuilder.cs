@@ -167,6 +167,14 @@ namespace Microsoft.Build.Graph
                 return references;
             }
 
+            // transitiveReferences contains all of the references we've found so far from the initial GetTransitiveProjectReferencesExcludingSelf call.
+            // referencesFromHere is essentially "reset" at each level of the recursion.
+            // The first is important because if we find a cycle at some point, we need to know not to keep recursing. We wouldn't have added to a cache yet, since we haven't finished
+            // finding all the transitive references yet.
+            // On the other hand, the second is important to help us fill that cache afterwards. The cache is from a particular node to all of its references, including transitive references
+            // but not including itself, which means we can't include parents as we would if we used transitiveReferences. You can see that for any particular call, it creates a new "toCache"
+            // HashSet that we fill with direct references and pass as referencesFromHere in recursive calls to fill it with transitive references. It is then used to populate the cache.
+            // Meanwhile, we avoid going into the recursive step at all if transitiveReferences already includes a particular node to avoid a StackOverflowException if there's a loop.
             void GetTransitiveProjectReferencesExcludingSelfHelper(ParsedProject parsedProject, HashSet<ProjectGraphNode> transitiveReferences, HashSet<ProjectGraphNode> referencesFromHere)
             {
                 if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> cachedTransitiveReferences))
