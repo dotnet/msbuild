@@ -255,8 +255,12 @@ jobs:
               RunAoTTests: 'true'
 
       - ${{ if eq(parameters.agentOs, 'Darwin') }}:
-        - script: eng/common/cibuild.sh
+        - script: eng/common/build.sh
                     --configuration $(_BuildConfig)
+                    --restore
+                    --build
+                    --pack
+                    --ci
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
                     $(_InternalRuntimeDownloadArgs)
