@@ -101,26 +101,26 @@ namespace Microsoft.Build.Tasks
         public ITaskItem DestinationFolder { get; set; }
 
         /// <summary>
-        /// How many times to attempt to copy, if all previous
-        /// attempts failed. Defaults to zero.
-        /// Warning: using retries may mask a synchronization problem in your
-        /// build process.
+        /// Gets or sets the number of times to attempt to copy, if all previous attempts failed.
+        /// Warning: using retries may mask a synchronization problem in your build process.
         /// </summary>
         public int Retries { get; set; } = 10;
 
         /// <summary>
-        /// Delay between any necessary retries.
+        /// Gets or sets the delay, in milliseconds, between any necessary retries.
         /// Defaults to <see cref="RetryDelayMillisecondsDefault">RetryDelayMillisecondsDefault</see>
         /// </summary>
         public int RetryDelayMilliseconds { get; set; }
 
         /// <summary>
-        /// Create Hard Links for the copied files rather than copy the files if possible to do so
+        /// Gets or sets a value that indicates whether to use Hard Links for the copied files
+        /// rather than copy the files, if it's possible to do so.
         /// </summary>
         public bool UseHardlinksIfPossible { get; set; }
 
         /// <summary>
-        /// Create Symbolic Links for the copied files rather than copy the files if possible to do so
+        /// Gets or sets a value that indicates whether to create Symbolic Links for the copied files
+        // rather than copy the files, if it's possible to do so.
         /// </summary>
         public bool UseSymboliclinksIfPossible { get; set; } = s_forceSymlinks;
 
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Tasks
         public bool WroteAtLeastOneFile { get; private set; }
 
         /// <summary>
-        /// Whether to overwrite files in the destination
+        /// Gets or sets a value that indicates whether to overwrite files in the destination
         /// that have the read-only attribute set.
         /// </summary>
         public bool OverwriteReadOnlyFiles { get; set; }
