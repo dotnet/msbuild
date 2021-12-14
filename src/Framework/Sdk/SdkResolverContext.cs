@@ -42,7 +42,7 @@ namespace Microsoft.Build.Framework
         ///    <format type="text/markdown"><![CDATA[
         /// ## Remarks
         ///     
-        /// File version is based on commit height from our public git repository. This is informational and not equal to the assembly version.
+        /// File version is informational and not equal to the assembly version.
         /// ]]></format>
         /// </remarks>
         public virtual Version MSBuildVersion { get; protected set; }

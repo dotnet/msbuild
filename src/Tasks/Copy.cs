@@ -113,13 +113,13 @@ namespace Microsoft.Build.Tasks
         public int RetryDelayMilliseconds { get; set; }
 
         /// <summary>
-        /// Gets or sets a value that indicates whether to use Hard Links for the copied files
+        /// Gets or sets a value that indicates whether to use hard links for the copied files
         /// rather than copy the files, if it's possible to do so.
         /// </summary>
         public bool UseHardlinksIfPossible { get; set; }
 
         /// <summary>
-        /// Gets or sets a value that indicates whether to create Symbolic Links for the copied files
+        /// Gets or sets a value that indicates whether to create symbolic links for the copied files
         /// rather than copy the files, if it's possible to do so.
         /// </summary>
         public bool UseSymboliclinksIfPossible { get; set; } = s_forceSymlinks;

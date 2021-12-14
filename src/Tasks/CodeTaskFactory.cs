@@ -170,7 +170,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Initialzes the task factory.
+        /// Initializes the task factory.
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
