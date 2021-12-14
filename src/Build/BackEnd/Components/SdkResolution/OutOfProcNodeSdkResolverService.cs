@@ -64,16 +64,19 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
-            bool wasResultCached = false;
+            bool wasResultCached = true;
 
             MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(submissionId, sdk.Name, solutionPath, projectPath);
 
             // Get a cached response if possible, otherwise send the request
             Lazy<SdkResult> sdkResultLazy = _responseCache.GetOrAdd(
                 sdk.Name,
-                key => new Lazy<SdkResult>(() => RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio)));
+                key => new Lazy<SdkResult>(() =>
+                {
+                    wasResultCached = false;
 
-            wasResultCached = sdkResultLazy.IsValueCreated;
+                    return RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                }));
 
             SdkResult sdkResult = sdkResultLazy.Value;
 
