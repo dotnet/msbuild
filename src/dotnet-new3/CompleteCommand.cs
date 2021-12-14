@@ -24,7 +24,8 @@ namespace Dotnet_new3
         {
             this.AddArgument(PathArgument);
             this.AddOption(PositionOption);
-            this.Handler = CommandHandler.Create((context) => Run(context.ParseResult));
+
+            this.SetHandler((ParseResult parseResult) => Run(parseResult));
             this.IsHidden = true;
         }
 
