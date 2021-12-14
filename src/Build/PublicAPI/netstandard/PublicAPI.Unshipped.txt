@@ -1,5 +1,11 @@
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.get -> Microsoft.Build.FileSystem.IDirectoryCacheFactory
 Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.set -> void
+Microsoft.Build.Execution.ProjectImportInstance
+Microsoft.Build.Execution.ProjectImportInstance.FullPath.get -> string
+Microsoft.Build.Execution.ProjectImportInstance.LastWriteTimeWhenRead.get -> System.DateTime
+Microsoft.Build.Execution.ProjectImportInstance.ProjectImportInstance() -> void
+Microsoft.Build.Execution.ProjectImportInstance.ProjectImportInstance(string fullPath, System.DateTime lastWriteTimeWhenRead) -> void
+Microsoft.Build.Execution.ProjectInstance.Imports.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Build.Execution.ProjectImportInstance>
 Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase.PluginLoggerBase() -> void
 Microsoft.Build.FileSystem.FindPredicate
 Microsoft.Build.FileSystem.FindTransform<TResult>
