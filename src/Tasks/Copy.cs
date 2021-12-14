@@ -120,7 +120,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Gets or sets a value that indicates whether to create Symbolic Links for the copied files
-        // rather than copy the files, if it's possible to do so.
+        /// rather than copy the files, if it's possible to do so.
         /// </summary>
         public bool UseSymboliclinksIfPossible { get; set; } = s_forceSymlinks;
 
