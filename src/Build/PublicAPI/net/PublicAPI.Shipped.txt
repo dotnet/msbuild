@@ -1115,11 +1115,6 @@ Microsoft.Build.Execution.OutOfProcNode.OutOfProcNode() -> void
 Microsoft.Build.Execution.OutOfProcNode.Run(bool enableReuse, bool lowPriority, out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
 Microsoft.Build.Execution.OutOfProcNode.Run(bool enableReuse, out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
 Microsoft.Build.Execution.OutOfProcNode.Run(out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
-Microsoft.Build.Execution.ProjectImportInstance
-Microsoft.Build.Execution.ProjectImportInstance.ProjectImportInstance() -> void
-Microsoft.Build.Execution.ProjectImportInstance.ProjectImportInstance(string fullPath, System.DateTime lastWriteTimeWhenRead) -> void
-Microsoft.Build.Execution.ProjectImportInstance.FullPath.get -> string
-Microsoft.Build.Execution.ProjectImportInstance.LastWriteTimeWhenRead.get -> System.DateTime
 Microsoft.Build.Execution.ProjectInstance
 Microsoft.Build.Execution.ProjectInstance.AddItem(string itemType, string evaluatedInclude) -> Microsoft.Build.Execution.ProjectItemInstance
 Microsoft.Build.Execution.ProjectInstance.AddItem(string itemType, string evaluatedInclude, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> metadata) -> Microsoft.Build.Execution.ProjectItemInstance
@@ -1149,7 +1144,6 @@ Microsoft.Build.Execution.ProjectInstance.GetProperty(string name) -> Microsoft.
 Microsoft.Build.Execution.ProjectInstance.GetPropertyValue(string name) -> string
 Microsoft.Build.Execution.ProjectInstance.GlobalProperties.get -> System.Collections.Generic.IDictionary<string, string>
 Microsoft.Build.Execution.ProjectInstance.ImportPaths.get -> System.Collections.Generic.IReadOnlyList<string>
-Microsoft.Build.Execution.ProjectInstance.Imports.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Build.Execution.ProjectImportInstance>
 Microsoft.Build.Execution.ProjectInstance.ImportPathsIncludingDuplicates.get -> System.Collections.Generic.IReadOnlyList<string>
 Microsoft.Build.Execution.ProjectInstance.InitialTargets.get -> System.Collections.Generic.List<string>
 Microsoft.Build.Execution.ProjectInstance.IsImmutable.get -> bool
