@@ -37,7 +37,6 @@ namespace Microsoft.NET.Build.Tests
                     "x64SolutionBuild.deps.json",
                     "x64SolutionBuild.dll",
                     "x64SolutionBuild.pdb",
-                    "ref/x64SolutionBuild.dll",
                     $"x64SolutionBuild{EnvironmentInfo.ExecutableExtension}"
                 });
         }
