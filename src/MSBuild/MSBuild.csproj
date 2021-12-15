@@ -340,8 +340,8 @@
       <Using Namespace="System.IO" />
       <Using Namespace="System.Reflection" />
       <Using Namespace="System.Xml" />
-      <Code Type="Fragment" Language="cs">
-<![CData[
+      <Code Type="Fragment" Source="Foo.cs" Language="cs">
+<![CDATA[
             XmlDocument doc = new XmlDocument();
             doc.Load(AppConfig);
             foreach (var topLevelElement in doc.ChildNodes)
