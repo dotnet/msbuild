@@ -5381,6 +5381,81 @@ elementFormDefault="qualified">
         </xs:complexType>
     </xs:element>
 
+    <!-- ============================ -->
+    <!-- Fast up-to-date check items. -->
+    <!-- ============================ -->
+
+    <xs:element name="UpToDateCheckInput" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UpToDateCheckInputDescription" _locComment="" -->Defines an item to be considered an input to the project for the fast up-to-date check.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:attribute name="Set">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckInput_Set" _locComment="" -->Optional group(s) of inputs and outputs that should be considered in isolation during build. Useful when a build involves multiple discrete compilation/transpilation steps. Semicolon-delimited when multiple sets are required.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Kind">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckInput_Kind" _locComment="" -->Optional identifier for this item that allows it to be omitted from the fast up-to-date check via a global property.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="UpToDateCheckOutput" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UpToDateCheckOutputDescription" _locComment="" -->Defines an item to be considered an output of the project for the fast up-to-date check.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:attribute name="Set">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckOutput_Set" _locComment="" -->Optional group(s) of inputs and outputs that should be considered in isolation during build. Useful when a build involves multiple discrete compilation/transpilation steps. Semicolon-delimited when multiple sets are required.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Kind">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckOutput_Kind" _locComment="" -->Optional identifier for this item that allows it to be omitted from the fast up-to-date check via a global property.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="UpToDateCheckBuilt" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UpToDateCheckBuiltDescription" _locComment="" -->Defines an item to be considered an output of the project for the fast up-to-date check, with optional corresponding input via 'Original' metadata. When 'Original' metadata is specified, the input and output are considered in isolation. Useful when a single file will be copied (and potentially transformed in doing so) during build.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:attribute name="Set">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckBuilt_Set" _locComment="" -->Optional group(s) of inputs and outputs that should be considered in isolation during build. Useful when a build involves multiple discrete compilation/transpilation steps. Semicolon-delimited when multiple sets are required.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Kind">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckBuilt_Kind" _locComment="" -->Optional identifier for this item that allows it to be omitted from the fast up-to-date check via a global property.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Original">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckBuilt_Original" _locComment="" -->Optional location of the input item that produces this output. Useful when a file is copied (and potentially transformed in doing so) during build. If multiple inputs and/or outputs are involved, use 'Set' metadata instead.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
     <!-- ================ -->
     <!-- Packaging tasks. -->
     <!-- ================ -->
