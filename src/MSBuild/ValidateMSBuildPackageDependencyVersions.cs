@@ -68,7 +68,7 @@ namespace MSBuild
                                                 {
                                                     if (!(name.Equals("System.ValueTuple", System.StringComparer.OrdinalIgnoreCase) && version.Equals("4.0.0.0") && assemblyVersion.Equals("4.0.3.0")))
                                                     {
-                                                        Log.LogError($"Binding redirect for '{name} redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
+                                                        Log.LogError($"Binding redirect for '{name}' redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
                                                     }
                                                 }
                                             }
