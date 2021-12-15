@@ -1,5 +1,6 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Xml;
@@ -34,6 +35,7 @@ namespace MSBuild
                                         {
                                             string name = string.Empty;
                                             string version = string.Empty;
+                                            bool check = true;
                                             foreach (var dependentAssembly in assemblyBindingXmlElement.ChildNodes)
                                             {
                                                 if (dependentAssembly is XmlElement dependentAssemblyXmlElement)
@@ -52,15 +54,19 @@ namespace MSBuild
                                                     {
                                                         foreach (var bindingRedirectAttribute in dependentAssemblyXmlElement.Attributes)
                                                         {
-                                                            if (bindingRedirectAttribute is XmlAttribute bindingRedirectAttributeXmlElement && bindingRedirectAttributeXmlElement.Name.Equals("newVersion", System.StringComparison.OrdinalIgnoreCase))
+                                                            if (bindingRedirectAttribute is XmlAttribute bindingRedirectVersion && bindingRedirectVersion.Name.Equals("newVersion", System.StringComparison.OrdinalIgnoreCase))
                                                             {
-                                                                version = bindingRedirectAttributeXmlElement.Value;
+                                                                version = bindingRedirectVersion.Value;
+                                                            }
+                                                            else if (bindingRedirectAttribute is XmlAttribute notToCheck && notToCheck.Name.Equals("notToBeChecked", System.StringComparison.OrdinalIgnoreCase))
+                                                            {
+                                                                check = !notToCheck.Value.Equals("true", System.StringComparison.OrdinalIgnoreCase);
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
-                                            if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version))
+                                            if (check && !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version))
                                             {
                                                 string path = Path.Combine(AssemblyPath, name + ".dll");
                                                 if (File.Exists(path) && !version.Equals(Assembly.LoadFile(path).GetName().Version.ToString()))
