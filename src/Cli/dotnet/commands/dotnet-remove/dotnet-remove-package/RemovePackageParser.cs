@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(CmdPackageArgument);
             command.AddOption(InteractiveOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new RemovePackageReferenceCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new RemovePackageReferenceCommand(parseResult).Execute());
 
             return command;
         }

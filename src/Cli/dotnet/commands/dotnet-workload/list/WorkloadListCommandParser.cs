@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(IncludePreviewsOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions(true);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadListCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadListCommand(parseResult).Execute());
 
             return command;
         }

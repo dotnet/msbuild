@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.Format
                 SeverityOption,
             };
             formatCommand.AddCommonOptions();
-            formatCommand.Handler = CommandHandler.Create<ParseResult>((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
+            formatCommand.SetHandler((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
             return formatCommand;
         }
     }

@@ -18,6 +18,7 @@ using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 using IConsole = Microsoft.Extensions.Tools.Internal.IConsole;
 using Resources = Microsoft.DotNet.Watcher.Tools.Resources;
+using System.CommandLine.Binding;
 
 namespace Microsoft.DotNet.Watcher
 {
@@ -109,6 +110,7 @@ Examples:
             return await rootCommand.InvokeAsync(args);
         }
 
+
         internal static RootCommand CreateRootCommand(Func<CommandLineOptions, Task<int>> handler, IReporter reporter)
         {
             var quiet = new Option<bool>(
@@ -129,52 +131,62 @@ Examples:
                 return null;
             });
 
-            var projectOption = new Option<string>("-p", "The project to watch") { IsHidden = true };
+            var listOption = new Option<bool>(
+                    "--list",
+                    "Lists all discovered files without starting the watcher");
+
+            var shortProjectOption = new Option<string>("-p", "The project to watch") { IsHidden = true };
+            var longProjectOption = new Option<string>("--project","The project to watch");
+            var noHotReloadOption = new Option<bool>(
+                    new[] { "--no-hot-reload" },
+                    "Suppress hot reload for supported apps.");
             var root = new RootCommand(Description)
             {
                  quiet,
                  verbose,
-                 new Option<bool>(
-                    new[] { "--no-hot-reload" },
-                    "Suppress hot reload for supported apps."),
-                 new Option<string>(
-                     "--project",
-                    "The project to watch"),
-                 projectOption,
-                 new Option<bool>(
-                    "--list",
-                    "Lists all discovered files without starting the watcher"),
+                 noHotReloadOption,
+                 longProjectOption,
+                 shortProjectOption,
+                 listOption
             };
-
+            
             root.TreatUnmatchedTokensAsErrors = false;
-            root.Handler = CommandHandler.Create((CommandLineOptions options, ParseResult parseResults) =>
-            {
-                if (string.IsNullOrEmpty(options.Project))
+            root.SetHandler((ParseResult parseResults) => {
+                var projectValue = parseResults.GetValueForOption(longProjectOption);
+                if (string.IsNullOrEmpty(projectValue))
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    var projectOptionShort = parseResults.GetValueForOption(projectOption);
+                    var projectShortValue = parseResults.GetValueForOption(shortProjectOption);
 #pragma warning restore CS0618 // Type or member is obsolete
-                    if (!string.IsNullOrEmpty(projectOptionShort))
+                    if (!string.IsNullOrEmpty(projectShortValue))
                     {
                         reporter.Warn(Resources.Warning_ProjectAbbreviationDeprecated);
-                        options.Project = projectOptionShort;
+                        projectValue = projectShortValue;
                     }
                 }
-
-                string[] remainingArguments;
+                var remainingArguments = new List<string>();
                 if (parseResults.UnparsedTokens.Any() && parseResults.UnmatchedTokens.Any())
                 {
-                    remainingArguments = parseResults.UnmatchedTokens.Append("--").Concat(parseResults.UnparsedTokens).ToArray();
+                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
+                    remainingArguments.Add("--");
+                    remainingArguments.AddRange(parseResults.UnparsedTokens);
                 }
                 else
                 {
-                    remainingArguments = parseResults.UnmatchedTokens.Concat(parseResults.UnparsedTokens).ToArray();
+                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
+                    remainingArguments.AddRange(parseResults.UnparsedTokens);
                 }
-
-                options.RemainingArguments = remainingArguments;
+                
+                var options = new CommandLineOptions {
+                    Quiet = parseResults.GetValueForOption(quiet),
+                    List = parseResults.GetValueForOption(listOption),
+                    NoHotReload = parseResults.GetValueForOption(noHotReloadOption),
+                    Verbose = parseResults.GetValueForOption(verbose),
+                    Project = projectValue,
+                    RemainingArguments = remainingArguments.AsReadOnly(),
+                };
                 return handler(options);
             });
-
             return root;
         }
 
@@ -245,11 +257,11 @@ Examples:
             var args = options.RemainingArguments;
 
             var isDefaultRunCommand = false;
-            if (args.Length == 1 && args[0] == "run")
+            if (args.Count == 1 && args[0] == "run")
             {
                 isDefaultRunCommand = true;
             }
-            else if (args.Length == 0)
+            else if (args.Count == 0)
             {
                 isDefaultRunCommand = true;
                 args = new[] { "run" };

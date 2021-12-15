@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(ProjectPathArgument);
             command.AddOption(FrameworkOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new RemoveProjectToProjectReferenceCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new RemoveProjectToProjectReferenceCommand(parseResult).Execute());
 
             return command;
         }

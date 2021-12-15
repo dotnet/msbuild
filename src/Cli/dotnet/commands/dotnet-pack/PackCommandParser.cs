@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ConfigurationOption);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: true, includeNoDependenciesOption: true);
 
-            command.Handler = CommandHandler.Create<ParseResult>(PackCommand.Run);
+            command.SetHandler(PackCommand.Run);
 
             return command;
         }

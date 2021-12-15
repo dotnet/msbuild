@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(Argument);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ListProjectToProjectReferencesCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ListProjectToProjectReferencesCommand(parseResult).Execute());
 
             return command;
         }

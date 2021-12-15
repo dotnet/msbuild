@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Format
                 FolderOption,
             };
             command.AddCommonOptions();
-            command.Handler = CommandHandler.Create<ParseResult>((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
+            command.SetHandler((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
             return command;
         }
     }

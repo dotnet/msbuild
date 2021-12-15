@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(TakeOption);
             command.AddOption(PrereleaseOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolSearchCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ToolSearchCommand(parseResult).Execute());
 
             return command;
         }

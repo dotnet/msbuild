@@ -184,11 +184,11 @@ namespace Microsoft.DotNet.Cli
             {
                 foreach (var option in HelpDescriptionCustomizations.Keys)
                 {
-                    Func<ParseResult, string> descriptionCallback = (ParseResult parseResult) =>
+                    Func<HelpContext, string> descriptionCallback = (HelpContext context) =>
                     {
                         foreach (var (command, helpText) in HelpDescriptionCustomizations[option])
                         {
-                            if (parseResult.CommandResult.Command.Equals(command))
+                            if (context.ParseResult.CommandResult.Command.Equals(command))
                             {
                                 return helpText;
                             }

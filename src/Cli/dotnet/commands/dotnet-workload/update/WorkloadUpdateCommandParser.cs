@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(PrintRollbackOption);
             command.AddOption(FromRollbackFileOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadUpdateCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadUpdateCommand(parseResult).Execute());
 
             return command;
         }

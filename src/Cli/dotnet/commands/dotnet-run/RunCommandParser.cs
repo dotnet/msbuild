@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.OperatingSystemOption);
             command.TreatUnmatchedTokensAsErrors = false;
 
-            command.Handler = CommandHandler.Create<ParseResult>(RunCommand.Run);
+            command.SetHandler(RunCommand.Run);
 
             return command;
         }

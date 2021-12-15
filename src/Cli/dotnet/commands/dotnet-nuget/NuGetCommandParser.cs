@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(GetTrustCommand());
             command.AddCommand(GetSignCommand());
 
-            command.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+            command.SetHandler(NuGetCommand.Run);
 
             return command;
         }
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli
             deleteCommand.AddOption(new Option<bool>("--no-service-endpoint"));
             deleteCommand.AddOption(new Option<bool>("--interactive"));
 
-            deleteCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+            deleteCommand.SetHandler(NuGetCommand.Run);
 
             return deleteCommand;
         }
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli
             localsCommand.AddOption(new Option<bool>(new string[] { "-c", "--clear" }));
             localsCommand.AddOption(new Option<bool>(new string[] { "-l", "--list" }));
 
-            localsCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+            localsCommand.SetHandler(NuGetCommand.Run);
 
             return localsCommand;
         }
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli
             pushCommand.AddOption(new Option<bool>("--interactive"));
             pushCommand.AddOption(new Option<bool>("--skip-duplicate"));
 
-            pushCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+            pushCommand.SetHandler(NuGetCommand.Run);
 
             return pushCommand;
         }
@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.Cli
                 .AllowSingleArgPerToken());
             verifyCommand.AddOption(CommonOptions.VerbosityOption);
 
-            verifyCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+            verifyCommand.SetHandler(NuGetCommand.Run);
 
             return verifyCommand;
         }
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Cli
             trustCommand.AddOption(new Option<string>("--configfile"));
             trustCommand.AddOption(CommonOptions.VerbosityOption);
 
-            trustCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+            trustCommand.SetHandler(NuGetCommand.Run);
 
             return trustCommand;
         }
@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Cli
             signCommand.AddOption(new Option<bool>("--overwrite"));
             signCommand.AddOption(CommonOptions.VerbosityOption);
 
-            signCommand.Handler = CommandHandler.Create<ParseResult>(NuGetCommand.Run);
+            signCommand.SetHandler(NuGetCommand.Run);
 
             return signCommand;
         }

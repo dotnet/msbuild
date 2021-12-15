@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(FrameworkOption);
             command.AddOption(InteractiveOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new AddProjectToProjectReferenceCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new AddProjectToProjectReferenceCommand(parseResult).Execute());
 
             return command;
         }

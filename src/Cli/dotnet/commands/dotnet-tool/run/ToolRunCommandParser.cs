@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(CommandNameArgument);
             command.TreatUnmatchedTokensAsErrors = false;
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolRunCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ToolRunCommand(parseResult).Execute());
 
             return command;
         }

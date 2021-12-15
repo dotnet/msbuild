@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(UpdateApplyOption);
             command.AddOption(ColumnsOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((ParseResult parseResult) => NewCommandShim.Run(parseResult.GetArguments()));
+            command.SetHandler((ParseResult parseResult) => NewCommandShim.Run(parseResult.GetArguments()));
 
             return command;
         }
