@@ -1691,7 +1691,7 @@ elementFormDefault="qualified">
     <xs:element name="DeployDirSuffix" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DisableFastUpToDateCheck" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="DisableFastUpToDateCheck" _locComment="" -->Whether Visual Studio should do its own faster up-to-date check before Building, rather than invoke MSBuild to do a possibly more accurate one. You would set this to false if you have a heavily customized build process and builds in Visual Studio are not occurring when they should.</xs:documentation>
+            <xs:documentation><!-- _locID_text="DisableFastUpToDateCheck" _locComment="" -->Whether Visual Studio should do its own faster up-to-date check before Building, rather than invoke MSBuild to do a possibly more accurate one. You would set this to true if you have a heavily customized build process and builds in Visual Studio are not occurring when they should.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="DocumentationFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
