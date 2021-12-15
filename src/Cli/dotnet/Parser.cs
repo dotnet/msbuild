@@ -171,9 +171,9 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 DotnetHelpBuilder dotnetHelpBuilder = new DotnetHelpBuilder(windowWidth);
-                dotnetHelpBuilder.Customize(FormatCommandCommon.DiagnosticsOption, defaultValue: Tools.Format.LocalizableStrings.whichever_ids_are_listed_in_the_editorconfig_file);
-                dotnetHelpBuilder.Customize(FormatCommandCommon.IncludeOption, defaultValue: Tools.Format.LocalizableStrings.all_files_in_the_solution_or_project);
-                dotnetHelpBuilder.Customize(FormatCommandCommon.ExcludeOption, defaultValue: Tools.Format.LocalizableStrings.none);
+                dotnetHelpBuilder.CustomizeSymbol(FormatCommandCommon.DiagnosticsOption, defaultValue: Tools.Format.LocalizableStrings.whichever_ids_are_listed_in_the_editorconfig_file);
+                dotnetHelpBuilder.CustomizeSymbol(FormatCommandCommon.IncludeOption, defaultValue: Tools.Format.LocalizableStrings.all_files_in_the_solution_or_project);
+                dotnetHelpBuilder.CustomizeSymbol(FormatCommandCommon.ExcludeOption, defaultValue: Tools.Format.LocalizableStrings.none);
 
                 SetHelpCustomizations(dotnetHelpBuilder);
 
@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Cli
                         }
                         return null;
                     };
-                    builder.Customize(option, secondColumnText: descriptionCallback);
+                    builder.CustomizeSymbol(option, secondColumnText: descriptionCallback);
                 }
             }
 
