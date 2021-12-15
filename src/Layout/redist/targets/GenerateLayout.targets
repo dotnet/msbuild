@@ -285,7 +285,7 @@
       rzc executable. -->
       <_RazorToolOutput Remove="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.CodeAnalysis.dll" />
       <_RazorToolOutput Remove="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.CodeAnalysis.CSharp.dll" />
-      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.AspNetCore.Razor.Internal.SourceGenerator.Transport.dll" />
+      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal.dll" />
       <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.NET.Sdk.Razor.SourceGenerators.dll" />
       <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\RazorSourceGenerator.razorencconfig	" />
     </ItemGroup>
