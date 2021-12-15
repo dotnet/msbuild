@@ -77,9 +77,6 @@
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\StringBuilderCache.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

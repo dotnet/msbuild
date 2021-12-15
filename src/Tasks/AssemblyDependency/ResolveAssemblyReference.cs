@@ -1095,7 +1095,10 @@ namespace Microsoft.Build.Tasks
                             bool logWarning = idealAssemblyRemappingsIdentities.Any(i => i.assemblyName.FullName.Equals(fusionName) && i.reference.GetConflictVictims().Count == 0);
                             StringBuilder logConflict = StringBuilderCache.Acquire();
                             LogConflict(conflictCandidate, fusionName, logConflict);
-                            StringBuilder logDependencies = logWarning ? logConflict.AppendLine() : StringBuilderCache.Acquire();
+
+                            // If we are logging warnings append it into existing StringBuilder, otherwise build details by new StringBuilder.
+                            // Remark: There is no point to use StringBuilderCache.Acquire() here as at this point StringBuilderCache already rent StringBuilder for this thread
+                            StringBuilder logDependencies = logWarning ? logConflict.AppendLine() : new StringBuilder();
 
                             // Log the assemblies and primary source items which are related to the conflict which was just logged.
                             Reference victor = dependencyTable.GetReference(conflictCandidate.ConflictVictorName);
@@ -1116,7 +1119,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                details = StringBuilderCache.GetStringAndRelease(logDependencies);
+                                details = logDependencies.ToString();
                                 Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), output);
                                 Log.LogMessage(MessageImportance.Low, details);
                             }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
+using Microsoft.Build.Framework;
 using Microsoft.NET.StringTools;
 
 namespace Microsoft.Build.Shared

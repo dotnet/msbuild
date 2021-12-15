@@ -200,6 +200,20 @@ elementFormDefault="qualified">
                   </xs:documentation>
                 </xs:annotation>
               </xs:element>
+              <xs:element name="NoWarn">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="PackageReference_NoWarn" _locComment="" -->Semicolon-separated list of warning codes to ignore (such as NU1605)
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="GeneratePathProperty">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="PackageReference_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents. If unset, does not create the property.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
             </xs:choice>
           </xs:sequence>
           <xs:attribute name="Include" type="xs:string">
@@ -234,6 +248,20 @@ elementFormDefault="qualified">
             <xs:annotation>
               <xs:documentation>
                 <!-- _locID_text="PackageReference_Attribute_PrivateAssets" _locComment="" -->Assets that are private in this reference
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="NoWarn" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_NoWarn" _locComment="" -->Semicolon-separated list of warning codes to ignore (such as NU1605)
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="GeneratePathProperty" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>

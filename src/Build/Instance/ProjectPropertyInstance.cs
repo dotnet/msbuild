@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// Added and removed via methods on the ProjectInstance object.
     /// </summary>
     [DebuggerDisplay("{_name}={_escapedValue}")]
-    public class ProjectPropertyInstance : IKeyed, IValued, IProperty, IEquatable<ProjectPropertyInstance>, ITranslatable, IDeepCloneable<ProjectPropertyInstance>
+    public class ProjectPropertyInstance : IKeyed, IValued, IProperty, IEquatable<ProjectPropertyInstance>, ITranslatable
     {
         /// <summary>
         /// Name of the property
@@ -134,18 +134,6 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _escapedValue);
             bool isImmutable = IsImmutable;
             translator.Translate(ref isImmutable);
-        }
-
-        #endregion
-
-        #region IDeepCloneable<T>
-
-        /// <summary>
-        /// Performs a deep clone
-        /// </summary>
-        ProjectPropertyInstance IDeepCloneable<ProjectPropertyInstance>.DeepClone()
-        {
-            return DeepClone();
         }
 
         #endregion
