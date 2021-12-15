@@ -336,11 +336,12 @@
       <AssemblyPath ParameterType="System.String" Required="true" />
     </ParameterGroup>
     <Task>
+      <Reference Include="System.Xml" />
       <Using Namespace="Microsoft.Build.Utilities" />
       <Using Namespace="System.IO" />
       <Using Namespace="System.Reflection" />
       <Using Namespace="System.Xml" />
-      <Code Type="Fragment" Source="ValidateMSBuildPackageDependencyVersions.cs" Language="cs">
+      <Code Source="ValidateMSBuildPackageDependencyVersions.cs" Language="cs">
       </Code>
     </Task>
   </UsingTask>

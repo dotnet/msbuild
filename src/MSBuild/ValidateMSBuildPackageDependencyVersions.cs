@@ -1,55 +1,76 @@
-XmlDocument doc = new XmlDocument();
-doc.Load(AppConfig);
-foreach (var topLevelElement in doc.ChildNodes)
+using Microsoft.Build.Utilities;
+using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Remoting.Messaging;
+using System.Threading.Tasks;
+using System.Xml;
+namespace MSBuild
 {
-    if (topLevelElement is XmlElement topLevelXmlElement && topLevelXmlElement.Name.Equals("configuration", System.StringComparison.OrdinalIgnoreCase))
+    public class ValidateMSBuildPackageDependencyVersions : Task
     {
-        foreach (var configurationElement in topLevelXmlElement.ChildNodes)
+        [RequiredAttribute]
+        public string AppConfig { get; set; }
+        [RequiredAttribute]
+        public string AssemblyPath { get; set; }
+
+        public override bool Execute()
         {
-            if (configurationElement is XmlElement configurationXmlElement && configurationXmlElement.Name.Equals("runtime", System.StringComparison.OrdinalIgnoreCase))
+            XmlDocument doc = new XmlDocument();
+            doc.Load(AppConfig);
+            foreach (var topLevelElement in doc.ChildNodes)
             {
-                foreach (var runtimeElement in configurationXmlElement.ChildNodes)
+                if (topLevelElement is XmlElement topLevelXmlElement && topLevelXmlElement.Name.Equals("configuration", System.StringComparison.OrdinalIgnoreCase))
                 {
-                    if (runtimeElement is XmlElement runtimeXmlElement && runtimeXmlElement.Name.Equals("assemblyBinding", System.StringComparison.OrdinalIgnoreCase))
+                    foreach (var configurationElement in topLevelXmlElement.ChildNodes)
                     {
-                        foreach (var assemblyBindingElement in runtimeXmlElement.ChildNodes)
+                        if (configurationElement is XmlElement configurationXmlElement && configurationXmlElement.Name.Equals("runtime", System.StringComparison.OrdinalIgnoreCase))
                         {
-                            if (assemblyBindingElement is XmlElement assemblyBindingXmlElement && assemblyBindingXmlElement.Name.Equals("dependentAssembly", System.StringComparison.OrdinalIgnoreCase))
+                            foreach (var runtimeElement in configurationXmlElement.ChildNodes)
                             {
-                                string name = string.Empty;
-                                string version = string.Empty;
-                                foreach (var dependentAssembly in assemblyBindingXmlElement.ChildNodes)
+                                if (runtimeElement is XmlElement runtimeXmlElement && runtimeXmlElement.Name.Equals("assemblyBinding", System.StringComparison.OrdinalIgnoreCase))
                                 {
-                                    if (dependentAssembly is XmlElement dependentAssemblyXmlElement)
+                                    foreach (var assemblyBindingElement in runtimeXmlElement.ChildNodes)
                                     {
-                                        if (dependentAssemblyXmlElement.Name.Equals("assemblyIdentity", System.StringComparison.OrdinalIgnoreCase))
+                                        if (assemblyBindingElement is XmlElement assemblyBindingXmlElement && assemblyBindingXmlElement.Name.Equals("dependentAssembly", System.StringComparison.OrdinalIgnoreCase))
                                         {
-                                            foreach (var assemblyIdentityAttribute in dependentAssemblyXmlElement.Attributes)
+                                            string name = string.Empty;
+                                            string version = string.Empty;
+                                            foreach (var dependentAssembly in assemblyBindingXmlElement.ChildNodes)
                                             {
-                                                if (assemblyIdentityAttribute is XmlAttribute assemblyIdentityAttributeXmlElement && assemblyIdentityAttributeXmlElement.Name.Equals("name", System.StringComparison.OrdinalIgnoreCase))
+                                                if (dependentAssembly is XmlElement dependentAssemblyXmlElement)
                                                 {
-                                                    name = assemblyIdentityAttributeXmlElement.Value;
+                                                    if (dependentAssemblyXmlElement.Name.Equals("assemblyIdentity", System.StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        foreach (var assemblyIdentityAttribute in dependentAssemblyXmlElement.Attributes)
+                                                        {
+                                                            if (assemblyIdentityAttribute is XmlAttribute assemblyIdentityAttributeXmlElement && assemblyIdentityAttributeXmlElement.Name.Equals("name", System.StringComparison.OrdinalIgnoreCase))
+                                                            {
+                                                                name = assemblyIdentityAttributeXmlElement.Value;
+                                                            }
+                                                        }
+                                                    }
+                                                    else if (dependentAssemblyXmlElement.Name.Equals("bindingRedirect", System.StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        foreach (var bindingRedirectAttribute in dependentAssemblyXmlElement.Attributes)
+                                                        {
+                                                            if (bindingRedirectAttribute is XmlAttribute bindingRedirectAttributeXmlElement && bindingRedirectAttributeXmlElement.Name.Equals("newVersion", System.StringComparison.OrdinalIgnoreCase))
+                                                            {
+                                                                version = bindingRedirectAttributeXmlElement.Value;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version))
+                                            {
+                                                string path = Path.Combine(AssemblyPath, name + ".dll");
+                                                if (File.Exists(path) && !version.Equals(Assembly.LoadFile(path).GetName().Version.ToString()))
+                                                {
+                                                    Log.LogError("Binding redirect redirects to a different version than MSBuild ships.");
                                                 }
                                             }
                                         }
-                                        else if (dependentAssemblyXmlElement.Name.Equals("bindingRedirect", System.StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            foreach (var bindingRedirectAttribute in dependentAssemblyXmlElement.Attributes)
-                                            {
-                                                if (bindingRedirectAttribute is XmlAttribute bindingRedirectAttributeXmlElement && bindingRedirectAttributeXmlElement.Name.Equals("newVersion", System.StringComparison.OrdinalIgnoreCase))
-                                                {
-                                                    version = bindingRedirectAttributeXmlElement.Value;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version))
-                                {
-                                    string path = Path.Combine(AssemblyPath, name + ".dll");
-                                    if (File.Exists(path) && !version.Equals(Assembly.LoadFile(path).GetName().Version.ToString()))
-                                    {
-                                        Log.LogError("Binding redirect redirects to a different version than MSBuild ships.");
                                     }
                                 }
                             }
@@ -57,6 +78,7 @@ foreach (var topLevelElement in doc.ChildNodes)
                     }
                 }
             }
+            return !Log.HasLoggedErrors;
         }
     }
 }
