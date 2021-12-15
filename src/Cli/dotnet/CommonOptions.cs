@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using System.CommandLine.Parsing;
-using System.CommandLine.Suggestions;
+using System.CommandLine.Completions;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -48,11 +48,11 @@ namespace Microsoft.DotNet.Cli
                 ArgumentHelpName = CommonLocalizableStrings.FrameworkArgumentName
                     
             }.ForwardAsSingle(o => $"-property:TargetFramework={o}")
-            .AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
+            .AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
         private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
         private static Func<string, IEnumerable<string>> RuntimeArgFunc = o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };
-        private static SuggestDelegate RuntimeSuggestions = Suggest.RunTimesFromProjectFile();
+        private static CompletionDelegate RuntimeCompletions = Complete.RunTimesFromProjectFile;
         
         public static Option<string> RuntimeOption = 
             new ForwardedOption<string>(
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli
             {
                 ArgumentHelpName = RuntimeArgName
             }.ForwardAsMany(RuntimeArgFunc)
-            .AddSuggestions(RuntimeSuggestions);
+            .AddCompletions(RuntimeCompletions);
 
         public static Option<string> LongFormRuntimeOption =
             new ForwardedOption<string>(
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli
             {
                 ArgumentHelpName = RuntimeArgName
             }.ForwardAsMany(RuntimeArgFunc)
-            .AddSuggestions(RuntimeSuggestions);
+            .AddCompletions(RuntimeCompletions);
 
         public static Option<bool> CurrentRuntimeOption(string description) =>
             new ForwardedOption<bool>("--use-current-runtime", description)
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli
             {
                 ArgumentHelpName = CommonLocalizableStrings.ConfigurationArgumentName
             }.ForwardAsSingle(o => $"-property:Configuration={o}")
-            .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults());
+            .AddCompletions(Complete.ConfigurationsFromProjectFileOrDefaults);
 
         public static Option<string> VersionSuffixOption =
             new ForwardedOption<string>(

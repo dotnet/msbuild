@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.IO;
@@ -21,7 +22,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Argument<string> CmdPackageArgument = new Argument<string>(LocalizableStrings.CmdPackage)
         {
             Description = LocalizableStrings.CmdPackageDescription
-        }.AddSuggestions((parseResult, match) => QueryNuGet(match));
+        }.AddCompletions((parseResult, match) => new CompletionItem(QueryNuGet(match)));
 
         public static readonly Option<string> VersionOption = new ForwardedOption<string>(new string[] { "-v", "--version" }, LocalizableStrings.CmdVersionDescription)
         {

@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Cli
                         IsHidden = !showHelp
                     }.ForwardAsSingle(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o)}")
                     .AllowSingleArgPerToken()
-                    .AddSuggestions(Suggest.RunTimesFromProjectFile())
+                    .AddCompletions(Complete.RunTimesFromProjectFile)
                 ).ToArray();
             }
 

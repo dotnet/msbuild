@@ -232,8 +232,8 @@ namespace Microsoft.DotNet.Cli
                     }
                     else if (command.Name.Equals(AddPackageParser.GetCommand().Name) || command.Name.Equals(AddCommandParser.GetCommand().Name))
                     {
-                        // Don't show package suggestions in help
-                        AddPackageParser.CmdPackageArgument.Suggestions.Clear();
+                        // Don't show package completions in help
+                        AddPackageParser.CmdPackageArgument.Completions.Clear();
                     }
 
                     base.Write(context);

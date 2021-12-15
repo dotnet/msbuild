@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli
         {
             ArgumentHelpName = Tools.Add.PackageReference.LocalizableStrings.CmdFramework
                 
-        }.AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
+        }.AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
         public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveOption;
 
