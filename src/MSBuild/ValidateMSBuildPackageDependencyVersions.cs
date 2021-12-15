@@ -63,9 +63,13 @@ namespace MSBuild
                                             if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version))
                                             {
                                                 string path = Path.Combine(AssemblyPath, name + ".dll");
-                                                if (File.Exists(path) && !version.Equals(Assembly.LoadFile(path).GetName().Version.ToString()))
+                                                string assemblyVersion = Assembly.LoadFile(path).GetName().Version.ToString();
+                                                if (File.Exists(path) && !version.Equals(assemblyVersion))
                                                 {
-                                                    Log.LogError($"Binding redirect for '{name} redirects to a different version ({version}) than MSBuild ships.");
+                                                    if (!(name.Equals("System.ValueTuple", System.StringComparer.OrdinalIgnoreCase) && version.Equals("4.0.0.0") && assemblyVersion.Equals("4.0.3.0")))
+                                                    {
+                                                        Log.LogError($"Binding redirect for '{name} redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
+                                                    }
                                                 }
                                             }
                                         }
