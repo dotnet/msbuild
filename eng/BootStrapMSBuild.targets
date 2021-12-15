@@ -107,6 +107,10 @@
       <FreshlyBuiltProjects Include="$(OutputPath)**\*tasks" />
       <FreshlyBuiltProjects Include="$(OutputPath)**\*xml" />
       <RoslynBinaries Include="$(OutputPath)\..\..\15.0\Bin\Roslyn\**\*.*" />
+
+      <RoslynPatchedBinaries Include="D:\roslyn\artifacts\bin\Microsoft.Build.Tasks.CodeAnalysis\Debug\net472\**\*.*" />
+      <RoslynPatchedBinaries Include="D:\roslyn\artifacts\bin\VBCSCompiler\Debug\net472\**\*.*" />
+      <RoslynPatchedBinaries Include="D:\roslyn\artifacts\bin\Csc\Debug\net472\**\*.*" />
     </ItemGroup>
 
     <!-- Copy in props and targets from the machine-installed MSBuildExtensionsPath -->
@@ -162,6 +166,11 @@
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(RoslynPatchedBinaries)"
+          DestinationFiles="@(RoslynPatchedBinaries -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\Roslyn\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(RoslynPatchedBinaries)"
+          DestinationFiles="@(RoslynPatchedBinaries -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\Roslyn\%(RecursiveDir)%(Filename)%(Extension)')" />
 
   </Target>
 
