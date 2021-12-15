@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
             command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolListCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ToolListCommand(parseResult).Execute());
 
             return command;
         }

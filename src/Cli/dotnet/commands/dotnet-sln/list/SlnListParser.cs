@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new Command("list", LocalizableStrings.ListAppFullName);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ListProjectsInSolutionCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ListProjectsInSolutionCommand(parseResult).Execute());
 
             return command;
         }

@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(OutputOption);
             command.AddOption(NoLogoOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>(CleanCommand.Run);
+            command.SetHandler(CleanCommand.Run);
 
             return command;
         }

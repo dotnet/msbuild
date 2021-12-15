@@ -42,7 +42,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
 
             rootCommand.Add(brotli);
 
-            brotli.Handler = CommandHandler.Create<CompressionLevel, List<string>, List<string>>((c, s, o) =>
+            brotli.SetHandler<CompressionLevel, List<string>, List<string>>((c, s, o) =>
             {
                     Parallel.For(0, s.Count, i =>
                     {

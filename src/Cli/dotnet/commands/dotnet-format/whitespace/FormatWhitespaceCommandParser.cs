@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Format
         {
             var command = new Command("whitespace", LocalizableStrings.Run_whitespace_formatting);
             command.AddCommonOptions();
-            command.Handler = CommandHandler.Create<ParseResult>((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
+            command.SetHandler((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
             return command;
         }
     }

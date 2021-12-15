@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Cli
                 command.AddOption(option);
             }
 
-            command.Handler = CommandHandler.Create<ParseResult>(RestoreCommand.Run);
+            command.SetHandler(RestoreCommand.Run);
 
             return command;
         }

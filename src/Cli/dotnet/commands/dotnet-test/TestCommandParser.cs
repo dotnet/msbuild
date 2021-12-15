@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.LongFormArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>(TestCommand.Run);
+            command.SetHandler(TestCommand.Run);
 
             return command;
         }

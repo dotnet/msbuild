@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.ArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>(BuildCommand.Run);
+            command.SetHandler(BuildCommand.Run);
 
             return command;
         }
