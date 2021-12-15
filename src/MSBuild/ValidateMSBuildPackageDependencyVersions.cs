@@ -1,17 +1,15 @@
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Messaging;
-using System.Threading.Tasks;
 using System.Xml;
 namespace MSBuild
 {
     public class ValidateMSBuildPackageDependencyVersions : Task
     {
-        [RequiredAttribute]
+        [Required]
         public string AppConfig { get; set; }
-        [RequiredAttribute]
+        [Required]
         public string AssemblyPath { get; set; }
 
         public override bool Execute()
@@ -67,7 +65,7 @@ namespace MSBuild
                                                 string path = Path.Combine(AssemblyPath, name + ".dll");
                                                 if (File.Exists(path) && !version.Equals(Assembly.LoadFile(path).GetName().Version.ToString()))
                                                 {
-                                                    Log.LogError("Binding redirect redirects to a different version than MSBuild ships.");
+                                                    Log.LogError($"Binding redirect for '{name} redirects to a different version ({version}) than MSBuild ships.");
                                                 }
                                             }
                                         }
