@@ -110,7 +110,6 @@ Examples:
             return await rootCommand.InvokeAsync(args);
         }
 
-
         internal static RootCommand CreateRootCommand(Func<CommandLineOptions, Task<int>> handler, IReporter reporter)
         {
             var quiet = new Option<bool>(
@@ -151,42 +150,8 @@ Examples:
             };
             
             root.TreatUnmatchedTokensAsErrors = false;
-            root.SetHandler((ParseResult parseResults) => {
-                var projectValue = parseResults.GetValueForOption(longProjectOption);
-                if (string.IsNullOrEmpty(projectValue))
-                {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    var projectShortValue = parseResults.GetValueForOption(shortProjectOption);
-#pragma warning restore CS0618 // Type or member is obsolete
-                    if (!string.IsNullOrEmpty(projectShortValue))
-                    {
-                        reporter.Warn(Resources.Warning_ProjectAbbreviationDeprecated);
-                        projectValue = projectShortValue;
-                    }
-                }
-                var remainingArguments = new List<string>();
-                if (parseResults.UnparsedTokens.Any() && parseResults.UnmatchedTokens.Any())
-                {
-                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
-                    remainingArguments.Add("--");
-                    remainingArguments.AddRange(parseResults.UnparsedTokens);
-                }
-                else
-                {
-                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
-                    remainingArguments.AddRange(parseResults.UnparsedTokens);
-                }
-                
-                var options = new CommandLineOptions {
-                    Quiet = parseResults.GetValueForOption(quiet),
-                    List = parseResults.GetValueForOption(listOption),
-                    NoHotReload = parseResults.GetValueForOption(noHotReloadOption),
-                    Verbose = parseResults.GetValueForOption(verbose),
-                    Project = projectValue,
-                    RemainingArguments = remainingArguments.AsReadOnly(),
-                };
-                return handler(options);
-            });
+            var binder = new CommandLineOptionsBinder(longProjectOption, shortProjectOption, quiet, listOption, noHotReloadOption, verbose, reporter);
+            root.SetHandler((CommandLineOptions options) => handler(options), binder);
             return root;
         }
 
@@ -432,5 +397,63 @@ Examples:
                 return null;
             };
         }
+        private class CommandLineOptionsBinder : BinderBase<CommandLineOptions> {
+            private readonly Option<string> _longProjectOption;
+            private readonly Option<string> _shortProjectOption;
+            private readonly Option<bool> _quietOption;
+            private readonly Option<bool> _listOption;
+            private readonly Option<bool> _noHotReloadOption;
+            private readonly Option<bool> _verboseOption;
+            private readonly IReporter _reporter;
+
+            internal CommandLineOptionsBinder(Option<string> longProjectOption, Option<string> shortProjectOption, Option<bool> quietOption, Option<bool> listOption, Option<bool> noHotReloadOption, Option<bool> verboseOption, IReporter reporter) {
+                _longProjectOption = longProjectOption;
+                _shortProjectOption = shortProjectOption;
+                _quietOption = quietOption;
+                _listOption = listOption;
+                _noHotReloadOption = noHotReloadOption;
+                _verboseOption = verboseOption;
+                _reporter = reporter;
+            }
+
+            protected override CommandLineOptions GetBoundValue(BindingContext bindingContext) {
+                var parseResults = bindingContext.ParseResult;
+                var projectValue = parseResults.GetValueForOption(_longProjectOption);
+                if (string.IsNullOrEmpty(projectValue))
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    var projectShortValue = parseResults.GetValueForOption(_shortProjectOption);
+#pragma warning restore CS0618 // Type or member is obsolete
+                    if (!string.IsNullOrEmpty(projectShortValue))
+                    {
+                        _reporter.Warn(Resources.Warning_ProjectAbbreviationDeprecated);
+                        projectValue = projectShortValue;
+                    }
+                }
+                var remainingArguments = new List<string>();
+                if (parseResults.UnparsedTokens.Any() && parseResults.UnmatchedTokens.Any())
+                {
+                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
+                    remainingArguments.Add("--");
+                    remainingArguments.AddRange(parseResults.UnparsedTokens);
+                }
+                else
+                {
+                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
+                    remainingArguments.AddRange(parseResults.UnparsedTokens);
+                }
+
+                var options = new CommandLineOptions {
+                    Quiet = parseResults.GetValueForOption(_quietOption),
+                    List = parseResults.GetValueForOption(_listOption),
+                    NoHotReload = parseResults.GetValueForOption(_noHotReloadOption),
+                    Verbose = parseResults.GetValueForOption(_verboseOption),
+                    Project = projectValue,
+                    RemainingArguments = remainingArguments.AsReadOnly(),
+                };
+                return options;
+            }
+        }
     }
+
 }
