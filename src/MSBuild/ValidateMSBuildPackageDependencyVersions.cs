@@ -23,51 +23,28 @@ namespace MSBuild
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(AppConfig);
-            var runtime = doc.SelectSingleNode("configuration").SelectSingleNode("runtime");
+            XmlNamespaceManager namespaceManager = new(doc.NameTable);
+            namespaceManager.AddNamespace("asm", "urn:schemas-microsoft-com:asm.v1");
             bool foundSystemValueTuple = false;
-            foreach (var node in runtime.ChildNodes)
+            foreach (XmlElement dependentAssemblyElement in doc.DocumentElement.SelectNodes("/configuration/runtime/asm:assemblyBinding/asm:dependentAssembly[asm:assemblyIdentity][asm:bindingRedirect]", namespaceManager))
             {
-                if (node is XmlElement assemblyBinding && assemblyBinding.Name.Equals("assemblyBinding"))
+                string name = (dependentAssemblyElement.SelectSingleNode("asm:assemblyIdentity", namespaceManager) as XmlElement).GetAttribute("name");
+                string version = (dependentAssemblyElement.SelectSingleNode("asm:bindingRedirect", namespaceManager) as XmlElement).GetAttribute("newVersion");
+                if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version) && !assembliesToIgnore.Contains(name, StringComparer.OrdinalIgnoreCase))
                 {
-                    foreach (var assemblyBindingElement in assemblyBinding.ChildNodes)
+                    string path = Path.Combine(AssemblyPath, name + ".dll");
+                    string assemblyVersion = AssemblyName.GetAssemblyName(path).Version.ToString();
+                    if (!version.Equals(assemblyVersion))
                     {
-                        string name = string.Empty;
-                        string version = string.Empty;
-                        if (assemblyBindingElement is not XmlElement dependentAssemblyElement)
+                        // It is unusual to want to redirect down, but in this case it's ok: 4.0.3.0 forwards to 4.0.0.0 in the GAC, so this just removes the need to redistribute a file
+                        // and makes that resolution faster. Still verify that the versions are exactly as in this comment, as that may change.
+                        if (String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) && String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0"))
                         {
-                            continue;
+                            foundSystemValueTuple = true;
                         }
-                        foreach (var dependentAssembly in dependentAssemblyElement.ChildNodes)
+                        else
                         {
-                            if (dependentAssembly is XmlElement dependentAssemblyXmlElement)
-                            {
-                                if (dependentAssemblyXmlElement.Name.Equals("assemblyIdentity", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    name = dependentAssemblyXmlElement.GetAttribute("name");
-                                }
-                                else if (dependentAssemblyXmlElement.Name.Equals("bindingRedirect", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    version = dependentAssemblyXmlElement.GetAttribute("newVersion");
-                                }
-                            }
-                        }
-                        if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version) && !assembliesToIgnore.Contains(name, StringComparer.OrdinalIgnoreCase))
-                        {
-                            string path = Path.Combine(AssemblyPath, name + ".dll");
-                            string assemblyVersion = AssemblyName.GetAssemblyName(path).Version.ToString();
-                            if (!version.Equals(assemblyVersion))
-                            {
-                                // It is unusual to want to redirect down, but in this case it's ok: 4.0.3.0 forwards to 4.0.0.0 in the GAC, so this just removes the need to redistribute a file
-                                // and makes that resolution faster. Still verify that the versions are exactly as in this comment, as that may change.
-                                if (String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) && String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0"))
-                                {
-                                    foundSystemValueTuple = true;
-                                }
-                                else
-                                {
-                                    Log.LogError($"Binding redirect for '{name}' redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
-                                }
-                            }
+                            Log.LogError($"Binding redirect for '{name}' redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
                         }
                     }
                 }
