@@ -15,10 +15,6 @@ using System.Globalization;
 using Microsoft.Build.Internal;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
-#if DEBUG
-using System.Threading;
-#endif
-
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -231,7 +227,7 @@ namespace Microsoft.Build.Evaluation
         {
 #if DEBUG
             // Verify that loadProjectRootElement delegate does not call ProjectRootElementCache.Get().
-            Interlocked.Increment(ref s_getEntriesNumber);
+            s_getEntriesNumber++;
             ErrorUtilities.VerifyThrow(
                 s_getEntriesNumber == 1,
                 "Reentrance to the ProjectRootElementCache.Get function detected."
@@ -328,7 +324,7 @@ namespace Microsoft.Build.Evaluation
             }
             finally
             {
-                Interlocked.Decrement(ref s_getEntriesNumber);
+                s_getEntriesNumber--;
             }
 #endif
         }
