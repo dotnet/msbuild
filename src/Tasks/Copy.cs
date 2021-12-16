@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task that copies files.
     /// </summary>
-    public class Copy : TaskExtension, ICancelableTask
+    public class Copy : TaskExtension, ICancelableTask, IConcurrentTask
     {
         internal const string AlwaysRetryEnvVar = "MSBUILDALWAYSRETRY";
         internal const string AlwaysOverwriteReadOnlyFilesEnvVar = "MSBUILDALWAYSOVERWRITEREADONLYFILES";
@@ -69,8 +69,6 @@ namespace Microsoft.Build.Tasks
         private static string RemovingReadOnlyAttribute;
         private static string SymbolicLinkComment;
 
-        private string _currentDirectory;
-
         #region Properties
 
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
@@ -91,6 +89,8 @@ namespace Microsoft.Build.Tasks
         private static readonly bool s_forceSymlinks = Environment.GetEnvironmentVariable("MSBuildUseSymboliclinksIfPossible") != null;
 
         private static readonly int s_parallelism = GetParallelismFromEnvironment();
+
+        private TaskExecutionContext _executionContext;
 
         /// <summary>
         /// Default milliseconds to wait between necessary retries
@@ -298,11 +298,11 @@ namespace Microsoft.Build.Tasks
             if (!linkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
-                string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
+                string sourceFilePath = _executionContext.GetFullPath(sourceFileState.Name);
+                string destinationFilePath = _executionContext.GetFullPath(destinationFileState.Name);
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
 
-                File.Copy(MakePath(_currentDirectory, sourceFileState.Name), MakePath(_currentDirectory, destinationFileState.Name), true);
+                File.Copy(sourceFilePath, destinationFilePath, true);
             }
             
             // Files were successfully copied or linked. Those are equivalent here.
@@ -452,7 +452,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!copyComplete)
                 {
-                    if (DoCopyIfNecessary(new FileState(SourceFiles[i].ItemSpec), new FileState(DestinationFiles[i].ItemSpec), copyFile))
+                    if (DoCopyIfNecessary(new FileState(SourceFiles[i].ItemSpec, _executionContext), new FileState(DestinationFiles[i].ItemSpec, _executionContext), copyFile))
                     {
                         filesActuallyCopied[destPath] = SourceFiles[i].ItemSpec;
                         copyComplete = true;
@@ -558,8 +558,8 @@ namespace Microsoft.Build.Tasks
                         if (!copyComplete)
                         {
                             if (DoCopyIfNecessary(
-                                new FileState(sourceItem.ItemSpec),
-                                new FileState(destItem.ItemSpec),
+                                new FileState(sourceItem.ItemSpec, _executionContext),
+                                new FileState(destItem.ItemSpec, _executionContext),
                                 copyFile))
                             {
                                 copyComplete = true;
@@ -921,7 +921,6 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            _currentDirectory = GetBasePath();
             return Execute(CopyFileWithLogging, s_parallelism);
         }
 
@@ -952,5 +951,7 @@ namespace Microsoft.Build.Tasks
 	        }
             return parallelism;
         }
+
+        void IConcurrentTask.ConfigureForConcurrentExecution(TaskExecutionContext executionContext) => _executionContext = executionContext;
     }
 }

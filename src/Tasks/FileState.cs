@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -238,11 +239,11 @@ namespace Microsoft.Build.Tasks
         /// Constructor.
         /// Only stores file name: does not grab the file state until first request.
         /// </summary>
-        internal FileState(string filename)
+        internal FileState(string filename, TaskExecutionContext taskExecutionContext = null)
         {
             ErrorUtilities.VerifyThrowArgumentLength(filename, nameof(filename));
             _filename = filename;
-            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(taskExecutionContext?.GetFullPath(_filename) ?? _filename));
         }
 
         /// <summary>

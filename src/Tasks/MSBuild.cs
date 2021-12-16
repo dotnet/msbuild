@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks
     /// RequestBuilder which spawned them.
     /// </remarks>
     [RunInMTA]
-    public class MSBuild : TaskExtension
+    public class MSBuild : TaskExtension, IConcurrentTask
     {
         /// <summary>
         /// Enum describing the behavior when a project doesn't exist on disk.
@@ -48,6 +48,8 @@ namespace Microsoft.Build.Tasks
 
         // Whether to skip project files that don't exist on disk. By default we error for such projects.
         private SkipNonexistentProjectsBehavior _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Error;
+
+        private TaskExecutionContext _executionContext;
 
         /// <summary>
         /// A list of property name/value pairs to apply as global properties to 
@@ -275,7 +277,7 @@ namespace Microsoft.Build.Tasks
             {
                 ITaskItem project = Projects[i];
 
-                string projectPath = FileUtilities.AttemptToShortenPath(project.ItemSpec);
+                string projectPath = FileUtilities.AttemptToShortenPath(_executionContext.GetFullPath(project.ItemSpec));
 
                 if (StopOnFirstFailure && !success)
                 {
@@ -314,7 +316,8 @@ namespace Microsoft.Build.Tasks
                                 Log,
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
-                                ToolsVersion
+                                ToolsVersion,
+                                _executionContext
                                 )
                            )
                         {
@@ -330,12 +333,13 @@ namespace Microsoft.Build.Tasks
                 {
                     if (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Skip)
                     {
-                        Log.LogMessageFromResources(MessageImportance.High, "MSBuild.ProjectFileNotFoundMessage", project.ItemSpec);
+                        Log.LogMessageFromResources(MessageImportance.High, "MSBuild.ProjectFileNotFoundMessage", projectPath);
                     }
                     else
                     {
                         ErrorUtilities.VerifyThrow(_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", _skipNonexistentProjects);
-                        Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", project.ItemSpec);
+                        Debugger.Launch();
+                        Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", projectPath);
                         success = false;
                     }
                 }
@@ -381,7 +385,8 @@ namespace Microsoft.Build.Tasks
                                 Log,
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
-                                ToolsVersion
+                                ToolsVersion,
+                                _executionContext
                                 )
                            )
                 {
@@ -474,7 +479,8 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log,
             List<ITaskItem> targetOutputs,
             bool unloadProjectsOnCompletion,
-            string toolsVersion
+            string toolsVersion,
+            TaskExecutionContext taskExecutionContext
             )
         {
             bool success = true;
@@ -498,7 +504,7 @@ namespace Microsoft.Build.Tasks
                     // Retrieve projectDirectory only the first time.  It never changes anyway.
                     string projectPath = FileUtilities.AttemptToShortenPath(projects[i].ItemSpec);
                     projectDirectory[i] = Path.GetDirectoryName(projectPath);
-                    projectNames[i] = projects[i].ItemSpec;
+                    projectNames[i] = taskExecutionContext.GetFullPath(projects[i].ItemSpec);
                     toolsVersions[i] = toolsVersion;
 
                     // If the user specified a different set of global properties for this project, then
@@ -665,5 +671,7 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+
+        void IConcurrentTask.ConfigureForConcurrentExecution(TaskExecutionContext executionContext) => _executionContext = executionContext;
     }
 }

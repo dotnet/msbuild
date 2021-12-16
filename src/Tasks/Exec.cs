@@ -471,7 +471,7 @@ namespace Microsoft.Build.Tasks
             // directory use that, otherwise it's the current directory
             _workingDirectory = !string.IsNullOrEmpty(WorkingDirectory)
                 ? WorkingDirectory
-                : Directory.GetCurrentDirectory();
+                : GetBasePath() ?? Directory.GetCurrentDirectory();
 
             // check if the working directory we're going to use for the exec command is a UNC path
             workingDirectoryIsUNC = FileUtilitiesRegex.StartsWithUncPattern(_workingDirectory);

@@ -111,7 +111,8 @@ namespace Microsoft.Build.BackEnd
                 targetOutputs: _targetOutputs,
                 unloadProjectsOnCompletion: false,
                 toolsVersion: null,
-                skipNonexistentTargets: false);
+                skipNonexistentTargets: false,
+                executionContext: null);
         }
 
         #endregion

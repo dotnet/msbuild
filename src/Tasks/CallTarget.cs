@@ -86,7 +86,8 @@ namespace Microsoft.Build.Tasks
                 Log,
                 _targetOutputs,
                 false,
-                null            // toolsVersion = null
+                null,           // toolsVersion = null
+                null            // no need for execution context as this is always in context of current project  
                 );
         }
 
