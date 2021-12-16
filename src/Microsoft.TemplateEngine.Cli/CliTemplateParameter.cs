@@ -356,6 +356,10 @@ namespace Microsoft.TemplateEngine.Cli
                             displayValue.AppendLine(line);
                         }
                     }
+                    else
+                    {
+                        displayValue.AppendLine();
+                    }
                 }
             }
             else

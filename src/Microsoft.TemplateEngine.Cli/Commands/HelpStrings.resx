@@ -161,7 +161,7 @@
     <value>Unable to resolve the template, these templates matched your input:</value>
   </data>
   <data name="Text_NoTemplateOptions" xml:space="preserve">
-    <value>(No Parameters)</value>
+    <value>(No options)</value>
   </data>
   <data name="Text_UsageTemplateOptionsPart" xml:space="preserve">
     <value>[template options]</value>

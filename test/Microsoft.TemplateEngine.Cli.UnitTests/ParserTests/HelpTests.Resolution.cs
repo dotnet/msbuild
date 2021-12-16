@@ -18,7 +18,7 @@ using Xunit;
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
     [UsesVerify]
-    public class HelpTests : IClassFixture<VerifyFixture>
+    public partial class HelpTests : IClassFixture<VerifyFixture>
     {
         private readonly VerifyFixture _verifySettings;
 

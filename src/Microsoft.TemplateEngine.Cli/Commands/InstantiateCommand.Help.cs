@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 HandleNoMatchingTemplateGroup(instantiateCommandArgs);
                 return;
             }
-            if (selectedTemplateGroups.Count() > 1)
+            if (selectedTemplateGroups.Take(2).Count() > 1)
             {
                 HandleAmbiguousTemplateGroup(instantiateCommandArgs);
                 return;
@@ -176,118 +176,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return true;
         }
 
-        private static NewCommandStatus HandleAmbiguousLanguage(
-            IEngineEnvironmentSettings environmentSettings,
-            IEnumerable<CliTemplateInfo> templates,
-            TextWriter writer)
-        {
-            writer.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
-            TemplateGroupDisplay.DisplayTemplateList(
-                environmentSettings,
-                templates,
-                new TabularOutputSettings(environmentSettings.Environment),
-                writer: writer);
-            writer.WriteLine(HelpStrings.Hint_AmbiguousLanguage);
-            return NewCommandStatus.NotFound;
-        }
-
-        private static NewCommandStatus HandleAmbiguousType(
-            IEngineEnvironmentSettings environmentSettings,
-            IEnumerable<CliTemplateInfo> templates,
-            TextWriter writer)
-        {
-            writer.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
-            TemplateGroupDisplay.DisplayTemplateList(
-                environmentSettings,
-                templates,
-                new TabularOutputSettings(
-                    environmentSettings.Environment,
-                    columnsToDisplay: new[] { TabularOutputSettings.ColumnNames.Type }),
-                writer: writer);
-            writer.WriteLine(HelpStrings.Hint_AmbiguousType);
-            return NewCommandStatus.NotFound;
-        }
-
-        /// <summary>
-        /// Ensure <paramref name="templates"/> are sorted in priority order
-        /// The highest priority should come first.
-        /// </summary>
-        private static IEnumerable<TemplateOption> CollectOptionsToShow(IEnumerable<TemplateCommand> templates, HelpContext context)
-        {
-            Dictionary<string, (CliTemplateParameter Parameter, IReadOnlyList<string> Aliases)> parametersToShow = new();
-
-            //templates are in priority order
-            //in case parameters are different in different templates
-            //highest priority ones wins
-            //except the choice parameter, where we merge possible values
-            foreach (TemplateCommand command in templates)
-            {
-                foreach (CliTemplateParameter param in command.Template.CliParameters)
-                {
-                    if (param.IsHidden && !param.AlwaysShow)
-                    {
-                        continue;
-                    }
-
-                    if (parametersToShow.ContainsKey(param.Name))
-                    {
-                        if (param is ChoiceTemplateParameter currentParam && parametersToShow[param.Name].Parameter is ChoiceTemplateParameter choiceParam)
-                        {
-                            if (choiceParam is CombinedChoiceTemplateParameter combinedParam)
-                            {
-                                combinedParam.MergeChoices(currentParam);
-                            }
-                            else
-                            {
-                                var combinedChoice = new CombinedChoiceTemplateParameter(choiceParam);
-                                combinedChoice.MergeChoices(currentParam);
-                                parametersToShow[param.Name] = (combinedChoice, parametersToShow[param.Name].Aliases);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var aliases = command.TemplateOptions[param.Name].Aliases.OrderByDescending(s => s, StringComparer.OrdinalIgnoreCase).ToArray();
-                        parametersToShow[param.Name] = (param, aliases);
-                    }
-                }
-            }
-
-            var optionsToShow = parametersToShow.Values.Select(p => new TemplateOption(p.Parameter, p.Aliases)).ToList();
-            foreach (var option in optionsToShow)
-            {
-                context.HelpBuilder.CustomizeSymbol(
-                    option.Option,
-                    firstColumnText: option.TemplateParameter.GetCustomFirstColumnText(option),
-                    secondColumnText: option.TemplateParameter.GetCustomSecondColumnText());
-            }
-            return optionsToShow;
-        }
-
-        private void WriteCustomInstantiateHelp(HelpContext context)
-        {
-            HelpBuilder.SynopsisSection()(context);
-            context.Output.WriteLine();
-            CustomUsageSection(context);
-            HelpBuilder.CommandArgumentsSection()(context);
-            context.Output.WriteLine();
-            HelpBuilder.OptionsSection()(context);
-            context.Output.WriteLine();
-            HelpBuilder.SubcommandsSection()(context);
-            context.Output.WriteLine();
-            HelpBuilder.AdditionalArgumentsSection()(context);
-            context.Output.WriteLine();
-        }
-
-        private void CustomUsageSection(HelpContext context)
-        {
-            //TODO: localization via LocalizationResources
-            context.Output.WriteLine(context.HelpBuilder.LocalizationResources.HelpUsageTitle());
-            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, this, showSubcommands: false)));
-            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, this, showParentArguments: false, showArguments: false)));
-        }
-
-        private void ShowTemplateDetailHeaders(CliTemplateInfo preferredTemplate, TextWriter writer)
+        internal static void ShowTemplateDetailHeaders(CliTemplateInfo preferredTemplate, TextWriter writer)
         {
             string? language = preferredTemplate.GetLanguage();
 
@@ -317,7 +206,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             writer.WriteLine();
         }
 
-        private void ShowHintForOtherTemplates(TemplateGroup templateGroup, CliTemplateInfo preferredtemplate, string commandName, TextWriter writer)
+        internal static void ShowHintForOtherTemplates(TemplateGroup templateGroup, CliTemplateInfo preferredtemplate, string commandName, TextWriter writer)
         {
             //other languages
             if (templateGroup.Languages.Count <= 1)
@@ -380,7 +269,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             writer.WriteLine();
         }
 
-        private void ShowTemplateSpecificOptions(
+        internal static void ShowTemplateSpecificOptions(
             IEnumerable<TemplateCommand> templates,
             HelpContext context)
         {
@@ -398,37 +287,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             context.Output.WriteLine();
         }
 
-        private void ShowUsage(IReadOnlyList<string> shortNames, HelpContext context)
-        {
-            List<string> usageParts = new List<string>();
-
-            ICommand? command = this;
-            while (command is not null)
-            {
-                if (!string.IsNullOrWhiteSpace(command.Name))
-                {
-                    usageParts.Add(command.Name);
-                }
-                command = command.Parents.FirstOrDefault(c => c is ICommand) as ICommand;
-            }
-
-            usageParts.Reverse();
-            context.Output.WriteLine(context.HelpBuilder.LocalizationResources.HelpUsageTitle());
-            foreach (string shortName in shortNames)
-            {
-                var parts = usageParts.Concat(
-                    new[]
-                    {
-                        shortName,
-                        context.HelpBuilder.LocalizationResources.HelpUsageOptionsTitle(),
-                        HelpStrings.Text_UsageTemplateOptionsPart
-                    });
-                context.Output.WriteLine(Indent + string.Join(" ", parts));
-            }
-            context.Output.WriteLine();
-        }
-
-        private void ShowCommandOptions(
+        internal static void ShowCommandOptions(
             IEnumerable<TemplateCommand> templatesToShow,
             TemplateCommand preferredTemplate,
             HelpContext context)
@@ -471,6 +330,147 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEnumerable<TwoColumnHelpRow> optionsToWrite = optionsToShow.Select(o => context.HelpBuilder.GetTwoColumnRow(o, context));
             context.HelpBuilder.WriteColumns(optionsToWrite.ToArray(), context);
             context.Output.WriteLine();
+        }
+
+        internal void ShowUsage(IReadOnlyList<string> shortNames, HelpContext context)
+        {
+            List<string> usageParts = new List<string>();
+
+            ICommand? command = this;
+            while (command is not null)
+            {
+                if (!string.IsNullOrWhiteSpace(command.Name))
+                {
+                    usageParts.Add(command.Name);
+                }
+                command = command.Parents.FirstOrDefault(c => c is ICommand) as ICommand;
+            }
+
+            usageParts.Reverse();
+            context.Output.WriteLine(context.HelpBuilder.LocalizationResources.HelpUsageTitle());
+            foreach (string shortName in shortNames)
+            {
+                var parts = usageParts.Concat(
+                    new[]
+                    {
+                        shortName,
+                        context.HelpBuilder.LocalizationResources.HelpUsageOptionsTitle(),
+                        HelpStrings.Text_UsageTemplateOptionsPart
+                    });
+                context.Output.WriteLine(Indent + string.Join(" ", parts));
+            }
+            context.Output.WriteLine();
+        }
+
+        private static NewCommandStatus HandleAmbiguousLanguage(
+            IEngineEnvironmentSettings environmentSettings,
+            IEnumerable<CliTemplateInfo> templates,
+            TextWriter writer)
+        {
+            writer.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
+            TemplateGroupDisplay.DisplayTemplateList(
+                environmentSettings,
+                templates,
+                new TabularOutputSettings(environmentSettings.Environment),
+                writer: writer);
+            writer.WriteLine(HelpStrings.Hint_AmbiguousLanguage);
+            return NewCommandStatus.NotFound;
+        }
+
+        private static NewCommandStatus HandleAmbiguousType(
+            IEngineEnvironmentSettings environmentSettings,
+            IEnumerable<CliTemplateInfo> templates,
+            TextWriter writer)
+        {
+            writer.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
+            TemplateGroupDisplay.DisplayTemplateList(
+                environmentSettings,
+                templates,
+                new TabularOutputSettings(
+                    environmentSettings.Environment,
+                    columnsToDisplay: new[] { TabularOutputSettings.ColumnNames.Type }),
+                writer: writer);
+            writer.WriteLine(HelpStrings.Hint_AmbiguousType);
+            return NewCommandStatus.NotFound;
+        }
+
+        /// <summary>
+        /// Ensure <paramref name="templates"/> are sorted in priority order
+        /// The highest priority should come first.
+        /// </summary>
+        private static IEnumerable<TemplateOption> CollectOptionsToShow(IEnumerable<TemplateCommand> templates, HelpContext context)
+        {
+            Dictionary<string, (CliTemplateParameter Parameter, IReadOnlyList<string> Aliases)> parametersToShow = new();
+
+            //templates are in priority order
+            //in case parameters are different in different templates
+            //highest priority ones wins
+            //except the choice parameter, where we merge possible values
+            foreach (TemplateCommand command in templates)
+            {
+                foreach (CliTemplateParameter currentParam in command.Template.CliParameters)
+                {
+                    if (currentParam.IsHidden && !currentParam.AlwaysShow)
+                    {
+                        continue;
+                    }
+
+                    if (parametersToShow.TryGetValue(currentParam.Name, out var existingParam))
+                    {
+                        if (currentParam is ChoiceTemplateParameter currentChoiceParam
+                            && existingParam.Parameter is ChoiceTemplateParameter existingChoiceParam)
+                        {
+                            if (existingChoiceParam is CombinedChoiceTemplateParameter combinedParam)
+                            {
+                                combinedParam.MergeChoices(currentChoiceParam);
+                            }
+                            else
+                            {
+                                var combinedChoice = new CombinedChoiceTemplateParameter(existingChoiceParam);
+                                combinedChoice.MergeChoices(currentChoiceParam);
+                                parametersToShow[currentParam.Name] = (combinedChoice, existingParam.Aliases);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var aliases = command.TemplateOptions[currentParam.Name].Aliases.OrderByDescending(s => s, StringComparer.OrdinalIgnoreCase).ToArray();
+                        parametersToShow[currentParam.Name] = (currentParam, aliases);
+                    }
+                }
+            }
+
+            var optionsToShow = parametersToShow.Values.Select(p => new TemplateOption(p.Parameter, p.Aliases)).ToList();
+            foreach (var option in optionsToShow)
+            {
+                context.HelpBuilder.CustomizeSymbol(
+                    option.Option,
+                    firstColumnText: option.TemplateParameter.GetCustomFirstColumnText(option),
+                    secondColumnText: option.TemplateParameter.GetCustomSecondColumnText());
+            }
+            return optionsToShow;
+        }
+
+        private void WriteCustomInstantiateHelp(HelpContext context)
+        {
+            HelpBuilder.SynopsisSection()(context);
+            context.Output.WriteLine();
+            CustomUsageSection(context);
+            HelpBuilder.CommandArgumentsSection()(context);
+            context.Output.WriteLine();
+            HelpBuilder.OptionsSection()(context);
+            context.Output.WriteLine();
+            HelpBuilder.SubcommandsSection()(context);
+            context.Output.WriteLine();
+            HelpBuilder.AdditionalArgumentsSection()(context);
+            context.Output.WriteLine();
+        }
+
+        private void CustomUsageSection(HelpContext context)
+        {
+            context.Output.WriteLine(context.HelpBuilder.LocalizationResources.HelpUsageTitle());
+            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, this, showSubcommands: false)));
+            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, this, showParentArguments: false, showArguments: false)));
         }
     }
 }

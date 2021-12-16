@@ -63,8 +63,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Text_NoTemplateOptions">
-        <source>(No Parameters)</source>
-        <target state="new">(No Parameters)</target>
+        <source>(No options)</source>
+        <target state="new">(No options)</target>
         <note />
       </trans-unit>
       <trans-unit id="Text_UsageTemplateOptionsPart">

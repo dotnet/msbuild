@@ -11,7 +11,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal partial class InstantiateCommand
     {
-        //TODO: this code is from System.CommandLine. Ideally if GetUsageParts (get first column by symbol) is exposed, we don't need it.
+        // This code is from System.CommandLine, HelpBuilder class.
+        // Ideally those methods are exposed, we may switch to use them.
         private static string FormatArgumentUsage(IReadOnlyList<IArgument> arguments)
         {
             var sb = new StringBuilder();

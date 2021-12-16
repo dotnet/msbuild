@@ -1,0 +1,20 @@
+﻿Template options:
+  -c, --choice <val1|val2|val3>  my description
+                                 Type: choice
+                                   val1  
+                                   val3  
+                                   val2  
+                                 Default: def-val
+                                 Default if option is provided without a value: def-val-no-arg
+  
+  -in, --int <int>               my int
+                                 Type: integer
+                                 Default: 0
+                                 Default if option is provided without a value: 10
+  
+  -b, --bool                     my bool
+                                 Type: boolean
+                                 Default: false
+                                 Default if option is provided without a value: false
+  
+

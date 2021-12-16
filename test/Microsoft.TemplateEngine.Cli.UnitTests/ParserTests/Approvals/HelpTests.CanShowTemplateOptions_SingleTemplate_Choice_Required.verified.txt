@@ -1,0 +1,8 @@
+﻿Template options:
+  -c, --choice <val1|val2> (REQUIRED)  my description
+                                       Type: choice
+                                         val1  
+                                         val2  
+                                       Default if option is provided without a value: def-val-no-arg
+  
+

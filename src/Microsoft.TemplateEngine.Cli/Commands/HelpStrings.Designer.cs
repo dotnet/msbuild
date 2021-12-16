@@ -169,7 +169,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to (No Parameters).
+        ///   Looks up a localized string similar to (No options).
         /// </summary>
         internal static string Text_NoTemplateOptions {
             get {
