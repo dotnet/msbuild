@@ -64,8 +64,8 @@ namespace MSBuild
                                             if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version))
                                             {
                                                 string path = Path.Combine(AssemblyPath, name + ".dll");
-                                                string assemblyVersion = Assembly.LoadFile(path).GetName().Version.ToString();
-                                                if (File.Exists(path) && !version.Equals(assemblyVersion))
+                                                string assemblyVersion = File.Exists(path) ? Assembly.LoadFile(path).GetName().Version.ToString() : version;
+                                                if (!version.Equals(assemblyVersion))
                                                 {
                                                     if (!(String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) && String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0")))
                                                     {
