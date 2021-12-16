@@ -21,6 +21,7 @@ namespace MSBuild
             XmlDocument doc = new XmlDocument();
             doc.Load(AppConfig);
             var runtime = doc.SelectSingleNode("configuration").SelectSingleNode("runtime");
+            bool foundSystemValueTuple = false;
             foreach (var node in runtime.ChildNodes)
             {
                 if (node is XmlElement assemblyBinding && assemblyBinding.Name.Equals("assemblyBinding"))
@@ -55,7 +56,11 @@ namespace MSBuild
                             {
                                 // It is unusual to want to redirect down, but in this case it's ok: 4.0.3.0 forwards to 4.0.0.0 in the GAC, so this just removes the need to redistribute a file
                                 // and makes that resolution faster. Still verify that the versions are exactly as in this comment, as that may change.
-                                if (!(String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) && String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0")))
+                                if (String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) && String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0"))
+                                {
+                                    foundSystemValueTuple = true;
+                                }
+                                else
                                 {
                                     Log.LogError($"Binding redirect for '{name}' redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
                                 }
@@ -63,6 +68,10 @@ namespace MSBuild
                         }
                     }
                 }
+            }
+            if (!foundSystemValueTuple)
+            {
+                Log.LogError("Binding redirect for 'System.ValueTuple' missing.");
             }
             return !Log.HasLoggedErrors;
         }
