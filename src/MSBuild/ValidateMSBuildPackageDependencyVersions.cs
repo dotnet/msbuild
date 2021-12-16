@@ -1,5 +1,6 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Xml;
@@ -18,19 +19,19 @@ namespace MSBuild
             doc.Load(AppConfig);
             foreach (var topLevelElement in doc.ChildNodes)
             {
-                if (topLevelElement is XmlElement topLevelXmlElement && topLevelXmlElement.Name.Equals("configuration", System.StringComparison.OrdinalIgnoreCase))
+                if (topLevelElement is XmlElement topLevelXmlElement && topLevelXmlElement.Name.Equals("configuration", StringComparison.OrdinalIgnoreCase))
                 {
                     foreach (var configurationElement in topLevelXmlElement.ChildNodes)
                     {
-                        if (configurationElement is XmlElement configurationXmlElement && configurationXmlElement.Name.Equals("runtime", System.StringComparison.OrdinalIgnoreCase))
+                        if (configurationElement is XmlElement configurationXmlElement && configurationXmlElement.Name.Equals("runtime", StringComparison.OrdinalIgnoreCase))
                         {
                             foreach (var runtimeElement in configurationXmlElement.ChildNodes)
                             {
-                                if (runtimeElement is XmlElement runtimeXmlElement && runtimeXmlElement.Name.Equals("assemblyBinding", System.StringComparison.OrdinalIgnoreCase))
+                                if (runtimeElement is XmlElement runtimeXmlElement && runtimeXmlElement.Name.Equals("assemblyBinding", StringComparison.OrdinalIgnoreCase))
                                 {
                                     foreach (var assemblyBindingElement in runtimeXmlElement.ChildNodes)
                                     {
-                                        if (assemblyBindingElement is XmlElement assemblyBindingXmlElement && assemblyBindingXmlElement.Name.Equals("dependentAssembly", System.StringComparison.OrdinalIgnoreCase))
+                                        if (assemblyBindingElement is XmlElement assemblyBindingXmlElement && assemblyBindingXmlElement.Name.Equals("dependentAssembly", StringComparison.OrdinalIgnoreCase))
                                         {
                                             string name = string.Empty;
                                             string version = string.Empty;
@@ -38,21 +39,21 @@ namespace MSBuild
                                             {
                                                 if (dependentAssembly is XmlElement dependentAssemblyXmlElement)
                                                 {
-                                                    if (dependentAssemblyXmlElement.Name.Equals("assemblyIdentity", System.StringComparison.OrdinalIgnoreCase))
+                                                    if (dependentAssemblyXmlElement.Name.Equals("assemblyIdentity", StringComparison.OrdinalIgnoreCase))
                                                     {
                                                         foreach (var assemblyIdentityAttribute in dependentAssemblyXmlElement.Attributes)
                                                         {
-                                                            if (assemblyIdentityAttribute is XmlAttribute assemblyIdentityAttributeXmlElement && assemblyIdentityAttributeXmlElement.Name.Equals("name", System.StringComparison.OrdinalIgnoreCase))
+                                                            if (assemblyIdentityAttribute is XmlAttribute assemblyIdentityAttributeXmlElement && assemblyIdentityAttributeXmlElement.Name.Equals("name", StringComparison.OrdinalIgnoreCase))
                                                             {
                                                                 name = assemblyIdentityAttributeXmlElement.Value;
                                                             }
                                                         }
                                                     }
-                                                    else if (dependentAssemblyXmlElement.Name.Equals("bindingRedirect", System.StringComparison.OrdinalIgnoreCase))
+                                                    else if (dependentAssemblyXmlElement.Name.Equals("bindingRedirect", StringComparison.OrdinalIgnoreCase))
                                                     {
                                                         foreach (var bindingRedirectAttribute in dependentAssemblyXmlElement.Attributes)
                                                         {
-                                                            if (bindingRedirectAttribute is XmlAttribute bindingRedirectAttributeXmlElement && bindingRedirectAttributeXmlElement.Name.Equals("newVersion", System.StringComparison.OrdinalIgnoreCase))
+                                                            if (bindingRedirectAttribute is XmlAttribute bindingRedirectAttributeXmlElement && bindingRedirectAttributeXmlElement.Name.Equals("newVersion", StringComparison.OrdinalIgnoreCase))
                                                             {
                                                                 version = bindingRedirectAttributeXmlElement.Value;
                                                             }
@@ -66,7 +67,7 @@ namespace MSBuild
                                                 string assemblyVersion = Assembly.LoadFile(path).GetName().Version.ToString();
                                                 if (File.Exists(path) && !version.Equals(assemblyVersion))
                                                 {
-                                                    if (!(name.Equals("System.ValueTuple", System.StringComparer.OrdinalIgnoreCase) && version.Equals("4.0.0.0") && assemblyVersion.Equals("4.0.3.0")))
+                                                    if (!(String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) && String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0")))
                                                     {
                                                         Log.LogError($"Binding redirect for '{name}' redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
                                                     }
