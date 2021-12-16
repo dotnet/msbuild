@@ -33,7 +33,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Scheduler should honor BuildParameters.DisableInprocNode](https://github.com/dotnet/msbuild/pull/6400)
 - [Don't compile globbing regexes on .NET Framework](https://github.com/dotnet/msbuild/pull/6632)
 - [Default to transitively copying content items](https://github.com/dotnet/msbuild/pull/6622)
-- [Reference assemblies are now no longer placed in the `bin` directory by default](https://github.com/dotnet/msbuild/pull/6560)
+- [Reference assemblies are now no longer placed in the `bin` directory by default](https://github.com/dotnet/msbuild/pull/6560) (reverted [here](https://github.com/dotnet/msbuild/pull/6718) and brought back [here](https://github.com/dotnet/msbuild/pull/7075))
 - [Improve debugging experience: add global switch MSBuildDebugEngine; Inject binary logger from BuildManager; print static graph as .dot file](https://github.com/dotnet/msbuild/pull/6639)
 - [Fix deadlock in BuildManager vs LoggingService](https://github.com/dotnet/msbuild/pull/6837)
 - [Optimize diag level for file logger and console logger](https://github.com/dotnet/msbuild/pull/7026)
