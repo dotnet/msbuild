@@ -5,6 +5,7 @@ using System;
 using System.Runtime.Loader;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.IO;
@@ -18,7 +19,6 @@ using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 using IConsole = Microsoft.Extensions.Tools.Internal.IConsole;
 using Resources = Microsoft.DotNet.Watcher.Tools.Resources;
-using System.CommandLine.Binding;
 
 namespace Microsoft.DotNet.Watcher
 {
