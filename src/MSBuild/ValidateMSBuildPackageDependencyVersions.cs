@@ -36,8 +36,10 @@ namespace MSBuild
                     string assemblyVersion = AssemblyName.GetAssemblyName(path).Version.ToString();
                     if (!version.Equals(assemblyVersion))
                     {
-                        // It is unusual to want to redirect down, but in this case it's ok: 4.0.3.0 forwards to 4.0.0.0 in the GAC, so this just removes the need to redistribute a file
-                        // and makes that resolution faster. Still verify that the versions are exactly as in this comment, as that may change.
+                        // Ensure that the binding redirect is to the GAC version, but
+                        // we still ship the version we explicitly reference to let
+                        // API consumers bind to it at runtime.
+                        // See https://github.com/dotnet/msbuild/issues/6976.
                         if (String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) && String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0"))
                         {
                             foundSystemValueTuple = true;
