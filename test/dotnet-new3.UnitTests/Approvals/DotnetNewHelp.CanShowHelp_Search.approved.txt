@@ -14,5 +14,5 @@ Options:
   --tag <tag>                            Filters the templates based on the tag.
   --package <package>                    Filters the templates based on NuGet package ID.
   --columns-all                          Display all columns in the output.
-  --columns <author|language|tags|type>  Specifies the columns to display in the output. 
+  --columns <author|language|tags|type>  Specifies the columns to display in the output.
   -?, -h, --help                         Show help and usage information

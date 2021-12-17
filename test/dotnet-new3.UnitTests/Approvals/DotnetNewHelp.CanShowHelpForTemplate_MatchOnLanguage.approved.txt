@@ -21,11 +21,9 @@ Template options:
                                                    net5.0         Target net5.0
                                                    netcoreapp3.1  Target netcoreapp3.1
                                                  Default: net7.0
-  
   --no-restore                                   If specified, skips the automatic restore of the project on create.
                                                  Type: bool
                                                  Default: false
-  
 
 To see help for other template languages (C#, VB), use --language option:
    dotnet new3 console -h --language C#

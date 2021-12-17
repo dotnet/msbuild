@@ -372,8 +372,8 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <note />
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongTokens">
-        <source>Unrecognized command or argument(s): {0}</source>
-        <target state="new">Unrecognized command or argument(s): {0}</target>
+        <source>Unrecognized command or argument(s): {0}.</source>
+        <target state="new">Unrecognized command or argument(s): {0}.</target>
         <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
       </trans-unit>
       <trans-unit id="ConfiguredValue">

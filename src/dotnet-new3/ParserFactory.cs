@@ -39,7 +39,7 @@ namespace Dotnet_new3
             }
             else
             {
-                return HelpBuilder.DefaultLayout();
+                return HelpBuilder.Default.GetLayout();
             }
         }
 

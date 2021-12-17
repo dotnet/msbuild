@@ -6,5 +6,4 @@
                                    val2  
                                  Default: def-val
                                  Default if option is provided without a value: def-val-no-arg
-  
 

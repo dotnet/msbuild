@@ -354,7 +354,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     new[]
                     {
                         shortName,
-                        context.HelpBuilder.LocalizationResources.HelpUsageOptionsTitle(),
+                        context.HelpBuilder.LocalizationResources.HelpUsageOptions(),
                         HelpStrings.Text_UsageTemplateOptionsPart
                     });
                 context.Output.WriteLine(Indent + string.Join(" ", parts));
@@ -453,16 +453,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private void WriteCustomInstantiateHelp(HelpContext context)
         {
-            HelpBuilder.SynopsisSection()(context);
+            HelpBuilder.Default.SynopsisSection()(context);
             context.Output.WriteLine();
             CustomUsageSection(context);
-            HelpBuilder.CommandArgumentsSection()(context);
+            HelpBuilder.Default.CommandArgumentsSection()(context);
             context.Output.WriteLine();
-            HelpBuilder.OptionsSection()(context);
+            HelpBuilder.Default.OptionsSection()(context);
             context.Output.WriteLine();
-            HelpBuilder.SubcommandsSection()(context);
+            HelpBuilder.Default.SubcommandsSection()(context);
             context.Output.WriteLine();
-            HelpBuilder.AdditionalArgumentsSection()(context);
+            HelpBuilder.Default.AdditionalArgumentsSection()(context);
             context.Output.WriteLine();
         }
 

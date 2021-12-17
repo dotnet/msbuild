@@ -13,5 +13,5 @@ Options:
   --type <type>                          Filters templates based on available types. Predefined values are "project" and "item".
   --tag <tag>                            Filters the templates based on the tag.
   --columns-all                          Display all columns in the output.
-  --columns <author|language|tags|type>  Specifies the columns to display in the output. 
+  --columns <author|language|tags|type>  Specifies the columns to display in the output.
   -?, -h, --help                         Show help and usage information

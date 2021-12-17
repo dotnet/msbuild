@@ -19,14 +19,11 @@ Template options:
                                Type: choice
                                  net7.0  Target net7.0
                                Default: net7.0
-  
   --langVersion <langVersion>  Sets the LangVersion property in the created project file
                                Type: text
-  
   --no-restore                 If specified, skips the automatic restore of the project on create.
                                Type: bool
                                Default: false
-  
 
 To see help for other template languages (F#, VB), use --language option:
    dotnet new3 console -h --language F#

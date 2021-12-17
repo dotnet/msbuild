@@ -197,7 +197,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.Equal(expectedInvalidTokenSets.Length, parseResult.Errors.Count);
             foreach (var tokenSet in expectedInvalidTokenSets)
             {
-                Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}"));
+                Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}.") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}."));
             }
         }
 

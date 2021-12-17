@@ -108,7 +108,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
                 if (hasCommandWithHelp)
                 {
-                    yield return context.HelpBuilder.LocalizationResources.HelpUsageCommandTitle();
+                    yield return context.HelpBuilder.LocalizationResources.HelpUsageCommand();
                 }
             }
 
@@ -117,7 +117,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 var displayOptionTitle = command.Options.Any(x => !x.IsHidden);
                 if (displayOptionTitle)
                 {
-                    yield return context.HelpBuilder.LocalizationResources.HelpUsageOptionsTitle();
+                    yield return context.HelpBuilder.LocalizationResources.HelpUsageOptions();
                 }
             }
 

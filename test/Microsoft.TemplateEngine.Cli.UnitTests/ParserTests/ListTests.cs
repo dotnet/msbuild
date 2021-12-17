@@ -145,7 +145,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse(command);
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal("Unrecognized command or argument 'cr2'", parseResult.Errors.First().Message);
+            Assert.Equal("Unrecognized command or argument 'cr2'.", parseResult.Errors.First().Message);
         }
 
         [Fact]
@@ -157,7 +157,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse("new smth list");
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal("Unrecognized command or argument(s): 'smth'", parseResult.Errors.First().Message);
+            Assert.Equal("Unrecognized command or argument(s): 'smth'.", parseResult.Errors.First().Message);
         }
 
         [Theory]
@@ -174,7 +174,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse(command);
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal($"Unrecognized command or argument(s): '{expectedFilter}','filter-value'", parseResult.Errors.First().Message);
+            Assert.Equal($"Unrecognized command or argument(s): '{expectedFilter}','filter-value'.", parseResult.Errors.First().Message);
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse("new smth --list smth-else");
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal("Unrecognized command or argument(s): 'smth'", parseResult.Errors.First().Message);
+            Assert.Equal("Unrecognized command or argument(s): 'smth'.", parseResult.Errors.First().Message);
         }
 
         [Theory]
@@ -264,7 +264,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.Equal(expectedInvalidTokenSets.Length, parseResult.Errors.Count);
             foreach (var tokenSet in expectedInvalidTokenSets)
             {
-                Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}"));
+                Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}.") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}."));
             }
         }
     }

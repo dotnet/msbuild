@@ -26,91 +26,69 @@ Template options:
                                                                             MultiOrg       Organizational authentication for multiple tenants
                                                                             Windows        Windows authentication
                                                                           Default: None
-  
   --aad-b2c-instance <aad-b2c-instance>                                   The Azure Active Directory B2C instance to connect to (use with IndividualB2C auth).
                                                                           Type: string
                                                                           Default: https://login.microsoftonline.com/tfp/
-  
   -ssp, --susi-policy-id <susi-policy-id>                                 The sign-in and sign-up policy ID for this project (use with IndividualB2C auth).
                                                                           Type: string
                                                                           Default: b2c_1_susi
-  
   -S, --SignedOutCallbackPath <SignedOutCallbackPath>                     The global signout callback (use with IndividualB2C auth).
                                                                           Type: string
                                                                           Default: /signout/B2C_1_susi
-  
   -rp, --reset-password-policy-id <reset-password-policy-id>              The reset password policy ID for this project (use with IndividualB2C auth).
                                                                           Type: string
                                                                           Default: b2c_1_reset
-  
   -ep, --edit-profile-policy-id <edit-profile-policy-id>                  The edit profile policy ID for this project (use with IndividualB2C auth).
                                                                           Type: string
                                                                           Default: b2c_1_edit_profile
-  
   --aad-instance <aad-instance>                                           The Azure Active Directory instance to connect to (use with SingleOrg or MultiOrg auth).
                                                                           Type: string
                                                                           Default: https://login.microsoftonline.com/
-  
   --client-id <client-id>                                                 The Client ID for this project (use with IndividualB2C, SingleOrg or MultiOrg auth).
                                                                           Type: string
                                                                           Default: 11111111-1111-1111-11111111111111111
-  
   --domain <domain>                                                       The domain for the directory tenant (use with SingleOrg or IndividualB2C auth).
                                                                           Type: string
                                                                           Default: qualified.domain.name
-  
   --tenant-id <tenant-id>                                                 The TenantId ID of the directory to connect to (use with SingleOrg auth).
                                                                           Type: string
                                                                           Default: 22222222-2222-2222-2222-222222222222
-  
   --callback-path <callback-path>                                         The request path within the application's base path of the redirect URI (use with SingleOrg or IndividualB2C auth).
                                                                           Type: string
                                                                           Default: /signin-oidc
-  
   -r, --org-read-access                                                   Whether or not to allow this application read access to the directory (only applies to SingleOrg or MultiOrg auth).
                                                                           Type: bool
                                                                           Default: false
-  
   --exclude-launch-settings                                               Whether to exclude launchSettings.json in the generated template.
                                                                           Type: bool
                                                                           Default: false
-  
   --no-restore                                                            If specified, skips the automatic restore of the project on create.
                                                                           Type: bool
                                                                           Default: false
-  
   --no-https                                                              Whether to turn off HTTPS. This option only applies if Individual, IndividualB2C, SingleOrg, or MultiOrg aren't used for --auth.
                                                                           Type: bool
                                                                           Default: false
-  
   -uld, --use-local-db                                                    Whether to use LocalDB instead of SQLite. This option only applies if --auth Individual or --auth IndividualB2C is specified.
                                                                           Type: bool
                                                                           Default: false
-  
   -rrc, --razor-runtime-compilation                                       Determines if the project is configured to use Razor runtime compilation in Debug builds.
                                                                           Type: bool
                                                                           Default: false
-  
   -f, --framework <net5.0|netcoreapp2.1|netcoreapp3.1>                    The target framework for the project.
                                                                           Type: choice
                                                                             net5.0         Target net5.0
                                                                             netcoreapp3.1  Target netcoreapp3.1
                                                                             netcoreapp2.1  Target netcoreapp2.1
                                                                           Default: net5.0
-  
   --called-api-url <called-api-url>                                       URL of the API to call from the web app. This option only applies if --auth SingleOrg, --auth MultiOrg or --auth IndividualB2C is specified.
                                                                           Type: string
                                                                           Default: https://graph.microsoft.com/v1.0
-  
   --calls-graph                                                           Specifies if the web app calls Microsoft Graph. This option only applies if --auth SingleOrg or --auth MultiOrg is specified.
                                                                           Type: bool
                                                                           Default: false
-  
   --called-api-scopes <called-api-scopes>                                 Scopes to request to call the API from the web app. This option only applies if --auth SingleOrg, --auth MultiOrg or --auth IndividualB2C is specified.
                                                                           Type: string
                                                                           Default: user.read
-  
   --use-browserlink                                                       Whether or not to include BrowserLink in the project
                                                                           Type: bool
                                                                           Default: false
-  

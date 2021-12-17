@@ -698,7 +698,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unrecognized command or argument(s): {0}.
+        ///   Looks up a localized string similar to Unrecognized command or argument(s): {0}..
         /// </summary>
         internal static string Commands_Validator_WrongTokens {
             get {
