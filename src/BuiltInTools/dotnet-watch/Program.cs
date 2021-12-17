@@ -139,14 +139,14 @@ Examples:
             });
 
             var listOption = new Option<bool>(
-                    "--list",
-                    "Lists all discovered files without starting the watcher");
+                "--list",
+                "Lists all discovered files without starting the watcher");
 
             var shortProjectOption = new Option<string>("-p", "The project to watch") { IsHidden = true };
             var longProjectOption = new Option<string>("--project","The project to watch");
             var noHotReloadOption = new Option<bool>(
-                    new[] { "--no-hot-reload" },
-                    "Suppress hot reload for supported apps.");
+                new[] { "--no-hot-reload" },
+                "Suppress hot reload for supported apps.");
             var root = new RootCommand(Description)
             {
                  quiet,
@@ -156,7 +156,7 @@ Examples:
                  shortProjectOption,
                  listOption
             };
-            
+
             root.TreatUnmatchedTokensAsErrors = false;
             var binder = new CommandLineOptionsBinder(longProjectOption, shortProjectOption, quiet, listOption, noHotReloadOption, verbose, reporter);
             root.SetHandler((CommandLineOptions options) => handler(options), binder);
@@ -414,7 +414,7 @@ Examples:
                 return null;
             };
         }
-        private class CommandLineOptionsBinder : BinderBase<CommandLineOptions> {
+        private sealed class CommandLineOptionsBinder : BinderBase<CommandLineOptions> {
             private readonly Option<string> _longProjectOption;
             private readonly Option<string> _shortProjectOption;
             private readonly Option<bool> _quietOption;
@@ -433,7 +433,8 @@ Examples:
                 _reporter = reporter;
             }
 
-            protected override CommandLineOptions GetBoundValue(BindingContext bindingContext) {
+            protected override CommandLineOptions GetBoundValue(BindingContext bindingContext)
+            {
                 var parseResults = bindingContext.ParseResult;
                 var projectValue = parseResults.GetValueForOption(_longProjectOption);
                 if (string.IsNullOrEmpty(projectValue))
@@ -460,7 +461,8 @@ Examples:
                     remainingArguments.AddRange(parseResults.UnparsedTokens);
                 }
 
-                var options = new CommandLineOptions {
+                var options = new CommandLineOptions
+                {
                     Quiet = parseResults.GetValueForOption(_quietOption),
                     List = parseResults.GetValueForOption(_listOption),
                     NoHotReload = parseResults.GetValueForOption(_noHotReloadOption),
