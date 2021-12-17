@@ -169,6 +169,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to choice.
+        /// </summary>
+        internal static string Text_ChoiceArgumentHelpName {
+            get {
+                return ResourceManager.GetString("Text_ChoiceArgumentHelpName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to (No options).
         /// </summary>
         internal static string Text_NoTemplateOptions {

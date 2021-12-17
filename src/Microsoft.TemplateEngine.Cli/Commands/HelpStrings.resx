@@ -160,6 +160,10 @@
   <data name="TableHeader_AmbiguousTemplatesList" xml:space="preserve">
     <value>Unable to resolve the template, these templates matched your input:</value>
   </data>
+  <data name="Text_ChoiceArgumentHelpName" xml:space="preserve">
+    <value>choice</value>
+    <comment>this text is used as argument help name when list of possible values is too long to fit the screen, " --my-o &lt;choice&gt;"</comment>
+  </data>
   <data name="Text_NoTemplateOptions" xml:space="preserve">
     <value>(No options)</value>
   </data>

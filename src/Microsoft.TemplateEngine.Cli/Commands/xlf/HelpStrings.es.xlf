@@ -62,6 +62,11 @@
         <target state="new">Unable to resolve the template, these templates matched your input:</target>
         <note />
       </trans-unit>
+      <trans-unit id="Text_ChoiceArgumentHelpName">
+        <source>choice</source>
+        <target state="new">choice</target>
+        <note>this text is used as argument help name when list of possible values is too long to fit the screen, " --my-o &lt;choice&gt;"</note>
+      </trans-unit>
       <trans-unit id="Text_NoTemplateOptions">
         <source>(No options)</source>
         <target state="new">(No options)</target>

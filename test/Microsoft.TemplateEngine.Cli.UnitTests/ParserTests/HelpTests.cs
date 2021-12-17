@@ -371,5 +371,55 @@ Author: Me
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
         }
 
+        [Fact]
+        public Task CanShowTemplateOptions_SingleTemplate_Choice_ShortenedUsage_FirstTwoValuesFit()
+        {
+            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                .WithChoiceParameter("choice", new[] { "val1", "val2", "val3", "val4", "val5", "val6" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
+            TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
+               CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
+               .Single();
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
+
+            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+
+            StringWriter sw = new StringWriter();
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 100), instantiateCommand, sw);
+
+            InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
+            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+        }
+
+        [Fact]
+        public Task CanShowTemplateOptions_SingleTemplate_Choice_ShortenedUsage()
+        {
+            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                .WithChoiceParameter("choice", new[] { "val1", "val2", "val3", "val4", "val5", "val6" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
+            TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
+               CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
+               .Single();
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
+
+            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+
+            StringWriter sw = new StringWriter();
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), instantiateCommand, sw);
+
+            InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
+            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+        }
+
     }
 }

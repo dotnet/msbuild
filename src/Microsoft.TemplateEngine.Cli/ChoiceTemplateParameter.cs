@@ -4,8 +4,10 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.Commands;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -46,20 +48,28 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal virtual IReadOnlyDictionary<string, ParameterChoice> Choices => _choices;
 
-        //TODO: needs https://github.com/dotnet/command-line-api/pull/1527
-        //internal override Func<HelpContext, string?>? GetCustomFirstColumnText(TemplateOption o)
-        //{
-        //    return (context) =>
-        //    {
-        //        //string standardUsage = context.HelpBuilder.GetTwoColumnRow(o.Option, context).FirstColumnText;
-        //        //if (standardUsage.Length > context.MaxWidth / 3)
-        //        //{
-        //        //    o.Option.ArgumentHelpName = "choice";
-        //        //    return context.HelpBuilder.GetTwoColumnRow(o.Option, context).FirstColumnText;
-        //        //}
-        //        //return standardUsage;
-        //    };
-        //}
+        internal override Func<HelpContext, string?>? GetCustomFirstColumnText(TemplateOption o)
+        {
+            return (context) =>
+            {
+                string standardUsage = HelpBuilder.Default.GetIdentifierSymbolUsageLabel(o.Option, context);
+                if (standardUsage.Length > context.HelpBuilder.MaxWidth / 3)
+                {
+                    if (Choices.Count > 2)
+                    {
+                        o.Option.ArgumentHelpName = $"{string.Join("|", Choices.Keys.Take(2))}|...";
+                        string updatedFirstColumn = HelpBuilder.Default.GetIdentifierSymbolUsageLabel(o.Option, context);
+                        if (updatedFirstColumn.Length <= context.HelpBuilder.MaxWidth / 3)
+                        {
+                            return updatedFirstColumn;
+                        }
+                    }
+                    o.Option.ArgumentHelpName = HelpStrings.Text_ChoiceArgumentHelpName;
+                    return HelpBuilder.Default.GetIdentifierSymbolUsageLabel(o.Option, context);
+                }
+                return standardUsage;
+            };
+        }
 
         protected override Option GetBaseOption(IReadOnlyList<string> aliases)
         {
