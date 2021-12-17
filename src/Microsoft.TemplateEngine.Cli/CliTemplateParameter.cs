@@ -342,19 +342,7 @@ namespace Microsoft.TemplateEngine.Cli
                     displayValue.Append(Indent + choiceInfo.Key.PadRight(longestChoiceLength + Indent.Length));
                     if (!string.IsNullOrWhiteSpace(choiceInfo.Value.Description))
                     {
-                        bool firstLine = true;
-                        foreach (string line in choiceInfo.Value.Description.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.TrimEntries))
-                        {
-                            if (!firstLine)
-                            {
-                                displayValue.Append(' ', longestChoiceLength + Indent.Length * 2);
-                            }
-                            else
-                            {
-                                firstLine = false;
-                            }
-                            displayValue.AppendLine(line);
-                        }
+                        displayValue.AppendLine(choiceInfo.Value.Description.Replace("\r\n", " ").Replace("\n", " "));
                     }
                     else
                     {
