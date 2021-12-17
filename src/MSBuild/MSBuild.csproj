@@ -336,8 +336,8 @@
     </Task>
   </UsingTask>
 
-  <Target Name="ValidateMSBuildPackageDependencyVersions" BeforeTargets="AfterBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" >
-    <ValidateMSBuildPackageDependencyVersions AppConfig="@(AppConfigWithTargetPath)" AssemblyPath="$(OutputPath)%(_TargetFrameworks.Identity)" />
+  <Target Name="ValidateMSBuildPackageDependencyVersions" AfterTargets="PrepareForBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" >
+    <ValidateMSBuildPackageDependencyVersions AppConfig="@(AppConfigWithTargetPath)" AssemblyPath="$(OutputPath)" />
   </Target>
 
 </Project>
