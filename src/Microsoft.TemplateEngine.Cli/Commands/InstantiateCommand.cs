@@ -122,19 +122,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return templateGroups.Where(template => template.ShortNames.Contains(instantiateArgs.ShortName));
         }
 
-        internal NewCommandStatus HandleNoMatchingTemplateGroup(InstantiateCommandArgs instantiateArgs)
+        internal void HandleNoMatchingTemplateGroup(InstantiateCommandArgs instantiateArgs, Reporter reporter)
         {
-            Reporter.Error.WriteLine(
+            reporter.WriteLine(
                 string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, $"'{instantiateArgs.ShortName}'").Bold().Red());
-            Reporter.Error.WriteLine();
+            reporter.WriteLine();
 
-            Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
-            Reporter.Error.WriteCommand(CommandExamples.ListCommandExample(instantiateArgs.CommandName));
+            reporter.WriteLine(LocalizableStrings.ListTemplatesCommand);
+            reporter.WriteCommand(CommandExamples.ListCommandExample(instantiateArgs.CommandName));
 
-            Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
-            Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(instantiateArgs.CommandName, instantiateArgs.ShortName));
-            Reporter.Error.WriteLine();
-            return NewCommandStatus.NotFound;
+            reporter.WriteLine(LocalizableStrings.SearchTemplatesCommand);
+            reporter.WriteCommand(CommandExamples.SearchCommandExample(instantiateArgs.CommandName, instantiateArgs.ShortName));
+            reporter.WriteLine();
         }
 
         internal NewCommandStatus HandleAmbiguousTemplateGroup(InstantiateCommandArgs instantiateArgs) => throw new NotImplementedException();
@@ -163,7 +162,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (!selectedTemplateGroups.Any())
             {
-                return HandleNoMatchingTemplateGroup(instantiateArgs);
+                HandleNoMatchingTemplateGroup(instantiateArgs, Reporter.Error);
+                return NewCommandStatus.NotFound;
             }
             if (selectedTemplateGroups.Count() > 1)
             {

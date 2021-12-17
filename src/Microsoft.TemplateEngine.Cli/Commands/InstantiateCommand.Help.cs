@@ -50,7 +50,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (!selectedTemplateGroups.Any())
             {
-                HandleNoMatchingTemplateGroup(instantiateCommandArgs);
+                //help do not return error exit code, so we write error to StdOut instead
+                HandleNoMatchingTemplateGroup(instantiateCommandArgs, Reporter.Output);
                 return;
             }
             if (selectedTemplateGroups.Take(2).Count() > 1)

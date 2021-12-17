@@ -185,9 +185,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "TODO: does not fail now, check if can fail")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotShowHelpForTemplate_PartialNameMatch()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -197,14 +195,11 @@ namespace Dotnet_new3.IntegrationTests
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
 
-            commandResult.Should().Fail();
-
-            Approvals.Verify(commandResult.StdErr);
+            commandResult.Should().Pass().And.NotHaveStdErr();
+            Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "TODO: does not fail now, check if can fail")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotShowHelpForTemplate_FullNameMatch()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -214,9 +209,8 @@ namespace Dotnet_new3.IntegrationTests
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
 
-            commandResult.Should().Fail();
-
-            Approvals.Verify(commandResult.StdErr);
+            commandResult.Should().Pass().And.NotHaveStdErr();
+            Approvals.Verify(commandResult.StdOut);
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
