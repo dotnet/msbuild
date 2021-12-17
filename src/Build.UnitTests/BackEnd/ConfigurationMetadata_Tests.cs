@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             copy.ProjectFullPath.ShouldBe(initial.ProjectFullPath);
             copy.ToolsVersion.ShouldBe(initial.ToolsVersion);
 
-            Assert.Equal(copy.GlobalProperties.GetCopyOnReadEnumerable(), initial.GlobalProperties.GetCopyOnReadEnumerable(), EqualityComparer<ProjectPropertyInstance>.Default);
+            Assert.Equal(copy.GlobalProperties, initial.GlobalProperties, EqualityComparer<ProjectPropertyInstance>.Default);
         }
 
         /// <summary>

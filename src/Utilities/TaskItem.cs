@@ -196,7 +196,15 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                var metadataNames = new List<string>(_metadata?.Keys ?? Array.Empty<string>());
+                int count = (_metadata?.Count ?? 0) + FileUtilities.ItemSpecModifiers.All.Length;
+
+                var metadataNames = new List<string>(capacity: count);
+
+                if (_metadata is not null)
+                {
+                    metadataNames.AddRange(_metadata.Keys);
+                }
+
                 metadataNames.AddRange(FileUtilities.ItemSpecModifiers.All);
 
                 return metadataNames;
