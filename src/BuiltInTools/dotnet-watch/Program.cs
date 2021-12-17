@@ -397,7 +397,8 @@ Examples:
                 return null;
             };
         }
-        private sealed class CommandLineOptionsBinder : BinderBase<CommandLineOptions> {
+        private sealed class CommandLineOptionsBinder : BinderBase<CommandLineOptions>
+        {
             private readonly Option<string> _longProjectOption;
             private readonly Option<string> _shortProjectOption;
             private readonly Option<bool> _quietOption;
