@@ -406,7 +406,8 @@ Examples:
             private readonly Option<bool> _verboseOption;
             private readonly IReporter _reporter;
 
-            internal CommandLineOptionsBinder(Option<string> longProjectOption, Option<string> shortProjectOption, Option<bool> quietOption, Option<bool> listOption, Option<bool> noHotReloadOption, Option<bool> verboseOption, IReporter reporter) {
+            internal CommandLineOptionsBinder(Option<string> longProjectOption, Option<string> shortProjectOption, Option<bool> quietOption, Option<bool> listOption, Option<bool> noHotReloadOption, Option<bool> verboseOption, IReporter reporter)
+            {
                 _longProjectOption = longProjectOption;
                 _shortProjectOption = shortProjectOption;
                 _quietOption = quietOption;
