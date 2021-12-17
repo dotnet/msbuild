@@ -347,9 +347,9 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Retrieves a hosted<see cref="ISdkResolverService"/> instance for resolving SDKs.
+        /// Retrieves a hosted <see cref="ISdkResolverService"/> instance for resolving SDKs.
         /// </summary>
-        private ISdkResolverService SdkResolverService => (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
+        ISdkResolverService IBuildComponentHost.SdkResolverService => (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
 
         /// <summary>
         /// Retrieves the logging service associated with a particular build
@@ -465,7 +465,7 @@ namespace Microsoft.Build.Execution
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestConfigurationResponse, BuildRequestConfigurationResponse.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildResult, BuildResult.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
-                _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
+                _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, ((IBuildComponentHost)this).SdkResolverService as INodePacketHandler);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResourceRequest, ResourceRequest.FactoryForDeserialization, this);
 
                 if (_threadException != null)
@@ -1377,7 +1377,7 @@ namespace Microsoft.Build.Execution
                 request.BuildEventContext,
                 false /* loaded by solution parser*/,
                 config.TargetNames,
-                SdkResolverService,
+                ((IBuildComponentHost)this).SdkResolverService,
                 request.SubmissionId);
 
             // The first instance is the traversal project, which goes into this configuration
@@ -1812,7 +1812,7 @@ namespace Microsoft.Build.Execution
                                     BuildEventContext.InvalidProjectContextId,
                                     BuildEventContext.InvalidTargetId,
                                     BuildEventContext.InvalidTaskId),
-                                SdkResolverService,
+                                ((IBuildComponentHost)this).SdkResolverService,
                                 submission.SubmissionId,
                                 projectLoadSettings);
                         });
@@ -2727,7 +2727,7 @@ namespace Microsoft.Build.Execution
                     _buildSubmissions.Remove(submission.SubmissionId);
 
                     // Clear all cached SDKs for the submission
-                    SdkResolverService.ClearCache(submission.SubmissionId);
+                    ((IBuildComponentHost)this).SdkResolverService.ClearCache(submission.SubmissionId);
                 }
 
                 CheckAllSubmissionsComplete(submission.BuildRequestData?.Flags);
@@ -2747,7 +2747,7 @@ namespace Microsoft.Build.Execution
                     _graphBuildSubmissions.Remove(submission.SubmissionId);
 
                     // Clear all cached SDKs for the submission
-                    SdkResolverService.ClearCache(submission.SubmissionId);
+                    ((IBuildComponentHost)this).SdkResolverService.ClearCache(submission.SubmissionId);
                 }
 
                 CheckAllSubmissionsComplete(submission.BuildRequestData?.Flags);

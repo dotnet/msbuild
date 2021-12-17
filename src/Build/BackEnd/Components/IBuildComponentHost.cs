@@ -4,6 +4,7 @@
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+using ISdkResolverService = Microsoft.Build.BackEnd.SdkResolution.ISdkResolverService;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -156,6 +157,11 @@ namespace Microsoft.Build.BackEnd
         /// Retrieves the logging service associated with a particular build
         /// </summary>
         ILoggingService LoggingService { get; }
+
+        /// <summary>
+        /// Retrieves an <see cref="ISdkResolverService" /> to use for resolving MSBuild project SDKs.
+        /// </summary>
+        ISdkResolverService SdkResolverService { get; }
 
         /// <summary>
         /// Registers a factory which will be used to create the necessary components of the build

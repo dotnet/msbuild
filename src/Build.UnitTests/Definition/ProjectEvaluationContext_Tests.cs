@@ -47,9 +47,11 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private static void SetResolverForContext(EvaluationContext context, SdkResolver resolver)
         {
-            var sdkService = (SdkResolverService) context.SdkResolverService;
-
-            sdkService.InitializeForTests(null, new List<SdkResolver> {resolver});
+            context.SdkResolverService = SdkResolverService.CreateForUnitTests(
+                resolvers: new List<SdkResolver>
+                {
+                    resolver
+                });
         }
 
         [Theory]

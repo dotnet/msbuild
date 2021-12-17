@@ -258,16 +258,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             EvaluationContext.TestOnlyHookOnCreate = context =>
             {
-                var sdkService = (SdkResolverService)context.SdkResolverService;
-
-                sdkService.InitializeForTests(null, new List<SdkResolver> { sdkResolver });
+                context.SdkResolverService = SdkResolverService.CreateForUnitTests(
+                    resolvers: new List<SdkResolver>
+                    {
+                        sdkResolver
+                    });
             };
 
             ((IBuildComponentHost)_buildManager).RegisterFactory(BuildComponentType.SdkResolverService, type =>
             {
-                var resolverService = new MainNodeSdkResolverService();
-                resolverService.InitializeForTests(null, new List<SdkResolver> { sdkResolver });
-                return resolverService;
+                return SdkResolverService.CreateForUnitTests(
+                    resolvers: new List<SdkResolver>
+                    {
+                        sdkResolver
+                    });
             });
 
             return sdkResolver;

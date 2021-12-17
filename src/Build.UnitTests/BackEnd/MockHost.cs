@@ -57,8 +57,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private LegacyThreadingData _legacyThreadingData;
 
-        private ISdkResolverService _sdkResolverService;
-
         #region SystemParameterFields
 
         #endregion;
@@ -100,8 +98,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _targetBuilder = new TestTargetBuilder();
             ((IBuildComponent)_targetBuilder).InitializeComponent(this);
 
-            _sdkResolverService = new MockSdkResolverService();
-            ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
+            SdkResolverService = new MockSdkResolverService();
+            ((IBuildComponent)SdkResolverService).InitializeComponent(this);
         }
 
         /// <summary>
@@ -112,6 +110,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             get { return _loggingService; }
             internal set { _loggingService = value; }
         }
+
+        public ISdkResolverService SdkResolverService { get; }
 
         /// <summary>
         /// Retrieves the name of the host.
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.TargetBuilder => (IBuildComponent)_targetBuilder,
                 BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                 BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
-                BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
+                BuildComponentType.SdkResolverService => (IBuildComponent)SdkResolverService,
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }

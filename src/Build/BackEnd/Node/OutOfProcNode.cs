@@ -188,6 +188,11 @@ namespace Microsoft.Build.Execution
         LegacyThreadingData IBuildComponentHost.LegacyThreadingData => _legacyThreadingData;
 
         /// <summary>
+        /// Gets the <see cref="ISdkResolverService" /> for a build.
+        /// </summary>
+        ISdkResolverService IBuildComponentHost.SdkResolverService => _sdkResolverService;
+
+        /// <summary>
         /// Retrieves the name of this component host.
         /// </summary>
         string IBuildComponentHost.Name => "OutOfProc";

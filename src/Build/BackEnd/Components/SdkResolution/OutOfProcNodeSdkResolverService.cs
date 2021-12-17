@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// The cache of responses which is cleared between builds.
         /// </summary>
-        private readonly ConcurrentDictionary<string, SdkResult> _responseCache = new ConcurrentDictionary<string, SdkResult>(MSBuildNameIgnoreCaseComparer.Default);
+        private readonly ConcurrentDictionary<string, Lazy<SdkResult>> _responseCache = new ConcurrentDictionary<string, Lazy<SdkResult>>(MSBuildNameIgnoreCaseComparer.Default);
 
         /// <summary>
         /// An event to signal when a response has been received.
@@ -52,25 +52,27 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="INodePacketHandler.PacketReceived"/>
         public override void PacketReceived(int node, INodePacket packet)
         {
-            switch (packet.Type)
+            if (packet.Type != NodePacketType.ResolveSdkResponse || packet is not SdkResult response)
             {
-                case NodePacketType.ResolveSdkResponse:
-                    HandleResponse(packet as SdkResult);
-                    break;
+                return;
             }
+
+            // Store the last response so the awaiting thread can use it
+            _lastResponse = response;
+
+            // Signal that a response has been received
+            _responseReceivedEvent.Set();
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
             // Get a cached response if possible, otherwise send the request
-            var sdkResult = _responseCache.GetOrAdd(
+            var resultLazy = _responseCache.GetOrAdd(
                 sdk.Name,
-                key =>
-                {
-                    var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
-                    return result;
-                });
+                key => new Lazy<SdkResult>(() => RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio)));
+
+            var sdkResult = resultLazy.Value;
 
             if (sdkResult.Version != null && !SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
             {
@@ -90,19 +92,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _responseCache.Clear();
         }
 
-        /// <summary>
-        /// Handles a response from the main node.
-        /// </summary>
-        /// <param name="response"></param>
-        private void HandleResponse(SdkResult response)
-        {
-            // Store the last response so the awaiting thread can use it
-            _lastResponse = response;
-
-            // Signal that a response has been received
-            _responseReceivedEvent.Set();
-        }
-
         private SdkResult RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
             // Clear out the last response for good measure
@@ -114,10 +103,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             SendPacket(packet);
 
             // Wait for either the response or a shutdown event.  Either event means this thread should return
-            WaitHandle.WaitAny(new WaitHandle[] {_responseReceivedEvent, ShutdownEvent});
+            WaitHandle.WaitAny(new WaitHandle[] { _responseReceivedEvent, ShutdownEvent });
 
-            // Keep track of the element location of the reference
-            _lastResponse.ElementLocation = sdkReferenceLocation;
+            if (_lastResponse != null)
+            {
+                // Keep track of the element location of the reference
+                _lastResponse.ElementLocation = sdkReferenceLocation;
+            }
 
             // Return the response which was set by another thread.  In the case of shutdown, it should be null.
             return _lastResponse;

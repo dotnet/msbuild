@@ -449,9 +449,6 @@ namespace Microsoft.Build.BackEnd
 
                 string toolsVersionOverride = ExplicitToolsVersionSpecified ? ToolsVersion : null;
 
-                // Get the hosted ISdkResolverService.  This returns either the MainNodeSdkResolverService or the OutOfProcNodeSdkResolverService depending on who created the current RequestBuilder
-                ISdkResolverService sdkResolverService = componentHost.GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
-
                 // Use different project load settings if the build request indicates to do so
                 ProjectLoadSettings projectLoadSettings = componentHost.BuildParameters.ProjectLoadSettings;
 
@@ -478,7 +475,7 @@ namespace Microsoft.Build.BackEnd
                         BuildEventContext.InvalidProjectContextId,
                         BuildEventContext.InvalidTargetId,
                         BuildEventContext.InvalidTaskId),
-                    sdkResolverService,
+                    componentHost.SdkResolverService,
                     submissionId,
                     projectLoadSettings);
             });

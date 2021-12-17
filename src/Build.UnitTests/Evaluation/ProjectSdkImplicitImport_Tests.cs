@@ -20,6 +20,7 @@ using SdkResolverContext = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResult = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactory = Microsoft.Build.Framework.SdkResultFactory;
 using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
+using Microsoft.Build.BackEnd.SdkResolution;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -89,6 +90,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             _sdkTargetsPath = Path.Combine(_testSdkDirectory, "Sdk.targets");
 
             Directory.CreateDirectory(_testSdkDirectory);
+
+            // Disable SDK resolver result cache since the tests in this class re-use the same SDK name in a different location
+            SdkResolverService.Instance.DisableResultCacheForUnitTests();
         }
 
         [Theory]

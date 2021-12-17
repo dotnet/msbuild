@@ -207,12 +207,10 @@
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverServiceFactory.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkLogger.cs" />
-    <Compile Include="BackEnd\Components\SdkResolution\CachingSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverContext.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverLoader.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverManifest.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverRequest.cs" />
-    <Compile Include="BackEnd\Components\SdkResolution\MainNodeSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\HostedSdkResolverServiceBase.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResult.cs" />

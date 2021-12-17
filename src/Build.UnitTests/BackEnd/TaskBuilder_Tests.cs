@@ -1181,8 +1181,6 @@ namespace ClassLibrary2
             /// </summary>
             private LegacyThreadingData _legacyThreadingData;
 
-            private ISdkResolverService _sdkResolverService;
-
             /// <summary>
             /// Constructor
             ///
@@ -1208,8 +1206,8 @@ namespace ClassLibrary2
                 _targetBuilder = new TargetBuilder();
                 ((IBuildComponent)_targetBuilder).InitializeComponent(this);
 
-                _sdkResolverService = new MockSdkResolverService();
-                ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
+                SdkResolverService = new MockSdkResolverService();
+                ((IBuildComponent)SdkResolverService).InitializeComponent(this);
             }
 
             /// <summary>
@@ -1256,6 +1254,9 @@ namespace ClassLibrary2
                 }
             }
 
+            /// <inheritdoc cref="IBuildComponentHost.SdkResolverService" />
+            public ISdkResolverService SdkResolverService { get; }
+
             /// <summary>
             /// Constructs and returns a component of the specified type.
             /// </summary>
@@ -1270,7 +1271,7 @@ namespace ClassLibrary2
                     BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                     BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                     BuildComponentType.TargetBuilder => (IBuildComponent)_targetBuilder,
-                    BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
+                    BuildComponentType.SdkResolverService => (IBuildComponent)SdkResolverService,
                     _ => throw new ArgumentException("Unexpected type " + type),
                 };
             }

@@ -11,6 +11,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Xunit;
+using Microsoft.Build.BackEnd.SdkResolution;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -38,6 +39,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             public ILoggingService LoggingService
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            public ISdkResolverService SdkResolverService
             {
                 get
                 {

@@ -40,7 +40,7 @@ namespace Microsoft.Build.Evaluation.Context
 
         internal SharingPolicy Policy { get; }
 
-        internal ISdkResolverService SdkResolverService { get; }
+        internal ISdkResolverService SdkResolverService { get; set; }
         internal IFileSystem FileSystem { get; }
         internal FileMatcher FileMatcher { get; }
 
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Evaluation.Context
         {
             Policy = policy;
 
-            SdkResolverService = sdkResolverService ?? new CachingSdkResolverService();
+            SdkResolverService = sdkResolverService ?? BackEnd.SdkResolution.SdkResolverService.Instance;
             FileEntryExpansionCache = fileEntryExpansionCache ?? new ConcurrentDictionary<string, IReadOnlyList<string>>();
             FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
             FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);

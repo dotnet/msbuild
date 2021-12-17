@@ -1703,8 +1703,6 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             /// </summary>
             private LegacyThreadingData _legacyThreadingData;
 
-            private ISdkResolverService _sdkResolverService;
-
             /// <summary>
             /// Constructor
             /// </summary>
@@ -1730,8 +1728,8 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
                 _targetBuilder = new TargetBuilder();
                 ((IBuildComponent)_targetBuilder).InitializeComponent(this);
 
-                _sdkResolverService = new MockSdkResolverService();
-                ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
+                SdkResolverService = new MockSdkResolverService();
+                ((IBuildComponent)SdkResolverService).InitializeComponent(this);
             }
 
             /// <summary>
@@ -1779,6 +1777,9 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
                 }
             }
 
+            /// <inheritdoc cref="IBuildComponentHost.SdkResolverService" />
+            public ISdkResolverService SdkResolverService { get; }
+
             /// <summary>
             /// Constructs and returns a component of the specified type.
             /// </summary>
@@ -1794,7 +1795,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
                     BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                     BuildComponentType.TaskBuilder => (IBuildComponent)_taskBuilder,
                     BuildComponentType.TargetBuilder => (IBuildComponent)_targetBuilder,
-                    BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
+                    BuildComponentType.SdkResolverService => (IBuildComponent)SdkResolverService,
                     _ => throw new ArgumentException("Unexpected type " + type),
                 };
             }

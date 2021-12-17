@@ -25,8 +25,12 @@ namespace Microsoft.Build.Unittest
         public static ProjectOptions CreateProjectOptionsWithResolver(SdkResolver resolver)
         {
             var context = EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
-            var sdkService = (SdkResolverService)context.SdkResolverService;
-            sdkService.InitializeForTests(null, new List<SdkResolver>() { resolver });
+            
+            context.SdkResolverService = SdkResolverService.CreateForUnitTests(
+                resolvers: new List<SdkResolver>
+                {
+                    resolver
+                });
 
             return new ProjectOptions
             {

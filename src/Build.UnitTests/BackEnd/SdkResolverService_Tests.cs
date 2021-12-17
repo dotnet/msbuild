@@ -39,11 +39,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void AssertAllResolverErrorsLoggedWhenSdkNotResolved()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(new MockLoaderStrategy());
 
             SdkReference sdk = new SdkReference("notfound", "referencedVersion", "minimumVersion");
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
+            var result = sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
             result.Success.ShouldBeFalse();
             result.ShouldNotBeNull();
@@ -63,8 +63,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             var sdk = new SdkReference("foo", "1.0.0", null);
 
-            SdkResolverService.Instance.InitializeForTests(
-                null,
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(
+                resolverLoader: null,
                 new List<SdkResolver>
                 {
                     new SdkUtilities.ConfigurableMockSdkResolver(
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             ))
                 });
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
+            var result = sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
             result.Path.ShouldBe("path");
 
@@ -87,12 +87,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void AssertResolverThrows()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeErrorResolver: true));
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(new MockLoaderStrategy(includeErrorResolver: true));
 
             SdkReference sdk = new SdkReference("1sdkName", "version1", "minimumVersion");
 
             // When an SDK resolver throws, the expander will catch it and stop the build.
-            SdkResolverException e = Should.Throw<SdkResolverException>(() => SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false));
+            SdkResolverException e = Should.Throw<SdkResolverException>(() => sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false));
             e.Resolver.Name.ShouldBe("MockSdkResolverThrows");
             e.Sdk.Name.ShouldBe("1sdkName");
         }
@@ -100,11 +100,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void AssertFirstResolverCanResolve()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(new MockLoaderStrategy());
 
             SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
+            var result = sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
             result.Path.ShouldBe("resolverpath1");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
@@ -113,13 +113,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void AssertFirstResolverErrorsSupressedWhenResolved()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(new MockLoaderStrategy());
 
             // 2sdkName will cause MockSdkResolver1 to fail with an error reason. The error will not
             // be logged because MockSdkResolver2 will succeed.
             SdkReference sdk = new SdkReference("2sdkName", "version2", "minimumVersion");
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
+            var result = sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
             result.Path.ShouldBe("resolverpath2");
 
@@ -137,15 +137,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             const int submissionId = 5;
 
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
-
-            SdkReference sdk = new SdkReference("othersdk", "1.0", "minimumVersion");
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(new MockLoaderStrategy());
 
             // First call should not know state
-            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false).Path.ShouldBe("resolverpath");
+            sdkResolverService.ResolveSdk(submissionId, new SdkReference("sdk1", "1.0", "minimumVersion"), _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false).Path.ShouldBe("resolverpath");
 
             // Second call should have received state
-            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false).Path.ShouldBe(MockSdkResolverWithState.Expected);
+            sdkResolverService.ResolveSdk(submissionId, new SdkReference("sdk2", "1.0", "minimumVersion"), _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false).Path.ShouldBe(MockSdkResolverWithState.Expected);
         }
 
         [Fact]
@@ -153,15 +151,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             const int submissionId = BuildEventContext.InvalidSubmissionId;
 
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(new MockLoaderStrategy());
 
             SdkReference sdk = new SdkReference("othersdk", "1.0", "minimumVersion");
 
             // First call should not know state
-            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false).Path.ShouldBe("resolverpath");
+            sdkResolverService.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false).Path.ShouldBe("resolverpath");
 
             // Second call should have received state
-            SdkResolverService.Instance.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false).Path.ShouldBe("resolverpath");
+            sdkResolverService.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false).Path.ShouldBe("resolverpath");
         }
 
         [Theory]
@@ -194,9 +192,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     Enumerable.Empty<string>()
                     ));
 
-            var service = new CachingSdkResolverService();
-            service.InitializeForTests(
-                null,
+            var service = SdkResolverService.CreateForUnitTests(
+                resolverLoader: null,
                 new List<SdkResolver>
                 {
                     resolver
@@ -282,9 +279,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     warnings: null
                     ));
 
-            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(
+                resolverLoader: null,
+                new List<SdkResolver>
+                {
+                    resolver
+                });
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
+            var result = sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
             result.Success.ShouldBeTrue();
             result.Path.ShouldBeNull();
@@ -319,9 +321,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     warnings: null
                     ));
 
-            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(
+                resolverLoader: null,
+                new List<SdkResolver>
+                {
+                    resolver
+                });
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
+            var result = sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
             result.Success.ShouldBeTrue();
             result.Path.ShouldBe(expectedPath);
@@ -366,9 +373,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     warnings: null
                     ));
 
-            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(
+                resolverLoader: null,
+                new List<SdkResolver>
+                {
+                    resolver
+                });
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
+            var result = sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
             result.Success.ShouldBeTrue();
 
@@ -412,9 +424,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     warnings: null
                     ));
 
-            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(
+                resolverLoader: null,
+                new List<SdkResolver>
+                {
+                    resolver
+                });
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
+            var result = sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
             result.Success.ShouldBeTrue();
 
@@ -450,9 +467,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     Enumerable.Empty<string>()
                 ));
 
-            var service = new CachingSdkResolverService();
-            service.InitializeForTests(
-                null,
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(
+                resolverLoader: null,
                 new List<SdkResolver>
                 {
                     resolver
@@ -462,7 +478,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             Parallel.For(
                 0,
                 10,
-                _ => service.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false));
+                _ => sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false));
 
             var result = resolver.ResolvedCalls.ShouldHaveSingleItem();
 
@@ -478,9 +494,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // Start with interactive false
             bool interactive = false;
 
-            var service = new CachingSdkResolverService();
-
-            service.InitializeForTests(
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(
                 resolvers: new List<SdkResolver>
                 {
                     new SdkUtilities.ConfigurableMockSdkResolver((sdkRference, resolverContext, factory) =>
@@ -491,7 +505,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     })
                 });
 
-            service.ResolveSdk(
+
+            sdkResolverService.ResolveSdk(
                 BuildEventContext.InvalidSubmissionId,
                 new SdkReference("foo", "1.0.0", null),
                 _loggingContext,
@@ -510,8 +525,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             bool isRunningInVisualStudio = false;
 
-            var service = new CachingSdkResolverService();
-            service.InitializeForTests(
+            var sdkResolverService = SdkResolverService.CreateForUnitTests(
                 resolvers: new List<SdkResolver>
                 {
                     new SdkUtilities.ConfigurableMockSdkResolver((sdkRference, resolverContext, factory) =>
@@ -521,7 +535,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     })
                 });
 
-            var result = service.ResolveSdk(
+            var result = sdkResolverService.ResolveSdk(
                 BuildEventContext.InvalidSubmissionId,
                 new SdkReference("foo", "1.0.0", null),
                 _loggingContext,
