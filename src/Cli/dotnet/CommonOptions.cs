@@ -1,16 +1,16 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using Microsoft.DotNet.Tools;
-using System.CommandLine;
-using System.IO;
-using Microsoft.DotNet.Tools.Common;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
-using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Common;
+using System;
+using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Completions;
+using System.CommandLine.Parsing;
+using System.IO;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli
 {
