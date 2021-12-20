@@ -207,8 +207,8 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
-        <source>Uninstall the templates or the packages to keep only one template from the list.</source>
-        <target state="translated">Odinstalujte šablony nebo balíčky, aby z daného seznamu zůstala pouze jedna šablona.</target>
+        <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
+        <target state="needs-review-translation">Odinstalujte šablony nebo balíčky, aby z daného seznamu zůstala pouze jedna šablona.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">

@@ -410,7 +410,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uninstall the templates or the packages to keep only one template from the list..
+        ///   Looks up a localized string similar to Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run..
         /// </summary>
         internal static string AmbiguousTemplatesMultiplePackagesHint {
             get {

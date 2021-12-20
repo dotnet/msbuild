@@ -56,7 +56,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             if (selectedTemplateGroups.Take(2).Count() > 1)
             {
-                HandleAmbiguousTemplateGroup(instantiateCommandArgs);
+                HandleAmbiguousTemplateGroup(environmentSettings, templatePackageManager, selectedTemplateGroups, Reporter.Output);
                 return;
             }
 

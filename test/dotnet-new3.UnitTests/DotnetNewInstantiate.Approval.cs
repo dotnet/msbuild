@@ -70,6 +70,37 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
+        public void CannotInstantiateTemplate_WhenAmbiguousShortNameChoice()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string templateOneLocation = Helpers.InstallTestTemplate("TemplateResolution/SameShortName/BasicFSharp", _log, workingDirectory, home);
+            string templateTwoLocation = Helpers.InstallTestTemplate("TemplateResolution/SameShortName/BasicVB", _log, workingDirectory, home);
+
+            var commandResult = new DotnetNewCommand(_log, "basic")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut();
+
+            Approvals.Verify(commandResult.StdErr, (output) =>
+            {
+                //package locaions are machine specific so we cannot use them in approval tests
+                //replace them with directory name
+                var finalOutput = output.Replace(templateOneLocation, Path.GetFileName(templateOneLocation)).Replace(templateTwoLocation, Path.GetFileName(templateTwoLocation));
+                //removes the delimiter line as we don't know the length of last columns containing paths above
+                finalOutput = Regex.Replace(finalOutput, "-+[ -]*", "%delimiter%");
+                //replace the "Package" column header as we don't know the amount of spaces after it (depends on the paths above)
+                finalOutput = Regex.Replace(finalOutput, "Package *", "Package");
+                return finalOutput;
+            });
+        }
+
+        [Fact]
         public void CannotInstantiateTemplate_WhenFullNameIsUsed()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();

@@ -493,7 +493,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>Unable to resolve the template, the following installed templates are conflicting:</value>
   </data>
   <data name="AmbiguousTemplatesMultiplePackagesHint" xml:space="preserve">
-    <value>Uninstall the templates or the packages to keep only one template from the list.</value>
+    <value>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</value>
   </data>
   <data name="AmbiguousTemplatesSamePackageHint" xml:space="preserve">
     <value>The package {0} is not correct, uninstall it and report the issue to the package author.</value>

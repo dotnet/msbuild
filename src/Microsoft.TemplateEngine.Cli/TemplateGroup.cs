@@ -4,6 +4,8 @@
 #nullable enable
 
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
+using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -133,14 +135,34 @@ namespace Microsoft.TemplateEngine.Cli
 
         /// <summary>
         /// Returns the description of template group
-        /// Template group name is the name of highest precedence template in the group.
-        /// If multiple templates have the maximum precedence, the name of first one is returned.
+        /// Template group description is the name of highest precedence template in the group.
+        /// If multiple templates have the maximum precedence, the description of first one is returned.
         /// </summary>
         internal string Description
         {
             get
             {
                 return GetHighestPrecedenceTemplates().First().Description ?? string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Returns the authors of template group.
+        /// If different templates have different authors, lists all of them.
+        /// </summary>
+        internal IReadOnlyList<string> Authors
+        {
+            get
+            {
+                HashSet<string> authors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (ITemplateInfo template in Templates)
+                {
+                    if (!string.IsNullOrWhiteSpace(template.Author))
+                    {
+                        authors.Add(template.Author);
+                    }
+                }
+                return authors.ToList();
             }
         }
 
@@ -164,6 +186,35 @@ namespace Microsoft.TemplateEngine.Cli
             return templates
               .GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase)
               .Select(group => new TemplateGroup(group.ToList()));
+        }
+
+        /// <summary>
+        /// Gets the list of <b>managed</b> template packages which contain templates of template group.
+        /// </summary>
+        /// <remarks>
+        /// The method might throw exceptions if <see cref="TemplatePackageManager.GetTemplatePackageAsync(ITemplateInfo, CancellationToken)"/> call throws.
+        /// </remarks>
+        internal async Task<IReadOnlyList<IManagedTemplatePackage>> GetManagedTemplatePackagesAsync(
+            TemplatePackageManager templatePackageManager,
+            CancellationToken cancellationToken)
+        {
+            var templatePackages = await GetTemplatePackagesAsync(templatePackageManager, cancellationToken).ConfigureAwait(false);
+
+            return templatePackages.OfType<IManagedTemplatePackage>().ToArray();
+        }
+
+        /// <summary>
+        /// Gets the list of template packages which contain templates of template group.
+        /// </summary>
+        /// <remarks>
+        /// The method might throw exceptions if <see cref="TemplatePackageManager.GetTemplatePackageAsync(ITemplateInfo, CancellationToken)"/> call throws.
+        /// </remarks>
+        internal async Task<IReadOnlyList<ITemplatePackage>> GetTemplatePackagesAsync(
+            TemplatePackageManager templatePackageManager,
+            CancellationToken cancellationToken)
+        {
+            var templatePackages = await Task.WhenAll(Templates.Select(t => templatePackageManager.GetTemplatePackageAsync(t, cancellationToken))).ConfigureAwait(false);
+            return templatePackages.Distinct().ToArray();
         }
 
         private IEnumerable<ITemplateInfo> GetHighestPrecedenceTemplates()

@@ -7,8 +7,11 @@ using System.CommandLine;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.Extensions;
+using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -136,7 +139,48 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             reporter.WriteLine();
         }
 
-        internal NewCommandStatus HandleAmbiguousTemplateGroup(InstantiateCommandArgs instantiateArgs) => throw new NotImplementedException();
+        internal NewCommandStatus HandleAmbiguousTemplateGroup(
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            IEnumerable<TemplateGroup> templateGroups,
+            Reporter reporter,
+            CancellationToken cancellationToken = default)
+        {
+            IEnvironment environment = environmentSettings.Environment;
+            reporter.WriteLine(LocalizableStrings.AmbiguousTemplatesHeader.Bold().Red());
+            TabularOutput<TemplateGroup> formatter =
+                TabularOutput.TabularOutput
+                    .For(
+                        new TabularOutputSettings(environment),
+                        templateGroups)
+                    .DefineColumn(t => t.GroupIdentity ?? t.Templates[0].Identity, out object identityColumn, LocalizableStrings.ColumnNameIdentity, showAlways: true)
+                    .DefineColumn(t => t.Name, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
+                    .DefineColumn(t => string.Join(",", t.ShortNames), LocalizableStrings.ColumnNameShortName, showAlways: true)
+                    .DefineColumn(t => string.Join(",", t.Languages), LocalizableStrings.ColumnNameLanguage, showAlways: true)
+                    .DefineColumn(t => string.Join(",", t.Authors), LocalizableStrings.ColumnNameAuthor, showAlways: true, shrinkIfNeeded: true, minWidth: 10)
+                    .DefineColumn(t => Task.Run(() => GetTemplatePackagesList(t)).GetAwaiter().GetResult(), LocalizableStrings.ColumnNamePackage, showAlways: true)
+                    .OrderBy(identityColumn, StringComparer.CurrentCultureIgnoreCase);
+
+            reporter.WriteLine(formatter.Layout().Bold().Red());
+            reporter.WriteLine(LocalizableStrings.AmbiguousTemplatesMultiplePackagesHint.Bold().Red());
+            return NewCommandStatus.NotFound;
+
+            async Task<string> GetTemplatePackagesList(TemplateGroup templateGroup)
+            {
+                try
+                {
+                    IReadOnlyList<IManagedTemplatePackage> templatePackages =
+                        await templateGroup.GetManagedTemplatePackagesAsync(templatePackageManager, cancellationToken).ConfigureAwait(false);
+                    return string.Join(environment.NewLine, templatePackages.Select(templatePackage => templatePackage.Identifier));
+                }
+                catch (Exception ex)
+                {
+                    environmentSettings.Host.Logger.LogWarning($"Failed to get information about template packages for template group {templateGroup.GroupIdentity}.");
+                    environmentSettings.Host.Logger.LogDebug($"Details: {ex}.");
+                    return string.Empty;
+                }
+            }
+        }
 
         protected async override Task<NewCommandStatus> ExecuteAsync(InstantiateCommandArgs instantiateArgs, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
@@ -167,7 +211,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             if (selectedTemplateGroups.Count() > 1)
             {
-                return HandleAmbiguousTemplateGroup(instantiateArgs);
+                return HandleAmbiguousTemplateGroup(environmentSettings, templatePackageManager, selectedTemplateGroups, Reporter.Error, cancellationToken);
             }
             return await HandleTemplateInstantationAsync(
                 instantiateArgs,

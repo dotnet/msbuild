@@ -207,8 +207,8 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
-        <source>Uninstall the templates or the packages to keep only one template from the list.</source>
-        <target state="translated">Odinstaluj szablony lub pakiety, aby zachować tylko jeden szablon z listy.</target>
+        <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
+        <target state="needs-review-translation">Odinstaluj szablony lub pakiety, aby zachować tylko jeden szablon z listy.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">

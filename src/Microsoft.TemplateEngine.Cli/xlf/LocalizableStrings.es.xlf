@@ -207,8 +207,8 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
-        <source>Uninstall the templates or the packages to keep only one template from the list.</source>
-        <target state="translated">Desinstale las plantillas o los paquetes para conservar solo una plantilla de la lista.</target>
+        <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
+        <target state="needs-review-translation">Desinstale las plantillas o los paquetes para conservar solo una plantilla de la lista.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
