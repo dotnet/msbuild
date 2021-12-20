@@ -46,7 +46,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(instantiateCommand, args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, matchingTemplates.Count());
             StringWriter output = new StringWriter();
-            Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, output, matchingTemplates, out _));
+            Reporter reporter = new Reporter(new AnsiConsole(output));
+            Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out _));
             Assert.Empty(output.ToString());
         }
 
@@ -72,7 +73,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(instantiateCommand, args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(3, matchingTemplates.Count());
             StringWriter output = new StringWriter();
-            Assert.False(InstantiateCommand.VerifyMatchingTemplates(settings, output, matchingTemplates, out _));
+            Reporter reporter = new Reporter(new AnsiConsole(output));
+            Assert.False(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out _));
             return Verifier.Verify(output.ToString(), _verifySettings.Settings);
         }
 
@@ -98,7 +100,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(instantiateCommand, args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(2, matchingTemplates.Count());
             StringWriter output = new StringWriter();
-            Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, output, matchingTemplates, out IEnumerable<TemplateCommand>? filtered));
+            Reporter reporter = new Reporter(new AnsiConsole(output));
+            Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out IEnumerable<TemplateCommand>? filtered));
             Assert.Equal(1, filtered?.Count());
             Assert.Equal("Console.App.L1", filtered?.Single().Template.Identity);
             Assert.Empty(output.ToString());
@@ -125,7 +128,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(instantiateCommand, args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, matchingTemplates.Count());
             StringWriter output = new StringWriter();
-            Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, output, matchingTemplates, out IEnumerable<TemplateCommand>? filtered));
+            Reporter reporter = new Reporter(new AnsiConsole(output));
+            Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out IEnumerable<TemplateCommand>? filtered));
             Assert.Equal(1, filtered?.Count());
             Assert.Equal("Console.App.L2", filtered?.Single().Template.Identity);
             Assert.Empty(output.ToString());
@@ -150,7 +154,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(instantiateCommand, args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(3, matchingTemplates.Count());
             StringWriter output = new StringWriter();
-            Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, output, matchingTemplates, out IEnumerable<TemplateCommand>? filtered));
+            Reporter reporter = new Reporter(new AnsiConsole(output));
+            Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out IEnumerable<TemplateCommand>? filtered));
             Assert.Equal(3, filtered?.Count());
             Assert.Empty(output.ToString());
         }

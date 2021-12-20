@@ -46,9 +46,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdErr);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "instantiation error handling is not complete yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotInstantiateTemplate_WhenAmbiguousLanguageChoice()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
@@ -189,9 +187,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdErr);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "instantiation error handling is not complete yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotInstantiateTemplate_WhenPrecedenceIsSame()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");

@@ -78,8 +78,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (!VerifyMatchingTemplates(
                 environmentSettings,
-                context.Output,
                 matchingTemplates,
+                Reporter.Output,
                 out IEnumerable<TemplateCommand>? templatesToShow))
             {
                 //error
@@ -129,8 +129,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static bool VerifyMatchingTemplates(
             IEngineEnvironmentSettings environmentSettings,
-            TextWriter writer,
             IEnumerable<TemplateCommand> matchingTemplates,
+            Reporter reporter,
             [NotNullWhen(true)]
             out IEnumerable<TemplateCommand>? filteredTemplates)
         {
@@ -153,7 +153,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         HandleAmbiguousLanguage(
                             environmentSettings,
                             matchingTemplates.Select(c => c.Template),
-                            writer);
+                            reporter);
 
                         filteredTemplates = null;
                         return false;
@@ -164,7 +164,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     HandleAmbiguousLanguage(
                         environmentSettings,
                         matchingTemplates.Select(c => c.Template),
-                        writer);
+                        reporter);
 
                     filteredTemplates = null;
                     return false;
@@ -178,7 +178,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 HandleAmbiguousType(
                     environmentSettings,
                     matchingTemplates.Select(c => c.Template),
-                    writer);
+                    reporter);
                 filteredTemplates = null;
                 return false;
             }
@@ -369,38 +369,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 context.Output.WriteLine(Indent + string.Join(" ", parts));
             }
             context.Output.WriteLine();
-        }
-
-        private static NewCommandStatus HandleAmbiguousLanguage(
-            IEngineEnvironmentSettings environmentSettings,
-            IEnumerable<CliTemplateInfo> templates,
-            TextWriter writer)
-        {
-            writer.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
-            TemplateGroupDisplay.DisplayTemplateList(
-                environmentSettings,
-                templates,
-                new TabularOutputSettings(environmentSettings.Environment),
-                writer: writer);
-            writer.WriteLine(HelpStrings.Hint_AmbiguousLanguage);
-            return NewCommandStatus.NotFound;
-        }
-
-        private static NewCommandStatus HandleAmbiguousType(
-            IEngineEnvironmentSettings environmentSettings,
-            IEnumerable<CliTemplateInfo> templates,
-            TextWriter writer)
-        {
-            writer.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
-            TemplateGroupDisplay.DisplayTemplateList(
-                environmentSettings,
-                templates,
-                new TabularOutputSettings(
-                    environmentSettings.Environment,
-                    columnsToDisplay: new[] { TabularOutputSettings.ColumnNames.Type }),
-                writer: writer);
-            writer.WriteLine(HelpStrings.Hint_AmbiguousType);
-            return NewCommandStatus.NotFound;
         }
 
         /// <summary>

@@ -539,7 +539,11 @@ namespace Microsoft.TemplateEngine.Cli
                         string.Format(
                             LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
                             result.TemplatePackage.DisplayName));
-                    TemplateGroupDisplay.DisplayTemplateList(_engineEnvironmentSettings, templates, new TabularOutputSettings(_engineEnvironmentSettings.Environment));
+                    TemplateGroupDisplay.DisplayTemplateList(
+                        _engineEnvironmentSettings,
+                        templates,
+                        new TabularOutputSettings(_engineEnvironmentSettings.Environment),
+                        reporter: Reporter.Output);
                 }
                 else
                 {

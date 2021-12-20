@@ -13,6 +13,7 @@ using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -223,6 +224,38 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
 
+        private static NewCommandStatus HandleAmbiguousLanguage(
+            IEngineEnvironmentSettings environmentSettings,
+            IEnumerable<CliTemplateInfo> templates,
+            Reporter reporter)
+        {
+            reporter.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
+            TemplateGroupDisplay.DisplayTemplateList(
+                environmentSettings,
+                templates,
+                new TabularOutputSettings(environmentSettings.Environment),
+                reporter);
+            reporter.WriteLine(HelpStrings.Hint_AmbiguousLanguage);
+            return NewCommandStatus.NotFound;
+        }
+
+        private static NewCommandStatus HandleAmbiguousType(
+            IEngineEnvironmentSettings environmentSettings,
+            IEnumerable<CliTemplateInfo> templates,
+            Reporter reporter)
+        {
+            reporter.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
+            TemplateGroupDisplay.DisplayTemplateList(
+                environmentSettings,
+                templates,
+                new TabularOutputSettings(
+                    environmentSettings.Environment,
+                    columnsToDisplay: new[] { TabularOutputSettings.ColumnNames.Type }),
+                reporter);
+            reporter.WriteLine(HelpStrings.Hint_AmbiguousType);
+            return NewCommandStatus.NotFound;
+        }
+
         private async Task<NewCommandStatus> HandleTemplateInstantationAsync(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
@@ -239,13 +272,87 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             else if (candidates.Any())
             {
-                return HandleAmbuguousResult();
+                return HandleAmbiguousResult(
+                    environmentSettings,
+                    templatePackageManager,
+                    candidates.Select(c => c.Template),
+                    Reporter.Error,
+                    cancellationToken);
             }
 
             return HandleNoTemplateFoundResult(args, environmentSettings, templatePackageManager, templateGroup, Reporter.Error);
         }
 
-        private NewCommandStatus HandleAmbuguousResult() => throw new NotImplementedException();
+        private NewCommandStatus HandleAmbiguousResult(
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            IEnumerable<CliTemplateInfo> templates,
+            Reporter reporter,
+            CancellationToken cancellationToken = default)
+        {
+            if (!templates.Any(t => string.IsNullOrWhiteSpace(t.GetLanguage()))
+                && !templates.AllAreTheSame(t => t.GetLanguage()))
+            {
+                return HandleAmbiguousLanguage(
+                       environmentSettings,
+                       templates,
+                       Reporter.Error);
+            }
+
+            if (!templates.Any(t => string.IsNullOrWhiteSpace(t.GetTemplateType()))
+            && !templates.AllAreTheSame(t => t.GetTemplateType()))
+            {
+                return HandleAmbiguousType(
+                       environmentSettings,
+                       templates,
+                       Reporter.Error);
+            }
+
+            reporter.WriteLine(LocalizableStrings.AmbiguousTemplatesHeader.Bold().Red());
+            IEnvironment environment = environmentSettings.Environment;
+            TabularOutput<CliTemplateInfo> formatter =
+                    TabularOutput.TabularOutput
+                        .For(
+                            new TabularOutputSettings(environment),
+                            templates)
+                        .DefineColumn(t => t.Identity, out object identityColumn, LocalizableStrings.ColumnNameIdentity, showAlways: true)
+                        .DefineColumn(t => t.Name, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
+                        .DefineColumn(t => string.Join(",", t.ShortNameList), LocalizableStrings.ColumnNameShortName, showAlways: true)
+                        .DefineColumn(t => t.GetLanguage(), LocalizableStrings.ColumnNameLanguage, showAlways: true)
+                        .DefineColumn(t => t.Precedence.ToString(), out object prcedenceColumn, LocalizableStrings.ColumnNamePrecedence, showAlways: true)
+                        .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, showAlways: true, shrinkIfNeeded: true, minWidth: 10)
+                        .DefineColumn(t => Task.Run(() => GetTemplatePackage(t)).GetAwaiter().GetResult(), LocalizableStrings.ColumnNamePackage, showAlways: true)
+                        .OrderBy(identityColumn, StringComparer.CurrentCultureIgnoreCase)
+                        .OrderByDescending(prcedenceColumn, new NullOrEmptyIsLastStringComparer());
+            reporter.WriteLine(formatter.Layout().Bold().Red());
+
+            reporter.WriteLine(LocalizableStrings.AmbiguousTemplatesMultiplePackagesHint.Bold().Red());
+            if (templates.AllAreTheSame(t => t.MountPointUri))
+            {
+                string templatePackage = Task.Run(() => GetTemplatePackage(templates.First())).GetAwaiter().GetResult();
+                if (!string.IsNullOrWhiteSpace(templatePackage))
+                {
+                    reporter.WriteLine(string.Format(LocalizableStrings.AmbiguousTemplatesSamePackageHint, templatePackage).Bold().Red());
+                }
+            }
+            return NewCommandStatus.NotFound;
+
+            async Task<string> GetTemplatePackage(CliTemplateInfo template)
+            {
+                try
+                {
+                    IManagedTemplatePackage? templatePackage =
+                        await template.GetManagedTemplatePackageAsync(templatePackageManager, cancellationToken).ConfigureAwait(false);
+                    return templatePackage?.Identifier ?? string.Empty;
+                }
+                catch (Exception ex)
+                {
+                    environmentSettings.Host.Logger.LogWarning($"Failed to get information about template packages for template group {template.Identity}.");
+                    environmentSettings.Host.Logger.LogDebug($"Details: {ex}.");
+                    return string.Empty;
+                }
+            }
+        }
 
         private HashSet<TemplateCommand> ReparseForTemplate(
             InstantiateCommandArgs args,

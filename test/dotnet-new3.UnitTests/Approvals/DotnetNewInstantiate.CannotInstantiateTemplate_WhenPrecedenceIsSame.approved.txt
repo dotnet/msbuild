@@ -4,4 +4,4 @@ Identity                                       Template Name   Short Name  Langu
 TestAssets.SamePrecedenceGroup.BasicTemplate1  Basic Template  basic       C#        100         Test Asset  
 TestAssets.SamePrecedenceGroup.BasicTemplate2  Basic Template  basic       C#        100         Test Asset  
 
-Uninstall the templates or the packages to keep only one template from the list.
+Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.

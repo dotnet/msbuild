@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 namespace Microsoft.TemplateEngine.Cli
 {
     internal class Reporter
@@ -8,14 +10,21 @@ namespace Microsoft.TemplateEngine.Cli
         private static readonly Reporter NullReporter = new Reporter(console: null);
         private static object _lock = new object();
 
-        private readonly AnsiConsole _console;
+        private readonly AnsiConsole? _console;
 
         static Reporter()
         {
-            Reset();
+            lock (_lock)
+            {
+                Output = new Reporter(AnsiConsole.GetOutput());
+                Error = new Reporter(AnsiConsole.GetError());
+                Verbose = IsVerbose ?
+                    new Reporter(AnsiConsole.GetOutput()) :
+                    NullReporter;
+            }
         }
 
-        private Reporter(AnsiConsole console)
+        internal Reporter(AnsiConsole? console)
         {
             _console = console;
         }
@@ -34,21 +43,6 @@ namespace Microsoft.TemplateEngine.Cli
         private bool ShouldPassAnsiCodesThrough
         {
             get { return bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_ANSI_PASS_THRU") ?? "false", out bool value) && value; }
-        }
-
-        /// <summary>
-        /// Resets the Reporters to write to the current Console Out/Error.
-        /// </summary>
-        internal static void Reset()
-        {
-            lock (_lock)
-            {
-                Output = new Reporter(AnsiConsole.GetOutput());
-                Error = new Reporter(AnsiConsole.GetError());
-                Verbose = IsVerbose ?
-                    new Reporter(AnsiConsole.GetOutput()) :
-                    NullReporter;
-            }
         }
 
         internal void WriteLine(string message)

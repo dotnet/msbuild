@@ -4,6 +4,8 @@
 #nullable enable
 
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
+using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -119,6 +121,33 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             return templateInfos.Select(templateInfo => new CliTemplateInfo(templateInfo, hostSpecificDataLoader.ReadHostSpecificTemplateData(templateInfo)));
+        }
+
+        /// <summary>
+        /// Gets the <b>managed</b> template package which contain the template, <see langword="null"/> otherwise.
+        /// </summary>
+        /// <remarks>
+        /// The method might throw exceptions if <see cref="TemplatePackageManager.GetTemplatePackageAsync(ITemplateInfo, CancellationToken)"/> call throws.
+        /// </remarks>
+        internal async Task<IManagedTemplatePackage?> GetManagedTemplatePackageAsync(
+            TemplatePackageManager templatePackageManager,
+            CancellationToken cancellationToken)
+        {
+            ITemplatePackage templatePackage = await GetTemplatePackageAsync(templatePackageManager, cancellationToken).ConfigureAwait(false);
+            return templatePackage as IManagedTemplatePackage;
+        }
+
+        /// <summary>
+        /// Gets the  template package which contain the template.
+        /// </summary>
+        /// <remarks>
+        /// The method might throw exceptions if <see cref="TemplatePackageManager.GetTemplatePackageAsync(ITemplateInfo, CancellationToken)"/> call throws.
+        /// </remarks>
+        internal Task<ITemplatePackage> GetTemplatePackageAsync(
+            TemplatePackageManager templatePackageManager,
+            CancellationToken cancellationToken)
+        {
+            return templatePackageManager.GetTemplatePackageAsync(this, cancellationToken);
         }
     }
 }

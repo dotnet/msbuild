@@ -29,16 +29,15 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             IEngineEnvironmentSettings engineEnvironmentSettings,
             IEnumerable<TemplateGroup> templateGroups,
             TabularOutputSettings helpFormatterSettings,
-            string? selectedLanguage = null,
-            bool useErrorOutput = false,
-            TextWriter? writer = null)
+            Reporter reporter,
+            string? selectedLanguage = null)
         {
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = GetTemplateGroupsForListDisplay(
                 templateGroups,
                 selectedLanguage,
                 engineEnvironmentSettings.GetDefaultLanguage(),
                 engineEnvironmentSettings.Environment);
-            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, useErrorOutput, writer: writer);
+            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, reporter);
         }
 
         /// <summary>
@@ -57,16 +56,15 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             IEngineEnvironmentSettings engineEnvironmentSettings,
             IEnumerable<ITemplateInfo> templates,
             TabularOutputSettings helpFormatterSettings,
-            string? selectedLanguage = null,
-            bool useErrorOutput = false,
-            TextWriter? writer = null)
+            Reporter reporter,
+            string? selectedLanguage = null)
         {
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = GetTemplateGroupsForListDisplay(
                 templates,
                 selectedLanguage,
                 engineEnvironmentSettings.GetDefaultLanguage(),
                 engineEnvironmentSettings.Environment);
-            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, useErrorOutput, writer: writer);
+            DisplayTemplateList(groupsForDisplay, helpFormatterSettings, reporter);
         }
 
         /// <summary>
@@ -154,8 +152,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         private static void DisplayTemplateList(
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay,
             TabularOutputSettings tabularOutputSettings,
-            bool useErrorOutput = false,
-            TextWriter? writer = null)
+            Reporter reporter)
         {
             TabularOutput<TemplateGroupTableRow> formatter =
                 TabularOutput
@@ -169,13 +166,6 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                     .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, TabularOutputSettings.ColumnNames.Tags, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.ColumnNameTags, TabularOutputSettings.ColumnNames.Author, defaultColumn: true)
                     .OrderBy(nameColumn, StringComparer.OrdinalIgnoreCase);
-
-            if (writer != null)
-            {
-                writer.WriteLine(formatter.Layout());
-                return;
-            }
-            Reporter reporter = useErrorOutput ? Reporter.Error : Reporter.Output;
             reporter.WriteLine(formatter.Layout());
         }
 

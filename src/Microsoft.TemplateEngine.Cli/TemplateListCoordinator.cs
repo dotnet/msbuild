@@ -65,6 +65,7 @@ namespace Microsoft.TemplateEngine.Cli
                     _engineEnvironmentSettings,
                     resolutionResult.TemplateGroupsWithMatchingTemplateInfoAndParameters,
                     settings,
+                    reporter: Reporter.Output,
                     selectedLanguage: args.Language);
                 return NewCommandStatus.Success;
             }
@@ -127,7 +128,8 @@ namespace Microsoft.TemplateEngine.Cli
             TemplateGroupDisplay.DisplayTemplateList(
                 _engineEnvironmentSettings,
                 curatedTemplates,
-                new TabularOutputSettings(_engineEnvironmentSettings.Environment));
+                new TabularOutputSettings(_engineEnvironmentSettings.Environment),
+                reporter: Reporter.Output);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
             Reporter.Output.WriteCommand(CommandExamples.InstantiateTemplateExample(args.CommandName, "console"));
