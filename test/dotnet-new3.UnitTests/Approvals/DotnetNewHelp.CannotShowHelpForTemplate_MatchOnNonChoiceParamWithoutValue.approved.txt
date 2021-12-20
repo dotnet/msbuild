@@ -1,3 +1,6 @@
 ﻿Error: Invalid option(s):
 --langVersion 
-   '' is not a valid value for --langVersion.
+   Required argument missing for option: '--langVersion'.
+
+For more information, run:
+   dotnet new3 console -h

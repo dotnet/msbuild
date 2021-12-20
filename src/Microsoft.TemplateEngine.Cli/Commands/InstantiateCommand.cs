@@ -198,17 +198,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return HandleAmbuguousResult();
             }
 
-            Reporter.Error.WriteLine(
-                string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, args.ShortName).Bold().Red());
-            Reporter.Error.WriteLine();
-
-            Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
-            Reporter.Error.WriteCommand(CommandExamples.ListCommandExample(args.CommandName));
-
-            Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
-            Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, args.ShortName));
-            Reporter.Error.WriteLine();
-            return NewCommandStatus.NotFound;
+            return HandleNoTemplateFoundResult(args, environmentSettings, templatePackageManager, templateGroup, Reporter.Error);
         }
 
         private NewCommandStatus HandleAmbuguousResult() => throw new NotImplementedException();

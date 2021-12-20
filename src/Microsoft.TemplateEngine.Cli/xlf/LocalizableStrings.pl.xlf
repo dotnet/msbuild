@@ -715,6 +715,12 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <target state="translated">Typowymi szablonami są:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
+        <source>Allowed values for '{0}' option are: {1}.</source>
+        <target state="new">Allowed values for '{0}' option are: {1}.</target>
+        <note>0} - option name (as --language)
+{1} - comma separated, escaped in quotes list of allowed values</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">Nie można znaleźć pakietu szablonów zawierającego szablon "{0}"</target>

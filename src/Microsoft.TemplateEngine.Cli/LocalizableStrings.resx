@@ -681,4 +681,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>Unrecognized command or argument(s): {0}.</value>
     <comment>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</comment>
   </data>
+  <data name="TemplateOptions_Error_AllowedValuesForOptionList" xml:space="preserve">
+    <value>Allowed values for '{0}' option are: {1}.</value>
+    <comment>0} - option name (as --language)
+{1} - comma separated, escaped in quotes list of allowed values</comment>
+  </data>
 </root>

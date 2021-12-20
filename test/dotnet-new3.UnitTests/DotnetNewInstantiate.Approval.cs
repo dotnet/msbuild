@@ -30,9 +30,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdErr);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "instantiation error handling is not complete yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotInstantiateTemplateWithUnknownLanguage()
         {
             var commandResult = new DotnetNewCommand(_log, "console", "--language", "D#")
@@ -88,9 +86,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdErr);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "instantiation error handling is not complete yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotInstantiateTemplate_WhenParameterIsInvalid()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -108,9 +104,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdErr);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "instantiation error handling is not complete yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotInstantiateTemplate_WhenChoiceParameterValueIsInvalid()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -128,9 +122,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdErr);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "instantiation error handling is not complete yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotInstantiateTemplate_WhenChoiceParameterValueIsNotComplete()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -148,9 +140,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdErr);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "instantiation error handling is not complete yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotInstantiateTemplate_OnMultipleParameterErrors()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();

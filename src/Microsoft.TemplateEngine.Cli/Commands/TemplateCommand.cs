@@ -216,7 +216,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private void AddTemplateOptionsToCommand(CliTemplateInfo templateInfo)
         {
             HashSet<string> initiallyTakenAliases = GetReservedAliases();
-            IEnumerable<CliTemplateParameter> parameters = templateInfo.CliParameters;
+            IEnumerable<CliTemplateParameter> parameters = templateInfo.CliParameters.Values;
             //TODO: handle errors
             var parametersWithAliasAssignments = AliasAssignmentCoordinator.AssignAliasesForParameter(parameters, initiallyTakenAliases);
 

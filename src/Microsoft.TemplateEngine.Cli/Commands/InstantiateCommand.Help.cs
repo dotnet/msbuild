@@ -69,6 +69,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     templatePackageManager,
                     templateGroup);
 
+            if (!matchingTemplates.Any())
+            {
+                //output is handled in HandleNoTemplateFoundResult
+                HandleNoTemplateFoundResult(instantiateCommandArgs, environmentSettings, templatePackageManager, templateGroup, Reporter.Output);
+                return;
+            }
+
             if (!VerifyMatchingTemplates(
                 environmentSettings,
                 context.Output,
@@ -128,6 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             out IEnumerable<TemplateCommand>? filteredTemplates)
         {
             filteredTemplates = matchingTemplates;
+
             //if more than one language, this is an error - handle it
             IEnumerable<string?> languages = matchingTemplates.Select(c => c.Template.GetLanguage()).Distinct();
             if (languages.Count() > 1)
@@ -409,7 +417,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //except the choice parameter, where we merge possible values
             foreach (TemplateCommand command in templates)
             {
-                foreach (CliTemplateParameter currentParam in command.Template.CliParameters)
+                foreach (CliTemplateParameter currentParam in command.Template.CliParameters.Values)
                 {
                     if (currentParam.IsHidden && !currentParam.AlwaysShow)
                     {

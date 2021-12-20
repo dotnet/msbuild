@@ -1321,6 +1321,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allowed values for &apos;{0}&apos; option are: {1}..
+        /// </summary>
+        internal static string TemplateOptions_Error_AllowedValuesForOptionList {
+            get {
+                return ResourceManager.GetString("TemplateOptions_Error_AllowedValuesForOptionList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find the template package containing template &apos;{0}&apos;.
         /// </summary>
         internal static string TemplatePackageCoordinator_Error_PackageForTemplateNotFound {

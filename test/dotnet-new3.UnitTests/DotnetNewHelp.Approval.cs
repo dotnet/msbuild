@@ -250,9 +250,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotShowHelpForTemplate_MatchOnChoiceWithoutValue()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -262,16 +260,12 @@ namespace Dotnet_new3.IntegrationTests
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
 
-            commandResult
-                .Should().Fail()
-                .And.NotHaveStdOut();
-
-            Approvals.Verify(commandResult.StdErr);
+            //help command cannot fail, therefore the output is written to stdout
+            commandResult.Should().Pass().And.NotHaveStdErr();
+            Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotShowHelpForTemplate_MatchOnUnexistingParam()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -281,11 +275,9 @@ namespace Dotnet_new3.IntegrationTests
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
 
-            commandResult
-                .Should().Fail()
-                .And.NotHaveStdOut();
-
-            Approvals.Verify(commandResult.StdErr);
+            //help command cannot fail, therefore the output is written to stdout
+            commandResult.Should().Pass().And.NotHaveStdErr();
+            Approvals.Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -298,11 +290,8 @@ namespace Dotnet_new3.IntegrationTests
                     .WithWorkingDirectory(workingDirectory)
                     .Execute();
 
-            commandResult
-                    .Should().Pass()
-                    .And.NotHaveStdErr()
-                    .And.NotHaveStdOutContaining("Usage: new3 [options]");
-
+            //help command cannot fail, therefore the output is written to stdout
+            commandResult.Should().Pass().And.NotHaveStdErr().And.NotHaveStdOutContaining("Usage: new3 [options]");
             Approvals.Verify(commandResult.StdOut);
         }
 
@@ -324,9 +313,7 @@ namespace Dotnet_new3.IntegrationTests
             Approvals.Verify(commandResult.StdOut);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "Help is not implemented yet")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CannotShowHelpForTemplate_MatchOnNonChoiceParamWithoutValue()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -336,11 +323,9 @@ namespace Dotnet_new3.IntegrationTests
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
 
-            commandResult
-                .Should().Fail()
-                .And.NotHaveStdOut();
-
-            Approvals.Verify(commandResult.StdErr);
+            //help command cannot fail, therefore the output is written to stdout
+            commandResult.Should().Pass().And.NotHaveStdErr();
+            Approvals.Verify(commandResult.StdOut);
         }
     }
 }

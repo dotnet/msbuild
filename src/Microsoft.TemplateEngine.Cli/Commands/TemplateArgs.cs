@@ -109,8 +109,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return null;
             }
 
-            var parameter = Template.CliParameters.FirstOrDefault(p => p.Name.Equals(parameterName, StringComparison.OrdinalIgnoreCase));
-            if (parameter == null)
+            if (!Template.CliParameters.TryGetValue(parameterName, out CliTemplateParameter? parameter))
             {
                 throw new InvalidOperationException($"Parameter {parameterName} is not defined for {Template.Identity}.");
             }

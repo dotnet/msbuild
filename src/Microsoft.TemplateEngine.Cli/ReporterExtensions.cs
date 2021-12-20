@@ -4,6 +4,8 @@
 #nullable enable
 
 using System.Diagnostics;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -79,6 +81,49 @@ namespace Microsoft.TemplateEngine.Cli
         internal static string Indent(this string s, int level = 1)
         {
             return new string(' ', IndentSpaceCount * level) + s;
+        }
+
+        /// <summary>
+        /// Indent all lines in the string, use this method to unify indents in the output.
+        /// </summary>
+        /// <param name="s">string to indent.</param>
+        /// <param name="level">indent level.</param>
+        /// <returns></returns>
+        internal static string IndentLines(this string s, int level = 1)
+        {
+            if (!s.Contains('\n'))
+            {
+                return s.Indent(level);
+            }
+            StringBuilder builder = new StringBuilder();
+            using StringReader sr = new StringReader(s);
+            bool firstLine = true;
+            string? line = sr.ReadLine();
+            while (line != null)
+            {
+                if (!firstLine)
+                {
+                    builder.AppendLine();
+                }
+                else
+                {
+                    firstLine = false;
+                }
+                builder.Indent(level).Append(line);
+                line = sr.ReadLine();
+            }
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Indents stringbuilder, use this method to unify indents in the output.
+        /// </summary>
+        /// <param name="s">string to indent.</param>
+        /// <param name="level">indent level.</param>
+        /// <returns></returns>
+        internal static StringBuilder Indent(this StringBuilder s, int level = 1)
+        {
+            return s.Append(' ', IndentSpaceCount * level);
         }
     }
 }

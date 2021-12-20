@@ -1,4 +1,5 @@
-﻿No templates found matching: 'console', language='D#'.
+﻿No templates found matching: 'console', --language='D#'.
+Allowed values for '--language' option are: 'C#', 'F#', 'VB'.
 
 To list installed templates, run:
    dotnet new3 --list

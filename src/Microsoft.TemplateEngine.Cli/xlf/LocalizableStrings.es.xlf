@@ -715,6 +715,12 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <target state="translated">Las plantillas comunes son:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
+        <source>Allowed values for '{0}' option are: {1}.</source>
+        <target state="new">Allowed values for '{0}' option are: {1}.</target>
+        <note>0} - option name (as --language)
+{1} - comma separated, escaped in quotes list of allowed values</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">No encontró el paquete de plantillas que contiene la plantilla "{0}"</target>

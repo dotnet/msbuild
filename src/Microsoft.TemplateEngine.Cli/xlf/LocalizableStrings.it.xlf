@@ -715,6 +715,12 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">Seguono dei modelli comuni:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
+        <source>Allowed values for '{0}' option are: {1}.</source>
+        <target state="new">Allowed values for '{0}' option are: {1}.</target>
+        <note>0} - option name (as --language)
+{1} - comma separated, escaped in quotes list of allowed values</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">Non è stato possibile trovare il pacchetto di modelli contenente il modello '{0}'</target>

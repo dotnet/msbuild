@@ -715,6 +715,12 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
         <target state="translated">Allgemeine Vorlagen:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
+        <source>Allowed values for '{0}' option are: {1}.</source>
+        <target state="new">Allowed values for '{0}' option are: {1}.</target>
+        <note>0} - option name (as --language)
+{1} - comma separated, escaped in quotes list of allowed values</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">Das Vorlagenpaket mit der Vorlage "{0}" wurde nicht gefunden.</target>
