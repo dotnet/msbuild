@@ -1,6 +1,6 @@
 ﻿global.json file
 Author: Microsoft
-Description: A file for selecting the .NET Core SDK version.
+Description: A file for selecting the .NET SDK version.
 
 Usage:
   new3 globaljson [options] [template options]
@@ -14,7 +14,7 @@ Options:
   --type <item>          Specifies the template type to instantiate.
 
 Template options:
-  --sdk-version <sdk-version>                                                                           The version of the .NET Core SDK to use.
+  --sdk-version <sdk-version>                                                                           The version of the .NET SDK to use.
                                                                                                         Type: string
   --roll-forward <disable|feature|latestFeature|latestMajor|latestMinor|latestPatch|major|minor|patch>  The roll-forward policy to use when selecting an SDK version.
                                                                                                         Type: choice

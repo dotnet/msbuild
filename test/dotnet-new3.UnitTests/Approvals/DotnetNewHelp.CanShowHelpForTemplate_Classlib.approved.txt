@@ -1,6 +1,6 @@
 ﻿Class Library (C#)
 Author: Microsoft
-Description: A project for creating a class library that targets .NET Standard or .NET Core
+Description: A project for creating a class library that targets .NET or .NET Standard
 
 Usage:
   new3 classlib [options] [template options]
