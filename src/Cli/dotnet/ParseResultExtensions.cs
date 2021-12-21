@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli
 
         private static string GetSymbolResultValue(ParseResult parseResult, SymbolResult symbolResult)
         {
-            if (symbolResult.Token() == null)
+            if (symbolResult.Token() == default)
             {
                 return parseResult.FindResultFor(Parser.DotnetSubCommand)?.GetValueOrDefault<string>();
             }
