@@ -13,7 +13,7 @@ namespace Microsoft.TemplateEngine.TestHelper
     public class AssemblyComponentCatalog : IReadOnlyList<(Type, IIdentifiedComponent)>
     {
         private readonly IReadOnlyList<Assembly> _assemblies;
-        private IReadOnlyList<(Type, IIdentifiedComponent)> _lookup;
+        private IReadOnlyList<(Type, IIdentifiedComponent)>? _lookup;
 
         public AssemblyComponentCatalog(IReadOnlyList<Assembly> assemblies)
         {
@@ -24,8 +24,7 @@ namespace Microsoft.TemplateEngine.TestHelper
         {
             get
             {
-                EnsureLoaded();
-                return _lookup.Count;
+                return EnsureLookupLoaded().Count;
             }
         }
 
@@ -33,24 +32,22 @@ namespace Microsoft.TemplateEngine.TestHelper
         {
             get
             {
-                EnsureLoaded();
-                return _lookup[index];
+                return EnsureLookupLoaded()[index];
             }
         }
 
         public IEnumerator<(Type, IIdentifiedComponent)> GetEnumerator()
         {
-            EnsureLoaded();
-            return _lookup.GetEnumerator();
+            return EnsureLookupLoaded().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private void EnsureLoaded()
+        private IReadOnlyList<(Type, IIdentifiedComponent)> EnsureLookupLoaded()
         {
             if (_lookup != null)
             {
-                return;
+                return _lookup;
             }
 
             var builder = new List<(Type, IIdentifiedComponent)>();
@@ -78,7 +75,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                 }
             }
 
-            _lookup = builder.ToList();
+            return builder.ToList();
         }
     }
 }

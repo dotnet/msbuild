@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks Condition="'$(PackSpecific)' != 'true'">$(NETStandardTargetFramework);$(NETFullTargetFramework)</TargetFrameworks>
     <TargetFrameworks Condition="'$(PackSpecific)' == 'true'">$(NETStandardTargetFramework)</TargetFrameworks>
+    <Nullable>enable</Nullable>
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
