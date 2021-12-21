@@ -67,7 +67,7 @@ namespace Microsoft.Build.Shared
 #if FEATURE_APPDOMAIN
                 if (separateAppDomain)
                 {
-                    if (!typeInformation.IsMarshallByRef)
+                    if (!typeInformation.IsMarshalByRef)
                     {
                         logError
                         (
@@ -119,12 +119,12 @@ namespace Microsoft.Build.Shared
 #endif
                     }
                 }
-                else
+                else if (typeInformation.LoadedType is not null)
 #endif
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
-                    return (ITask)Activator.CreateInstance(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.Assembly.AssemblyName, typeInformation.TypeName);
+                    return (ITask)Activator.CreateInstance(typeInformation.LoadedType.Type);
                 }
 
 #if FEATURE_APPDOMAIN

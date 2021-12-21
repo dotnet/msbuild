@@ -916,13 +916,14 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
+                string taskFactoryFullName = returnClass.TaskFactory is AssemblyTaskFactory atf ? atf.TaskName : returnClass.TaskFactory.TaskType.FullName;
                 // Map to an intrinsic task, if necessary.
-                if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(taskFactoryFullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
                     returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new TypeInformation(new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null))), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
-                else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
+                else if (String.Equals(taskFactoryFullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
                     returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new TypeInformation(new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null))), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;

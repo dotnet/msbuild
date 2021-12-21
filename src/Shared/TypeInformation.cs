@@ -3,6 +3,9 @@
 
 using System;
 using System.Reflection;
+#if !TASKHOST
+using System.Reflection.Metadata;
+#endif
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
@@ -16,9 +19,13 @@ namespace Microsoft.Build.Shared
 
         internal bool HasSTAThreadAttribute { get; set; }
         internal bool HasLoadInSeparateAppDomainAttribute { get; set; }
-        internal bool IsMarshallByRef { get; set; }
+        internal bool IsMarshalByRef { get; set; }
         internal bool ImplementsIGeneratedTask { get; set; }
         internal AssemblyName AssemblyName { get; set; }
+        internal string Namespace { get; set; }
+#if !TASKHOST
+        internal TypeInformationPropertyInfo[] Properties { get; set; }
+#endif
 
         internal TypeInformation()
         {
@@ -29,13 +36,14 @@ namespace Microsoft.Build.Shared
             LoadedType = baseType;
             HasSTAThreadAttribute = LoadedType.HasSTAThreadAttribute();
             HasLoadInSeparateAppDomainAttribute = LoadedType.HasLoadInSeparateAppDomainAttribute();
-            IsMarshallByRef = LoadedType.Type.GetTypeInfo().IsMarshalByRef;
+            IsMarshalByRef = LoadedType.Type.GetTypeInfo().IsMarshalByRef;
 #if TASKHOST
             ImplementsIGeneratedTask = false;
 #else
             ImplementsIGeneratedTask = LoadedType.Type is IGeneratedTask;
 #endif
-            AssemblyName = LoadedType.LoadedAssembly.GetName();
+            AssemblyName = LoadedType.LoadedAssembly?.GetName();
+            Namespace = LoadedType.Type.Namespace;
         }
 
         public PropertyInfo[] GetProperties(BindingFlags flags)
@@ -43,6 +51,7 @@ namespace Microsoft.Build.Shared
             if (LoadedType is null)
             {
                 throw new NotImplementedException();
+                
             }
             else
             {
@@ -61,5 +70,13 @@ namespace Microsoft.Build.Shared
                 return LoadedType.Type.GetProperty(name, flags);
             }
         }
+    }
+
+    internal struct TypeInformationPropertyInfo
+    {
+        public string Name { get; set; }
+        public Type PropertyType { get; set; } = null;
+        public bool OutputAttribute { get; set; }
+        public bool RequiredAttribute { get; set; }
     }
 }

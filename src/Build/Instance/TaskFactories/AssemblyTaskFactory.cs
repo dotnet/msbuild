@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
@@ -93,6 +94,11 @@ namespace Microsoft.Build.BackEnd
             get { return _typeInformation.LoadedType?.Type ?? Type.GetType(_typeInformation.TypeName, true, true); }
         }
 
+        public string TaskName
+        {
+            get { return _typeInformation.LoadedType is null ? $"{_typeInformation.Namespace}.{_typeInformation.TypeName}" : TaskType.FullName; }
+        }
+
         public TypeInformation TypeInformation { get { return _typeInformation; } }
 
         public bool ImplementsIGeneratedTask { get { return _typeInformation?.ImplementsIGeneratedTask ?? false; } }
@@ -148,14 +154,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
-            PropertyInfo[] infos = _typeInformation.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            var propertyInfos = new TaskPropertyInfo[infos.Length];
-            for (int i = 0; i < infos.Length; i++)
-            {
-                propertyInfos[i] = new ReflectableTaskPropertyInfo(infos[i]);
-            }
-
-            return propertyInfos;
+            return _typeInformation.LoadedType is null ?
+                _typeInformation.Properties.Select(prop => new ReflectableTaskPropertyInfo(prop)).ToArray() :
+                _typeInformation.GetProperties(BindingFlags.Instance | BindingFlags.Public).Select(prop => new ReflectableTaskPropertyInfo(prop)).ToArray();
         }
 
         /// <summary>

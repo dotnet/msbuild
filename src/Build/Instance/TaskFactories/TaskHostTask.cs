@@ -13,7 +13,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
-using System.Linq;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -202,16 +201,28 @@ namespace Microsoft.Build.BackEnd
             {
                 // If we returned an exception, then we want to throw it when we 
                 // do the get.  
-                if (value is Exception)
+                if (value is Exception eVal)
                 {
-                    throw (Exception)value;
+                    throw eVal;
                 }
 
                 return value;
             }
+            else if (_taskType.LoadedType is null)
+            {
+                switch (property.Name)
+                {
+                    case "HostObject":
+                        return this.HostObject;
+                    case "BuildEngine":
+                        return this.BuildEngine;
+                    default:
+                        throw new InternalErrorException($"{property.Name} is not a property on TaskHostTask, or else it needs to be added to its registered list of properties.");
+                }
+            }
             else
             {
-                PropertyInfo parameter = _taskType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.Name.Equals(property.Name)).FirstOrDefault();
+                PropertyInfo parameter = _taskType.GetProperty(property.Name, BindingFlags.Instance | BindingFlags.Public);
                 return parameter.GetValue(this, null);
             }
         }

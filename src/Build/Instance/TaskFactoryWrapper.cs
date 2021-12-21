@@ -8,6 +8,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
+using System.Linq;
 
 namespace Microsoft.Build.Execution
 {
@@ -193,15 +194,15 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
             ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
 
-            IGeneratedTask generatedTask = task as IGeneratedTask;
-            if (generatedTask != null)
+            if (task is IGeneratedTask generatedTask)
             {
                 generatedTask.SetPropertyValue(property, value);
             }
             else
             {
-                ReflectableTaskPropertyInfo propertyInfo = (ReflectableTaskPropertyInfo)property;
-                propertyInfo.Reflection.SetValue(task, value, null);
+                PropertyInfo prop = task.GetType().GetProperty(property.Name);
+                prop.SetValue(task, value);
+                //task.GetType().GetTypeInfo().DeclaredProperties.FirstOrDefault(prop => prop.Name.Equals(property.Name)).SetValue(property, value);
             }
         }
 
@@ -220,16 +221,17 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                ReflectableTaskPropertyInfo propertyInfo = property as ReflectableTaskPropertyInfo;
-                if (propertyInfo != null)
+                if (property is ReflectableTaskPropertyInfo propertyInfo)
                 {
-                    return propertyInfo.Reflection.GetValue(task, null);
+                    try
+                    {
+                        return propertyInfo.Reflection.GetValue(task, null);
+                    }
+                    // If the type was not loaded, we may end up with a NotImplementedException. Ignore it.
+                    catch (NotImplementedException) { }
                 }
-                else
-                {
-                    ErrorUtilities.ThrowInternalError("Task does not implement IGeneratedTask and we don't have {0} either.", typeof(ReflectableTaskPropertyInfo).Name);
-                    throw new InternalErrorException(); // unreachable
-                }
+
+                return task.GetType().GetTypeInfo().GetProperty(property.Name);
             }
         }
 
