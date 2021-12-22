@@ -3201,25 +3201,25 @@ elementFormDefault="qualified">
             </xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="AssemblySearchPathUseCandidateAssemblyFiles" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseCandidateAssemblyFiles" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseReferencePath" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseReferencePath" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseHintPathFromItem" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseHintPathFromItem" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseTargetFrameworkDirectory" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseTargetFrameworkDirectory" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseAssemblyFoldersConfigFileSearchPath" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseAssemblyFoldersConfigFileSearchPath" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseRegistry" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseRegistry" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseAssemblyFolders" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseAssemblyFolders" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseGAC" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseGAC" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseRawFileName" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseRawFileName" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseOutDir" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseOutDir" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
     <xs:element name="ResolveAssemblyReference" substitutionGroup="msb:Task">
         <xs:complexType>
