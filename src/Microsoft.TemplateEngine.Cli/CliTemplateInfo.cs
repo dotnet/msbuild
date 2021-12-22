@@ -90,7 +90,8 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         if (parameters.ContainsKey(parameter.Name))
                         {
-                            //TODO:
+                            //runnable projects generator ensures the symbols are unique, so no error handling here.
+                            //in case there is a duplicate, the logic is broken.
                             throw new Exception($"Template {Identity} defines {parameter.Name} twice.");
                         }
                         if (parameter.IsChoice())
