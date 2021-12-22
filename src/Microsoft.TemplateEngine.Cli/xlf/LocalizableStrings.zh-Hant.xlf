@@ -92,6 +92,23 @@
         <target state="translated">不支援要新增的專案類型 {0}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
+        <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
+        <target state="new">Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</note>
+      </trans-unit>
+      <trans-unit id="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon">
+        <source>Parameter name '{0}' contains colon, which is forbidden.</source>
+        <target state="new">Parameter name '{0}' contains colon, which is forbidden.</target>
+        <note>{0} is parameter name, has no whitespaces.</note>
+      </trans-unit>
+      <trans-unit id="AliasAssignmentCoordinator_Error_ShortAlias">
+        <source>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
+        <target state="new">Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</note>
+      </trans-unit>
       <trans-unit id="AliasCannotBeShortName">
         <source>Alias '{0}' is a template short name, and therefore cannot be aliased.</source>
         <target state="translated">別名 '{0}' 是範本簡短名稱，因此無法別名化。</target>
@@ -422,6 +439,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <source>Displays help for this command.</source>
         <target state="translated">顯示此命令的協助。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Exception_InvalidTemplateParameters_MessageHeader">
+        <source>Template {0} ({1}) is malformed. The following template parameters are invalid:</source>
+        <target state="new">Template {0} ({1}) is malformed. The following template parameters are invalid:</target>
+        <note>{0} is template identity, {1} is template short name.
+The header is followed by the list of parameters and their errors (might be several for one parameter).</note>
       </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:

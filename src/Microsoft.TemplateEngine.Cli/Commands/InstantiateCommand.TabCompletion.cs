@@ -6,6 +6,7 @@
 using System.CommandLine.Completions;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.Commands.Exceptions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -48,12 +49,28 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     {
                         foreach (CliTemplateInfo template in templateGrouping)
                         {
-                            TemplateCommand command = new TemplateCommand(this, environmentSettings, templatePackageManager, templateGroup, template);
-                            Parser parser = ParserFactory.CreateParser(command);
-                            ParseResult templateParseResult = parser.Parse(context.CommandLineText);
-                            foreach (CompletionItem completion in templateParseResult.GetCompletions(context.CursorPosition))
+                            try
                             {
-                                distinctCompletions.Add(completion);
+                                TemplateCommand command = new TemplateCommand(
+                                    this,
+                                    environmentSettings,
+                                    templatePackageManager,
+                                    templateGroup,
+                                    template);
+
+                                Parser parser = ParserFactory.CreateParser(command);
+
+                                //it is important to pass raw text to get the completion
+                                //completions for args passed as array are not supported
+                                ParseResult parseResult = parser.Parse(context.CommandLineText);
+                                foreach (CompletionItem completion in parseResult.GetCompletions(context.CursorPosition))
+                                {
+                                    distinctCompletions.Add(completion);
+                                }
+                            }
+                            catch (InvalidTemplateParametersException e)
+                            {
+                                Reporter.Error.WriteLine(string.Format(LocalizableStrings.GenericWarning, e.Message));
                             }
                         }
                     }

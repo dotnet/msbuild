@@ -5,10 +5,9 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
-using System.Globalization;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
+using Microsoft.TemplateEngine.Cli.Commands.Exceptions;
 using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -26,6 +25,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private readonly CliTemplateInfo _template;
         private Dictionary<string, TemplateOption> _templateSpecificOptions = new Dictionary<string, TemplateOption>();
 
+        /// <summary>
+        /// Create command for instantiation of specific template.
+        /// </summary>
+        /// <exception cref="InvalidTemplateParametersException">when <paramref name="template"/> has invalid template parameters.</exception>
         public TemplateCommand(
             InstantiateCommand instantiateCommand,
             IEngineEnvironmentSettings environmentSettings,
@@ -220,11 +223,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private void AddTemplateOptionsToCommand(CliTemplateInfo templateInfo)
         {
             HashSet<string> initiallyTakenAliases = GetReservedAliases();
-            IEnumerable<CliTemplateParameter> parameters = templateInfo.CliParameters.Values;
-            //TODO: handle errors
-            var parametersWithAliasAssignments = AliasAssignmentCoordinator.AssignAliasesForParameter(parameters, initiallyTakenAliases);
 
-            foreach ((CliTemplateParameter parameter, IReadOnlyList<string> aliases, IReadOnlyList<string> errors) in parametersWithAliasAssignments)
+            var parametersWithAliasAssignments = AliasAssignmentCoordinator.AssignAliasesForParameter(templateInfo.CliParameters.Values, initiallyTakenAliases);
+            if (parametersWithAliasAssignments.Any(p => p.Errors.Any()))
+            {
+                IReadOnlyDictionary<CliTemplateParameter, IReadOnlyList<string>> errors = parametersWithAliasAssignments
+                    .Where(p => p.Errors.Any())
+                    .ToDictionary(p => p.Parameter, p => p.Errors);
+                throw new InvalidTemplateParametersException(templateInfo, errors);
+            }
+
+            foreach ((CliTemplateParameter parameter, IReadOnlyList<string> aliases, IReadOnlyList<string> _) in parametersWithAliasAssignments)
             {
                 TemplateOption option = new TemplateOption(parameter, aliases);
                 this.AddOption(option.Option);

@@ -63,7 +63,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             TemplateGroup templateGroup = selectedTemplateGroups.Single();
             IEnumerable<TemplateCommand> matchingTemplates =
                 GetMatchingTemplates(
-                    this,
                     instantiateCommandArgs,
                     environmentSettings,
                     templatePackageManager,
@@ -95,36 +94,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ShowCommandOptions(templatesToShow, preferredTemplate, context);
             ShowTemplateSpecificOptions(templatesToShow, context);
             ShowHintForOtherTemplates(templateGroup, preferredTemplate.Template, instantiateCommandArgs.CommandName, context.Output);
-        }
-
-        internal static IEnumerable<TemplateCommand> GetMatchingTemplates(
-            InstantiateCommand instantiateCommand,
-            InstantiateCommandArgs instantiateCommandArgs,
-            IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager,
-            TemplateGroup templateGroup)
-        {
-            List<TemplateCommand> matchingTemplates = new();
-
-            //unlike instantiation we need to try all the templates
-            //however we try them in precedence order
-            //so the highest priority one is first
-            foreach (IGrouping<int, CliTemplateInfo> templateGrouping in templateGroup.Templates.GroupBy(g => g.Precedence).OrderByDescending(g => g.Key))
-            {
-                foreach (CliTemplateInfo template in templateGrouping)
-                {
-                    TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, environmentSettings, templatePackageManager, templateGroup, template);
-                    Parser parser = ParserFactory.CreateParser(templateCommand);
-                    ParseResult templateParseResult = parser.Parse(instantiateCommandArgs.RemainingArguments ?? Array.Empty<string>());
-
-                    if (!templateParseResult.Errors.Any())
-                    {
-                        matchingTemplates.Add(templateCommand);
-                    }
-                }
-            }
-
-            return matchingTemplates;
         }
 
         internal static bool VerifyMatchingTemplates(
@@ -339,6 +308,40 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEnumerable<TwoColumnHelpRow> optionsToWrite = optionsToShow.Select(o => context.HelpBuilder.GetTwoColumnRow(o, context));
             context.HelpBuilder.WriteColumns(optionsToWrite.ToArray(), context);
             context.Output.WriteLine();
+        }
+
+        internal IEnumerable<TemplateCommand> GetMatchingTemplates(
+            InstantiateCommandArgs instantiateCommandArgs,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            TemplateGroup templateGroup)
+        {
+            List<TemplateCommand> matchingTemplates = new();
+
+            //unlike instantiation we need to try all the templates
+            //however we try them in precedence order
+            //so the highest priority one is first
+            foreach (IGrouping<int, CliTemplateInfo> templateGrouping in templateGroup.Templates.GroupBy(g => g.Precedence).OrderByDescending(g => g.Key))
+            {
+                foreach (CliTemplateInfo template in templateGrouping)
+                {
+                    if (ReparseForTemplate(
+                        instantiateCommandArgs,
+                        environmentSettings,
+                        templatePackageManager,
+                        templateGroup,
+                        template)
+                        is (TemplateCommand command, ParseResult parseResult))
+                    {
+                        if (!parseResult.Errors.Any())
+                        {
+                            matchingTemplates.Add(command);
+                        }
+                    }
+                }
+            }
+
+            return matchingTemplates;
         }
 
         internal void ShowUsage(IReadOnlyList<string> shortNames, HelpContext context)

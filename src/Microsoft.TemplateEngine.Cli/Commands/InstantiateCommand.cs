@@ -10,6 +10,7 @@ using System.CommandLine.Parsing;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
+using Microsoft.TemplateEngine.Cli.Commands.Exceptions;
 using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -366,15 +367,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             HashSet<TemplateCommand> candidates = new HashSet<TemplateCommand>();
             foreach (CliTemplateInfo template in templatesToReparse)
             {
-                TemplateCommand command = new TemplateCommand(this, environmentSettings, templatePackageManager, templateGroup, template);
-                Parser parser = ParserFactory.CreateParser(command);
-                ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-
-                languageOptionSpecified = command.LanguageOption != null
-                    && parseResult.FindResultFor(command.LanguageOption) != null;
-                if (!parseResult.Errors.Any())
+                if (ReparseForTemplate(args, environmentSettings, templatePackageManager, templateGroup, template) is (TemplateCommand command, ParseResult parseResult))
                 {
-                    candidates.Add(command);
+                    languageOptionSpecified = command.LanguageOption != null
+                        && parseResult.FindResultFor(command.LanguageOption) != null;
+                    if (!parseResult.Errors.Any())
+                    {
+                        candidates.Add(command);
+                    }
                 }
             }
             return candidates;
@@ -390,24 +390,52 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             HashSet<TemplateCommand> languageAwareCandidates = new HashSet<TemplateCommand>();
             foreach (var templateCommand in candidates)
             {
-                TemplateCommand command = new TemplateCommand(
-                    this,
+                if (ReparseForTemplate(
+                    args,
                     environmentSettings,
                     templatePackageManager,
                     templateGroup,
                     templateCommand.Template,
-                    buildDefaultLanguageValidation: true);
-                Parser parser = ParserFactory.CreateParser(command);
-                ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-
-                if (!parseResult.Errors.Any())
+                    validateDefaultLanguage: true) is (TemplateCommand command, ParseResult parseResult))
                 {
-                    languageAwareCandidates.Add(command);
+                    if (!parseResult.Errors.Any())
+                    {
+                        languageAwareCandidates.Add(command);
+                    }
                 }
             }
             return languageAwareCandidates.Any()
                 ? languageAwareCandidates
                 : candidates;
+        }
+
+        private (TemplateCommand? Command, ParseResult? ParseResult)? ReparseForTemplate(
+            InstantiateCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            TemplateGroup templateGroup,
+            CliTemplateInfo template,
+            bool validateDefaultLanguage = false)
+        {
+            try
+            {
+                TemplateCommand command = new TemplateCommand(
+                    this,
+                    environmentSettings,
+                    templatePackageManager,
+                    templateGroup,
+                    template,
+                    validateDefaultLanguage);
+
+                Parser parser = ParserFactory.CreateParser(command);
+                ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
+                return (command, parseResult);
+            }
+            catch (InvalidTemplateParametersException e)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.GenericWarning, e.Message));
+                return null;
+            }
         }
     }
 

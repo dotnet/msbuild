@@ -210,6 +210,33 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to assign long option alias for parameter &apos;{0}&apos;, tried: &apos;{1}&apos;; &apos;{2}&apos;..
+        /// </summary>
+        internal static string AliasAssignmentCoordinator_Error_LongAlias {
+            get {
+                return ResourceManager.GetString("AliasAssignmentCoordinator_Error_LongAlias", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parameter name &apos;{0}&apos; contains colon, which is forbidden..
+        /// </summary>
+        internal static string AliasAssignmentCoordinator_Error_NameShouldNotHaveColon {
+            get {
+                return ResourceManager.GetString("AliasAssignmentCoordinator_Error_NameShouldNotHaveColon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to assign short option alias for parameter &apos;{0}&apos;, tried: &apos;{1}&apos;; &apos;{2}&apos;..
+        /// </summary>
+        internal static string AliasAssignmentCoordinator_Error_ShortAlias {
+            get {
+                return ResourceManager.GetString("AliasAssignmentCoordinator_Error_ShortAlias", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alias &apos;{0}&apos; is a template short name, and therefore cannot be aliased..
         /// </summary>
         internal static string AliasCannotBeShortName {
@@ -794,6 +821,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string DisplaysHelp {
             get {
                 return ResourceManager.GetString("DisplaysHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template {0} ({1}) is malformed. The following template parameters are invalid:.
+        /// </summary>
+        internal static string Exception_InvalidTemplateParameters_MessageHeader {
+            get {
+                return ResourceManager.GetString("Exception_InvalidTemplateParameters_MessageHeader", resourceCulture);
             }
         }
         

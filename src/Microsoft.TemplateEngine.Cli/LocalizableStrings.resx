@@ -686,4 +686,23 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <comment>0} - option name (as --language)
 {1} - comma separated, escaped in quotes list of allowed values</comment>
   </data>
+  <data name="AliasAssignmentCoordinator_Error_LongAlias" xml:space="preserve">
+    <value>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</value>
+    <comment>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</comment>
+  </data>
+  <data name="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon" xml:space="preserve">
+    <value>Parameter name '{0}' contains colon, which is forbidden.</value>
+    <comment>{0} is parameter name, has no whitespaces.</comment>
+  </data>
+  <data name="AliasAssignmentCoordinator_Error_ShortAlias" xml:space="preserve">
+    <value>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</value>
+    <comment>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</comment>
+  </data>
+  <data name="Exception_InvalidTemplateParameters_MessageHeader" xml:space="preserve">
+    <value>Template {0} ({1}) is malformed. The following template parameters are invalid:</value>
+    <comment>{0} is template identity, {1} is template short name.
+The header is followed by the list of parameters and their errors (might be several for one parameter).</comment>
+  </data>
 </root>

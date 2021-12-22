@@ -25,7 +25,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 if (parameter.Name.Contains(':'))
                 {
                     // Colon is reserved, template param names cannot have any.
-                    errors.Add($"Parameter name '{parameter.Name}' contains colon, which is forbidden.");
+                    errors.Add(string.Format(LocalizableStrings.AliasAssignmentCoordinator_Error_NameShouldNotHaveColon, parameter.Name));
                     result.Add((parameter, aliases, errors));
                     continue;
                 }
@@ -64,7 +64,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 {
                     // short name starting point was explicitly specified
                     string fullShortNameOverride = "-" + shortNameOverride;
-                    if (!isAliasTaken(shortNameOverride))
+                    if (!isAliasTaken(fullShortNameOverride))
                     {
                         aliases.Add(fullShortNameOverride);
                         takenAliases.Add(fullShortNameOverride);
@@ -79,7 +79,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         takenAliases.Add(qualifiedShortNameOverride);
                         continue;
                     }
-                    errors.Add($"Failed to assign short option name from {parameter.Name}, tried: '{fullShortNameOverride}'; '{qualifiedShortNameOverride}.'");
+                    errors.Add(string.Format(LocalizableStrings.AliasAssignmentCoordinator_Error_ShortAlias, parameter.Name, fullShortNameOverride, qualifiedShortNameOverride));
                 }
             }
         }
@@ -123,7 +123,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     takenAliases.Add(optionName);
                     continue;
                 }
-                errors.Add($"Failed to assign long option name from {parameter.Name}, tried: '--{longName}'; '--param:{longName}.'");
+                errors.Add(string.Format(LocalizableStrings.AliasAssignmentCoordinator_Error_LongAlias, parameter.Name, $"--{longName}", $"--param:{longName}"));
             }
         }
 
@@ -154,7 +154,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 aliases.Add(qualifiedShortName);
                 return;
             }
-            errors.Add($"Failed to assign short option name from {parameter.Name}, tried: '{shortName}'; '{qualifiedShortName}.'");
+            errors.Add(string.Format(LocalizableStrings.AliasAssignmentCoordinator_Error_ShortAlias, parameter.Name, shortName, qualifiedShortName));
         }
 
         private static string GetFreeShortName(Func<string, bool> isAliasTaken, string name, string prefix = "")

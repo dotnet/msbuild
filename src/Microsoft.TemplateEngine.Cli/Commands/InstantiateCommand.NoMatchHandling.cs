@@ -65,10 +65,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             List<TemplateResult> matchInfos = new List<TemplateResult>();
             foreach (CliTemplateInfo template in templateGroup.Templates)
             {
-                TemplateCommand command = new TemplateCommand(this, environmentSettings, templatePackageManager, templateGroup, template);
-                Parser parser = ParserFactory.CreateParser(command);
-                ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-                matchInfos.Add(TemplateResult.FromParseResult(command, parseResult));
+                if (ReparseForTemplate(args, environmentSettings, templatePackageManager, templateGroup, template)
+                    is (TemplateCommand command, ParseResult parseResult))
+                {
+                    matchInfos.Add(TemplateResult.FromParseResult(command, parseResult));
+                }
             }
             return matchInfos;
         }
