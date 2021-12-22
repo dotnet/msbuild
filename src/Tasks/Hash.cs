@@ -58,8 +58,7 @@ namespace Microsoft.Build.Tasks
                     // Once the limit is reached, the sha1.TransformBlock is be run on all the bytes of this buffer.
                     byte[] sha1Buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(sha1BufferSize);
 
-                    int maxItemStringSize = encoding.GetMaxByteCount(Math.Min(ComputeMaxItemSpecLength(ItemsToHash), maxInputChunkLength));
-                    byte[] bytesBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(maxItemStringSize);
+                    byte[] bytesBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(encoding.GetMaxByteCount(maxInputChunkLength));
 
                     int bufferLength = 0;
                     for (int i = 0; i < ItemsToHash.Length; i++)
@@ -106,8 +105,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="sha1BufferSize">The size of sha1 buffer.</param>
         /// <param name="bytesBuffer">Bytes buffer which contains bytes to be written to sha1 buffer.</param>
         /// <param name="bytesNumber">Amount of bytes that are to be added to sha1 buffer.</param>
-        /// <returns></returns>
-        private bool AddBytesToSha1Buffer(SHA1 sha1, byte[] sha1Buffer, ref int sha1BufferLength, int sha1BufferSize, byte[] bytesBuffer, int bytesNumber)
+        private void AddBytesToSha1Buffer(SHA1 sha1, byte[] sha1Buffer, ref int sha1BufferLength, int sha1BufferSize, byte[] bytesBuffer, int bytesNumber)
         {
             int bytesProcessedNumber = 0;
             while (sha1BufferLength + bytesNumber >= sha1BufferSize)
@@ -133,22 +131,6 @@ namespace Microsoft.Build.Tasks
 
             Array.Copy(bytesBuffer, bytesProcessedNumber, sha1Buffer, sha1BufferLength, bytesNumber);
             sha1BufferLength += bytesNumber;
-
-            return true;
-        }
-
-        private int ComputeMaxItemSpecLength(ITaskItem[] itemsToHash)
-        {
-            int maxItemSpecLength = 0;
-            foreach (var item in itemsToHash)
-            {
-                if (item.ItemSpec.Length > maxItemSpecLength)
-                {
-                    maxItemSpecLength = item.ItemSpec.Length;
-                }
-            }
-
-            return maxItemSpecLength;
         }
     }
 }
