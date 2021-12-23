@@ -71,6 +71,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         public IReadOnlyList<string> ShortNameList => _templateInfo.ShortNameList;
 
+        public IReadOnlyList<Guid> PostActions => _templateInfo.PostActions;
+
         internal HostSpecificTemplateData CliData => _cliData;
 
         internal bool IsHidden => _cliData.IsHidden;
