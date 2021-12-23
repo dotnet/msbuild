@@ -10,6 +10,7 @@ using System.Globalization;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Cli.Extensions;
+using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 
@@ -103,6 +104,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     Description = SymbolStrings.TemplateCommand_Option_AllowScripts,
                     Arity = new ArgumentArity(1, 1)
                 };
+                AllowScriptsOption.SetDefaultValue(AllowRunScripts.Prompt);
                 this.AddOption(AllowScriptsOption);
             }
 
@@ -176,8 +178,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        //TODO: implement this
-        private bool HasRunScriptPostActionDefined(CliTemplateInfo template) => false;
+        private bool HasRunScriptPostActionDefined(CliTemplateInfo template)
+        {
+            return template.PostActions.Contains(ProcessStartPostActionProcessor.ActionProcessorId);
+        }
 
         private HashSet<string> GetReservedAliases()
         {

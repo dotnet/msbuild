@@ -181,9 +181,7 @@ namespace Dotnet_new3.IntegrationTests
                   .And.HaveStdOutContaining("TemplateApplication.Tests");
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "This test is failing due to --allow-scripts option is not implemented yet.")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void RunScript_Basic()
         {
             string templateLocation = "PostActions/RunScript/Basic";
@@ -216,9 +214,7 @@ namespace Dotnet_new3.IntegrationTests
             }
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "This test is failing due to --allow-scripts option is not implemented yet.")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void RunScript_DoNotRedirect()
         {
             string templateLocation = "PostActions/RunScript/DoNotRedirect";
@@ -243,9 +239,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdOutContaining("Manual instructions: Run 'setup.sh'");
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "This test is failing due to --allow-scripts option is not implemented yet.")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void RunScript_Redirect()
         {
             string templateLocation = "PostActions/RunScript/Redirect";
@@ -270,9 +264,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdOutContaining("Manual instructions: Run 'setup.sh'");
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "This test is failing due to --allow-scripts option is not implemented yet.")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void RunScript_RedirectOnError()
         {
             string templateLocation = "PostActions/RunScript/RedirectOnError";
@@ -515,6 +507,34 @@ Action would have been taken automatically:
                 .And.HaveStdErrContaining($"The post action 210d431b-a78b-4d2f-b762-4ed3e3ea9027 is not supported.")
                 .And.HaveStdErrContaining($"Description: This is not defined post action.")
                 .And.HaveStdErrContaining($"Manual instructions: Run setup.cmd script manually.");
+        }
+
+        [Fact]
+        public void RunScript_DoNotExecuteWhenScriptsAreNotAllowed()
+        {
+            string templateLocation = "PostActions/RunScript/Basic";
+            string templateName = "TestAssets.PostActions.RunScript.Basic";
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+
+            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "no")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.HaveStdErrContaining("Execution of 'Run script' post action is not allowed.");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                commandResult.Should().HaveStdErrContaining("Manual instructions: Run 'setup.cmd'");
+            }
+            else
+            {
+                commandResult.Should().HaveStdErrContaining("Manual instructions: Run 'setup.sh'");
+            }
         }
     }
 }

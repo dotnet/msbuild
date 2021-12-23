@@ -8,6 +8,7 @@ using System.CommandLine.Parsing;
 using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
+using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
@@ -490,6 +491,66 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
             Assert.Equal(expectedError, templateParseResult.Errors.Single().Message);
+        }
+
+        [Fact]
+        internal void DoNotAddAllowScriptOptionForTemplate()
+        {
+            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group");
+
+            TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
+                .Single();
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
+            var parseResult = instantiateCommand.Parse($" new foo");
+            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+
+            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            Parser parser = ParserFactory.CreateParser(templateCommand);
+            ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
+
+            TemplateArgs templateArgs = new TemplateArgs(templateCommand, templateParseResult);
+            Assert.Null(templateArgs.AllowScripts);
+        }
+
+        [Theory]
+        [InlineData ("foo", AllowRunScripts.Prompt)]
+        [InlineData("foo --allow-scripts prompt", AllowRunScripts.Prompt)]
+        [InlineData("foo --allow-scripts Prompt", AllowRunScripts.Prompt)]
+        [InlineData("foo --allow-scripts yes", AllowRunScripts.Yes)]
+        [InlineData("foo --allow-scripts Yes", AllowRunScripts.Yes)]
+        [InlineData("foo --allow-scripts no", AllowRunScripts.No)]
+        [InlineData("foo --allow-scripts NO", AllowRunScripts.No)]
+        internal void CanParseAllowScriptsOption(string command, AllowRunScripts? result)
+        {
+            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                .WithPostActions(ProcessStartPostActionProcessor.ActionProcessorId);
+
+            TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
+                .Single();
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
+            var parseResult = instantiateCommand.Parse(command);
+            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+
+            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            Parser parser = ParserFactory.CreateParser(templateCommand);
+            ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
+
+            TemplateArgs templateArgs = new TemplateArgs(templateCommand, templateParseResult);
+            Assert.Equal(result, templateArgs.AllowScripts);
         }
 
         #region MultiShortNameResolutionTests 

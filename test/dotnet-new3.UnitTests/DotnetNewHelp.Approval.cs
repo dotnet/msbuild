@@ -326,5 +326,23 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should().Pass().And.NotHaveStdErr();
             Approvals.Verify(commandResult.StdOut);
         }
+
+        [Fact]
+        public void CanShowAllowScriptsOption()
+        {
+            string templateLocation = "PostActions/RunScript/Basic";
+            string templateName = "TestAssets.PostActions.RunScript.Basic";
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+
+            var commandResult = new DotnetNewCommand(_log, templateName, "--help")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult.Should().Pass().And.NotHaveStdErr();
+            Approvals.Verify(commandResult.StdOut);
+        }
     }
 }
