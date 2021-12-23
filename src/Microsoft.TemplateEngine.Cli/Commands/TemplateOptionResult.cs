@@ -48,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             return new TemplateOptionResult(
                     option,
-                    optionResult.Token?.Value ?? string.Empty,
+                    optionResult.Token.Value ?? string.Empty,
                     optionResult.GetValueOrDefault<string>());
         }
     }
@@ -168,7 +168,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new InvalidTemplateOptionResult(
                     option,
                     Kind.InvalidValue,
-                    optionResult.Token?.Value ?? string.Empty,
+                    optionResult.Token.Value ?? string.Empty,
                     optionValue,
                     errorMessage);
         }

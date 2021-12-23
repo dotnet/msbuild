@@ -103,10 +103,10 @@ namespace Microsoft.TemplateEngine.Cli
                             {
                                 return defaultValue;
                             }
-                            argumentResult.ErrorMessage = $"Cannot parse default value '{parameter.DefaultValue}' for option '{or.Token?.Value}' as expected type 'choice': {error}.";
+                            argumentResult.ErrorMessage = $"Cannot parse default value '{parameter.DefaultValue}' for option '{or.Token.Value}' as expected type 'choice': {error}.";
                             return string.Empty;
                         }
-                        argumentResult.ErrorMessage = $"Default value for argument missing for option: {or.Token?.Value}.";
+                        argumentResult.ErrorMessage = $"Default value for argument missing for option: {or.Token.Value}.";
                         return string.Empty;
                     }
                     if (parameter.DefaultIfOptionWithoutValue != null)
@@ -115,10 +115,10 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             return defaultValue;
                         }
-                        argumentResult.ErrorMessage = $"Cannot parse default if option without value '{parameter.DefaultIfOptionWithoutValue}' for option '{or.Token?.Value}' as expected type 'choice': {error}.";
+                        argumentResult.ErrorMessage = $"Cannot parse default if option without value '{parameter.DefaultIfOptionWithoutValue}' for option '{or.Token.Value}' as expected type 'choice': {error}.";
                         return string.Empty;
                     }
-                    argumentResult.ErrorMessage = $"Required argument missing for option: {or.Token?.Value}.";
+                    argumentResult.ErrorMessage = $"Required argument missing for option: {or.Token.Value}.";
                     return string.Empty;
                 }
                 else if (argumentResult.Tokens.Count == 1)
@@ -127,12 +127,12 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         return value;
                     }
-                    argumentResult.ErrorMessage = $"Cannot parse argument '{argumentResult.Tokens[0].Value}' for option '{or.Token?.Value}' as expected type 'choice': {error}.";
+                    argumentResult.ErrorMessage = $"Cannot parse argument '{argumentResult.Tokens[0].Value}' for option '{or.Token.Value}' as expected type 'choice': {error}.";
                     return string.Empty;
                 }
                 else
                 {
-                    argumentResult.ErrorMessage = $"Using more than 1 argument is not allowed for '{or.Token?.Value}', used: {argumentResult.Tokens.Count}.";
+                    argumentResult.ErrorMessage = $"Using more than 1 argument is not allowed for '{or.Token.Value}', used: {argumentResult.Tokens.Count}.";
                     return string.Empty;
                 }
             };

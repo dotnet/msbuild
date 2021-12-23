@@ -181,7 +181,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 if (result.FindResultFor(option) is { } optionResult)
                 {
-                    baseInputParameters = baseInputParameters + $", {optionResult.Token?.Value}='{optionResult.GetValueOrDefault<string>()}'";
+                    baseInputParameters = baseInputParameters + $", {optionResult.Token.Value}='{optionResult.GetValueOrDefault<string>()}'";
                 }
             }
 
@@ -196,7 +196,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 if (option.Condition && result.FindResultFor(option.Option) is { } optionResult)
                 {
                     string availableLanguagesStr = string.Join(", ", templateGroup.Languages.Select(l => $"'{l}'").OrderBy(l => l, StringComparer.OrdinalIgnoreCase));
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplateOptions_Error_AllowedValuesForOptionList, optionResult.Token?.Value, availableLanguagesStr));
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplateOptions_Error_AllowedValuesForOptionList, optionResult.Token.Value, availableLanguagesStr));
                 }
             }
 

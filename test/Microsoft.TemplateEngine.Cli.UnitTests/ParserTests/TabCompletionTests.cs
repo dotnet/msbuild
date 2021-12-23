@@ -19,9 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
     public partial class TabCompletionTests
     {
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact (Skip = "https://github.com/dotnet/command-line-api/issues/1518")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void Instantiate_CanSuggestTemplateOption_StartsWith()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
@@ -158,9 +156,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.Equal(new[] { "val1", "val2" }, result);
         }
 
-#pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact(Skip = "https://github.com/dotnet/command-line-api/issues/1519")]
-#pragma warning restore xUnit1004 // Test methods should not be skipped
+        [Fact]
         public void CanCompleteChoice_FromSingleTemplate_InTheMiddle()
         {
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")

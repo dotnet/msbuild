@@ -10,14 +10,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal static class Extensions
     {
-        internal static string? GetValueForOptionOrNull(this ParseResult parseResult, IOption option)
+        internal static string? GetValueForOptionOrNull(this ParseResult parseResult, Option option)
         {
             OptionResult? result = parseResult.FindResultFor(option);
             if (result == null)
-            {
-                return null;
-            }
-            if (result.Token is null)
             {
                 return null;
             }

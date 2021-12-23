@@ -241,12 +241,12 @@ namespace Microsoft.TemplateEngine.Cli
                             {
                                 return value;
                             }
-                            argumentResult.ErrorMessage = $"Cannot parse default value '{parameter.DefaultValue}' for option '{or.Token?.Value}' as expected type {typeof(T).Name}.";
+                            argumentResult.ErrorMessage = $"Cannot parse default value '{parameter.DefaultValue}' for option '{or.Token.Value}' as expected type {typeof(T).Name}.";
                             //https://github.com/dotnet/command-line-api/blob/5eca6545a0196124cc1a66d8bd43db8945f1f1b7/src/System.CommandLine/Argument%7BT%7D.cs#L99-L113
                             //TODO: system-command-line can handle null.
                             return default!;
                         }
-                        argumentResult.ErrorMessage = $"Default value for argument missing for option: {or.Token?.Value}.";
+                        argumentResult.ErrorMessage = $"Default value for argument missing for option: {or.Token.Value}.";
                         return default!;
                     }
                     if (parameter.DefaultIfOptionWithoutValue != null)
@@ -256,10 +256,10 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             return value;
                         }
-                        argumentResult.ErrorMessage = $"Cannot parse default if option without value '{parameter.DefaultIfOptionWithoutValue}' for option '{or.Token?.Value}' as expected type {typeof(T).Name}.";
+                        argumentResult.ErrorMessage = $"Cannot parse default if option without value '{parameter.DefaultIfOptionWithoutValue}' for option '{or.Token.Value}' as expected type {typeof(T).Name}.";
                         return default!;
                     }
-                    argumentResult.ErrorMessage = $"Required argument missing for option: {or.Token?.Value}.";
+                    argumentResult.ErrorMessage = $"Required argument missing for option: {or.Token.Value}.";
                     return default!;
                 }
                 else if (argumentResult.Tokens.Count == 1)
@@ -269,12 +269,12 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         return value;
                     }
-                    argumentResult.ErrorMessage = $"Cannot parse argument '{argumentResult.Tokens[0].Value}' for option '{or.Token?.Value}' as expected type {typeof(T).Name}.";
+                    argumentResult.ErrorMessage = $"Cannot parse argument '{argumentResult.Tokens[0].Value}' for option '{or.Token.Value}' as expected type {typeof(T).Name}.";
                     return default!;
                 }
                 else
                 {
-                    argumentResult.ErrorMessage = $"Using more than 1 argument is not allowed for '{or.Token?.Value}', used: {argumentResult.Tokens.Count}.";
+                    argumentResult.ErrorMessage = $"Using more than 1 argument is not allowed for '{or.Token.Value}', used: {argumentResult.Tokens.Count}.";
                     return default!;
                 }
             };

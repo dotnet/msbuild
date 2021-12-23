@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 .Select(result => result.Token);
 
             Tokens = parseResult.Tokens
-                .Where(t => !helpTokens.Contains(t) && !string.IsNullOrWhiteSpace(t?.Value))
+                .Where(t => !helpTokens.Contains(t) && !string.IsNullOrWhiteSpace(t.Value))
                 .Select(t => t.Value).ToArray();
         }
 

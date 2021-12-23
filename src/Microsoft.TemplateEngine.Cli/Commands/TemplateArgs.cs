@@ -98,7 +98,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private string? GetValueForOption(string parameterName, OptionResult optionResult)
         {
-            if (optionResult.Token is null)
+            //if default value is used, no need to return it - it will be populated in template engine edge instead.
+            if (optionResult.IsImplicit)
             {
                 return null;
             }

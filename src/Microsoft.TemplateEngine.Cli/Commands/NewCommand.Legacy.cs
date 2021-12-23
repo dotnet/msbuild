@@ -83,13 +83,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (optionResult != null)
             {
                 List<string> wrongTokens = new List<string>();
-                if (!string.IsNullOrWhiteSpace(optionResult.Token?.Value))
+                if (!string.IsNullOrWhiteSpace(optionResult.Token.Value))
                 {
                     wrongTokens.Add($"'{optionResult.Token.Value}'");
                 }
                 foreach (var token in optionResult.Tokens)
                 {
-                    if (!string.IsNullOrWhiteSpace(token?.Value))
+                    if (!string.IsNullOrWhiteSpace(token.Value))
                     {
                         wrongTokens.Add($"'{token.Value}'");
                     }
@@ -112,7 +112,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
                 foreach (var token in newCommandArgument.Tokens)
                 {
-                    if (!string.IsNullOrWhiteSpace(token?.Value))
+                    if (!string.IsNullOrWhiteSpace(token.Value))
                     {
                         wrongTokens.Add($"'{token.Value}'");
                     }

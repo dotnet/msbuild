@@ -13,7 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         // This code is from System.CommandLine, HelpBuilder class.
         // Ideally those methods are exposed, we may switch to use them.
-        private static string FormatArgumentUsage(IReadOnlyList<IArgument> arguments)
+        private static string FormatArgumentUsage(IReadOnlyList<Argument> arguments)
         {
             var sb = new StringBuilder();
             var end = default(Stack<char>);
@@ -60,34 +60,34 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
 
             return sb.ToString();
-            bool IsMultiParented(IArgument argument) =>
+            bool IsMultiParented(Argument argument) =>
                 argument is Argument a &&
-                a.Parents.Count > 1;
+                a.Parents.Count() > 1;
 
-            bool IsOptional(IArgument argument) =>
+            bool IsOptional(Argument argument) =>
                 IsMultiParented(argument) ||
                 argument.Arity.MinimumNumberOfValues == 0;
         }
 
         private static IEnumerable<string> GetUsageParts(
             HelpContext context,
-            ICommand command,
+            Command command,
             bool showSubcommands = true,
             bool showParentArguments = true,
             bool showArguments = true,
             bool showOptions = true,
             bool showAdditionalOptions = true)
         {
-            List<ICommand> parentCommands = new List<ICommand>();
-            ICommand? nextCommand = command;
+            List<Command> parentCommands = new List<Command>();
+            Command? nextCommand = command;
             while (nextCommand is not null)
             {
                 parentCommands.Add(nextCommand);
-                nextCommand = nextCommand.Parents.FirstOrDefault(c => c is ICommand) as ICommand;
+                nextCommand = nextCommand.Parents.FirstOrDefault(c => c is Command) as Command;
             }
             parentCommands.Reverse();
 
-            foreach (ICommand parentCommand in parentCommands)
+            foreach (Command parentCommand in parentCommands)
             {
                 yield return parentCommand.Name;
                 if (showParentArguments)
@@ -103,7 +103,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (showSubcommands)
             {
                 var hasCommandWithHelp = command.Children
-                    .OfType<ICommand>()
+                    .OfType<Command>()
                     .Any(x => !x.IsHidden);
 
                 if (hasCommandWithHelp)

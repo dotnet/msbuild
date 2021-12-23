@@ -345,14 +345,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             List<string> usageParts = new List<string>();
 
-            ICommand? command = this;
+            Command? command = this;
             while (command is not null)
             {
                 if (!string.IsNullOrWhiteSpace(command.Name))
                 {
                     usageParts.Add(command.Name);
                 }
-                command = command.Parents.FirstOrDefault(c => c is ICommand) as ICommand;
+                command = command.Parents.FirstOrDefault(c => c is Command) as Command;
             }
 
             usageParts.Reverse();
