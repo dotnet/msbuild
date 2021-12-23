@@ -217,7 +217,7 @@ namespace Microsoft.DotNet.Cli
                 }
                 else if (command.Name.Equals(NewCommandParser.GetCommand().Name))
                 {
-                    NewCommandShim.Run(helpArgs);
+                    NewCommandShim.Run(context.ParseResult.GetArguments());
                 }
                 else if (command.Name.Equals(VSTestCommandParser.GetCommand().Name))
                 {
