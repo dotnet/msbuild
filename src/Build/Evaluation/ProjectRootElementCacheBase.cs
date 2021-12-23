@@ -45,7 +45,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal event EventHandler<ProjectChangedEventArgs> ProjectDirtied;
 
-        internal abstract ProjectRootElement Get(string projectFile, OpenProjectRootElement openProjectRootElement,
+        internal abstract ProjectRootElement Get(string projectFile, OpenProjectRootElement loadProjectRootElement,
             bool isExplicitlyLoaded,
             bool? preserveFormatting);
 
