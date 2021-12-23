@@ -167,22 +167,10 @@ namespace Microsoft.Build.Logging
                     InternalLoggerException.Throw(null, null, "LoggerNotFoundError", true, this.Name);
                 }
             }
-            catch (Exception e /* Wrap all other exceptions in a more meaningful exception*/)
+            catch (Exception e) // Wrap other exceptions in a more meaningful exception. LoggerException and InternalLoggerException are already meaningful.
+            when (!(e is LoggerException /* Polite logger Failure*/ || e is InternalLoggerException /* LoggerClass not found*/ || ExceptionHandling.IsCriticalException(e)))
             {
-                // Two of the possible exceptions are already in reasonable exception types
-                if (e is LoggerException /* Polite logger Failure*/ || e is InternalLoggerException /* LoggerClass not found*/)
-                {
-                    throw;
-                }
-                else
-                {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(e, null, "LoggerCreationError", true, Name);
-                }
+                InternalLoggerException.Throw(e, null, "LoggerCreationError", true, Name);
             }
 
             return forwardingLogger;

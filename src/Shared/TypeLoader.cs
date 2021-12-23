@@ -394,7 +394,6 @@ namespace Microsoft.Build.Shared
                                             }
                                         }
 
-#if !TASKHOST
                                         IEnumerable<PropertyDefinition> propertyDefinitions = typeDef.GetProperties().Select(prop => metadataReader.GetPropertyDefinition(prop));
                                         List<TypeInformationPropertyInfo> typePropertyInfos = new();
                                         foreach (PropertyDefinition propertyDefinition in propertyDefinitions)
@@ -420,7 +419,6 @@ namespace Microsoft.Build.Shared
                                             typePropertyInfos.Add(toAdd);
                                         }
                                         typeInformation.Properties = typePropertyInfos.ToArray();
-#endif
 
                                         TypeDefinition parentTypeDefinition = typeDef;
                                         while (true)

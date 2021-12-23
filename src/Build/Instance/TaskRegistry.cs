@@ -1447,18 +1447,13 @@ namespace Microsoft.Build.Execution
 
                                 return false;
                             }
-                            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e)) // Catching Exception, but rethrowing unless it's a well-known exception.
                             {
-                                if (ExceptionHandling.IsCriticalException(e))
-                                {
-                                    throw;
-                                }
-
-                                string message = String.Empty;
+                                string message =
 #if DEBUG
-                                message += UnhandledFactoryError;
+                                UnhandledFactoryError +
 #endif
-                                message += e.Message;
+                                e.Message;
 
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskFactoryLoadFailure", TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation, message);
                             }

@@ -44,6 +44,8 @@ namespace Microsoft.Build.Shared
 #endif
             AssemblyName = LoadedType.LoadedAssembly?.GetName();
             Namespace = LoadedType.Type.Namespace;
+            LoadInfo = LoadedType.Assembly;
+            TypeName = LoadedType.Type.FullName;
         }
 
         public PropertyInfo[] GetProperties(BindingFlags flags)
