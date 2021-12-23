@@ -138,7 +138,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         /// <summary>
-        /// Gets the  template package which contain the template.
+        /// Gets the template package which contains the template.
         /// </summary>
         /// <remarks>
         /// The method might throw exceptions if <see cref="TemplatePackageManager.GetTemplatePackageAsync(ITemplateInfo, CancellationToken)"/> call throws.

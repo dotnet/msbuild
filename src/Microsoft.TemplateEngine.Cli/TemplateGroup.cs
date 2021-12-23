@@ -134,9 +134,9 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         /// <summary>
-        /// Returns the description of template group
-        /// Template group description is the name of highest precedence template in the group.
-        /// If multiple templates have the maximum precedence, the description of first one is returned.
+        /// Returns the description of template group.
+        /// Template group description is the description of the template in the group with the highest precedence.
+        /// If multiple templates have the maximum precedence, the description of the first one is returned.
         /// </summary>
         internal string Description
         {
