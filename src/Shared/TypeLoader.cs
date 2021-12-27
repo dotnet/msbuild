@@ -11,6 +11,9 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+#if !NETFRAMEWORK
+using System.Runtime.Loader;
+#endif
 using System.Threading;
 
 namespace Microsoft.Build.Shared
@@ -357,125 +360,90 @@ namespace Microsoft.Build.Shared
             private TypeInformation FindTypeInformationUsingSystemReflectionMetadata(string typeName)
             {
                 TypeInformation typeInformation = new();
-                if (_assemblyLoadInfo.AssemblyFile != null)
+                string path = _assemblyLoadInfo.AssemblyFile;
+                if (path is null)
                 {
-                    using (FileStream stream = File.OpenRead(_assemblyLoadInfo.AssemblyFile))
-                    using (PEReader peFile = new(stream))
+#if NETFRAMEWORK
+                    AppDomain appDomain = AppDomain.CreateDomain("appDomainToFindPath");
+                    path = appDomain.Load(new AssemblyName(_assemblyLoadInfo.AssemblyName)).Location;
+                    AppDomain.Unload(appDomain);
+#else
+                    AssemblyLoadContext alc = new("loadContextToFindPath", true);
+                    alc.LoadFromAssemblyName(new AssemblyName(_assemblyLoadInfo.AssemblyName));
+                    path = alc.Assemblies.First().Location;
+                    alc.Unload();
+#endif
+                }
+
+                using (FileStream stream = File.OpenRead(path))
+                using (PEReader peFile = new(stream))
+                {
+                    MetadataReader metadataReader = peFile.GetMetadataReader();
+                    AssemblyDefinition assemblyDef = metadataReader.GetAssemblyDefinition();
+                    foreach (TypeDefinitionHandle typeDefHandle in metadataReader.TypeDefinitions)
                     {
-                        MetadataReader metadataReader = peFile.GetMetadataReader();
-                        AssemblyDefinition assemblyDef = metadataReader.GetAssemblyDefinition();
-                        foreach (TypeDefinitionHandle typeDefHandle in metadataReader.TypeDefinitions)
+                        TypeDefinition typeDef = metadataReader.GetTypeDefinition(typeDefHandle);
+                        if (!typeDef.Attributes.HasFlag(TypeAttributes.Public) || !typeDef.Attributes.HasFlag(TypeAttributes.Class))
                         {
-                            TypeDefinition typeDef = metadataReader.GetTypeDefinition(typeDefHandle);
-                            if (!typeDef.Attributes.HasFlag(TypeAttributes.Public) || !typeDef.Attributes.HasFlag(TypeAttributes.Class))
+                            continue;
+                        }
+                        else
+                        {
+                            string currentTypeName = metadataReader.GetString(typeDef.Name);
+                            if (currentTypeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(currentTypeName, typeName))
                             {
-                                continue;
-                            }
-                            else
-                            {
-                                string currentTypeName = metadataReader.GetString(typeDef.Name);
-                                if (currentTypeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(currentTypeName, typeName))
+                                // We found the right type! Now get its information.
+                                foreach (CustomAttributeHandle customAttrHandle in typeDef.GetCustomAttributes())
                                 {
-                                    // We found the right type! Now get its information.
-                                    foreach (CustomAttributeHandle customAttrHandle in typeDef.GetCustomAttributes())
+                                    CustomAttribute customAttribute = metadataReader.GetCustomAttribute(customAttrHandle);
+                                    MemberReference constructorReference = metadataReader.GetMemberReference((MemberReferenceHandle)customAttribute.Constructor);
+                                    if (constructorReference.Parent.Kind == HandleKind.TypeReference)
                                     {
-                                        CustomAttribute customAttribute = metadataReader.GetCustomAttribute(customAttrHandle);
-                                        MemberReference constructorReference = metadataReader.GetMemberReference((MemberReferenceHandle)customAttribute.Constructor);
-                                        if (constructorReference.Parent.Kind == HandleKind.TypeReference)
+                                        TypeReference typeReference = metadataReader.GetTypeReference((TypeReferenceHandle)constructorReference.Parent);
+                                        string customAttributeName = metadataReader.GetString(typeReference.Name);
+                                        switch (customAttributeName)
                                         {
-                                            TypeReference typeReference = metadataReader.GetTypeReference((TypeReferenceHandle)constructorReference.Parent);
-                                            string customAttributeName = metadataReader.GetString(typeReference.Name);
-                                            switch (customAttributeName)
+                                            case "RunInSTAAttribute":
+                                                typeInformation.HasSTAThreadAttribute = true;
+                                                break;
+                                            case "LoadInSeparateAppDomainAttribute":
+                                                typeInformation.HasLoadInSeparateAppDomainAttribute = true;
+                                                break;
+                                        }
+                                    }
+                                }
+
+                                IEnumerable<PropertyDefinition> propertyDefinitions = typeDef.GetProperties().Select(prop => metadataReader.GetPropertyDefinition(prop));
+                                List<TypeInformationPropertyInfo> typePropertyInfos = new();
+                                foreach (PropertyDefinition propertyDefinition in propertyDefinitions)
+                                {
+                                    TypeInformationPropertyInfo toAdd = new();
+                                    toAdd.Name = metadataReader.GetString(propertyDefinition.Name);
+                                    byte[] bytes = metadataReader.GetBlobReader(propertyDefinition.Signature).ReadBytes(metadataReader.GetBlobReader(propertyDefinition.Signature).Length);
+                                    foreach (CustomAttributeHandle attr in propertyDefinition.GetCustomAttributes())
+                                    {
+                                        EntityHandle referenceHandle = metadataReader.GetMemberReference((MemberReferenceHandle)metadataReader.GetCustomAttribute(attr).Constructor).Parent;
+                                        if (referenceHandle.Kind == HandleKind.TypeReference)
+                                        {
+                                            string name = metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)referenceHandle).Name);
+                                            if (name.Equals("OutputAttribute", StringComparison.OrdinalIgnoreCase))
                                             {
-                                                case "RunInSTAAttribute":
-                                                    typeInformation.HasSTAThreadAttribute = true;
-                                                    break;
-                                                case "LoadInSeparateAppDomainAttribute":
-                                                    typeInformation.HasLoadInSeparateAppDomainAttribute = true;
-                                                    break;
+                                                toAdd.OutputAttribute = true;
+                                            }
+                                            else if (name.Equals("RequiredAttribute", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                toAdd.RequiredAttribute = true;
                                             }
                                         }
                                     }
+                                    typePropertyInfos.Add(toAdd);
+                                }
+                                typeInformation.Properties = typePropertyInfos.ToArray();
 
-                                    IEnumerable<PropertyDefinition> propertyDefinitions = typeDef.GetProperties().Select(prop => metadataReader.GetPropertyDefinition(prop));
-                                    List<TypeInformationPropertyInfo> typePropertyInfos = new();
-                                    foreach (PropertyDefinition propertyDefinition in propertyDefinitions)
-                                    {
-                                        TypeInformationPropertyInfo toAdd = new();
-                                        toAdd.Name = metadataReader.GetString(propertyDefinition.Name);
-                                        foreach (CustomAttributeHandle attr in propertyDefinition.GetCustomAttributes())
-                                        {
-                                            EntityHandle referenceHandle = metadataReader.GetMemberReference((MemberReferenceHandle)metadataReader.GetCustomAttribute(attr).Constructor).Parent;
-                                            if (referenceHandle.Kind == HandleKind.TypeReference)
-                                            {
-                                                string name = metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)referenceHandle).Name);
-                                                if (name.Equals("OutputAttribute", StringComparison.OrdinalIgnoreCase))
-                                                {
-                                                    toAdd.OutputAttribute = true;
-                                                }
-                                                else if (name.Equals("RequiredAttribute", StringComparison.OrdinalIgnoreCase))
-                                                {
-                                                    toAdd.RequiredAttribute = true;
-                                                }
-                                            }
-                                        }
-                                        typePropertyInfos.Add(toAdd);
-                                    }
-                                    typeInformation.Properties = typePropertyInfos.ToArray();
-
-                                    TypeDefinition parentTypeDefinition = typeDef;
-                                    while (true)
-                                    {
-                                        foreach (InterfaceImplementationHandle interfaceHandle in parentTypeDefinition.GetInterfaceImplementations())
-                                        {
-                                            if (metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)metadataReader.GetInterfaceImplementation(interfaceHandle).Interface).Name).Equals("IGeneratedTask"))
-                                            {
-                                                typeInformation.ImplementsIGeneratedTask = true;
-                                            }
-                                        }
-
-                                        if (parentTypeDefinition.BaseType.IsNil)
-                                        {
-                                            break;
-                                        }
-
-                                        // If the baseType is not a TypeDefinitionHandle, we won't be able to chase it without actually loading the assembly. We would need to find the assembly containing the base type
-                                        // and load it using System.Reflection.Metdata just as we're doing here, but we don't know its path without loading this assembly. Just assume it didn't implement IGeneratedTask.
-                                        bool shouldBreakLoop = false;
-                                        switch (parentTypeDefinition.BaseType.Kind)
-                                        {
-                                            case HandleKind.TypeDefinition:
-                                                parentTypeDefinition = metadataReader.GetTypeDefinition((TypeDefinitionHandle)parentTypeDefinition.BaseType);
-                                                break;
-                                            case HandleKind.TypeReference:
-                                                string parentName = metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)parentTypeDefinition.BaseType).Name);
-                                                if (parentName.Equals("IGeneratedTask"))
-                                                {
-                                                    typeInformation.ImplementsIGeneratedTask = true;
-                                                }
-                                                else if (parentName.Equals("MarshalByRefObject"))
-                                                {
-                                                    typeInformation.IsMarshalByRef = true;
-                                                }
-                                                shouldBreakLoop = true;
-                                                break;
-                                            case HandleKind.TypeSpecification:
-                                                shouldBreakLoop = true;
-                                                break;
-                                        }
-
-                                        string typeDefinitionName = metadataReader.GetString(parentTypeDefinition.Name);
-                                        if (typeDefinitionName.Equals("MarshalByRefObject"))
-                                        {
-                                            typeInformation.IsMarshalByRef = true;
-                                        }
-                                        if (shouldBreakLoop || typeDefinitionName.Equals("object"))
-                                        {
-                                            break;
-                                        }
-                                    }
-
-                                    foreach (InterfaceImplementationHandle interfaceHandle in typeDef.GetInterfaceImplementations())
+                                TypeDefinition parentTypeDefinition = typeDef;
+                                while (true)
+                                {
+                                    foreach (InterfaceImplementationHandle interfaceHandle in parentTypeDefinition.GetInterfaceImplementations())
                                     {
                                         if (metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)metadataReader.GetInterfaceImplementation(interfaceHandle).Interface).Name).Equals("IGeneratedTask"))
                                         {
@@ -483,16 +451,65 @@ namespace Microsoft.Build.Shared
                                         }
                                     }
 
-                                    typeInformation.AssemblyName = _assemblyLoadInfo.AssemblyName is null ? new AssemblyName(Path.GetFileNameWithoutExtension(_assemblyLoadInfo.AssemblyFile)) : new AssemblyName(_assemblyLoadInfo.AssemblyName);
+                                    if (parentTypeDefinition.BaseType.IsNil)
+                                    {
+                                        break;
+                                    }
 
-                                    typeInformation.Namespace = metadataReader.GetString(metadataReader.GetNamespaceDefinition(metadataReader.GetNamespaceDefinitionRoot().NamespaceDefinitions.First()).Name);
+                                    // If the baseType is not a TypeDefinitionHandle, we won't be able to chase it without actually loading the assembly. We would need to find the assembly containing the base type
+                                    // and load it using System.Reflection.Metdata just as we're doing here, but we don't know its path without loading this assembly. Just assume it didn't implement IGeneratedTask.
+                                    bool shouldBreakLoop = false;
+                                    switch (parentTypeDefinition.BaseType.Kind)
+                                    {
+                                        case HandleKind.TypeDefinition:
+                                            parentTypeDefinition = metadataReader.GetTypeDefinition((TypeDefinitionHandle)parentTypeDefinition.BaseType);
+                                            break;
+                                        case HandleKind.TypeReference:
+                                            string parentName = metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)parentTypeDefinition.BaseType).Name);
+                                            if (parentName.Equals("IGeneratedTask"))
+                                            {
+                                                typeInformation.ImplementsIGeneratedTask = true;
+                                            }
+                                            else if (parentName.Equals("MarshalByRefObject"))
+                                            {
+                                                typeInformation.IsMarshalByRef = true;
+                                            }
+                                            shouldBreakLoop = true;
+                                            break;
+                                        case HandleKind.TypeSpecification:
+                                            shouldBreakLoop = true;
+                                            break;
+                                    }
 
-                                    break;
+                                    string typeDefinitionName = metadataReader.GetString(parentTypeDefinition.Name);
+                                    if (typeDefinitionName.Equals("MarshalByRefObject"))
+                                    {
+                                        typeInformation.IsMarshalByRef = true;
+                                    }
+                                    if (shouldBreakLoop || typeDefinitionName.Equals("object"))
+                                    {
+                                        break;
+                                    }
                                 }
+
+                                foreach (InterfaceImplementationHandle interfaceHandle in typeDef.GetInterfaceImplementations())
+                                {
+                                    if (metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)metadataReader.GetInterfaceImplementation(interfaceHandle).Interface).Name).Equals("IGeneratedTask"))
+                                    {
+                                        typeInformation.ImplementsIGeneratedTask = true;
+                                    }
+                                }
+
+                                typeInformation.AssemblyName = _assemblyLoadInfo.AssemblyName is null ? new AssemblyName(Path.GetFileNameWithoutExtension(_assemblyLoadInfo.AssemblyFile)) : new AssemblyName(_assemblyLoadInfo.AssemblyName);
+
+                                typeInformation.Namespace = metadataReader.GetString(metadataReader.GetNamespaceDefinition(metadataReader.GetNamespaceDefinitionRoot().NamespaceDefinitions.First()).Name);
+
+                                break;
                             }
                         }
                     }
                 }
+
                 return typeInformation;
             }
 
