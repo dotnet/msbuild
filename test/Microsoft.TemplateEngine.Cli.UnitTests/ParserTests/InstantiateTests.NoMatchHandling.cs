@@ -90,7 +90,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 },
                 new string[][]
                 {
-                    new string[] { "value", "int", "--int", "fake", "Cannot parse argument 'fake' for option '--int' as expected type Int64." },
+                    new string[] { "value", "int", "--int", "fake", "Cannot parse argument 'fake' for option '--int' as expected type 'Int64'." },
                 }
             };
             yield return new object[]
@@ -103,7 +103,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 },
                 new string?[][]
                 {
-                    new string?[] { "value", "int", "--int", null, "Cannot parse default if option without value 'fake' for option '--int' as expected type Int64." },
+                    new string?[] { "value", "int", "--int", null, "Cannot parse default if option without value 'fake' for option '--int' as expected type 'Int64'." },
                 }
             };
             //TODO: does not work, see https://github.com/dotnet/command-line-api/issues/1474

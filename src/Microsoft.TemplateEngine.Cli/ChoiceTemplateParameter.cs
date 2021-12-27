@@ -12,7 +12,7 @@ using Microsoft.TemplateEngine.Cli.Commands;
 namespace Microsoft.TemplateEngine.Cli
 {
     /// <summary>
-    /// The class combines information from<see cref="ITemplateParameter"/> and <see cref="HostSpecificTemplateData"/> for choice parameter.
+    /// The class combines information from <see cref="ITemplateParameter"/> and <see cref="HostSpecificTemplateData"/> for choice parameter.
     /// Other parameters are implemented in base class <see cref="CliTemplateParameter"/>.
     /// </summary>
     internal class ChoiceTemplateParameter : CliTemplateParameter
@@ -48,6 +48,10 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal virtual IReadOnlyDictionary<string, ParameterChoice> Choices => _choices;
 
+        /// <summary>
+        /// Customization for first column of help, required to shorten the value in case choice parameter has too many choices.
+        /// Otherwise the first column of help is getting too wide.
+        /// </summary>
         internal override Func<HelpContext, string?>? GetCustomFirstColumnText(TemplateOption o)
         {
             return (context) =>
@@ -84,6 +88,10 @@ namespace Microsoft.TemplateEngine.Cli
             return option;
         }
 
+        /// <summary>
+        /// Custom parse method for template option.
+        /// It is mainly required to process default if no option value cases.
+        /// </summary>
         private static ParseArgument<string> GetParseChoiceArgument(ChoiceTemplateParameter parameter)
         {
             return (argumentResult) =>
@@ -97,16 +105,23 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     if (or.IsImplicit)
                     {
-                        if (string.IsNullOrWhiteSpace(parameter.DefaultValue))
+                        if (!string.IsNullOrWhiteSpace(parameter.DefaultValue))
                         {
                             if (TryConvertValueToChoice(parameter.DefaultValue, parameter, out string defaultValue, out string error))
                             {
                                 return defaultValue;
                             }
-                            argumentResult.ErrorMessage = $"Cannot parse default value '{parameter.DefaultValue}' for option '{or.Token.Value}' as expected type 'choice': {error}.";
+                            //Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.
+                            argumentResult.ErrorMessage = string.Format(
+                                LocalizableStrings.ParseChoiceTemplateOption_Error_InvalidDefaultValue,
+                                parameter.DefaultValue,
+                                or.Token.Value,
+                                "choice",
+                                error);
                             return string.Empty;
                         }
-                        argumentResult.ErrorMessage = $"Default value for argument missing for option: {or.Token.Value}.";
+                        //Default value for argument missing for option: '{0}'.
+                        argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.Token.Value);
                         return string.Empty;
                     }
                     if (parameter.DefaultIfOptionWithoutValue != null)
@@ -115,10 +130,17 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             return defaultValue;
                         }
-                        argumentResult.ErrorMessage = $"Cannot parse default if option without value '{parameter.DefaultIfOptionWithoutValue}' for option '{or.Token.Value}' as expected type 'choice': {error}.";
+                        //Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.
+                        argumentResult.ErrorMessage = string.Format(
+                            LocalizableStrings.ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue,
+                            parameter.DefaultIfOptionWithoutValue,
+                            or.Token.Value,
+                            "choice",
+                            error);
                         return string.Empty;
                     }
-                    argumentResult.ErrorMessage = $"Required argument missing for option: {or.Token.Value}.";
+                    //Required argument missing for option: '{0}'.
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.Token.Value);
                     return string.Empty;
                 }
                 else if (argumentResult.Tokens.Count == 1)
@@ -127,29 +149,31 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         return value;
                     }
-                    argumentResult.ErrorMessage = $"Cannot parse argument '{argumentResult.Tokens[0].Value}' for option '{or.Token.Value}' as expected type 'choice': {error}.";
+                    //Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.
+                    argumentResult.ErrorMessage = string.Format(
+                        LocalizableStrings.ParseChoiceTemplateOption_Error_InvalidArgument,
+                        argumentResult.Tokens[0].Value,
+                        or.Token.Value,
+                        "choice",
+                        error);
                     return string.Empty;
                 }
                 else
                 {
-                    argumentResult.ErrorMessage = $"Using more than 1 argument is not allowed for '{or.Token.Value}', used: {argumentResult.Tokens.Count}.";
+                    //Using more than 1 argument is not allowed for '{0}', used: {1}.
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.Token.Value, argumentResult.Tokens.Count);
                     return string.Empty;
                 }
             };
         }
 
-        private static bool TryConvertValueToChoice(string? value, ChoiceTemplateParameter parameter, out string parsedValue, out string error)
+        private static bool TryConvertValueToChoice(string value, ChoiceTemplateParameter parameter, out string parsedValue, out string error)
         {
             parsedValue = string.Empty;
-            if (value == null)
-            {
-                error = "value is <null>";
-                return false;
-            }
-
             if (parameter.Choices == null)
             {
-                error = "no choices are defined for parameter";
+                //no choices are defined for parameter
+                error = LocalizableStrings.ParseChoiceTemplateOption_ErrorText_NoChoicesDefined;
                 return false;
             }
 
@@ -162,7 +186,11 @@ namespace Microsoft.TemplateEngine.Cli
                     return true;
                 }
             }
-            error = $"value '{value}' is not allowed, allowed values are: {string.Join(",", parameter.Choices.Keys.Select(key => $"'{key}'"))}";
+            //value '{0}' is not allowed, allowed values are: {1}
+            error = string.Format(
+                LocalizableStrings.ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue,
+                value,
+                string.Join(",", parameter.Choices.Keys.Select(key => $"'{key}'")));
             return false;
         }
     }

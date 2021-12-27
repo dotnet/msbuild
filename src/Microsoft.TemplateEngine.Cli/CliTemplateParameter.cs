@@ -123,6 +123,10 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal string? DefaultIfOptionWithoutValue { get; private set; }
 
+        /// <summary>
+        /// Creates <see cref="Option"/> for template parameter.
+        /// </summary>
+        /// <param name="aliases">aliases to be used for option.</param>
         internal Option GetOption(IReadOnlyList<string> aliases)
         {
             Option option = GetBaseOption(aliases);
@@ -241,12 +245,20 @@ namespace Microsoft.TemplateEngine.Cli
                             {
                                 return value;
                             }
-                            argumentResult.ErrorMessage = $"Cannot parse default value '{parameter.DefaultValue}' for option '{or.Token.Value}' as expected type {typeof(T).Name}.";
+
+                            //Cannot parse default value '{0}' for option '{1}' as expected type '{2}'.
+                            argumentResult.ErrorMessage = string.Format(
+                                LocalizableStrings.ParseTemplateOption_Error_InvalidDefaultValue,
+                                parameter.DefaultValue,
+                                or.Token.Value,
+                                typeof(T).Name);
+
                             //https://github.com/dotnet/command-line-api/blob/5eca6545a0196124cc1a66d8bd43db8945f1f1b7/src/System.CommandLine/Argument%7BT%7D.cs#L99-L113
-                            //TODO: system-command-line can handle null.
+                            //system-command-line can handle null.
                             return default!;
                         }
-                        argumentResult.ErrorMessage = $"Default value for argument missing for option: {or.Token.Value}.";
+                        //Default value for argument missing for option: '{0}'.
+                        argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.Token.Value);
                         return default!;
                     }
                     if (parameter.DefaultIfOptionWithoutValue != null)
@@ -256,10 +268,16 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             return value;
                         }
-                        argumentResult.ErrorMessage = $"Cannot parse default if option without value '{parameter.DefaultIfOptionWithoutValue}' for option '{or.Token.Value}' as expected type {typeof(T).Name}.";
+                        //Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.
+                        argumentResult.ErrorMessage = string.Format(
+                            LocalizableStrings.ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue,
+                            parameter.DefaultIfOptionWithoutValue,
+                            or.Token.Value,
+                            typeof(T).Name);
                         return default!;
                     }
-                    argumentResult.ErrorMessage = $"Required argument missing for option: {or.Token.Value}.";
+                    //Required argument missing for option: '{0}'.
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.Token.Value);
                     return default!;
                 }
                 else if (argumentResult.Tokens.Count == 1)
@@ -269,12 +287,18 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         return value;
                     }
-                    argumentResult.ErrorMessage = $"Cannot parse argument '{argumentResult.Tokens[0].Value}' for option '{or.Token.Value}' as expected type {typeof(T).Name}.";
+                    //Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.
+                    argumentResult.ErrorMessage = string.Format(
+                        LocalizableStrings.ParseTemplateOption_Error_InvalidArgument,
+                        argumentResult.Tokens[0].Value,
+                        or.Token.Value,
+                        typeof(T).Name);
                     return default!;
                 }
                 else
                 {
-                    argumentResult.ErrorMessage = $"Using more than 1 argument is not allowed for '{or.Token.Value}', used: {argumentResult.Tokens.Count}.";
+                    //Using more than 1 argument is not allowed for '{0}', used: {1}.
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.Token.Value, argumentResult.Tokens.Count);
                     return default!;
                 }
             };

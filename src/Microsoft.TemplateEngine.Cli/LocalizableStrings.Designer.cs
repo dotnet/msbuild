@@ -1096,6 +1096,105 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot parse argument &apos;{0}&apos; for option &apos;{1}&apos; as expected type &apos;{2}&apos;: {3}..
+        /// </summary>
+        internal static string ParseChoiceTemplateOption_Error_InvalidArgument {
+            get {
+                return ResourceManager.GetString("ParseChoiceTemplateOption_Error_InvalidArgument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot parse default if option without value &apos;{0}&apos; for option &apos;{1}&apos; as expected type &apos;{2}&apos;: {3}..
+        /// </summary>
+        internal static string ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue {
+            get {
+                return ResourceManager.GetString("ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot parse default value &apos;{0}&apos; for option &apos;{1}&apos; as expected type &apos;{2}&apos;: {3}..
+        /// </summary>
+        internal static string ParseChoiceTemplateOption_Error_InvalidDefaultValue {
+            get {
+                return ResourceManager.GetString("ParseChoiceTemplateOption_Error_InvalidDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to value &apos;{0}&apos; is not allowed, allowed values are: {1}.
+        /// </summary>
+        internal static string ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue {
+            get {
+                return ResourceManager.GetString("ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to no choices are defined for parameter.
+        /// </summary>
+        internal static string ParseChoiceTemplateOption_ErrorText_NoChoicesDefined {
+            get {
+                return ResourceManager.GetString("ParseChoiceTemplateOption_ErrorText_NoChoicesDefined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot parse argument &apos;{0}&apos; for option &apos;{1}&apos; as expected type &apos;{2}&apos;..
+        /// </summary>
+        internal static string ParseTemplateOption_Error_InvalidArgument {
+            get {
+                return ResourceManager.GetString("ParseTemplateOption_Error_InvalidArgument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Using more than 1 argument is not allowed for &apos;{0}&apos;, used: {1}..
+        /// </summary>
+        internal static string ParseTemplateOption_Error_InvalidCount {
+            get {
+                return ResourceManager.GetString("ParseTemplateOption_Error_InvalidCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot parse default if option without value &apos;{0}&apos; for option &apos;{1}&apos; as expected type &apos;{2}&apos;..
+        /// </summary>
+        internal static string ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue {
+            get {
+                return ResourceManager.GetString("ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot parse default value &apos;{0}&apos; for option &apos;{1}&apos; as expected type {2}&apos;..
+        /// </summary>
+        internal static string ParseTemplateOption_Error_InvalidDefaultValue {
+            get {
+                return ResourceManager.GetString("ParseTemplateOption_Error_InvalidDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Required argument missing for option: &apos;{0}&apos;..
+        /// </summary>
+        internal static string ParseTemplateOption_Error_MissingDefaultIfNoOptionValue {
+            get {
+                return ResourceManager.GetString("ParseTemplateOption_Error_MissingDefaultIfNoOptionValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default value for argument missing for option: &apos;{0}&apos;..
+        /// </summary>
+        internal static string ParseTemplateOption_Error_MissingDefaultValue {
+            get {
+                return ResourceManager.GetString("ParseTemplateOption_Error_MissingDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Some partially matched templates may not support these input switches:.
         /// </summary>
         internal static string PartialTemplateMatchSwitchesNotValidForAllMatches {

@@ -593,6 +593,79 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">덮어쓰기</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue">
+        <source>value '{0}' is not allowed, allowed values are: {1}</source>
+        <target state="new">value '{0}' is not allowed, allowed values are: {1}</target>
+        <note>the error message is part of other sentence, no punctuation is needed
+{0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined">
+        <source>no choices are defined for parameter</source>
+        <target state="new">no choices are defined for parameter</target>
+        <note>the error message is part of other sentence, no punctuation is needed</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_Error_InvalidArgument">
+        <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</source>
+        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <note>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue">
+        <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
+        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <note>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultValue">
+        <source>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
+        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <note>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidArgument">
+        <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</source>
+        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</target>
+        <note>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidCount">
+        <source>Using more than 1 argument is not allowed for '{0}', used: {1}.</source>
+        <target state="new">Using more than 1 argument is not allowed for '{0}', used: {1}.</target>
+        <note>{0} - option name, {1} - count of arguments used</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue">
+        <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</source>
+        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</target>
+        <note>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidDefaultValue">
+        <source>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</source>
+        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</target>
+        <note>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue">
+        <source>Required argument missing for option: '{0}'.</source>
+        <target state="new">Required argument missing for option: '{0}'.</target>
+        <note>{0} - option name</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_MissingDefaultValue">
+        <source>Default value for argument missing for option: '{0}'.</source>
+        <target state="new">Default value for argument missing for option: '{0}'.</target>
+        <note>{0} - option name</note>
+      </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
         <source>Some partially matched templates may not support these input switches:</source>
         <target state="translated">부분적으로 일치하는 일부 템플릿은 다음 입력 스위치를 지원하지 않을 수 있습니다.</target>

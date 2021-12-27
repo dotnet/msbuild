@@ -705,4 +705,66 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <comment>{0} is template identity, {1} is template short name.
 The header is followed by the list of parameters and their errors (might be several for one parameter).</comment>
   </data>
+  <data name="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue" xml:space="preserve">
+    <value>value '{0}' is not allowed, allowed values are: {1}</value>
+    <comment>the error message is part of other sentence, no punctuation is needed
+{0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</comment>
+  </data>
+  <data name="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined" xml:space="preserve">
+    <value>no choices are defined for parameter</value>
+    <comment>the error message is part of other sentence, no punctuation is needed</comment>
+  </data>
+  <data name="ParseChoiceTemplateOption_Error_InvalidArgument" xml:space="preserve">
+    <value>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</value>
+    <comment>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</comment>
+  </data>
+  <data name="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue" xml:space="preserve">
+    <value>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</value>
+    <comment>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</comment>
+  </data>
+  <data name="ParseChoiceTemplateOption_Error_InvalidDefaultValue" xml:space="preserve">
+    <value>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</value>
+    <comment>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_InvalidArgument" xml:space="preserve">
+    <value>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</value>
+    <comment>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_InvalidCount" xml:space="preserve">
+    <value>Using more than 1 argument is not allowed for '{0}', used: {1}.</value>
+    <comment>{0} - option name, {1} - count of arguments used</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue" xml:space="preserve">
+    <value>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</value>
+    <comment>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_InvalidDefaultValue" xml:space="preserve">
+    <value>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</value>
+    <comment>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue" xml:space="preserve">
+    <value>Required argument missing for option: '{0}'.</value>
+    <comment>{0} - option name</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_MissingDefaultValue" xml:space="preserve">
+    <value>Default value for argument missing for option: '{0}'.</value>
+    <comment>{0} - option name</comment>
+  </data>
 </root>

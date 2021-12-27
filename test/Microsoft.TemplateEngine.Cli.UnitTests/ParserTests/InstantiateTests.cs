@@ -398,21 +398,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 new object?[] { "foo --text", "text", "string", false, null, null, "Required argument missing for option: '--text'." },
                 new object?[] { "foo", "text", "string", true, null, null, "Option '--text' is required." },
                 //int
-                new object?[] { "foo --int text", "int", "int", false, null, null, "Cannot parse argument 'text' for option '--int' as expected type Int64." },
+                new object?[] { "foo --int text", "int", "int", false, null, null, "Cannot parse argument 'text' for option '--int' as expected type 'Int64'." },
                 new object?[] { "foo --int", "int", "int", false, null, null, "Required argument missing for option: '--int'." },
                 new object?[] { "foo", "int", "int", true, null, null, "Option '--int' is required." },
-                new object?[] { "foo --int", "int", "int", true, null, "not-int", "Cannot parse default if option without value 'not-int' for option '--int' as expected type Int64." },
+                new object?[] { "foo --int", "int", "int", true, null, "not-int", "Cannot parse default if option without value 'not-int' for option '--int' as expected type 'Int64'." },
                 //float
-                new object?[] { "foo --float text", "float", "float", false, null, null, "Cannot parse argument 'text' for option '--float' as expected type Double." },
+                new object?[] { "foo --float text", "float", "float", false, null, null, "Cannot parse argument 'text' for option '--float' as expected type 'Double'." },
                 new object?[] { "foo --float", "float", "float", false, null, null, "Required argument missing for option: '--float'." },
                 new object?[] { "foo", "float", "float", true, null, null, "Option '--float' is required." },
-                new object?[] { "foo --float", "float", "float", true, null, "not-float", "Cannot parse default if option without value 'not-float' for option '--float' as expected type Double." },
+                new object?[] { "foo --float", "float", "float", true, null, "not-float", "Cannot parse default if option without value 'not-float' for option '--float' as expected type 'Double'." },
 
                 //hex
-                new object?[] { "foo --hex text", "hex", "hex", false, null, null, "Cannot parse argument 'text' for option '--hex' as expected type Int64." },
+                new object?[] { "foo --hex text", "hex", "hex", false, null, null, "Cannot parse argument 'text' for option '--hex' as expected type 'Int64'." },
                 new object?[] { "foo --hex", "hex", "hex", false, null, null, "Required argument missing for option: '--hex'." },
                 new object?[] { "foo", "hex", "hex", true, null, null, "Option '--hex' is required." },
-                new object?[] { "foo --hex", "hex", "hex", true, null, "not-hex", "Cannot parse default if option without value 'not-hex' for option '--hex' as expected type Int64." },
+                new object?[] { "foo --hex", "hex", "hex", true, null, "not-hex", "Cannot parse default if option without value 'not-hex' for option '--hex' as expected type 'Int64'." },
 
             };
 
