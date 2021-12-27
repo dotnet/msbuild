@@ -53,8 +53,6 @@ namespace Dotnet_new3
                 string[] remainingArgs = preParseResult.GetValueForArgument(New3Command.RemainingTokensArgument) ?? Array.Empty<string>();
 
                 Command newCommand = NewCommandFactory.Create(new3Command.Name, host, telemetryLogger, new NewCommandCallbacks());
-
-                //TODO: discuss rawInput requirement
                 ParseResult newCommandResult = ParserFactory.CreateParser(newCommand).Parse(remainingArgs, rawInput: input);
                 foreach (CompletionItem suggestion in newCommandResult.GetCompletions(position).Distinct())
                 {

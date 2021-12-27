@@ -139,11 +139,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             try
             {
-                //TODO:
-                //if (commandInput.IsHelpFlagSpecified)
-                //{
-                //    _telemetryLogger.TrackEvent(commandInput.CommandName + TelemetryConstants.HelpEventSuffix);
-                //}
                 using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
                 {
                     await HandleGlobalOptionsAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);

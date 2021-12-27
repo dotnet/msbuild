@@ -5,6 +5,9 @@
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
+    /// <summary>
+    /// This class is doing assignments of aliases to template options based on their settings and other options already defined in the command.
+    /// </summary>
     internal class AliasAssignmentCoordinator
     {
         internal static IReadOnlyList<(CliTemplateParameter Parameter, IReadOnlyList<string> Aliases, IReadOnlyList<string> Errors)> AssignAliasesForParameter(IEnumerable<CliTemplateParameter> parameters, HashSet<string> takenAliases)

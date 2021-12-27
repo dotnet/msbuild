@@ -105,7 +105,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 new HostSpecificDataLoader(environmentSettings),
                 TelemetryLogger);
 
-            //TODO: consider putting TemplatePackageManager into base class, so no need to await here for dispose.
+            //we need to await, otherwise templatePackageManager will be disposed.
             return await templateListCoordinator.DisplayTemplateGroupListAsync(args, default).ConfigureAwait(false);
         }
 

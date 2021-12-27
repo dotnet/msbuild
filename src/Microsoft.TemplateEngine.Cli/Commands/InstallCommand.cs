@@ -76,7 +76,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 environmentSettings,
                 templatePackageManager);
 
-            //TODO: we need to await, otherwise templatePackageManager will be disposed.
+            //we need to await, otherwise templatePackageManager will be disposed.
             return await templatePackageCoordinator.EnterInstallFlowAsync(args, context.GetCancellationToken()).ConfigureAwait(false);
         }
 

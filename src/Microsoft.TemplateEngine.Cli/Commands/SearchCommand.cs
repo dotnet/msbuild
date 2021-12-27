@@ -101,7 +101,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override async Task<NewCommandStatus> ExecuteAsync(SearchCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            //TODO: we need to await, otherwise templatePackageManager will be disposed.
+            //we need to await, otherwise templatePackageManager will be disposed.
             return await CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(
                 environmentSettings,
                 templatePackageManager,
