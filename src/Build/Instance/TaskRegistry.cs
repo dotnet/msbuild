@@ -1377,7 +1377,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
                                 factory = (ITaskFactory)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.Type.GetTypeInfo().Assembly.FullName, typeInformation.TypeName);
 #else
-                                factory = (ITaskFactory) Activator.CreateInstance(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.LoadedAssembly.FullName, typeInformation.TypeName);
+                                factory = (ITaskFactory) Activator.CreateInstance(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.LoadedAssembly.FullName, typeInformation.TypeName)?.Unwrap();
 #endif
                                 TaskFactoryLoggingHost taskFactoryLoggingHost = new TaskFactoryLoggingHost(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext);
 
