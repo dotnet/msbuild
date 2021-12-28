@@ -22,6 +22,7 @@ using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Build.Shared;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 {
@@ -715,14 +716,14 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Trait("Category", "mono-osx-failing")]
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new();
 
             try
             {
                 // Populate the project directory with three physical files on disk -- a.weirdo, b.weirdo, c.weirdo.
                 EscapingInProjectsHelper.CreateThreeWeirdoFiles();
                 Project project = ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project>
                     <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
 
                     <Target Name=`t`>
@@ -734,8 +735,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 </Project>
                 ");
 
-                bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
+                project.Build(logger).ShouldBeTrue(); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
                 logger.AssertLogContains("[*]");
             }
             finally

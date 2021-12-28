@@ -11,6 +11,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Construction;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -52,7 +53,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
+                AssemblyTaskFactory taskFactory = new();
                 taskFactory.InitializeFactory(null, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, null, ElementLocation.Create("NONE"), String.Empty);
             }
            );
@@ -255,8 +256,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false);
-                Assert.NotNull(createdTask);
-                Assert.False(createdTask is TaskHostTask);
+                createdTask.ShouldNotBeNull();
+                createdTask.ShouldNotBeOfType<TaskHostTask>();
             }
             finally
             {
