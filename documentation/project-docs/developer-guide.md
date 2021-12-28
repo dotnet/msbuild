@@ -29,7 +29,7 @@ build.cmd
 
 The build script will output a `dotnet` installation to `artifacts\bin\redist\Debug\dotnet` that will include any local changes to the .NET Core CLI.
 
-To open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated `artifacts\sdk-build-env.bat`. Finally, open Visual Studio with `devenv sdk.sln`.
+To open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated environment for your shell. If you're using `cmd`, then run `artifacts\sdk-build-env.bat`. If you're using powershell, you need to 'dot source' `artifacts/sdk-build-env.ps1`. Finally, open Visual Studio with `devenv sdk.sln`.
 
 ### Linux and macOS
 
