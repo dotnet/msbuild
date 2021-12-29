@@ -221,15 +221,17 @@ namespace Microsoft.NET.Build.Tasks
             string appHostRuntimeIdentifiers = selectedAppHostPack.GetMetadata("AppHostRuntimeIdentifiers");
             string appHostPackPattern = selectedAppHostPack.GetMetadata("AppHostPackNamePattern");
             string appHostPackVersion = selectedAppHostPack.GetMetadata("AppHostPackVersion");
+            string runtimeIdentifiersToExclude = selectedAppHostPack.GetMetadata(MetadataKeys.ExcludedRuntimeIdentifiers);
 
             if (!string.IsNullOrEmpty(RuntimeFrameworkVersion))
             {
                 appHostPackVersion = RuntimeFrameworkVersion;
             }
 
-            string bestAppHostRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
+            string bestAppHostRuntimeIdentifier = NuGetUtils.GetBestMatchingRidWithExclusion(
                 new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath),
                 runtimeIdentifier,
+                runtimeIdentifiersToExclude.Split(';'),
                 appHostRuntimeIdentifiers.Split(';'),
                 out bool wasInGraph);
 

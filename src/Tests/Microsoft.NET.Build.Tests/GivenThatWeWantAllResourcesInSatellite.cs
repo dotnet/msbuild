@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_retrieves_strings_successfully()
         {
             TestSatelliteResources(Log, _testAssetsManager);
@@ -81,7 +81,6 @@ namespace Microsoft.NET.Build.Tests
                 else
                 {
                     outputFiles.Add($"AllResourcesInSatellite{EnvironmentInfo.ExecutableExtension}");
-                    outputFiles.Add("ref/AllResourcesInSatellite.dll");
                     outputFiles.Add("AllResourcesInSatellite.dll");
                     outputFiles.Add("AllResourcesInSatellite.deps.json");
                     outputFiles.Add("AllResourcesInSatellite.runtimeconfig.json");
