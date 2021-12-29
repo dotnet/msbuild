@@ -716,7 +716,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Trait("Category", "mono-osx-failing")]
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new();
 
             try
             {
