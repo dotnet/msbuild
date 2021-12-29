@@ -117,29 +117,19 @@ namespace Microsoft.Build.CommandLine
                 TypeLoader typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
                 taskType = typeLoader.Load(taskName, AssemblyLoadInfo.Create(null, taskLocation), false).LoadedType;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
-                Exception exceptionToReturn = e;
-
                 // If it's a TargetInvocationException, we only care about the contents of the inner exception, 
-                // so just save that instead. 
-                if (e is TargetInvocationException)
-                {
-                    exceptionToReturn = e.InnerException;
-                }
+                // so just save that instead.
+                Exception exceptionToReturn = e is TargetInvocationException ? e.InnerException : e;
 
                 return new OutOfProcTaskHostTaskResult
-                                (
-                                    TaskCompleteType.CrashedDuringInitialization,
-                                    exceptionToReturn,
-                                    "TaskInstantiationFailureError",
-                                    new string[] { taskName, taskLocation, String.Empty }
-                                );
+                            (
+                                TaskCompleteType.CrashedDuringInitialization,
+                                exceptionToReturn,
+                                "TaskInstantiationFailureError",
+                                new string[] { taskName, taskLocation, String.Empty }
+                            );
             }
 
             OutOfProcTaskHostTaskResult taskResult;

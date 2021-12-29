@@ -997,13 +997,8 @@ namespace Microsoft.Build.BackEnd
                     Environment.NewLine + e.InnerException
                 );
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 // Reflection related exception
                 _taskLoggingContext.LogError
                 (
