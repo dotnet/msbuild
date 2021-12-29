@@ -723,7 +723,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // Populate the project directory with three physical files on disk -- a.weirdo, b.weirdo, c.weirdo.
                 EscapingInProjectsHelper.CreateThreeWeirdoFiles();
                 Project project = ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project>
                     <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
 
                     <Target Name=`t`>
