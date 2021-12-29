@@ -455,9 +455,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
-            NodeContext context;
             bool nodeCreationSucceeded;
-            if (!_nodeContexts.TryGetValue(hostContext, out context))
+            if (!_nodeContexts.TryGetValue(hostContext, out _))
             {
                 nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration);
             }
@@ -469,7 +468,7 @@ namespace Microsoft.Build.BackEnd
 
             if (nodeCreationSucceeded)
             {
-                context = _nodeContexts[hostContext];
+                NodeContext context = _nodeContexts[hostContext];
                 _nodeIdToPacketFactory[(int)hostContext] = factory;
                 _nodeIdToPacketHandler[(int)hostContext] = handler;
 

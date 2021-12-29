@@ -562,10 +562,8 @@ namespace Microsoft.Build.BackEnd
             {
                 mergedParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                string taskRuntime;
-                taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out taskRuntime);
-                string usingTaskRuntime;
-                factoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out usingTaskRuntime);
+                taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string taskRuntime);
+                factoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string usingTaskRuntime);
 
                 if (!XMakeAttributes.TryMergeRuntimeValues(taskRuntime, usingTaskRuntime, out mergedRuntime))
                 {
@@ -576,10 +574,8 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters.Add(XMakeAttributes.runtime, mergedRuntime);
                 }
 
-                string taskArchitecture;
-                taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out taskArchitecture);
-                string usingTaskArchitecture;
-                factoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out usingTaskArchitecture);
+                taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string taskArchitecture);
+                factoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string usingTaskArchitecture);
 
                 if (!XMakeAttributes.TryMergeArchitectureValues(taskArchitecture, usingTaskArchitecture, out mergedArchitecture))
                 {
