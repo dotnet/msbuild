@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 #if !NETFRAMEWORK
 using System.Runtime.Loader;
@@ -364,7 +365,7 @@ namespace Microsoft.Build.Shared
                 if (path is null)
                 {
 #if NETFRAMEWORK
-                    AppDomain appDomain = AppDomain.CreateDomain("appDomainToFindPath");
+                    AppDomain appDomain = AppDomain.CreateDomain("appDomainToFindPath", null, AppDomain.CurrentDomain.SetupInformation);
                     path = appDomain.Load(new AssemblyName(_assemblyLoadInfo.AssemblyName)).Location;
                     AppDomain.Unload(appDomain);
 #else
@@ -419,7 +420,9 @@ namespace Microsoft.Build.Shared
                                 {
                                     TypeInformationPropertyInfo toAdd = new();
                                     toAdd.Name = metadataReader.GetString(propertyDefinition.Name);
-                                    byte[] bytes = metadataReader.GetBlobReader(propertyDefinition.Signature).ReadBytes(metadataReader.GetBlobReader(propertyDefinition.Signature).Length);
+                                    //MethodSignature<RuntimeTypeInfo> sign = propertyDefinition.DecodeSignature<RuntimeTypeInfo, TypeContext>(new SignatureDecoder<RuntimeTypeInfo, TypeContext>(), null);
+                                    //toAdd.PropertyType = sign.ReturnType ?? sign.ParameterTypes[0];
+                                    //byte[] bytes = metadataReader.GetBlobReader(propertyDefinition.Signature).ReadBytes(metadataReader.GetBlobReader(propertyDefinition.Signature).Length);
                                     foreach (CustomAttributeHandle attr in propertyDefinition.GetCustomAttributes())
                                     {
                                         EntityHandle referenceHandle = metadataReader.GetMemberReference((MemberReferenceHandle)metadataReader.GetCustomAttribute(attr).Constructor).Parent;

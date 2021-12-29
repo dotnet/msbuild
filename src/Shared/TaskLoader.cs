@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+#if !NETFRAMEWORK
 using System.Linq;
+#endif
 using System.Reflection;
 
 using Microsoft.Build.Framework;
@@ -139,7 +141,7 @@ namespace Microsoft.Build.Shared
                     // a task assembly using Load, and loaded a different one. I don't see any other choice than
                     // to fail here.
                     if (((typeInformation.LoadedType is not null) && taskType != typeInformation.LoadedType.Type) ||
-                            !taskType.Assembly.Location.Equals(typeInformation.LoadInfo.AssemblyLocation) || !taskType.Name.Equals(typeInformation.TypeName))
+                            ((typeInformation.LoadedType is null) && (!taskType.Assembly.Location.Equals(typeInformation.LoadInfo.AssemblyLocation) || !taskType.Name.Equals(typeInformation.TypeName))))
                     {
                         logError
                         (
