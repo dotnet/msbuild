@@ -22,6 +22,7 @@ using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Build.Shared;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 {
@@ -734,8 +735,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 </Project>
                 ");
 
-                bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
+                project.Build(logger).ShouldBeTrue(); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
                 logger.AssertLogContains("[*]");
             }
             finally
