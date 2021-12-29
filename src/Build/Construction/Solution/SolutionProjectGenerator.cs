@@ -2191,14 +2191,8 @@ namespace Microsoft.Build.Construction
                             AddDependencyByGuid(project, referencedWebProjectGuid);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e)) // We don't want any problems scanning the project file to result in aborting the build.
                     {
-                        // We don't want any problems scanning the project file to result in aborting the build.
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
                         _loggingService.LogWarning
                             (
                             _projectBuildEventContext,

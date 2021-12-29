@@ -2082,13 +2082,8 @@ namespace Microsoft.Build.Construction
                     StreamTimeUtc = null;
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.NotExpectedIoOrXmlException(ex))
             {
-                if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
-                {
-                    throw;
-                }
-
                 BuildEventFileInfo fileInfo = ex is XmlException xmlException
                     ? new BuildEventFileInfo(fullPath, xmlException)
                     : new BuildEventFileInfo(fullPath);

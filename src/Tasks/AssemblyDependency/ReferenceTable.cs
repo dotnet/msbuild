@@ -2983,13 +2983,8 @@ namespace Microsoft.Build.Tasks
 
                 return true;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 _log.LogErrorWithCodeFromResources("ResolveAssemblyReference.ProblemReadingImplementationDll", dllPath, e.Message);
                 return false;
             }

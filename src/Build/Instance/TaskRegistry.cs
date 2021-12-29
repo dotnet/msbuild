@@ -1234,19 +1234,14 @@ namespace Microsoft.Build.Execution
                                         creatableByFactory = null;
                                     }
                                 }
-                                catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                                 {
-                                    if (ExceptionHandling.IsCriticalException(e))
-                                    {
-                                        throw;
-                                    }
-
                                     // Log e.ToString to give as much information about the failure of a "third party" call as possible.
-                                    string message = String.Empty;
+                                    string message =
 #if DEBUG
-                                    message += UnhandledFactoryError;
+                                    UnhandledFactoryError +
 #endif
-                                    message += e.ToString();
+                                    e.ToString();
                                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _taskFactoryWrapperInstance.Name, message);
                                 }
                             }
@@ -1360,13 +1355,8 @@ namespace Microsoft.Build.Execution
 
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskFactoryLoadFailure", TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation, e.Message);
                             }
-                            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
                             {
-                                if (ExceptionHandling.NotExpectedReflectionException(e))
-                                {
-                                    throw;
-                                }
-
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskFactoryLoadFailure", TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation, e.Message);
                             }
 
@@ -1447,18 +1437,13 @@ namespace Microsoft.Build.Execution
 
                                 return false;
                             }
-                            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e)) // Catching Exception, but rethrowing unless it's a well-known exception.
                             {
-                                if (ExceptionHandling.IsCriticalException(e))
-                                {
-                                    throw;
-                                }
-
-                                string message = String.Empty;
+                                string message =
 #if DEBUG
-                                message += UnhandledFactoryError;
+                                UnhandledFactoryError +
 #endif
-                                message += e.Message;
+                                e.Message;
 
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskFactoryLoadFailure", TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation, message);
                             }

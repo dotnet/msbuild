@@ -2527,14 +2527,9 @@ namespace Microsoft.Build.Shared
                     taskOptions);
             }
             // Catch exceptions that are thrown inside the Parallel.ForEach
-            catch (AggregateException ex)
+            catch (AggregateException ex) when (ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException))
             {
-                // Flatten to get exceptions than are thrown inside a nested Parallel.ForEach
-                if (ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException))
-                {
-                    return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
-                }
-                throw;
+                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {

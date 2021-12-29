@@ -877,19 +877,10 @@ namespace Microsoft.Build.UnitTests
 
                     break;
                 }
-                catch (Exception ex)
+                // After all the retries fail, we fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
         }
@@ -924,19 +915,10 @@ namespace Microsoft.Build.UnitTests
                     }
                     break;
                 }
-                catch (Exception ex)
+                // After all the retries fail, we fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
 

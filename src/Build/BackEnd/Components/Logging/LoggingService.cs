@@ -1315,17 +1315,8 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 logger?.Shutdown();
             }
-            catch (LoggerException)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
-                throw;
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 InternalLoggerException.Throw(e, null, "FatalErrorDuringLoggerShutdown", false, logger.GetType().Name);
             }
         }
@@ -1586,17 +1577,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     logger.Initialize(sourceForLogger);
                 }
             }
-            catch (LoggerException)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
-                throw;
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 InternalLoggerException.Throw(e, null, "FatalErrorWhileInitializingLogger", true, logger.GetType().Name);
             }
 

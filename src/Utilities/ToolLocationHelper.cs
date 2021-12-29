@@ -1467,13 +1467,9 @@ namespace Microsoft.Build.Utilities
                     foldersString = string.Join(";", folders);
                 }
             }
-            catch(Exception e)
+            catch(Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                // this method will be used in vc props and we don't want to fail project load if it throws for some non critical reason.
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
+                // This method will be used in vc props and we don't want to fail project load if it throws for some non critical reason.
             }
 
             return foldersString;
@@ -3237,11 +3233,8 @@ namespace Microsoft.Build.Utilities
 
                 return pathToReturn;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                    throw;
-
                 ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.CouldNotCreateChain", path, pathToReturn, e.Message);
             }
 

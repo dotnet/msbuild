@@ -1225,14 +1225,10 @@ internal static class NativeMethods
                     // Kill this process, so that no further children can be created.
                     thisProcess.Kill();
                 }
-                catch (Win32Exception e)
+                catch (Win32Exception e) when (e.NativeErrorCode == ERROR_ACCESS_DENIED)
                 {
                     // Access denied is potentially expected -- it happens when the process that
                     // we're attempting to kill is already dead.  So just ignore in that case.
-                    if (e.NativeErrorCode != ERROR_ACCESS_DENIED)
-                    {
-                        throw;
-                    }
                 }
 
                 // Now enumerate our children.  Children of this process are any process which has this process id as its parent

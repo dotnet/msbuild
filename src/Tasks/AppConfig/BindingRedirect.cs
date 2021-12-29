@@ -54,13 +54,8 @@ namespace Microsoft.Build.Tasks
                     OldVersionHigh = new Version(oldVersion);
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.ThrowArgument(e, "AppConfig.InvalidOldVersionAttribute", e.Message);
             }
 
@@ -73,13 +68,8 @@ namespace Microsoft.Build.Tasks
             {
                 NewVersion = new Version(newVersionAttribute);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.ThrowArgument(e, "AppConfig.InvalidNewVersionAttribute", e.Message);
             }
         }

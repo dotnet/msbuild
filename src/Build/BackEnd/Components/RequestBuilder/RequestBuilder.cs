@@ -288,19 +288,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     taskCleanedUp = _requestTask.Wait(BuildParameters.RequestBuilderShutdownTimeout);
                 }
-                catch (AggregateException e)
+                catch (AggregateException e) when (e.Flatten().InnerExceptions.All(ex => ex is TaskCanceledException || ex is OperationCanceledException))
                 {
-                    AggregateException flattenedException = e.Flatten();
-
-                    if (flattenedException.InnerExceptions.All(ex => (ex is TaskCanceledException || ex is OperationCanceledException)))
-                    {
-                        // ignore -- just indicates that the task finished cancelling before we got a chance to wait on it.  
-                        taskCleanedUp = true;
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    // ignore -- just indicates that the task finished cancelling before we got a chance to wait on it.  
+                    taskCleanedUp = true;
                 }
 
                 if (!taskCleanedUp)
@@ -824,17 +815,7 @@ namespace Microsoft.Build.BackEnd
 
                 thrownException = ex;
             }
-            catch (LoggerException ex)
-            {
-                // Polite logger failure
-                thrownException = ex;
-            }
-            catch (InternalLoggerException ex)
-            {
-                // Logger threw arbitrary exception
-                thrownException = ex;
-            }
-            catch (Exception ex)
+            catch (Exception ex) // LoggerException is a polite logger failure. InternalLoggerException is an arbitrary exception. Handle them the same.
             {
                 thrownException = ex;
 
@@ -874,13 +855,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     _projectLoggingContext.LogProjectFinished(result.OverallResult == BuildResultCode.Success);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    if (ExceptionHandling.IsCriticalException(ex))
-                    {
-                        throw;
-                    }
-
                     if (result.Exception == null)
                     {
                         result.Exception = ex;

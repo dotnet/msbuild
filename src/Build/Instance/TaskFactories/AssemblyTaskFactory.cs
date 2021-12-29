@@ -302,13 +302,8 @@ namespace Microsoft.Build.BackEnd
                 // taskName may be null
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
 
@@ -440,13 +435,8 @@ namespace Microsoft.Build.BackEnd
                 // taskName may be null
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
             }
 

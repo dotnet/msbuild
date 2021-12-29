@@ -279,13 +279,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("GetSDKReferenceFiles.CouldNotGetSDKReferenceFiles", e.Message);
             }
 
@@ -1095,13 +1090,8 @@ namespace Microsoft.Build.Tasks
                         return true;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    if (ExceptionHandling.IsCriticalException(ex))
-                    {
-                        throw;
-                    }
-
                     // Queue up for later logging, does not matter if the cache got written
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetSDKReferenceFiles.ProblemGeneratingHash", currentAssembly, ex.Message));
 
@@ -1134,13 +1124,8 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     // Queue up for later logging, does not matter if the cache got written
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetSDKReferenceFiles.ProblemGettingAssemblyMetadata", referencePath, e.Message));
                 }

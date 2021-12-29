@@ -137,17 +137,12 @@ namespace Microsoft.Build.CommandLine
 
                 s_initialized = true;
             }
-            catch (TypeInitializationException ex)
-            {
-                if (ex.InnerException == null
-#if !FEATURE_SYSTEM_CONFIGURATION
-                )
-#else
-                    || ex.InnerException.GetType() != typeof(ConfigurationErrorsException))
+            catch (TypeInitializationException ex) when (ex.InnerException is not null
+#if FEATURE_SYSTEM_CONFIGURATION
+            && ex.InnerException is ConfigurationErrorsException
 #endif
-                {
-                    throw;
-                }
+            )
+            {
                 HandleConfigurationException(ex);
             }
 #if FEATURE_SYSTEM_CONFIGURATION
