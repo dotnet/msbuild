@@ -56,25 +56,9 @@ namespace Microsoft.Build.Evaluation
     internal class ProjectRootElementCache : ProjectRootElementCacheBase
     {
         /// <summary>
-        /// The maximum number of entries to keep strong references to.
-        /// This has to be strong enough to make sure that key .targets files aren't pushed
-        /// off by transient loads of non-reusable files like .user files.
-        /// </summary>
-        /// <remarks>
-        /// Made this as large as 200 because ASP.NET Core (6.0) projects have
-        /// something like 80-90 imports. This was observed to give a noticeable
-        /// performance improvement compared to a mid-17.0 MSBuild with the old
-        /// value of 50.
-        ///
-        /// If this number is increased much higher, the datastructure may
-        /// need to be changed from a linked list, since it's currently O(n).
-        /// </remarks>
-        private static readonly int s_maximumStrongCacheSize = 200;
-
-        /// <summary>
         /// Whether the cache should log activity to the Debug.Out stream
         /// </summary>
-        private static bool s_debugLogCacheActivity;
+        private static readonly bool s_debugLogCacheActivity;
 
         /// <summary>
         /// Whether the cache should check file content for cache entry invalidation.
@@ -82,7 +66,7 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// Value shall be true only in case of testing. Outside QA tests it shall be false.
         /// </remarks>
-        private static bool s_сheckFileContent;
+        private static readonly bool s_сheckFileContent;
 
 #if DEBUG
         /// <summary>
@@ -105,34 +89,25 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The list of strongly-held ProjectRootElement's
         /// </summary>
-        private LinkedList<ProjectRootElement> _strongCache;
+        private HashSet<ProjectRootElement> _strongCache;
 
         /// <summary>
         /// Whether the cache should check the timestamp of the file on disk
         /// whenever it is requested, and update with the latest content of that
         /// file if it has changed.
         /// </summary>
-        private bool _autoReloadFromDisk;
+        private readonly bool _autoReloadFromDisk;
 
         /// <summary>
         /// Locking object for this shared cache
         /// </summary>
-        private Object _locker = new Object();
+        private readonly object _locker = new();
 
         /// <summary>
         /// Static constructor to choose cache size.
         /// </summary>
         static ProjectRootElementCache()
         {
-            // Configurable in case a customer has related perf problems after shipping and so that
-            // we can measure different values for perf easily.
-            string userSpecifiedSize = Environment.GetEnvironmentVariable("MSBUILDPROJECTROOTELEMENTCACHESIZE");
-            if (!String.IsNullOrEmpty(userSpecifiedSize))
-            {
-                // Not catching as this is an undocumented setting
-                s_maximumStrongCacheSize = Convert.ToInt32(userSpecifiedSize, NumberFormatInfo.InvariantInfo);
-            }
-
             s_debugLogCacheActivity = Environment.GetEnvironmentVariable("MSBUILDDEBUGXMLCACHE") == "1";
             s_сheckFileContent = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT"));
         }
@@ -145,7 +120,7 @@ namespace Microsoft.Build.Evaluation
             DebugTraceCache("Constructing with autoreload from disk: ", autoReloadFromDisk);
 
             _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-            _strongCache = new LinkedList<ProjectRootElement>();
+            _strongCache = new HashSet<ProjectRootElement>();
             _autoReloadFromDisk = autoReloadFromDisk;
             LoadProjectsReadOnly = loadProjectsReadOnly;
         }
@@ -393,8 +368,8 @@ namespace Microsoft.Build.Evaluation
             {
                 DebugTraceCache("Clearing strong refs: ", _strongCache.Count);
 
-                LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
-                _strongCache = new LinkedList<ProjectRootElement>();
+                HashSet<ProjectRootElement> oldStrongCache = _strongCache;
+                _strongCache.Clear();
 
                 foreach (ProjectRootElement projectRootElement in oldStrongCache)
                 {
@@ -414,9 +389,9 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
+                HashSet<ProjectRootElement> oldStrongCache = _strongCache;
                 _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-                _strongCache = new LinkedList<ProjectRootElement>();
+                _strongCache.Clear();
 
                 foreach (ProjectRootElement projectRootElement in oldStrongCache)
                 {
@@ -437,28 +412,28 @@ namespace Microsoft.Build.Evaluation
                 WeakValueDictionary<string, ProjectRootElement> oldWeakCache = _weakCache;
                 _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
 
-                LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
-                _strongCache = new LinkedList<ProjectRootElement>();
+                HashSet<ProjectRootElement> oldStrongCache = _strongCache;
+                _strongCache.Clear();
 
                 foreach (string projectPath in oldWeakCache.Keys)
                 {
-                    ProjectRootElement rootElement;
-
-                    if (oldWeakCache.TryGetValue(projectPath, out rootElement))
+                    if (oldWeakCache.TryGetValue(projectPath, out ProjectRootElement rootElement))
                     {
                         if (rootElement.IsExplicitlyLoaded)
                         {
                             _weakCache[projectPath] = rootElement;
                         }
 
-                        if (rootElement.IsExplicitlyLoaded && oldStrongCache.Contains(rootElement))
+                        if (oldStrongCache.Contains(rootElement))
                         {
-                            _strongCache.AddFirst(rootElement);
-                        }
-                        else
-                        {
-                            _strongCache.Remove(rootElement);
-                            RaiseProjectRootElementRemovedFromStrongCache(rootElement);
+                            if (rootElement.IsExplicitlyLoaded)
+                            {
+                                _strongCache.Add(rootElement);
+                            }
+                            else
+                            {
+                                RaiseProjectRootElementRemovedFromStrongCache(rootElement);
+                            }
                         }
                     }
                 }
@@ -518,8 +493,7 @@ namespace Microsoft.Build.Evaluation
             // but clients ought not get themselves into such a state - and unless they save them to disk,
             // it may not be a problem. Replacing also doesn't cause a problem for the strong cache,
             // as it is never consulted by us, but it is reasonable for us to remove the old entry in that case.
-            ProjectRootElement existingWeakEntry;
-            _weakCache.TryGetValue(projectRootElement.FullPath, out existingWeakEntry);
+            _weakCache.TryGetValue(projectRootElement.FullPath, out ProjectRootElement existingWeakEntry);
 
             if (existingWeakEntry != null && !Object.ReferenceEquals(existingWeakEntry, projectRootElement))
             {
@@ -534,44 +508,14 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Update the strong cache.
-        /// If the item is already a member of the list, move it to the top.
-        /// Otherwise, just add it to the top.
-        /// If the list is too large, remove an entry from the bottom.
+        /// Add the item to the strong cache if not present already.
         /// </summary>
         /// <remarks>
         /// Must be called within the cache lock.
-        /// If the size of strong cache gets large, this needs a faster data structure
-        /// than a linked list. It's currently O(n).
         /// </remarks>
         private void BoostEntryInStrongCache(ProjectRootElement projectRootElement)
         {
-            LinkedListNode<ProjectRootElement> node = _strongCache.First;
-
-            while (node != null)
-            {
-                if (Object.ReferenceEquals(node.Value, projectRootElement))
-                {
-                    // DebugTraceCache("Boosting: ", projectRootElement.FullPath);
-                    _strongCache.Remove(node);
-                    _strongCache.AddFirst(node);
-
-                    return;
-                }
-
-                node = node.Next;
-            }
-
-            _strongCache.AddFirst(projectRootElement);
-
-            if (_strongCache.Count > s_maximumStrongCacheSize)
-            {
-                node = _strongCache.Last;
-
-                DebugTraceCache("Shedding: ", node.Value.FullPath);
-                _strongCache.Remove(node);
-                RaiseProjectRootElementRemovedFromStrongCache(node.Value);
-            }
+            _strongCache.Add(projectRootElement);
         }
 
         /// <summary>
@@ -586,11 +530,9 @@ namespace Microsoft.Build.Evaluation
 
             _weakCache.Remove(projectRootElement.FullPath);
 
-            LinkedListNode<ProjectRootElement> strongCacheEntry = _strongCache.Find(projectRootElement);
-            if (strongCacheEntry != null)
+            if (_strongCache.Remove(projectRootElement))
             {
-                _strongCache.Remove(strongCacheEntry);
-                RaiseProjectRootElementRemovedFromStrongCache(strongCacheEntry.Value);
+                RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
             }
 
             DebugTraceCache("Out of date dropped from XML cache: ", projectRootElement.FullPath);
