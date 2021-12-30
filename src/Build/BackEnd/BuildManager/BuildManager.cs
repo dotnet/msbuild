@@ -1200,7 +1200,7 @@ namespace Microsoft.Build.Execution
 
         private static bool ProjectCachePresentViaVisualStudioWorkaround()
         {
-            return BuildEnvironmentHelper.Instance.RunningInVisualStudio && ProjectCacheItems.Count > 0;
+            return BuildEnvironmentHelper.Instance.RunningInVisualStudio && ProjectCacheItems.IsEmpty;
         }
 
         // Cache requests on configuration N do not block future build submissions depending on configuration N.
@@ -1259,7 +1259,7 @@ namespace Microsoft.Build.Execution
         private void AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio()
         {
             if (BuildEnvironmentHelper.Instance.RunningInVisualStudio &&
-                ProjectCacheItems.Count > 0 &&
+                ProjectCacheItems.IsEmpty &&
                 _projectCacheService == null &&
                 _buildParameters.ProjectCacheDescriptor == null)
             {
