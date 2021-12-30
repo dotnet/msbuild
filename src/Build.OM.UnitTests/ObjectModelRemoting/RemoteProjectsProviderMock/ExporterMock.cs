@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     /// </summary>
     internal class ProjectCollectionLinker : ExternalProjectsProvider
     {
-        internal static int _collecitonId;
+        internal static int _collectionId;
 
         private bool importing;
         private ExportedLinksMap exported = ExportedLinksMap.Create();
@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         private ProjectCollectionLinker(ConnectedProjectCollections group)
         {
             this.LinkedCollections = group;
-            this.CollectionId = (UInt32) Interlocked.Increment(ref _collecitonId);
+            this.CollectionId = (UInt32) Interlocked.Increment(ref _collectionId);
             this.Collection = new ProjectCollection();
             this.LinkFactory = LinkedObjectsFactory.Get(this.Collection);
         }
