@@ -1292,7 +1292,7 @@ namespace Microsoft.Build.UnitTests
             string workingPath = _env.CreateFolder().Path;
             string workingPathSubfolder = Path.Combine(workingPath, "SubDir");
             string offendingPattern = Path.Combine(workingPath, @"*\..\bar");
-            string[] files = new string[0];
+            string[] files = Array.Empty<string>();
 
             Directory.CreateDirectory(workingPath);
             Directory.CreateDirectory(workingPathSubfolder);
@@ -1518,9 +1518,7 @@ namespace Microsoft.Build.UnitTests
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new string[]    //  Non matching files that shouldn't be touched
-                {
-                }
+                Array.Empty<string>()    //  Non matching files that shouldn't be touched
             );
         }
 

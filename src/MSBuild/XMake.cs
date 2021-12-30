@@ -539,11 +539,11 @@ namespace Microsoft.Build.CommandLine
                 // process the detected command line switches -- gather build information, take action on non-build switches, and
                 // check for non-trivial errors
                 string projectFile = null;
-                string[] targets = { };
+                string[] targets = Array.Empty<string>();
                 string toolsVersion = null;
                 Dictionary<string, string> globalProperties = null;
                 Dictionary<string, string> restoreProperties = null;
-                ILogger[] loggers = { };
+                ILogger[] loggers = Array.Empty<ILogger>();
                 LoggerVerbosity verbosity = LoggerVerbosity.Normal;
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
 #if FEATURE_XML_SCHEMA_VALIDATION

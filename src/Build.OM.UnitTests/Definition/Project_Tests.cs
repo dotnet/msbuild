@@ -3245,7 +3245,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using (var env = TestEnvironment.Create())
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], "u/x");
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>(), "u/x");
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 var expected2Foo = new ProvenanceResultTupleList
@@ -3274,7 +3274,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
 
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
@@ -3566,7 +3566,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], relativePathOfProjectFile);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>(), relativePathOfProjectFile);
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 ProvenanceResultTupleList expectedProvenance = null;
@@ -3762,7 +3762,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
 
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 

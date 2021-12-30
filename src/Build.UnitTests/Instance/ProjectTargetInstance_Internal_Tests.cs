@@ -26,8 +26,8 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
 
                 yield return new object[]
                 {
-                    new ReadOnlyCollection<ProjectTargetInstanceChild>(new ProjectTargetInstanceChild[0]),
-                    new ReadOnlyCollection<ProjectOnErrorInstance>(new ProjectOnErrorInstance[0])
+                    new ReadOnlyCollection<ProjectTargetInstanceChild>(System.Array.Empty<ProjectTargetInstanceChild>()),
+                    new ReadOnlyCollection<ProjectOnErrorInstance>(System.Array.Empty<ProjectOnErrorInstance>())
                 };
 
                 yield return new object[]

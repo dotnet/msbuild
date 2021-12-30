@@ -299,7 +299,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 var buildRequestData = new BuildRequestData(
                     projectInstance,
-                    new string[]{},
+                    Array.Empty<string>(),
                     projectCollection.HostServices);
 
                 var result = _buildManager.Build(parameters, buildRequestData);

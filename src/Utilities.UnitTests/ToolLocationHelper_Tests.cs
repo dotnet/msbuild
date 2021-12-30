@@ -2819,7 +2819,7 @@ namespace Microsoft.Build.UnitTests
             {
                 return new[] { @"{runtime-base}\v1.2.30617", @"{runtime-base}\v1.2.x86dbg", @"{runtime-base}\v1.2.x86fre" };
             }
-            return new string[0];
+            return Array.Empty<string>();
         }
 
         /// <summary>
@@ -4084,7 +4084,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKWithNoInstalledTargetPlatforms()
         {
-            ToolLocationHelper.GetPlatformsForSDK("AnySDK", new Version("1.0"), new string[0], "").Any().ShouldBeFalse();
+            ToolLocationHelper.GetPlatformsForSDK("AnySDK", new Version("1.0"), Array.Empty<string>(), "").Any().ShouldBeFalse();
         }
 
         /// <summary>
@@ -4753,7 +4753,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            return new string[] { };
+            return Array.Empty<string>();
         }
 
         /// <summary>

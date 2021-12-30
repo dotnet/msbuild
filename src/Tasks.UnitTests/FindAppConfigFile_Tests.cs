@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
             FindAppConfigFile f = new FindAppConfigFile();
             f.BuildEngine = new MockEngine();
             f.PrimaryList = new ITaskItem[] { new TaskItem("app.config"), new TaskItem("xxx") };
-            f.SecondaryList = new ITaskItem[] { };
+            f.SecondaryList = System.Array.Empty<ITaskItem>();
             f.TargetPath = "targetpath";
             Assert.True(f.Execute());
             Assert.Equal("app.config", f.AppConfigFile.ItemSpec);
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
             ITaskItem item2 = new TaskItem("app.config");
             item2.SetMetadata("id", "2");
             f.PrimaryList = new ITaskItem[] { item1, item2 };
-            f.SecondaryList = new ITaskItem[] { };
+            f.SecondaryList = System.Array.Empty<ITaskItem>();
             f.TargetPath = "targetpath";
             Assert.True(f.Execute());
             Assert.Equal("app.config", f.AppConfigFile.ItemSpec);

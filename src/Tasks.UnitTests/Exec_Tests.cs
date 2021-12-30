@@ -523,7 +523,7 @@ namespace Microsoft.Build.UnitTests
 
                 MethodInfo generateCommandLineCommandsMethod = execType.GetMethod("GenerateCommandLineCommands", BindingFlags.Instance | BindingFlags.NonPublic);
 
-                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, new object[0]) as string;
+                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, Array.Empty<object>()) as string;
 
                 if (autoRunShouldBeDisabled)
                 {

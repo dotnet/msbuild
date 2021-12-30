@@ -121,7 +121,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
             if (entries == null)
             {
-                entries = new string[0];
+                entries = Array.Empty<string>();
             }
 
             return entries;
@@ -177,12 +177,12 @@ namespace Microsoft.Build.BuildEngine.Shared
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return new string[0];
+                return Array.Empty<string>();
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return new string[0];
+                return Array.Empty<string>();
             }
         }
 
@@ -229,12 +229,12 @@ namespace Microsoft.Build.BuildEngine.Shared
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return new string[0];
+                return Array.Empty<string>();
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return new string[0];
+                return Array.Empty<string>();
             }
         }
 
@@ -1198,7 +1198,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                     catch (ArgumentException)
                     {
-                        return new string[0];
+                        return Array.Empty<string>();
                     }
 
                     stripProjectDirectory = !String.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
@@ -1216,7 +1216,7 @@ namespace Microsoft.Build.BuildEngine.Shared
              */
             if (fixedDirectoryPart.Length > 0 && !directoryExists(fixedDirectoryPart))
             {
-                return new string[0];
+                return Array.Empty<string>();
             }
 
             // determine if we need to use the regular expression to match the files

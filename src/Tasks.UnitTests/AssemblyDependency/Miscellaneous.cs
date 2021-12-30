@@ -3312,7 +3312,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns></returns>
         private ReferenceTable GenerateTableWithAssemblyFromTheGlobalLocation(string location)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
@@ -3514,7 +3514,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.TargetFrameworkDirectories = new string[] { };
+            t.TargetFrameworkDirectories = Array.Empty<string>();
             t.SearchPaths = new string[] { "{RawFileName}" };
             Execute(t);
             Assert.Equal(@"true", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
@@ -6206,7 +6206,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                SubsetListFinder finder = new SubsetListFinder(new string[0]);
+                SubsetListFinder finder = new SubsetListFinder(Array.Empty<string>());
                 finder.GetSubsetListPathsFromDisk(null);
             }
            );
@@ -6229,7 +6229,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SubsetListFinderEmptySubsetToSearchFor()
         {
-            SubsetListFinder finder = new SubsetListFinder(new string[0]);
+            SubsetListFinder finder = new SubsetListFinder(Array.Empty<string>());
             string[] returnArray = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
             Assert.Empty(returnArray); // "Expected the array returned to be 0 length"
         }
@@ -6526,7 +6526,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             targetFrameworks = new string[] { "Client", "Framework" };
             Assert.Equal("Client, Framework", ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null));
 
-            targetFrameworks = new string[0];
+            targetFrameworks = Array.Empty<string>();
             Assert.True(String.IsNullOrEmpty(ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null)));
 
             targetFrameworks = null;
@@ -6580,7 +6580,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             referenceTable.RemoveReferencesMarkedForExclusion(true, String.Empty);
 
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
-            string subSetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { }, null);
+            string subSetName = ResolveAssemblyReference.GenerateSubSetName(Array.Empty<string>(), null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList", taskItem.ItemSpec, subSetName);
             Assert.False(Object.ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
             Assert.Single(table2); // "Expected there to be one elements in the dictionary"
@@ -6817,7 +6817,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTableDependentItemsInBlackList4()
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
@@ -6995,7 +6995,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         private static ReferenceTable MakeEmptyReferenceTable(TaskLoggingHelper log)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
@@ -7317,7 +7317,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 t.TargetFrameworkDirectories = new string[] { Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5") };
                 t.InstalledAssemblyTables = new ITaskItem[] { new TaskItem(redistListPath) };
                 // Only the explicitly specified redist list should be used
-                t.TargetFrameworkSubsets = new string[0];
+                t.TargetFrameworkSubsets = Array.Empty<string>();
 
                 // Create a subset list which should be read in
                 string explicitSubsetListContents =

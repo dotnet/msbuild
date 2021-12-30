@@ -408,7 +408,7 @@ namespace Microsoft.Build.BuildEngine
                 this.targets = new TargetCollection(this);
 
                 // Initialize the default targets, initial targets, and project file name.
-                this.defaultTargetNames = new string[0];
+                this.defaultTargetNames = Array.Empty<string>();
                 this.initialTargetNamesInMainProject = new ArrayList();
                 this.initialTargetNamesInImportedProjects = new ArrayList();
                 this.FullFileName = String.Empty;
@@ -1549,7 +1549,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (propertyValues == null)
             {
-                return new string[0];
+                return Array.Empty<string>();
             }
             else
             {
@@ -3743,7 +3743,7 @@ namespace Microsoft.Build.BuildEngine
             this.evaluatedItemsIgnoringCondition.Clear();
             this.targets.Clear();
             this.nameOfFirstTarget = null;
-            this.defaultTargetNames = new string[0];
+            this.defaultTargetNames = Array.Empty<string>();
             this.initialTargetNamesInImportedProjects.Clear();
             this.initialTargetNamesInMainProject.Clear();
 

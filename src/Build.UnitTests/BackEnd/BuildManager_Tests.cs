@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         .ProjectInstance.FullPath,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    new string[0],
+                    Array.Empty<string>(),
                     null));
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -444,7 +444,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Project project = CreateProject(CleanupFileContents(contents), MSBuildDefaultToolsVersion, _projectCollection, false);
 
-            var data = new BuildRequestData(project.CreateProjectInstance(), new string[0], _projectCollection.HostServices);
+            var data = new BuildRequestData(project.CreateProjectInstance(), Array.Empty<string>(), _projectCollection.HostServices);
             var customparameters = new BuildParameters { EnableNodeReuse = false, Loggers = new ILogger[] { _logger } };
             buildParametersModifier(customparameters);
 
@@ -655,7 +655,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _env.SetEnvironmentVariable("MsBuildForwardPropertiesFromChild", "Something");
 
             var project = CreateProject(contents, null, _projectCollection, false);
-            var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
+            var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
@@ -711,7 +711,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
@@ -773,7 +773,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
@@ -828,7 +828,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
@@ -897,7 +897,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var project = CreateProject(contents, null, projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
             var customParameters = new BuildParameters(projectCollection) { Loggers = new ILogger[] { _logger } };
             BuildResult result = _buildManager.Build(customParameters, data);
@@ -932,7 +932,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
@@ -1098,7 +1098,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void BuildRequestWithoutBegin()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", Array.Empty<string>(), null);
             Should.Throw<InvalidOperationException>(() => _buildManager.BuildRequest(data));
         }
 
@@ -1108,7 +1108,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void GraphBuildRequestWithoutBegin()
         {
-            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), Array.Empty<string>(), null);
             Should.Throw<InvalidOperationException>(() => _buildManager.BuildRequest(data));
         }
 
@@ -1118,7 +1118,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void PendBuildRequestWithoutBegin()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", Array.Empty<string>(), null);
             Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
         }
 
@@ -1128,7 +1128,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void PendGraphBuildRequestWithoutBegin()
         {
-            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), Array.Empty<string>(), null);
             Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
         }
 
@@ -1154,7 +1154,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
             var project = CreateProject(contents, null, _projectCollection, false);
             var globalProperties = new Dictionary<string, string>();
-            var targets = new string[0];
+            var targets = Array.Empty<string>();
             var brd = new BuildRequestData(project.FullPath, globalProperties, null, targets, new HostServices());
             using (var bm = new BuildManager())
             {
@@ -1218,7 +1218,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void PendBuildRequestAfterEnd()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", Array.Empty<string>(), null);
             _buildManager.BeginBuild(new BuildParameters());
             _buildManager.EndBuild();
 
@@ -1231,7 +1231,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void PendGraphBuildRequestAfterEnd()
         {
-            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), Array.Empty<string>(), null);
             _buildManager.BeginBuild(new BuildParameters());
             _buildManager.EndBuild();
 
@@ -1247,7 +1247,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 BuildRequestData data =
-                    new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+                    new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", Array.Empty<string>(), null);
                 _buildManager.BeginBuild(new BuildParameters());
 
                 Assert.Throws<InvalidOperationException>(() => { _buildManager.Build(new BuildParameters(), data); });
@@ -1489,7 +1489,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             _buildManager.PendBuildRequest(data);
             _buildManager.EndBuild();
@@ -1509,7 +1509,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             _buildManager.PendBuildRequest(data);
             _buildManager.CancelAllSubmissions();
@@ -1539,7 +1539,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 EnableNodeReuse = false
             };
 
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
 
             Console.WriteLine("CancelledBuild: beginning build");
             _buildManager.BeginBuild(_parameters);
@@ -1620,7 +1620,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
@@ -1657,7 +1657,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
@@ -1688,7 +1688,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
@@ -1828,7 +1828,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             File.WriteAllText(projectFile, contents);
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-            var data = new BuildRequestData(projectFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
+            var data = new BuildRequestData(projectFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             _buildManager.Build(_parameters, data);
         }
 
@@ -1983,7 +1983,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Create Project 1
             ProjectInstance projectInstance = CreateProjectInstance(contents1, null, _projectCollection, false);
-            var data = new BuildRequestData(projectInstance, new string[0]);
+            var data = new BuildRequestData(projectInstance, Array.Empty<string>());
 
             _logger.ClearLog();
 
@@ -2010,7 +2010,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Create a new build.
             ProjectInstance projectInstance2 = CreateProjectInstance(contents1, null, _projectCollection, false);
-            var data2 = new BuildRequestData(projectInstance2, new string[0]);
+            var data2 = new BuildRequestData(projectInstance2, Array.Empty<string>());
 
             // Build again.
             _parameters.ResetCaches = false;
@@ -2148,7 +2148,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             string fileName = _env.CreateFile(".proj").Path;
             File.WriteAllText(fileName, contents);
-            var data = new BuildRequestData(fileName, _projectCollection.GlobalProperties, MSBuildDefaultToolsVersion, new string[0], null);
+            var data = new BuildRequestData(fileName, _projectCollection.GlobalProperties, MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             _parameters.DisableInProcNode = true;
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
@@ -2236,7 +2236,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
             }
 
-            var data = new BuildRequestData(instance, new string[0]);
+            var data = new BuildRequestData(instance, Array.Empty<string>());
 
             // Force this to build out-of-proc
             _parameters.DisableInProcNode = true;
@@ -2280,7 +2280,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             instance.SetProperty("VirtualProp", "overridden");
             instance.SetProperty("Unmodified", "changed");
 
-            var data = new BuildRequestData(instance, new string[0], null, BuildRequestDataFlags.None, new string[] { "VirtualProp" });
+            var data = new BuildRequestData(instance, Array.Empty<string>(), null, BuildRequestDataFlags.None, new string[] { "VirtualProp" });
 
             // Force this to build out-of-proc
             _parameters.DisableInProcNode = true;
@@ -2307,7 +2307,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Do a build with one build manager.
             using (var outerBuildManager = new BuildManager())
             {
-                outerBuildCacheDirectory = BuildAndCheckCache(outerBuildManager, new string[] { });
+                outerBuildCacheDirectory = BuildAndCheckCache(outerBuildManager, Array.Empty<string>());
 
                 // Do another build with a second build manager while the first still exists.  Since both BuildManagers
                 // share a process-wide cache directory, we want to verify that they don't stomp on each other, either
@@ -4324,7 +4324,7 @@ $@"<Project InitialTargets=`Sleep`>
                 var graphResult = buildSession.BuildGraphSubmission(
                     new GraphBuildRequestData(
                         projectGraphEntryPoints: new[] {new ProjectGraphEntryPoint(graph.GraphRoots.First().ProjectInstance.FullPath)},
-                        targetsToBuild: new string[0],
+                        targetsToBuild: Array.Empty<string>(),
                         hostServices: null,
                         flags: BuildRequestDataFlags.None,
                         graphBuildOptions: new GraphBuildOptions {Build = false}));

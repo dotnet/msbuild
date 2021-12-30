@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             TestTargetBuilder targetBuilder = (TestTargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
             IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
-            BuildRequestConfiguration configuration = new BuildRequestConfiguration(1, new BuildRequestData("testName", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0");
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(1, new BuildRequestData("testName", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0");
             configCache.AddConfiguration(configuration);
 
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "target1" });
@@ -266,7 +266,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     projectFile,
                     new Dictionary<string, string>(),
                     ObjectModelHelpers.MSBuildDefaultToolsVersion,
-                    new string[0],
+                    Array.Empty<string>(),
                     null),
                 defaultToolsVersion);
             return config;
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private TargetResult GetEmptySuccessfulTargetResult()
         {
-            return new TargetResult(new TaskItem[0] { }, new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null));
+            return new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null));
         }
 
         private void WaitForEvent(WaitHandle evt, string eventName)

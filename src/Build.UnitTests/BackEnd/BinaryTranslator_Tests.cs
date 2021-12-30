@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSerializeStringArray()
         {
-            HelperTestArray(new string[] { }, StringComparer.Ordinal);
+            HelperTestArray(Array.Empty<string>(), StringComparer.Ordinal);
             HelperTestArray(new string[] { "foo", "bar" }, StringComparer.Ordinal);
             HelperTestArray(null, StringComparer.Ordinal);
         }

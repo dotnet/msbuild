@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = new MockEngine();
 
             t.BasePath = @"c:\abc\def";
-            t.Paths = new ITaskItem[0];
+            t.Paths = System.Array.Empty<ITaskItem>();
             Assert.True(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(@"

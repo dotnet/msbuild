@@ -398,10 +398,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             HostServices hostServices = new HostServices();
             ProjectInstance project = CreateDummyProject("foo.proj");
 
-            BuildRequestData data = new BuildRequestData(project, new string[] { }, hostServices);
+            BuildRequestData data = new BuildRequestData(project, Array.Empty<string>(), hostServices);
 
             hostServices.SetNodeAffinity(project.FullPath, NodeAffinity.InProc);
-            BuildRequestData data2 = new BuildRequestData(project, new string[] { }, hostServices);
+            BuildRequestData data2 = new BuildRequestData(project, Array.Empty<string>(), hostServices);
         }
 
         /// <summary>

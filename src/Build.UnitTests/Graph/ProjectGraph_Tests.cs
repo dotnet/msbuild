@@ -1954,7 +1954,7 @@ $@"
                     yield return new object[]
                     {
                         new Dictionary<int, int[]>(),
-                        new int[] {},
+                        Array.Empty<int>(),
                         globalVariables
                     };
 
@@ -2089,7 +2089,7 @@ $@"
                         {1, new[] {2, 3, 4}},
                         {2, new[] {3}},
                         {3, new[] {4}},
-                        {4, new int[0]}
+                        {4, Array.Empty<int>()}
                     }
                 };
 
@@ -2154,7 +2154,7 @@ $@"
                         {3, new[] {4, 5, 6}},
                         {4, new[] {5}},
                         {5, new[] {6}},
-                        {6, new int[0]},
+                        {6, Array.Empty<int>()},
                     }
                 };
             }
@@ -2230,7 +2230,7 @@ $@"
 
             GetFirstNodeWithProjectNumber(graph, 2).AssertReferencesIgnoringOrder(new []{3, 4, 4, 4, 5, 6, 6, 6});
 
-            GetOuterBuild(graph, 4).AssertReferencesIgnoringOrder(new int[0]);
+            GetOuterBuild(graph, 4).AssertReferencesIgnoringOrder(Array.Empty<int>());
 
             var innerBuilds4 = GetInnerBuilds(graph, 4);
             innerBuilds4.Count.ShouldBe(2);

@@ -1408,7 +1408,7 @@ namespace Microsoft.Build.UnitTests
                     projectFile,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    new string[] {},
+                    Array.Empty<string>(),
                     null);
 
                 var result = buildManager.Build(
@@ -1982,7 +1982,7 @@ namespace Microsoft.Build.UnitTests
                 var buildRequestData = new BuildRequestData(projectFile,
                     globalProperties ?? new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    entryTargets ?? new string[0],
+                    entryTargets ?? Array.Empty<string>(),
                     null);
 
                 var completion = new TaskCompletionSource<BuildResult>();
@@ -2002,7 +2002,7 @@ namespace Microsoft.Build.UnitTests
 
             public GraphBuildResult BuildGraph(ProjectGraph graph, string[] entryTargets = null)
             {
-                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? new string[0]));
+                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? Array.Empty<string>()));
             }
 
             public void Dispose()

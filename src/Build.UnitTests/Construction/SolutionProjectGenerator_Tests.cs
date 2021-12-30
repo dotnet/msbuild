@@ -1930,7 +1930,7 @@ EndGlobal
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
 
-                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
                 BuildResult result = buildManager.Build(parameters, request);
                 Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
@@ -2018,7 +2018,7 @@ EndGlobal
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
 
-                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
                 BuildResult result = buildManager.Build(parameters, request);
                 Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
