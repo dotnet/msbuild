@@ -185,9 +185,9 @@ namespace Microsoft.Build.CommandLine
                 // One of the exceptions is missing a period!
                 if (message[message.Length - 1] != '.')
                 {
-                    builder.Append(".");
+                    builder.Append('.');
                 }
-                builder.Append(" ");
+                builder.Append(' ');
 
                 exception = exception.InnerException;
             }
