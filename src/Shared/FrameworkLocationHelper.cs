@@ -377,7 +377,7 @@ namespace Microsoft.Build.Shared
         private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict = s_dotNetFrameworkSpecs.ToDictionary(spec => spec.Version);
         private static readonly IReadOnlyDictionary<Version, VisualStudioSpec> s_visualStudioSpecDict = s_visualStudioSpecs.ToDictionary(spec => spec.Version);
 
-        #endregion // Static member variables
+#endregion // Static member variables
 
 #region Static properties
 
