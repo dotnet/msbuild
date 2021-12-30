@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectCollection.GlobalProjectCollection.GlobalProperties.ShouldBeEmpty();
         }
 
-        private static readonly string ProjectWithItemGroup =
+        private const string ProjectWithItemGroup =
 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
 {0}

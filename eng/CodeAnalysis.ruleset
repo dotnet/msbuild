@@ -82,7 +82,7 @@
     <Rule Id="CA1721" Action="None" />             <!-- Property names should not match get methods --> 
     <Rule Id="CA1724" Action="None" />             <!-- Type names should not match namespaces --> 
     <Rule Id="CA1801" Action="None" />             <!-- Review unused parameters --> 
-    <Rule Id="CA1802" Action="Info" />             <!-- Use literals where appropriate --> 
+    <Rule Id="CA1802" Action="Warning" />          <!-- Use literals where appropriate --> 
     <Rule Id="CA1805" Action="Info" />             <!-- Do not initialize unnecessarily --> 
     <Rule Id="CA1806" Action="None" />
     <Rule Id="CA1810" Action="Info" />             <!-- Initialize reference type static fields inline --> 
