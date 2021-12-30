@@ -91,6 +91,10 @@ namespace Microsoft.Build.Collections
     {
         // store lower 31 bits of hash code
         private const int Lower31BitMask = 0x7FFFFFFF;
+#if NEVER
+        // cutoff point, above which we won't do stackallocs. This corresponds to 100 integers.
+        private const int StackAllocThreshold = 100;
+#endif
         // when constructing a hashset from an existing collection, it may contain duplicates, 
         // so this is used as the max acceptable excess ratio of capacity to count. Note that
         // this is only used on the ctor and not to automatically shrink if the hashset has, e.g,
@@ -117,7 +121,7 @@ namespace Microsoft.Build.Collections
         // temporary variable needed during deserialization
         private SerializationInfo _siInfo;
 
-        #region Constructors
+#region Constructors
 
         public RetrievableEntryHashSet(IEqualityComparer<string> comparer)
         {
@@ -200,7 +204,7 @@ namespace Microsoft.Build.Collections
             _siInfo = info;
         }
 
-        #endregion
+#endregion
 
         // Convenience to minimise change to callers used to dictionaries
         public ICollection<string> Keys
@@ -226,7 +230,7 @@ namespace Microsoft.Build.Collections
             get { return this; }
         }
 
-        #region ICollection<T> methods
+#region ICollection<T> methods
 
         // Convenience to minimise change to callers used to dictionaries
         internal T this[string name]
@@ -477,9 +481,9 @@ namespace Microsoft.Build.Collections
             _readOnly = true;
         }
 
-        #endregion
+#endregion
 
-        #region IEnumerable methods
+#region IEnumerable methods
 
         public Enumerator GetEnumerator()
         {
@@ -504,9 +508,9 @@ namespace Microsoft.Build.Collections
             return new Enumerator(this);
         }
 
-        #endregion
+#endregion
 
-        #region ISerializable methods
+#region ISerializable methods
 
         // [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         [SecurityCritical]
@@ -529,9 +533,9 @@ namespace Microsoft.Build.Collections
             }
         }
 
-        #endregion
+#endregion
 
-        #region IDeserializationCallback methods
+#region IDeserializationCallback methods
 
         public virtual void OnDeserialization(Object sender)
         {
@@ -576,9 +580,9 @@ namespace Microsoft.Build.Collections
             _siInfo = null;
         }
 
-        #endregion
+#endregion
 
-        #region HashSet methods
+#region HashSet methods
 
         /// <summary>
         /// Add item to this HashSet. 
@@ -626,7 +630,7 @@ namespace Microsoft.Build.Collections
             }
         }
 
-#if NEVER 
+#if NEVER
                                                                                                                                                         /// <summary>
                                                                                                                                                         /// Takes the intersection of this set with other. Modifies this set.
                                                                                                                                                         /// 
@@ -1148,9 +1152,9 @@ namespace Microsoft.Build.Collections
 #endif
 #endif
 
-        #endregion
+#endregion
 
-        #region Helper methods
+#region Helper methods
 
         /// <summary>
         /// Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
@@ -1288,6 +1292,338 @@ namespace Microsoft.Build.Collections
             return true;
         }
 
+#if NEVER
+                                                                                                                                                                        /// <summary>
+                                                                                                                                                                        /// Checks if this contains of other's elements. Iterates over other's elements and 
+                                                                                                                                                                        /// returns false as soon as it finds an element in other that's not in this.
+                                                                                                                                                                        /// Used by SupersetOf, ProperSupersetOf, and SetEquals.
+                                                                                                                                                                        /// </summary>
+                                                                                                                                                                        /// <param name="other"></param>
+                                                                                                                                                                        /// <returns></returns>
+                                                                                                                                                                        private bool ContainsAllElements(IEnumerable<T> other) {
+                                                                                                                                                                            foreach (T element in other) {
+                                                                                                                                                                                if (!Contains(element)) {
+                                                                                                                                                                                    return false;
+                                                                                                                                                                                }
+                                                                                                                                                                            }
+                                                                                                                                                                            return true;
+                                                                                                                                                                        }
+
+                                                                                                                                                                        /// <summary>
+                                                                                                                                                                        /// Implementation Notes:
+                                                                                                                                                                        /// If other is a hashset and is using same equality comparer, then checking subset is 
+                                                                                                                                                                        /// faster. Simply check that each element in this is in other.
+                                                                                                                                                                        /// 
+                                                                                                                                                                        /// Note: if other doesn't use same equality comparer, then Contains check is invalid,
+                                                                                                                                                                        /// which is why callers must take are of this.
+                                                                                                                                                                        /// 
+                                                                                                                                                                        /// If callers are concerned about whether this is a proper subset, they take care of that.
+                                                                                                                                                                        ///
+                                                                                                                                                                        /// </summary>
+                                                                                                                                                                        /// <param name="other"></param>
+                                                                                                                                                                        /// <returns></returns>
+                                                                                                                                                                        private bool IsSubsetOfHashSetWithSameEC(RetrievableEntryHashSet<T> other) {
+
+                                                                                                                                                                            foreach (T item in this) {
+                                                                                                                                                                                if (!other.Contains(item)) {
+                                                                                                                                                                                    return false;
+                                                                                                                                                                                }
+                                                                                                                                                                            }
+                                                                                                                                                                            return true;
+                                                                                                                                                                        }
+
+                                                                                                                                                                        /// <summary>
+                                                                                                                                                                        /// If other is a hashset that uses same equality comparer, intersect is much faster 
+                                                                                                                                                                        /// because we can use other's Contains
+                                                                                                                                                                        /// </summary>
+                                                                                                                                                                        /// <param name="other"></param>
+                                                                                                                                                                        private void IntersectWithHashSetWithSameEC(RetrievableEntryHashSet<T> other) {
+                                                                                                                                                                            for (int i = 0; i < m_lastIndex; i++) {
+                                                                                                                                                                                if (m_slots[i].hashCode >= 0) {
+                                                                                                                                                                                    T item = m_slots[i].value;
+                                                                                                                                                                                    if (!other.Contains(item)) {
+                                                                                                                                                                                        Remove(item);
+                                                                                                                                                                                    }
+                                                                                                                                                                                }
+                                                                                                                                                                            }
+                                                                                                                                                                        }
+
+                                                                                                                                                                        /// <summary>
+                                                                                                                                                                        /// Iterate over other. If contained in this, mark an element in bit array corresponding to
+                                                                                                                                                                        /// its position in m_slots. If anything is unmarked (in bit array), remove it.
+                                                                                                                                                                        /// 
+                                                                                                                                                                        /// This attempts to allocate on the stack, if below StackAllocThreshold.
+                                                                                                                                                                        /// </summary>
+                                                                                                                                                                        /// <param name="other"></param>
+                                                                                                                                                                        [System.Security.SecuritySafeCritical]
+                                                                                                                                                                        private unsafe void IntersectWithEnumerable(IEnumerable<T> other) {
+                                                                                                                                                                            Debug.Assert(m_buckets != null, "m_buckets shouldn't be null; callers should check first");
+
+                                                                                                                                                                            // keep track of current last index; don't want to move past the end of our bit array
+                                                                                                                                                                            // (could happen if another thread is modifying the collection)
+                                                                                                                                                                            int originalLastIndex = m_lastIndex;
+                                                                                                                                                                            int intArrayLength = BitHelper.ToIntArrayLength(originalLastIndex);
+
+                                                                                                                                                                            BitHelper bitHelper;
+                                                                                                                                                                            if (intArrayLength <= StackAllocThreshold) {
+                                                                                                                                                                                int* bitArrayPtr = stackalloc int[intArrayLength];
+                                                                                                                                                                                bitHelper = new BitHelper(bitArrayPtr, intArrayLength);
+                                                                                                                                                                            }
+                                                                                                                                                                            else {
+                                                                                                                                                                                int[] bitArray = new int[intArrayLength];
+                                                                                                                                                                                bitHelper = new BitHelper(bitArray, intArrayLength);
+                                                                                                                                                                            }
+
+                                                                                                                                                                            // mark if contains: find index of in slots array and mark corresponding element in bit array
+                                                                                                                                                                            foreach (T item in other) {
+                                                                                                                                                                                int index = InternalIndexOf(item);
+                                                                                                                                                                                if (index >= 0) {
+                                                                                                                                                                                    bitHelper.MarkBit(index);
+                                                                                                                                                                                }
+                                                                                                                                                                            }
+
+                                                                                                                                                                            // if anything unmarked, remove it. Perf can be optimized here if BitHelper had a 
+                                                                                                                                                                            // FindFirstUnmarked method.
+                                                                                                                                                                            for (int i = 0; i < originalLastIndex; i++) {
+                                                                                                                                                                                if (m_slots[i].hashCode >= 0 && !bitHelper.IsMarked(i)) {
+                                                                                                                                                                                    Remove(m_slots[i].value);
+                                                                                                                                                                                }
+                                                                                                                                                                            }
+                                                                                                                                                                        }
+
+                                                                                                                                                                    /// <summary>
+                                                                                                                                                                    /// Used internally by set operations which have to rely on bit array marking. This is like
+                                                                                                                                                                    /// Contains but returns index in slots array. 
+                                                                                                                                                                    /// </summary>
+                                                                                                                                                                    /// <param name="item"></param>
+                                                                                                                                                                    /// <returns></returns>
+                                                                                                                                                                    private int InternalIndexOf(T item) {
+                                                                                                                                                                        Debug.Assert(m_buckets != null, "m_buckets was null; callers should check first");
+
+                                                                                                                                                                        int hashCode = InternalGetHashCode(item);
+                                                                                                                                                                        for (int i = m_buckets[hashCode % m_buckets.Length] - 1; i >= 0; i = m_slots[i].next) {
+                                                                                                                                                                            if ((m_slots[i].hashCode) == hashCode && m_comparer.Equals(m_slots[i].value, item)) {
+                                                                                                                                                                                return i;
+                                                                                                                                                                            }
+                                                                                                                                                                        }
+                                                                                                                                                                        // wasn't found
+                                                                                                                                                                        return -1;
+                                                                                                                                                                    }
+
+                                                                                                                                                                /// <summary>
+                                                                                                                                                                /// if other is a set, we can assume it doesn't have duplicate elements, so use this
+                                                                                                                                                                /// technique: if can't remove, then it wasn't present in this set, so add.
+                                                                                                                                                                /// 
+                                                                                                                                                                /// As with other methods, callers take care of ensuring that other is a hashset using the
+                                                                                                                                                                /// same equality comparer.
+                                                                                                                                                                /// </summary>
+                                                                                                                                                                /// <param name="other"></param>
+                                                                                                                                                                private void SymmetricExceptWithUniqueHashSet(RetrievableEntryHashSet<T> other) {
+                                                                                                                                                                    foreach (T item in other) {
+                                                                                                                                                                        if (!Remove(item)) {
+                                                                                                                                                                            AddEvenIfPresent(item);
+                                                                                                                                                                        }
+                                                                                                                                                                    }
+                                                                                                                                                                }
+
+                                                                                                                                                                /// <summary>
+                                                                                                                                                                /// Implementation notes:
+                                                                                                                                                                /// 
+                                                                                                                                                                /// Used for symmetric except when other isn't a HashSet. This is more tedious because 
+                                                                                                                                                                /// other may contain duplicates. HashSet technique could fail in these situations:
+                                                                                                                                                                /// 1. Other has a duplicate that's not in this: HashSet technique would add then 
+                                                                                                                                                                /// remove it.
+                                                                                                                                                                /// 2. Other has a duplicate that's in this: HashSet technique would remove then add it
+                                                                                                                                                                /// back.
+                                                                                                                                                                /// In general, its presence would be toggled each time it appears in other. 
+                                                                                                                                                                /// 
+                                                                                                                                                                /// This technique uses bit marking to indicate whether to add/remove the item. If already
+                                                                                                                                                                /// present in collection, it will get marked for deletion. If added from other, it will
+                                                                                                                                                                /// get marked as something not to remove.
+                                                                                                                                                                ///
+                                                                                                                                                                /// </summary>
+                                                                                                                                                                /// <param name="other"></param>
+                                                                                                                                                                [System.Security.SecuritySafeCritical]
+                                                                                                                                                                private unsafe void SymmetricExceptWithEnumerable(IEnumerable<T> other) {
+                                                                                                                                                                    int originalLastIndex = m_lastIndex;
+                                                                                                                                                                    int intArrayLength = BitHelper.ToIntArrayLength(originalLastIndex);
+
+                                                                                                                                                                    BitHelper itemsToRemove;
+                                                                                                                                                                    BitHelper itemsAddedFromOther;
+                                                                                                                                                                    if (intArrayLength <= StackAllocThreshold / 2) {
+                                                                                                                                                                        int* itemsToRemovePtr = stackalloc int[intArrayLength];
+                                                                                                                                                                        itemsToRemove = new BitHelper(itemsToRemovePtr, intArrayLength);
+
+                                                                                                                                                                        int* itemsAddedFromOtherPtr = stackalloc int[intArrayLength];
+                                                                                                                                                                        itemsAddedFromOther = new BitHelper(itemsAddedFromOtherPtr, intArrayLength);
+                                                                                                                                                                    }
+                                                                                                                                                                    else {
+                                                                                                                                                                        int[] itemsToRemoveArray = new int[intArrayLength];
+                                                                                                                                                                        itemsToRemove = new BitHelper(itemsToRemoveArray, intArrayLength);
+
+                                                                                                                                                                        int[] itemsAddedFromOtherArray = new int[intArrayLength];
+                                                                                                                                                                        itemsAddedFromOther = new BitHelper(itemsAddedFromOtherArray, intArrayLength);
+                                                                                                                                                                    }
+
+                                                                                                                                                                    foreach (T item in other) {
+                                                                                                                                                                        int location = 0;
+                                                                                                                                                                        bool added = AddOrGetLocation(item, out location);
+                                                                                                                                                                        if (added) {
+                                                                                                                                                                            // wasn't already present in collection; flag it as something not to remove
+                                                                                                                                                                            // *NOTE* if location is out of range, we should ignore. BitHelper will
+                                                                                                                                                                            // detect that it's out of bounds and not try to mark it. But it's 
+                                                                                                                                                                            // expected that location could be out of bounds because adding the item
+                                                                                                                                                                            // will increase m_lastIndex as soon as all the free spots are filled.
+                                                                                                                                                                            itemsAddedFromOther.MarkBit(location);
+                                                                                                                                                                        }
+                                                                                                                                                                        else {
+                                                                                                                                                                            // already there...if not added from other, mark for remove. 
+                                                                                                                                                                            // *NOTE* Even though BitHelper will check that location is in range, we want 
+                                                                                                                                                                            // to check here. There's no point in checking items beyond originalLastIndex
+                                                                                                                                                                            // because they could not have been in the original collection
+                                                                                                                                                                            if (location < originalLastIndex && !itemsAddedFromOther.IsMarked(location)) {
+                                                                                                                                                                                itemsToRemove.MarkBit(location);
+                                                                                                                                                                            }
+                                                                                                                                                                        }
+                                                                                                                                                                    }
+
+                                                                                                                                                                    // if anything marked, remove it
+                                                                                                                                                                    for (int i = 0; i < originalLastIndex; i++) {
+                                                                                                                                                                        if (itemsToRemove.IsMarked(i)) {
+                                                                                                                                                                            Remove(m_slots[i].value);
+                                                                                                                                                                        }
+                                                                                                                                                                    }
+                                                                                                                                                                }
+
+                                                                                                                                                                /// <summary>
+                                                                                                                                                                /// Add if not already in hashset. Returns an out param indicating index where added. This 
+                                                                                                                                                                /// is used by SymmetricExcept because it needs to know the following things:
+                                                                                                                                                                /// - whether the item was already present in the collection or added from other
+                                                                                                                                                                /// - where it's located (if already present, it will get marked for removal, otherwise
+                                                                                                                                                                /// marked for keeping)
+                                                                                                                                                                /// </summary>
+                                                                                                                                                                /// <param name="value"></param>
+                                                                                                                                                                /// <param name="location"></param>
+                                                                                                                                                                /// <returns></returns>
+                                                                                                                                                                private bool AddOrGetLocation(T value, out int location) {
+                                                                                                                                                                    Debug.Assert(m_buckets != null, "m_buckets is null, callers should have checked");
+
+                                                                                                                                                                    int hashCode = InternalGetHashCode(value);
+                                                                                                                                                                    int bucket = hashCode % m_buckets.Length;
+                                                                                                                                                                    for (int i = m_buckets[hashCode % m_buckets.Length] - 1; i >= 0; i = m_slots[i].next) {
+                                                                                                                                                                        if (m_slots[i].hashCode == hashCode && m_comparer.Equals(m_slots[i].value, value)) {
+                                                                                                                                                                            location = i;
+                                                                                                                                                                            return false; //already present
+                                                                                                                                                                        }
+                                                                                                                                                                    }
+                                                                                                                                                                    int index;
+                                                                                                                                                                    if (m_freeList >= 0) {
+                                                                                                                                                                        index = m_freeList;
+                                                                                                                                                                        m_freeList = m_slots[index].next;
+                                                                                                                                                                    }
+                                                                                                                                                                    else {
+                                                                                                                                                                        if (m_lastIndex == m_slots.Length) {
+                                                                                                                                                                            IncreaseCapacity();
+                                                                                                                                                                            // this will change during resize
+                                                                                                                                                                            bucket = hashCode % m_buckets.Length;
+                                                                                                                                                                        }
+                                                                                                                                                                        index = m_lastIndex;
+                                                                                                                                                                        m_lastIndex++;
+                                                                                                                                                                    }
+                                                                                                                                                                    m_slots[index].hashCode = hashCode;
+                                                                                                                                                                    m_slots[index].value = value;
+                                                                                                                                                                    m_slots[index].next = m_buckets[bucket] - 1;
+                                                                                                                                                                    m_buckets[bucket] = index + 1;
+                                                                                                                                                                    m_count++;
+                                                                                                                                                                    m_version++;
+                                                                                                                                                                    location = index;
+                                                                                                                                                                    return true;
+                                                                                                                                                                }
+
+                                                                                                                                                                /// <summary>
+                                                                                                                                                                /// Determines counts that can be used to determine equality, subset, and superset. This
+                                                                                                                                                                /// is only used when other is an IEnumerable and not a HashSet. If other is a HashSet
+                                                                                                                                                                /// these properties can be checked faster without use of marking because we can assume 
+                                                                                                                                                                /// other has no duplicates.
+                                                                                                                                                                /// 
+                                                                                                                                                                /// The following count checks are performed by callers:
+                                                                                                                                                                /// 1. Equals: checks if unfoundCount = 0 and uniqueFoundCount = m_count; i.e. everything 
+                                                                                                                                                                /// in other is in this and everything in this is in other
+                                                                                                                                                                /// 2. Subset: checks if unfoundCount >= 0 and uniqueFoundCount = m_count; i.e. other may
+                                                                                                                                                                /// have elements not in this and everything in this is in other
+                                                                                                                                                                /// 3. Proper subset: checks if unfoundCount > 0 and uniqueFoundCount = m_count; i.e
+                                                                                                                                                                /// other must have at least one element not in this and everything in this is in other
+                                                                                                                                                                /// 4. Proper superset: checks if unfound count = 0 and uniqueFoundCount strictly less
+                                                                                                                                                                /// than m_count; i.e. everything in other was in this and this had at least one element
+                                                                                                                                                                /// not contained in other.
+                                                                                                                                                                /// 
+                                                                                                                                                                /// An earlier implementation used delegates to perform these checks rather than returning
+                                                                                                                                                                /// an ElementCount struct; however this was changed due to the perf overhead of delegates.
+                                                                                                                                                                /// </summary>
+                                                                                                                                                                /// <param name="other"></param>
+                                                                                                                                                                /// <param name="returnIfUnfound">Allows us to finish faster for equals and proper superset
+                                                                                                                                                                /// because unfoundCount must be 0.</param>
+                                                                                                                                                                /// <returns></returns>
+                                                                                                                                                                [System.Security.SecuritySafeCritical]
+                                                                                                                                                                private unsafe ElementCount CheckUniqueAndUnfoundElements(IEnumerable<T> other, bool returnIfUnfound) {
+                                                                                                                                                                    ElementCount result;
+
+                                                                                                                                                                    // need special case in case this has no elements. 
+                                                                                                                                                                    if (m_count == 0) {
+                                                                                                                                                                        int numElementsInOther = 0;
+                                                                                                                                                                        foreach (T item in other) {
+                                                                                                                                                                            numElementsInOther++;
+                                                                                                                                                                            // break right away, all we want to know is whether other has 0 or 1 elements
+                                                                                                                                                                            break;
+                                                                                                                                                                        }
+                                                                                                                                                                        result.uniqueCount = 0;
+                                                                                                                                                                        result.unfoundCount = numElementsInOther;
+                                                                                                                                                                        return result;
+                                                                                                                                                                    }
+
+
+                                                                                                                                                                    Debug.Assert((m_buckets != null) && (m_count > 0), "m_buckets was null but count greater than 0");
+
+                                                                                                                                                                    int originalLastIndex = m_lastIndex;
+                                                                                                                                                                    int intArrayLength = BitHelper.ToIntArrayLength(originalLastIndex);
+
+                                                                                                                                                                    BitHelper bitHelper;
+                                                                                                                                                                    if (intArrayLength <= StackAllocThreshold) {
+                                                                                                                                                                        int* bitArrayPtr = stackalloc int[intArrayLength];
+                                                                                                                                                                        bitHelper = new BitHelper(bitArrayPtr, intArrayLength);
+                                                                                                                                                                    }
+                                                                                                                                                                    else {
+                                                                                                                                                                        int[] bitArray = new int[intArrayLength];
+                                                                                                                                                                        bitHelper = new BitHelper(bitArray, intArrayLength);
+                                                                                                                                                                    }
+
+                                                                                                                                                                    // count of items in other not found in this
+                                                                                                                                                                    int unfoundCount = 0;
+                                                                                                                                                                    // count of unique items in other found in this
+                                                                                                                                                                    int uniqueFoundCount = 0;
+
+                                                                                                                                                                    foreach (T item in other) {
+                                                                                                                                                                        int index = InternalIndexOf(item);
+                                                                                                                                                                        if (index >= 0) {
+                                                                                                                                                                            if (!bitHelper.IsMarked(index)) {
+                                                                                                                                                                                // item hasn't been seen yet
+                                                                                                                                                                                bitHelper.MarkBit(index);
+                                                                                                                                                                                uniqueFoundCount++;
+                                                                                                                                                                            }
+                                                                                                                                                                        }
+                                                                                                                                                                        else {
+                                                                                                                                                                            unfoundCount++;
+                                                                                                                                                                            if (returnIfUnfound) {
+                                                                                                                                                                                break;
+                                                                                                                                                                            }
+                                                                                                                                                                        }
+                                                                                                                                                                    }
+
+                                                                                                                                                                    result.uniqueCount = uniqueFoundCount;
+                                                                                                                                                                    result.unfoundCount = unfoundCount;
+                                                                                                                                                                    return result;
+                                                                                                                                                                }
+#endif
         /// <summary>
         /// Copies this to an array. Used for DebugView
         /// </summary>
@@ -1298,6 +1634,71 @@ namespace Microsoft.Build.Collections
             CopyTo(newArray);
             return newArray;
         }
+
+#if NEVER
+                                                                                                                                                            /// <summary>
+                                                                                                                                                            /// Internal method used for HashSetEqualityComparer. Compares set1 and set2 according 
+                                                                                                                                                            /// to specified comparer.
+                                                                                                                                                            /// 
+                                                                                                                                                            /// Because items are hashed according to a specific equality comparer, we have to resort
+                                                                                                                                                            /// to n^2 search if they're using different equality comparers.
+                                                                                                                                                            /// </summary>
+                                                                                                                                                            /// <param name="set1"></param>
+                                                                                                                                                            /// <param name="set2"></param>
+                                                                                                                                                            /// <param name="comparer"></param>
+                                                                                                                                                            /// <returns></returns>
+                                                                                                                                                            internal static bool HashSetEquals(RetrievableEntryHashSet<T> set1, RetrievableEntryHashSet<T> set2, IEqualityComparer<T> comparer) {
+                                                                                                                                                                // handle null cases first
+                                                                                                                                                                if (set1 == null) {
+                                                                                                                                                                    return (set2 == null);
+                                                                                                                                                                }
+                                                                                                                                                                else if (set2 == null) {
+                                                                                                                                                                    // set1 != null
+                                                                                                                                                                    return false;
+                                                                                                                                                                }
+
+                                                                                                                                                                // all comparers are the same; this is faster
+                                                                                                                                                                if (AreEqualityComparersEqual(set1, set2)) {
+                                                                                                                                                                    if (set1.Count != set2.Count) {
+                                                                                                                                                                        return false;
+                                                                                                                                                                    }
+                                                                                                                                                                    // suffices to check subset
+                                                                                                                                                                    foreach (T item in set2) {
+                                                                                                                                                                        if (!set1.Contains(item)) {
+                                                                                                                                                                            return false;
+                                                                                                                                                                        }
+                                                                                                                                                                    }
+                                                                                                                                                                    return true;
+                                                                                                                                                                }
+                                                                                                                                                                else {  // n^2 search because items are hashed according to their respective ECs
+                                                                                                                                                                    foreach (T set2Item in set2) {
+                                                                                                                                                                        bool found = false;
+                                                                                                                                                                        foreach (T set1Item in set1) {
+                                                                                                                                                                            if (comparer.Equals(set2Item, set1Item)) {
+                                                                                                                                                                                found = true;
+                                                                                                                                                                                break;
+                                                                                                                                                                            }
+                                                                                                                                                                        }
+                                                                                                                                                                        if (!found) {
+                                                                                                                                                                            return false;
+                                                                                                                                                                        }
+                                                                                                                                                                    }
+                                                                                                                                                                    return true;
+                                                                                                                                                                }
+                                                                                                                                                            }
+
+                                                                                                                                                            /// <summary>
+                                                                                                                                                            /// Checks if equality comparers are equal. This is used for algorithms that can
+                                                                                                                                                            /// speed up if it knows the other item has unique elements. I.e. if they're using 
+                                                                                                                                                            /// different equality comparers, then uniqueness assumption between sets break.
+                                                                                                                                                            /// </summary>
+                                                                                                                                                            /// <param name="set1"></param>
+                                                                                                                                                            /// <param name="set2"></param>
+                                                                                                                                                            /// <returns></returns>
+                                                                                                                                                            private static bool AreEqualityComparersEqual(RetrievableEntryHashSet<T> set1, RetrievableEntryHashSet<T> set2) {
+                                                                                                                                                                return set1.Comparer.Equals(set2.Comparer);
+        }
+#endif
        
         private int InternalGetHashCode(string item, int index, int length)
         {
@@ -1322,7 +1723,7 @@ namespace Microsoft.Build.Collections
             return _comparer.GetHashCode(item) & Lower31BitMask;
         }
 
-        #endregion
+#endregion
 
         // used for set checking operations (using enumerables) that rely on counting
         internal struct ElementCount
