@@ -523,47 +523,18 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void UncPatternEmptyString_LegacyRegex()
+        public void PatternEmptyString_LegacyRegex()
         {
-            UncPattern.IsMatch(string.Empty).ShouldBe(false);
-            UncPattern.IsMatch(string.Empty).ShouldBe(false);
+            UncPattern.IsMatch(string.Empty).ShouldBeFalse();
+            StartsWithUncPattern.IsMatch(string.Empty).ShouldBeFalse();
+            StartsWithUncPattern.Match(string.Empty).Success.ShouldBeFalse();
         }
 
         [Fact]
-        public void UncPatternEmptyString()
+        public void PatternEmptyString()
         {
-            FileUtilitiesRegex.IsUncPattern(string.Empty).ShouldBe(false);
-            FileUtilitiesRegex.IsUncPattern(string.Empty).ShouldBe(false);
-        }
-
-        [Fact]
-        public void StartWithUncPatternEmptyString_LegacyRegex()
-        {
-            StartsWithUncPattern.IsMatch(string.Empty).ShouldBe(false);
-            StartsWithUncPattern.IsMatch(string.Empty).ShouldBe(false);
-        }
-
-        [Fact]
-        public void StartsWithUncPatternEmptyString()
-        {
-            FileUtilitiesRegex.StartsWithUncPattern(string.Empty).ShouldBe(false);
-            FileUtilitiesRegex.StartsWithUncPattern(string.Empty).ShouldBe(false);
-        }
-
-        [Fact]
-        public void MatchLengthStartWithUncPatternEmptyString_LegacyRegex()
-        {
-            var match = StartsWithUncPattern.Match(string.Empty);
-            match.Success.ShouldBeFalse();
-
-            match = StartsWithUncPattern.Match(string.Empty);
-            match.Success.ShouldBeFalse();
-        }
-
-        [Fact]
-        public void MatchLengthStartWithUncPatternEmptyString()
-        {
-            FileUtilitiesRegex.StartsWithUncPatternMatchLength(string.Empty).ShouldBe(-1);
+            FileUtilitiesRegex.IsUncPattern(string.Empty).ShouldBeFalse();
+            FileUtilitiesRegex.StartsWithUncPattern(string.Empty).ShouldBeFalse();
             FileUtilitiesRegex.StartsWithUncPatternMatchLength(string.Empty).ShouldBe(-1);
         }
     }
