@@ -374,16 +374,10 @@ namespace Microsoft.Build.Shared
        };
 #endif // FEATURE_WIN32_REGISTRY
 
-        private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict;
-        private static readonly IReadOnlyDictionary<Version, VisualStudioSpec> s_visualStudioSpecDict;
+        private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict = s_dotNetFrameworkSpecs.ToDictionary(spec => spec.Version);
+        private static readonly IReadOnlyDictionary<Version, VisualStudioSpec> s_visualStudioSpecDict = s_visualStudioSpecs.ToDictionary(spec => spec.Version);
 
-#endregion // Static member variables
-
-        static FrameworkLocationHelper()
-        {
-            s_dotNetFrameworkSpecDict = s_dotNetFrameworkSpecs.ToDictionary(spec => spec.Version);
-            s_visualStudioSpecDict = s_visualStudioSpecs.ToDictionary(spec => spec.Version);
-        }
+        #endregion // Static member variables
 
 #region Static properties
 

@@ -32,12 +32,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ExceptionHandling
     {
-        private static readonly string s_debugDumpPath;
-
-        static ExceptionHandling()
-        {
-            s_debugDumpPath = GetDebugDumpPath();
-        }
+        private static readonly string s_debugDumpPath = GetDebugDumpPath();
 
         /// <summary>
         /// Gets the location of the directory used for diagnostic log files.
