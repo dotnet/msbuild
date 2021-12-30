@@ -1074,42 +1074,42 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Last error event the logger encountered
             /// </summary>
-            private BuildErrorEventArgs _lastError = null;
+            private BuildErrorEventArgs _lastError;
 
             /// <summary>
             /// Last warning event the logger encountered
             /// </summary>
-            private BuildWarningEventArgs _lastWarning = null;
+            private BuildWarningEventArgs _lastWarning;
 
             /// <summary>
             /// Last message event the logger encountered
             /// </summary>
-            private BuildMessageEventArgs _lastMessage = null;
+            private BuildMessageEventArgs _lastMessage;
 
             /// <summary>
             /// Last custom build event the logger encountered
             /// </summary>
-            private CustomBuildEventArgs _lastCustom = null;
+            private CustomBuildEventArgs _lastCustom;
 
             /// <summary>
             /// Number of errors
             /// </summary>
-            private int _numberOfError = 0;
+            private int _numberOfError;
 
             /// <summary>
             /// Number of warnings
             /// </summary>
-            private int _numberOfWarning = 0;
+            private int _numberOfWarning;
 
             /// <summary>
             /// Number of messages
             /// </summary>
-            private int _numberOfMessage = 0;
+            private int _numberOfMessage;
 
             /// <summary>
             /// Number of custom build events
             /// </summary>
-            private int _numberOfCustom = 0;
+            private int _numberOfCustom;
 
             /// <summary>
             /// Last error logged

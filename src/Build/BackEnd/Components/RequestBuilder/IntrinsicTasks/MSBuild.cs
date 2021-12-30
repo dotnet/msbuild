@@ -90,7 +90,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets or sets a semicolon-delimited list of global properties to remove.
         /// </summary>
-        public string RemoveProperties { get; set; } = null;
+        public string RemoveProperties { get; set; }
 
         /// <summary>
         /// The targets to build in each project specified by the <see cref="Projects"/> property.
@@ -116,25 +116,25 @@ namespace Microsoft.Build.BackEnd
         /// Indicates if the paths of target output items should be rebased relative to the calling project.
         /// </summary>
         /// <value>true, if target output item paths should be rebased</value>
-        public bool RebaseOutputs { get; set; } = false;
+        public bool RebaseOutputs { get; set; }
 
         /// <summary>
         /// Forces the task to stop building the remaining projects as soon as any of
         /// them fail.
         /// </summary>
-        public bool StopOnFirstFailure { get; set; } = false;
+        public bool StopOnFirstFailure { get; set; }
 
         /// <summary>
         /// When this is true, instead of calling the engine once to build all the targets (for each project),
         /// we would call the engine once per target (for each project).  The benefit of this is that
         /// if one target fails, you can still continue with the remaining targets.
         /// </summary>
-        public bool RunEachTargetSeparately { get; set; } = false;
+        public bool RunEachTargetSeparately { get; set; }
 
         /// <summary>
         /// Value of ToolsVersion to use when building projects passed to this task.
         /// </summary>
-        public string ToolsVersion { get; set; } = null;
+        public string ToolsVersion { get; set; }
 
         /// <summary>
         /// When this is true we call the engine with all the projects at once instead of 
@@ -145,7 +145,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// If true the project will be unloaded once the operation is completed
         /// </summary>
-        public bool UnloadProjectsOnCompletion { get; set; } = false;
+        public bool UnloadProjectsOnCompletion { get; set; }
 
         /// <summary>
         /// Deprecated. Does nothing.
@@ -200,7 +200,7 @@ namespace Microsoft.Build.BackEnd
         /// will be un-escaped before processing. e.g. %3B (an escaped ';') in the string for any of them will 
         /// be treated as if it were an un-escaped ';'
         /// </summary>
-        public string[] TargetAndPropertyListSeparators { get; set; } = null;
+        public string[] TargetAndPropertyListSeparators { get; set; }
 
         /// <summary>
         /// If set, MSBuild will skip the targets specified in this build request if they are not defined in the

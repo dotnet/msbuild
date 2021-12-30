@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests.Construction
     {
         private readonly ITestOutputHelper output;
 
-        private string _originalVisualStudioVersion = null;
+        private string _originalVisualStudioVersion;
 
         private static readonly BuildEventContext _buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 

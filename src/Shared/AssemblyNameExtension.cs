@@ -57,9 +57,9 @@ namespace Microsoft.Build.Shared
     [Serializable]
     internal sealed class AssemblyNameExtension : ISerializable, IEquatable<AssemblyNameExtension>, ITranslatable
     {
-        private AssemblyName asAssemblyName = null;
-        private string asString = null;
-        private bool isSimpleName = false;
+        private AssemblyName asAssemblyName;
+        private string asString;
+        private bool isSimpleName;
         private bool hasProcessorArchitectureInFusionName;
         private bool immutable;
 

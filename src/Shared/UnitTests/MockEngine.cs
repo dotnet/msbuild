@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
 
         internal int Errors { get; set; }
 
-        public bool AllowFailureWithoutError { get; set; } = false;
+        public bool AllowFailureWithoutError { get; set; }
 
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
         public BuildWarningEventArgs[] WarningEvents => _warningEvents.ToArray();

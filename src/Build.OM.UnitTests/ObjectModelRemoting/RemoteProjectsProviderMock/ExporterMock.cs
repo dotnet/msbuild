@@ -143,9 +143,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     /// </summary>
     internal class ProjectCollectionLinker : ExternalProjectsProvider
     {
-        internal static int _collecitonId = 0;
+        internal static int _collecitonId;
 
-        private bool importing = false;
+        private bool importing;
         private ExportedLinksMap exported = ExportedLinksMap.Create();
         private Dictionary<UInt32, ExternalConnection> imported = new Dictionary<UInt32, ExternalConnection>();
 
@@ -214,7 +214,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             }
         }
 
-        private static bool dbgValidateDuplicateViews = false;
+        private static bool dbgValidateDuplicateViews;
 
 
         internal  void ValidateNoDuplicates()

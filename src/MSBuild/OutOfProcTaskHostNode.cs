@@ -267,7 +267,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = false;
+        public bool AllowFailureWithoutError { get; set; }
         #endregion
 
         #region IBuildEngine8 Implementation

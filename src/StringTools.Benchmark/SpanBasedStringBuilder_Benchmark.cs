@@ -20,7 +20,7 @@ namespace Microsoft.NET.StringTools.Benchmark
         private static SpanBasedStringBuilder _pooledSpanBasedStringBuilder = new SpanBasedStringBuilder();
         private static StringBuilder _pooledStringBuilder = new StringBuilder();
 
-        private static int _uniqueStringCounter = 0;
+        private static int _uniqueStringCounter;
 
         [GlobalSetup]
         public void GlobalSetup()

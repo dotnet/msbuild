@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
         /// default targets, use the <see cref="MSBuild"/> task and pass in Projects=$(MSBuildProjectFile).
         /// </summary>
         /// <value>Array of target names.</value>
-        public string[] Targets { get; set; } = null;
+        public string[] Targets { get; set; }
 
         /// <summary>
         /// Outputs of the targets built in each project.
@@ -48,12 +48,12 @@ namespace Microsoft.Build.BackEnd
         /// we would call the engine once per target (for each project).  The benefit of this is that
         /// if one target fails, you can still continue with the remaining targets.
         /// </summary>
-        public bool RunEachTargetSeparately { get; set; } = false;
+        public bool RunEachTargetSeparately { get; set; }
 
         /// <summary>
         /// Deprecated. Does nothing.
         /// </summary>
-        public bool UseResultsCache { get; set; } = false;
+        public bool UseResultsCache { get; set; }
 
         #endregion
 

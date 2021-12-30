@@ -21,7 +21,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// What node is this logging service being created on.
         /// </summary>
-        private int _nodeId = 0;
+        private int _nodeId;
         #endregion
 
         #region Constructor

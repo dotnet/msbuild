@@ -145,7 +145,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// What is the Id for the next logger registered with the logging service.
         /// This Id is unique for this instance of the loggingService.
         /// </summary>
-        private int _nextSinkId = 0;
+        private int _nextSinkId;
 
         /// <summary>
         /// The number of nodes in the system. Loggers may take different action depending on how many nodes are in the system.
@@ -185,7 +185,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// What node is this logging service running on
         /// </summary>
-        private int _nodeId = 0;
+        private int _nodeId;
 
         /// <summary>
         /// Whether to include evaluation metaprojects in events.
@@ -477,7 +477,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get;
             set;
-        } = null;
+        }
 
         /// <summary>
         /// A list of warnings to treat as low importance messages.
@@ -486,7 +486,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get;
             set;
-        } = null;
+        }
 
         /// <summary>
         /// Should evaluation events include generated metaprojects?

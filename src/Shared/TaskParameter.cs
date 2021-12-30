@@ -502,17 +502,17 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// The item spec 
             /// </summary>
-            private string _escapedItemSpec = null;
+            private string _escapedItemSpec;
 
             /// <summary>
             /// The full path to the project that originally defined this item.
             /// </summary>
-            private string _escapedDefiningProject = null;
+            private string _escapedDefiningProject;
 
             /// <summary>
             /// The custom metadata
             /// </summary>
-            private Dictionary<string, string> _customEscapedMetadata = null;
+            private Dictionary<string, string> _customEscapedMetadata;
 
             /// <summary>
             /// Cache for fullpath metadata

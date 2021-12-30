@@ -41,7 +41,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The directory where MSBuild stores cache information used during the build.
         /// </summary>
-        internal static string cacheDirectory = null;
+        internal static string cacheDirectory;
 
         /// <summary>
         /// FOR UNIT TESTS ONLY

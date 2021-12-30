@@ -73,12 +73,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The set of parameters / values from the task after it finishes execution. 
         /// </summary>
-        private Dictionary<string, TaskParameter> _taskOutputParameters = null;
+        private Dictionary<string, TaskParameter> _taskOutputParameters;
 
         /// <summary>
         /// The process environment at the end of task execution.
         /// </summary>
-        private Dictionary<string, string> _buildProcessEnvironment = null;
+        private Dictionary<string, string> _buildProcessEnvironment;
 
         /// <summary>
         /// Constructor

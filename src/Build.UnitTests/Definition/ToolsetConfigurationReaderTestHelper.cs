@@ -16,8 +16,8 @@ namespace Microsoft.Build.UnitTests
     internal class ToolsetConfigurationReaderTestHelper
     {
         private static ExeConfigurationFileMap s_configFile;
-        private static string s_testFolderFullPath = null;
-        private static Exception s_exceptionToThrow = null;
+        private static string s_testFolderFullPath;
+        private static Exception s_exceptionToThrow;
 
         internal static string WriteConfigFile(string content)
         {

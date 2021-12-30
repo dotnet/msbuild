@@ -327,7 +327,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Indicates whether to emit a default error if a task returns false without logging an error.
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = false;
+        public bool AllowFailureWithoutError { get; set; }
 
         /// <summary>
         /// Gets the environment variables which were set when this build was created.
@@ -780,7 +780,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Determines whether MSBuild will save the results of builds after EndBuild to speed up future builds.
         /// </summary>
-        public bool DiscardBuildResults { get; set; } = false;
+        public bool DiscardBuildResults { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the build process should run as low priority.

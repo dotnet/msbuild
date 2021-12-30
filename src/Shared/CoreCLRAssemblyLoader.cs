@@ -22,7 +22,7 @@ namespace Microsoft.Build.Shared
         private readonly HashSet<string> _dependencyPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly object _guard = new object();
 
-        private bool _resolvingHandlerHookedUp = false;
+        private bool _resolvingHandlerHookedUp;
 
         private static readonly Version _currentAssemblyVersion = new Version(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion);
 

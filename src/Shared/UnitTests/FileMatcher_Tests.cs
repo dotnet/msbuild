@@ -1965,17 +1965,17 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Number of times a file from set 1 was requested.
             /// </summary>
-            private int _fileSet1Hits = 0;
+            private int _fileSet1Hits;
 
             /// <summary>
             /// Number of times a file from set 2 was requested.
             /// </summary>
-            private int _fileSet2Hits = 0;
+            private int _fileSet2Hits;
 
             /// <summary>
             /// Number of times a file from set 3 was requested.
             /// </summary>
-            private int _fileSet3Hits = 0;
+            private int _fileSet3Hits;
 
             /// <summary>
             /// Construct.

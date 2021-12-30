@@ -12,43 +12,43 @@ namespace Microsoft.Build.UnitTests
 {
     internal class MockTaskBase
     {
-        private bool _myBoolParam = false;
-        private bool[] _myBoolArrayParam = null;
-        private int _myIntParam = 0;
-        private int[] _myIntArrayParam = null;
-        private string _myStringParam = null;
-        private string[] _myStringArrayParam = null;
-        private ITaskItem _myITaskItemParam = null;
-        private ITaskItem[] _myITaskItemArrayParam = null;
+        private bool _myBoolParam;
+        private bool[] _myBoolArrayParam;
+        private int _myIntParam;
+        private int[] _myIntArrayParam;
+        private string _myStringParam;
+        private string[] _myStringArrayParam;
+        private ITaskItem _myITaskItemParam;
+        private ITaskItem[] _myITaskItemArrayParam;
 
-        private bool _myRequiredBoolParam = false;
-        private bool[] _myRequiredBoolArrayParam = null;
-        private int _myRequiredIntParam = 0;
-        private int[] _myRequiredIntArrayParam = null;
-        private string _myRequiredStringParam = null;
-        private string[] _myRequiredStringArrayParam = null;
-        private ITaskItem _myRequiredITaskItemParam = null;
-        private ITaskItem[] _myRequiredITaskItemArrayParam = null;
+        private bool _myRequiredBoolParam;
+        private bool[] _myRequiredBoolArrayParam;
+        private int _myRequiredIntParam;
+        private int[] _myRequiredIntArrayParam;
+        private string _myRequiredStringParam;
+        private string[] _myRequiredStringArrayParam;
+        private ITaskItem _myRequiredITaskItemParam;
+        private ITaskItem[] _myRequiredITaskItemArrayParam;
 
-        internal bool myBoolParamWasSet = false;
-        internal bool myBoolArrayParamWasSet = false;
-        internal bool myIntParamWasSet = false;
-        internal bool myIntArrayParamWasSet = false;
-        internal bool myStringParamWasSet = false;
-        internal bool myStringArrayParamWasSet = false;
-        internal bool myITaskItemParamWasSet = false;
-        internal bool myITaskItemArrayParamWasSet = false;
+        internal bool myBoolParamWasSet;
+        internal bool myBoolArrayParamWasSet;
+        internal bool myIntParamWasSet;
+        internal bool myIntArrayParamWasSet;
+        internal bool myStringParamWasSet;
+        internal bool myStringArrayParamWasSet;
+        internal bool myITaskItemParamWasSet;
+        internal bool myITaskItemArrayParamWasSet;
 
         // disable csharp compiler warning #0414: field assigned unused value
 #pragma warning disable 0414
-        internal bool myRequiredBoolParamWasSet = false;
-        internal bool myRequiredBoolArrayParamWasSet = false;
-        internal bool myRequiredIntParamWasSet = false;
-        internal bool myRequiredIntArrayParamWasSet = false;
-        internal bool myRequiredStringParamWasSet = false;
-        internal bool myRequiredStringArrayParamWasSet = false;
-        internal bool myRequiredITaskItemParamWasSet = false;
-        internal bool myRequiredITaskItemArrayParamWasSet = false;
+        internal bool myRequiredBoolParamWasSet;
+        internal bool myRequiredBoolArrayParamWasSet;
+        internal bool myRequiredIntParamWasSet;
+        internal bool myRequiredIntArrayParamWasSet;
+        internal bool myRequiredStringParamWasSet;
+        internal bool myRequiredStringArrayParamWasSet;
+        internal bool myRequiredITaskItemParamWasSet;
+        internal bool myRequiredITaskItemArrayParamWasSet;
 #pragma warning restore 0414
 
         /// <summary>
@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     sealed internal class MockTask : MockTaskBase, ITask
     {
-        private IBuildEngine _e = null;
+        private IBuildEngine _e;
 
         /// <summary>
         /// Task constructor.

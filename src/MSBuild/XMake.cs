@@ -2037,7 +2037,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Whether switches from the auto-response file are being used.
         /// </summary>
-        internal static bool usingSwitchesFromAutoResponseFile = false;
+        internal static bool usingSwitchesFromAutoResponseFile;
 
         /// <summary>
         /// Parses the auto-response file (assumes the "/noautoresponse" switch is not specified on the command line), and combines the

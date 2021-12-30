@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
         /// Base instance of a BuildEventArgs some default data, this is used during the tests
         /// to verify the equals operators.
         /// </summary>
-        private static GenericBuildEventArgs s_baseGenericEvent = null;
+        private static GenericBuildEventArgs s_baseGenericEvent;
 
         /// <summary>
         /// Setup the test, this method is run ONCE for the entire test fixture

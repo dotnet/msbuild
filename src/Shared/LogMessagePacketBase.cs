@@ -187,7 +187,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Delegate for translating targetfinished events. 
         /// </summary>
-        private TargetFinishedTranslator _targetFinishedTranslator = null;
+        private TargetFinishedTranslator _targetFinishedTranslator;
 
         #region Data
 

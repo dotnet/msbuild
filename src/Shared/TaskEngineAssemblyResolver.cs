@@ -157,11 +157,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
 
         // we have to store the event handler instance in case we have to remove it
-        private ResolveEventHandler _eventHandler = null;
+        private ResolveEventHandler _eventHandler;
 #else
-        private Func<AssemblyLoadContext, AssemblyName, Assembly> _eventHandler = null;
+        private Func<AssemblyLoadContext, AssemblyName, Assembly> _eventHandler;
 #endif
         // path to the task assembly, but only if it's loaded using LoadFrom. If it's loaded with Load, this is null.
-        private string _taskAssemblyFile = null;
+        private string _taskAssemblyFile;
     }
 }

@@ -9,8 +9,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     internal class LinkedObjectsMap<KeyType> : IDisposable
     {
         private static object Lock { get; } = new object();
-        private static UInt32 nextCollectionId = 0;
-        private UInt32 nextLocalId = 0;
+        private static UInt32 nextCollectionId;
+        private UInt32 nextLocalId;
 
         // internal fore debugging
         internal object GetLockForDebug => Lock;

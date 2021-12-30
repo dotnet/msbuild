@@ -41,10 +41,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal static Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader = new Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader(ReadMachineTypeFromPEHeader);
 
         // Performance checks.
-        internal static Dictionary<string, int> uniqueFileExists = null;
-        internal static Dictionary<string, int> uniqueGetAssemblyName = null;
+        internal static Dictionary<string, int> uniqueFileExists;
+        internal static Dictionary<string, int> uniqueGetAssemblyName;
 
-        internal static bool useFrameworkFileExists = false;
+        internal static bool useFrameworkFileExists;
         internal const string REDISTLIST = @"<FileList  Redist=""Microsoft-Windows-CLRCoreComp.4.0"" Name="".NET Framework 4"" RuntimeVersion=""4.0"" ToolsVersion=""12.0"">
   <File AssemblyName=""Accessibility"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""CustomMarshalers"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />

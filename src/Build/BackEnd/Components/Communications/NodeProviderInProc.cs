@@ -27,7 +27,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag indicating we have disposed.
         /// </summary>
-        private bool _disposed = false;
+        private bool _disposed;
 
         /// <summary>
         /// Value used to ensure multiple in-proc nodes which save the operating environment are not created.
@@ -72,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Check to allow the inproc node to have exclusive ownership of the operating environment
         /// </summary>
-        private bool _exclusiveOperatingEnvironment = false;
+        private bool _exclusiveOperatingEnvironment;
 
         #endregion
 
