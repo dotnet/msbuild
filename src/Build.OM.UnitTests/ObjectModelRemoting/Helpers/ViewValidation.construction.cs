@@ -265,7 +265,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return LinkedObjectsFactory.GetLink(obj) != null;
         }
 
-        private static bool dbgIgnoreLinked;
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        private static bool dbgIgnoreLinked = false;
+#pragma warning restore CA1805 // Do not initialize unnecessarily
         public static void VerifyNotLinked(object obj)
         {
             if (dbgIgnoreLinked) return;

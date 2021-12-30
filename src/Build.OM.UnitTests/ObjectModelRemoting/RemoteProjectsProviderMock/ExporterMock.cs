@@ -1,5 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
@@ -214,10 +213,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             }
         }
 
-        private static bool dbgValidateDuplicateViews;
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        private static bool dbgValidateDuplicateViews = false;
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
-
-        internal  void ValidateNoDuplicates()
+        internal void ValidateNoDuplicates()
         {
             foreach (var r in imported)
             {
