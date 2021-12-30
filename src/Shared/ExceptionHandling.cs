@@ -371,7 +371,7 @@ namespace Microsoft.Build.Shared
                 {
                     builder.Append(Environment.NewLine);
                     builder.Append(file);
-                    builder.Append(":");
+                    builder.Append(':');
                     builder.Append(Environment.NewLine);
                     builder.Append(File.ReadAllText(file));
                     builder.Append(Environment.NewLine);

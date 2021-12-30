@@ -3616,7 +3616,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             if (tagName != null)
             {
-                txt.Append("[");
+                txt.Append('[');
                 txt.Append(tagName);
                 txt.Append("]\xd\xa");
             }
