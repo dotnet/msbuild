@@ -384,8 +384,8 @@ After:
         {
             public ITaskHost TaskHost { get; }
             public string MonikerName { get; }
-            public bool IsTaskHost { get; } = false;
-            public bool IsMoniker { get; } = false;
+            public bool IsTaskHost { get; }
+            public bool IsMoniker { get; }
             public MonikerNameOrITaskHost(ITaskHost taskHost)
             {
                 TaskHost = taskHost;

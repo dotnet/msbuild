@@ -94,13 +94,13 @@ namespace Microsoft.Build.BackEnd
         /// The number of inproc nodes that can be created without hitting the
         /// node limit.
         /// </summary>
-        private int _currentInProcNodeCount = 0;
+        private int _currentInProcNodeCount;
 
         /// <summary>
         /// The number of out-of-proc nodes that can be created without hitting the
         /// node limit.
         /// </summary>
-        private int _currentOutOfProcNodeCount = 0;
+        private int _currentOutOfProcNodeCount;
 
         /// <summary>
         /// The collection of all requests currently known to the system.
@@ -170,7 +170,7 @@ namespace Microsoft.Build.BackEnd
 
         private NodeLoggingContext _inprocNodeContext;
 
-        private int _loggedWarningsForProxyBuildsOnOutOfProcNodes = 0;
+        private int _loggedWarningsForProxyBuildsOnOutOfProcNodes;
 
         /// <summary>
         /// Constructor.

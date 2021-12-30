@@ -686,7 +686,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = false;
+        public bool AllowFailureWithoutError { get; set; }
 
         #endregion
 
@@ -756,12 +756,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Additional cores granted to the task by the scheduler. Does not include the one implicit core automatically granted to all tasks.
         /// </summary>
-        private int _additionalAcquiredCores = 0;
+        private int _additionalAcquiredCores;
 
         /// <summary>
         /// True if the one implicit core has been allocated by <see cref="RequestCores"/>, false otherwise.
         /// </summary>
-        private bool _isImplicitCoreUsed = false;
+        private bool _isImplicitCoreUsed;
 
         /// <summary>
         /// Total number of cores granted to the task, including the one implicit core.

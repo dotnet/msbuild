@@ -25,7 +25,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// A section of a toolset configuration
         /// </summary>
-        private ToolsetConfigurationSection _configurationSection = null;
+        private ToolsetConfigurationSection _configurationSection;
 
         /// <summary>
         /// Delegate used to read application configurations
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Flag indicating that an attempt has been made to read the configuration
         /// </summary>
-        private bool _configurationReadAttempted = false;
+        private bool _configurationReadAttempted;
 
         /// <summary>
         /// Character used to separate search paths specified for MSBuildExtensionsPath* in

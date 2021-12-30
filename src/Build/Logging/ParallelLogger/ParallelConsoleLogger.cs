@@ -1769,7 +1769,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private BuildEventContext _lastDisplayedBuildEventContext;
         private int _bufferWidth = -1;
         private readonly object _lockObject = new Object();
-        private int _prefixWidth = 0;
+        private int _prefixWidth;
         private ProjectFullKey _lastProjectFullKey = new ProjectFullKey(-1, -1);
         private bool _alignMessages;
         private bool _forceNoAlign;

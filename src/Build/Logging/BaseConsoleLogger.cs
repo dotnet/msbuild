@@ -75,14 +75,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// and warnings summary at the end of a build.
         /// </summary>
         /// <value>null</value>
-        public string Parameters { get; set; } = null;
+        public string Parameters { get; set; }
 
         /// <summary>
         /// Suppresses the display of project headers. Project headers are
         /// displayed by default unless this property is set.
         /// </summary>
         /// <remarks>This is only needed by the IDE logger.</remarks>
-        internal bool SkipProjectStartedText { get; set; } = false;
+        internal bool SkipProjectStartedText { get; set; }
 
         /// <summary>
         /// Suppresses the display of error and warnings summary.
@@ -1148,12 +1148,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Delegate used to change text color.
         /// </summary>
-        internal ColorSetter setColor = null;
+        internal ColorSetter setColor;
 
         /// <summary>
         /// Delegate used to reset text color
         /// </summary>
-        internal ColorResetter resetColor = null;
+        internal ColorResetter resetColor;
 
         /// <summary>
         /// Number of spaces that each level of indentation is worth
@@ -1163,7 +1163,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Keeps track of the current indentation level.
         /// </summary>
-        internal int currentIndentLevel = 0;
+        internal int currentIndentLevel;
 
         /// <summary>
         /// The kinds of newline breaks we expect.
@@ -1190,7 +1190,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// When true, accumulate performance numbers.
         /// </summary>
-        internal bool showPerfSummary = false;
+        internal bool showPerfSummary;
 
         /// <summary>
         /// When true, show the list of item and property values at the start of each project
@@ -1200,7 +1200,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Should the target output items be displayed
         /// </summary>
-        internal bool showTargetOutputs = false;
+        internal bool showTargetOutputs;
 
         /// <summary>
         /// When true, suppresses all messages except for warnings. (And possibly errors, if showOnlyErrors is true.)
@@ -1220,23 +1220,23 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// When true, indicates that the logger should tack the project file onto the end of errors and warnings.
         /// </summary>
-        protected bool showProjectFile = false;
+        protected bool showProjectFile;
 
         internal bool ignoreLoggerErrors = true;
 
-        internal bool runningWithCharacterFileType = false;
+        internal bool runningWithCharacterFileType;
 
         #region Per-build Members
 
         /// <summary>
         /// Number of errors encountered in this build
         /// </summary>
-        internal int errorCount = 0;
+        internal int errorCount;
 
         /// <summary>
         /// Number of warnings encountered in this build
         /// </summary>
-        internal int warningCount = 0;
+        internal int warningCount;
 
         /// <summary>
         /// A list of the errors that have occurred during this build.

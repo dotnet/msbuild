@@ -174,7 +174,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Delegate to check to see if a directory exists
         /// </summary>
-        private DirectoryExists _directoryExists = null;
+        private DirectoryExists _directoryExists;
 
         /// <summary>
         /// Delegate for loading Xml.  For unit testing only.

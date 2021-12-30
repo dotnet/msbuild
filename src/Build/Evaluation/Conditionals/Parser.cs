@@ -43,11 +43,11 @@ namespace Microsoft.Build.Evaluation
         private Scanner _lexer;
         private ParserOptions _options;
         private ElementLocation _elementLocation;
-        internal int errorPosition = 0; // useful for unit tests
+        internal int errorPosition; // useful for unit tests
 
         #region REMOVE_COMPAT_WARNING
 
-        private bool _warnedForExpression = false;
+        private bool _warnedForExpression;
 
         private BuildEventContext _logBuildEventContext;
         /// <summary>

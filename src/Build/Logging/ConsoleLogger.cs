@@ -50,7 +50,7 @@ namespace Microsoft.Build.Logging
         private ColorSetter _colorSet;
         private ColorResetter _colorReset;
         private string _parameters;
-        private bool _skipProjectStartedText = false;
+        private bool _skipProjectStartedText;
         private bool? _showSummary;
 
         #region Constructors

@@ -512,7 +512,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Console logger parameters.
         /// </summary>
-        private string _loggerParameters = null;
+        private string _loggerParameters;
 
         /// <summary>
         /// Console logger parameters delimiters.
@@ -572,12 +572,12 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// When true, accumulate performance numbers.
         /// </summary>
-        private bool _showPerfSummary = false;
+        private bool _showPerfSummary;
 
         /// <summary>
         /// When true the commandline message is sent
         /// </summary>
-        private bool _showCommandLine = false;
+        private bool _showCommandLine;
 
         /// <summary>
         /// Id of the node the logger is attached to

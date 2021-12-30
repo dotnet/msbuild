@@ -370,6 +370,6 @@ namespace Microsoft.Build.Exceptions
         // the F1-help keyword for the host IDE
         private string helpKeyword;
         // Has this errors been sent to the loggers?
-        private bool hasBeenLogged = false;
+        private bool hasBeenLogged;
     }
 }

@@ -20,7 +20,7 @@ namespace Microsoft.Build.Exceptions
         /// <summary>
         /// The MSBuild error code corresponding with this exception.
         /// </summary>
-        private string errorCode = null;
+        private string errorCode;
 
         /// <summary>
         /// Basic constructor.

@@ -96,12 +96,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag indicating we are in an MSBuild callback
         /// </summary>
-        private bool _inMSBuildCallback = false;
+        private bool _inMSBuildCallback;
 
         /// <summary>
         /// Flag indicating whether this request builder has been zombied by a cancellation request.
         /// </summary>
-        private bool _isZombie = false;
+        private bool _isZombie;
 
         /// <summary>
         /// Creates a new request builder.
@@ -1382,7 +1382,7 @@ namespace Microsoft.Build.BackEnd
         private sealed class DedicatedThreadsTaskScheduler : TaskScheduler
         {
             private readonly BlockingCollection<Task> _tasks = new BlockingCollection<Task>();
-            private int _availableThreads = 0;
+            private int _availableThreads;
 
             protected override void QueueTask(Task task)
             {

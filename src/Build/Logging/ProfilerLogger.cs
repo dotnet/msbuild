@@ -29,7 +29,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Aggregation of all profiled locations. Computed the first time <see cref="GetAggregatedResult"/> is called.
         /// </summary>
-        private Dictionary<EvaluationLocation, ProfiledLocation> _aggregatedLocations = null;
+        private Dictionary<EvaluationLocation, ProfiledLocation> _aggregatedLocations;
 
         /// <summary>
         /// If null, no file is saved to disk

@@ -16,9 +16,9 @@ namespace Microsoft.Build.Evaluation
         class UpdateOperation : LazyItemOperation
         {
             private readonly ImmutableList<ProjectMetadataElement> _metadata;
-            private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate = null;
-            private ItemSpecMatchesItem _matchItemSpec = null;
-            private bool? _needToExpandMetadataForEachItem = null;
+            private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate;
+            private ItemSpecMatchesItem _matchItemSpec;
+            private bool? _needToExpandMetadataForEachItem;
 
             public UpdateOperation(OperationBuilderWithMetadata builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)

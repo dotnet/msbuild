@@ -22,7 +22,7 @@ namespace Microsoft.Build.Logging
     {
         private readonly BinaryReader binaryReader;
         private readonly int fileFormatVersion;
-        private long recordNumber = 0;
+        private long recordNumber;
 
         /// <summary>
         /// A list of string records we've encountered so far. If it's a small string, it will be the string directly.
@@ -1291,7 +1291,7 @@ namespace Microsoft.Build.Logging
                 }
             }
 
-            private long totalAllocatedShortStrings = 0;
+            private long totalAllocatedShortStrings;
 
             public object Add(string text)
             {

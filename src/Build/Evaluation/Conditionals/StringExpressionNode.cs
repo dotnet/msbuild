@@ -154,7 +154,7 @@ namespace Microsoft.Build.Evaluation
             _shouldBeTreatedAsVisualStudioVersion = null;
         }
 
-        private bool? _shouldBeTreatedAsVisualStudioVersion = null;
+        private bool? _shouldBeTreatedAsVisualStudioVersion;
 
         /// <summary>
         /// Should this node be treated as an expansion of VisualStudioVersion, rather than

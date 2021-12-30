@@ -91,7 +91,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// True if currently connected to the task host; false otherwise. 
         /// </summary>
-        private bool _connectedToTaskHost = false;
+        private bool _connectedToTaskHost;
 
         /// <summary>
         /// The provider for task host nodes. 
@@ -117,7 +117,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Did the task succeed? 
         /// </summary>
-        private bool _taskExecutionSucceeded = false;
+        private bool _taskExecutionSucceeded;
 
         /// <summary>
         /// Constructor

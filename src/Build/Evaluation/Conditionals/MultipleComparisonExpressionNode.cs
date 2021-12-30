@@ -12,7 +12,7 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class MultipleComparisonNode : OperatorExpressionNode
     {
-        private bool _conditionedPropertiesUpdated = false;
+        private bool _conditionedPropertiesUpdated;
 
         /// <summary>
         /// Compare numbers

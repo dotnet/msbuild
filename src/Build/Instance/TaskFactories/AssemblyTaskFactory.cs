@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Name of the task wrapped by the task factory
         /// </summary>
-        private string _taskName = null;
+        private string _taskName;
 
         /// <summary>
         /// The loaded type (type, assembly name / file) of the task wrapped by the factory

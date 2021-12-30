@@ -34,7 +34,7 @@ namespace Microsoft.Build.Evaluation
         private readonly LoggingContext _loggingContext;
         private readonly EvaluationProfiler _evaluationProfiler;
 
-        private int _nextElementOrder = 0;
+        private int _nextElementOrder;
 
         private Dictionary<string, LazyItemList> _itemLists = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
             new Dictionary<string, LazyItemList>() :

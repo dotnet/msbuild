@@ -620,7 +620,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public DateTime LastWriteTimeWhenRead => Link != null ? RootLink.LastWriteTimeWhenRead : _lastWriteTimeWhenReadUtc.ToLocalTime();
 
-        internal DateTime? StreamTimeUtc = null;
+        internal DateTime? StreamTimeUtc;
 
         /// <summary>
         /// This does not allow conditions, so it should not be called.

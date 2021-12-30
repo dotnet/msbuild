@@ -31,10 +31,10 @@ namespace Microsoft.Build.Evaluation
         internal bool _errorState;
         private int _errorPosition;
         // What we found instead of what we were looking for
-        private string _unexpectedlyFound = null;
+        private string _unexpectedlyFound;
         private ParserOptions _options;
-        private string _errorResource = null;
-        private static string s_endOfInput = null;
+        private string _errorResource;
+        private static string s_endOfInput;
 
         /// <summary>
         /// Lazily format resource string to help avoid (in some perf critical cases) even loading
