@@ -105,7 +105,7 @@
     <Rule Id="CA1832" Action="Warning" />          <!-- Use AsSpan or AsMemory instead of Range-based indexers when appropriate --> 
     <Rule Id="CA1833" Action="Warning" />          <!-- Use AsSpan or AsMemory instead of Range-based indexers when appropriate --> 
     <Rule Id="CA1834" Action="Info" />             <!-- Consider using 'StringBuilder.Append(char)' when applicable. --> 
-    <Rule Id="CA1835" Action="Info" />             <!-- Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync' --> 
+    <Rule Id="CA1835" Action="Warning" />          <!-- Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync' --> 
     <Rule Id="CA1836" Action="Info" />             <!-- Prefer IsEmpty over Count --> 
     <Rule Id="CA1837" Action="Info" />             <!-- Use 'Environment.ProcessId' -->  
     <Rule Id="CA1838" Action="Info" />             <!-- Avoid 'StringBuilder' parameters for P/Invokes --> 

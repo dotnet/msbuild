@@ -463,7 +463,7 @@ namespace Microsoft.Build.Internal
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)
             {
-                int bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bytesToRead - totalBytesRead);
+                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead), new CancellationToken());
                 if (bytesRead == 0)
                 {
                     return totalBytesRead;
