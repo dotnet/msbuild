@@ -2284,7 +2284,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             project.RemoveItems(list);
 
-            project.Items.Count().ShouldBe(2);
+            project.Items.Count.ShouldBe(2);
         }
 
         /// <summary>
@@ -2304,7 +2304,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
 
             project.RemoveItems(project.GetItems("j").Take(2));
-            project.Items.Count().ShouldBe(3);
+            project.Items.Count.ShouldBe(3);
 
             StringWriter writer = new EncodingStringWriter();
             project.Save(writer);

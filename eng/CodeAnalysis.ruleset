@@ -99,7 +99,7 @@
     <Rule Id="CA1825" Action="Info" />             <!-- Avoid zero-length array allocations. --> 
     <Rule Id="CA1827" Action="Warning" />          <!-- Do not use Count() or LongCount() when Any() can be used --> 
     <Rule Id="CA1828" Action="Warning" />          <!-- Do not use CountAsync() or LongCountAsync() when AnyAsync() can be used --> 
-    <Rule Id="CA1829" Action="Info" />             <!-- Use Length/Count property instead of Count() when available --> 
+    <Rule Id="CA1829" Action="Warning" />          <!-- Use Length/Count property instead of Count() when available --> 
     <Rule Id="CA1830" Action="Warning" />          <!-- Prefer strongly-typed Append and Insert method overloads on StringBuilder. --> 
     <Rule Id="CA1831" Action="Warning" />          <!-- Use AsSpan or AsMemory instead of Range-based indexers when appropriate --> 
     <Rule Id="CA1832" Action="Warning" />          <!-- Use AsSpan or AsMemory instead of Range-based indexers when appropriate --> 

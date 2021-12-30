@@ -406,7 +406,7 @@ namespace Microsoft.Build.CommandLine
             foreach (PropertyInfo value in finalPropertyValues)
             {
                 // only record outputs
-                if (value.GetCustomAttributes(typeof(OutputAttribute), true).Count() > 0)
+                if (value.GetCustomAttributes(typeof(OutputAttribute), true).Length > 0)
                 {
                     try
                     {

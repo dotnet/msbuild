@@ -1886,7 +1886,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-                Assert.Equal(6, project.AllEvaluatedItems.Count());
+                Assert.Equal(6, project.AllEvaluatedItems.Count);
                 Assert.Equal("i1", project.AllEvaluatedItems.ElementAt(0).EvaluatedInclude);
                 Assert.Equal(String.Empty, project.AllEvaluatedItems.ElementAt(0).GetMetadataValue("m"));
                 Assert.Equal("j1", project.AllEvaluatedItems.ElementAt(1).EvaluatedInclude);
@@ -1902,12 +1902,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 project.AddItem("i", "i7");
                 project.RemoveItem(project.AllEvaluatedItems.ElementAt(1));
 
-                Assert.Equal(6, project.AllEvaluatedItems.Count());
+                Assert.Equal(6, project.AllEvaluatedItems.Count);
 
                 project.MarkDirty();
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal(7, project.AllEvaluatedItems.Count());
+                Assert.Equal(7, project.AllEvaluatedItems.Count);
             }
             finally
             {
@@ -2002,15 +2002,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            int initial = project.AllEvaluatedProperties.Count();
+            int initial = project.AllEvaluatedProperties.Count;
 
             project.SetProperty("p", "1");
 
-            Assert.Equal(initial, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial, project.AllEvaluatedProperties.Count);
 
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(initial + 1, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial + 1, project.AllEvaluatedProperties.Count);
         }
 
         /// <summary>
@@ -2038,13 +2038,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count);
 
             Assert.Equal("2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(1).EvaluatedValue);
             Assert.Equal("1;2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(3).EvaluatedValue);
 
             // Verify lists are cleared on reevaluation
-            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count);
         }
 
         /// <summary>
