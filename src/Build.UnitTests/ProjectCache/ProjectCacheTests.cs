@@ -306,7 +306,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 if (_projectQuerySleepTime is not null)
                 {
-                    await Task.Delay(_projectQuerySleepTime.Value);
+                    await Task.Delay(_projectQuerySleepTime.Value, cancellationToken);
                 }
 
                 QueryStartStops.Enqueue(queryId);
