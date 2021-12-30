@@ -69,8 +69,8 @@ namespace Microsoft.Build.Evaluation
         /// If this number is increased much higher, the datastructure may
         /// need to be changed from a linked list, since it's currently O(n).
         /// </remarks>
-        private static readonly int s_maximumStrongCacheSize = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDPROJECTROOTELEMENTCACHESIZE")) ?
-            Convert.ToInt32(Environment.GetEnvironmentVariable("MSBUILDPROJECTROOTELEMENTCACHESIZE"), NumberFormatInfo.InvariantInfo)  : 200;
+        private static readonly int s_maximumStrongCacheSize =
+            Convert.ToInt32(Environment.GetEnvironmentVariable("MSBUILDPROJECTROOTELEMENTCACHESIZE") ?? "200", NumberFormatInfo.InvariantInfo);
 
         /// <summary>
         /// Whether the cache should log activity to the Debug.Out stream
