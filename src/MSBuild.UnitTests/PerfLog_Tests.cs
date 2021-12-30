@@ -24,15 +24,6 @@ namespace Microsoft.Build.UnitTests
 {
     public class PerfLogTests
     {
-#pragma warning disable CA1823 // Avoid unused private fields
-#if USE_MSBUILD_DLL_EXTN
-
-        private const string MSBuildExeName = "MSBuild.dll";
-#else
-        private const string MSBuildExeName = "MSBuild.exe";
-#endif
-#pragma warning restore CA1823 // Avoid unused private fields
-
         private readonly ITestOutputHelper _output;
 
         public PerfLogTests(ITestOutputHelper output)
