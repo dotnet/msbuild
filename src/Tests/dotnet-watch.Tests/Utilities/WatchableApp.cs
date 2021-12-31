@@ -38,6 +38,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public string SourceDirectory { get; }
 
+        public string WorkingDirectory { get; set; }
+
         public Task HasRestarted()
             => HasRestarted(DefaultMessageTimeOut);
 
@@ -76,7 +78,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var commandSpec = new DotnetCommand(_logger, args.ToArray())
             {
-                WorkingDirectory = SourceDirectory,
+                WorkingDirectory = WorkingDirectory ?? SourceDirectory,
             };
             commandSpec.WithEnvironmentVariable("DOTNET_USE_POLLING_FILE_WATCHER", "true");
             commandSpec.WithEnvironmentVariable("__DOTNET_WATCH_RUNNING_AS_TEST", "true");
