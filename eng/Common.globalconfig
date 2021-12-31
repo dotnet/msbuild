@@ -6,7 +6,7 @@ is_global = true
 
 
 # Analyzer threw an exception
-dotnet_diagnostic.AD0001.severity = suggestion
+dotnet_diagnostic.AD0001.severity = warning
 
 # Ensure minimum API surface is respected
 dotnet_diagnostic.BCL0001.severity = warning
@@ -695,7 +695,7 @@ dotnet_diagnostic.IL3000.severity = none
 dotnet_diagnostic.IL3001.severity = none
 
 # XML comments
-dotnet_diagnostic.SA0001.severity = suggestion
+dotnet_diagnostic.SA0001.severity = warning
 
 dotnet_diagnostic.SA1000.severity = none
 
