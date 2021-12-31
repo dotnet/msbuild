@@ -6,7 +6,7 @@ is_global = true
 
 
 # Analyzer threw an exception
-dotnet_diagnostic.AD0001.severity = warning
+dotnet_diagnostic.AD0001.severity = suggestion
 
 # Ensure minimum API surface is respected
 dotnet_diagnostic.BCL0001.severity = warning
@@ -282,7 +282,7 @@ dotnet_diagnostic.CA1824.severity = warning
 dotnet_diagnostic.CA1825.severity = suggestion
 
 # Do not use Count() or LongCount() when Any() can be used
-dotnet_diagnostic.CA1827.severity = warning
+dotnet_diagnostic.CA1827.severity = suggestion
 
 # Do not use CountAsync() or LongCountAsync() when AnyAsync() can be used
 dotnet_diagnostic.CA1828.severity = warning
@@ -533,19 +533,19 @@ dotnet_diagnostic.CA3012.severity = none
 dotnet_diagnostic.CA3061.severity = warning
 
 # Insecure DTD processing in XML
-dotnet_diagnostic.CA3075.severity = warning
+dotnet_diagnostic.CA3075.severity = suggestion
 
 # Insecure XSLT script processing.
-dotnet_diagnostic.CA3076.severity = warning
+dotnet_diagnostic.CA3076.severity = suggestion
 
 # Insecure Processing in API Design, XmlDocument and XmlTextReader
-dotnet_diagnostic.CA3077.severity = warning
+dotnet_diagnostic.CA3077.severity = suggestion
 
 # Mark Verb Handlers With Validate Antiforgery Token
 dotnet_diagnostic.CA3147.severity = warning
 
 # Do Not Use Weak Cryptographic Algorithms
-dotnet_diagnostic.CA5350.severity = warning
+dotnet_diagnostic.CA5350.severity = suggestion
 
 # Do Not Use Broken Cryptographic Algorithms
 dotnet_diagnostic.CA5351.severity = warning
@@ -629,7 +629,7 @@ dotnet_diagnostic.CA5382.severity = none
 dotnet_diagnostic.CA5383.severity = none
 
 # Do Not Use Digital Signature Algorithm (DSA)
-dotnet_diagnostic.CA5384.severity = warning
+dotnet_diagnostic.CA5384.severity = suggestion
 
 # Use Rivest–Shamir–Adleman (RSA) Algorithm With Sufficient Key Size
 dotnet_diagnostic.CA5385.severity = warning
@@ -695,7 +695,7 @@ dotnet_diagnostic.IL3000.severity = none
 dotnet_diagnostic.IL3001.severity = none
 
 # XML comments
-dotnet_diagnostic.SA0001.severity = warning
+dotnet_diagnostic.SA0001.severity = suggestion
 
 dotnet_diagnostic.SA1000.severity = none
 
@@ -733,10 +733,16 @@ dotnet_diagnostic.SA1012.severity = suggestion
 # Closing brace should be preceded by a space
 dotnet_diagnostic.SA1013.severity = suggestion
 
+# Opening generic brackets should not be preceded by a space
+dotnet_diagnostic.SA1014.severity = suggestion
+
 # Closing generic bracket should not be followed by a space
 dotnet_diagnostic.SA1015.severity = suggestion
 
 dotnet_diagnostic.SA1019.severity = none
+
+# Increment symbol '++' should not be preceded by a space
+dotnet_diagnostic.SA1020.severity = suggestion
 
 # Negative sign should be preceded by a space
 dotnet_diagnostic.SA1021.severity = suggestion
@@ -884,8 +890,14 @@ dotnet_diagnostic.SA1214.severity = suggestion
 # Using static directives should be placed at the correct location
 dotnet_diagnostic.SA1216.severity = suggestion
 
+# The using static directives within a C# code file are not sorted alphabetically by full type name.
+dotnet_diagnostic.SA1217.severity = suggestion
+
 # Element should begin with an uppercase letter
 dotnet_diagnostic.SA1300.severity = suggestion
+
+# Interface names should begin with I
+dotnet_diagnostic.SA1302.severity = suggestion
 
 # Const field names should begin with upper-case letter
 dotnet_diagnostic.SA1303.severity = suggestion
