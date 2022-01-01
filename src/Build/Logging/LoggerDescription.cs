@@ -10,7 +10,9 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
 
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
+#if NETCOREAPP
 using System.Linq;
+#endif
 
 namespace Microsoft.Build.Logging
 {

@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+#if FEATURE_APPDOMAIN
 using System.Threading.Tasks;
+#endif
 
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;

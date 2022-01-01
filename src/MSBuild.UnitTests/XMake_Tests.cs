@@ -2,10 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if FEATURE_CULTUREINFO_CONSOLE_FALLBACK
 using System.Globalization;
+#endif
 using System.IO;
 using System.Linq;
 using System.Threading;

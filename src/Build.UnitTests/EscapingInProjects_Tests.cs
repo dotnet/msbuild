@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+#if FEATURE_COMPILE_IN_TESTS
 using System.Reflection;
+#endif
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -13,15 +15,17 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-
-
+#if FEATURE_COMPILE_IN_TESTS
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
+#endif
 using FileUtilities = Microsoft.Build.Shared.FileUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Xunit;
 using Xunit.Abstractions;
+#if FEATURE_COMPILE_IN_TESTS
 using Microsoft.Build.Shared;
+#endif
 
 namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 {

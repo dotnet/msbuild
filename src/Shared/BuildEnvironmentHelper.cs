@@ -8,7 +8,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
