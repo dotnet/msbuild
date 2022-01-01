@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Build.Framework;
 using System.Reflection;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
