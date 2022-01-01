@@ -116,7 +116,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // If sha1 buffer is empty and bytes number is big enough there is no need to copy bytes to sha1 buffer.
                     // Pass the bytes to TransformBlock right away.
-                    sha1.TransformBlock(bytesBuffer, 0, sha1BufferSize, null, 0);
+                    sha1.TransformBlock(bytesBuffer, bytesProcessedNumber, sha1BufferSize, null, 0);
                 }
                 else
                 {
