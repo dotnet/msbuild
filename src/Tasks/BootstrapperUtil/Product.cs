@@ -12,7 +12,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal enum CopyAllFilesType
     {
-        CopyAllFilesFalse, CopyAllFilesTrue, CopyAllFilesIfNotHomeSite
+        CopyAllFilesFalse,
+        CopyAllFilesTrue,
+        CopyAllFilesIfNotHomeSite
     };
 
     /// <summary>
