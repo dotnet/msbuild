@@ -295,6 +295,8 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Finalizes an instance of the <see cref="BuildManager"/> class.
+        /// Finalizes an instance of the <see cref="BuildManager"/> class.
         /// Finalizer
         /// </summary>
         ~BuildManager()

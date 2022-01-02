@@ -88,6 +88,7 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         /// <summary>
+        /// Finalizes an instance of the <see cref="NodeProviderInProc"/> class.
         /// Finalizer
         /// </summary>
         ~NodeProviderInProc()

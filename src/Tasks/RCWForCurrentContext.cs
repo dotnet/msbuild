@@ -62,6 +62,7 @@ namespace Microsoft.Build.Tasks.InteropUtilities
         }
 
         /// <summary>
+        /// Finalizes an instance of the <see cref="RCWForCurrentContext{T}"/> class.
         /// Finalizer
         /// </summary>
         ~RCWForCurrentContext()
