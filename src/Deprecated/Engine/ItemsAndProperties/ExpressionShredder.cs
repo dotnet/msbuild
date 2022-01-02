@@ -391,7 +391,7 @@ namespace Microsoft.Build.BuildEngine
         }
     }
 
-    # region Related Types
+    #region Related Types
 
     /// <summary>
     /// What the shredder should be looking for.
