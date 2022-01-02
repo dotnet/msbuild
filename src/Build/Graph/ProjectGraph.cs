@@ -351,7 +351,7 @@ namespace Microsoft.Build.Graph
         ///     on <see cref="ProjectInstanceFactoryFunc" /> for other scenarios.
         /// </param>
         /// <param name="cancellationToken">
-        ///     The <see cref="T:System.Threading.CancellationToken" /> token to observe.
+        ///     The <see cref="System.Threading.CancellationToken" /> token to observe.
         /// </param>
         /// <exception cref="InvalidProjectFileException">
         ///     If the evaluation of any project in the graph fails
@@ -395,7 +395,7 @@ namespace Microsoft.Build.Graph
         ///     Number of threads to participate in building the project graph.
         /// </param>
         /// <param name="cancellationToken">
-        ///     The <see cref="T:System.Threading.CancellationToken" /> token to observe.
+        ///     The <see cref="System.Threading.CancellationToken" /> token to observe.
         /// </param>
         /// <exception cref="InvalidProjectFileException">
         ///     If the evaluation of any project in the graph fails
