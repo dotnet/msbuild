@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        ///  ProjectItemDefinitionLink remoting
+        //  ProjectItemDefinitionLink remoting
         public MockProjectLinkRemoter Project => this.OwningCollection.Export<Project, MockProjectLinkRemoter>(this.Source.Project);
         public string ItemType => this.Source.ItemType;
         public ICollection<MockProjectMetadataLinkRemoter> Metadata => this.OwningCollection.ExportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.Metadata);

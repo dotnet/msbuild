@@ -286,15 +286,21 @@ namespace Microsoft.Build.BuildEngine
         // control which projects it allows to run targets/tasks.
         private BuildEnabledSetting buildEnabled;
 
+        /// <summary>
         /// 0 means not building; >=1 means building.
-        // The refcount may be greater than 1 because the MSBuild task may call back in to
-        // cause the project to be built again.
+        /// The refcount may be greater than 1 because the MSBuild task may call back in to
+        /// cause the project to be built again.
+        /// </summary>
         private int buildingCount = 0;
 
-        // The MSBuild ToolsVersion associated with the project file
+        /// <summary>
+        /// The MSBuild ToolsVersion associated with the project file.
+        /// </summary>
         private string toolsVersion = null;
 
+        /// <summary>
         /// true if the ToolsVersion of this project was overridden; false otherwise.
+        /// </summary>
         private bool overridingToolsVersion = false;
 
         // Whether when we read ToolsVersion="4.0" or greater on the <Project> tag, we treat it as "4.0".

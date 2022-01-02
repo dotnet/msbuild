@@ -15,8 +15,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return holder.Linker.LinkFactory.Create(link);
         }
 
-
-        ///  ProjectPropertyLink remoting
+        // ProjectPropertyLink remoting
         public MockProjectLinkRemoter Project => this.OwningCollection.Export<Project, MockProjectLinkRemoter>(this.Source.Project);
         public MockProjectPropertyElementLinkRemoter Xml => (MockProjectPropertyElementLinkRemoter)this.ExportElement(this.Source.Xml);
         public string Name => this.Source.Name;

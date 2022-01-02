@@ -353,7 +353,7 @@ namespace Microsoft.Build.UnitTests
 
             AssignProjectConfiguration assignProjectConfiguration = new AssignProjectConfiguration();
 
-            /// Test defaults with nothing set
+            // Test defaults with nothing set
             string actualDefaultToVcxPlatformMapping = assignProjectConfiguration.DefaultToVcxPlatformMapping;
             Assert.Equal(actualDefaultToVcxPlatformMapping, expectedDefaultToVcxPlatformMapping);
 

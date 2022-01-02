@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 new KeyValuePair<string, string>("b", "bValue"),
             };
 
-            /// test AddItems
+            // test AddItems
             // add a new files in the view, ensure it is added correctly and also the real object will immediately reflect that add as well
             Assert.Null(pair.GetSingleItemWithVerify(ObjectType.View, "foo.cpp"));
             var fooView = pair.AddSingleItemWithVerify(ObjectType.View, "cpp", "foo.cpp");
