@@ -3594,7 +3594,9 @@ namespace Microsoft.Build.Tasks
                     {
                         String skip = sr.ReadLine();
                         if (skip.Equals("strings]"))
+                        {
                             _logger.LogWarningWithCodeFromResources(null, fileName, sr.LineNumber - 1, 1, 0, 0, "GenerateResource.ObsoleteStringsTag");
+                        }
                         else
                         {
                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.UnexpectedInfBracket", "[" + skip), fileName, sr.LineNumber - 1, 1);
@@ -3913,7 +3915,9 @@ namespace Microsoft.Build.Tasks
                         _col = 0;
                     }
                     else
+                    {
                         _col++;
+                    }
                 }
                 return r;
             }

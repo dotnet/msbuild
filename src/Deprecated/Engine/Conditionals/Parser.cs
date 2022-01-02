@@ -302,7 +302,9 @@ namespace Microsoft.Build.BuildEngine
             {
                 GenericExpressionNode child = Expr(expression);
                 if (Same(expression, Token.TokenType.RightParenthesis))
+                {
                     return child;
+                }
                 else
                 {
                     errorPosition = lexer.GetErrorPosition();
@@ -393,7 +395,9 @@ namespace Microsoft.Build.BuildEngine
                 return true;
             }
             else
+            {
                 return false;
+            }
         }
     }
 }
