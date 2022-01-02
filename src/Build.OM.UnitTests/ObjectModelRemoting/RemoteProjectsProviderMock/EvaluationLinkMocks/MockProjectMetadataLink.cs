@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        ///  ProjectMetadataLink remoting
+        /// ProjectMetadataLink remoting
         public object Parent
         {
             get

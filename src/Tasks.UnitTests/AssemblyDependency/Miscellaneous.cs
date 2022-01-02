@@ -7101,7 +7101,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify setting certain combinations of Profile parameters will case an error to be logged and rar to fail execution.
         ///
         /// Test the case where the profile name is not set and ProfileFullFrameworkFolders is set.
-        ///</summary>
+        /// </summary>
         [Fact]
         public void TestProfileParameterCombinations()
         {
@@ -7116,7 +7116,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when the frameworkdirectory metadata is not set on the ProfileFullFrameworkAssemblyTables that an
         /// error is logged and rar fails.
-        ///</summary>
+        /// </summary>
         [Fact]
         public void TestFrameworkDirectoryMetadata()
         {
@@ -7177,7 +7177,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        ///Initialize the black list and use it to remove references from the reference table
+        /// Initialize the black list and use it to remove references from the reference table
         /// </summary>
         private void InitializeExclusionList(ReferenceTable referenceTable, AssemblyNameExtension[] assembliesForBlackList, out Dictionary<string, string> blackList)
         {
@@ -7742,12 +7742,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Consider this dependency chain:
         ///
         /// App
-        ///   References - A
-        ///        Depends on B
-        ///        Will be found by hintpath.
-        ///   References -B
-        ///        No hintpath
-        ///        Exists in A.dll's folder.
+        /// References - A
+        /// Depends on B
+        /// Will be found by hintpath.
+        /// References -B
+        /// No hintpath
+        /// Exists in A.dll's folder.
         ///
         /// B.dll should be unresolved even though its in A's folder because primary resolution needs to work
         /// without looking at dependencies because of the load-time perf scenarios don't look at dependencies.

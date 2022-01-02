@@ -256,16 +256,16 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        ///  <summary>
+        /// <summary>
         ///  Parses and validates the body of the &lt;UsingTask /&gt;.
         ///  </summary>
-        ///  <param name="log">A <see cref="TaskLoggingHelper"/> used to log events during parsing.</param>
-        ///  <param name="taskName">The name of the task.</param>
-        ///  <param name="taskBody">The raw inner XML string of the &lt;UsingTask />&gt; to parse and validate.</param>
+        /// <param name="log">A <see cref="TaskLoggingHelper"/> used to log events during parsing.</param>
+        /// <param name="taskName">The name of the task.</param>
+        /// <param name="taskBody">The raw inner XML string of the &lt;UsingTask />&gt; to parse and validate.</param>
         /// <param name="parameters">An <see cref="ICollection{TaskPropertyInfo}"/> containing parameters for the task.</param>
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object that receives the details of the parsed task.</param>
         /// <returns><code>true</code> if the task body was successfully parsed, otherwise <code>false</code>.</returns>
-        ///  <remarks>
+        /// <remarks>
         ///  The <paramref name="taskBody"/> will look like this:
         ///  <![CDATA[
         ///

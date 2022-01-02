@@ -30,7 +30,7 @@ namespace Microsoft.Build.Framework
         ///     the SDK could not be resolved.  Return <code>null</code> if the resolver is not
         ///     applicable for a particular <see cref="SdkReference"/>.
         ///  </returns>   
-        ///  <remarks>
+        /// <remarks>
         ///    Note: You must use <see cref="Microsoft.Build.Framework.SdkResultFactory"/> to return a result.
         ///  </remarks>
         /// 

@@ -10,7 +10,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    ///There is no search path element because the only way to get this resolver is by having the SDKName metadata on the reference.
+    /// There is no search path element because the only way to get this resolver is by having the SDKName metadata on the reference.
     /// </summary>
     internal class InstalledSDKResolver : Resolver
     {

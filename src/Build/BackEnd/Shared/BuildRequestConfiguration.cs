@@ -121,7 +121,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _resultsNodeId = Scheduler.InvalidNodeId;
 
-        ///<summary>
+        /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
         private Dictionary<string, string> _savedEnvironmentVariables;

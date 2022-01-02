@@ -89,7 +89,7 @@ namespace Microsoft.Build.BuildEngine
         ///  This type however does not set the type of the memory mapped section,
         ///  the memory mapped section itself is created
         ///  with READWRITE access.
-        ///</param>
+        /// </param>
         /// <param name="allowExistingMapping">
         ///  The shared memory is given a parameter to determine whether or not to
         ///  reuse an existing mapped memory secion. When the node is first created
@@ -98,7 +98,7 @@ namespace Microsoft.Build.BuildEngine
         ///  is created, at this point the there should be no shared memory with the
         ///  same name. However when we create the reader and writer threads
         ///  (which happens on node reuse) we want to reuse the memory.
-        ///</param>
+        /// </param>
         internal SharedMemory(string name, SharedMemoryType type, bool allowExistingMapping)
         {
             this.type = type;

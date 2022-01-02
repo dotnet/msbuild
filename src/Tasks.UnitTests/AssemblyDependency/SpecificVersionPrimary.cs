@@ -89,8 +89,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Primary references are never unified. This is because:
         /// (a) The user expects that a primary reference will be respected.
         /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
-        ///     dependencies anyway to make things work consistently. This would be a significant
-        ///     perf hit when loading large solutions.
+        /// dependencies anyway to make things work consistently. This would be a significant
+        /// perf hit when loading large solutions.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]

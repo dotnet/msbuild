@@ -855,27 +855,27 @@ namespace Microsoft.Build.Evaluation
         /// <example>
         ///
         /// <code>
-        ///<P>*.txt</P>
+        /// <P>*.txt</P>
         ///
-        ///<Bar Include="bar"/> (both outside and inside project cone)
-        ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
-        ///<Foo Include="*.a;*.b" Exclude="3.a"/>
-        ///<Foo Remove="2.a" />
-        ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b;**\bar\*.b"/>
-        ///<Foo Include="$(P)"/>
-        ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
-        ///<Foo Include="*.cs" Exclude="@(Bar)"/>
-        ///</code>
+        /// <Bar Include="bar"/> (both outside and inside project cone)
+        /// <Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
+        /// <Foo Include="*.a;*.b" Exclude="3.a"/>
+        /// <Foo Remove="2.a" />
+        /// <Foo Include="**\*.b" Exclude="1.b;**\obj\*.b;**\bar\*.b"/>
+        /// <Foo Include="$(P)"/>
+        /// <Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
+        /// <Foo Include="*.cs" Exclude="@(Bar)"/>
+        /// </code>
         ///
-        ///Example result:
-        ///[
-        ///GlobResult(glob: "C:\**\*.foo", exclude: []),
-        ///GlobResult(glob: ["*.a", "*.b"], exclude=["3.a"], remove=["2.a"]),
-        ///GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
-        ///GlobResult(glob: "*.txt", exclude=[]),
-        ///GlobResult(glob: "*.a", exclude=[]),
-        ///GlobResult(glob: "*.cs", exclude=["bar"])
-        ///].
+        /// Example result:
+        /// [
+        /// GlobResult(glob: "C:\**\*.foo", exclude: []),
+        /// GlobResult(glob: ["*.a", "*.b"], exclude=["3.a"], remove=["2.a"]),
+        /// GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
+        /// GlobResult(glob: "*.txt", exclude=[]),
+        /// GlobResult(glob: "*.a", exclude=[]),
+        /// GlobResult(glob: "*.cs", exclude=["bar"])
+        /// ].
         /// </example>
         /// <remarks>
         /// <see cref="GlobResult.MsBuildGlob"/> is a <see cref="IMSBuildGlob"/> that combines all globs in the include element and ignores

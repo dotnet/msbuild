@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks
     {
         #region Fields
 
-        ///<summary>
+        /// <summary>
         /// Regex for breaking up the platform moniker
         /// Example: XNA, Version=8.0
         /// </summary>

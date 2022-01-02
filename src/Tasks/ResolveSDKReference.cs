@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
     {
         #region fields
 
-        ///<summary>
+        /// <summary>
         /// Regex for breaking up the sdk reference include into pieces.
         /// Example: XNA, Version=8.0
         /// </summary>
