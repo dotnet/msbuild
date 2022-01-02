@@ -60,7 +60,7 @@ namespace Microsoft.Build.BuildEngine
             nodeProviderToRegister.AssignNodeIdentifiers(nodeIds);
 
             // Go through all of the nodes as described by nodeDescriptions and add them to out list of nodes
-            for(int i=0; i < nodeDescriptions.Length;i++)
+            for(int i=0; i < nodeDescriptions.Length; i++)
             {
                 ProvidersNodeInformation nodeToAddFromProvider = 
                     new ProvidersNodeInformation(i, nodeIds[i], nodeDescriptions[i], nodeProviderToRegister);

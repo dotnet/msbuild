@@ -58,7 +58,7 @@ namespace Microsoft.Build.BuildEngine
                 string[] leftValuePieces = leftValue.Split(new char[]{'|'});
 
                 // Loop through each of the pieces.
-                for (int i = 0 ; i < leftValuePieces.Length ; i++)
+                for (int i = 0; i < leftValuePieces.Length; i++)
                 {
                     Match singlePropertyMatch = singlePropertyRegex.Match(leftValuePieces[i]);
 

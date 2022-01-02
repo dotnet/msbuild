@@ -138,8 +138,8 @@ namespace Microsoft.Build.BuildEngine
         }
 #endregion
 #region Pass-through Hashtable methods.
-        public bool Contains(Object key) {return ReadOperation.Contains(key);}
-        public void Add(Object key, Object value) {WriteOperation.Add(key, value);}
+        public bool Contains(Object key) {return ReadOperation.Contains(key); }
+        public void Add(Object key, Object value) {WriteOperation.Add(key, value); }
         public void Clear() 
         {
             lock (sharedLock)
@@ -152,17 +152,17 @@ namespace Microsoft.Build.BuildEngine
         }
 
         IEnumerator IEnumerable.GetEnumerator() { return ((IEnumerable)ReadOperation).GetEnumerator(); }
-        public IDictionaryEnumerator GetEnumerator() {return ReadOperation.GetEnumerator();}
-        public void Remove(Object key) {WriteOperation.Remove(key);}        
+        public IDictionaryEnumerator GetEnumerator() {return ReadOperation.GetEnumerator(); }
+        public void Remove(Object key) {WriteOperation.Remove(key); }        
         public bool IsFixedSize { get { return ReadOperation.IsFixedSize; }}
-        public bool IsReadOnly {get {return ReadOperation.IsFixedSize;}}
-        public ICollection Keys {get {return ReadOperation.Keys;}}
-        public ICollection Values {get {return ReadOperation.Values;}}
+        public bool IsReadOnly {get {return ReadOperation.IsFixedSize; }}
+        public ICollection Keys {get {return ReadOperation.Keys; }}
+        public ICollection Values {get {return ReadOperation.Values; }}
         public void CopyTo(Array array, int arrayIndex) { ReadOperation.CopyTo(array, arrayIndex); }
         public int Count{get { return ReadOperation.Count; }}
         public bool IsSynchronized {get { return ReadOperation.IsSynchronized; }}
         public Object SyncRoot {get { return ReadOperation.SyncRoot; }}
-        public bool ContainsKey(Object key)    {return ReadOperation.Contains(key);}
+        public bool ContainsKey(Object key)    {return ReadOperation.Contains(key); }
         
         public Object this[Object key] 
         {

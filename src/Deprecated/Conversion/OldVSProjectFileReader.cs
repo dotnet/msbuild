@@ -456,7 +456,7 @@ namespace Microsoft.Build.Conversion
                     // should only get executed in fairly rare circumstances.  It's not very 
                     // common for people to have these embedded into their project files.
                     bool foundEntity = false;
-                    for (int i = 0 ; i < entities.Length ; i++)
+                    for (int i = 0; i < entities.Length; i++)
                     {
                         // Case-sensitive comparison to see if the entity name matches any of
                         // the well-known ones that were emitted by the XML writer in the VS.NET

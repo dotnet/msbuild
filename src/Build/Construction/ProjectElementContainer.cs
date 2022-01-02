@@ -95,7 +95,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Number of children of any kind
         /// </summary>
-        public int Count { get => Link != null ? ContainerLink.Count : _count ; private set => _count = value; }
+        public int Count { get => Link != null ? ContainerLink.Count : _count; private set => _count = value; }
 
         /// <summary>
         /// First child, if any, otherwise null.

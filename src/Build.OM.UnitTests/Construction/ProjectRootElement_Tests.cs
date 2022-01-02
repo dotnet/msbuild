@@ -1718,7 +1718,7 @@ true, true, true)]
             AssertProjectFileAfterReload(
                 true,
                 false,
-                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile);});
+                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile); });
         }
 
         [Fact]

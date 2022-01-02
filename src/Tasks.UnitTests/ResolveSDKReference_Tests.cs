@@ -405,7 +405,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             reference4.DependsOnSDK = "NotThere, Version=1.0";
             references.Add(reference4);
 
-            ResolveSDKReference.VerifySDKDependsOn(log, references);//, new Version(8, 1), "Windows", null);
+            ResolveSDKReference.VerifySDKDependsOn(log, references); //, new Version(8, 1), "Windows", null);
             Assert.Equal(4, engine.Warnings);
             Assert.Equal(0, engine.Errors);
 
