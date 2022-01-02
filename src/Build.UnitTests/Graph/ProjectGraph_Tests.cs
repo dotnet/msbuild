@@ -82,6 +82,17 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Fact]
+        public void CycleInGraphDoesNotThrowStackOverflowException()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProjectFile(env, 1, new[] { 2 });
+                CreateProjectFile(env, 2, new[] { 2 }, extraContent: @"<PropertyGroup><UsingMicrosoftNETSdk>true</UsingMicrosoftNETSdk></PropertyGroup>");
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
+            }
+        }
+
+        [Fact]
         public void ConstructWithSingleNodeWithProjectInstanceFactory()
         {
             using (var env = TestEnvironment.Create())
