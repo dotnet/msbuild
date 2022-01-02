@@ -11,9 +11,14 @@ namespace Microsoft.Build.BuildEngine
     internal abstract class OperatorExpressionNode : GenericExpressionNode
     {
         /// <summary>
-        /// Storage for the left and right children of the operator
+        /// Storage for the left child of the operator.
         /// </summary>
-        private GenericExpressionNode leftChild, rightChild;
+        private GenericExpressionNode leftChild;
+
+        /// <summary>
+        /// Storage for the right child of the operator.
+        /// </summary>
+        private GenericExpressionNode rightChild;
 
         /// <summary>
         /// Numeric evaluation is never allowed for operators
