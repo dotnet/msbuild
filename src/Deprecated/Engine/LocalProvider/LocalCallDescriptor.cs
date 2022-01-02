@@ -266,7 +266,7 @@ namespace Microsoft.Build.BuildEngine
         {
         }
 
-        internal LocalCallDescriptorForPostBuildRequests(BuildRequest [] buildRequests)
+        internal LocalCallDescriptorForPostBuildRequests(BuildRequest[] buildRequests)
             :base(LocalCallType.PostBuildRequests)
         {
             this.buildRequests = buildRequests;

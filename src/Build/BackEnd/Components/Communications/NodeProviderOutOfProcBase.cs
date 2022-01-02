@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-            private bool ReadAndRoutePacket(NodePacketType packetType, byte [] packetData, int packetLength)
+            private bool ReadAndRoutePacket(NodePacketType packetType, byte[] packetData, int packetLength)
             {
                 try
                 {

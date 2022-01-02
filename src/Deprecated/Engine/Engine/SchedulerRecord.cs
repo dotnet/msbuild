@@ -22,7 +22,7 @@ namespace Microsoft.Build.BuildEngine
             int evaluationNode,
             string projectName,
             string toolsVersion,
-            string [] targetsBuild
+            string[] targetsBuild
         )
         {
             this.recordKey = recordKey;

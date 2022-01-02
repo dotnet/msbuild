@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The XML elements to include as children of the root element
         /// </summary>
-        public ITaskItem [] XmlElements { get; set; }
+        public ITaskItem[] XmlElements { get; set; }
 
         /// <summary>
         /// The generated XML

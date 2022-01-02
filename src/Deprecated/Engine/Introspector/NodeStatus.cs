@@ -179,7 +179,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The state of the targets which are in progress on the node
         /// </summary>
-        internal TargetInProgessState [] StateOfInProgressTargets
+        internal TargetInProgessState[] StateOfInProgressTargets
         {
             get
             {

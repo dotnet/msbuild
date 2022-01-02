@@ -2275,7 +2275,7 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup[] globalPropertiesPerProject,
             IDictionary[] targetOutputsPerProject,
             BuildSettings buildFlags,
-            string [] toolsVersions
+            string[] toolsVersions
         )
         {
             // Verify the arguments to the API
@@ -2305,7 +2305,7 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup[] globalPropertiesPerProject,
             IDictionary[] targetOutputsPerProject,
             BuildSettings buildFlags,
-            string [] toolVersions
+            string[] toolVersions
         )
         {
             string currentDirectory = Environment.CurrentDirectory;
@@ -2726,7 +2726,7 @@ namespace Microsoft.Build.BuildEngine
             string projectFullPath,
             BuildPropertyGroup globalPropertiesToUse,
             string toolsVersion,
-            string [] targetNames,
+            string[] targetNames,
             BuildEventContext buildEventContext,
             bool toolsVersionPeekedFromProjectFile
             )
@@ -2977,9 +2977,9 @@ namespace Microsoft.Build.BuildEngine
         internal NodeStatus RequestStatus(int requestId)
         {
             // Find out the list of the inprogress waiting targets
-            List<BuildRequest []> outstandingRequests = new List<BuildRequest []>();
-            int [] handleIds = NodeManager.TaskExecutionModule.GetWaitingTaskData(outstandingRequests);
-            Target [] waitingTargets = EngineCallback.GetListOfTargets(handleIds);
+            List<BuildRequest[]> outstandingRequests = new List<BuildRequest[]>();
+            int[] handleIds = NodeManager.TaskExecutionModule.GetWaitingTaskData(outstandingRequests);
+            Target[] waitingTargets = EngineCallback.GetListOfTargets(handleIds);
 
             // Find out the list of targets waiting due to dependency or onerror call but not actively in progress
             List<Project> inProgressProject = cacheOfBuildingProjects.GetInProgressProjects();
