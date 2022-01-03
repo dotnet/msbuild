@@ -129,5 +129,44 @@ namespace Microsoft.DotNet.Watcher.Tools
             message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix, TimeSpan.FromMinutes(2));
             Assert.Equal(messagePrefix + " --no-restore -- wait", message.Trim());
         }
+
+        [CoreMSBuildOnlyFact]
+        public async Task Run_WithHotReloadEnabled_ReadsLaunchSettings()
+        {
+            var testAsset = _testAssetsManager.CopyTestAsset("WatchAppWithLaunchSettings")
+                .WithSource()
+                .Path;
+
+            using var app = new WatchableApp(testAsset, _logger);
+
+            app.DotnetWatchArgs.Add("--verbose");
+
+            await app.StartWatcherAsync();
+
+            await app.Process.GetOutputLineAsync("Environment: Development", TimeSpan.FromSeconds(10));
+        }
+
+        [CoreMSBuildOnlyFact]
+        public async Task Run_WithHotReloadEnabled_ReadsLaunchSettings_WhenUsingProjectOption()
+        {
+            var testAsset = _testAssetsManager.CopyTestAsset("WatchAppWithLaunchSettings")
+                .WithSource()
+                .Path;
+
+            var directoryInfo = new DirectoryInfo(testAsset);
+            using var app = new WatchableApp(testAsset, _logger)
+            {
+                // Configure the working directory to be one level above the test app directory.
+                WorkingDirectory = Path.GetFullPath(directoryInfo.Parent.FullName),
+            };
+
+            app.DotnetWatchArgs.Add("--verbose");
+            app.DotnetWatchArgs.Add("--project");
+            app.DotnetWatchArgs.Add(Path.Combine(directoryInfo.Name, "WatchAppWithLaunchSettings.csproj"));
+
+            await app.StartWatcherAsync();
+
+            await app.Process.GetOutputLineAsync("Environment: Development", TimeSpan.FromSeconds(10));
+        }
     }
 }

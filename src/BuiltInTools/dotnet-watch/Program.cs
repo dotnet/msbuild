@@ -278,7 +278,7 @@ Examples:
                 _reporter.Output("Polling file watcher is enabled");
             }
 
-            var defaultProfile = LaunchSettingsProfile.ReadDefaultProfile(_workingDirectory, reporter) ?? new();
+            var defaultProfile = LaunchSettingsProfile.ReadDefaultProfile(processInfo.WorkingDirectory, reporter) ?? new();
 
             var context = new DotNetWatchContext
             {
