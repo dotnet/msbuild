@@ -60,7 +60,7 @@ namespace Microsoft.Build.Tasks
 
                     byte[] byteBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(s_encoding.GetMaxByteCount(maxInputChunkLength));
 
-                    int bufferLength = 0;
+                    int sha1BufferPosition = 0;
                     for (int i = 0; i < ItemsToHash.Length; i++)
                     {
                         string itemSpec = IgnoreCase ? ItemsToHash[i].ItemSpec.ToUpperInvariant() : ItemsToHash[i].ItemSpec;
@@ -71,13 +71,13 @@ namespace Microsoft.Build.Tasks
                             int charsToProcess = Math.Min(itemSpec.Length - itemSpecPosition, maxInputChunkLength);
                             int byteCount = s_encoding.GetBytes(itemSpec, itemSpecPosition, charsToProcess, byteBuffer, 0);
 
-                            AddBytesToSha1Buffer(sha1, sha1Buffer, ref bufferLength, sha1BufferSize, byteBuffer, byteCount);
+                            AddBytesToSha1Buffer(sha1, sha1Buffer, ref sha1BufferPosition, sha1BufferSize, byteBuffer, byteCount);
                         }
 
-                        AddBytesToSha1Buffer(sha1, sha1Buffer, ref bufferLength, sha1BufferSize, s_itemSeparatorCharacterBytes, s_itemSeparatorCharacterBytes.Length);
+                        AddBytesToSha1Buffer(sha1, sha1Buffer, ref sha1BufferPosition, sha1BufferSize, s_itemSeparatorCharacterBytes, s_itemSeparatorCharacterBytes.Length);
                     }
 
-                    sha1.TransformFinalBlock(sha1Buffer, 0, bufferLength);
+                    sha1.TransformFinalBlock(sha1Buffer, 0, sha1BufferPosition);
 
                     using (var stringBuilder = new ReuseableStringBuilder(sha1.HashSize))
                     {
