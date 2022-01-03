@@ -704,7 +704,7 @@ namespace Microsoft.Build.Conversion
         {
             var toRepairImports = RequiresRepairForAssetCompat();
 
-            if (toRepairImports == null || toRepairImports.Count() == 0)
+            if (toRepairImports == null || !toRepairImports.Any())
             {
                 // no need to repair
                 return false;
