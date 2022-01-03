@@ -515,7 +515,7 @@ namespace Microsoft.Build.BuildEngine
             (
             string[] projectFileNames,
             string[] targetNames,
-            IDictionary[] globalProperties,
+            IDictionary [] globalProperties,
             IList<string>[] removeGlobalProperties,
             string[] toolsVersions,
             bool returnTargetOutputs

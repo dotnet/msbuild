@@ -111,7 +111,7 @@ namespace Microsoft.Build.BuildEngine
                 bool useMPLogger = false;
                 if (!string.IsNullOrEmpty(parameters))
                 {
-                    string[] parameterComponents = parameters.Split(BaseConsoleLogger.parameterDelimiters);
+                    string [] parameterComponents = parameters.Split(BaseConsoleLogger.parameterDelimiters);
                     for (int param = 0; param < parameterComponents.Length; param++)
                     {
                         if (parameterComponents[param].Length > 0)

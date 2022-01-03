@@ -182,7 +182,7 @@ namespace Microsoft.Build.BuildEngine
             IDictionary[] globalPropertiesPerProject,
             IDictionary[] targetOutputsPerProject,
             EngineLoggingServices loggingServices,
-            string[] toolsVersions,
+            string [] toolsVersions,
             bool useResultsCache,
             bool unloadProjectsOnCompletion,
             BuildEventContext taskContext
@@ -499,13 +499,13 @@ namespace Microsoft.Build.BuildEngine
             return DateTime.Now.Ticks;
         }
 
-        internal int[] GetWaitingTaskData(List<BuildRequest[]> outstandingRequests)
+        internal int[] GetWaitingTaskData(List<BuildRequest []> outstandingRequests)
         {
             if (moduleMode != TaskExecutionModuleMode.SingleProcMode)
             {
                 return workerThread.GetWaitingTasksData(outstandingRequests);
             }
-            return new int[0];
+            return new int [0];
         }
 
         internal void Shutdown()

@@ -27,7 +27,7 @@ namespace Microsoft.Build.BuildEngine
             Target target, 
             List<ProjectBuildState> waitingBuildStates,
             ProjectBuildState initiatingRequest,
-            BuildRequest[] outstandingBuildRequests,
+            BuildRequest [] outstandingBuildRequests,
             string projectName
         )
         {
@@ -306,7 +306,7 @@ namespace Microsoft.Build.BuildEngine
         BuildRequest[] outstandingBuildRequests;
         // Mapping between list of build requests waiting on the current target and targets
         // from which these build reuquests originated
-        TargetIdWrapper[] parentTargetsForBuildRequests;
+        TargetIdWrapper [] parentTargetsForBuildRequests;
         // Name of the project containing the target (only used for logging)
         string projectName;
         // Set to true if the target had a been requested by host (direct requests from host only occur on

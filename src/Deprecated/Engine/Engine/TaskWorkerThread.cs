@@ -254,7 +254,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="executionMode">Current execution mode</param>
         /// <returns>Array of handles to wait on</returns>
-        private WaitHandle[] GetHandlesArray( NodeLoopExecutionMode executionMode )
+        private WaitHandle [] GetHandlesArray( NodeLoopExecutionMode executionMode )
         {
             WaitHandle[] waitHandles = null;
 
@@ -307,7 +307,7 @@ namespace Microsoft.Build.BuildEngine
         (
             NodeLoopExecutionMode executionMode,
             int handleId,
-            BuildResult[] buildResults
+            BuildResult [] buildResults
         )
         {
             // Create an array of event to the node thread responds
@@ -499,7 +499,7 @@ namespace Microsoft.Build.BuildEngine
         (
             int handleId,
             BuildResult[] buildResults,
-            BuildRequest[] buildRequests
+            BuildRequest [] buildRequests
         )
         {
             TaskWorkerThread workerThread = GetWorkerThreadForHandleId(handleId);
@@ -519,7 +519,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
 
-        internal int[] GetWaitingTasksData(List<BuildRequest[]> outstandingRequests)
+        internal int [] GetWaitingTasksData(List<BuildRequest[]> outstandingRequests)
         {
             int[] waitingTasksArray;
             lock (waitingTasks)
