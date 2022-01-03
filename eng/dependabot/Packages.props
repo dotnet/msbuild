@@ -17,7 +17,7 @@
     <PackageReference Update="Shouldly" Version="3.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND !$([System.String]::Copy($(MSBuildProjectDirectoryNoRoot)).StartsWith('src\Deprecated\')) ">
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.3" />
 	<GlobalPackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0" PrivateAssets="all" />
 	<GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" PrivateAssets="all"/>
