@@ -425,7 +425,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             const string slnFileHeaderNoVersion = "Microsoft Visual Studio Solution File, Format Version ";
 
             // Read the file header.  This can be on either of the first two lines.
-            for (int i=1; i<=2; i++)
+            for (int i=1 ; i<=2 ; i++)
             {
                 string str = ReadLine();
                 if (str == null)
