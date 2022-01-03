@@ -35,11 +35,11 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string HashResult { get; set; }
 
-        private static readonly char ItemSeparatorCharacter = '\u2028';
+        private static readonly char s_itemSeparatorCharacter = '\u2028';
 
-        private static readonly Encoding encoding = Encoding.UTF8;
+        private static readonly Encoding s_encoding = Encoding.UTF8;
 
-        private static readonly byte[] ItemSeparatorCharacterBytes = encoding.GetBytes(new char[] { ItemSeparatorCharacter });
+        private static readonly byte[] s_itemSeparatorCharacterBytes = s_encoding.GetBytes(new char[] { s_itemSeparatorCharacter });
 
         private const int sha1BufferSize = 512;
 
@@ -50,15 +50,15 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            if (ItemsToHash != null && ItemsToHash.Length > 0)
+            if (ItemsToHash?.Length > 0)
             {
                 using (var sha1 = SHA1.Create())
                 {
-                    // Buffer in which bytes of the strings are to be stored until their number reachs the limit size.
+                    // Buffer in which bytes of the strings are to be stored until their number reaches the limit size.
                     // Once the limit is reached, the sha1.TransformBlock is be run on all the bytes of this buffer.
                     byte[] sha1Buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(sha1BufferSize);
 
-                    byte[] bytesBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(encoding.GetMaxByteCount(maxInputChunkLength));
+                    byte[] byteBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(s_encoding.GetMaxByteCount(maxInputChunkLength));
 
                     int bufferLength = 0;
                     for (int i = 0; i < ItemsToHash.Length; i++)
@@ -66,19 +66,15 @@ namespace Microsoft.Build.Tasks
                         string itemSpec = IgnoreCase ? ItemsToHash[i].ItemSpec.ToUpperInvariant() : ItemsToHash[i].ItemSpec;
 
                         // Slice the itemSpec string into chunks of reasonable size and add them to sha1 buffer.
-                        int itemSpecLength = itemSpec.Length;
-                        int itemSpecPosition = 0;
-                        while (itemSpecLength > 0)
+                        for (int itemSpecPosition = 0; itemSpecPosition < itemSpec.Length; itemSpecPosition += maxInputChunkLength)
                         {
-                            int charsToProcess = Math.Min(itemSpecLength, maxInputChunkLength);
-                            int bytesNumber = encoding.GetBytes(itemSpec, itemSpecPosition, charsToProcess, bytesBuffer, 0);
-                            itemSpecPosition += charsToProcess;
-                            itemSpecLength -= charsToProcess;
+                            int charsToProcess = Math.Min(itemSpec.Length - itemSpecPosition, maxInputChunkLength);
+                            int byteCount = s_encoding.GetBytes(itemSpec, itemSpecPosition, charsToProcess, byteBuffer, 0);
 
-                            AddBytesToSha1Buffer(sha1, sha1Buffer, ref bufferLength, sha1BufferSize, bytesBuffer, bytesNumber);
+                            AddBytesToSha1Buffer(sha1, sha1Buffer, ref bufferLength, sha1BufferSize, byteBuffer, byteCount);
                         }
 
-                        AddBytesToSha1Buffer(sha1, sha1Buffer, ref bufferLength, sha1BufferSize, ItemSeparatorCharacterBytes, ItemSeparatorCharacterBytes.Length);
+                        AddBytesToSha1Buffer(sha1, sha1Buffer, ref bufferLength, sha1BufferSize, s_itemSeparatorCharacterBytes, s_itemSeparatorCharacterBytes.Length);
                     }
 
                     sha1.TransformFinalBlock(sha1Buffer, 0, bufferLength);
@@ -101,36 +97,36 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="sha1">Hashing algorithm sha1.</param>
         /// <param name="sha1Buffer">The sha1 buffer which stores bytes of the strings. Bytes should be added to this buffer.</param>
-        /// <param name="sha1BufferLength">Number of used bytes of the sha1 buffer.</param>
+        /// <param name="sha1BufferPosition">Number of used bytes of the sha1 buffer.</param>
         /// <param name="sha1BufferSize">The size of sha1 buffer.</param>
-        /// <param name="bytesBuffer">Bytes buffer which contains bytes to be written to sha1 buffer.</param>
-        /// <param name="bytesNumber">Amount of bytes that are to be added to sha1 buffer.</param>
-        private void AddBytesToSha1Buffer(SHA1 sha1, byte[] sha1Buffer, ref int sha1BufferLength, int sha1BufferSize, byte[] bytesBuffer, int bytesNumber)
+        /// <param name="byteBuffer">Bytes buffer which contains bytes to be written to sha1 buffer.</param>
+        /// <param name="byteCount">Amount of bytes that are to be added to sha1 buffer.</param>
+        private void AddBytesToSha1Buffer(SHA1 sha1, byte[] sha1Buffer, ref int sha1BufferPosition, int sha1BufferSize, byte[] byteBuffer, int byteCount)
         {
             int bytesProcessedNumber = 0;
-            while (sha1BufferLength + bytesNumber >= sha1BufferSize)
+            while (sha1BufferPosition + byteCount >= sha1BufferSize)
             {
-                int sha1BufferFreeSpace = sha1BufferSize - sha1BufferLength;
+                int sha1BufferFreeSpace = sha1BufferSize - sha1BufferPosition;
 
-                if (sha1BufferLength == 0)
+                if (sha1BufferPosition == 0)
                 {
                     // If sha1 buffer is empty and bytes number is big enough there is no need to copy bytes to sha1 buffer.
                     // Pass the bytes to TransformBlock right away.
-                    sha1.TransformBlock(bytesBuffer, bytesProcessedNumber, sha1BufferSize, null, 0);
+                    sha1.TransformBlock(byteBuffer, bytesProcessedNumber, sha1BufferSize, null, 0);
                 }
                 else
                 {
-                    Array.Copy(bytesBuffer, bytesProcessedNumber, sha1Buffer, sha1BufferLength, sha1BufferFreeSpace);
+                    Array.Copy(byteBuffer, bytesProcessedNumber, sha1Buffer, sha1BufferPosition, sha1BufferFreeSpace);
                     sha1.TransformBlock(sha1Buffer, 0, sha1BufferSize, null, 0);
-                    sha1BufferLength = 0;
+                    sha1BufferPosition = 0;
                 }
 
                 bytesProcessedNumber += sha1BufferFreeSpace;
-                bytesNumber -= sha1BufferFreeSpace;
+                byteCount -= sha1BufferFreeSpace;
             }
 
-            Array.Copy(bytesBuffer, bytesProcessedNumber, sha1Buffer, sha1BufferLength, bytesNumber);
-            sha1BufferLength += bytesNumber;
+            Array.Copy(byteBuffer, bytesProcessedNumber, sha1Buffer, sha1BufferPosition, byteCount);
+            sha1BufferPosition += byteCount;
         }
     }
 }
