@@ -506,8 +506,11 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1100: Windows is required to build Windows desktop applications.</value>
     <comment>{StrBegin="NETSDK1100: "}</comment>
   </data>
-  <data name="ILLink_Info" xml:space="preserve">
-    <value>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</value>
+  <data name="ILLinkRunning" xml:space="preserve">
+    <value>Optimizing assemblies for size. This process might take a while.</value>
+  </data>
+  <data name="ILLinkOptimizedAssemblies" xml:space="preserve">
+    <value>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</value>
   </data>
   <data name="ILLinkNotSupportedError" xml:space="preserve">
     <value>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</value>

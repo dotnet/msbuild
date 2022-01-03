@@ -104,8 +104,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                       '$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' "
           DependsOnTargets="_RunILLink">
 
-    <NETSdkInformation ResourceName="ILLink_Info" />
-
     <NETSdkError Condition="'$(_ILLinkExitCode)' != '' And '$(_ILLinkExitCode)' != '0'" ResourceName="ILLinkFailed" />
 
     <ItemGroup>
@@ -143,7 +141,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeManagedAssemblyToLink;PrepareForILLink"
           Inputs="$(MSBuildAllProjects);@(ManagedAssemblyToLink);@(TrimmerRootDescriptor);@(ReferencePath)"
           Outputs="$(_LinkSemaphore)">
-
+    <NETSdkInformation ResourceName="ILLinkRunning" />
     <!-- When running from Desktop MSBuild, DOTNET_HOST_PATH is not set.
          In this case, explicitly specify the path to the dotnet host. -->
     <PropertyGroup Condition=" '$(DOTNET_HOST_PATH)' == '' ">
@@ -205,6 +203,10 @@ Copyright (c) .NET Foundation. All rights reserved.
    -->
    <Target Name="PrepareForILLink"
            DependsOnTargets="_ComputeManagedAssemblyToLink">
+
+    <!-- We print a message to the user to explain that trimming is 
+         potentially problematic when warnings are suppressed. -->
+    <NETSdkInformation Condition="'$(PublishTrimmed)' == 'true' And '$(SuppressTrimAnalysisWarnings)' == 'true'" ResourceName="ILLinkOptimizedAssemblies" />
 
     <!-- The defaults currently root non-framework assemblies, which
          is a no-op for portable apps. If we later support more ways

@@ -592,7 +592,6 @@ namespace Microsoft.NET.Publish.Tests
                 "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComponentActivator.GetFunctionPointer(IntPtr,IntPtr,IntPtr,IntPtr,IntPtr,IntPtr",
                 "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr,IntPtr",
                 "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.DeserializeUsingBinaryFormatter(DesigntimeLicenseContextSerializer.StreamWrapper,String,RuntimeLicenseContext",
-                "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
                 "ILLink : Trim analysis warning IL2026: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
                 "ILLink : Trim analysis warning IL2026: System.StartupHookProvider.ProcessStartupHooks(",
             };
@@ -1211,8 +1210,9 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
-        public void ILLink_displays_informational_warning(string targetFramework)
+        [InlineData("net5.0")]
+        [InlineData("netcoreapp3.1")]
+        public void ILLink_displays_informational_warning_up_to_net5_by_default(string targetFramework)
         {
             var projectName = "HelloWorld";
             var referenceProjectName = "ClassLibForILLink";
@@ -1222,11 +1222,68 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true")
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}")
                 .Should().Pass().And.HaveStdOutContainingIgnoreCase("https://aka.ms/dotnet-illink");
         }
 
-        [Fact(Skip = "https://github.com/aspnet/AspNetCore/issues/12064")]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [MemberData(nameof(Net6Plus), MemberType = typeof(PublishTestUtils))]
+        public void ILLink_displays_informational_warning_when_trim_analysis_warnings_are_suppressed_on_net6plus(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}", "/p:SuppressTrimAnalysisWarnings=true")
+                .Should().Pass().And.HaveStdOutContainingIgnoreCase("https://aka.ms/dotnet-illink")
+                .And.HaveStdOutContainingIgnoreCase("This process might take a while");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [MemberData(nameof(Net6Plus), MemberType = typeof(PublishTestUtils))]
+        public void ILLink_dont_display_informational_warning_by_default_on_net6plus(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}")
+                .Should().Pass().And.NotHaveStdErrContaining("https://aka.ms/dotnet-illink")
+                .And.HaveStdOutContainingIgnoreCase("This process might take a while");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
+        public void ILLink_dont_display_time_awareness_message_on_incremental_build(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}")
+                .Should().Pass().And.HaveStdOutContainingIgnoreCase("This process might take a while");
+
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}")
+                .Should().Pass().And.NotHaveStdErrContaining("This process might take a while");
+        }
+
+        [Fact()]
         public void ILLink_and_crossgen_process_razor_assembly()
         {
             var targetFramework = "netcoreapp3.0";
@@ -1365,13 +1422,10 @@ namespace Microsoft.NET.Publish.Tests
 
         static string unusedFrameworkAssembly = "System.IO";
 
-        private TestPackageReference GetPackageReference(TestProject project, string callingMethod, string identifier)
+        private TestAsset GetProjectReference(TestProject project, string callingMethod, string identifier)
         {
             var asset = _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier);
-            var pack = new PackCommand(Log, Path.Combine(asset.TestRoot, project.Name));
-            pack.Execute().Should().Pass();
-
-            return new TestPackageReference(project.Name, "1.0.0", pack.GetNuGetPackage(project.Name));
+            return asset;
         }
 
         private void AddRootDescriptor(XDocument project, string rootDescriptorFileName)
@@ -1772,11 +1826,8 @@ public class ClassLib
 
             if (usePackageReference)
             {
-                var packageReference = GetPackageReference(referenceProject, callingMethod, referenceProjectIdentifier ?? targetFramework);
-                testProject.PackageReferences.Add(packageReference);
-                testProject.AdditionalProperties.Add(
-                    "RestoreAdditionalProjectSources",
-                    "$(RestoreAdditionalProjectSources);" + Path.GetDirectoryName(packageReference.NupkgPath));
+                var referenceAsset = GetProjectReference(referenceProject, callingMethod, referenceProjectIdentifier ?? targetFramework);
+                testProject.ReferencedProjects.Add(referenceAsset.TestProject);
             }
             else
             {

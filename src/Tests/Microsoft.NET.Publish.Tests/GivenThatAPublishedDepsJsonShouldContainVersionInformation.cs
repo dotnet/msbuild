@@ -135,7 +135,7 @@ namespace Microsoft.NET.Publish.Tests
             CheckVersionsInDepsFile(depsFilePath);
         }
 
-        [Fact(Skip = "Host deps.json doesn't have runtime file version info yet: https://github.com/dotnet/sdk/issues/2124")]
+        [Fact]
         public void Inbox_version_of_assembly_is_loaded_over_applocal_version()
         {
             var (coreDir, publishDir, immutableDir) = TestConflictResult();

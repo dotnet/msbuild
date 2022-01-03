@@ -10,4 +10,9 @@
   <ItemGroup>
     <DotNetCliToolReference Include="dotnet-outputsframeworkversion-netcoreapp1.0" Version="1.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Net.Http" Version="4.3.2" />
+    <PackageReference Include="System.Net.Security" Version="4.3.1" />
+  </ItemGroup>
 </Project>

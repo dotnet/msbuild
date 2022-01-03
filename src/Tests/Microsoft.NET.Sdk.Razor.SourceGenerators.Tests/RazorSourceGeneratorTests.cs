@@ -1074,21 +1074,21 @@ public class HeaderTagHelper : TagHelper
 
         private class AppLocalResolver : ICompilationAssemblyResolver
         {
-            public bool TryResolveAssemblyPaths(CompilationLibrary library, List<string> assemblies)
+            public bool TryResolveAssemblyPaths(CompilationLibrary library, List<string>? assemblies)
             {
                 foreach (var assembly in library.Assemblies)
                 {
                     var dll = Path.Combine(Directory.GetCurrentDirectory(), "refs", Path.GetFileName(assembly));
                     if (File.Exists(dll))
                     {
-                        assemblies.Add(dll);
+                        assemblies!.Add(dll);
                         return true;
                     }
 
                     dll = Path.Combine(Directory.GetCurrentDirectory(), Path.GetFileName(assembly));
                     if (File.Exists(dll))
                     {
-                        assemblies.Add(dll);
+                        assemblies!.Add(dll);
                         return true;
                     }
                 }
@@ -1112,7 +1112,7 @@ public class HeaderTagHelper : TagHelper
             project = project.WithParseOptions(((CSharpParseOptions)project.ParseOptions!).WithLanguageVersion(LanguageVersion.Preview));
 
 
-            foreach (var defaultCompileLibrary in DependencyContext.Load(typeof(RazorSourceGeneratorTests).Assembly).CompileLibraries)
+            foreach (var defaultCompileLibrary in DependencyContext.Load(typeof(RazorSourceGeneratorTests).Assembly)!.CompileLibraries)
             {
                 foreach (var resolveReferencePath in defaultCompileLibrary.ResolveReferencePaths(new AppLocalResolver()))
                 {

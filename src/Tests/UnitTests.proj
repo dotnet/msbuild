@@ -13,7 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <SDKCustomXUnitProject Include="**\*.Tests.csproj"/>
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="**\*.Tests.csproj" Exclude="**\*.AoT.Tests.csproj" />
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' == 'true'" Include="**\*.AoT.Tests.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(_CustomHelixTargetQueue)' != '' ">

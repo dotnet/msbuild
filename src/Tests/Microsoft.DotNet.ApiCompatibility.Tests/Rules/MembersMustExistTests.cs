@@ -104,38 +104,6 @@ namespace CompatTests
         }
 
         [Fact]
-        public static void NoDifferencesWithNoWarn()
-        {
-            string leftSyntax = @"
-namespace CompatTests
-{
-  public class First
-  {
-    public void MissingMember() { }
-    public int MissingProperty { get; }
-    public int MissingField;
-  }
-}
-";
-
-            string rightSyntax = @"
-namespace CompatTests
-{
-  public class First
-  {
-  }
-}
-";
-
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
-            differ.NoWarn = DiagnosticIds.MemberMustExist;
-            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
-            Assert.Empty(differences);
-        }
-
-        [Fact]
         public static void MultipleOverridesAreReported()
         {
             string leftSyntax = @"

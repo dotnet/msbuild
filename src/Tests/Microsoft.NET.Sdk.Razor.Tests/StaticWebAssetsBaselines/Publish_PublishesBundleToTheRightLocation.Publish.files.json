@@ -1,7 +1,7 @@
 [
-  "${OutputPath}\\wwwroot\\ComponentApp.lib.module.js",
-  "${OutputPath}\\wwwroot\\ComponentApp.modules.json",
-  "${OutputPath}\\wwwroot\\ComponentApp.styles.css",
+  "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\ComponentApp.lib.module.js",
+  "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\ComponentApp.modules.json",
+  "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\ComponentApp.styles.css",
   "${ProjectPath}\\obj\\Debug\\${Tfm}\\jsmodules\\jsmodules.publish.manifest.json",
   "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\ComponentApp.styles.css",
   "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css"

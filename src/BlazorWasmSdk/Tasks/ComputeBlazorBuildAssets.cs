@@ -278,7 +278,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 ".props" when fromMonoPackage => "extension is .props is not supported.",
                 ".blat" when !timezoneSupport => "timezone support is not enabled.",
                 ".dat" when invariantGlobalization && fileName.StartsWith("icudt") => "invariant globalization is enabled",
-                ".json" when fromMonoPackage && fileName == "emcc-props" => $"{fileName}{extension} is not used by Blazor",
+                ".json" when fromMonoPackage && (fileName == "emcc-props" || fileName == "package") => $"{fileName}{extension} is not used by Blazor",
+                ".ts" when fromMonoPackage && fileName == "dotnet.d" => "dotnet type definition is not used by Blazor",
                 ".js" when assetType == "native" && fileName != "dotnet" => $"{fileName}{extension} is not used by Blazor",
                 ".pdb" when !copySymbols => "copying symbols is disabled",
                 _ => null

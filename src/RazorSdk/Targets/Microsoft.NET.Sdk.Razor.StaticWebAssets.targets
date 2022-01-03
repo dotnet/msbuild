@@ -45,7 +45,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.UpdatePackageStaticWebAssets"
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
-    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />    
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
   <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.DefineStaticWebAssets"
@@ -65,12 +65,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.StaticWebAssetsGeneratePackagePropsFile"
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
-    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />    
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
   <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.CollectStaticWebAssetsToCopy"
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
-    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />    
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
   <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.MergeConfigurationProperties"
@@ -260,7 +260,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GetCopyToOutputDirectoryItemsDependsOn>$(GetCopyToOutputDirectoryItemsDependsOn);AddStaticWebAssetsManifest</GetCopyToOutputDirectoryItemsDependsOn>
 
     <CopyStaticWebAssetsToOutputDirectoryDependsOn>LoadStaticWebAssetsBuildManifest;$(CopyStaticWebAssetsToOutputDirectoryDependsOn)</CopyStaticWebAssetsToOutputDirectoryDependsOn>
-    
+
     <!-- StaticWebAssetsPrepareForPublish -> ComputeFilesToPublish -->
 
     <StaticWebAssetsPrepareForPublishDependsOn>$(StaticWebAssetsPrepareForPublishDependsOn);ResolveStaticWebAssetsConfiguration;GenerateStaticWebAssetsPublishManifest;GenerateComputedPublishStaticWebAssets</StaticWebAssetsPrepareForPublishDependsOn>
@@ -318,7 +318,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_StaticWebAssetsGeneratedBuildMultiTargetingPropsFileImportPath>..\buildMultiTargeting\$(PackageId).props</_StaticWebAssetsGeneratedBuildMultiTargetingPropsFileImportPath>
 
       <_CurrentProjectHasStaticWebAssets Condition="'@(_CurrentProjectStaticWebAsset->Count())' != '0'">true</_CurrentProjectHasStaticWebAssets>
-        
+
     </PropertyGroup>
 
     <MakeDir
@@ -340,7 +340,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="CopyStaticWebAssetsToOutputDirectory" DependsOnTargets="$(CopyStaticWebAssetsToOutputDirectoryDependsOn)" />
-  
+
   <Target Name="_SplitStaticWebAssetsByCopyOptions" AfterTargets="CopyStaticWebAssetsToOutputDirectory">
 
     <CollectStaticWebAssetsToCopy Assets="@(StaticWebAsset)" OutputPath="$(OutputPath)\wwwroot\">
@@ -354,7 +354,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
-  <Target 
+  <Target
     Name="_BuildCopyStaticWebAssetsPreserveNewest"
     Inputs="@(_BuildStaticWebAssetsPreserveNewest)"
     Outputs="@(_BuildStaticWebAssetsPreserveNewest->'%(TargetPath)')"
@@ -374,7 +374,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
-  <Target 
+  <Target
     Name="_BuildCopyStaticWebAssetsAlways"
     AfterTargets="_SplitStaticWebAssetsByCopyOptions">
 
@@ -390,7 +390,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </Copy>
 
-  </Target>  
+  </Target>
 
   <Target Name="AddStaticWebAssetsManifest" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
     <ItemGroup>
@@ -403,6 +403,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="StaticWebAssetsPrepareForRun" DependsOnTargets="$(StaticWebAssetsPrepareForRunDependsOn)" />
+
+  <!-- Invoked by VS to re-generate scoped css bundle during hot reload -->
+  <Target Name="UpdateStaticWebAssetsDesignTime" DependsOnTargets="ResolveReferencedProjectsStaticWebAssets;GenerateComputedBuildStaticWebAssets" />
 
   <Target Name="GenerateComputedBuildStaticWebAssets" DependsOnTargets="$(GenerateComputedBuildStaticWebAssetsDependsOn)" />
 
@@ -433,7 +436,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <FileWrites Include="$(StaticWebAssetDevelopmentManifestPath)" />
       <FileWrites Include="$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel" />
     </ItemGroup>
-    
+
   </Target>
 
   <Target Name="ResolveStaticWebAssetsInputs" DependsOnTargets="$(ResolveStaticWebAssetsInputsDependsOn)" />
@@ -477,7 +480,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Publish -->
 
-  <Target Name="StaticWebAssetsPrepareForPublish" 
+  <Target Name="StaticWebAssetsPrepareForPublish"
     BeforeTargets="ComputeFilesToPublish"
     DependsOnTargets="$(StaticWebAssetsPrepareForPublishDependsOn)" />
 
@@ -493,7 +496,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Mode="$(StaticWebAssetProjectMode)"
       ManifestType="Publish"
       ReferencedProjectsConfigurations="@(StaticWebAssetProjectConfiguration)"
-      DiscoveryPatterns="@(StaticWebAssetDiscoveryPattern)"  
+      DiscoveryPatterns="@(StaticWebAssetDiscoveryPattern)"
       Assets="@(_FinalPublishStaticWebAsset)"
       ManifestPath="$(StaticWebAssetPublishManifestPath)">
     </GenerateStaticWebAssetsManifest>
@@ -503,7 +506,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="ResolvePublishStaticWebAssets" DependsOnTargets="$(ResolvePublishStaticWebAssetsDependsOn)" />
-  
+
   <Target Name="LoadStaticWebAssetsBuildManifest" BeforeTargets="ComputeResolvedFilesToPublishList">
     <!-- Before we load assets from the manifest we cleanup any potential existing asset that might be present by default
          for example, assets from packages as a result of a publish (no-build) invocation. Those assets were already taken
@@ -681,7 +684,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ReadStaticWebAssetsManifestFile ManifestPath="$(StaticWebAssetBuildManifestPath)">
         <Output TaskParameter="Assets" ItemName="_CleanupStaticWebAsset" />
       </ReadStaticWebAssetsManifestFile>
-        
+
       <ItemGroup>
         <Content Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
         <ContentWithTargetPath Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
@@ -690,7 +693,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <ResolvedFileToPublish Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
       </ItemGroup>
     </Target>
-  
+
     <Target Name="ResolveReferencedProjectsStaticWebAssetsConfiguration" DependsOnTargets="ResolveStaticWebAssetsConfiguration;PrepareProjectReferences">
       <ItemGroup>
         <!-- It is explicitly ok to take a dependency on _MSBuildProjectReferenceExistent as it is
@@ -951,7 +954,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <!-- We need to use a separate target because MSBuild doesn't capture the output item groups from tasks
-       and as a result, the output of ComputeStaticWebAssetsTargetPaths is not defined on incremental builds 
+       and as a result, the output of ComputeStaticWebAssetsTargetPaths is not defined on incremental builds
   -->
   <Target Name="IncludeStaticWebAssetsPackItems">
     <!-- We need to adjust the path for files without extension (LICENSE) for example. Otherwise, when they get packed, nuget creates an

@@ -150,6 +150,23 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
 
             Assert.Equal(newSuppression, deserializedSuppressions[9]);
         }
+
+        [Fact]
+        public void NoWarnIsHonored()
+        {
+            SuppressionEngine engine = SuppressionEngine.Create(noWarn: "CP0001;CP0003;CP1111");
+
+            Assert.True(engine.IsErrorSuppressed("CP0001", "T:A.B", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: true));
+            Assert.False(engine.IsErrorSuppressed("CP1110", "T:A.B", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: false));
+
+            Assert.True(engine.IsErrorSuppressed("CP0001", "T:A.C", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: false));
+            Assert.False(engine.IsErrorSuppressed("CP1000", "T:A.C", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: true));
+
+            Assert.True(engine.IsErrorSuppressed("CP0003", "T:A.B", "ref/net6.0/myLeft.dll", "lib/net6.0/myRight.dll"));
+            Assert.True(engine.IsErrorSuppressed("CP0003", "T:A.C", "ref/net6.0/myLeft.dll", "lib/net6.0/myRight.dll"));
+            Assert.True(engine.IsErrorSuppressed("CP0003", "T:A.D", "ref/net6.0/myLeft.dll", "lib/net6.0/myRight.dll"));
+            Assert.False(engine.IsErrorSuppressed("CP1232", "T:A.D", "ref/net6.0/myLeft.dll", "lib/net6.0/myRight.dll", isBaselineSuppression: true));
+        }
     }
 
     public class EmptyTestSuppressionEngine : SuppressionEngine
@@ -157,7 +174,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
         private Stream _stream;
         private readonly Action _callback;
 
-        public EmptyTestSuppressionEngine(Action callback)
+        public EmptyTestSuppressionEngine(Action callback) : base(null)
         {
             _callback = callback;
         }
@@ -300,8 +317,8 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
         private MemoryStream _outputStream = new();
         private readonly Action<Stream> _callback;
 
-        public TestSuppressionEngine(string baselineFile, Action<Stream> callback)
-            : base(baselineFile)
+        public TestSuppressionEngine(string baselineFile, string noWarn, Action<Stream> callback)
+            : base(baselineFile, noWarn)
         {
             if (callback == null)
             {
@@ -310,8 +327,8 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
             _callback = callback;
         }
 
-        public static TestSuppressionEngine CreateTestSuppressionEngine(Action<Stream> callback = null)
-            => new("NonExistentFile.xml", callback);
+        public static TestSuppressionEngine CreateTestSuppressionEngine(Action<Stream> callback = null, string noWarn = "")
+            => new("NonExistentFile.xml", noWarn, callback);
 
         public int GetSuppressionCount() => _validationSuppressions.Count;
 

@@ -2,6 +2,6 @@
 <Project>
   <PropertyGroup>
     <DotNetCompatibilityAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tools\net472\Microsoft.DotNet.Compatibility.dll</DotNetCompatibilityAssembly>
-    <DotNetCompatibilityAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tools\net6.0\Microsoft.DotNet.Compatibility.dll</DotNetCompatibilityAssembly>
+    <DotNetCompatibilityAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tools\net7.0\Microsoft.DotNet.Compatibility.dll</DotNetCompatibilityAssembly>
   </PropertyGroup>
 </Project>
