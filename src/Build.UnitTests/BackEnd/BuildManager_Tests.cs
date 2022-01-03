@@ -3805,7 +3805,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// not reload it from disk but instead fully utilize the entire translate project instance state
         /// to do the build.
         /// </summary>
-        /// <param name="shouldSerializeEntireState">Serializes the entire project instance state if true.</param>
+        /// <param name="shouldSerializeEntireState"><see langword="true"/> to serialize the entire project instance state; otherwise, <see langword="false"/>.</param>
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
