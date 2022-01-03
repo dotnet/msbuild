@@ -612,7 +612,6 @@ namespace Microsoft.Build.BuildEngine
             set { itemDefinitionLibrary = value; }
         }
 
-        /// <summary>
         /// Accessor for the item's "include" string.
         /// </summary>
         /// <owner>RGoel</owner>
