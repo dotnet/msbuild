@@ -316,7 +316,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <remarks>
         /// It is safe to modify the children in this way
-        /// during enumeration. See <see cref="Microsoft.Build.Construction.ProjectElementContainer.RemoveChild(Microsoft.Build.Construction.ProjectElement)" />.
+        /// during enumeration. See <see cref="ProjectElementContainer.RemoveChild(ProjectElement)"/>.
         /// </remarks>
         public void RemoveAllChildren()
         {
