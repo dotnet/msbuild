@@ -11,9 +11,15 @@
   </ItemGroup>
 
   <!-- Global Analyzer Config -->
-  <ItemGroup Condition="$(ProjectIsDeprecated) != 'true'">
+  <ItemGroup Condition="$(ProjectIsDeprecated) != 'true' AND $(IsTestProject) != 'true'">
     <!-- Always include Common.globalconfig -->
     <EditorConfigFiles Include="$(MSBuildThisFileDirectory)eng/Common.globalconfig" />
+  </ItemGroup>
+  
+  <!-- Test Project Global Analyzer Config -->
+  <ItemGroup Condition="$(ProjectIsDeprecated) != 'true' AND $(IsTestProject) == 'true'">
+    <!-- Always include Common.globalconfig -->
+    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)eng/CommonTest.globalconfig" />
   </ItemGroup>
   
   <PropertyGroup>
