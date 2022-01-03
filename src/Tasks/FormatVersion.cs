@@ -19,8 +19,8 @@ namespace Microsoft.Build.Tasks
     {
         private enum _FormatType {
             Version,
-            Path
-        };
+            Path,
+        }
 
         private _FormatType _formatType = _FormatType.Version;
 

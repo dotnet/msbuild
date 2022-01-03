@@ -20,13 +20,13 @@ namespace Microsoft.Build.Tasks
             Unspecified,
             Managed,
             Native,
-            Satellite
-        };
+            Satellite,
+        }
 
         private enum DependencyType {
             Install,
-            Prerequisite
-        };
+            Prerequisite,
+        }
 
         private string _processorArchitecture;
         private int _startTime;

@@ -19,8 +19,8 @@ namespace Microsoft.Build.Tasks
     {
         private enum _ManifestType {
             Native,
-            ClickOnce
-        };
+            ClickOnce,
+        }
 
         private ITaskItem[] _dependencies;
         private ITaskItem[] _files;
