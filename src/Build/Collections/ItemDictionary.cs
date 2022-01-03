@@ -407,7 +407,6 @@ namespace Microsoft.Build.Collections
 
             /// <summary>
             /// Finalizes an instance of the <see cref="Enumerator"/> class.
-            /// Finalizer
             /// </summary>
             ~Enumerator()
             {

@@ -14,7 +14,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
     {
         /// <summary>
         /// Finalizes an instance of the <see cref="RegisteredTaskObjectCache"/> class.
-        /// Finalizer
         /// </summary>
         ~RegisteredTaskObjectCache()
         {
