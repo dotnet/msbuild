@@ -7739,19 +7739,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
         }
 
+        /// <summary>
         /// Consider this dependency chain:
         ///
         /// App
+        /// <code>
+        /// <![CDATA[
         /// References - A
-        /// Depends on B
-        /// Will be found by hintpath.
+        ///      Depends on B
+        ///      Will be found by hintpath.
         /// References -B
-        /// No hintpath
-        /// Exists in A.dll's folder.
-        ///
+        ///      No hintpath
+        ///      Exists in A.dll's folder.
+        /// ]]>
+        /// </code>
         /// B.dll should be unresolved even though its in A's folder because primary resolution needs to work
         /// without looking at dependencies because of the load-time perf scenarios don't look at dependencies.
         /// We must be consistent between primaries resolved with FindDependencies=true and FindDependencies=false.
+        /// </summary>
         [Fact]
         public void ByDesignRelatedTo454863_PrimaryReferencesDontResolveToParentFolders()
         {

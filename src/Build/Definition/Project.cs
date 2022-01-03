@@ -855,6 +855,7 @@ namespace Microsoft.Build.Evaluation
         /// <example>
         ///
         /// <code>
+        /// <![CDATA[
         /// <P>*.txt</P>
         ///
         /// <Bar Include="bar"/> (both outside and inside project cone)
@@ -865,9 +866,12 @@ namespace Microsoft.Build.Evaluation
         /// <Foo Include="$(P)"/>
         /// <Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
         /// <Foo Include="*.cs" Exclude="@(Bar)"/>
+        /// ]]>
         /// </code>
         ///
         /// Example result:
+        /// <code>
+        /// <![CDATA[
         /// [
         /// GlobResult(glob: "C:\**\*.foo", exclude: []),
         /// GlobResult(glob: ["*.a", "*.b"], exclude=["3.a"], remove=["2.a"]),
@@ -876,17 +880,23 @@ namespace Microsoft.Build.Evaluation
         /// GlobResult(glob: "*.a", exclude=[]),
         /// GlobResult(glob: "*.cs", exclude=["bar"])
         /// ].
+        /// ]]>
+        /// </code>
         /// </example>
         /// <remarks>
+        /// <para>
         /// <see cref="GlobResult.MsBuildGlob"/> is a <see cref="IMSBuildGlob"/> that combines all globs in the include element and ignores
         /// all the fragments in the exclude attribute and all the fragments in all Remove elements that apply to the include element.
+        /// </para>
         ///
         /// Users can construct a composite glob that incorporates all the globs in the Project:
         /// <code>
+        /// <![CDATA[
         /// var uberGlob = new CompositeGlob(project.GetAllGlobs().Select(r => r.MSBuildGlob).ToArray());
         /// uberGlob.IsMatch("foo.cs");
+        /// ]]>
         /// </code>
-        ///
+        /// 
         /// </remarks>
         /// <returns>
         /// List of <see cref="GlobResult"/>.
