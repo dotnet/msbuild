@@ -16,24 +16,11 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal enum TokenType 
         {
-            Comma,
-            LeftParenthesis,
-            RightParenthesis,
-            LessThan,
-            GreaterThan,
-            LessThanOrEqualTo,
-            GreaterThanOrEqualTo,
-            And,
-            Or,
-            EqualTo,
-            NotEqualTo,
-            Not,
-            Property,
-            String,
-            Numeric,
-            ItemList,
-            ItemMetadata,
-            Function,
+            Comma, LeftParenthesis, RightParenthesis,
+            LessThan, GreaterThan, LessThanOrEqualTo, GreaterThanOrEqualTo,
+            And, Or,
+            EqualTo, NotEqualTo, Not,
+            Property, String, Numeric, ItemList, ItemMetadata, Function,
             EndOfInput
         };
 
