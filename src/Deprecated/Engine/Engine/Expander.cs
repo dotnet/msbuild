@@ -1517,7 +1517,7 @@ namespace Microsoft.Build.BuildEngine
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
-                        functionArguments = Array.Empty<string>();
+                        functionArguments = new string[0];
                     }
                     else
                     {
@@ -1527,7 +1527,7 @@ namespace Microsoft.Build.BuildEngine
                         // If there are no arguments, then just create an empty array
                         if (String.IsNullOrEmpty(argumentsContent))
                         {
-                            functionArguments = Array.Empty<string>();
+                            functionArguments = new string[0];
                         }
                         else
                         {
@@ -1543,7 +1543,7 @@ namespace Microsoft.Build.BuildEngine
                     int nextMethodIndex = expressionFunction.IndexOf('.', methodStartIndex);
                     int methodLength = expressionFunction.Length - methodStartIndex;
 
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = new string[0];
 
                     if (nextMethodIndex > 0)
                     {

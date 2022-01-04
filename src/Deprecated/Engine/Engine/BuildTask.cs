@@ -310,7 +310,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (this.taskElement == null)
             {
-                return Array.Empty<string>();
+                return new string[0];
             }
 
             ArrayList list = new ArrayList();
