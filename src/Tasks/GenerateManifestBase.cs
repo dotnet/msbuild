@@ -16,14 +16,16 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public abstract class GenerateManifestBase : Task
     {
-        private enum AssemblyType {
+        private enum AssemblyType
+        {
             Unspecified,
             Managed,
             Native,
             Satellite,
         }
 
-        private enum DependencyType {
+        private enum DependencyType
+        {
             Install,
             Prerequisite,
         }

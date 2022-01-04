@@ -42,7 +42,7 @@ namespace Microsoft.Build.Graph
         {
             OuterBuild,
             InnerBuild,
-            NonMultitargeting
+            NonMultitargeting,
         }
 
         internal readonly struct ReferenceInfo

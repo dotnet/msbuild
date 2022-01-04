@@ -17,7 +17,8 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed class GenerateApplicationManifest : GenerateManifestBase
     {
-        private enum _ManifestType {
+        private enum _ManifestType
+        {
             Native,
             ClickOnce,
         }

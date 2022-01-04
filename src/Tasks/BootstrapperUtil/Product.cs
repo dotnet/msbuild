@@ -14,7 +14,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     {
         CopyAllFilesFalse,
         CopyAllFilesTrue,
-        CopyAllFilesIfNotHomeSite
+        CopyAllFilesIfNotHomeSite,
     };
 
     /// <summary>

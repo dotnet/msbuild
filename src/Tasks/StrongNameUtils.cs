@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
         None,
         DelaySigned,
         FullySigned,
-        Unknown
+        Unknown,
     };
 
     /// <summary>

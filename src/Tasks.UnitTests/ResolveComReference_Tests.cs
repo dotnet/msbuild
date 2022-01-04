@@ -753,7 +753,8 @@ namespace Microsoft.Build.UnitTests
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingPia /* pass in the PIA reference */, true /* include version in the interop name */);
         }
 
-        private enum RcwStyle {
+        private enum RcwStyle
+        {
             GenerateTlb,
             PreexistingTlb,
             PreexistingPia,

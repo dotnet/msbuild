@@ -17,7 +17,8 @@ namespace Microsoft.Build.Tasks
     /// </comment>
     public sealed class FormatVersion : TaskExtension
     {
-        private enum _FormatType {
+        private enum _FormatType
+        {
             Version,
             Path,
         }
