@@ -399,6 +399,12 @@ namespace Microsoft.Build.Shared
                             currentDirectory = String.Empty;
                         }
 
+                        if (string.IsNullOrEmpty(currentDirectory))
+                        {
+                            currentDirectory = NativeMethodsShared.CurrentThreadWorkingDirectory
+                                               ?? string.Empty;
+                        }
+
                         modifiedItemSpec = GetFullPath(itemSpec, currentDirectory);
                         fullPath = modifiedItemSpec;
 
