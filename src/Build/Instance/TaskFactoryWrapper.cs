@@ -244,25 +244,26 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void PopulatePropertyInfoCacheIfNecessary()
         {
-            if (_propertyInfoCache == null)
+            lock (_locker)
             {
-                bool taskTypeImplementsIGeneratedTask = typeof(IGeneratedTask).IsAssignableFrom(_taskFactory.TaskType);
-                TaskPropertyInfo[] propertyInfos = _taskFactory.GetTaskParameters();
 
-                for (int i = 0; i < propertyInfos.Length; i++)
+                if (_propertyInfoCache == null)
                 {
-                    // If the task implements IGeneratedTask, we must use the TaskPropertyInfo the factory gives us.
-                    // Otherwise, we never have to hand the TaskPropertyInfo back to the task or factory, so we replace
-                    // theirs with one of our own that will allow us to cache reflection data per-property.
-                    TaskPropertyInfo propertyInfo = propertyInfos[i];
-                    if (!taskTypeImplementsIGeneratedTask)
-                    {
-                        propertyInfo = new ReflectableTaskPropertyInfo(propertyInfo, _taskFactory.TaskType);
-                    }
+                    bool taskTypeImplementsIGeneratedTask = typeof(IGeneratedTask).IsAssignableFrom(_taskFactory.TaskType);
+                    TaskPropertyInfo[] propertyInfos = _taskFactory.GetTaskParameters();
 
-                    try
+                    for (int i = 0; i < propertyInfos.Length; i++)
                     {
-                        lock (_locker)
+                        // If the task implements IGeneratedTask, we must use the TaskPropertyInfo the factory gives us.
+                        // Otherwise, we never have to hand the TaskPropertyInfo back to the task or factory, so we replace
+                        // theirs with one of our own that will allow us to cache reflection data per-property.
+                        TaskPropertyInfo propertyInfo = propertyInfos[i];
+                        if (!taskTypeImplementsIGeneratedTask)
+                        {
+                            propertyInfo = new ReflectableTaskPropertyInfo(propertyInfo, _taskFactory.TaskType);
+                        }
+
+                        try
                         {
                             if (_propertyInfoCache == null)
                             {
@@ -274,50 +275,50 @@ namespace Microsoft.Build.Execution
                                 _propertyInfoCache.Add(propertyInfo.Name, propertyInfo);
                             }
                         }
-                    }
-                    catch (ArgumentException)
-                    {
-                        // We have encountered a duplicate entry in our hashtable; if we had used BindingFlags.IgnoreCase this
-                        // would have produced an AmbiguousMatchException. In the old code, before this cache existed,
-                        // that wouldn't have been thrown unless and until the project actually tried to set this ambiguous parameter.
-                        // So rather than fail here, we store a list of ambiguous names and throw later, when one of them
-                        // is requested.
-                        if (_namesOfPropertiesWithAmbiguousMatches == null)
+                        catch (ArgumentException)
                         {
-                            _namesOfPropertiesWithAmbiguousMatches = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            // We have encountered a duplicate entry in our hashtable; if we had used BindingFlags.IgnoreCase this
+                            // would have produced an AmbiguousMatchException. In the old code, before this cache existed,
+                            // that wouldn't have been thrown unless and until the project actually tried to set this ambiguous parameter.
+                            // So rather than fail here, we store a list of ambiguous names and throw later, when one of them
+                            // is requested.
+                            if (_namesOfPropertiesWithAmbiguousMatches == null)
+                            {
+                                _namesOfPropertiesWithAmbiguousMatches = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            }
+
+                            _namesOfPropertiesWithAmbiguousMatches[propertyInfo.Name] = String.Empty;
                         }
 
-                        _namesOfPropertiesWithAmbiguousMatches[propertyInfo.Name] = String.Empty;
-                    }
-
-                    if (propertyInfos[i].Required)
-                    {
-                        if (_namesOfPropertiesWithRequiredAttribute == null)
+                        if (propertyInfos[i].Required)
                         {
-                            _namesOfPropertiesWithRequiredAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            if (_namesOfPropertiesWithRequiredAttribute == null)
+                            {
+                                _namesOfPropertiesWithRequiredAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            }
+
+                            // we have a require attribute defined, keep a record of that
+                            _namesOfPropertiesWithRequiredAttribute[propertyInfo.Name] = String.Empty;
                         }
 
-                        // we have a require attribute defined, keep a record of that
-                        _namesOfPropertiesWithRequiredAttribute[propertyInfo.Name] = String.Empty;
-                    }
-
-                    if (propertyInfos[i].Output)
-                    {
-                        if (_namesOfPropertiesWithOutputAttribute == null)
+                        if (propertyInfos[i].Output)
                         {
-                            _namesOfPropertiesWithOutputAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                        }
+                            if (_namesOfPropertiesWithOutputAttribute == null)
+                            {
+                                _namesOfPropertiesWithOutputAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            }
 
-                        // we have a output attribute defined, keep a record of that
-                        _namesOfPropertiesWithOutputAttribute[propertyInfo.Name] = String.Empty;
+                            // we have a output attribute defined, keep a record of that
+                            _namesOfPropertiesWithOutputAttribute[propertyInfo.Name] = String.Empty;
+                        }
                     }
+
+                    _propertyInfoCache ??= ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
+
+                    _namesOfPropertiesWithRequiredAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
+                    _namesOfPropertiesWithOutputAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
+                    _namesOfPropertiesWithAmbiguousMatches ??= ReadOnlyEmptyDictionary<string, string>.Instance;
                 }
-
-                _propertyInfoCache ??= ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
-
-                _namesOfPropertiesWithRequiredAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
-                _namesOfPropertiesWithOutputAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
-                _namesOfPropertiesWithAmbiguousMatches ??= ReadOnlyEmptyDictionary<string, string>.Instance;
             }
         }
         #endregion
