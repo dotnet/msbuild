@@ -22,7 +22,7 @@ namespace Microsoft.Build.Tasks
         DelaySigned,
         FullySigned,
         Unknown,
-    };
+    }
 
     /// <summary>
     /// Strong naming utilities.

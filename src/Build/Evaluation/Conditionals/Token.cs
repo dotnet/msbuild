@@ -50,8 +50,8 @@ namespace Microsoft.Build.Evaluation
             ItemList,
             ItemMetadata,
             Function,
-            EndOfInput
-        };
+            EndOfInput,
+        }
 
         private TokenType _tokenType;
         private string _tokenString;

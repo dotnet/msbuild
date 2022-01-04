@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         CopyAllFilesFalse,
         CopyAllFilesTrue,
         CopyAllFilesIfNotHomeSite,
-    };
+    }
 
     /// <summary>
     /// This class represents a product in the found by the BootstrapperBuilder in the Path property.
