@@ -406,14 +406,6 @@ namespace Microsoft.Build.Collections
             }
 
             /// <summary>
-            /// Finalizer
-            /// </summary>
-            ~Enumerator()
-            {
-                Dispose(false);
-            }
-
-            /// <summary>
             /// Get the current item
             /// </summary>
             /// <remarks>Undefined if enumerator is before or after collection: we return null.</remarks>
