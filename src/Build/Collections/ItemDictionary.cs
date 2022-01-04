@@ -461,27 +461,6 @@ namespace Microsoft.Build.Collections
             }
 
             /// <summary>
-            /// The real disposer.
-            /// </summary>
-            private void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    if (_listEnumerator != null)
-                    {
-                        if (_itemEnumerator != null)
-                        {
-                            _itemEnumerator.Dispose();
-                            _itemEnumerator = null;
-                        }
-
-                        _listEnumerator.Dispose();
-                        _listEnumerator = null;
-                    }
-                }
-            }
-
-            /// <summary>
             /// Get an item enumerator over the next list with items in it
             /// </summary>
             private IEnumerator<T> GetNextItemEnumerator()
