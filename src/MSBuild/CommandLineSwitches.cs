@@ -439,6 +439,29 @@ namespace Microsoft.Build.CommandLine
         private static readonly char[] s_parameterSeparators = { ',', ';' };
 
         /// <summary>
+        /// Called when a recognized switch that takes parameters is detected on the command line,
+        /// but an invalid switch of the same kind was detected first. Here we pretend the first
+        /// switch didn't exist and override it.
+        /// </summary>
+        /// <param name="parameterizedSwitch"></param>
+        /// <param name="switchParameters"></param>
+        /// <param name="multipleParametersAllowed"></param>
+        /// <param name="unquoteParameters"></param>
+        /// <returns>true, if the given parameters were successfully stored</returns>
+        internal bool OverrideParameterizedSwitch(
+            ParameterizedSwitch parameterizedSwitch,
+            string commandLineArg,
+            string switchParameters,
+            bool multipleParametersAllowed,
+            bool unquoteParameters,
+            bool emptyParametersAllowed
+            )
+        {
+            _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg = null;
+            return SetParameterizedSwitch(parameterizedSwitch, commandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters, emptyParametersAllowed);
+        }
+
+        /// <summary>
         /// Called when a recognized switch that takes parameters is detected on the command line.
         /// </summary>
         /// <param name="parameterizedSwitch"></param>

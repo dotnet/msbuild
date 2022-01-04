@@ -2008,6 +2008,27 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
                 }
+                else if (parameterizedSwitch == CommandLineSwitches.ParameterizedSwitch.Project && switchParameters.Length > 0 &&
+                    (IsEnvironmentVariable(commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project)) ||
+                    IsEnvironmentVariable(switchParameters.Substring(1))))
+                {
+                    if (IsEnvironmentVariable(commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project)))
+                    {
+                        if (switchParameters.Length > 0)
+                        {
+                            switchParameters = switchParameters.Substring(1);
+                        }
+
+                        if (!commandLineSwitches.OverrideParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters, allowEmptyParameters))
+                        {
+                            // if parsing revealed there were no real parameters, flag an error, unless the parameters are optional
+                            if (missingParametersErrorMessage != null)
+                            {
+                                commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg);
+                            }
+                        }
+                    }
+                }
                 else
                 {
                     commandLineSwitches.SetSwitchError(duplicateSwitchErrorMessage, unquotedCommandLineArg);
@@ -2017,6 +2038,11 @@ namespace Microsoft.Build.CommandLine
             {
                 commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg);
             }
+        }
+
+        private static bool IsEnvironmentVariable(string s)
+        {
+            return s.StartsWith("$") || (s.StartsWith("%") && s.EndsWith("%") && s.Length > 1);
         }
 
         /// <summary>
