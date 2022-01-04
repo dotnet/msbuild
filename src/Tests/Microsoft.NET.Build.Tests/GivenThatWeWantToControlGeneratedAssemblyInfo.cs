@@ -370,7 +370,7 @@ namespace Microsoft.NET.Build.Tests
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests");
         }
 
-        [RequiresMSBuildVersionTheory("17.0.0.32901", Skip = "https://github.com/dotnet/sdk/issues/20325")]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(true, true, "net5.0")]
         [InlineData(true, true, ToolsetInfo.CurrentTargetFramework)]
         [InlineData(true, false, ToolsetInfo.CurrentTargetFramework)]
