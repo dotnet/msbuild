@@ -258,15 +258,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public List<BuildRequest> GetRequestsToIssueIfReady()
         {
-            if (_unresolvedConfigurations == null && _requestsToIssue != null)
+            lock (GlobalLock)
             {
-                List<BuildRequest> requests = _requestsToIssue;
-                _requestsToIssue = null;
+                if (_unresolvedConfigurations == null && _requestsToIssue != null)
+                {
+                    List<BuildRequest> requests = _requestsToIssue;
+                    _requestsToIssue = null;
 
-                return requests;
+                    return requests;
+                }
+
+                return null;
             }
-
-            return null;
         }
 
         /// <summary>
