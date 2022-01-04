@@ -221,7 +221,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             };
 
             publishDirectory.Should().HaveFiles(expectedFiles);
-            
+
             new FileInfo(Path.Combine(blazorPublishDirectory, "css", "app.css")).Should().Contain(".publish");
         }
 
@@ -694,7 +694,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/39289")]
         // Regression test for https://github.com/dotnet/aspnetcore/issues/18752
         public void Publish_HostedApp_WithoutTrimming_Works()
         {
@@ -1307,7 +1307,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 }
             });
 
-            // Ensure a compile time reference exists between the project and the assembly added as a reference. This is required for 
+            // Ensure a compile time reference exists between the project and the assembly added as a reference. This is required for
             // the assembly to be resolved by the "app" as part of RAR
             File.WriteAllText(Path.Combine(testInstance.Path, "razorclasslibrary", "TestReference.cs"),
 @"
