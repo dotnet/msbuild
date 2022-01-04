@@ -1415,7 +1415,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (_debugDumpState)
             {
-                lock (this)
+                lock (typeof(BuildRequestEngine))
                 {
                     FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
