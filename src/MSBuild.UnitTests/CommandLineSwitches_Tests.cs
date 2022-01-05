@@ -1182,6 +1182,32 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verify that environment variables cannot be passed in as command line switches.
+        /// Also verifies that the full command line is properly passed when a switch error occurs.
+        /// </summary>
+        [Fact]
+        public void ProcessEnvironmentVariableSwitch()
+        {
+            string savedEnvironmentVariable = Environment.GetEnvironmentVariable("ENVIRONMENTVARIABLE");
+            Environment.SetEnvironmentVariable("ENVIRONMENTVARIABLE", null);
+
+            CommandLineSwitches commandLineSwitches = new();
+            string fullCommandLine = "msbuild validProject.csproj %ENVIRONMENTVARIABLE%";
+            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "validProject.csproj", "%ENVIRONMENTVARIABLE%" }, commandLineSwitches, fullCommandLine);
+            VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
+
+            commandLineSwitches = new();
+            fullCommandLine = "msbuild %ENVIRONMENTVARIABLE% validProject.csproj";
+            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "%ENVIRONMENTVARIABLE%", "validProject.csproj" }, commandLineSwitches, fullCommandLine);
+            VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
+
+            if (savedEnvironmentVariable is not null)
+            {
+                Environment.SetEnvironmentVariable("ENVIRONMENTVARIABLE", savedEnvironmentVariable);
+            }
+        }
+
+        /// <summary>
         /// Verifies that the /warnasmessage switch is parsed properly when codes are specified.
         /// </summary>
         [Fact]
