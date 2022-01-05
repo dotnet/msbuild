@@ -32,25 +32,29 @@ namespace Microsoft.DotNet.Cli.Telemetry
             }
             else if (OperatingSystem.IsLinux())
             {
-                return ReadProcToDetectDockerInLinux()
-                    ? Cli.Telemetry.IsDockerContainer.True
-                    : Cli.Telemetry.IsDockerContainer.False;
+                try
+                {
+                    bool isDocker = File
+                        .ReadAllText("/proc/1/cgroup")
+                        .Contains("/docker/");
+
+                    return isDocker
+                        ? Cli.Telemetry.IsDockerContainer.True
+                        : Cli.Telemetry.IsDockerContainer.False;
+                }
+                catch (Exception ex) when (ex is IOException || ex.InnerException is IOException)
+                {
+                    // in some environments (restricted docker container, shared hosting etc.),
+                    // procfs is not accessible and we get UnauthorizedAccessException while the
+                    // inner exception is set to IOException. Ignore and continue when that happens.
+                }
             }
             else if (OperatingSystem.IsMacOS())
             {
                 return Cli.Telemetry.IsDockerContainer.False;
             }
-            else
-            {
-                return Cli.Telemetry.IsDockerContainer.Unknown;
-            }
-        }
 
-        private static bool ReadProcToDetectDockerInLinux()
-        {
-            return File
-                .ReadAllText("/proc/1/cgroup")
-                .Contains("/docker/");
+            return Cli.Telemetry.IsDockerContainer.Unknown;
         }
     }
 
