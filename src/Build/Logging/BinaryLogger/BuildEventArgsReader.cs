@@ -53,9 +53,9 @@ namespace Microsoft.Build.Logging
             typeof(BuildEventArgs).GetField("senderName", BindingFlags.Instance | BindingFlags.NonPublic);
 
         /// <summary>
-        /// Initializes a new instance of BuildEventArgsReader using a BinaryReader instance
+        /// Initializes a new instance of <see cref="T:Microsoft.Build.Logging.BuildEventArgsReader"/> using a <see cref="T:System.IO.BinaryReader"/> instance.
         /// </summary>
-        /// <param name="binaryReader">The BinaryReader to read BuildEventArgs from</param>
+        /// <param name="binaryReader">The <see cref="T:System.IO.BinaryReader"/> to read <see cref="T:Microsoft.Build.Framework.BuildEventArgs"/> from.</param>
         /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
@@ -79,8 +79,11 @@ namespace Microsoft.Build.Logging
         internal event Action<BinaryLogRecordKind, byte[]> OnBlobRead;
 
         /// <summary>
-        /// Reads the next log record from the binary reader. If there are no more records, returns null.
+        /// Reads the next log record from the <see cref="T:System.IO.BinaryReader"/>.
         /// </summary>
+        /// <returns>
+        /// The next <see cref="T:Microsoft.Build.Framework.BuildEventArgs" />. If there are no more records, returns <see langword="null" />.
+        /// </returns>
         public BuildEventArgs Read()
         {
             BinaryLogRecordKind recordKind = (BinaryLogRecordKind)ReadInt32();
