@@ -2022,25 +2022,9 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
                 else if (parameterizedSwitch == CommandLineSwitches.ParameterizedSwitch.Project && switchParameters.Length > 0 &&
-                    (IsEnvironmentVariable(commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project)) ||
-                    IsEnvironmentVariable(switchParameters.Substring(1))))
+                    IsEnvironmentVariable(commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project)))
                 {
-                    if (IsEnvironmentVariable(commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project)))
-                    {
-                        if (switchParameters.Length > 0)
-                        {
-                            switchParameters = switchParameters.Substring(1);
-                        }
-
-                        if (!commandLineSwitches.OverrideParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters, allowEmptyParameters))
-                        {
-                            // if parsing revealed there were no real parameters, flag an error, unless the parameters are optional
-                            if (missingParametersErrorMessage != null)
-                            {
-                                commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg, commandLine);
-                            }
-                        }
-                    }
+                    commandLineSwitches.SetSwitchError(duplicateSwitchErrorMessage, commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project), commandLine);
                 }
                 else
                 {
@@ -2054,13 +2038,15 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Checks whether envVar is an environment variable.
+        /// Checks whether envVar is an environment variable. MSBuild uses
+        /// Environment.ExpandEnvironmentVariables(string), which only
+        /// considers %-delimited variables.
         /// </summary>
         /// <param name="envVar">A possible environment variable</param>
         /// <returns>Whether envVar is an environment variable</returns>
         private static bool IsEnvironmentVariable(string envVar)
         {
-            return envVar.StartsWith("$") || (envVar.StartsWith("%") && envVar.EndsWith("%") && envVar.Length > 1);
+            return envVar.StartsWith("%") && envVar.EndsWith("%") && envVar.Length > 1;
         }
 
         /// <summary>
