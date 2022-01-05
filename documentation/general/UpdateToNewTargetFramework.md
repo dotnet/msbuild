@@ -21,3 +21,4 @@
 - More test fixes -- https://github.com/dotnet/installer/pull/11750/commits/9a7b55da4d5c777268295326f6be8469f8b4b9f9
 - Stage 0 Update -- https://github.com/dotnet/installer/pull/11750/commits/02286315b221895b8181fc350b44bcdf399f7d92
 - Install RC version of runtime -- https://github.com/dotnet/installer/commit/ea68501d392ab28b32af5d62946a764e2fadf88c
+- Update Templates -- https://github.com/dotnet/installer/pull/12946
