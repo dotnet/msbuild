@@ -516,6 +516,10 @@ Build
             Write((int)e.Kind);
             WriteDeduplicatedString(e.ItemType);
             WriteTaskItemList(e.Items, e.LogItemMetadata);
+            if (e.Kind == TaskParameterMessageKind.AddItem)
+            {
+                CheckForFilesToEmbed(e.ItemType, e.Items);
+            }
         }
 
         private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true, bool writeLineAndColumn = false)
