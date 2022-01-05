@@ -55,6 +55,14 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     that itself launches MSBuild on a number of other projects.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="EnvironmentVariableAsSwitch">
+        <source>Undefined environment variable passed in as switch. Full path: '{0}'</source>
+        <target state="new">Undefined environment variable passed in as switch. Full path: '{0}'</target>
+        <note>
+      UE: This error is shown when a user passes in an environment variable (including from a response file)
+      but the environment variable is not defined.
+    </note>
+      </trans-unit>
       <trans-unit id="FatalError">
         <source>MSBUILD : error MSB1025: An internal failure occurred while running MSBuild.</source>
         <target state="translated">MSBUILD : error MSB1025: errore interno durante l'esecuzione di MSBuild.</target>

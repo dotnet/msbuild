@@ -2011,6 +2011,11 @@ namespace Microsoft.Build.CommandLine
                         switchParameters = switchParameters.Substring(1);
                     }
 
+                    if (parameterizedSwitch == CommandLineSwitches.ParameterizedSwitch.Project && IsEnvironmentVariable(switchParameters))
+                    {
+                        commandLineSwitches.SetSwitchError("EnvironmentVariableAsSwitch", unquotedCommandLineArg, commandLine);
+                    }
+
                     // save the parameters after unquoting and splitting them if necessary
                     if (!commandLineSwitches.SetParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters, allowEmptyParameters))
                     {
@@ -2020,11 +2025,6 @@ namespace Microsoft.Build.CommandLine
                             commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg, commandLine);
                         }
                     }
-                }
-                else if (parameterizedSwitch == CommandLineSwitches.ParameterizedSwitch.Project && switchParameters.Length > 0 &&
-                    IsEnvironmentVariable(commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project)))
-                {
-                    commandLineSwitches.SetSwitchError(duplicateSwitchErrorMessage, commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project), commandLine);
                 }
                 else
                 {

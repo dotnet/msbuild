@@ -1277,6 +1277,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       logger could not be created -- this message comes from the CLR/FX and is localized.
     </comment>
   </data>
+  <data name="EnvironmentVariableAsSwitch" Visibility="Public">
+    <value>Undefined environment variable passed in as switch. Full path: '{0}'</value>
+    <comment>
+      UE: This error is shown when a user passes in an environment variable (including from a response file)
+      but the environment variable is not defined.
+    </comment>
+  </data>
   <data name="Process" UESanitized="true" Visibility="Public">
     <value>Process = "{0}"</value>
   </data>
@@ -1295,7 +1302,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1060.
+        Next error code should be MSB1061.
 
         Don't forget to update this comment after using the new code.
   -->
