@@ -525,9 +525,17 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (_includeEvaluationPropertiesAndItems == null)
                 {
-                    var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
-                    // .All() on an empty list defaults to true, we want to default to false
-                    _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    var escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
+                    if (escapeHatch.HasValue)
+                    {
+                        _includeEvaluationPropertiesAndItems = escapeHatch.Value;
+                    }
+                    else
+                    {
+                        var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
+                        // .All() on an empty list defaults to true, we want to default to false
+                        _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    }
                 }
 
                 return _includeEvaluationPropertiesAndItems ?? false;
