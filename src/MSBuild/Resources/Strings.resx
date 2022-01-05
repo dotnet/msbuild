@@ -1278,8 +1278,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </comment>
   </data>
   <data name="EnvironmentVariableAsSwitch" Visibility="Public">
-    <value>Undefined environment variable passed in as switch. Full path: '{0}'</value>
+    <value>MSBUILD : error MSB1060: Undefined environment variable passed in as switch. Full path: '{0}'</value>
     <comment>
+      {StrBegin="MSBUILD : error MSB1060: "}
       UE: This error is shown when a user passes in an environment variable (including from a response file)
       but the environment variable is not defined.
     </comment>

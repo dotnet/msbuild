@@ -2001,21 +2001,21 @@ namespace Microsoft.Build.CommandLine
                 // unless the parameters are optional
                 (missingParametersErrorMessage == null))
             {
+                // skip the parameter indicator (if any)
+                if (switchParameters.Length > 0)
+                {
+                    switchParameters = switchParameters.Substring(1);
+                }
+
+                if (parameterizedSwitch == CommandLineSwitches.ParameterizedSwitch.Project && IsEnvironmentVariable(switchParameters))
+                {
+                    commandLineSwitches.SetSwitchError("EnvironmentVariableAsSwitch", unquotedCommandLineArg, commandLine);
+                }
+
                 // check if switch is duplicated, and if that's allowed
                 if (!commandLineSwitches.IsParameterizedSwitchSet(parameterizedSwitch) ||
                     (duplicateSwitchErrorMessage == null))
                 {
-                    // skip the parameter indicator (if any)
-                    if (switchParameters.Length > 0)
-                    {
-                        switchParameters = switchParameters.Substring(1);
-                    }
-
-                    if (parameterizedSwitch == CommandLineSwitches.ParameterizedSwitch.Project && IsEnvironmentVariable(switchParameters))
-                    {
-                        commandLineSwitches.SetSwitchError("EnvironmentVariableAsSwitch", unquotedCommandLineArg, commandLine);
-                    }
-
                     // save the parameters after unquoting and splitting them if necessary
                     if (!commandLineSwitches.SetParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters, allowEmptyParameters))
                     {
