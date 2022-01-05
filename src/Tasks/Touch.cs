@@ -177,6 +177,7 @@ namespace Microsoft.Build.Tasks
             SetLastWriteTime fileSetLastWriteTime
         )
         {
+            file = MakePath(file);
             if (!fileExists(file))
             {
                 // If the file does not exist then we check if we need to create it.
