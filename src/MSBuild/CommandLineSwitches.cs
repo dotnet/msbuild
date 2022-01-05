@@ -735,18 +735,18 @@ namespace Microsoft.Build.CommandLine
         /// Called to flag an error when an unrecognized switch is detected on the command line.
         /// </summary>
         /// <param name="badCommandLineArg"></param>
-        internal void SetUnknownSwitchError(string badCommandLineArgValue)
+        internal void SetUnknownSwitchError(string badCommandLineArgValue, string commandLine)
         {
-            SetSwitchError("UnknownSwitchError", badCommandLineArgValue);
+            SetSwitchError("UnknownSwitchError", badCommandLineArgValue, commandLine);
         }
 
         /// <summary>
         /// Called to flag an error when a switch that doesn't take parameters is found with parameters on the command line.
         /// </summary>
         /// <param name="badCommandLineArg"></param>
-        internal void SetUnexpectedParametersError(string badCommandLineArgValue)
+        internal void SetUnexpectedParametersError(string badCommandLineArgValue, string commandLine)
         {
-            SetSwitchError("UnexpectedParametersError", badCommandLineArgValue);
+            SetSwitchError("UnexpectedParametersError", badCommandLineArgValue, commandLine);
         }
 
         // information about last flagged error
@@ -755,15 +755,16 @@ namespace Microsoft.Build.CommandLine
         private string _badCommandLineArg;
         private Exception _innerException;
         private bool _isParameterError;
+        private string _commandLine;
 
         /// <summary>
         /// Used to flag/store switch errors.
         /// </summary>
         /// <param name="messageResourceName"></param>
         /// <param name="badCommandLineArg"></param>
-        internal void SetSwitchError(string messageResourceNameValue, string badCommandLineArgValue)
+        internal void SetSwitchError(string messageResourceNameValue, string badCommandLineArgValue, string commandLine)
         {
-            SetError(messageResourceNameValue, badCommandLineArgValue, null, false);
+            SetError(messageResourceNameValue, badCommandLineArgValue, null, false, commandLine);
         }
 
         /// <summary>
@@ -771,9 +772,9 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="messageResourceName"></param>
         /// <param name="badCommandLineArg"></param>
-        internal void SetParameterError(string messageResourceNameValue, string badCommandLineArgValue)
+        internal void SetParameterError(string messageResourceNameValue, string badCommandLineArgValue, string commandLine)
         {
-            SetParameterError(messageResourceNameValue, badCommandLineArgValue, null);
+            SetParameterError(messageResourceNameValue, badCommandLineArgValue, null, commandLine);
         }
 
         /// <summary>
@@ -782,9 +783,9 @@ namespace Microsoft.Build.CommandLine
         /// <param name="messageResourceName"></param>
         /// <param name="badCommandLineArg"></param>
         /// <param name="innerException"></param>
-        internal void SetParameterError(string messageResourceNameValue, string badCommandLineArgValue, Exception innerExceptionValue)
+        internal void SetParameterError(string messageResourceNameValue, string badCommandLineArgValue, Exception innerExceptionValue, string commandLine)
         {
-            SetError(messageResourceNameValue, badCommandLineArgValue, innerExceptionValue, true);
+            SetError(messageResourceNameValue, badCommandLineArgValue, innerExceptionValue, true, commandLine);
         }
 
         /// <summary>
@@ -794,7 +795,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="badCommandLineArg"></param>
         /// <param name="innerException"></param>
         /// <param name="isParameterError"></param>
-        private void SetError(string messageResourceNameValue, string badCommandLineArgValue, Exception innerExceptionValue, bool isParameterErrorValue)
+        private void SetError(string messageResourceNameValue, string badCommandLineArgValue, Exception innerExceptionValue, bool isParameterErrorValue, string commandLine)
         {
             if (!HaveErrors())
             {
@@ -802,6 +803,7 @@ namespace Microsoft.Build.CommandLine
                 _badCommandLineArg = badCommandLineArgValue;
                 _innerException = innerExceptionValue;
                 _isParameterError = isParameterErrorValue;
+                _commandLine = commandLine;
             }
         }
 
@@ -827,7 +829,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    CommandLineSwitchException.Throw(_errorMessage, _badCommandLineArg);
+                    CommandLineSwitchException.Throw(_errorMessage, _badCommandLineArg, _commandLine);
                 }
             }
         }
@@ -841,7 +843,7 @@ namespace Microsoft.Build.CommandLine
         /// considered to be on the "left", and the switches being appended are on the "right".
         /// </remarks>
         /// <param name="switchesToAppend"></param>
-        internal void Append(CommandLineSwitches switchesToAppend)
+        internal void Append(CommandLineSwitches switchesToAppend, string commandLine)
         {
             // if this collection doesn't already have an error registered, but the collection being appended does
             if (!HaveErrors() && switchesToAppend.HaveErrors())
@@ -854,6 +856,7 @@ namespace Microsoft.Build.CommandLine
                 _badCommandLineArg = switchesToAppend._badCommandLineArg;
                 _innerException = switchesToAppend._innerException;
                 _isParameterError = switchesToAppend._isParameterError;
+                _commandLine = commandLine;
             }
 
             // NOTE: we might run into some duplicate switch errors below, but if we've already registered the error from the
@@ -874,7 +877,7 @@ namespace Microsoft.Build.CommandLine
                     else
                     {
                         SetSwitchError(s_parameterlessSwitchesMap[i].duplicateSwitchErrorMessage,
-                            switchesToAppend.GetParameterlessSwitchCommandLineArg((ParameterlessSwitch)i));
+                            switchesToAppend.GetParameterlessSwitchCommandLineArg((ParameterlessSwitch)i), commandLine);
                     }
                 }
             }
@@ -898,7 +901,7 @@ namespace Microsoft.Build.CommandLine
                     else
                     {
                         SetSwitchError(s_parameterizedSwitchesMap[j].duplicateSwitchErrorMessage,
-                            switchesToAppend.GetParameterizedSwitchCommandLineArg((ParameterizedSwitch)j));
+                            switchesToAppend.GetParameterizedSwitchCommandLineArg((ParameterizedSwitch)j), commandLine);
                     }
                 }
             }

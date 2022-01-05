@@ -24,8 +24,8 @@
     </note>
       </trans-unit>
       <trans-unit id="CannotAutoDisableAutoResponseFile">
-        <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
-        <target state="translated">MSBUILD : error MSB1027: Impossible de spécifier le commutateur -noAutoResponse dans le fichier réponse automatique MSBuild.rsp, ni dans aucun autre fichier réponse référencé par le fichier réponse automatique.</target>
+        <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
       <trans-unit id="CopyrightMessage">
@@ -43,13 +43,13 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
-        <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
-        <target state="translated">MSBUILD : error MSB1058: un seul cache de résultats de sortie peut être spécifié.</target>
+        <source>MSBUILD : error MSB1058: Only one output results cache can be specified. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1058: Only one output results cache can be specified. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1058: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateProjectSwitchError">
-        <source>MSBUILD : error MSB1008: Only one project can be specified.</source>
-        <target state="translated">MSBUILD : error MSB1008: Un seul projet peut être spécifié.</target>
+        <source>MSBUILD : error MSB1008: Only one project can be specified. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1008: Only one project can be specified. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1008: "}UE: This happens if the user does something like "msbuild.exe myapp.proj myapp2.proj". This is not allowed.
     MSBuild.exe will only build a single project. The help topic may link to an article about how to author an MSBuild project
     that itself launches MSBuild on a number of other projects.
@@ -1134,8 +1134,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note />
       </trans-unit>
       <trans-unit id="MissingLoggerError">
-        <source>MSBUILD : error MSB1007: Specify a logger.</source>
-        <target state="translated">MSBUILD : error MSB1007: Spécifiez un journal.</target>
+        <source>MSBUILD : error MSB1007: Specify a logger. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1007: Specify a logger. Full command line: '{0}'</target>
         <note>
       {StrBegin="MSBUILD : error MSB1007: "}UE: This happens if the user does something like "msbuild.exe -logger". The user must pass in an actual logger class
       following the switch, as in "msbuild.exe -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral".
@@ -1143,8 +1143,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="MissingMaxCPUCountError">
-        <source>MSBUILD : error MSB1031: Specify the maximum number of CPUs.</source>
-        <target state="translated">MSBUILD : error MSB1031: Spécifiez le nombre maximal d'UC.</target>
+        <source>MSBUILD : error MSB1031: Specify the maximum number of CPUs. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1031: Specify the maximum number of CPUs. Full command line: '{0}'</target>
         <note>
       {StrBegin="MSBUILD : error MSB1031: "}UE: This happens if the user does something like "msbuild.exe -m". The user must pass in an actual number like -m:4.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1160,8 +1160,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="MissingPropertyError">
-        <source>MSBUILD : error MSB1005: Specify a property and its value.</source>
-        <target state="translated">MSBUILD : error MSB1005: Spécifiez une propriété et sa valeur.</target>
+        <source>MSBUILD : error MSB1005: Specify a property and its value. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1005: Specify a property and its value. Full command line: '{0}'</target>
         <note>
       {StrBegin="MSBUILD : error MSB1005: "}UE: This happens if the user does something like "msbuild.exe -property". The user must pass in an actual property
       name and value following the switch, as in "msbuild.exe -property:Configuration=Debug".
@@ -1169,8 +1169,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="MissingResponseFileError">
-        <source>MSBUILD : error MSB1012: Specify a response file.</source>
-        <target state="translated">MSBUILD : error MSB1012: Spécifiez un fichier réponse.</target>
+        <source>MSBUILD : error MSB1012: Specify a response file. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1012: Specify a response file. Full command line: '{0}'</target>
         <note>
       {StrBegin="MSBUILD : error MSB1012: "}UE: This error would occur if the user did something like "msbuild.exe @ foo.proj". The at-sign must be followed by a
       response file.
@@ -1178,8 +1178,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="MissingTargetError">
-        <source>MSBUILD : error MSB1004: Specify the name of the target.</source>
-        <target state="translated">MSBUILD : error MSB1004: Spécifiez le nom de la cible.</target>
+        <source>MSBUILD : error MSB1004: Specify the name of the target. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1004: Specify the name of the target. Full command line: '{0}'</target>
         <note>
       {StrBegin="MSBUILD : error MSB1004: "}UE: This happens if the user does something like "msbuild.exe -target". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -target:blah".
@@ -1187,8 +1187,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="MissingToolsVersionError">
-        <source>MSBUILD : error MSB1039: Specify the version of the toolset.</source>
-        <target state="translated">MSBUILD : error MSB1039: Spécifiez la version de l'ensemble d'outils.</target>
+        <source>MSBUILD : error MSB1039: Specify the version of the toolset. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1039: Specify the version of the toolset. Full command line: '{0}'</target>
         <note>
       {StrBegin="MSBUILD : error MSB1039: "}
       UE: This happens if the user does something like "msbuild.exe -toolsVersion". The user must pass in an actual toolsversion
@@ -1197,8 +1197,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="MissingVerbosityError">
-        <source>MSBUILD : error MSB1016: Specify the verbosity level.</source>
-        <target state="translated">MSBUILD : error MSB1016: Spécifiez le niveau de verbosité.</target>
+        <source>MSBUILD : error MSB1016: Specify the verbosity level. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1016: Specify the verbosity level. Full command line: '{0}'</target>
         <note>
       {StrBegin="MSBUILD : error MSB1016: "}UE: This happens if the user does something like "msbuild.exe -verbosity". The user must pass in a verbosity level
       after the switch e.g. "msbuild.exe -verbosity:detailed".
@@ -1253,15 +1253,17 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note>{StrBegin="MSBUILD : MSB1045: "}</note>
       </trans-unit>
       <trans-unit id="ReadResponseFileError">
-        <source>MSBUILD : error MSB1023: Cannot read the response file. {0}</source>
-        <target state="translated">MSBUILD : error MSB1023: Impossible de lire le fichier réponse. {0}</target>
+        <source>MSBUILD : error MSB1023: Cannot read the response file. {0}
+    Full command line: '{1}'</source>
+        <target state="new">MSBUILD : error MSB1023: Cannot read the response file. {0}
+    Full command line: '{1}'</target>
         <note>{StrBegin="MSBUILD : error MSB1023: "}UE: This error is shown when the response file cannot be read off disk.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a localized message explaining
     why the response file could not be read -- this message comes from the CLR/FX.</note>
       </trans-unit>
       <trans-unit id="RepeatedResponseFileError">
-        <source>MSBUILD : error MSB1013: The response file was specified twice. A response file can be specified only once. Any files named "msbuild.rsp" in the directory of MSBuild.exe or in the directory of the first project or solution built (which if no project or solution is specified is the current working directory) were automatically used as response files.</source>
-        <target state="translated">MSBUILD : error MSB1013: Fichier réponse spécifié deux fois. Il ne peut l'être qu'une seule fois. Tous les fichiers nommés "msbuild.rsp" dans le répertoire de MSBuild.exe ou dans le répertoire de la première solution ou du premier projet généré (correspondant au répertoire de travail actif si aucun projet ni aucune solution n'est spécifié) sont automatiquement utilisés comme fichiers réponse.</target>
+        <source>MSBUILD : error MSB1013: The response file was specified twice. A response file can be specified only once. Any files named "msbuild.rsp" in the directory of MSBuild.exe or in the directory of the first project or solution built (which if no project or solution is specified is the current working directory) were automatically used as response files. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1013: The response file was specified twice. A response file can be specified only once. Any files named "msbuild.rsp" in the directory of MSBuild.exe or in the directory of the first project or solution built (which if no project or solution is specified is the current working directory) were automatically used as response files. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1013: "}UE: Response files are just text files that contain a bunch of command-line switches to be passed to MSBuild.exe. The
     purpose is so you don't have to type the same switches over and over again ... you can just pass in the response file instead.
     Response files can include the @ switch in order to further include other response files. In order to prevent a circular
@@ -1270,8 +1272,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="ResponseFileNotFoundError">
-        <source>MSBUILD : error MSB1022: Response file does not exist.</source>
-        <target state="translated">MSBUILD : error MSB1022: Le fichier réponse n'existe pas.</target>
+        <source>MSBUILD : error MSB1022: Response file does not exist. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1022: Response file does not exist. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1022: "}UE: This message would show if the user did something like "msbuild @bogus.rsp" where bogus.rsp doesn't exist. This
     message does not need in-line parameters because the exception takes care of displaying the invalid arg.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
@@ -1309,15 +1311,15 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
-        <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
-        <target state="translated">MSBUILD : error MSB1002: Ce commutateur n'accepte aucun paramètre.</target>
+        <source>MSBUILD : error MSB1002: This switch does not take any parameters. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1002: This switch does not take any parameters. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1002: "}UE: For example, if somebody types "msbuild.exe -noLogo:1", they would get this error because the -noLogo switch
     should not be followed by any parameters ... it stands alone.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="UnknownSwitchError">
-        <source>MSBUILD : error MSB1001: Unknown switch.</source>
-        <target state="translated">MSBUILD : error MSB1001: Commutateur inconnu.</target>
+        <source>MSBUILD : error MSB1001: Unknown switch. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1001: Unknown switch. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1001: "}UE: This occurs when the user passes in an unrecognized switch on the MSBuild.exe command-line.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
@@ -1332,8 +1334,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note />
       </trans-unit>
       <trans-unit id="MissingIgnoreProjectExtensionsError">
-        <source>MSBUILD : error MSB1035: Specify the project extensions to ignore.</source>
-        <target state="translated">MSBUILD : error MSB1035: Spécifiez les extensions de projet à ignorer.</target>
+        <source>MSBUILD : error MSB1035: Specify the project extensions to ignore. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1035: Specify the project extensions to ignore. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1035: "}
       UE: This happens if the user does something like "msbuild.exe -ignoreProjectExtensions". The user must pass in one or more
       project extensions to ignore e.g. "msbuild.exe -ignoreProjectExtensions:.sln".
@@ -1346,8 +1348,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note>{StrBegin="MSBUILD : error MSB1036: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="MissingConsoleLoggerParameterError">
-        <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1037: Spécifiez un ou plusieurs paramètres pour le journaliseur de console si vous utilisez le commutateur -consoleLoggerParameters</target>
+        <source>MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1037: Specify one or more parameters for the console logger if using the -consoleLoggerParameters switch. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1037: "}
       UE: This happens if the user does something like "msbuild.exe -consoleLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -consoleLoggerParameters:ErrorSummary".
@@ -1355,8 +1357,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="MissingFileLoggerParameterError">
-        <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1038: Spécifiez un ou plusieurs paramètres pour le journaliseur vers un fichier si vous utilisez le commutateur -fileLoggerParameters</target>
+        <source>MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1038: Specify one or more parameters for the file logger if using the -fileLoggerParameters switch. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1038: "}
       UE: This happens if the user does something like "msbuild.exe -fileLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -fileLoggerParameters:logfile=c:\temp\logfile".
@@ -1364,8 +1366,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="MissingNodeReuseParameterError">
-        <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch</source>
-        <target state="translated">MSBUILD : error MSB1041: Spécifiez un ou plusieurs paramètres pour la réutilisation du nœud si vous utilisez le commutateur -nodeReuse</target>
+        <source>MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1041: Specify one or more parameters for node reuse if using the -nodeReuse switch. Full command line: '{0}'</target>
         <note>{StrBegin="MSBUILD : error MSB1041: "}
       UE: This happens if the user does something like "msbuild.exe -nodeReuse:" without a true or false
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1506,8 +1508,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note>{StrBegin="MSBUILD : error MSB1049: "}</note>
       </trans-unit>
       <trans-unit id="MissingWarnAsMessageParameterError">
-        <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</source>
-        <target state="translated">MSBUILD : error MSB1051: Spécifiez un ou plusieurs codes d'avertissement à traiter comme des messages d'importance faible lors de l'utilisation du commutateur /warnAsMessage.</target>
+        <source>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch. Full command line: '{0}'</target>
         <note>
       {StrBegin="MSBUILD : error MSB1051: "}
       UE: This happens if the user does something like "msbuild.exe -warnAsMessage:" without any codes.
@@ -1721,8 +1723,8 @@ fois plus petit que le journal
         <note />
       </trans-unit>
       <trans-unit id="MissingProfileParameterError">
-        <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
-        <target state="translated">MSBUILD : erreur MSB1054 : Un nom de fichier doit être spécifié pour générer le résultat du profileur.</target>
+        <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result. Full command line: '{0}'</source>
+        <target state="new">MSBUILD :error MSB1054: A filename must be specified to generate the profiler result. Full command line: '{0}'</target>
         <note />
       </trans-unit>
     </body>

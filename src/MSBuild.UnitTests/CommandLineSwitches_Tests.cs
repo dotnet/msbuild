@@ -458,7 +458,7 @@ namespace Microsoft.Build.UnitTests
         public void TargetsSwitchParameter()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets:targets.txt" }, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets:targets.txt" }, switches, string.Empty);
 
             switches.HaveErrors().ShouldBeFalse();
             switches[CommandLineSwitches.ParameterizedSwitch.Targets].ShouldBe(new[] { "targets.txt" });
@@ -468,7 +468,7 @@ namespace Microsoft.Build.UnitTests
         public void TargetsSwitchDoesNotSupportMultipleOccurrences()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets /targets" }, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets /targets" }, switches, string.Empty);
 
             switches.HaveErrors().ShouldBeTrue();
         }
@@ -546,7 +546,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches, string.Empty);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new[] {"true", "  NoBuild  ", "  ", "foo"});
 
@@ -558,7 +558,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph" }, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph" }, switches, string.Empty);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new string[0]);
 
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/irc", "/irc:a;b", "/irc:c;d"}, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/irc", "/irc:a;b", "/irc:c;d"}, switches, string.Empty);
 
             switches[CommandLineSwitches.ParameterizedSwitch.InputResultsCaches].ShouldBe(new []{null, "a", "b", "c", "d"});
 
@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a"}, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a"}, switches, string.Empty);
 
             switches[CommandLineSwitches.ParameterizedSwitch.OutputResultsCache].ShouldBe(new []{"a"});
 
@@ -594,7 +594,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a", "/orc:b"}, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a", "/orc:b"}, switches, string.Empty);
 
             switches.HaveErrors().ShouldBeTrue();
         }
@@ -768,24 +768,24 @@ namespace Microsoft.Build.UnitTests
             Assert.False(switchesLeft.HaveErrors());
             Assert.False(switchesRight.HaveErrors());
 
-            switchesLeft.Append(switchesRight);
+            switchesLeft.Append(switchesRight, string.Empty);
 
             Assert.False(switchesLeft.HaveErrors());
             Assert.False(switchesRight.HaveErrors());
 
-            switchesLeft.SetUnknownSwitchError("/bogus");
+            switchesLeft.SetUnknownSwitchError("/bogus", string.Empty);
 
             Assert.True(switchesLeft.HaveErrors());
             Assert.False(switchesRight.HaveErrors());
 
-            switchesLeft.Append(switchesRight);
+            switchesLeft.Append(switchesRight, string.Empty);
 
             Assert.True(switchesLeft.HaveErrors());
             Assert.False(switchesRight.HaveErrors());
 
             VerifySwitchError(switchesLeft, "/bogus");
 
-            switchesRight.Append(switchesLeft);
+            switchesRight.Append(switchesLeft, string.Empty);
 
             Assert.True(switchesLeft.HaveErrors());
             Assert.True(switchesRight.HaveErrors());
@@ -803,8 +803,8 @@ namespace Microsoft.Build.UnitTests
             Assert.False(switchesLeft.HaveErrors());
             Assert.False(switchesRight.HaveErrors());
 
-            switchesLeft.SetUnknownSwitchError("/bogus");
-            switchesRight.SetUnexpectedParametersError("/nologo:foo");
+            switchesLeft.SetUnknownSwitchError("/bogus", string.Empty);
+            switchesRight.SetUnexpectedParametersError("/nologo:foo", string.Empty);
 
             Assert.True(switchesLeft.HaveErrors());
             Assert.True(switchesRight.HaveErrors());
@@ -812,7 +812,7 @@ namespace Microsoft.Build.UnitTests
             VerifySwitchError(switchesLeft, "/bogus");
             VerifySwitchError(switchesRight, "/nologo:foo");
 
-            switchesLeft.Append(switchesRight);
+            switchesLeft.Append(switchesRight, string.Empty);
 
             VerifySwitchError(switchesLeft, "/bogus");
             VerifySwitchError(switchesRight, "/nologo:foo");
@@ -835,7 +835,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(switchesRight1.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Help));
             Assert.True(switchesRight1.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger));
 
-            switchesLeft.Append(switchesRight1);
+            switchesLeft.Append(switchesRight1, string.Empty);
 
             Assert.Equal("/noconlog", switchesLeft.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger));
             Assert.True(switchesLeft.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger));
@@ -853,7 +853,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(switchesRight2.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Help));
             Assert.True(switchesRight2.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger));
 
-            switchesLeft.Append(switchesRight2);
+            switchesLeft.Append(switchesRight2, string.Empty);
 
             Assert.Equal("/NOCONSOLELOGGER", switchesLeft.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger));
             Assert.True(switchesLeft.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger));
@@ -883,7 +883,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(switchesRight.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Project));
             Assert.True(switchesRight.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target));
 
-            switchesLeft.Append(switchesRight);
+            switchesLeft.Append(switchesRight, string.Empty);
 
             Assert.Equal("tempproject.proj", switchesLeft.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project));
             Assert.True(switchesLeft.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Project));
@@ -919,7 +919,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(switchesRight.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target));
 
-            switchesLeft.Append(switchesRight);
+            switchesLeft.Append(switchesRight, string.Empty);
 
             Assert.Equal("/t:\"RESOURCES\";build", switchesLeft.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Target));
             Assert.True(switchesLeft.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target));
@@ -948,7 +948,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(switchesRight.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Project));
 
-            switchesLeft.Append(switchesRight);
+            switchesLeft.Append(switchesRight, string.Empty);
 
             Assert.Equal("tempproject.proj", switchesLeft.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Project));
             Assert.True(switchesLeft.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Project));
@@ -1074,7 +1074,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "" }), commandLineSwitches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "" }), commandLineSwitches, string.Empty);
 
             Assert.Null(MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches));
         }
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.UnitTests
                 "/err:D,d;E,e",               // A different source with new items and uses the short form
                 "/warnaserror:a",             // A different source with a single duplicate
                 "/warnaserror:a,b",           // A different source with  multiple duplicates
-            }), commandLineSwitches);
+            }), commandLineSwitches, string.Empty);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1118,7 +1118,7 @@ namespace Microsoft.Build.UnitTests
             {
                 "/warnaserror:a;b;c",
                 "/warnaserror",
-            }), commandLineSwitches);
+            }), commandLineSwitches, string.Empty);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1142,7 +1142,7 @@ namespace Microsoft.Build.UnitTests
                 "/warnaserror:a;b;c",
                 "/warnaserror",
                 "/warnaserror:e;f;g",
-            }), commandLineSwitches);
+            }), commandLineSwitches, string.Empty);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1159,7 +1159,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new [] { "/warnaserror" }), commandLineSwitches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new [] { "/warnaserror" }), commandLineSwitches, string.Empty);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1176,7 +1176,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches, string.Empty);
 
             VerifySwitchError(commandLineSwitches, "/warnasmessage", AssemblyResources.GetString("MissingWarnAsMessageParameterError"));
         }
@@ -1199,7 +1199,7 @@ namespace Microsoft.Build.UnitTests
                 "/nowarn:D,d;E,e",              // A different source with new items and uses the short form
                 "/warnasmessage:a",             // A different source with a single duplicate
                 "/warnasmessage:a,b",           // A different source with  multiple duplicates
-            }), commandLineSwitches);
+            }), commandLineSwitches, string.Empty);
 
             ISet<string> actualWarningsAsMessages = MSBuildApp.ProcessWarnAsMessageSwitch(commandLineSwitches);
 
@@ -1216,7 +1216,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/profileevaluation" }), commandLineSwitches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/profileevaluation" }), commandLineSwitches, string.Empty);
             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
         }
 
