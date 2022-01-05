@@ -1176,7 +1176,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches, string.Empty);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches, /*This is a hack so the error message contains the exact resource string.*/ "{0}");
 
             VerifySwitchError(commandLineSwitches, "/warnasmessage", AssemblyResources.GetString("MissingWarnAsMessageParameterError"));
         }
