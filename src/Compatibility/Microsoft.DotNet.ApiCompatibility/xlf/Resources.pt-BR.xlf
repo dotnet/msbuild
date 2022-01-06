@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="MemberExistsOnLeft">
         <source>Member '{0}' exists on {1} but not on {2}</source>
-        <target state="new">Member '{0}' exists on {1} but not on {2}</target>
+        <target state="translated">O membro '{0}' existe em {1} mas não em {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="MemberExistsOnRight">
@@ -129,12 +129,12 @@
       </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
+        <target state="translated">O tipo '{0}' existe em {1} mas não em {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnRight">
         <source>Type '{0}' exists on {2} but not on {1}</source>
-        <target state="new">Type '{0}' exists on {2} but not on {1}</target>
+        <target state="translated">O tipo '{0}' existe em {2} mas não em {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">

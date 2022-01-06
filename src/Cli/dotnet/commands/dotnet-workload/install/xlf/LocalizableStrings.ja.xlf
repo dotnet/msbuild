@@ -279,7 +279,7 @@
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
         <source>Workload(s) '{0}' are already installed.</source>
-        <target state="needs-review-translation">ワークロード '{0}' は既にインストールされています。</target>
+        <target state="translated">ワークロード '{0}' は既にインストールされています。</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">

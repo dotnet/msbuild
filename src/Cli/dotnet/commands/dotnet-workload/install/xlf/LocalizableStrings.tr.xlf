@@ -279,7 +279,7 @@
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
         <source>Workload(s) '{0}' are already installed.</source>
-        <target state="needs-review-translation">'{0}' iş yükü zaten yüklü.</target>
+        <target state="translated">'{0}' iş yükleri zaten yüklü.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">

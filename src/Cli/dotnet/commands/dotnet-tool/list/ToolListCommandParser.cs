@@ -5,6 +5,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Tool.Common;
+using Microsoft.DotNet.Tools.Tool.List;
 using Microsoft.DotNet.Tools.Tool.Restore;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
 
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
             command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
 
-            CommandHandler.Create<ParseResult>((parseResult) => new ToolRestoreCommand(parseResult).Execute());
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolListCommand(parseResult).Execute());
 
             return command;
         }
