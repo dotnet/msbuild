@@ -26,7 +26,6 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
@@ -1654,14 +1653,14 @@ namespace Microsoft.Build.CommandLine
 
             // parse the command line, and flag syntax errors and obvious switch errors
             switchesNotFromAutoResponseFile = new CommandLineSwitches();
-            GatherCommandLineSwitches(commandLineArgs, switchesNotFromAutoResponseFile, fullCommandLine);
+            GatherCommandLineSwitches(commandLineArgs, switchesNotFromAutoResponseFile, ref fullCommandLine);
 
             // parse the auto-response file (if "/noautoresponse" is not specified), and combine those switches with the
             // switches on the command line
             switchesFromAutoResponseFile = new CommandLineSwitches();
             if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
             {
-                GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile, fullCommandLine);
+                GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile, ref fullCommandLine);
             }
         }
 
@@ -1672,7 +1671,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Internal for unit testing only.
         /// </remarks>
-        internal static void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine)
+        internal static void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches, ref string commandLine)
         {
             foreach (string commandLineArg in commandLineArgs)
             {
@@ -1683,7 +1682,7 @@ namespace Microsoft.Build.CommandLine
                     // response file switch starts with @
                     if (unquotedCommandLineArg.StartsWith("@", StringComparison.Ordinal))
                     {
-                        GatherResponseFileSwitch(unquotedCommandLineArg, commandLineSwitches, commandLine);
+                        GatherResponseFileSwitch(unquotedCommandLineArg, commandLineSwitches, ref commandLine);
                     }
                     else
                     {
@@ -1845,7 +1844,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="unquotedCommandLineArg"></param>
         /// <param name="commandLineSwitches"></param>
-        private static void GatherResponseFileSwitch(string unquotedCommandLineArg, CommandLineSwitches commandLineSwitches, string commandLine)
+        private static void GatherResponseFileSwitch(string unquotedCommandLineArg, CommandLineSwitches commandLineSwitches, ref string commandLine)
         {
             try
             {
@@ -1910,7 +1909,9 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
 
-                        GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, commandLine);
+                        commandLine += ' ' + string.Join(" ", argsFromResponseFile);
+
+                        GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, ref commandLine);
                     }
                 }
             }
@@ -2074,13 +2075,13 @@ namespace Microsoft.Build.CommandLine
         /// switches from the auto-response file with the switches passed in.
         /// Returns true if the response file was found.
         /// </summary>
-        private static bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
+        private static bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile, ref string commandLine)
         {
             string autoResponseFile = Path.Combine(path, autoResponseFileName);
-            return GatherAutoResponseFileSwitchesFromFullPath(autoResponseFile, switchesFromAutoResponseFile, commandLine);
+            return GatherAutoResponseFileSwitchesFromFullPath(autoResponseFile, switchesFromAutoResponseFile, ref commandLine);
         }
 
-        private static bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
+        private static bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile, ref string commandLine)
         {
             bool found = false;
 
@@ -2088,7 +2089,7 @@ namespace Microsoft.Build.CommandLine
             if (FileSystems.Default.FileExists(autoResponseFile))
             {
                 found = true;
-                GatherResponseFileSwitch($"@{autoResponseFile}", switchesFromAutoResponseFile, commandLine);
+                GatherResponseFileSwitch($"@{autoResponseFile}", switchesFromAutoResponseFile, ref commandLine);
 
                 // if the "/noautoresponse" switch was set in the auto-response file, flag an error
                 if (switchesFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
@@ -2218,13 +2219,13 @@ namespace Microsoft.Build.CommandLine
                         // gather any switches from the first Directory.Build.rsp found in the project directory or above
                         string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
 
-                        bool found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, commandLine);
+                        bool found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, ref commandLine);
 
                         // Don't look for more response files if it's only in the same place we already looked (next to the exe)
                         if (!string.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
                         {
                             // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                            found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile, commandLine);
+                            found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile, ref commandLine);
                         }
 
                         if (found)
