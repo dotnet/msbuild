@@ -16,6 +16,7 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.Loader;
 #endif
 using System.Threading;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
@@ -422,7 +423,10 @@ namespace Microsoft.Build.Shared
                                     toAdd.Name = metadataReader.GetString(propertyDefinition.Name);
                                     //MethodSignature<RuntimeTypeInfo> sign = propertyDefinition.DecodeSignature<RuntimeTypeInfo, TypeContext>(new SignatureDecoder<RuntimeTypeInfo, TypeContext>(), null);
                                     //toAdd.PropertyType = sign.ReturnType ?? sign.ParameterTypes[0];
-                                    //byte[] bytes = metadataReader.GetBlobReader(propertyDefinition.Signature).ReadBytes(metadataReader.GetBlobReader(propertyDefinition.Signature).Length);
+                                    byte[] bytes = metadataReader.GetBlobReader(propertyDefinition.Signature).ReadBytes(metadataReader.GetBlobReader(propertyDefinition.Signature).Length);
+                                    toAdd.PropertyType = ByteSignatureToType(bytes);
+                                    toAdd.OutputAttribute = false;
+                                    toAdd.RequiredAttribute = false;
                                     foreach (CustomAttributeHandle attr in propertyDefinition.GetCustomAttributes())
                                     {
                                         EntityHandle referenceHandle = metadataReader.GetMemberReference((MemberReferenceHandle)metadataReader.GetCustomAttribute(attr).Constructor).Parent;
@@ -514,6 +518,36 @@ namespace Microsoft.Build.Shared
                 }
 
                 return typeInformation;
+            }
+
+            private Type ByteSignatureToType(byte[] bytes)
+            {
+                string stringBytes = string.Join(string.Empty, bytes.Select(b => b.ToString("X2")));
+                return stringBytes switch
+                {
+                    "280002" => typeof(bool),
+                    "280003" => typeof(char),
+                    "280008" => typeof(int),
+                    "28000C" => typeof(float),
+                    "28000E" => typeof(string),
+                    "2800128095" => typeof(ITaskItem),
+                    "28001D02" => typeof(bool[]),
+                    "28001D03" => typeof(char[]),
+                    "28001D08" => typeof(int[]),
+                    "28001D0C" => typeof(float[]),
+                    "28001D0E" => typeof(string[]),
+                    "28001D128095" => typeof(ITaskItem[]),
+                    "28001D1281E1" => typeof(ITaskItem[]),
+                    "2800151182110102" => typeof(bool?),
+                    "2800151182110103" => typeof(char?),
+                    "2800151182110108" => typeof(int?),
+                    "280015118211010C" => typeof(float?),
+                    "28001D151182110102" => typeof(bool?[]),
+                    "28001D151182110103" => typeof(char?[]),
+                    "28001D151182110108" => typeof(int?[]),
+                    "28001D15118211010c" => typeof(float?[]),
+                    _ => stringBytes.StartsWith("28001185") && stringBytes.Length == 10 ? typeof(Enum) : null,
+                };
             }
 
             /// <summary>
