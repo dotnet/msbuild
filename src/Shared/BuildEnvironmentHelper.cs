@@ -51,8 +51,14 @@ namespace Microsoft.Build.Shared
                 }
                 catch (TypeInitializationException e)
                 {
-                    // Throw the error that caused the TypeInitializationException, likely InvalidOperationException.
-                    throw e.InnerException ?? e;
+                    if (e.InnerException != null)
+                    {
+                        // Throw the error that caused the TypeInitializationException.
+                        // (likely InvalidOperationException)
+                        throw e.InnerException;
+                    }
+
+                    throw;
                 }
             }
         }

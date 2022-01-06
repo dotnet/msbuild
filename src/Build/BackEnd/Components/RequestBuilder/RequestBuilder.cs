@@ -815,7 +815,7 @@ namespace Microsoft.Build.BackEnd
 
                 thrownException = ex;
             }
-            catch (Exception ex) // LoggerException is a polite logger failure. InternalLoggerException is an arbitrary exception. Handle them the same.
+            catch (Exception ex)
             {
                 thrownException = ex;
 

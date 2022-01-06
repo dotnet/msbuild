@@ -1437,7 +1437,7 @@ namespace Microsoft.Build.Execution
 
                                 return false;
                             }
-                            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e)) // Catching Exception, but rethrowing unless it's a well-known exception.
+                            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                             {
                                 string message =
 #if DEBUG

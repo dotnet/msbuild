@@ -735,7 +735,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 </Project>
                 ");
 
-                project.Build(logger).ShouldBeTrue(); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
+                project.Build(logger).ShouldBeTrue("Build failed.  See test output (Attachments in Azure Pipelines) for details");
                 logger.AssertLogContains("[*]");
             }
             finally

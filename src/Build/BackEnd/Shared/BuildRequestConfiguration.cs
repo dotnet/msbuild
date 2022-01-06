@@ -1005,12 +1005,7 @@ namespace Microsoft.Build.BackEnd
                     return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
                 }
             }
-            catch (DirectoryNotFoundException e)
-            {
-                ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
-                throw;
-            }
-            catch (UnauthorizedAccessException e)
+            catch (Exception e) when (e is DirectoryNotFoundException || e is UnauthorizedAccessException)
             {
                 ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
                 throw;
