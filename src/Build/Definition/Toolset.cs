@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml;
 
 using Microsoft.Build.BackEnd;
@@ -475,6 +476,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public string DefaultSubToolsetVersion
         {
+            [MethodImpl(MethodImplOptions.Synchronized)]
             get
             {
                 if (_defaultSubToolsetVersion == null)
@@ -882,6 +884,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="loggingServices">The logging services to use to log during this registration.</param>
         /// <param name="buildEventContext">The build event context to use to log during this registration.</param>
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private void RegisterDefaultTasks(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCacheBase projectRootElementCache)
         {
             if (!_defaultTasksRegistrationAttempted)
