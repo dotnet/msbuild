@@ -17,7 +17,7 @@ namespace MSBuild
         [Required]
         public string AssemblyPath { get; set; }
 
-        // Microsoft.Build.Conversion.Core and Microsoft.Build.Engine are deprecated. We don't ship them, but they're still used in VS for now. We should ensure they're the right version if present.
+        // Microsoft.Build.Conversion.Core and Microsoft.Build.Engine are deprecated, but they're still used in VS for now. This project doesn't directly reference them, so they don't appear in its output directory.
         // Microsoft.NET.StringTools uses API not available in net35, but since we need it to work for TaskHosts as well, there are simpler versions implemented for that. Ensure it's the right version.
         // Microsoft.Activities.Build and XamlBuildTask are loaded within an AppDomain in the XamlBuildTask after having been loaded from the GAC elsewhere. See https://github.com/dotnet/msbuild/pull/856
         private string[] assembliesToIgnore = { "Microsoft.Build.Conversion.Core", "Microsoft.NET.StringTools.net35", "Microsoft.Build.Engine", "Microsoft.Activities.Build", "XamlBuildTask" };
