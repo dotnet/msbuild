@@ -49,10 +49,11 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem directory in Directories)
             {
-                if (FileSystems.Default.DirectoryExists(directory.ItemSpec))
+                var directoryPath = MakePath(directory.ItemSpec);
+                if (FileSystems.Default.DirectoryExists(directoryPath))
                 {
                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                    Log.LogMessageFromResources(MessageImportance.Normal, "RemoveDir.Removing", directory.ItemSpec);
+                    Log.LogMessageFromResources(MessageImportance.Normal, "RemoveDir.Removing", directoryPath);
 
                     // Try to remove the directory, this will not log unauthorized access errors since
                     // we will attempt to remove read only attributes and try again.
@@ -63,7 +64,7 @@ namespace Microsoft.Build.Tasks
                     {
                         // If the directory delete operation returns an unauthorized access exception
                         // we need to attempt to remove the readonly attributes and try again.
-                        currentSuccess = RemoveReadOnlyAttributeRecursively(new DirectoryInfo(directory.ItemSpec));
+                        currentSuccess = RemoveReadOnlyAttributeRecursively(new DirectoryInfo(directoryPath));
                         if (currentSuccess)
                         {
                             // Retry the remove directory operation, this time we want to log any errors
@@ -102,7 +103,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // Try to delete the directory
-                Directory.Delete(directory.ItemSpec, true);
+                Directory.Delete(MakePath(directory.ItemSpec), true);
             }
             catch (UnauthorizedAccessException e)
             {
