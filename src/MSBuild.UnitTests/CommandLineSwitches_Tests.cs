@@ -1201,22 +1201,19 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ProcessEnvironmentVariableSwitch()
         {
-            string savedEnvironmentVariable = Environment.GetEnvironmentVariable("ENVIRONMENTVARIABLE");
-            Environment.SetEnvironmentVariable("ENVIRONMENTVARIABLE", null);
-
-            CommandLineSwitches commandLineSwitches = new();
-            string fullCommandLine = "msbuild validProject.csproj %ENVIRONMENTVARIABLE%";
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "validProject.csproj", "%ENVIRONMENTVARIABLE%" }, commandLineSwitches, ref fullCommandLine);
-            VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
-
-            commandLineSwitches = new();
-            fullCommandLine = "msbuild %ENVIRONMENTVARIABLE% validProject.csproj";
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "%ENVIRONMENTVARIABLE%", "validProject.csproj" }, commandLineSwitches, ref fullCommandLine);
-            VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
-
-            if (savedEnvironmentVariable is not null)
+            using (TestEnvironment env = TestEnvironment.Create())
             {
-                Environment.SetEnvironmentVariable("ENVIRONMENTVARIABLE", savedEnvironmentVariable);
+                env.SetEnvironmentVariable("ENVIRONMENTVARIABLE", string.Empty);
+
+                CommandLineSwitches commandLineSwitches = new();
+                string fullCommandLine = "msbuild validProject.csproj %ENVIRONMENTVARIABLE%";
+                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "validProject.csproj", "%ENVIRONMENTVARIABLE%" }, commandLineSwitches, ref fullCommandLine);
+                VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
+
+                commandLineSwitches = new();
+                fullCommandLine = "msbuild %ENVIRONMENTVARIABLE% validProject.csproj";
+                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "%ENVIRONMENTVARIABLE%", "validProject.csproj" }, commandLineSwitches, ref fullCommandLine);
+                VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
             }
         }
 
