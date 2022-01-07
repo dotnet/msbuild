@@ -13,6 +13,7 @@ using Microsoft.Build.Shared;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -476,6 +477,8 @@ namespace Microsoft.Build.BackEnd
             _buildRequestEngine.UnblockBuildRequest(unblocker);
         }
 
+        private static ProjectRootElementCacheBase s_projectRootElementCacheBase = new ProjectRootElementCache(true /* automatically reload any changes from disk */);
+
         /// <summary>
         /// Handles the NodeConfiguration packet.
         /// </summary>
@@ -502,6 +505,8 @@ namespace Microsoft.Build.BackEnd
 
             // Declare in-proc
             _componentHost.BuildParameters.IsOutOfProc = false;
+
+            _componentHost.BuildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 
             // Set the logging exception handler
             ILoggingService loggingService = _componentHost.LoggingService;
