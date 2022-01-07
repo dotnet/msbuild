@@ -72,7 +72,7 @@
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
 
-  <!-- Enable SDK supplied netanalyzers as we reference them from nugets instead -->
+  <!-- Enable SDK supplied netanalyzers for all target frameworks -->
   <PropertyGroup>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>

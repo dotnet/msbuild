@@ -24,6 +24,6 @@
 
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-  </ItemGroup>  
+  </ItemGroup>
 
 </Project>
