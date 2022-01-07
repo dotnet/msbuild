@@ -383,7 +383,7 @@ namespace Microsoft.Build.Collections
         /// All items of a type are returned consecutively in their correct order.
         /// However the order in which item types are returned is not defined.
         /// </summary>
-        private sealed class Enumerator : IEnumerator<T>, IDisposable
+        private sealed class Enumerator : IEnumerator<T>
         {
             /// <summary>
             /// Enumerator over lists
@@ -456,7 +456,6 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public void Dispose()
             {
-                Dispose(true);
                 GC.SuppressFinalize(this);
             }
 
