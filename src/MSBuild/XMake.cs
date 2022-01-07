@@ -1909,7 +1909,7 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
 
-                        commandLine += ' ' + string.Join(" ", argsFromResponseFile);
+                        commandLine += $"' '{responseFile}': '{string.Join(" ", argsFromResponseFile)}";
 
                         GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, ref commandLine);
                     }
