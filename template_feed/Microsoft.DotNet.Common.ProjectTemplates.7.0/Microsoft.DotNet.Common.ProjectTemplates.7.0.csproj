@@ -10,6 +10,7 @@
         <!-- .NET 6 template package is shipped with the preview / RC since .NET 6 is not released yet -->
         <!-- if the package should be shipped for servicing, set <IsPackable> to true for explicit version here -->
         <IsPackable>false</IsPackable>
+        <IsPackable Condition="'$(PreReleaseVersionLabel)' == 'alpha'">true</IsPackable>
         <IsPackable Condition="'$(PreReleaseVersionLabel)' == 'preview'">true</IsPackable>
         <IsPackable Condition="'$(PreReleaseVersionLabel)' == 'rc'">true</IsPackable>
         <IsPackable Condition="'$(PreReleaseVersionLabel)' == 'rtm'">true</IsPackable>
