@@ -23,7 +23,6 @@
 
         $runTestsCannotRunOnHelixArgs = ("-configuration", $configuration, "-ci")
         $runTestsOnHelixArgs = ("-configuration", $configuration,
-        "-prepareMachine",
         "-ci",
         "-restore",
         "-test",
@@ -38,3 +37,11 @@
     }
 
     runHelixAndNonHelixInParallel -configuration $configuration -buildSourcesDirectory $buildSourcesDirectory -customHelixTargetQueue $customHelixTargetQueue -engfolderPath $PSScriptRoot
+    
+  # An array of names of processes to stop on script exit
+  $processesToStopOnExit =  @('msbuild', 'dotnet', 'vbcscompiler')
+
+  Write-Host 'Stopping running build processes...'
+  foreach ($processName in $processesToStopOnExit) {
+    Get-Process -Name $processName -ErrorAction SilentlyContinue | Stop-Process
+  }
