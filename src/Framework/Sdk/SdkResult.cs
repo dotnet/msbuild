@@ -9,7 +9,11 @@ namespace Microsoft.Build.Framework
     ///     An abstract interface class to indicate SDK resolver success or failure.
     /// </summary>
     /// <remarks>
-    ///   Note: Use <see cref="Microsoft.Build.Framework.SdkResultFactory"/> to create instances of this class. Do not inherit from this class.
+    ///    <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!NOTE]
+    /// > Use <xref:Microsoft.Build.Framework.SdkResultFactory> to create instances of this class. Do not inherit from this class.
+    /// ]]></format>
     /// </remarks>
     public abstract class SdkResult
     {
