@@ -456,6 +456,17 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public void Dispose()
             {
+                if (_listEnumerator != null)
+                {
+                    if (_itemEnumerator != null)
+                    {
+                        _itemEnumerator.Dispose();
+                        _itemEnumerator = null;
+                    }
+
+                    _listEnumerator.Dispose();
+                    _listEnumerator = null;
+                }
                 GC.SuppressFinalize(this);
             }
 
