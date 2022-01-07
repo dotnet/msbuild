@@ -11,6 +11,8 @@ using Microsoft.Build.Utilities;
 using Marshal = System.Runtime.InteropServices.Marshal;
 using COMException = System.Runtime.InteropServices.COMException;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

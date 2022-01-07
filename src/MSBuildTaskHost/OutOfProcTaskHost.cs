@@ -8,6 +8,8 @@ using System.Diagnostics;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>

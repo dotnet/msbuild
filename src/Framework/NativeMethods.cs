@@ -19,6 +19,8 @@ using Microsoft.Win32.SafeHandles;
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework;
 internal static class NativeMethods
 {

@@ -7,6 +7,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     sealed public class GetCompatiblePlatform_Tests

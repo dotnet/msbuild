@@ -9,6 +9,8 @@ using Xunit;
 using Shouldly;
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class ResGenDependencies_Tests

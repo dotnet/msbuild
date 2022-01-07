@@ -18,6 +18,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     using Utilities = Internal.Utilities;

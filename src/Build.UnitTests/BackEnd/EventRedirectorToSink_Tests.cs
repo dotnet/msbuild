@@ -6,6 +6,8 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Logging
 {
     /// <summary>

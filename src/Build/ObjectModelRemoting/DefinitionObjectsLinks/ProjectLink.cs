@@ -10,6 +10,8 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
+#nullable disable
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
     /// <summary>

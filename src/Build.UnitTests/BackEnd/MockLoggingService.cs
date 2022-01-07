@@ -13,6 +13,8 @@ using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

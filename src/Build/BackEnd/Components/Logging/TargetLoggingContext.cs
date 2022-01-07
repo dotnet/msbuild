@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using System.Collections;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>

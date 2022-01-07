@@ -6,6 +6,8 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     internal static class BinaryWriterExtensions

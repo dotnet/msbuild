@@ -11,6 +11,8 @@ using Xunit;
 
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class FindUnderPath_Tests

@@ -7,6 +7,8 @@ using System.Text;
 using Microsoft.Build.Construction;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     /// <summary>

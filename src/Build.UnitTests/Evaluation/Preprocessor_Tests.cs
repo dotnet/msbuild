@@ -13,6 +13,8 @@ using Xunit;
 using Microsoft.Build.Framework;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Preprocessor
 {
     /// <summary>

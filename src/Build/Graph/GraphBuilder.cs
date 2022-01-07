@@ -16,6 +16,8 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder

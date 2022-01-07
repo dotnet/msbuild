@@ -11,6 +11,8 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using System.Collections.Generic;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

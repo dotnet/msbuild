@@ -11,6 +11,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
