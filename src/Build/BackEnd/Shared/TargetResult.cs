@@ -12,6 +12,8 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Collections;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

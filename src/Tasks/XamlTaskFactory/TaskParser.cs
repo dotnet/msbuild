@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using XamlTypes = Microsoft.Build.Framework.XamlTypes;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Xaml
 {
     /// <summary>

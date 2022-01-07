@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>

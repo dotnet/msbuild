@@ -5,6 +5,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     public class BuildEnvironmentHelper_Tests

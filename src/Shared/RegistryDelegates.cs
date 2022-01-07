@@ -10,6 +10,8 @@ using Microsoft.Win32;
 using System.Collections;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {  /// <summary>
    /// Given a registry hive and a request view open the base key for that registry location.

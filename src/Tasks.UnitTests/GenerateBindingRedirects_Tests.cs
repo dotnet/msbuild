@@ -13,6 +13,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class GenerateBindingRedirectsTests : IDisposable

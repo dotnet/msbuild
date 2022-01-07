@@ -4,6 +4,8 @@
 using System;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.UnGAC
 {
     // See: https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/fusion/iassemblycache-interface

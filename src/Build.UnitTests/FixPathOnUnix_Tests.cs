@@ -4,6 +4,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     [PlatformSpecific(TestPlatforms.AnyUnix)]
