@@ -161,7 +161,7 @@ dotnet_diagnostic.CA1068.severity = none
 dotnet_diagnostic.CA1069.severity = none
 
 # Do not declare event fields as virtual
-dotnet_diagnostic.CA1070.severity = suggestion
+dotnet_diagnostic.CA1070.severity = warning
 
 # Avoid using cref tags with a prefix
 dotnet_diagnostic.CA1200.severity = suggestion
