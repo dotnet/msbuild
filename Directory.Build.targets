@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <!-- Global Analyzer Config -->
-  <ItemGroup Condition="'$(ProjectIsDeprecated)' != 'true' AND '$(IsTestProject)' != 'true'">
-    <!-- Include Common.globalconfig for non-deprecated and non-test projects-->
+  <ItemGroup Condition="'$(ProjectIsDeprecated)' != 'true'">
+    <!-- Include Common.globalconfig for non-deprecated projects-->
     <EditorConfigFiles Include="$(MSBuildThisFileDirectory)eng/Common.globalconfig" />
   </ItemGroup>
   

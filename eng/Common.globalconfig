@@ -1,6 +1,10 @@
 # Top level entry required to mark this as a global AnalyzerConfig file
 is_global = true
 
+# Set precedence one lower than default to allow subsets of projects to override values
+# from this file with more specific configurations
+global_level = 99
+
 # Microsoft.Analyzers.ManagedCodeAnalysis
 # Description: Microsoft.Analyzers.ManagedCodeAnalysis
 
