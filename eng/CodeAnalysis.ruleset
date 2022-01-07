@@ -66,7 +66,7 @@
     <Rule Id="CA1502" Action="None" />             <!-- Avoid excessive complexity --> 
     <Rule Id="CA1505" Action="None" />             <!-- Avoid unmaintainable code --> 
     <Rule Id="CA1506" Action="None" />             <!-- Avoid excessive class coupling --> 
-    <Rule Id="CA1507" Action="Warning" />          <!-- Use nameof to express symbol names --> 
+    <Rule Id="CA1507" Action="Info" />             <!-- Use nameof to express symbol names --> 
     <Rule Id="CA1508" Action="None" />             <!-- Avoid dead conditional code --> 
     <Rule Id="CA1509" Action="None" />             <!-- Invalid entry in code metrics rule specification file --> 
     <Rule Id="CA1700" Action="None" />             <!-- Do not name enum values 'Reserved' --> 
