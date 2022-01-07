@@ -56,8 +56,8 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="EnvironmentVariableAsSwitch">
-        <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch. Full path: '{0}'</source>
-        <target state="new">MSBUILD : error MSB1060: Undefined environment variable passed in as switch. Full path: '{0}'</target>
+        <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch. Full command line: '{0}'</source>
+        <target state="new">MSBUILD : error MSB1060: Undefined environment variable passed in as switch. Full command line: '{0}'</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This error is shown when a user passes in an environment variable (including from a response file)
