@@ -13,8 +13,8 @@ namespace Microsoft.Build.Tasks
     /// Generates a hash of a given ItemGroup items. Metadata is not considered in the hash.
     /// </summary>
     /// <remarks>
-    /// Currently uses SHA1. Implementation subject to change between MSBuild versions. Not
-    /// intended as a cryptographic security measure, only uniqueness between build executions.
+    /// Currently uses SHA1. Implementation subject to change between MSBuild versions.
+    /// This class is not intended as a cryptographic security measure, only uniqueness between build executions.
     /// </remarks>
     public class Hash : TaskExtension
     {

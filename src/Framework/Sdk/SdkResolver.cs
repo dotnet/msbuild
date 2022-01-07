@@ -27,11 +27,11 @@ namespace Microsoft.Build.Framework
         /// <param name="factory">Factory class to create an <see cref="SdkResult" /></param>
         /// <returns>
         ///     An <see cref="SdkResult" /> containing the resolved SDKs or associated error / reason
-        ///     the SDK could not be resolved.  Return <code>null</code> if the resolver is not
+        ///     the SDK could not be resolved.  Return <see langword="null"/> if the resolver is not
         ///     applicable for a particular <see cref="SdkReference"/>.
         ///  </returns>   
         ///  <remarks>
-        ///    Note: You must use <see cref="Microsoft.Build.Framework.SdkResultFactory"/> to return a result.
+        ///    Note: You must use <see cref="SdkResultFactory"/> to return a result.
         ///  </remarks>
         /// 
         public abstract SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext,
