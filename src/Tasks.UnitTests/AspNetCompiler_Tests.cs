@@ -6,6 +6,8 @@ using Microsoft.Build.Evaluation;
 using System.Globalization;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /*

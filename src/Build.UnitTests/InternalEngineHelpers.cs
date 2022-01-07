@@ -18,6 +18,8 @@ using SdkResolverContext = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 using SdkResultFactory = Microsoft.Build.Framework.SdkResultFactory;
 
+#nullable disable
+
 namespace Microsoft.Build.Unittest
 {
     internal static class SdkUtilities

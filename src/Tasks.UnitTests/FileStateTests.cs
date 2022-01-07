@@ -7,6 +7,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

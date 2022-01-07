@@ -9,6 +9,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>

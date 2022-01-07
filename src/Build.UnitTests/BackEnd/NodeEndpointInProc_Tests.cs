@@ -12,6 +12,8 @@ using Microsoft.Build.Shared;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class NodeEndpointInProc_Tests

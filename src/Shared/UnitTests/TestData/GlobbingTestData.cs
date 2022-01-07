@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
     public static class GlobbingTestData

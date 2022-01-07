@@ -5,6 +5,8 @@ using System;
 using System.Text;
 using System.Collections;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

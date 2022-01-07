@@ -10,6 +10,8 @@ using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

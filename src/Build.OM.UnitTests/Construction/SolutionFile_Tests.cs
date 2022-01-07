@@ -11,6 +11,8 @@ using Shouldly;
 using Xunit;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     /// <summary>

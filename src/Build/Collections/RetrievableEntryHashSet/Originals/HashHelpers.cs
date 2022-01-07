@@ -7,6 +7,8 @@ using System.Runtime.ConstrainedExecution;
 #endif
 using System.Text;
 
+#nullable disable
+
 namespace System.Collections.Generic {
 
     /// <summary>

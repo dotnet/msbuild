@@ -5,6 +5,8 @@ using Microsoft.Build.Evaluation;
 using System;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class CreateProperty_Tests : IDisposable

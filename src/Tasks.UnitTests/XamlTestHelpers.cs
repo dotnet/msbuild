@@ -14,6 +14,8 @@ using System.Xaml;
 using Microsoft.Build.Evaluation;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     internal static class XamlTestHelpers
