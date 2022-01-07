@@ -26,7 +26,6 @@ using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerExcepti
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
-using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -433,7 +432,7 @@ namespace Microsoft.Build.Evaluation
         /// This is the Windows file version (specifically the value of the FileVersion
         /// resource), not necessarily the assembly version.
         /// If you want the assembly version, use Constants.AssemblyVersion.
-        /// This is not the <see cref="ToolsetCollection.ToolsVersions"/>.
+        /// This is not a <see cref="Toolset"/>.
         /// </remarks>
         public static Version Version
         {
