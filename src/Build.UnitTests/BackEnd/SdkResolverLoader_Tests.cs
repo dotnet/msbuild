@@ -19,6 +19,8 @@ using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResolverLoader_Tests

@@ -10,6 +10,8 @@ using Xunit;
 using Xunit.Abstractions;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>

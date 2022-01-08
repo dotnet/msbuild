@@ -7,6 +7,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Globbing
 {
     /// <summary>

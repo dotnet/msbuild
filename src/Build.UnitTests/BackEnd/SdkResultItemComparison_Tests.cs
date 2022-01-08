@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResultItemComparison_Tests

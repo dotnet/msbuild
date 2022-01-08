@@ -11,6 +11,8 @@ using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>

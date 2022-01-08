@@ -6,6 +6,8 @@ using System;
 using System.IO;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

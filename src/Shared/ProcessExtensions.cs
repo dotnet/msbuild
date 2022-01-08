@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     internal static class ProcessExtensions

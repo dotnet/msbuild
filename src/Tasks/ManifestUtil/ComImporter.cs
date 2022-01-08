@@ -11,6 +11,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal class ComImporter

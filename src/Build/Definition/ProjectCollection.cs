@@ -27,6 +27,8 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     using Utilities = Internal.Utilities;

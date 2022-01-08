@@ -7,6 +7,8 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
