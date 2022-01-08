@@ -20,6 +20,8 @@ using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

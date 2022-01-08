@@ -4,6 +4,8 @@
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework.UnitTests
 {
     public class SdkReference_Tests

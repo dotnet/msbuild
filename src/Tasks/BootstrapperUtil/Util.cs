@@ -8,6 +8,8 @@ using System.IO;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal static class Util

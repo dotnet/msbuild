@@ -10,6 +10,8 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using Xunit;
 
 #if !RUNTIME_TYPE_NETCORE
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

@@ -5,6 +5,8 @@ using System.Resources;
 
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

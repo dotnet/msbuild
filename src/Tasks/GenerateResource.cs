@@ -40,6 +40,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -3874,7 +3876,7 @@ namespace Microsoft.Build.Tasks
             private int _col;
 
             internal LineNumberStreamReader(String fileName, Encoding encoding, bool detectEncoding)
-                : base(File.Open(fileName, FileMode.Open, FileAccess.Read), encoding, detectEncoding)
+                : base(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read), encoding, detectEncoding)
             {
                 _lineNumber = 1;
                 _col = 0;

@@ -3,6 +3,8 @@
 
 using Microsoft.Build.Eventing;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>

@@ -10,6 +10,18 @@
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" Condition=" '$(IsPackable)' == 'true' " />
   </ItemGroup>
 
+  <!-- Global Analyzer Config -->
+  <ItemGroup Condition="'$(ProjectIsDeprecated)' != 'true'">
+    <!-- Include Common.globalconfig for non-deprecated projects-->
+    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)eng/Common.globalconfig" />
+  </ItemGroup>
+  
+  <!-- Test Project Global Analyzer Config -->
+  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
+    <!-- Include Common.Test.globalconfig for Test projects-->
+    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)eng/Common.Test.globalconfig" />
+  </ItemGroup>
+  
   <PropertyGroup>
     <CentralPackagesFile>$(MSBuildThisFileDirectory)eng/Packages.props</CentralPackagesFile>
   </PropertyGroup>

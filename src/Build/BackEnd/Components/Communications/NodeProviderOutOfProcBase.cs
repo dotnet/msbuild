@@ -30,6 +30,8 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

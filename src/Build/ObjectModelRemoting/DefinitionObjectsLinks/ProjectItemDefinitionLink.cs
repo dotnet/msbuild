@@ -4,6 +4,8 @@
 using Microsoft.Build.Evaluation;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
     /// <summary>

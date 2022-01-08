@@ -4,6 +4,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 
+#nullable disable
+
 namespace System.Deployment.Internal.CodeSigning
 {
     [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "RSAPKCS", Justification = "This casing is to match the existing RSAPKCS1SHA1SignatureDescription type")]

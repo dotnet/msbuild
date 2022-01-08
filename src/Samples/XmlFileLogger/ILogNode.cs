@@ -3,6 +3,8 @@
 
 using System.Xml.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging.StructuredLogger
 {
     /// <summary>

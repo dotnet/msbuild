@@ -4,6 +4,8 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     public class FileUtilitiesRegex_Tests

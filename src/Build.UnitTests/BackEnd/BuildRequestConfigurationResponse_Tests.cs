@@ -4,6 +4,8 @@
 using Microsoft.Build.BackEnd;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

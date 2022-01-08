@@ -19,6 +19,8 @@ using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using System.Collections.ObjectModel;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <remarks>

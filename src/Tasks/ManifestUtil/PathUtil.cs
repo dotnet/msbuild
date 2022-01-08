@@ -5,6 +5,8 @@ using Microsoft.Build.Shared;
 using System;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal static class PathUtil

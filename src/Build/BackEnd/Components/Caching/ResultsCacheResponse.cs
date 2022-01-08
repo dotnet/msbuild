@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

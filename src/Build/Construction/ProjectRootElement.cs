@@ -23,6 +23,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
