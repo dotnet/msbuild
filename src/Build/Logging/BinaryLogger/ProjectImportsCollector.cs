@@ -5,6 +5,8 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>

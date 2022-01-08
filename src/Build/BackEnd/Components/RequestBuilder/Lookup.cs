@@ -12,6 +12,8 @@ using Microsoft.Build.Collections;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     using ItemsMetadataUpdateDictionary = Dictionary<ProjectItemInstance, Lookup.MetadataModifications>;

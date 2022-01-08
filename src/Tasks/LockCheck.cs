@@ -10,6 +10,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     internal class LockCheck

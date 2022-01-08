@@ -4,6 +4,7 @@
 
   <PropertyGroup>
       <LangVersion>latest</LangVersion>
+      <Nullable>enable</Nullable>
       <DiscoverEditorConfigFiles>true</DiscoverEditorConfigFiles>
   </PropertyGroup>
 

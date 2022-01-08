@@ -16,6 +16,8 @@ using System.Xaml;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 {
     #region Tests for Load and Parse methods

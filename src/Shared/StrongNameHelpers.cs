@@ -9,6 +9,8 @@ using System.Reflection;
 
 #if FEATURE_STRONG_NAMES
 
+#nullable disable
+
 namespace Microsoft.Runtime.Hosting
 {
     /// <summary>

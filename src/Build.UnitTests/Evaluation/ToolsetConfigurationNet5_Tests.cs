@@ -12,6 +12,8 @@ using Xunit;
 using System.Collections.Generic;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     /// <summary>

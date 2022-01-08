@@ -8,6 +8,8 @@ using System.IO;
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class SdkToolsPathUtility_Tests

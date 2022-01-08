@@ -11,6 +11,8 @@ using System.IO.Compression;
 using System.Linq;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class ZipDirectory_Tests

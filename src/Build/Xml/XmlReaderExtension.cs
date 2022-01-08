@@ -4,6 +4,8 @@ using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>

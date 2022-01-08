@@ -21,6 +21,8 @@ using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidTool
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
 #if FEATURE_REGISTRY_TOOLSETS

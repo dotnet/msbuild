@@ -17,6 +17,8 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>

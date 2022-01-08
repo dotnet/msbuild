@@ -4,6 +4,8 @@ using System;
 using System.Diagnostics;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Shared
 {
     public static class RunnerUtilities

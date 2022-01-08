@@ -23,6 +23,8 @@ using System.Collections.Generic;
 using System.IO;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class UtilitiesTestStandard : UtilitiesTest
