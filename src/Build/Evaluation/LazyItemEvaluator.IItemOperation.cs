@@ -3,6 +3,8 @@
 
 using System.Collections.Immutable;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>

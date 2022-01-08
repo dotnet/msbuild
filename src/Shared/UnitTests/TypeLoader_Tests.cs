@@ -9,6 +9,8 @@ using System.Reflection;
 using Xunit;
 using Microsoft.Build.UnitTests.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class TypeLoader_Tests

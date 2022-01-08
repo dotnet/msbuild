@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.FileSystem
 {
     /// <summary>

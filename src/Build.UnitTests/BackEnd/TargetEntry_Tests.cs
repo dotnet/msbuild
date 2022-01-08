@@ -20,6 +20,8 @@ using Microsoft.Build.Shared;
 using Xunit;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

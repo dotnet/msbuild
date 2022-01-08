@@ -6,6 +6,8 @@ using Microsoft.Build.Collections;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>

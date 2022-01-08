@@ -10,6 +10,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation.Context;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

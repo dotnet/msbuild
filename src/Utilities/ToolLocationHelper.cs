@@ -20,6 +20,8 @@ using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFramework
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

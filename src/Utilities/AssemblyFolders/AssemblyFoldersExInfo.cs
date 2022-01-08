@@ -9,6 +9,8 @@ using System;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

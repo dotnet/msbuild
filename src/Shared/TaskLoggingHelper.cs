@@ -16,6 +16,8 @@ using System.Runtime.Remoting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd
 #else

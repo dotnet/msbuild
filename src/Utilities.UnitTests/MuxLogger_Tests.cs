@@ -13,6 +13,8 @@ using Shouldly;
 using Xunit;
 using MuxLogger = Microsoft.Build.Utilities.MuxLogger;
 
+#nullable disable
+
 namespace Microsoft.VisualStudio.Build.UnitTest
 {
     /// <summary>

@@ -16,6 +16,8 @@ using System.Xml;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
 #if !MONO
