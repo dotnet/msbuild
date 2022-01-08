@@ -900,7 +900,7 @@ namespace Microsoft.Build.Tasks
         }
 
 #if FEATURE_COM_INTEROP
-        private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) as string).Equals("true", StringComparison.OrdinalIgnoreCase);
+        private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) as string ?? string.Empty).Equals("true", StringComparison.OrdinalIgnoreCase);
 
         private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
 
