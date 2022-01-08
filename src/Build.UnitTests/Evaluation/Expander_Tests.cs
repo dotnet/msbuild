@@ -3727,7 +3727,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new string[] {"$(Reg:AAA)", ""}
                                    };
 
-            var errorTests = new List<string>{
+            var errorTests = new List<string> {
             "$(input[)",
             "$(input.ToString()])",
             "$(input.ToString()[)",

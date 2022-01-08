@@ -1360,11 +1360,11 @@ namespace Microsoft.Build.UnitTests
                     Array.Sort(files);
                     Assert.Equal(new []{"a.cs", "b.cs", "c.cs"}, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> {"a.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs", "c.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> {"a.cs", "c.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs" }, files);
                 }

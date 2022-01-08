@@ -548,7 +548,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new[] {"true", "  NoBuild  ", "  ", "foo"});
 
@@ -560,7 +560,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph" }, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph" }, switches);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new string[0]);
 

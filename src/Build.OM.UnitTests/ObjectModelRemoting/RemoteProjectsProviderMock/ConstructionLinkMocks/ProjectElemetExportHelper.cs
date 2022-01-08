@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return exporter.Export<ProjectElement, RMock>(xml);
         }
 
-        private static bool IsOfType<T> (ProjectElement xml) { return xml is T; }
+        private static bool IsOfType<T>(ProjectElement xml) { return xml is T; }
 
         private static Dictionary<Type, ExporterFactory> knownTypes = new Dictionary<Type, ExporterFactory>();
 
