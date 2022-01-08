@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using Microsoft.Extensions.Internal;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 
@@ -41,6 +40,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public int Id => _process.Id;
 
+        public Process Process => _process;
+
         public void Start()
         {
             if (_process != null)
@@ -51,6 +52,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var processStartInfo = _spec.GetProcessStartInfo();
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
+            processStartInfo.RedirectStandardInput = true;
 
             _process = new Process
             {
