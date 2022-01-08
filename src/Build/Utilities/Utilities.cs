@@ -17,6 +17,8 @@ using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>

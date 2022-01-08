@@ -14,6 +14,8 @@ using Microsoft.Build.Unittest;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class BuildResult_Tests

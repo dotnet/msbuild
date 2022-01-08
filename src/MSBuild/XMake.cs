@@ -40,6 +40,8 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>

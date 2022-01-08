@@ -24,6 +24,8 @@ using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFramework
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class ToolLocationHelper_Tests

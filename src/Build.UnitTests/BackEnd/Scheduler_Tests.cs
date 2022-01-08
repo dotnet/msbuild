@@ -15,6 +15,8 @@ using Shouldly;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     using Microsoft.Build.Unittest;

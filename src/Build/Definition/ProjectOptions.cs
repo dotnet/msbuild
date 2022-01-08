@@ -3,6 +3,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Definition
 {
     /// <summary>

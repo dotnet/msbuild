@@ -6,6 +6,8 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
 #if FEATURE_COM_INTEROP

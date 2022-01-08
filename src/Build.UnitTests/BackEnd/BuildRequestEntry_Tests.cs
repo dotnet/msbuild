@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class BuildRequestEntry_Tests

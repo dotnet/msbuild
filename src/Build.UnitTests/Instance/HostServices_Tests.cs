@@ -13,6 +13,8 @@ using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>

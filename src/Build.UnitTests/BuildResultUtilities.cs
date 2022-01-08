@@ -6,6 +6,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.Unittest
 {
     internal class BuildResultUtilities

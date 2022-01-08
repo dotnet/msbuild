@@ -10,6 +10,8 @@ using Xunit;
 using static Microsoft.Build.Engine.UnitTests.TestData.ProjectInstanceTestObjects;
 using static Microsoft.Build.Engine.UnitTests.TestComparers.ProjectInstanceModelTestComparers;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.Instance
 {
     public class ProjectTargetInstance_Internal_Tests

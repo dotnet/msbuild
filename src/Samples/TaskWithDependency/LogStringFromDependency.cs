@@ -3,6 +3,8 @@
 
 using Dependency;
 
+#nullable disable
+
 namespace TaskWithDependency
 {
     public class LogStringFromDependency : Microsoft.Build.Utilities.Task

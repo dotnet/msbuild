@@ -23,6 +23,8 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

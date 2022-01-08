@@ -13,6 +13,8 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>

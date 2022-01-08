@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ProcessExtensions_Tests

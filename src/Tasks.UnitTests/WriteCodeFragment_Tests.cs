@@ -11,6 +11,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

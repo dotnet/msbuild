@@ -6,6 +6,8 @@ using System;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class XmlUtilities_Tests

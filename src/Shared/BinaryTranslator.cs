@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using System.Globalization;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

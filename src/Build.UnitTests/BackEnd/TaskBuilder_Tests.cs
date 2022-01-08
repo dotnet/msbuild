@@ -24,6 +24,8 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -1003,6 +1005,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"
 using System;
 using Microsoft.Build.Framework;
+
 namespace ClassLibrary2
 {" + (requireSTA ? "[RunInSTA]" : String.Empty) + @"
     public class ThreadTask : ITask
