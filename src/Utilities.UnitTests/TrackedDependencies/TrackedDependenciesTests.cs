@@ -16,6 +16,8 @@ using Xunit;
 
 #if FEATURE_FILE_TRACKER
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.TrackedDependencies
 {
     public sealed class TrackedDependenciesTests

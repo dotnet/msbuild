@@ -9,6 +9,8 @@ using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

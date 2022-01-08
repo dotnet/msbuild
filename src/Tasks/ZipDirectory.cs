@@ -6,6 +6,8 @@ using System;
 using System.IO;
 using System.IO.Compression;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     public sealed class ZipDirectory : TaskExtension

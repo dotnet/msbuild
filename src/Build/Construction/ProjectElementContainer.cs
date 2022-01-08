@@ -10,6 +10,8 @@ using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>

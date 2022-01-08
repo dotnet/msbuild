@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

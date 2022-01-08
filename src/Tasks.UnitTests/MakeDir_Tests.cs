@@ -9,6 +9,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class MakeDir_Tests

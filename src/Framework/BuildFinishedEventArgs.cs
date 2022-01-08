@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>

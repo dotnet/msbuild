@@ -6,6 +6,8 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     sealed public class GenerateTemporaryTargetAssembly_Tests

@@ -16,6 +16,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 {
     public class ResolveSDKReferenceTestFixture

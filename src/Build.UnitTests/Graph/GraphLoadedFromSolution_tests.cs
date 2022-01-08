@@ -17,6 +17,8 @@ using Xunit.Abstractions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using static Microsoft.Build.UnitTests.Helpers;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph.UnitTests
 {
     public class GraphLoadedFromSolutionTests : IDisposable

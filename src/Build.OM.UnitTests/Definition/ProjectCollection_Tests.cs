@@ -16,6 +16,8 @@ using Xunit.Abstractions;
 using Shouldly;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>

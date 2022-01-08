@@ -11,6 +11,8 @@ using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

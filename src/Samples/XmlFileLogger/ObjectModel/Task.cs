@@ -4,6 +4,8 @@
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging.StructuredLogger
 {
     /// <summary>
