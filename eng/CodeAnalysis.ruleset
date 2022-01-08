@@ -85,7 +85,7 @@
     <Rule Id="CA1802" Action="Info" />             <!-- Use literals where appropriate --> 
     <Rule Id="CA1805" Action="Info" />             <!-- Do not initialize unnecessarily --> 
     <Rule Id="CA1806" Action="None" />
-    <Rule Id="CA1810" Action="Warning" />          <!-- Initialize reference type static fields inline --> 
+    <Rule Id="CA1810" Action="Info" />             <!-- Initialize reference type static fields inline --> 
     <Rule Id="CA1812" Action="None" />             <!-- Avoid uninstantiated internal classes --> 
     <Rule Id="CA1814" Action="None" />
     <Rule Id="CA1815" Action="None" />
