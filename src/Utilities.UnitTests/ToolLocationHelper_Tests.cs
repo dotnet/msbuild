@@ -1039,7 +1039,7 @@ namespace Microsoft.Build.UnitTests
 #pragma warning restore 618
 
 #if FEATURE_CODETASKFACTORY
-        private static readonly string s_verifyToolsetAndToolLocationHelperProjectCommonContent = @"
+        private const string VerifyToolsetAndToolLocationHelperProjectCommonContent = @"
                                     string currentInstallFolderLocation = null;
 
                                     using (RegistryKey baseKey = Registry.LocalMachine.OpenSubKey(""SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows""))
@@ -1121,7 +1121,7 @@ namespace Microsoft.Build.UnitTests
                                     }
 
                                     string pathTo81WinSDK = ToolLocationHelper.GetPathToWindowsSdk(TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);" +
-                                    s_verifyToolsetAndToolLocationHelperProjectCommonContent +
+                                    VerifyToolsetAndToolLocationHelperProjectCommonContent +
                                   @"if (!String.Equals(WindowsSDK80Path, pathTo81WinSDK, StringComparison.OrdinalIgnoreCase))
                                     {
                                         Log.LogError(""WindowsSDK80Path is incorrect! Registry: {0}  ToolLocationHelper: {1}"", WindowsSDK80Path, pathTo81WinSDK);
@@ -1167,7 +1167,7 @@ namespace Microsoft.Build.UnitTests
 
                                     pathTo35Sdk = pathTo35Sdk == null ? pathTo35Sdk : Path.Combine(pathTo35Sdk, ""bin\\"");
                                     pathTo40Sdk = pathTo40Sdk == null ? pathTo40Sdk : Path.Combine(pathTo40Sdk, ""bin\\NetFX 4.0 Tools\\"");" +
-                                    s_verifyToolsetAndToolLocationHelperProjectCommonContent +
+                                    VerifyToolsetAndToolLocationHelperProjectCommonContent +
                                   @"return !Log.HasLoggedErrors;
                                 ]]>
                               </Code>
@@ -1209,7 +1209,7 @@ namespace Microsoft.Build.UnitTests
 
                                     pathTo35Sdk = pathTo35Sdk == null ? pathTo35Sdk : Path.Combine(pathTo35Sdk, ""bin\\"");
                                     pathTo40Sdk = pathTo40Sdk == null ? pathTo40Sdk : Path.Combine(pathTo40Sdk, ""bin\\NetFX 4.0 Tools\\"");" +
-                                    s_verifyToolsetAndToolLocationHelperProjectCommonContent +
+                                    VerifyToolsetAndToolLocationHelperProjectCommonContent +
                                   @"return !Log.HasLoggedErrors;
                                 ]]>
                               </Code>
@@ -1254,7 +1254,7 @@ namespace Microsoft.Build.UnitTests
 
                                     pathTo35Sdk = pathTo35Sdk == null ? pathTo35Sdk : Path.Combine(pathTo35Sdk, ""bin\\"");
                                     pathTo40Sdk = pathTo40Sdk == null ? pathTo40Sdk : Path.Combine(pathTo40Sdk, ""bin\\NetFX 4.0 Tools\\"");" +
-                                    s_verifyToolsetAndToolLocationHelperProjectCommonContent +
+                                    VerifyToolsetAndToolLocationHelperProjectCommonContent +
                                    @"if (String.IsNullOrEmpty(WindowsSDK80Path))
                                     {
                                         Log.LogWarning(""WindowsSDK80Path is empty, which is technically not correct, but we're letting it slide for now because the OTG build won't have the updated registry for a while.  Make sure we don't see this warning on PURITs runs, though!"");
