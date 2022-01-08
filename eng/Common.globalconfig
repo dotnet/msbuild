@@ -717,7 +717,7 @@ dotnet_diagnostic.SA1004.severity = suggestion
 dotnet_diagnostic.SA1005.severity = suggestion
 
 # Region should not be preceded by a space
-dotnet_diagnostic.SA1006.severity = suggestion
+dotnet_diagnostic.SA1006.severity = warning
 
 # Opening parenthesis should not be preceded by a space
 dotnet_diagnostic.SA1008.severity = suggestion
