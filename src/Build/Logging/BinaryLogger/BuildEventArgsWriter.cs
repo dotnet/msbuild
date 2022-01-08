@@ -18,6 +18,8 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>

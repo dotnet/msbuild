@@ -5,9 +5,10 @@ using System;
 using System.Collections.Concurrent;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 #if BUILD_ENGINE
 using Microsoft.Build.Shared;
-
 namespace Microsoft.Build.BackEnd.Components.Caching
 #else
 namespace Microsoft.Build.Shared

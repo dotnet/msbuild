@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>

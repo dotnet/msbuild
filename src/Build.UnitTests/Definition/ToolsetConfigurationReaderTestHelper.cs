@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 
 #pragma warning disable 436
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

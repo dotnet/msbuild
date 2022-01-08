@@ -8,6 +8,8 @@ using System.Diagnostics;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>

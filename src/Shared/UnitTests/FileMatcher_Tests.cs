@@ -15,6 +15,8 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class FileMatcherTest : IDisposable

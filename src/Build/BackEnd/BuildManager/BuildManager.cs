@@ -36,6 +36,8 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

@@ -11,6 +11,8 @@ using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFac
 using Microsoft.Build.Construction;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>

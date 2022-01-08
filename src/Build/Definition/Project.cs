@@ -34,6 +34,8 @@ using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Mic
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 using Microsoft.Build.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     using Utilities = Internal.Utilities;

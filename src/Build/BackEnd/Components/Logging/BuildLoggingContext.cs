@@ -6,6 +6,8 @@ using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>

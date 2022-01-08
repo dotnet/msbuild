@@ -3,6 +3,8 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class Hash_Tests

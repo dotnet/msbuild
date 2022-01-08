@@ -10,6 +10,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph.UnitTests
 {
     internal static class GraphTestingUtilities

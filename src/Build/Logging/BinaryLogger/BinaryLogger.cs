@@ -5,6 +5,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -89,19 +91,20 @@ namespace Microsoft.Build.Logging
 
         private string FilePath { get; set; }
 
-        /// <summary>
+        /// <summary> Gets or sets the verbosity level.</summary>
+        /// <remarks>
         /// The binary logger Verbosity is always maximum (Diagnostic). It tries to capture as much
         /// information as possible.
-        /// </summary>
+        /// </remarks>
         public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
 
         /// <summary>
-        /// The only supported parameter is the output log file path (e.g. "msbuild.binlog") 
+        /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog"). 
         /// </summary>
         public string Parameters { get; set; }
 
         /// <summary>
-        /// Initializes the logger by subscribing to events of IEventSource
+        /// Initializes the logger by subscribing to events of the specified event source.
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {

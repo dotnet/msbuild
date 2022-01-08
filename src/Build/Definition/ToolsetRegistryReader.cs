@@ -17,6 +17,8 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

@@ -11,6 +11,8 @@ using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class CreateItem_Tests

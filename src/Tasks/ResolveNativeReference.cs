@@ -13,6 +13,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

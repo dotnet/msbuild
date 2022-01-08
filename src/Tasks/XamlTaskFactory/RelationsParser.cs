@@ -7,6 +7,8 @@ using System.Xml;
 using System.IO;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Xaml
 {
     /// <summary>
