@@ -19,6 +19,8 @@ using Microsoft.Build.Shared;
 using System.Runtime.Remoting;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>

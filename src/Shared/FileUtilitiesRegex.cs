@@ -3,6 +3,8 @@
 
 using System.Runtime.CompilerServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

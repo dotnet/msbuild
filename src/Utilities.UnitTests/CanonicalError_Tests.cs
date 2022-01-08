@@ -5,6 +5,8 @@ using Shouldly;
 using Xunit;
 using CanonicalError = Microsoft.Build.Shared.CanonicalError;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class CanonicalErrorTest

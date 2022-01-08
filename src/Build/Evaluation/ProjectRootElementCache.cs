@@ -15,6 +15,8 @@ using System.Globalization;
 using Microsoft.Build.Internal;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

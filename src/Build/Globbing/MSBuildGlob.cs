@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Globbing
 {
     /// <summary>

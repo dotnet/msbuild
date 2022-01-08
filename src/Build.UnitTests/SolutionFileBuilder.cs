@@ -20,6 +20,8 @@ using Microsoft.Build.Graph.UnitTests;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     internal class SolutionFileBuilder

@@ -18,6 +18,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph.UnitTests
 {
     [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]

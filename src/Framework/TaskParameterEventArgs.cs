@@ -9,6 +9,8 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     public enum TaskParameterMessageKind

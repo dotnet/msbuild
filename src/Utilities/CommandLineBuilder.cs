@@ -10,6 +10,8 @@ using Microsoft.Build.Framework;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

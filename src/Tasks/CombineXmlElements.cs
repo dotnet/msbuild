@@ -4,6 +4,8 @@
 using Microsoft.Build.Framework;
 using System.Xml.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

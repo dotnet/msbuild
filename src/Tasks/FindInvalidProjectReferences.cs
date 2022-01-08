@@ -6,6 +6,8 @@ using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
