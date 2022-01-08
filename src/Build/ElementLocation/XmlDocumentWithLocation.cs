@@ -7,6 +7,8 @@ using System.Xml;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>

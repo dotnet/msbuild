@@ -71,11 +71,10 @@
 
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
-  
-  <Import Project="$(RepositoryEngineeringDir)Analyzers.props" />
 
+  <!-- Enable SDK supplied netanalyzers for all target frameworks -->
   <PropertyGroup>
-    <EnableAnalyzers>true</EnableAnalyzers>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
   
 </Project>

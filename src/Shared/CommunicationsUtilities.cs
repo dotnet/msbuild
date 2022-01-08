@@ -22,6 +22,8 @@ using Microsoft.Build.Shared.Debugging;
 using System.Threading.Tasks;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>

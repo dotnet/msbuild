@@ -7,6 +7,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AppConfig
 {
     public sealed class SpecificVersionPrimary : ResolveAssemblyReferenceTestFixture

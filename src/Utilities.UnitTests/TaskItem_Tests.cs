@@ -14,6 +14,8 @@ using Xunit;
 
 #pragma warning disable 0219
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class TaskItemTests

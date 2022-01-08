@@ -10,6 +10,8 @@ using System.Threading;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
