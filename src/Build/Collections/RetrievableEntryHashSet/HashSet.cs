@@ -39,6 +39,8 @@ using Microsoft.Build.Internal;
     ==================================================================================================================
 */
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>

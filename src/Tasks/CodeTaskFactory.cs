@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
 #if FEATURE_CODETASKFACTORY
@@ -160,7 +162,7 @@ namespace Microsoft.Build.Tasks
         public Type TaskType { get; private set; }
 
         /// <summary>
-        /// Get the type information for all task parameters
+        /// Get the type information for all task parameters.
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
@@ -170,7 +172,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Initialze the task factory
+        /// Initializes the task factory.
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
@@ -306,7 +308,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Create a taskfactory instance which contains the data that needs to be refreshed between task invocations
+        /// Create a taskfactory instance which contains the data that needs to be refreshed between task invocations.
         /// </summary>
         public ITask CreateTask(IBuildEngine loggingHost)
         {

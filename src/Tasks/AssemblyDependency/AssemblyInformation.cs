@@ -20,6 +20,8 @@ using System.Reflection.Metadata;
 #endif
 using Microsoft.Build.Tasks.AssemblyDependency;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

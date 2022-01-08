@@ -16,6 +16,8 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

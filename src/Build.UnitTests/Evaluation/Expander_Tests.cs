@@ -32,6 +32,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     public class Expander_Tests

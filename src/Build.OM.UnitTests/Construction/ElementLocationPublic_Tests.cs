@@ -8,6 +8,8 @@ using System.Reflection;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     /// <summary>
