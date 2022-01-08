@@ -12,6 +12,8 @@ using Microsoft.Build.Utilities;
 using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ResGen_Tests

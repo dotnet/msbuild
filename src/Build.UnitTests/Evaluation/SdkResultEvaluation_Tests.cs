@@ -15,6 +15,8 @@ using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     public class SdkResultEvaluation_Tests : IDisposable

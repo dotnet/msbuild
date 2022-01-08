@@ -11,6 +11,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ExpressionTest : IDisposable

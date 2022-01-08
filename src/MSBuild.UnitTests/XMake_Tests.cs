@@ -21,6 +21,8 @@ using System.IO.Compression;
 using System.Reflection;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class XMakeAppTests : IDisposable

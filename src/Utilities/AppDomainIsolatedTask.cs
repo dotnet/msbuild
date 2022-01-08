@@ -8,6 +8,8 @@ using System.Security;
 
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

@@ -12,6 +12,8 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     //  Although this tests the ProfilerResult API from Microsoft.Build.Framework, it uses the

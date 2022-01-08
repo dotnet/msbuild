@@ -23,6 +23,8 @@ using Microsoft.Build.Shared.FileSystem;
 
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

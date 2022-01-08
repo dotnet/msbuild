@@ -11,6 +11,8 @@ using Microsoft.Win32;
 
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
