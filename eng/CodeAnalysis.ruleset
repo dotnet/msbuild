@@ -139,7 +139,7 @@
     <Rule Id="CA2231" Action="None" />             <!-- Overload operator equals on overriding value type Equals --> 
     <Rule Id="CA2234" Action="None" />             <!-- Pass system uri objects instead of strings --> 
     <Rule Id="CA2235" Action="None" />             <!-- Mark all non-serializable fields --> 
-    <Rule Id="CA2241" Action="Warning" />          <!-- Provide correct arguments to formatting methods --> 
+    <Rule Id="CA2241" Action="Info" />             <!-- Provide correct arguments to formatting methods --> 
     <Rule Id="CA2242" Action="Warning" />          <!-- Test for NaN correctly --> 
     <Rule Id="CA2243" Action="None" />             <!-- Attribute string literals should parse correctly --> 
     <Rule Id="CA2244" Action="None" />             <!-- Do not duplicate indexed element initializations --> 
