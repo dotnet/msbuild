@@ -20,21 +20,21 @@ namespace Microsoft.Build.Framework
         public abstract int Priority { get; }
 
         /// <summary>
-        /// Resolves the specified SDK reference.
+        ///     Resolves the specified SDK reference.
         /// </summary>
         /// <param name="sdkReference">A <see cref="SdkReference" /> containing the referenced SDKs be resolved.</param>
         /// <param name="resolverContext">Context for resolving the SDK.</param>
         /// <param name="factory">Factory class to create an <see cref="SdkResult" /></param>
         /// <returns>
-        /// An <see cref="SdkResult" /> containing the resolved SDKs or associated error / reason
-        /// the SDK could not be resolved. Return <c>null</c> if the resolver is not
-        /// applicable for a particular <see cref="SdkReference"/>.
-        /// </returns>   
-        /// <remarks>
-        /// Note: You must use <see cref="SdkResultFactory"/> to return a result.
-        /// </remarks>
-        public abstract SdkResult Resolve(SdkReference sdkReference,
-                                          SdkResolverContext resolverContext,
-                                          SdkResultFactory factory);
+        ///     An <see cref="SdkResult" /> containing the resolved SDKs or associated error / reason
+        ///     the SDK could not be resolved.  Return <code>null</code> if the resolver is not
+        ///     applicable for a particular <see cref="SdkReference"/>.
+        ///  </returns>   
+        ///  <remarks>
+        ///    Note: You must use <see cref="Microsoft.Build.Framework.SdkResultFactory"/> to return a result.
+        ///  </remarks>
+        /// 
+        public abstract SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext,
+            SdkResultFactory factory);
     }
 }
