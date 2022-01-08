@@ -29,11 +29,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static readonly string logPath = GetLogPath();
         private static readonly char[] s_fileNameInvalidChars = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
         private static StreamWriter s_logFileWriter;
-        // Major, Minor, Build and Revision of CLR v2.0
-        private static readonly int[] s_clrVersion2 = { 2, 0, 50727, 0 };
 #if RUNTIME_TYPE_NETCORE
         // Major, Minor, Build and Revision of CLR v4.0
         private static readonly int[] s_clrVersion4 = { 4, 0, 30319, 0 };
+#else
+        // Major, Minor, Build and Revision of CLR v2.0
+        private static readonly int[] s_clrVersion2 = { 2, 0, 50727, 0 };
 #endif
 
         #region " Platform <-> ProcessorArchitecture mapping "
