@@ -549,7 +549,7 @@ dotnet_diagnostic.CA3077.severity = suggestion
 dotnet_diagnostic.CA3147.severity = warning
 
 # Do Not Use Weak Cryptographic Algorithms
-dotnet_diagnostic.CA5350.severity = suggestion
+dotnet_diagnostic.CA5350.severity = warning
 
 # Do Not Use Broken Cryptographic Algorithms
 dotnet_diagnostic.CA5351.severity = warning
