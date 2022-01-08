@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks
     [AttributeUsage(AttributeTargets.All)]
     internal sealed class SRDescriptionAttribute : DescriptionAttribute
     {
-        private bool _replaced = false;
+        private bool _replaced;
 
         /// <summary>
         ///     Constructs a new sys description.
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Tasks
         internal const string MismatchedResourceName = "MismatchedResourceName";
         internal const string InvalidIdentifier = "InvalidIdentifier";
 
-        private static SR s_loader = null;
+        private static SR s_loader;
         private MainAssemblyFallbackResourceManager _resources;
 
         /// <summary>

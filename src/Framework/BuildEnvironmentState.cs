@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     internal static class BuildEnvironmentState
     {
-        internal static bool s_runningInVisualStudio = false;
-        internal static bool s_runningTests = false;
+        internal static bool s_runningInVisualStudio;
+        internal static bool s_runningTests;
     }
 }

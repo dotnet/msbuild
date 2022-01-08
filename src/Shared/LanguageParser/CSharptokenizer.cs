@@ -33,10 +33,10 @@ namespace Microsoft.Build.Shared.LanguageParser
         internal class CloseScopeToken : OperatorOrPunctuatorToken { } // i.e. "}"
 
         // The source lines
-        private Stream _binaryStream = null;
+        private Stream _binaryStream;
 
         // Whether to force ANSI or not.
-        private bool _forceANSI = false;
+        private bool _forceANSI;
 
         /// <summary>
         /// Construct.

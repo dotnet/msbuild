@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Only apply the additional metadata is none already exists
         /// </summary>
-        public bool PreserveExistingMetadata { get; set; } = false;
+        public bool PreserveExistingMetadata { get; set; }
 
         /// <summary>
         /// A list of metadata name/value pairs to apply to the output items.  

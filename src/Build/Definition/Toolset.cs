@@ -110,7 +110,7 @@ namespace Microsoft.Build.Evaluation
         /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on
         /// the current machine, false otherwise.
         /// </summary>
-        private static bool? s_dev10IsInstalled = null;
+        private static bool? s_dev10IsInstalled;
 #endif // FEATURE_WIN32_REGISTRY
 
         /// <summary>

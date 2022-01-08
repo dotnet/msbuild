@@ -12,6 +12,6 @@ namespace Microsoft.Build.Framework
     //  which are compiled into multiple projects.
     internal static class TestInfo
     {
-        public static bool s_runningTests = false;
+        public static bool s_runningTests;
     }
 }

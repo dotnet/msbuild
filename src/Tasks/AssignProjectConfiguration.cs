@@ -112,7 +112,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Should we build references even if they were disabled in the project configuration
         /// </summary>
-        public bool OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration { get; set; } = false;
+        public bool OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration { get; set; }
 
         // Whether to set the project reference's GlobalPropertiesToRemove metadata to contain
         // Configuration and Platform. 
@@ -122,7 +122,7 @@ namespace Microsoft.Build.Tasks
         /// on an MSBuild call, the Configuration and Platform metadata will be unset, allowing the 
         /// child project to build in its default configuration / platform. 
         /// </summary>
-        public bool ShouldUnsetParentConfigurationAndPlatform { get; set; } = false;
+        public bool ShouldUnsetParentConfigurationAndPlatform { get; set; }
 
         /// <summary>
         /// The output type for the project

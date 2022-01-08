@@ -17,7 +17,7 @@ namespace Microsoft.Build.Shared.LanguageParser
     sealed internal class VisualBasicTokenEnumerator : TokenEnumerator
     {
         // Reader over the sources.
-        private VisualBasicTokenCharReader _reader = null;
+        private VisualBasicTokenCharReader _reader;
 
         /*
         * Method:  TokenEnumerator

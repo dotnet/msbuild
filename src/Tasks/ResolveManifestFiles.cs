@@ -92,10 +92,10 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] RuntimePackAssets { get; set; }
 
         // True if deployment mode during publish is set to self-contained mode
-        public bool IsSelfContainedPublish { get; set; } = false;
+        public bool IsSelfContainedPublish { get; set; }
 
         // True if single file publish is on
-        public bool IsSingleFilePublish { get; set; } = false;
+        public bool IsSingleFilePublish { get; set; }
 
         [Output]
         public ITaskItem[] OutputAssemblies { get; set; }
@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks
 
         public string AssemblyName { get; set; }
 
-        public bool LauncherBasedDeployment {get; set; } = false;
+        public bool LauncherBasedDeployment {get; set; }
 
         public string TargetFrameworkVersion
         {

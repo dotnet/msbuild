@@ -17,7 +17,7 @@ namespace Microsoft.Build.Shared.LanguageParser
     internal abstract class TokenEnumerator : IEnumerator
     {
         // The current token that was found.
-        protected Token current = null;
+        protected Token current;
 
         // Return the token char reader.
         abstract internal TokenCharReader Reader { get; }

@@ -34,9 +34,9 @@ namespace Microsoft.Build.Tasks
 
         public string CertificateFile { get; set; }
 
-        public bool SuppressAutoClosePasswordPrompt { get; set; } = false;
+        public bool SuppressAutoClosePasswordPrompt { get; set; }
 
-        public bool ShowImportDialogDespitePreviousFailures { get; set; } = false;
+        public bool ShowImportDialogDespitePreviousFailures { get; set; }
 
         public int AutoClosePasswordPromptTimeout { get; set; } = 20;
 

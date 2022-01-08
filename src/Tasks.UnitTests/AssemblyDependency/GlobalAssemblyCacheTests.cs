@@ -958,7 +958,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         internal class MockEnumerator : IEnumerable<AssemblyNameExtension>
         {
-            private List<string> _assembliesToEnumerate = null;
+            private List<string> _assembliesToEnumerate;
             private List<string>.Enumerator _enumerator;
 
             public MockEnumerator(List<string> assembliesToEnumerate)

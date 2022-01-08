@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache of system state information, used to optimize performance.
         /// </summary>
-        internal SystemState _cache = null;
+        internal SystemState _cache;
 
         /// <summary>
         /// Construct
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Tasks
             public static string UnifiedDependency;
             public static string UnifiedPrimaryReference;
 
-            private static bool initialized = false;
+            private static bool initialized;
 
             internal static void Initialize(TaskLoggingHelper log)
             {
@@ -163,18 +163,18 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _installedAssemblySubsetTables = Array.Empty<TaskItem>();
         private ITaskItem[] _fullFrameworkAssemblyTables = Array.Empty<TaskItem>();
         private ITaskItem[] _resolvedSDKReferences = Array.Empty<TaskItem>();
-        private bool _ignoreDefaultInstalledAssemblyTables = false;
-        private bool _ignoreDefaultInstalledAssemblySubsetTables = false;
+        private bool _ignoreDefaultInstalledAssemblyTables;
+        private bool _ignoreDefaultInstalledAssemblySubsetTables;
         private string[] _candidateAssemblyFiles = Array.Empty<string>();
         private string[] _targetFrameworkDirectories = Array.Empty<string>();
         private string[] _searchPaths = Array.Empty<string>();
         private string[] _allowedAssemblyExtensions = new string[] { ".winmd", ".dll", ".exe" };
         private string[] _relatedFileExtensions = new string[] { ".pdb", ".xml", ".pri" };
-        private string _appConfigFile = null;
+        private string _appConfigFile;
         private bool _supportsBindingRedirectGeneration;
-        private bool _autoUnify = false;
-        private bool _ignoreVersionForFrameworkReferences = false;
-        private bool _ignoreTargetFrameworkAttributeVersionMismatch = false;
+        private bool _autoUnify;
+        private bool _ignoreVersionForFrameworkReferences;
+        private bool _ignoreTargetFrameworkAttributeVersionMismatch;
         private ITaskItem[] _resolvedFiles = Array.Empty<TaskItem>();
         private ITaskItem[] _resolvedDependencyFiles = Array.Empty<TaskItem>();
         private ITaskItem[] _relatedFiles = Array.Empty<TaskItem>();
@@ -192,22 +192,22 @@ namespace Microsoft.Build.Tasks
         private bool _findSatellites = true;
         private bool _findSerializationAssemblies = true;
         private bool _findRelatedFiles = true;
-        private bool _silent = false;
+        private bool _silent;
         private string _projectTargetFrameworkAsString = String.Empty;
         private string _targetedRuntimeVersionRawValue = String.Empty;
         private Version _projectTargetFramework;
 
-        private string _stateFile = null;
-        private string _targetProcessorArchitecture = null;
+        private string _stateFile;
+        private string _targetProcessorArchitecture;
 
         private string _profileName = String.Empty;
         private string[] _fullFrameworkFolders = Array.Empty<string>();
         private string[] _latestTargetFrameworkDirectories = Array.Empty<string>();
         private bool _copyLocalDependenciesWhenParentReferenceInGac = true;
         private Dictionary<string, MessageImportance> _showAssemblyFoldersExLocations = new Dictionary<string, MessageImportance>(StringComparer.OrdinalIgnoreCase);
-        private bool _logVerboseSearchResults = false;
+        private bool _logVerboseSearchResults;
         private WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
-        private bool _unresolveFrameworkAssembliesFromHigherFrameworks = false;
+        private bool _unresolveFrameworkAssembliesFromHigherFrameworks;
 
         /// <summary>
         /// If set to true, it forces to unresolve framework assemblies with versions higher or equal the version of the target framework, regardless of the target framework

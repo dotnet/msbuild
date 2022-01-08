@@ -16,9 +16,9 @@ namespace Microsoft.Build.Shared.LanguageParser
     internal abstract class Token
     {
         // The text from the originating source file that caused this token.
-        private string _innerText = null;
+        private string _innerText;
         // The line number that the token fell on.
-        private int _line = 0;
+        private int _line;
 
         /*
          * Method:  InnerText

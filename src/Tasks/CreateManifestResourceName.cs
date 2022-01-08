@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Rootnamespace to use for naming.
         /// </summary>
-        public string RootNamespace { get; set; } = null;
+        public string RootNamespace { get; set; }
 
         /// <summary>
         /// The resulting manifest names.

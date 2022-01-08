@@ -263,18 +263,18 @@ namespace Microsoft.Build.Utilities
         /// Task Parameter: Importance with which to log text from the
         /// standard out stream.
         /// </summary>
-        public string StandardOutputImportance { get; set; } = null;
+        public string StandardOutputImportance { get; set; }
 
         /// <summary>
         /// Task Parameter: Importance with which to log text from the
         /// standard error stream.
         /// </summary>
-        public string StandardErrorImportance { get; set; } = null;
+        public string StandardErrorImportance { get; set; }
 
         /// <summary>
         /// Should ALL messages received on the standard error stream be logged as errors.
         /// </summary>
-        public bool LogStandardErrorAsError { get; set; } = false;
+        public bool LogStandardErrorAsError { get; set; }
 
         /// <summary>
         /// Importance with which to log text from in the

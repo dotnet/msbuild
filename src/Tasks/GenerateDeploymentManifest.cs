@@ -72,7 +72,7 @@ namespace Microsoft.Build.Tasks
             set => _install = value;
         }
 
-        public string MinimumRequiredVersion { get; set; } = null;
+        public string MinimumRequiredVersion { get; set; }
 
         public bool MapFileExtensions
         {
@@ -97,7 +97,7 @@ namespace Microsoft.Build.Tasks
             set => _suiteName = value;
         }
 
-        public string SupportUrl { get; set; } = null;
+        public string SupportUrl { get; set; }
 
         public bool TrustUrlParameters
         {

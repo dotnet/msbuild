@@ -43,27 +43,27 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <summary>
         /// The number of characters read into currentPage.
         /// </summary>
-        private int _charactersRead = 0;
+        private int _charactersRead;
 
         /// <summary>
         /// The page before currentPage.
         /// </summary>
-        private char[] _priorPage = null;
+        private char[] _priorPage;
 
         /// <summary>
         /// The most recently read page.
         /// </summary>
-        private char[] _currentPage = null;
+        private char[] _currentPage;
 
         /// <summary>
         /// Count of the total number of pages allocated.
         /// </summary>
-        private int _pagesAllocated = 0;
+        private int _pagesAllocated;
 
         /// <summary>
         /// Size of pages to use for reading from source file.
         /// </summary>
-        private int _pageSize = 0;
+        private int _pageSize;
 
         /// <summary>
         /// Construct.

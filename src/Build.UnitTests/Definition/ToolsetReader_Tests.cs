@@ -34,11 +34,11 @@ namespace Microsoft.Build.UnitTests.Definition
     public class ToolsetReaderTests : IDisposable
     {
         // The registry key that is passed as the baseKey parameter to the ToolsetRegistryReader class
-        private RegistryKey _testRegistryKey = null;
+        private RegistryKey _testRegistryKey;
         // Subkey "4.0"
-        private RegistryKey _currentVersionRegistryKey = null;
+        private RegistryKey _currentVersionRegistryKey;
         // Subkey "ToolsVersions"
-        private RegistryKey _toolsVersionsRegistryKey = null;
+        private RegistryKey _toolsVersionsRegistryKey;
 
         // Path to the registry key under HKCU
         // Note that this is a test registry key created solely for unit testing.
@@ -2868,7 +2868,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         private WhereToThrow _whereToThrow = WhereToThrow.None;
-        private string _subKeyThatDoesNotExist = null;
+        private string _subKeyThatDoesNotExist;
 
         /// <summary>
         /// Construct the mock key with a specified key

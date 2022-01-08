@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared.LanguageParser
     sealed internal class CSharpTokenEnumerator : TokenEnumerator
     {
         // Reader over the sources.
-        private CSharpTokenCharReader _reader = null;
+        private CSharpTokenCharReader _reader;
 
         /*
         * Method:  TokenEnumerator

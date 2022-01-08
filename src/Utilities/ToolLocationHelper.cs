@@ -257,7 +257,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Cache the list of supported frameworks
         /// </summary>
-        private static List<string> s_targetFrameworkMonikers = null;
+        private static List<string> s_targetFrameworkMonikers;
 
         /// <summary>
         /// Cache the VS Install folders for particular range of VS versions

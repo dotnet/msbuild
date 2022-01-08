@@ -51,9 +51,9 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem OutputManifest { get; set; }
 
-        public string Platform { get; set; } = null;
+        public string Platform { get; set; }
 
-        public string TargetCulture { get; set; } = null;
+        public string TargetCulture { get; set; }
 
         public string TargetFrameworkVersion
         {

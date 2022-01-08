@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
         /// executable, so return null for the ToolName -- And make sure that 
         /// Execute() logs an error!
         /// </summary>
-        protected override string ToolName { get; } = null;
+        protected override string ToolName { get; }
 
         /// <summary>
         /// Invokes the ToolTask with the given parameters

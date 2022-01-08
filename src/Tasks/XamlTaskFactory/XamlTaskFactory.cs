@@ -246,7 +246,7 @@ namespace Microsoft.Build.Tasks
     {
         public string FactoryName => "XamlTaskFactory";
     
-        public Type TaskType { get; } = null;
+        public Type TaskType { get; }
 
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {

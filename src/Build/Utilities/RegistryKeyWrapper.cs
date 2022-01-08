@@ -25,7 +25,7 @@ namespace Microsoft.Build.Internal
         // The hive this registry key lives under
         private RegistryKey _registryHive;
         // This field will be set to true when we try to open the registry key
-        private bool _attemptedToOpenRegistryKey = false;
+        private bool _attemptedToOpenRegistryKey;
 
         /// <summary>
         /// Has the object been disposed yet.

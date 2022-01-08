@@ -240,7 +240,7 @@ namespace System.Deployment.Internal.CodeSigning
 
     internal class ManifestSignedXml2 : SignedXml
     {
-        private bool _verify = false;
+        private bool _verify;
         private const string Sha256SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha256";
         private const string Sha256DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha256";
 
@@ -310,9 +310,9 @@ namespace System.Deployment.Internal.CodeSigning
 
     internal class SignedCmiManifest2
     {
-        private XmlDocument _manifestDom = null;
-        private CmiStrongNameSignerInfo _strongNameSignerInfo = null;
-        private CmiAuthenticodeSignerInfo _authenticodeSignerInfo = null;
+        private XmlDocument _manifestDom;
+        private CmiStrongNameSignerInfo _strongNameSignerInfo;
+        private CmiAuthenticodeSignerInfo _authenticodeSignerInfo;
         private bool _useSha256;
 
         private const string Sha256SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha256";
@@ -1163,9 +1163,9 @@ namespace System.Deployment.Internal.CodeSigning
 
     internal class CmiStrongNameSignerInfo
     {
-        private int _error = 0;
-        private string _publicKeyToken = null;
-        private AsymmetricAlgorithm _snKey = null;
+        private int _error;
+        private string _publicKeyToken;
+        private AsymmetricAlgorithm _snKey;
 
         internal CmiStrongNameSignerInfo() { }
 
@@ -1217,13 +1217,13 @@ namespace System.Deployment.Internal.CodeSigning
 
     internal class CmiAuthenticodeSignerInfo
     {
-        private int _error = 0;
-        private X509Chain _signerChain = null;
-        private uint _algHash = 0;
-        private string _hash = null;
-        private string _description = null;
-        private string _descriptionUrl = null;
-        private CmiAuthenticodeTimestamperInfo _timestamperInfo = null;
+        private int _error;
+        private X509Chain _signerChain;
+        private uint _algHash;
+        private string _hash;
+        private string _description;
+        private string _descriptionUrl;
+        private CmiAuthenticodeTimestamperInfo _timestamperInfo;
 
         internal CmiAuthenticodeSignerInfo() { }
 
@@ -1343,10 +1343,10 @@ namespace System.Deployment.Internal.CodeSigning
 
     internal class CmiAuthenticodeTimestamperInfo
     {
-        private int _error = 0;
-        private X509Chain _timestamperChain = null;
+        private int _error;
+        private X509Chain _timestamperChain;
         private DateTime _timestampTime;
-        private uint _algHash = 0;
+        private uint _algHash;
 
         private CmiAuthenticodeTimestamperInfo() { }
 

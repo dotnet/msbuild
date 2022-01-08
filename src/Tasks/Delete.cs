@@ -38,7 +38,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// When true, errors will be logged as warnings.
         /// </summary>
-        public bool TreatErrorsAsWarnings { get; set; } = false;
+        public bool TreatErrorsAsWarnings { get; set; }
 
         [Output]
         public ITaskItem[] DeletedFiles { get; set; }

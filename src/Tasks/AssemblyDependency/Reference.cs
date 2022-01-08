@@ -318,18 +318,18 @@ namespace Microsoft.Build.Tasks
         /// Whether types need to be embedded into the target assembly
         /// </summary>
         /// <value></value>
-        internal bool EmbedInteropTypes { get; set; } = false;
+        internal bool EmbedInteropTypes { get; set; }
 
         /// <summary>
         /// This will be true if the user requested a specific file. We know this when the file was resolved
         /// by hintpath or if it was resolve as a raw file name for example.
         /// </summary>
-        internal bool UserRequestedSpecificFile { get; set; } = false;
+        internal bool UserRequestedSpecificFile { get; set; }
 
         /// <summary>
         /// The version number of this reference
         /// </summary>
-        internal Version ReferenceVersion { get; set; } = null;
+        internal Version ReferenceVersion { get; set; }
 
         /// <summary>
         /// True if the assembly was found to be in the GAC.
@@ -589,22 +589,22 @@ namespace Microsoft.Build.Tasks
         /// through the reference resolution process.
         /// </summary>
         /// <value>'true' if this reference is a primary assembly.</value>
-        internal bool IsPrimary { get; private set; } = false;
+        internal bool IsPrimary { get; private set; }
 
         /// <summary>
         /// Whether or not this reference will be installed on the target machine.
         /// </summary>
-        internal bool IsPrerequisite { set; get; } = false;
+        internal bool IsPrerequisite { set; get; }
 
         /// <summary>
         /// Whether or not this reference is a redist root.
         /// </summary>
-        internal bool? IsRedistRoot { set; get; } = null;
+        internal bool? IsRedistRoot { set; get; }
 
         /// <summary>
         /// The redist name for this reference (if any)
         /// </summary>
-        internal string RedistName { set; get; } = null;
+        internal string RedistName { set; get; }
 
         /// <summary>
         /// The original source item, as passed into the task that is directly associated
@@ -628,7 +628,7 @@ namespace Microsoft.Build.Tasks
         /// This item shouldn't be passed to compilers and so forth. 
         /// </summary>
         /// <value>'true' if this reference points to a bad image.</value>
-        internal bool IsBadImage { get; private set; } = false;
+        internal bool IsBadImage { get; private set; }
 
         /// <summary>
         ///  If true, then this item conflicted with another item and lost.
@@ -660,7 +660,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         ///  The name of the assembly that won over this reference.
         /// </summary>
-        internal AssemblyNameExtension ConflictVictorName { get; set; } = null;
+        internal AssemblyNameExtension ConflictVictorName { get; set; }
 
         /// <summary>
         ///  The reason why this reference lost to another reference.
@@ -799,7 +799,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Whether or not we still need to find dependencies for this reference.
         /// </summary>
-        internal bool DependenciesFound { get; set; } = false;
+        internal bool DependenciesFound { get; set; }
 
         /// <summary>
         /// If the reference has an SDK name metadata this will contain that string.

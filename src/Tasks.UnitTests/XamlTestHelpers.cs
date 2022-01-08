@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
                                          </ProjectSchemaDefinitions>
                                             ";
 
-        private static string s_pathToMSBuildBinaries = null;
+        private static string s_pathToMSBuildBinaries;
 
         /// <summary>
         /// Returns the path to the MSBuild binaries 

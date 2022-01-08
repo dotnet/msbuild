@@ -4234,7 +4234,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
 #if FEATURE_HTTP_LISTENER
-        private Exception _httpListenerThreadException = null;
+        private Exception _httpListenerThreadException;
 
         /// <summary>
         /// Verify that DTD processing is disabled when loading a project

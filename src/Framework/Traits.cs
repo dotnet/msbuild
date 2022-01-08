@@ -195,7 +195,7 @@ namespace Microsoft.Build.Framework
         }
 
         private bool? _logPropertiesAndItemsAfterEvaluation;
-        private bool _logPropertiesAndItemsAfterEvaluationInitialized = false;
+        private bool _logPropertiesAndItemsAfterEvaluationInitialized;
         public bool? LogPropertiesAndItemsAfterEvaluation
         {
             get

@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// <summary>
         /// The file location to copy output files to
         /// </summary>
-        public string OutputPath { get; set; } = null;
+        public string OutputPath { get; set; }
 
         /// <summary>
         /// The product builders to use for generating the bootstrapper

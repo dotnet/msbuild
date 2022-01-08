@@ -40,10 +40,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public sealed class AssemblyReference : BaseReference
     {
-        private AssemblyIdentity _assemblyIdentity = null;
-        private bool _isPrerequisite = false;
+        private AssemblyIdentity _assemblyIdentity;
+        private bool _isPrerequisite;
         private AssemblyReferenceType _referenceType = AssemblyReferenceType.Unspecified;
-        private bool _isPrimary = false;
+        private bool _isPrimary;
 
         /// <summary>
         /// Initializes a new instance of the AssemblyReference class.

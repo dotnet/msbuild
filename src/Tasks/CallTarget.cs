@@ -49,7 +49,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Deprecated. Does nothing.
         /// </summary>
-        public bool UseResultsCache { get; set; } = false;
+        public bool UseResultsCache { get; set; }
 
         #endregion
 

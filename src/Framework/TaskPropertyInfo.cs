@@ -61,6 +61,6 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Whether the Log and LogItemMetadata properties have been assigned already.
         /// </summary>
-        internal bool Initialized = false;
+        internal bool Initialized;
     }
 }
