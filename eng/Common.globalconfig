@@ -706,7 +706,7 @@ dotnet_diagnostic.SA1000.severity = none
 dotnet_diagnostic.SA1001.severity = none
 
 # Semicolons should not be preceded by a space
-dotnet_diagnostic.SA1002.severity = suggestion
+dotnet_diagnostic.SA1002.severity = warning
 
 dotnet_diagnostic.SA1003.severity = none
 
