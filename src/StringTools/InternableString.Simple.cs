@@ -20,7 +20,8 @@ namespace System
             {
                 return new string(charArray, start, length);
             }
-            throw new ArgumentException(nameof(array));
+
+            throw new ArgumentException("array is not char array.", nameof(array));
         }
     }
 }

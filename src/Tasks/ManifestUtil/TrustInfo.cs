@@ -412,7 +412,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public PermissionSet PermissionSet
         {
             get => GetOutputPermissionSet();
-            set => _outputPermissionSet = value ?? throw new ArgumentNullException("PermissionSet cannot be set to null.");
+            set => _outputPermissionSet = value ?? throw new ArgumentNullException(nameof(value), "PermissionSet cannot be set to null.");
         }
 #endif
 
