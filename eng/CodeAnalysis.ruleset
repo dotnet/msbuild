@@ -94,7 +94,7 @@
     <Rule Id="CA1820" Action="None" />             <!-- Test for empty strings using string length --> 
     <Rule Id="CA1821" Action="Warning" />          <!-- Remove empty Finalizers --> 
     <Rule Id="CA1822" Action="None" />             <!-- Mark members as static --> 
-    <Rule Id="CA1823" Action="Warning" />          <!-- Avoid unused private fields --> 
+    <Rule Id="CA1823" Action="Info" />             <!-- Avoid unused private fields --> 
     <Rule Id="CA1824" Action="Warning" />          <!-- Mark assemblies with NeutralResourcesLanguageAttribute -->
     <Rule Id="CA1825" Action="Info" />             <!-- Avoid zero-length array allocations. --> 
     <Rule Id="CA1827" Action="Warning" />          <!-- Do not use Count() or LongCount() when Any() can be used --> 
