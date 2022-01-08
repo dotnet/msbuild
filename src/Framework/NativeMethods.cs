@@ -258,7 +258,7 @@ internal static class NativeMethods
     internal class MemoryStatus
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:MemoryStatus"/> class.
+        /// Initializes a new instance of the <see cref="MemoryStatus"/> class.
         /// </summary>
         public MemoryStatus()
         {
