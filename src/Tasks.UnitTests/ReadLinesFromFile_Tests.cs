@@ -12,6 +12,8 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class ReadLinesFromFile_Tests

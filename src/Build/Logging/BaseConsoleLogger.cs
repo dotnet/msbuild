@@ -18,6 +18,8 @@ using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     #region Delegates

@@ -10,6 +10,8 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
     internal class MSBuildResXReader

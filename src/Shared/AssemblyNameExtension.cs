@@ -15,6 +15,8 @@ using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

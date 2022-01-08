@@ -30,6 +30,8 @@ using Xunit.Abstractions;
 using Shouldly;
 using Microsoft.Build.UnitTests.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     public class SolutionProjectGenerator_Tests : IDisposable

@@ -30,6 +30,8 @@ using Microsoft.Build.Utilities;
 
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>

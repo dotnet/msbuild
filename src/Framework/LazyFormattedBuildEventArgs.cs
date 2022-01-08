@@ -5,6 +5,8 @@ using System;
 using System.Globalization;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>

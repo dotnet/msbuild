@@ -14,6 +14,8 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

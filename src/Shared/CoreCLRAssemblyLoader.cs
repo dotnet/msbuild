@@ -10,6 +10,8 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

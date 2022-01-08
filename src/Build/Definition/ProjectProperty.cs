@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

@@ -15,6 +15,8 @@ using Microsoft.Build.Utilities;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

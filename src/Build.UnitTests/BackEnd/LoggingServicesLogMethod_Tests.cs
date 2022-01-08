@@ -21,6 +21,8 @@ using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Logging
 {
     /// <summary>

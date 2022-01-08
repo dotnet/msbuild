@@ -22,6 +22,8 @@ using Microsoft.Build.Execution;
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     #region Enumerations

@@ -7,6 +7,8 @@ using Microsoft.Build.Shared;
 
 using Microsoft.Build.Construction;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

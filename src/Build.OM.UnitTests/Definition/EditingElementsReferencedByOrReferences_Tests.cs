@@ -9,6 +9,8 @@ using System.Xml;
 using Microsoft.Build.Evaluation;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>

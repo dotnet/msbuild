@@ -10,6 +10,8 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

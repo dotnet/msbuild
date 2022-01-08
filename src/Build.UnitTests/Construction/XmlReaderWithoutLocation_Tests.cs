@@ -6,6 +6,8 @@ using System.Xml;
 using System.IO;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     public class XmlReaderWithoutLocation_Tests
