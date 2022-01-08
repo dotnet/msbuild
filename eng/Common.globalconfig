@@ -746,7 +746,7 @@ dotnet_diagnostic.SA1015.severity = suggestion
 dotnet_diagnostic.SA1019.severity = none
 
 # Increment symbol '++' should not be preceded by a space
-dotnet_diagnostic.SA1020.severity = suggestion
+dotnet_diagnostic.SA1020.severity = warning
 
 # Negative sign should be preceded by a space
 dotnet_diagnostic.SA1021.severity = suggestion
