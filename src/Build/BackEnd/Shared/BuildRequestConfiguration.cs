@@ -16,6 +16,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

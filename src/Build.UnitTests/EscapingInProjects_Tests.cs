@@ -23,6 +23,8 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 {
     /// <summary>

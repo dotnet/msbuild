@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

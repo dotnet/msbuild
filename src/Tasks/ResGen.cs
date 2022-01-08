@@ -14,6 +14,8 @@ using Microsoft.Build.Utilities;
 using CodeDomProvider = System.CodeDom.Compiler.CodeDomProvider;
 using MSBuildProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

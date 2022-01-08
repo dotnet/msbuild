@@ -16,6 +16,8 @@ using Xunit.Abstractions;
 using Shouldly;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>

@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;

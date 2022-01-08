@@ -17,6 +17,8 @@ using Microsoft.Win32;
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

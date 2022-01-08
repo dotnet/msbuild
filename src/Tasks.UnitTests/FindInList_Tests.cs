@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class FindInList_Tests

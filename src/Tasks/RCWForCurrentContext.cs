@@ -5,6 +5,8 @@ using System;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.InteropUtilities
 {
     /// <summary>

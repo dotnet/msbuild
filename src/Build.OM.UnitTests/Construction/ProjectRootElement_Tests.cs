@@ -22,6 +22,8 @@ using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>

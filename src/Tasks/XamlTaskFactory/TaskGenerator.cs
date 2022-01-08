@@ -9,6 +9,8 @@ using System.CodeDom;
 
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Xaml
 {
     /// <summary>

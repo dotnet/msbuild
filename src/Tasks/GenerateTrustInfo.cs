@@ -7,6 +7,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

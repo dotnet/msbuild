@@ -3,6 +3,8 @@
 
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
