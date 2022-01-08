@@ -18,6 +18,8 @@ using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 using SdkResultImpl = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResolverService_Tests

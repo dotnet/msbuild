@@ -21,6 +21,8 @@ using ImmutableDictionary = System.Collections.Immutable.ImmutableDictionary<str
 using ImmutableDictionary = MSBuildTaskHost::System.Collections.Immutable.ImmutableDictionary<string, string>;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ImmutableDictionary_Tests

@@ -8,6 +8,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
 {
     /// <summary>

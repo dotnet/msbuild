@@ -8,6 +8,8 @@ using System.Linq;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class ResourceManagement_Tests

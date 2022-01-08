@@ -14,6 +14,8 @@ using Xunit;
 using StringToolsNet35::Microsoft.NET.StringTools;
 #endif
 
+#nullable disable
+
 namespace Microsoft.NET.StringTools.Tests
 {
     public class SpanBasedStringBuilder_Tests

@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     /// <summary>

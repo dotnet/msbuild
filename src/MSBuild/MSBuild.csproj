@@ -330,4 +330,14 @@
 
   </Target>
 
+  <UsingTask TaskName="ValidateMSBuildPackageDependencyVersions" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <Task>
+      <Code Source="ValidateMSBuildPackageDependencyVersions.cs" Language="cs" />
+    </Task>
+  </UsingTask>
+
+  <Target Name="ValidateMSBuildPackageDependencyVersions" BeforeTargets="AfterBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" >
+    <ValidateMSBuildPackageDependencyVersions AppConfig="@(AppConfigWithTargetPath)" AssemblyPath="$(OutputPath)" />
+  </Target>
+
 </Project>

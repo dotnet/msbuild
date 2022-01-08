@@ -17,6 +17,8 @@ using Xunit.Abstractions;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
     [Trait("Category", "mono-osx-failing")]

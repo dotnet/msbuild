@@ -8,11 +8,15 @@ The [changelog](documentation/Changelog.md) has detailed information about chang
 
 ### Build Status
 
-The current development branch is `main`. Changes in `main` will go into a future update of MSBuild, which will release with Visual Studio 17.1 and a corresponding version of the .NET Core SDK.
+The current development branch is `main`. Changes in `main` will go into a future update of MSBuild, which will release with Visual Studio 17.2 and a corresponding version of the .NET Core SDK.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=main)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=main)
 
-We have forked for MSBuild 17.0 in the branch [`vs17.0`](https://github.com/Microsoft/msbuild/tree/vs17.0). Changes to that branch need special approval.
+We have forked for MSBuild 17.1 in the branch [`vs17.1`](https://github.com/Microsoft/msbuild/tree/vs17.1). Changes to that branch need special approval.
+
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.1)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.1)
+
+17.0 builds from the branch [`vs17.0`](https://github.com/Microsoft/msbuild/tree/vs17.0). Only high-priority bugfixes will be considered for servicing 17.0.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.0)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.0)
 

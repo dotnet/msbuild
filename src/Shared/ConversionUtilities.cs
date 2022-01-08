@@ -6,6 +6,8 @@ using System.Globalization;
 using System.Text;
 using Error = Microsoft.Build.Shared.ErrorUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

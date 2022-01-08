@@ -8,6 +8,8 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

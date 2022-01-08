@@ -19,6 +19,8 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     public class ToolsetState_Tests
