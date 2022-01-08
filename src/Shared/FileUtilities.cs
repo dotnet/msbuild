@@ -1090,27 +1090,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Helper function to create an Uri object from path.
-        /// </summary>
-        /// <param name="path">path string</param>
-        /// <returns>uri object</returns>
-        private static Uri CreateUriFromPath(string path)
-        {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
-
-            Uri pathUri;
-
-            // Try absolute first, then fall back on relative, otherwise it
-            // makes some absolute UNC paths like (\\foo\bar) relative ...
-            if (!Uri.TryCreate(path, UriKind.Absolute, out pathUri))
-            {
-                pathUri = new Uri(path, UriKind.Relative);
-            }
-
-            return pathUri;
-        }
-
-        /// <summary>
         /// Normalizes the path if and only if it is longer than max path,
         /// or would be if rooted by the current directory.
         /// This may make it shorter by removing ".."'s.
