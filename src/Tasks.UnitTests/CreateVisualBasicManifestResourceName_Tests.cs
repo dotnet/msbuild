@@ -12,6 +12,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class CreateVisualBasicManifestResourceName_Tests

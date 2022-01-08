@@ -18,6 +18,8 @@ using System.Xml.XPath;
 using System.Xml.Xsl;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     /// <summary>

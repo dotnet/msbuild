@@ -38,6 +38,8 @@ using System.Text;
 using Microsoft.Build.Eventing;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     internal static class StringBuilderCache

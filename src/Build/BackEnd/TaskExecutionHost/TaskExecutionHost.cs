@@ -25,6 +25,8 @@ using Microsoft.Build.Utilities;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

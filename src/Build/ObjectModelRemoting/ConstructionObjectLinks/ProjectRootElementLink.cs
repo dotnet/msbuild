@@ -7,6 +7,8 @@ using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
 
+#nullable disable
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
     /// <summary>

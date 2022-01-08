@@ -16,6 +16,8 @@ using Xunit.Abstractions;
 
 using NativeMethods = Microsoft.Build.Tasks.NativeMethods;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     public class ResolveAssemblyReferenceTestFixture : IDisposable

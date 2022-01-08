@@ -7,6 +7,8 @@ using Microsoft.Build.Execution;
 using System;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>

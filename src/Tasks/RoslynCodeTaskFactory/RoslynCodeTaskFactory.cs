@@ -18,6 +18,8 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     public sealed class RoslynCodeTaskFactory : ITaskFactory
