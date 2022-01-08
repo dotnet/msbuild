@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Cli
                 command.AddOption(option);
             }
 
-            command.Handler = CommandHandler.Create<ParseResult>(RestoreCommand.Run);
+            command.SetHandler(RestoreCommand.Run);
 
             return command;
         }
@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Cli
                         IsHidden = !showHelp
                     }.ForwardAsSingle(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o)}")
                     .AllowSingleArgPerToken()
-                    .AddSuggestions(Suggest.RunTimesFromProjectFile())
+                    .AddCompletions(Complete.RunTimesFromProjectFile)
                 ).ToArray();
             }
 

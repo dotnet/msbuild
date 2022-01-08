@@ -635,7 +635,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining($"0 = a{Environment.NewLine}1 = {Environment.NewLine}2 = c");
+                .HaveStdOutContaining($"0 = a{Environment.NewLine}1 = c");
         }
 
         [Fact]

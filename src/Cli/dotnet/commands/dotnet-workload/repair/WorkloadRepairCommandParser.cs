@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VerbosityOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadRepairCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadRepairCommand(parseResult).Execute());
 
             return command;
         }

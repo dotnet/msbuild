@@ -5,6 +5,7 @@ using System;
 using System.Runtime.Loader;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.IO;
@@ -129,52 +130,28 @@ Examples:
                 return null;
             });
 
-            var projectOption = new Option<string>("-p", "The project to watch") { IsHidden = true };
+            var listOption = new Option<bool>(
+                "--list",
+                "Lists all discovered files without starting the watcher");
+
+            var shortProjectOption = new Option<string>("-p", "The project to watch") { IsHidden = true };
+            var longProjectOption = new Option<string>("--project","The project to watch");
+            var noHotReloadOption = new Option<bool>(
+                new[] { "--no-hot-reload" },
+                "Suppress hot reload for supported apps.");
             var root = new RootCommand(Description)
             {
                  quiet,
                  verbose,
-                 new Option<bool>(
-                    new[] { "--no-hot-reload" },
-                    "Suppress hot reload for supported apps."),
-                 new Option<string>(
-                     "--project",
-                    "The project to watch"),
-                 projectOption,
-                 new Option<bool>(
-                    "--list",
-                    "Lists all discovered files without starting the watcher"),
+                 noHotReloadOption,
+                 longProjectOption,
+                 shortProjectOption,
+                 listOption
             };
 
             root.TreatUnmatchedTokensAsErrors = false;
-            root.Handler = CommandHandler.Create((CommandLineOptions options, ParseResult parseResults) =>
-            {
-                if (string.IsNullOrEmpty(options.Project))
-                {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    var projectOptionShort = parseResults.GetValueForOption(projectOption);
-#pragma warning restore CS0618 // Type or member is obsolete
-                    if (!string.IsNullOrEmpty(projectOptionShort))
-                    {
-                        reporter.Warn(Resources.Warning_ProjectAbbreviationDeprecated);
-                        options.Project = projectOptionShort;
-                    }
-                }
-
-                string[] remainingArguments;
-                if (parseResults.UnparsedTokens.Any() && parseResults.UnmatchedTokens.Any())
-                {
-                    remainingArguments = parseResults.UnmatchedTokens.Append("--").Concat(parseResults.UnparsedTokens).ToArray();
-                }
-                else
-                {
-                    remainingArguments = parseResults.UnmatchedTokens.Concat(parseResults.UnparsedTokens).ToArray();
-                }
-
-                options.RemainingArguments = remainingArguments;
-                return handler(options);
-            });
-
+            var binder = new CommandLineOptionsBinder(longProjectOption, shortProjectOption, quiet, listOption, noHotReloadOption, verbose, reporter);
+            root.SetHandler((CommandLineOptions options) => handler(options), binder);
             return root;
         }
 
@@ -245,11 +222,11 @@ Examples:
             var args = options.RemainingArguments;
 
             var isDefaultRunCommand = false;
-            if (args.Length == 1 && args[0] == "run")
+            if (args.Count == 1 && args[0] == "run")
             {
                 isDefaultRunCommand = true;
             }
-            else if (args.Length == 0)
+            else if (args.Count == 0)
             {
                 isDefaultRunCommand = true;
                 args = new[] { "run" };
@@ -420,5 +397,67 @@ Examples:
                 return null;
             };
         }
+        private sealed class CommandLineOptionsBinder : BinderBase<CommandLineOptions>
+        {
+            private readonly Option<string> _longProjectOption;
+            private readonly Option<string> _shortProjectOption;
+            private readonly Option<bool> _quietOption;
+            private readonly Option<bool> _listOption;
+            private readonly Option<bool> _noHotReloadOption;
+            private readonly Option<bool> _verboseOption;
+            private readonly IReporter _reporter;
+
+            internal CommandLineOptionsBinder(Option<string> longProjectOption, Option<string> shortProjectOption, Option<bool> quietOption, Option<bool> listOption, Option<bool> noHotReloadOption, Option<bool> verboseOption, IReporter reporter)
+            {
+                _longProjectOption = longProjectOption;
+                _shortProjectOption = shortProjectOption;
+                _quietOption = quietOption;
+                _listOption = listOption;
+                _noHotReloadOption = noHotReloadOption;
+                _verboseOption = verboseOption;
+                _reporter = reporter;
+            }
+
+            protected override CommandLineOptions GetBoundValue(BindingContext bindingContext)
+            {
+                var parseResults = bindingContext.ParseResult;
+                var projectValue = parseResults.GetValueForOption(_longProjectOption);
+                if (string.IsNullOrEmpty(projectValue))
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    var projectShortValue = parseResults.GetValueForOption(_shortProjectOption);
+#pragma warning restore CS0618 // Type or member is obsolete
+                    if (!string.IsNullOrEmpty(projectShortValue))
+                    {
+                        _reporter.Warn(Resources.Warning_ProjectAbbreviationDeprecated);
+                        projectValue = projectShortValue;
+                    }
+                }
+                var remainingArguments = new List<string>();
+                if (parseResults.UnparsedTokens.Any() && parseResults.UnmatchedTokens.Any())
+                {
+                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
+                    remainingArguments.Add("--");
+                    remainingArguments.AddRange(parseResults.UnparsedTokens);
+                }
+                else
+                {
+                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
+                    remainingArguments.AddRange(parseResults.UnparsedTokens);
+                }
+
+                var options = new CommandLineOptions
+                {
+                    Quiet = parseResults.GetValueForOption(_quietOption),
+                    List = parseResults.GetValueForOption(_listOption),
+                    NoHotReload = parseResults.GetValueForOption(_noHotReloadOption),
+                    Verbose = parseResults.GetValueForOption(_verboseOption),
+                    Project = projectValue,
+                    RemainingArguments = remainingArguments.AsReadOnly(),
+                };
+                return options;
+            }
+        }
     }
+
 }

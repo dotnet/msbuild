@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(InRootOption);
             command.AddOption(SolutionFolderOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new AddProjectToSolutionCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new AddProjectToSolutionCommand(parseResult).Execute());
 
             return command;
         }

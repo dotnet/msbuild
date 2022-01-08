@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SourceOption);
             command.AddOption(InteractiveOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
 
             return command;
         }

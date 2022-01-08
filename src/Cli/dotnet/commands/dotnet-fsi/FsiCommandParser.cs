@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new DocumentedCommand("fsi", DocsLink);
 
-            command.Handler = CommandHandler.Create<ParseResult>(FsiCommand.Run);
+            command.SetHandler(FsiCommand.Run);
 
             return command;
         }

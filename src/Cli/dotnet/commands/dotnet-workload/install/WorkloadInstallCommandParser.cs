@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(WorkloadIdArgument);
             AddWorkloadInstallCommandOptions(command);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadInstallCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadInstallCommand(parseResult).Execute());
 
             return command;
         }
