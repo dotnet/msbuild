@@ -751,8 +751,8 @@ dotnet_diagnostic.SA1020.severity = suggestion
 # Negative sign should be preceded by a space
 dotnet_diagnostic.SA1021.severity = suggestion
 
-# Dereference symbol '*' should not be preceded by a space."
-dotnet_diagnostic.SA1023.severity = suggestion
+# Dereference symbol '*' should not be preceded by a space.
+dotnet_diagnostic.SA1023.severity = warning
 
 # Colon should be followed by a space
 dotnet_diagnostic.SA1024.severity = suggestion
