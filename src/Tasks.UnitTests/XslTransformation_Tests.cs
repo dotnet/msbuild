@@ -1143,7 +1143,7 @@ namespace Microsoft.Build.UnitTests
 
             // Add custom attribute to assembly marking it as security transparent so that Assert will not be allowed
             // and link demands will be converted to full demands.
-            asmBldr.SetCustomAttribute(new CustomAttributeBuilder(typeof(System.Security.SecurityTransparentAttribute).GetConstructor(Type.EmptyTypes), new object[] { }));
+            asmBldr.SetCustomAttribute(new CustomAttributeBuilder(typeof(System.Security.SecurityTransparentAttribute).GetConstructor(Type.EmptyTypes), Array.Empty<object>()));
 
             // Mark the assembly with GeneratedCodeAttribute to improve profiling experience
             asmBldr.SetCustomAttribute(new CustomAttributeBuilder(typeof(GeneratedCodeAttribute).GetConstructor(new Type[] { typeof(string), typeof(string) }), new object[] { "XsltCompiler", "2.0.0.0" }));

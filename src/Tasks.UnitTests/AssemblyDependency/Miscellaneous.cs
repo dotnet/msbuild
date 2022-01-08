@@ -5639,10 +5639,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListGenerateBlackListEmptyAssemblyInfoNoRedistAssemblies()
         {
-            RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[0]);
+            RedistList redistList = RedistList.GetRedistList(Array.Empty<AssemblyTableInfo>());
             List<Exception> whiteListErrors = new List<Exception>();
             List<string> whiteListErrorFileNames = new List<string>();
-            Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[0], whiteListErrors, whiteListErrorFileNames);
+            Dictionary<string, string> blackList = redistList.GenerateBlackList(Array.Empty<AssemblyTableInfo>(), whiteListErrors, whiteListErrorFileNames);
             Assert.Null(blackList); // "Should return null if the AssemblyTableInfo is empty and the redist list is empty"
         }
 
@@ -5660,7 +5660,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[0], whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(Array.Empty<AssemblyTableInfo>(), whiteListErrors, whiteListErrorFileNames);
 
                 // Since there were no white list expect the black list to return null
                 Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
@@ -6543,7 +6543,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             installedSubSetTable = new ITaskItem[] { new TaskItem("c:\\foo\\Client.xml"), new TaskItem("D:\\foo\\bar\\Framework2\\"), new TaskItem("D:\\foo\\bar\\Framework"), new TaskItem("Nothing") };
             Assert.Equal("Client, Framework, Nothing", ResolveAssemblyReference.GenerateSubSetName(null, installedSubSetTable));
 
-            installedSubSetTable = new ITaskItem[0];
+            installedSubSetTable = Array.Empty<ITaskItem>();
             Assert.True(String.IsNullOrEmpty(ResolveAssemblyReference.GenerateSubSetName(null, installedSubSetTable)));
 
             installedSubSetTable = null;
