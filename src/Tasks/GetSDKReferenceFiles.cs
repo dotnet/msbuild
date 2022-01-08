@@ -273,7 +273,7 @@ namespace Microsoft.Build.Tasks
 
                 GenerateOutputItems();
 
-                if (_exceptions.Count > 0 && LogCacheFileExceptions)
+                if (!_exceptions.IsEmpty && LogCacheFileExceptions)
                 {
                     foreach (string exceptionMessage in _exceptions)
                     {
