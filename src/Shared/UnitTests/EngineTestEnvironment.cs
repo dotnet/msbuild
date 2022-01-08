@@ -15,6 +15,8 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public partial class TestEnvironment

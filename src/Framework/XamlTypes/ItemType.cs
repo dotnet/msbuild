@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>

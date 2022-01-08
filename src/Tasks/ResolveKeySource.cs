@@ -14,6 +14,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Runtime.Hosting;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

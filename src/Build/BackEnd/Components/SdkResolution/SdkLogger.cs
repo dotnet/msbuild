@@ -6,6 +6,8 @@ using Microsoft.Build.Framework;
 
 using SdkLoggerBase = Microsoft.Build.Framework.SdkLogger;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>

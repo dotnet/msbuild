@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

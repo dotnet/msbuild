@@ -4,6 +4,8 @@
 using System.IO;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Framework
 {
     /// <summary>

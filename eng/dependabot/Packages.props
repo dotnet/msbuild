@@ -11,16 +11,15 @@
     <PackageReference Update="BenchmarkDotNet" Version="0.13.1" />
     <PackageReference Update="LargeAddressAware" Version="1.0.5" />
     <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
-    <PackageReference Update="Microsoft.CodeQuality.Analyzers" Version="3.3.2" PrivateAssets="all" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" />
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.0.4492" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
     <PackageReference Update="Shouldly" Version="3.0.0" />
-    <PackageReference Update="StyleCop.Analyzers" Version="1.2.0-beta.164" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.3" />
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup>

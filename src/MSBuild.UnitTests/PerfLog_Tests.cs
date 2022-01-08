@@ -20,6 +20,8 @@ using Shouldly;
 using System.IO.Compression;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class PerfLogTests

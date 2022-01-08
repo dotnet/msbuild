@@ -7,6 +7,8 @@ using System.Collections;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>
