@@ -726,7 +726,7 @@ dotnet_diagnostic.SA1008.severity = suggestion
 dotnet_diagnostic.SA1009.severity = suggestion
 
 # Opening square brackets should not be preceded by a space
-dotnet_diagnostic.SA1010.severity = suggestion
+dotnet_diagnostic.SA1010.severity = warning
 
 # Closing square bracket should be followed by a space
 dotnet_diagnostic.SA1011.severity = suggestion
