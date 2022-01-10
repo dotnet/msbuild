@@ -1646,9 +1646,9 @@ namespace Microsoft.Build.CommandLine
             commandLineArgs.RemoveAt(0);
 
 #if FEATURE_GET_COMMANDLINE
-            string fullCommandLine = commandLine;
+            string fullCommandLine = $"'{commandLine}'";
 #else
-            string fullCommandLine = string.Join(' ', commandLine);
+            string fullCommandLine = $"'{string.Join(' ', commandLine)}'";
 #endif
 
             // parse the command line, and flag syntax errors and obvious switch errors
@@ -1909,7 +1909,7 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
 
-                        commandLine += $"' '{responseFile}': '{string.Join(" ", argsFromResponseFile)}";
+                        commandLine += $"\n{responseFile}: {string.Join(" ", argsFromResponseFile)}";
 
                         GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, ref commandLine);
                     }
