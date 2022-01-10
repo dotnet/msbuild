@@ -741,7 +741,7 @@ dotnet_diagnostic.SA1013.severity = suggestion
 dotnet_diagnostic.SA1014.severity = suggestion
 
 # Closing generic bracket should not be followed by a space
-dotnet_diagnostic.SA1015.severity = suggestion
+dotnet_diagnostic.SA1015.severity = warning
 
 dotnet_diagnostic.SA1019.severity = none
 

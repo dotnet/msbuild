@@ -891,7 +891,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 projectGraph.ProjectNodes.Count.ShouldBe(2);
 
-                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string>{"A"});
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string> {"A"});
                 targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
 
                 targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new[] { "A" });
@@ -932,7 +932,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 projectGraph.ProjectNodes.Count.ShouldBe(2);
 
-                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string>{"A"});
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string> {"A"});
                 targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
 
                 targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new[] { "A" });
@@ -966,7 +966,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 projectGraph.ProjectNodes.Count.ShouldBe(4);
 
-                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string>{"A"});
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string> {"A"});
 
                 targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
                 var root = GetFirstNodeWithProjectNumber(projectGraph, 1);
@@ -1138,7 +1138,7 @@ $@"
 
                 projectGraph.ProjectNodes.Count.ShouldBe(12);
 
-                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string>{"A"});
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string> {"A"});
 
                 targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
 
@@ -1724,7 +1724,7 @@ $@"
             var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup).Path;
             CreateProjectFile(env: _env, projectNumber: 2);
 
-            var graph = new ProjectGraph(root, new Dictionary<string, string>{{InnerBuildPropertyName, "foo"}});
+            var graph = new ProjectGraph(root, new Dictionary<string, string> {{InnerBuildPropertyName, "foo"}});
 
             var dot = graph.ToDot();
 
@@ -1789,13 +1789,13 @@ $@"
 
             innerBuildWithCommonReferences.ProjectReferences.Count.ShouldBe(4);
             var referenceNumbersSet = innerBuildWithCommonReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstance.FullPath)).ToHashSet();
-            referenceNumbersSet.ShouldBeSameIgnoringOrder(new HashSet<string>{"2", "3"});
+            referenceNumbersSet.ShouldBeSameIgnoringOrder(new HashSet<string> {"2", "3"});
 
             var innerBuildWithAdditionalReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GlobalProperties.TryGetValue(InnerBuildPropertyName, out string p) && p == "b");
 
             innerBuildWithAdditionalReferences.ProjectReferences.Count.ShouldBe(8);
             referenceNumbersSet = innerBuildWithAdditionalReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstance.FullPath)).ToHashSet();
-            referenceNumbersSet.ShouldBeSameIgnoringOrder(new HashSet<string>{"2", "3", "4", "5"});
+            referenceNumbersSet.ShouldBeSameIgnoringOrder(new HashSet<string> {"2", "3", "4", "5"});
         }
 
         [Fact]
@@ -1805,7 +1805,7 @@ $@"
                                                <ProjectReference Include='1.proj' Properties='{InnerBuildPropertyName}=a'/>
                                            </ItemGroup>";
 
-            var additionalGlobalProperties = new Dictionary<string, string>{{"x", "y"}};
+            var additionalGlobalProperties = new Dictionary<string, string> {{"x", "y"}};
 
             var graph = new ProjectGraph(new []
             {
@@ -1844,7 +1844,7 @@ $@"
             CreateProjectFile(env: _env, projectNumber: 2, projectReferences: new []{3}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup + $"<PropertyGroup><{InnerBuildPropertyName}>a</{InnerBuildPropertyName}></PropertyGroup>");
             CreateProjectFile(env: _env, projectNumber: 3);
 
-            var additionalGlobalProperties = new Dictionary<string, string>{{"x", "y"}};
+            var additionalGlobalProperties = new Dictionary<string, string> {{"x", "y"}};
 
             var graph = new ProjectGraph(root, additionalGlobalProperties);
 
@@ -1871,7 +1871,7 @@ $@"
                                                <ProjectReference Include='2.proj' Condition=`'$({InnerBuildPropertyName})' == 'a'` Properties='{InnerBuildPropertyName}=a'/>
                                            </ItemGroup>".Cleanup();
 
-            var additionalGlobalProperties = new Dictionary<string, string>{{"x", "y"}};
+            var additionalGlobalProperties = new Dictionary<string, string> {{"x", "y"}};
 
             var root = CreateProjectFile(
                 env: _env,
