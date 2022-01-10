@@ -17,11 +17,11 @@ Tools configuration can come from configuration file, registry and local.
 ## Building
 
 Function `BeginBuild` prepares `BuildManager` to receive build requests, which:
-• Attaches debugger;
-• Checks that current build manager's state is idle;
-• Initializes logging service;
-• Initializes caches;
-• Registers packet handlers.
+- Attaches debugger;
+- Checks that current build manager's state is idle;
+- Initializes logging service;
+- Initializes caches;
+- Registers packet handlers.
 
 After this setup, `MSBuild` creates build request data from project
 files or project instances. Data for build requests is stored in `BuildRequestData` class.
@@ -50,11 +50,11 @@ file format version.
 
 After that, it parses all remaining lines. Each such line should start with
 one of the following strings:
-• `Project(` - calls `ParseProject`
-• `GlobalSection(NestedProject)` - calls `ParseNestedProjects`
-• `GlobalSection(SolutionConfigurationPlatforms)` - calls `ParseSolutionConfiguration`
-• `GlobalSection(ProjectConfigurationPlatforms)` - calls `ProjectConfigurationPlatforms`
-• `VisualStudioVersion` - calls `ParseVisualStudioVersion`
+- `Project(` - calls `ParseProject`
+- `GlobalSection(NestedProject)` - calls `ParseNestedProjects`
+- `GlobalSection(SolutionConfigurationPlatforms)` - calls `ParseSolutionConfiguration`
+- `GlobalSection(ProjectConfigurationPlatforms)` - calls `ProjectConfigurationPlatforms`
+- `VisualStudioVersion` - calls `ParseVisualStudioVersion`
 
 `ParseProject` parses first line which contains Project Type GUID,
 Project name, Relative Path, Project GUID. Each project type is hardcoded (defined
