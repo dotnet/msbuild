@@ -212,7 +212,7 @@ namespace Microsoft.Build.CommandLine
         [MTAThread]
         public static int Main(
 #if !FEATURE_GET_COMMANDLINE
-            string [] args
+            string[] args
 #endif
             )
         {
@@ -482,7 +482,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
             string commandLine
 #else
-            string [] commandLine
+            string[] commandLine
 #endif
             )
         {
@@ -1615,7 +1615,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
             string commandLine,
 #else
-            string [] commandLine,
+            string[] commandLine,
 #endif
             out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile)
         {
