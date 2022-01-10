@@ -434,7 +434,7 @@ namespace Microsoft.Build.Evaluation
         /// This is the Windows file version (specifically the value of the FileVersion
         /// resource), not necessarily the assembly version.
         /// If you want the assembly version, use Constants.AssemblyVersion.
-        /// This is not a <see cref="Toolset"/>.
+        /// This is not the <see cref="Toolset.ToolsVersion"/>.
         /// </remarks>
         public static Version Version
         {
