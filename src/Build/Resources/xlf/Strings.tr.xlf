@@ -2080,7 +2080,7 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
         <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
-        <target state="translated">Proje ProjectLoadSettings.RecordDuplicateButNotCircularImports bayrağıyla yüklenmedi.</target>
+        <target state="new">Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
