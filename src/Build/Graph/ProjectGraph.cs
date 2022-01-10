@@ -18,6 +18,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     /// <summary>
@@ -522,7 +524,7 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            sb.Append("}");
+            sb.Append('}');
 
             return sb.ToString();
 

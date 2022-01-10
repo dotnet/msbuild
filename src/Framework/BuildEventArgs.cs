@@ -7,6 +7,8 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -288,14 +290,14 @@ namespace Microsoft.Build.Framework
         {
             var sb = new StringBuilder();
             sb.Append(resourceName);
-            sb.Append("(");
+            sb.Append('(');
 
             bool notFirst = false;
             foreach (var argument in arguments)
             {
                 if (notFirst)
                 {
-                    sb.Append(",");
+                    sb.Append(',');
                 }
                 else
                 {
@@ -305,7 +307,7 @@ namespace Microsoft.Build.Framework
                 sb.Append(argument);
             }
 
-            sb.Append(")");
+            sb.Append(')');
             return sb.ToString();
         };
 

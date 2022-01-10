@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
@@ -99,7 +101,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     /// Base remoter object implementation.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal abstract class MockLinkRemoter<T> : ExportedLinksMap.LinkedObject<T> , IRemoterSource
+    internal abstract class MockLinkRemoter<T> : ExportedLinksMap.LinkedObject<T>, IRemoterSource
         where T : class
     {
         object IRemoterSource.RealObject => this.Source;

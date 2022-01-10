@@ -6,6 +6,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>

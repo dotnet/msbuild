@@ -28,6 +28,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
@@ -71,7 +73,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectCollection.GlobalProjectCollection.GlobalProperties.ShouldBeEmpty();
         }
 
-        private static readonly string ProjectWithItemGroup =
+        private const string ProjectWithItemGroup =
 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
 {0}
@@ -2284,7 +2286,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             project.RemoveItems(list);
 
-            project.Items.Count().ShouldBe(2);
+            project.Items.Count.ShouldBe(2);
         }
 
         /// <summary>
@@ -2304,7 +2306,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
 
             project.RemoveItems(project.GetItems("j").Take(2));
-            project.Items.Count().ShouldBe(3);
+            project.Items.Count.ShouldBe(3);
 
             StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
@@ -3245,7 +3247,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using (var env = TestEnvironment.Create())
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], "u/x");
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>(), "u/x");
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 var expected2Foo = new ProvenanceResultTupleList
@@ -3274,7 +3276,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
 
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
@@ -3566,7 +3568,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], relativePathOfProjectFile);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>(), relativePathOfProjectFile);
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 ProvenanceResultTupleList expectedProvenance = null;
@@ -3762,7 +3764,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
 
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 

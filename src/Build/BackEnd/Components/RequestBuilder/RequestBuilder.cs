@@ -21,6 +21,8 @@ using System.Threading.Tasks;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -1131,8 +1133,7 @@ namespace Microsoft.Build.BackEnd
                     _nodeLoggingContext,
                     _requestEntry.Request,
                     _requestEntry.RequestConfiguration.ProjectFullPath,
-                    _requestEntry.RequestConfiguration.ToolsVersion,
-                    _requestEntry.Request.ParentBuildEventContext
+                    _requestEntry.RequestConfiguration.ToolsVersion
                     );
 
                 throw;

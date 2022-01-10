@@ -18,6 +18,8 @@ using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 using SdkResultImpl = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResolverService_Tests
@@ -244,7 +246,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 result.PropertiesToAdd.Count.ShouldBe(1);
                 result.PropertiesToAdd["PropertyFromSdkResolver"].ShouldBe("ValueFromSdkResolver");
 
-                result.ItemsToAdd.Count().ShouldBe(1);
+                result.ItemsToAdd.Count.ShouldBe(1);
                 result.ItemsToAdd.Keys.Single().ShouldBe("ItemNameFromSdkResolver");
                 result.ItemsToAdd.Values.Single().ItemSpec.ShouldBe("ItemValueFromSdkResolver");
                 var metadata = result.ItemsToAdd.Values.Single().Metadata;

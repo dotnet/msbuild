@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -43,7 +42,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             _env.Dispose();
         }
 
-        private static readonly string AssemblyMockCache = nameof(AssemblyMockCache);
+        private const string AssemblyMockCache = nameof(AssemblyMockCache);
 
         private static readonly Lazy<string> SamplePluginAssemblyPath =
             new Lazy<string>(
@@ -306,7 +305,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 if (_projectQuerySleepTime is not null)
                 {
-                    await Task.Delay(_projectQuerySleepTime.Value);
+                    await Task.Delay(_projectQuerySleepTime.Value, cancellationToken);
                 }
 
                 QueryStartStops.Enqueue(queryId);

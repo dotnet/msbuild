@@ -15,6 +15,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -86,11 +88,11 @@ namespace Microsoft.Build.Utilities
         private static readonly List<string> s_commonApplicationDataPaths;
 
         // The name of the standalone tracker tool.
-        private static readonly string s_TrackerFilename = "Tracker.exe";
+        private const string s_TrackerFilename = "Tracker.exe";
 
         // The name of the assembly that is injected into the executing process.
         // Detours handles picking between FileTracker{32,64}.dll so only mention one.
-        private static readonly string s_FileTrackerFilename = "FileTracker32.dll";
+        private const string s_FileTrackerFilename = "FileTracker32.dll";
 
         // The name of the PATH environment variable.
         private const string pathEnvironmentVariableName = "PATH";

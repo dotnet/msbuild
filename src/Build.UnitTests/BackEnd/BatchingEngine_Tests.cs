@@ -16,6 +16,8 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class BatchingEngine_Tests

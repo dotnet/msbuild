@@ -26,23 +26,20 @@ function Stop-Processes() {
 }
 
 function KillProcessesFromRepo {
-  # Jenkins does not allow taskkill
-  if (-not $ci) {
-    # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
-    foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
+  # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
+  foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
+  {
+
+    if ([string]::IsNullOrEmpty($process.Path))
     {
+      Write-Host "Process $($process.Id) $($process.Name) does not have a Path. Skipping killing it."
+      continue
+    }
 
-      if ([string]::IsNullOrEmpty($process.Path))
-      {
-        Write-Host "Process $($process.Id) $($process.Name) does not have a Path. Skipping killing it."
-        continue
-      }
-
-      if ($process.Path.StartsWith($RepoRoot, [StringComparison]::InvariantCultureIgnoreCase))
-      {
-        Write-Host "Killing $($process.Name) from $($process.Path)"
-        taskkill /f /pid $process.Id
-      }
+    if ($process.Path.StartsWith($RepoRoot, [StringComparison]::InvariantCultureIgnoreCase))
+    {
+      Write-Host "Killing $($process.Name) from $($process.Path)"
+      taskkill /f /pid $process.Id
     }
   }
 }
@@ -63,16 +60,14 @@ if ($msbuildEngine -eq '')
 $msbuildToUse = "msbuild"
 
 try {
-
-  # turning off vbcscompiler.exe because it causes the move-item call below to fail
-  $env:UseSharedCompilation="false"
-
   KillProcessesFromRepo
 
   if ($buildStage1)
   {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
   }
+
+  KillProcessesFromRepo
 
   $bootstrapRoot = Join-Path $Stage1BinDir "bootstrap"
 
@@ -117,9 +112,6 @@ try {
 
   $buildTool = @{ Path = $buildToolPath; Command = $buildToolCommand; Tool = $msbuildEngine; Framework = $buildToolFramework }
   $global:_BuildTool = $buildTool
-
-  # turn vbcscompiler back on to save on time. It speeds up the build considerably
-  $env:UseSharedCompilation="true"
 
   # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
   $env:MSBUILDDONOTLAUNCHDEBUGGER="true"

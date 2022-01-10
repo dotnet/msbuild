@@ -7,11 +7,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// The License Compiler task
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0022:Constructor make noninheritable base class inheritable", Justification = "Class structure has existed for a long time and shouldn't be adjusted.")]
     public class LC : ToolTaskExtension
     {
         #region Input/output properties
@@ -87,6 +90,21 @@ namespace Microsoft.Build.Tasks
         [Required]
         public string TargetFrameworkVersion { get; set; }
         #endregion
+
+#if !NETFRAMEWORK
+        /// <summary>
+        /// Override of Execute that errors, since <see cref="LC"/> is not expected to get
+        /// .NET Core support.
+        /// </summary>
+        /// <remarks>
+        /// See https://github.com/dotnet/winforms/issues/1462.
+        /// </remarks>
+        public override bool Execute()
+        {
+            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(LC));
+            return false;
+        }
+#endif
 
         #region Class properties
 

@@ -10,6 +10,8 @@ using Microsoft.Build.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class ResolveNonMSBuildProjectOutput_Tests

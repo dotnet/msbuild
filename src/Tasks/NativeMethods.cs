@@ -15,6 +15,8 @@ using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
 #if FEATURE_COM_INTEROP

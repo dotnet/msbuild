@@ -16,6 +16,8 @@ using Xunit.Abstractions;
 
 using NativeMethods = Microsoft.Build.Tasks.NativeMethods;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     public class ResolveAssemblyReferenceTestFixture : IDisposable
@@ -914,7 +916,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            return new string[0];
+            return Array.Empty<string>();
         }
 
         /// <summary>
@@ -1985,7 +1987,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, @"c:\Regress313086\mscorlib.dll", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2088,16 +2090,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
             )
             {
-                return new AssemblyNameExtension[]
-                {
-                };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, @"MyRelativeAssembly.dll", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[]
-                {
-                };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myAppRootPath, "DependsOnSimpleA.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2206,9 +2204,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[]
-                {
-                };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myApp_V05Path, "DependsOnWeaklyNamedUnified.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2354,7 +2350,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2367,7 +2363,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Z.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Y.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2380,7 +2376,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2439,7 +2435,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (String.Equals(path, @"C:\DirectoryContainsdllAndWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
-                return new AssemblyNameExtension[0];
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\a.winmd", StringComparison.OrdinalIgnoreCase))
@@ -2453,12 +2449,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[0];
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (path.StartsWith(@"C:\FakeSDK\", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[0];
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, s_portableDllPath, StringComparison.OrdinalIgnoreCase))
@@ -2526,49 +2522,49 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 if (String.Equals(subKey, @"Software\Regress714052", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase))
@@ -2609,7 +2605,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlB", StringComparison.OrdinalIgnoreCase)
                 )
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if
@@ -2666,12 +2662,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\A", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\B", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase))
                 {
@@ -2695,21 +2691,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase))
@@ -2724,12 +2720,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.FancyControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework", StringComparison.OrdinalIgnoreCase))
@@ -2744,12 +2740,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\Microsoft SDKs\Windows", StringComparison.OrdinalIgnoreCase))
@@ -3027,7 +3023,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 	                );
 
                     // A few checks. These should always be true or it may be a perf issue for project load.
-                    ITaskItem[] loadModeResolvedFiles = new TaskItem[0];
+                    ITaskItem[] loadModeResolvedFiles = Array.Empty<TaskItem>();
                     if (t.ResolvedFiles != null)
                     {
                         loadModeResolvedFiles = (ITaskItem[])t.ResolvedFiles.Clone();

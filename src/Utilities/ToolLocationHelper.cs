@@ -20,6 +20,8 @@ using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFramework
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -1462,7 +1464,7 @@ namespace Microsoft.Build.Utilities
 
                 var folders = GetFoldersInVSInstalls(minVersion, maxVersion, subFolder);
 
-                if (folders.Count() > 0)
+                if (folders.Any())
                 {
                     foldersString = string.Join(";", folders);
                 }
@@ -2301,12 +2303,12 @@ namespace Microsoft.Build.Utilities
             StringBuilder displayNameBuilder = new StringBuilder();
 
             displayNameBuilder.Append(frameworkName.Identifier);
-            displayNameBuilder.Append(" ");
+            displayNameBuilder.Append(' ');
             displayNameBuilder.Append('v').Append(frameworkName.Version.ToString());
 
             if (!string.IsNullOrEmpty(frameworkName.Profile))
             {
-                displayNameBuilder.Append(" ");
+                displayNameBuilder.Append(' ');
                 displayNameBuilder.Append(frameworkName.Profile);
             }
 

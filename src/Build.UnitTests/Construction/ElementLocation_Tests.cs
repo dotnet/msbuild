@@ -13,6 +13,8 @@ using System.Reflection;
 using Xunit;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     /// <summary>

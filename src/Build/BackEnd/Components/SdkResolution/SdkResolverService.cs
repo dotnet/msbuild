@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Eventing;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>

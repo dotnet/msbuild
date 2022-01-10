@@ -14,6 +14,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -2226,7 +2228,7 @@ namespace Microsoft.Build.Shared
             }
             else if (aString.StartsWith(@"\", StringComparison.Ordinal))
             {
-                sb.Append(@"\");
+                sb.Append('\\');
                 index = SkipSlashes(aString, 1);
             }
 

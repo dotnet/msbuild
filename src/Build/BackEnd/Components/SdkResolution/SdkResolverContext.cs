@@ -5,6 +5,8 @@ using System;
 
 using SdkResolverContextBase2 = Microsoft.Build.Framework.SdkResolverContext2;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>

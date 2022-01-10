@@ -1323,7 +1323,6 @@ Microsoft.Build.Experimental.ProjectCache.CacheResultType.CacheMiss = 2 -> Micro
 Microsoft.Build.Experimental.ProjectCache.CacheResultType.CacheNotApplicable = 3 -> Microsoft.Build.Experimental.ProjectCache.CacheResultType
 Microsoft.Build.Experimental.ProjectCache.CacheResultType.None = 0 -> Microsoft.Build.Experimental.ProjectCache.CacheResultType
 Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase
-Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase.PluginLoggerBase(Microsoft.Build.Framework.LoggerVerbosity verbosity) -> void
 Microsoft.Build.Experimental.ProjectCache.PluginTargetResult
 Microsoft.Build.Experimental.ProjectCache.PluginTargetResult.PluginTargetResult() -> void
 Microsoft.Build.Experimental.ProjectCache.PluginTargetResult.PluginTargetResult(string targetName, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2> taskItems, Microsoft.Build.Execution.BuildResultCode resultCode) -> void

@@ -15,6 +15,8 @@ using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
@@ -891,7 +893,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     var formattedProject = string.Format(projectContents, include, exclude);
                     File.WriteAllText(projectFile, formattedProject);
 
-                    var expectedInclude = includeSurvivesExclude ? new[] { include } : new string[0];
+                    var expectedInclude = includeSurvivesExclude ? new[] { include } : Array.Empty<string>();
 
                     ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
                 }
@@ -3423,7 +3425,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void UpdateAndRemoveShouldWorkWithEscapedCharacters(string projectContents, string include, string update, string remove, string[] expectedInclude, Dictionary<string, string>[] expectedMetadata)
         {
             var formattedProjectContents = string.Format(projectContents, include, update, remove);
-            ObjectModelHelpers.AssertItemEvaluationFromProject(formattedProjectContents, new string[0], expectedInclude, expectedMetadata);
+            ObjectModelHelpers.AssertItemEvaluationFromProject(formattedProjectContents, Array.Empty<string>(), expectedInclude, expectedMetadata);
         }
 
         [Fact]
@@ -3456,7 +3458,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         .ToList();
                 },
                 project,
-                inputFiles: new string[0],
+                inputFiles: Array.Empty<string>(),
                 expectedInclude: new[] { "1.cs", "2.js" },
                 expectedMetadataPerItem: null
                 );

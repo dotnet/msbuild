@@ -12,6 +12,8 @@ using Microsoft.Build.Shared;
 using Xunit;
 using Microsoft.Build.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
 {
     public class FakeSDKStructure : IDisposable

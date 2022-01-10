@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using System;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>

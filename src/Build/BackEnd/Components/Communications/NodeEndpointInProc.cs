@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

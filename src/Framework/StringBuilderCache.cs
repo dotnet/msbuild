@@ -32,16 +32,20 @@
 ===========================================================*/
 
 using System;
+using System.Diagnostics;
 using System.Text;
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+using Microsoft.Build.Eventing;
+#endif
 
-namespace Microsoft.Build.Shared
+#nullable disable
+
+namespace Microsoft.Build.Framework
 {
     internal static class StringBuilderCache
     {
-        // The value 360 was chosen in discussion with performance experts as a compromise between using
-        // as little memory (per thread) as possible and still covering a large part of short-lived
-        // StringBuilder creations on the startup path of VS designers.
-        private const int MAX_BUILDER_SIZE = 360;
+        // The value 512 was chosen empirically as 95% percentile of returning string length.
+        private const int MAX_BUILDER_SIZE = 512;
 
         [ThreadStatic]
         private static StringBuilder t_cachedInstance;
@@ -51,27 +55,41 @@ namespace Microsoft.Build.Shared
             if (capacity <= MAX_BUILDER_SIZE)
             {
                 StringBuilder sb = StringBuilderCache.t_cachedInstance;
+                StringBuilderCache.t_cachedInstance = null;
                 if (sb != null)
                 {
                     // Avoid StringBuilder block fragmentation by getting a new StringBuilder
                     // when the requested size is larger than the current capacity
                     if (capacity <= sb.Capacity)
                     {
-                        StringBuilderCache.t_cachedInstance = null;
                         sb.Length = 0; // Equivalent of sb.Clear() that works on .Net 3.5
+#if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+                        MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: sb.GetHashCode(), newCapacity: capacity, oldCapacity: sb.Capacity, type: "sbc-hit");
+#endif
                         return sb;
                     }
                 }
             }
-            return new StringBuilder(capacity);
+
+            StringBuilder stringBuilder = new StringBuilder(capacity);
+#if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+            MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: stringBuilder.GetHashCode(), newCapacity: capacity, oldCapacity: stringBuilder.Capacity, type: "sbc-miss");
+#endif
+            return stringBuilder;
         }
 
         public static void Release(StringBuilder sb)
         {
             if (sb.Capacity <= MAX_BUILDER_SIZE)
             {
+                // Assert we are not replacing another string builder. That could happen when Acquire is reentered.
+                // User of StringBuilderCache has to make sure that calling method call stacks do not also use StringBuilderCache.
+                Debug.Assert(StringBuilderCache.t_cachedInstance == null, "Unexpected replacing of other StringBuilder.");
                 StringBuilderCache.t_cachedInstance = sb;
             }
+#if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+            MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: sb.GetHashCode(), returningCapacity: sb.Capacity, returningLength: sb.Length, type: sb.Capacity <= MAX_BUILDER_SIZE ? "sbc-return" :  "sbc-discard");
+#endif
         }
 
         public static string GetStringAndRelease(StringBuilder sb)

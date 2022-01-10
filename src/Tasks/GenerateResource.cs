@@ -40,6 +40,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -3347,13 +3349,13 @@ namespace Microsoft.Build.Tasks
         {
             if (_usePreserializedResources && HaveSystemResourcesExtensionsReference)
             {
-                WriteResources(reader, new PreserializedResourceWriter(File.OpenWrite(filename))); // closes writer for us
+                WriteResources(reader, new PreserializedResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
                 return;
             }
 
             try
             {
-                WriteResources(reader, new ResourceWriter(File.OpenWrite(filename))); // closes writer for us
+                WriteResources(reader, new ResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
             }
             catch (PreserializedResourceWriterRequiredException)
             {
@@ -3594,7 +3596,9 @@ namespace Microsoft.Build.Tasks
                     {
                         String skip = sr.ReadLine();
                         if (skip.Equals("strings]"))
+                        {
                             _logger.LogWarningWithCodeFromResources(null, fileName, sr.LineNumber - 1, 1, 0, 0, "GenerateResource.ObsoleteStringsTag");
+                        }
                         else
                         {
                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.UnexpectedInfBracket", "[" + skip), fileName, sr.LineNumber - 1, 1);
@@ -3874,7 +3878,7 @@ namespace Microsoft.Build.Tasks
             private int _col;
 
             internal LineNumberStreamReader(String fileName, Encoding encoding, bool detectEncoding)
-                : base(File.Open(fileName, FileMode.Open, FileAccess.Read), encoding, detectEncoding)
+                : base(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read), encoding, detectEncoding)
             {
                 _lineNumber = 1;
                 _col = 0;
@@ -3913,7 +3917,9 @@ namespace Microsoft.Build.Tasks
                         _col = 0;
                     }
                     else
+                    {
                         _col++;
+                    }
                 }
                 return r;
             }

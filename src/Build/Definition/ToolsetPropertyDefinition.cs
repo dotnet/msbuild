@@ -6,6 +6,8 @@ using System.Diagnostics;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
