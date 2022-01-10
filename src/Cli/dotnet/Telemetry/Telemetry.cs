@@ -97,6 +97,16 @@ namespace Microsoft.DotNet.Cli.Telemetry
             _trackEventTask.Wait();
         }
 
+        // Adding dispose on graceful shutdown per https://github.com/microsoft/ApplicationInsights-dotnet/issues/1152#issuecomment-518742922
+        public void Dispose()
+        {
+            if (_client != null)
+            {
+                _client.TelemetryConfiguration.Dispose();
+                _client = null;
+            }
+        }
+
         public void ThreadBlockingTrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
             if (!Enabled)
