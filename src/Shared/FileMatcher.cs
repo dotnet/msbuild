@@ -2527,7 +2527,7 @@ namespace Microsoft.Build.Shared
                     taskOptions);
             }
             // Catch exceptions that are thrown inside the Parallel.ForEach
-            catch (AggregateException ex) when (ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException))
+            catch (AggregateException ex) when (InnerExceptionsAreAllIoRelated(ex))
             {
                 return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
             }
@@ -2545,6 +2545,11 @@ namespace Microsoft.Build.Shared
                 : listOfFiles.SelectMany(list => list).ToArray();
 
             return files;
+        }
+
+        private bool InnerExceptionsAreAllIoRelated(AggregateException ex)
+        {
+            return ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException);
         }
 
         private static bool IsSubdirectoryOf(string possibleChild, string possibleParent)

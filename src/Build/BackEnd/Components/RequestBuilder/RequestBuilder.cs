@@ -288,7 +288,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     taskCleanedUp = _requestTask.Wait(BuildParameters.RequestBuilderShutdownTimeout);
                 }
-                catch (AggregateException e) when (e.Flatten().InnerExceptions.All(ex => ex is TaskCanceledException || ex is OperationCanceledException))
+                catch (AggregateException e) when (InnerExceptionsAreAllCancelledExceptions(e))
                 {
                     // ignore -- just indicates that the task finished cancelling before we got a chance to wait on it.  
                     taskCleanedUp = true;
@@ -303,6 +303,11 @@ namespace Microsoft.Build.BackEnd
             }
 
             _isZombie = true;
+        }
+
+        private bool InnerExceptionsAreAllCancelledExceptions(AggregateException e)
+        {
+            return e.Flatten().InnerExceptions.All(ex => ex is TaskCanceledException || ex is OperationCanceledException);
         }
 
         #region IRequestBuilderCallback Members

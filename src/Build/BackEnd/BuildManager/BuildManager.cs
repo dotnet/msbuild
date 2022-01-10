@@ -1719,7 +1719,7 @@ namespace Microsoft.Build.Execution
                         HandleNewRequest(Scheduler.VirtualNode, blocker);
                     }
                 }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && !ExceptionHandling.NotExpectedException(ex) && ex is not BuildAbortedException)
+                catch (Exception ex) when (IsInvalidProjectOrIORelatedException(ex))
                 {
                     if (ex is InvalidProjectFileException projectException)
                     {
@@ -1757,6 +1757,11 @@ namespace Microsoft.Build.Execution
 
                 }
             }
+        }
+
+        private bool IsInvalidProjectOrIORelatedException(Exception e)
+        {
+            return !ExceptionHandling.IsCriticalException(e) && !ExceptionHandling.NotExpectedException(e) && e is not BuildAbortedException;
         }
 
         private void ExecuteGraphBuildScheduler(GraphBuildSubmission submission)
@@ -1842,7 +1847,7 @@ namespace Microsoft.Build.Execution
                         submission.SubmissionId,
                         new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
             }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && !ExceptionHandling.NotExpectedException(ex) && ex is not BuildAbortedException)
+            catch (Exception ex) when (IsInvalidProjectOrIORelatedException(ex))
             {
                 GraphBuildResult result = null;
 
