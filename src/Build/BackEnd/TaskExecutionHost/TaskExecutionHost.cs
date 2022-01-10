@@ -161,7 +161,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Finalizer
+        /// Finalizes an instance of the <see cref="TaskExecutionHost"/> class.
         /// </summary>
         ~TaskExecutionHost()
         {

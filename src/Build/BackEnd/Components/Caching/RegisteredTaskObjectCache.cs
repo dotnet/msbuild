@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
     internal class RegisteredTaskObjectCache : RegisteredTaskObjectCacheBase, IBuildComponent, IRegisteredTaskObjectCache, IDisposable
     {
         /// <summary>
-        /// Finalizer
+        /// Finalizes an instance of the <see cref="RegisteredTaskObjectCache"/> class.
         /// </summary>
         ~RegisteredTaskObjectCache()
         {
