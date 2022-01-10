@@ -4204,7 +4204,7 @@ namespace Microsoft.Build.UnitTests
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyFindRootFolderWhereAllFilesExist");
             string[] rootDirectories = new string[] { Path.Combine(testDirectoryRoot, "Root1"), Path.Combine(testDirectoryRoot, "Root2") };
             
-            for(int i = 0; i < rootDirectories.Count(); i++)
+            for(int i = 0; i < rootDirectories.Length; i++)
             {
                 // create directory
                 string subdir = Path.Combine(rootDirectories[i], "Subdir");

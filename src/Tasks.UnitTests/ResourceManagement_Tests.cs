@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }", "<UseCores />");
 
             var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ")).ToArray();
-            filteredMessages.Count().ShouldBe(1);
+            filteredMessages.Length.ShouldBe(1);
             GetTrailingIntegerFromMessage(filteredMessages[0]).ShouldBeGreaterThan(0);
         }
 
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }", "<UseCores /> <UseCores />");
 
             var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ")).ToArray();
-            filteredMessages.Count().ShouldBe(2);
+            filteredMessages.Length.ShouldBe(2);
 
             int grantedCores1 = GetTrailingIntegerFromMessage(filteredMessages[0]);
             int grantedCores2 = GetTrailingIntegerFromMessage(filteredMessages[1]);
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }", "<UseCores />");
 
             var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ")).ToArray();
-            filteredMessages.Count().ShouldBe(2);
+            filteredMessages.Length.ShouldBe(2);
 
             int grantedCores1 = GetTrailingIntegerFromMessage(filteredMessages[0]);
             int grantedCores2 = GetTrailingIntegerFromMessage(filteredMessages[1]);

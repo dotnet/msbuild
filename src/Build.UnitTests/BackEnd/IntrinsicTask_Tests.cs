@@ -2014,7 +2014,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
             ICollection<ProjectItemInstance> items = lookup.GetItems("I2");
-            items.Count().ShouldBe(3);
+            items.Count.ShouldBe(3);
             items.ElementAt(0).EvaluatedInclude.ShouldBe("a2");
             items.ElementAt(1).EvaluatedInclude.ShouldBe("c2");
             items.ElementAt(2).EvaluatedInclude.ShouldBe("d2");
@@ -3480,7 +3480,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance instance = new ProjectInstance(xml);
             instance.Build();
 
-            Assert.Equal(2, instance.Items.Count());
+            Assert.Equal(2, instance.Items.Count);
             Assert.Equal("gen.obj", instance.GetItems("CppCompile").First().GetMetadataValue("ObjectFile"));
             Assert.Equal("def.obj", instance.GetItems("CppCompile").Last().GetMetadataValue("ObjectFile"));
         }
