@@ -837,7 +837,7 @@ dotnet_diagnostic.SA1130.severity = suggestion
 dotnet_diagnostic.SA1131.severity = suggestion
 
 # Do not combine fields
-dotnet_diagnostic.SA1132.severity = suggestion
+dotnet_diagnostic.SA1132.severity = warning
 
 # Do not combine attributes
 dotnet_diagnostic.SA1133.severity = suggestion
