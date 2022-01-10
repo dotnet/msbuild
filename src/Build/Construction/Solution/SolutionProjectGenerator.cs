@@ -1976,9 +1976,9 @@ namespace Microsoft.Build.Construction
             }
         }
 
-        ///<summary>
+        /// <summary>
         /// Creates the target used to build all of the references in the traversal project.
-        ///</summary>
+        /// </summary>
         private static void AddTraversalReferencesTarget(ProjectInstance traversalProject, string targetName, string outputItem)
         {
             string outputItemAsItem = null;

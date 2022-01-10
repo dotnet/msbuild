@@ -711,7 +711,7 @@ dotnet_diagnostic.SA1002.severity = suggestion
 dotnet_diagnostic.SA1003.severity = none
 
 # Documentation line should begin with a space
-dotnet_diagnostic.SA1004.severity = suggestion
+dotnet_diagnostic.SA1004.severity = warning
 
 # Single line comment should begin with a space
 dotnet_diagnostic.SA1005.severity = suggestion
