@@ -4,6 +4,8 @@
 using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Hosting
 {
     /// <summary>

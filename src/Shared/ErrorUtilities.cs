@@ -10,6 +10,8 @@ using System.Threading;
 
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
 #else

@@ -5,10 +5,12 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Logging
 {
     /// <summary>
-    ///Test the Factory to create components of the type LoggingService
+    /// Test the Factory to create components of the type LoggingService
     /// </summary>
     public class LoggingServiceFactory_Tests
     {

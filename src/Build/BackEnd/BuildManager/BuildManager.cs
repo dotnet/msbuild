@@ -36,6 +36,8 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -295,7 +297,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Finalizer
+        /// Finalizes an instance of the <see cref="BuildManager"/> class.
         /// </summary>
         ~BuildManager()
         {

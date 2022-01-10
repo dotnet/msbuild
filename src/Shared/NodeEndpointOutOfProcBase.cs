@@ -22,6 +22,8 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

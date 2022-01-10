@@ -11,6 +11,8 @@ using Microsoft.Build.BackEnd;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

@@ -17,6 +17,8 @@ using Xunit.Abstractions;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
     [Trait("Category", "mono-osx-failing")]
@@ -3616,7 +3618,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             if (tagName != null)
             {
-                txt.Append("[");
+                txt.Append('[');
                 txt.Append(tagName);
                 txt.Append("]\xd\xa");
             }

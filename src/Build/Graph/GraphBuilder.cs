@@ -16,11 +16,13 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder
     {
-        internal static readonly string SolutionItemReference = "_SolutionReference";
+        internal const string SolutionItemReference = "_SolutionReference";
         
         /// <summary>
         /// The thread calling BuildGraph() will act as an implicit worker

@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class AttributeTests

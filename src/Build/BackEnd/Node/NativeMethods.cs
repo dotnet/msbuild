@@ -4,6 +4,8 @@
 using System;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

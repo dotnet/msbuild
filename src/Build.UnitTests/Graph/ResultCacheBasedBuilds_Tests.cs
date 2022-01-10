@@ -20,6 +20,8 @@ using static Microsoft.Build.UnitTests.Helpers;
 using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string[]>;
 using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string>;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph.UnitTests
 {
     public class ResultCacheBasedBuilds_Tests : IDisposable

@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>

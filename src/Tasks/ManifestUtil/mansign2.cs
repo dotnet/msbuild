@@ -15,6 +15,8 @@ using System.Runtime.InteropServices;
 
 using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
+#nullable disable
+
 namespace System.Deployment.Internal.CodeSigning
 {
     internal static class Win32

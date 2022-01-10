@@ -3,6 +3,8 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class Hash_Tests
@@ -39,7 +41,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             var nullItemsHash = ExecuteHashTask(null);
             Assert.Null(nullItemsHash);
 
-            var zeroLengthItemsHash = ExecuteHashTask(new ITaskItem[0]);
+            var zeroLengthItemsHash = ExecuteHashTask(System.Array.Empty<ITaskItem>());
             Assert.Null(zeroLengthItemsHash);
         }
 

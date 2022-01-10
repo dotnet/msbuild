@@ -18,6 +18,8 @@ using System.IO;
 using Microsoft.Build.BackEnd;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class ResolveComReference_Tests

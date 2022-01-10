@@ -8,6 +8,8 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class Move_Tests

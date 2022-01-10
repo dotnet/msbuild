@@ -8,6 +8,8 @@ using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -40,7 +42,7 @@ namespace Microsoft.Build.Evaluation
                 var NuGetFrameworkDefaultCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.DefaultCompatibilityProvider");
                 ParseMethod = NuGetFramework.GetMethod("Parse", new Type[] { typeof(string) });
                 IsCompatibleMethod = NuGetFrameworkCompatibilityProvider.GetMethod("IsCompatible");
-                DefaultCompatibilityProvider = NuGetFrameworkDefaultCompatibilityProvider.GetMethod("get_Instance").Invoke(null, new object[] { });
+                DefaultCompatibilityProvider = NuGetFrameworkDefaultCompatibilityProvider.GetMethod("get_Instance").Invoke(null, Array.Empty<object>());
                 FrameworkProperty = NuGetFramework.GetProperty("Framework");
                 VersionProperty = NuGetFramework.GetProperty("Version");
                 PlatformProperty = NuGetFramework.GetProperty("Platform");
