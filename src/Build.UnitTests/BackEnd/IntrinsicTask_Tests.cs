@@ -3881,7 +3881,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectTargetInstanceChild targetChild = projectInstance.Targets["t"].Children.First();
 
             NodeLoggingContext nodeContext = new NodeLoggingContext(new MockLoggingService(), 1, false);
-            BuildRequestEntry entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "t" }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0"));
+            BuildRequestEntry entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "t" }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0"));
             entry.RequestConfiguration.Project = projectInstance;
             IntrinsicTask task = IntrinsicTask.InstantiateTask(
                 targetChild,
@@ -3916,7 +3916,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var targetChild = projectInstance.Targets["t"].Children.First();
 
                     var nodeContext = new NodeLoggingContext(new MockLoggingService(), 1, false);
-                    var entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { targetName }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0"));
+                    var entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { targetName }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0"));
                     entry.RequestConfiguration.Project = projectInstance;
                     var task = IntrinsicTask.InstantiateTask(
                         targetChild,

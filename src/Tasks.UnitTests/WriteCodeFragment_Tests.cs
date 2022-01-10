@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
             task.Language = "c#";
-            task.AssemblyAttributes = new TaskItem[] { }; // MSBuild sets an empty array
+            task.AssemblyAttributes = Array.Empty<TaskItem>(); // MSBuild sets an empty array
             task.OutputFile = new TaskItem(file);
             bool result = task.Execute();
 

@@ -272,7 +272,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             get
             {
                 _testTaskHost.OutputRead("EmptyStringArrayOutput", null);
-                return new string[0];
+                return Array.Empty<string>();
             }
         }
 
