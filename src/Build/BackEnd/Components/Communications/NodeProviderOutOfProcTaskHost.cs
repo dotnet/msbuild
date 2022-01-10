@@ -456,7 +456,7 @@ namespace Microsoft.Build.BackEnd
         internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
             bool nodeCreationSucceeded;
-            if (!_nodeContexts.TryGetValue(hostContext, out _))
+            if (!_nodeContexts.ContainsKey(hostContext))
             {
                 nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration);
             }
