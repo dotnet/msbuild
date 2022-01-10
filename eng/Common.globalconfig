@@ -200,7 +200,7 @@ dotnet_diagnostic.CA1505.severity = none
 dotnet_diagnostic.CA1506.severity = none
 
 # Use nameof to express symbol names
-dotnet_diagnostic.CA1507.severity = suggestion
+dotnet_diagnostic.CA1507.severity = warning
 
 # Avoid dead conditional code
 dotnet_diagnostic.CA1508.severity = none
