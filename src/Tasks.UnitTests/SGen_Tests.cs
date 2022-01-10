@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests
             sgen.ShouldGenerateSerializer = true;
             sgen.UseProxyTypes = false;
             sgen.UseKeep = false;
-            sgen.References = new string[]{ };
+            sgen.References = Array.Empty<string>();
 
             string commandLine = sgen.CommandLine();
 

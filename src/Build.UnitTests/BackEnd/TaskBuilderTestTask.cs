@@ -272,7 +272,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             get
             {
                 _testTaskHost.OutputRead("EmptyStringArrayOutput", null);
-                return new string[0];
+                return Array.Empty<string>();
             }
         }
 
@@ -552,8 +552,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     propertyInfos[i] = new TaskPropertyInfo(
                         infos[i].Name,
                         infos[i].PropertyType,
-                        infos[i].GetCustomAttributes(typeof(OutputAttribute), false).Count() > 0,
-                        infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Count() > 0);
+                        infos[i].GetCustomAttributes(typeof(OutputAttribute), false).Length > 0,
+                        infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Length > 0);
                 }
 
                 return propertyInfos;

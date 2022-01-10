@@ -1134,7 +1134,7 @@ namespace ClassLibrary2
                 ");
 
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testfile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testfile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0");
             Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
             config.Project = project.CreateProjectInstance();
             cache.AddConfiguration(config);
