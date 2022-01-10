@@ -1464,7 +1464,7 @@ namespace Microsoft.Build.Utilities
 
                 var folders = GetFoldersInVSInstalls(minVersion, maxVersion, subFolder);
 
-                if (folders.Count() > 0)
+                if (folders.Any())
                 {
                     foldersString = string.Join(";", folders);
                 }
