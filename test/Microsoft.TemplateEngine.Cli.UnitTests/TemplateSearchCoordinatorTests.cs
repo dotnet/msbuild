@@ -410,6 +410,37 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             }
         }
 
+        [Fact]
+        public async Task CacheSkipInvalidTemplatesTest()
+        {
+            string cacheLocation = TestUtils.CreateTemporaryFolder();
+            string v2FileLocation = SetupInvalidTemplateCache(cacheLocation);
+
+            var environment = A.Fake<IEnvironment>();
+
+            var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(hostIdentifier: this.GetType().Name, virtualize: true, environment: environment);
+            var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
+
+            engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
+
+            MockNewCommandInput commandInput = new MockNewCommandInput().WithTemplateOption("--unknown");
+
+            var templatePackages = await templatePackageManager.GetManagedTemplatePackagesAsync(false, default).ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(engineEnvironmentSettings);
+            CliSearchFiltersFactory factory = new CliSearchFiltersFactory(templatePackages);
+
+            A.CallTo(() => environment.GetEnvironmentVariable("DOTNET_NEW_SEARCH_FILE_OVERRIDE")).Returns(v2FileLocation);
+            var searchResults = await searchCoordinator.SearchAsync(
+                factory.GetPackFilter(commandInput),
+                CliSearchFiltersFactory.GetMatchingTemplatesFilter(commandInput),
+                default).ConfigureAwait(false);
+
+            Assert.Equal(1, searchResults.Count);
+            Assert.Single(searchResults, result => result.Provider.Factory.DisplayName == "NuGet.org");
+            var nugetSearchResults = searchResults.Single(result => result.Provider.Factory.DisplayName == "NuGet.org");
+            Assert.Equal(0, nugetSearchResults.SearchHits.Count);
+        }
+
         [Theory]
         [InlineData(12489, 3198, 1)]
         [InlineData(3198, 12489, -1)]
@@ -529,6 +560,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var packThree = new TemplatePackageSearchData(_packThreeInfo, new[] { barCSharpTemplateData, barFSharpTemplateData });
 
             var cache = new TemplateSearchCache(new[] { packOne, packTwo, packThree });
+
+            JObject toSerialize = JObject.FromObject(cache);
+            string targetPath = Path.Combine(fileLocation, "searchCacheV2.json");
+            File.WriteAllText(targetPath, toSerialize.ToString());
+            return targetPath;
+        }
+
+        private static string SetupInvalidTemplateCache(string fileLocation)
+        {
+            var packOne = new TemplatePackageSearchData(new MockTemplatePackageInfo("PackOne", "1.0.0"), new[] { new TemplateSearchData(new MockTemplateInfo("foo", "foo", "foo").WithParameters("Config type", "Main type", "unknown")) });
+            var cache = new TemplateSearchCache(new[] { packOne });
 
             JObject toSerialize = JObject.FromObject(cache);
             string targetPath = Path.Combine(fileLocation, "searchCacheV2.json");

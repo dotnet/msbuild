@@ -331,8 +331,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                             LocalizableStrings.TemplateResolver_Warning_FailedToReparseTemplate,
                             $"{template.Identity} ({shortname})"));
                     Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.Generic_Details, ex.ToString()));
+                    return new[] { new ParameterMatchInfo("%GENERIC-ERROR%", null, MatchKind.Mismatch, ParameterMatchInfo.MismatchKind.InvalidValue, null) };
                 }
-                return Array.Empty<MatchInfo>();
             };
         }
     }
