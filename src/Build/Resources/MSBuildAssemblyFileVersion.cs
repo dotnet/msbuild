@@ -4,6 +4,8 @@
 using System;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>

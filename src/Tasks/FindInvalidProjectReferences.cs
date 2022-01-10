@@ -6,6 +6,8 @@ using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -15,7 +17,7 @@ namespace Microsoft.Build.Tasks
     {
         #region Fields
 
-        ///<summary>
+        /// <summary>
         /// Regex for breaking up the platform moniker
         /// Example: XNA, Version=8.0
         /// </summary>

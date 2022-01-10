@@ -11,6 +11,8 @@ using System.Text;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     /// <summary>
@@ -115,7 +117,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ObjectModelHelpers.AssertItems(new[] { "a", "b", "c" }, itemsForI, expectedMetadata);
 
             var itemsForI2 = items.Where(i => i.ItemType == "i2").ToList();
-            ObjectModelHelpers.AssertItems(new string[0], itemsForI2);
+            ObjectModelHelpers.AssertItems(Array.Empty<string>(), itemsForI2);
         }
 
         [Fact]

@@ -13,6 +13,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ProjectSchemaValidationHandlerTest
@@ -30,7 +32,7 @@ namespace Microsoft.Build.UnitTests
             (
             )
         {
-            string[] msbuildTempXsdFilenames = new string[] { };
+            string[] msbuildTempXsdFilenames = Array.Empty<string>();
             string projectFilename = null;
             string oldValueForMSBuildOldOM = null;
             try
@@ -165,7 +167,7 @@ namespace Microsoft.Build.UnitTests
             (
             )
         {
-            string[] msbuildTempXsdFilenames = new string[] { };
+            string[] msbuildTempXsdFilenames = Array.Empty<string>();
             string projectFilename = CreateTempFileOnDisk(@"
                     <Project xmlns=`msbuildnamespace`>
                         <Target Name=`Build` />
@@ -209,7 +211,7 @@ namespace Microsoft.Build.UnitTests
             (
             )
         {
-            string[] msbuildTempXsdFilenames = new string[] { };
+            string[] msbuildTempXsdFilenames = Array.Empty<string>();
 
             string importedProjectFilename = CreateTempFileOnDisk(@"
                     <Project xmlns=`msbuildnamespace`>

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
@@ -23,7 +25,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        ///  ProjectLink remoting
+        /// ProjectLink remoting
         public MockProjectElementLinkRemoter Xml => this.OwningCollection.ExportElement(this.Source.Xml);
 
         public bool ThrowInsteadOfSplittingItemElement { get => this.Source.ThrowInsteadOfSplittingItemElement; set => this.Source.ThrowInsteadOfSplittingItemElement = value; }

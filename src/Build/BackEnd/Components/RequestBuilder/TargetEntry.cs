@@ -22,6 +22,8 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

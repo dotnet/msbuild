@@ -4,6 +4,8 @@
 using Microsoft.Build.Shared;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

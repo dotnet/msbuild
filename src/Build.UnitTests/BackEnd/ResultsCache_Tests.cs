@@ -15,6 +15,8 @@ using Xunit;
 
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class ResultsCache_Tests

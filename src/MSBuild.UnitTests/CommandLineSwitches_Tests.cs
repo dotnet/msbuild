@@ -16,6 +16,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class CommandLineSwitchesTests
@@ -549,7 +551,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches, ref command);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new[] {"true", "  NoBuild  ", "  ", "foo"});
 
@@ -562,9 +564,9 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph" }, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph" }, switches, ref command);
 
-            switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new string[0]);
+            switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(Array.Empty<string>());
 
             switches.HaveErrors().ShouldBeFalse();
         }
@@ -988,9 +990,9 @@ namespace Microsoft.Build.UnitTests
                                         "ScoobyDoo",
                                         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
                                         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
-                                        new ILogger[] { },
+                                        Array.Empty<ILogger>(),
                                         LoggerVerbosity.Normal,
-                                        new DistributedLoggerRecord[] { },
+                                        Array.Empty<DistributedLoggerRecord>(),
 #if FEATURE_XML_SCHEMA_VALIDATION
                                         false,
                                         null,
@@ -1261,9 +1263,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ProcessBooleanSwitchTest()
         {
-            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: true, resourceName: null).ShouldBeTrue();
+            MSBuildApp.ProcessBooleanSwitch(Array.Empty<string>(), defaultValue: true, resourceName: null).ShouldBeTrue();
 
-            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: false, resourceName: null).ShouldBeFalse();
+            MSBuildApp.ProcessBooleanSwitch(Array.Empty<string>(), defaultValue: false, resourceName: null).ShouldBeFalse();
 
             MSBuildApp.ProcessBooleanSwitch(new [] { "true" }, defaultValue: false, resourceName: null).ShouldBeTrue();
 
@@ -1277,7 +1279,7 @@ namespace Microsoft.Build.UnitTests
             var emptyOptions = new GraphBuildOptions();
             var noBuildOptions = new GraphBuildOptions {Build = false};
 
-            yield return new object[] {new string[0], emptyOptions, null};
+            yield return new object[] {Array.Empty<string>(), emptyOptions, null};
 
             yield return new object[] {new[] {"true"}, emptyOptions, null};
 

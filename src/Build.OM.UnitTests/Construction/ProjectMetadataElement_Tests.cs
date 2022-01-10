@@ -12,6 +12,8 @@ using System.Linq;
 using Microsoft.Build.Evaluation;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>

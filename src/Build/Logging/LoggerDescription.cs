@@ -12,6 +12,8 @@ using Microsoft.Build.BackEnd;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>

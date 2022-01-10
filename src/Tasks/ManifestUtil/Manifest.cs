@@ -13,6 +13,8 @@ using System.Xml.Serialization;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>

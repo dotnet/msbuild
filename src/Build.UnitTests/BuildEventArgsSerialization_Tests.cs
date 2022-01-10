@@ -12,6 +12,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class BuildEventArgsSerializationTests

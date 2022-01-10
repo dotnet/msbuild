@@ -15,6 +15,8 @@ using Shouldly;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     using Microsoft.Build.Unittest;
@@ -70,11 +72,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _scheduler = new Scheduler();
             _scheduler.InitializeComponent(_host);
             CreateConfiguration(99, "parent.proj");
-            _defaultParentRequest = CreateBuildRequest(99, 99, new string[] { }, null);
+            _defaultParentRequest = CreateBuildRequest(99, 99, Array.Empty<string>(), null);
 
             // Set up the scheduler with one node to start with.
             _scheduler.ReportNodesCreated(new NodeInfo[] { new NodeInfo(1, NodeProviderType.InProc) });
-            _scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, new string[] { }, new BuildRequest[] { _defaultParentRequest }));
+            _scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, Array.Empty<string>(), new BuildRequest[] { _defaultParentRequest }));
 
             _logger = new MockLogger();
             _parameters = new BuildParameters();
@@ -105,7 +107,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             CreateConfiguration(1, "foo.proj");
             BuildRequest request = CreateBuildRequest(1, 1);
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Single(response);
@@ -123,7 +125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request = CreateBuildRequest(1, 1, new string[] { "foo" });
             BuildResult result = CacheBuildResult(request, "foo", BuildResultUtilities.GetSuccessResult());
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(2, response.Count);
@@ -147,7 +149,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request = CreateBuildRequest(1, 1, new string[] { "foo" });
             BuildResult result = CacheBuildResult(request, "foo", BuildResultUtilities.GetStopWithErrorResult());
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(2, response.Count);
@@ -170,7 +172,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             CreateConfiguration(1, "foo.proj");
             BuildRequest request = CreateBuildRequest(1, 1, new string[] { "foo" });
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(-1, new string[] { }, new BuildRequest[] { request });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new BuildRequest[] { request });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             CreateConfiguration(2, "bar.proj");
@@ -201,7 +203,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request1 = CreateBuildRequest(1, 1, new string[] { "foo" });
             BuildRequest request2 = CreateBuildRequest(2, 1, new string[] { "bar" });
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Single(response);
@@ -221,7 +223,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request2 = CreateBuildRequest(2, 2, new string[] { "bar" });
             BuildResult result2 = CacheBuildResult(request2, "bar", BuildResultUtilities.GetSuccessResult());
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(2, response.Count);
@@ -244,7 +246,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request2 = CreateBuildRequest(2, 2, new string[] { "bar" });
             BuildResult result2 = CacheBuildResult(request2, "bar", BuildResultUtilities.GetSuccessResult());
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(3, response.Count);
@@ -272,7 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request1 = CreateBuildRequest(1, 1, new string[] { "foo" }, NodeAffinity.OutOfProc, _defaultParentRequest);
             BuildRequest request2 = CreateBuildRequest(2, 1, new string[] { "bar" }, NodeAffinity.OutOfProc, _defaultParentRequest);
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't
@@ -296,7 +298,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request1 = CreateBuildRequest(1, 1, new string[] { "foo" }, NodeAffinity.OutOfProc, _defaultParentRequest);
             BuildRequest request2 = CreateBuildRequest(2, 1, new string[] { "bar" }, NodeAffinity.OutOfProc, _defaultParentRequest);
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't
@@ -323,7 +325,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request3 = CreateBuildRequest(3, 1, new string[] { "baz" });
             BuildRequest request4 = CreateBuildRequest(4, 1, new string[] { "qux" });
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Single(response);
@@ -349,7 +351,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request3 = CreateBuildRequest(3, 3, new string[] { "baz" });
             BuildRequest request4 = CreateBuildRequest(4, 4, new string[] { "qux" });
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(2, response.Count);
@@ -386,14 +388,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager = new BuildManager();
 
             CreateConfiguration(99, "parent.proj");
-            _defaultParentRequest = CreateBuildRequest(99, 99, new string[] { }, null);
+            _defaultParentRequest = CreateBuildRequest(99, 99, Array.Empty<string>(), null);
 
             CreateConfiguration(1, "foo.proj");
             BuildRequest request1 = CreateBuildRequest(1, 1, new string[] { "foo" }, NodeAffinity.Any, _defaultParentRequest);
             BuildRequest request2 = CreateBuildRequest(2, 1, new string[] { "bar" }, NodeAffinity.InProc, _defaultParentRequest);
             BuildRequest request3 = CreateBuildRequest(3, 1, new string[] { "bar" }, NodeAffinity.InProc, _defaultParentRequest);
 
-            List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, new string[] { }, new BuildRequest[] { _defaultParentRequest, request1, request2, request3 })));
+            List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, Array.Empty<string>(), new BuildRequest[] { _defaultParentRequest, request1, request2, request3 })));
             Assert.Single(response);
             Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
             Assert.Equal(NodeAffinity.InProc, response[0].RequiredNodeType);
@@ -427,7 +429,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request3 = CreateBuildRequest(3, 3, new string[] { "baz" }, NodeAffinity.OutOfProc, _defaultParentRequest);
             BuildRequest request4 = CreateBuildRequest(4, 4, new string[] { "qux" }, NodeAffinity.OutOfProc, _defaultParentRequest);
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't
@@ -457,7 +459,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request3 = CreateBuildRequest(3, 3, new string[] { "baz" });
             BuildRequest request4 = CreateBuildRequest(4, 4, new string[] { "qux" });
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(2, response.Count);
@@ -487,7 +489,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request3 = CreateBuildRequest(3, 3, new string[] { "baz" });
             BuildRequest request4 = CreateBuildRequest(4, 4, new string[] { "qux" });
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(2, response.Count);
@@ -520,7 +522,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request1 = CreateBuildRequest(1, 1, new string[] { "foo" }, _defaultParentRequest);
             BuildRequest request2 = CreateBuildRequest(2, 2, new string[] { "bar" }, _defaultParentRequest);
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             // There will be no request to create a new node, because both of the above requests are traversals,
@@ -544,7 +546,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildRequest request1 = CreateProxyBuildRequest(1, 1, new ProxyTargets(new Dictionary<string, string> {{"foo", "bar"}}), null);
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(-1, new string[] { }, new[] { request1 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] { request1 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             // There will be no request to create a new node, because both of the above requests are proxy build requests,
@@ -578,7 +580,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager = new BuildManager();
 
             CreateConfiguration(99, "parent.proj");
-            _defaultParentRequest = CreateBuildRequest(99, 99, new string[] { }, null);
+            _defaultParentRequest = CreateBuildRequest(99, 99, Array.Empty<string>(), null);
 
             CreateConfiguration(1, "foo.proj");
             BuildRequest request1 = CreateBuildRequest(1, 1, new string[] { "foo" }, NodeAffinity.OutOfProc, _defaultParentRequest);
@@ -587,7 +589,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             CreateConfiguration(3, "foo3.proj");
             BuildRequest request3 = CreateBuildRequest(3, 3, new string[] { "bar" }, NodeAffinity.InProc, _defaultParentRequest);
 
-            List<ScheduleResponse> responses = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, new string[] { }, new BuildRequest[] { _defaultParentRequest, request1, request2, request3 })));
+            List<ScheduleResponse> responses = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, Array.Empty<string>(), new BuildRequest[] { _defaultParentRequest, request1, request2, request3 })));
 
             int nextNodeId = 1;
             bool inProcNodeExists = false;
@@ -606,7 +608,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result1 = CacheBuildResult(request1, "foo", BuildResultUtilities.GetStopWithErrorResult());
             BuildRequest request2 = CreateBuildRequest(2, 1, new string[] { "bar" });
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(2, response.Count);
@@ -625,7 +627,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request2 = CreateBuildRequest(2, 1, new string[] { "bar" });
             BuildResult result2 = CacheBuildResult(request2, "bar", BuildResultUtilities.GetStopWithErrorResult());
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(2, response.Count);
@@ -645,7 +647,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result2 = CacheBuildResult(request2, "bar", BuildResultUtilities.GetStopWithErrorResult());
             BuildRequest request3 = CreateBuildRequest(3, 1, new string[] { "baz" });
 
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3 });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request1, request2, request3 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             Assert.Equal(2, response.Count);
@@ -661,7 +663,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             CreateConfiguration(1, "foo.proj");
             BuildRequest request = CreateBuildRequest(1, 1);
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request });
+            BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
             BuildResult result = CreateBuildResult(request, "foo", BuildResultUtilities.GetSuccessResult());
@@ -708,7 +710,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private void CreateConfiguration(int configId, string file)
         {
-            BuildRequestData data = new BuildRequestData(file, new Dictionary<string, string>(), "4.0", new string[] { }, null);
+            BuildRequestData data = new BuildRequestData(file, new Dictionary<string, string>(), "4.0", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(configId, data, "4.0");
             config.ProjectInitialTargets = new List<string>();
             config.ProjectDefaultTargets = new List<string>();
@@ -733,7 +735,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private BuildResult CreateBuildResult(BuildRequest request, string target, WorkUnitResult workUnitResult)
         {
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget(target, new TargetResult(new TaskItem[] { }, workUnitResult));
+            result.AddResultsForTarget(target, new TargetResult(Array.Empty<TaskItem>(), workUnitResult));
             return result;
         }
 
@@ -742,7 +744,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private BuildRequest CreateBuildRequest(int nodeRequestId, int configId)
         {
-            return CreateBuildRequest(nodeRequestId, configId, new string[] { });
+            return CreateBuildRequest(nodeRequestId, configId, Array.Empty<string>());
         }
 
         /// <summary>

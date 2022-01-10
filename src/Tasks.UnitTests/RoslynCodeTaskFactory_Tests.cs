@@ -11,6 +11,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class RoslynCodeTaskFactory_Tests
@@ -85,7 +87,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             // with broken cache we get two Compiling messages
             // as we fail to reuse the first assembly
-            messages.Count().ShouldBe(1);
+            messages.Length.ShouldBe(1);
         }
 
         [Fact]

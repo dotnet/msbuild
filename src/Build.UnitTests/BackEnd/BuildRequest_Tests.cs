@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class BuildRequest_Tests
@@ -32,39 +34,39 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorGood()
         {
-            CreateNewBuildRequest(0, new string[0] { });
+            CreateNewBuildRequest(0, Array.Empty<string>() );
         }
 
         [Fact]
         public void TestConfigurationId()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             Assert.Equal(0, request.ConfigurationId);
 
-            BuildRequest request2 = CreateNewBuildRequest(1, new string[0] { });
+            BuildRequest request2 = CreateNewBuildRequest(1, Array.Empty<string>());
             Assert.Equal(1, request2.ConfigurationId);
 
-            BuildRequest request3 = CreateNewBuildRequest(-1, new string[0] { });
+            BuildRequest request3 = CreateNewBuildRequest(-1, Array.Empty<string>());
             Assert.Equal(-1, request3.ConfigurationId);
         }
 
         [Fact]
         public void TestConfigurationResolved()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             Assert.False(request.IsConfigurationResolved);
 
-            BuildRequest request2 = CreateNewBuildRequest(1, new string[0] { });
+            BuildRequest request2 = CreateNewBuildRequest(1, Array.Empty<string>());
             Assert.True(request2.IsConfigurationResolved);
 
-            BuildRequest request3 = CreateNewBuildRequest(-1, new string[0] { });
+            BuildRequest request3 = CreateNewBuildRequest(-1, Array.Empty<string>());
             Assert.False(request3.IsConfigurationResolved);
         }
 
         [Fact]
         public void TestTargets()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             Assert.NotNull(request.Targets);
             Assert.Empty(request.Targets);
 
@@ -77,14 +79,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestPacketType()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             Assert.Equal(NodePacketType.BuildRequest, request.Type);
         }
 
         [Fact]
         public void TestResolveConfigurationGood()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             request.ResolveConfiguration(1);
             Assert.True(request.IsConfigurationResolved);
             Assert.Equal(1, request.ConfigurationId);
@@ -95,7 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0] { });
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 request.ResolveConfiguration(2);
             }
            );
@@ -106,7 +108,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+                BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
                 request.ResolveConfiguration(-1);
             }
            );

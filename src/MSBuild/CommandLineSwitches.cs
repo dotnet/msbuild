@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
@@ -597,7 +599,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         // used to indicate a null parameter list for a switch
-        private static readonly string[] s_noParameters = { };
+        private static readonly string[] s_noParameters = Array.Empty<string>();
 
         /// <summary>
         /// Gets the parameters (if any) detected on the command line for the given parameterized switch.

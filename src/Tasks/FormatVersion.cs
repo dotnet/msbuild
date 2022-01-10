@@ -5,6 +5,8 @@ using System;
 using System.Globalization;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

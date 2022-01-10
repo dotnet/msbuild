@@ -6,6 +6,8 @@ using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>

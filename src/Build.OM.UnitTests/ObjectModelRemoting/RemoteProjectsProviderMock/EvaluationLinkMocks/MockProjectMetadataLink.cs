@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using Microsoft.Build.Construction;
@@ -16,7 +18,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        ///  ProjectMetadataLink remoting
+        /// ProjectMetadataLink remoting
         public object Parent
         {
             get

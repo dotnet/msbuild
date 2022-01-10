@@ -9,6 +9,8 @@ using Microsoft.Runtime.Hosting;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
     sealed public class AxTlbBaseTask_Tests
