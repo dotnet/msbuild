@@ -1261,7 +1261,7 @@ namespace Microsoft.Build.Execution
         private void AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio()
         {
             if (BuildEnvironmentHelper.Instance.RunningInVisualStudio &&
-                !ProjectCacheItems.IsEmpty &&
+                ProjectCacheItems.Any() &&
                 _projectCacheService == null &&
                 _buildParameters.ProjectCacheDescriptor == null)
             {
