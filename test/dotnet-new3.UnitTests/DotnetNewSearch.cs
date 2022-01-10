@@ -437,7 +437,6 @@ Examples:
 
             commandResult.Should()
                 .ExitWith(0)
-                .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', --framework")
@@ -458,7 +457,6 @@ Examples:
 
             commandResult.Should()
                 .ExitWith(0)
-                .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', -f")
@@ -479,7 +477,6 @@ Examples:
 
             commandResult.Should()
                 .ExitWith(0)
-                .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: -f")
@@ -504,7 +501,6 @@ Examples:
 
             commandResult.Should()
                 .ExitWith(0)
-                .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', --langVersion")
@@ -526,7 +522,6 @@ Examples:
 
             commandResult.Should()
                 .ExitWith(0)
-                .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: --langVersion")
@@ -551,7 +546,6 @@ Examples:
 
             commandResult.Should()
                 .ExitWith(0)
-                .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', --langVersion")
@@ -573,7 +567,6 @@ Examples:
 
             commandResult.Should()
                 .ExitWith(0)
-                .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: --langVersion")
@@ -598,7 +591,6 @@ Examples:
 
             commandResult.Should()
                 .ExitWith(0)
-                .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', -f='netcoreapp3.1'")
@@ -620,7 +612,6 @@ Examples:
 
             commandResult.Should()
                 .ExitWith(0)
-                .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: -f='net5.0'")
