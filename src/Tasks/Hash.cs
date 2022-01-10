@@ -42,7 +42,6 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string HashResult { get; set; }
 
-
         /// <summary>
         /// Execute the task.
         /// </summary>
