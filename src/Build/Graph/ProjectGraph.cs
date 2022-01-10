@@ -524,7 +524,7 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            sb.Append("}");
+            sb.Append('}');
 
             return sb.ToString();
 

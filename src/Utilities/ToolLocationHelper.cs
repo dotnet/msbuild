@@ -2303,12 +2303,12 @@ namespace Microsoft.Build.Utilities
             StringBuilder displayNameBuilder = new StringBuilder();
 
             displayNameBuilder.Append(frameworkName.Identifier);
-            displayNameBuilder.Append(" ");
+            displayNameBuilder.Append(' ');
             displayNameBuilder.Append('v').Append(frameworkName.Version.ToString());
 
             if (!string.IsNullOrEmpty(frameworkName.Profile))
             {
-                displayNameBuilder.Append(" ");
+                displayNameBuilder.Append(' ');
                 displayNameBuilder.Append(frameworkName.Profile);
             }
 

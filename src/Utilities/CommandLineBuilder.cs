@@ -222,7 +222,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else if(CommandLine[CommandLine.Length - 1] != ' ')
                 {
-                    CommandLine.Append(" ");
+                    CommandLine.Append(' ');
                 }
             }
         }

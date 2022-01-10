@@ -1779,7 +1779,7 @@ namespace Microsoft.Build.Construction
                     {
                         condition.Append(" or (");
                         condition.Append(GetConditionStringForConfiguration(solutionConfiguration));
-                        condition.Append(")");
+                        condition.Append(')');
                     }
                 }
                 else if (String.Equals(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase) ||
@@ -1790,7 +1790,7 @@ namespace Microsoft.Build.Construction
                     // so these should be available in the solution project
                     condition.Append(" or (");
                     condition.Append(GetConditionStringForConfiguration(solutionConfiguration));
-                    condition.Append(")");
+                    condition.Append(')');
                 }
             }
 
