@@ -82,7 +82,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     wasResultCached = false;
 
-                    return RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                    return RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, null);
                 }));
 
             SdkResult sdkResult = sdkResultLazy.Value;

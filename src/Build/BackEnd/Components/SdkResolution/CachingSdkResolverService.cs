@@ -66,7 +66,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     {
                         wasResultCached = false;
 
-                        return base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                        return base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, null);
                     }));
 
                 // Get the lazy value which will block all waiting threads until the SDK is resolved at least once while subsequent calls get cached results.
