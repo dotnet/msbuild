@@ -352,7 +352,7 @@ dotnet_diagnostic.CA2014.severity = warning
 dotnet_diagnostic.CA2015.severity = warning
 
 # Forward the 'CancellationToken' parameter to methods that take one
-dotnet_diagnostic.CA2016.severity = suggestion
+dotnet_diagnostic.CA2016.severity = warning
 
 # Review SQL queries for security vulnerabilities
 dotnet_diagnostic.CA2100.severity = none
