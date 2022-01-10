@@ -2351,7 +2351,7 @@ EndGlobal
                 projectInstance.Targets["MyTarget"].BeforeTargets.ShouldBe("DynamicTraversalTarget");
 
                 MockLogger mockLogger = new MockLogger(output);
-                projectInstance.Build(targetsToBuild, new List <ILogger> { mockLogger })
+                projectInstance.Build(targetsToBuild, new List<ILogger> { mockLogger })
                     .ShouldBeFalse("The solution build should have failed due to a missing project");
                 mockLogger.AssertLogContains("Message from MyTarget");
             }
