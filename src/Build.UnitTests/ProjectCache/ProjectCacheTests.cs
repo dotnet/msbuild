@@ -42,7 +42,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             _env.Dispose();
         }
 
-        private static readonly string AssemblyMockCache = nameof(AssemblyMockCache);
+        private const string AssemblyMockCache = nameof(AssemblyMockCache);
 
         private static readonly Lazy<string> SamplePluginAssemblyPath =
             new Lazy<string>(

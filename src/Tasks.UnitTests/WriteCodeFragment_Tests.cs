@@ -484,8 +484,8 @@ namespace Microsoft.Build.UnitTests
             File.Delete(task.OutputFile.ItemSpec);
         }
 
-        private static readonly string VBCarriageReturn = "Global.Microsoft.VisualBasic.ChrW(13)";
-        private static readonly string VBLineFeed = "Global.Microsoft.VisualBasic.ChrW(10)";
+        private const string VBCarriageReturn = "Global.Microsoft.VisualBasic.ChrW(13)";
+        private const string VBLineFeed = "Global.Microsoft.VisualBasic.ChrW(10)";
 
         public static readonly string VBLineSeparator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"{VBCarriageReturn}&{VBLineFeed}" : VBLineFeed;
 

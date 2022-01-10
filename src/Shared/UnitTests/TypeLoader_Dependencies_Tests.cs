@@ -15,9 +15,9 @@ namespace Microsoft.Build.UnitTests
     public class TypeLoader_Dependencies_Tests
     {
         private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "TaskWithDependency");
-        private static readonly string ProjectFileName = "TaskWithDependencyTest.proj";
-        private static readonly string TaskDllFileName = "TaskWithDependency.dll";
-        private static readonly string DependencyDllFileName = "Dependency.dll";
+        private const string ProjectFileName = "TaskWithDependencyTest.proj";
+        private const string TaskDllFileName = "TaskWithDependency.dll";
+        private const string DependencyDllFileName = "Dependency.dll";
 
         [Fact]
         public void LoadAssemblyAndDependency_InsideProjectFolder()
