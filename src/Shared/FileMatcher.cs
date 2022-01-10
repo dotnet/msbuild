@@ -2228,7 +2228,7 @@ namespace Microsoft.Build.Shared
             }
             else if (aString.StartsWith(@"\", StringComparison.Ordinal))
             {
-                sb.Append(@"\");
+                sb.Append('\\');
                 index = SkipSlashes(aString, 1);
             }
 

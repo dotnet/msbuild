@@ -45,8 +45,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new BuildRequestData("path3", new Dictionary<string, string> { ["a3"] = "b3" }, Constants.defaultToolsVersion, new[] { "target3" }, null),
                     Constants.defaultToolsVersion);
 
-                brq3.ProjectDefaultTargets = new List<string>{"target3"};
-                brq3.ProjectInitialTargets = new List<string>{"targetInitial"};
+                brq3.ProjectDefaultTargets = new List<string> {"target3"};
+                brq3.ProjectInitialTargets = new List<string> {"targetInitial"};
 
                 var configCache3 = new ConfigCache();
                 configCache3.AddConfiguration(brq3.ShallowCloneWithNewId(3));

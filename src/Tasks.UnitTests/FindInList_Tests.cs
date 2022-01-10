@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests
             f.BuildEngine = new MockEngine();
             f.ItemSpecToFind = "a.cs";
             f.FindLastMatch = true;
-            f.List = new ITaskItem[] { };
+            f.List = Array.Empty<ITaskItem>();
             Assert.True(f.Execute());
             Assert.Null(f.ItemFound);
         }

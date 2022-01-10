@@ -303,7 +303,9 @@ namespace Microsoft.Build.Evaluation
             {
                 GenericExpressionNode child = Expr(expression);
                 if (Same(expression, Token.TokenType.RightParenthesis))
+                {
                     return child;
+                }
                 else
                 {
                     errorPosition = _lexer.GetErrorPosition();

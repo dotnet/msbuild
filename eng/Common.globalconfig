@@ -161,7 +161,7 @@ dotnet_diagnostic.CA1068.severity = none
 dotnet_diagnostic.CA1069.severity = none
 
 # Do not declare event fields as virtual
-dotnet_diagnostic.CA1070.severity = suggestion
+dotnet_diagnostic.CA1070.severity = warning
 
 # Avoid using cref tags with a prefix
 dotnet_diagnostic.CA1200.severity = warning
@@ -200,7 +200,7 @@ dotnet_diagnostic.CA1505.severity = none
 dotnet_diagnostic.CA1506.severity = none
 
 # Use nameof to express symbol names
-dotnet_diagnostic.CA1507.severity = suggestion
+dotnet_diagnostic.CA1507.severity = warning
 
 # Avoid dead conditional code
 dotnet_diagnostic.CA1508.severity = none
@@ -245,7 +245,7 @@ dotnet_diagnostic.CA1724.severity = none
 dotnet_diagnostic.CA1801.severity = none
 
 # Use literals where appropriate
-dotnet_diagnostic.CA1802.severity = suggestion
+dotnet_diagnostic.CA1802.severity = warning
 
 # Do not initialize unnecessarily
 dotnet_diagnostic.CA1805.severity = suggestion
@@ -283,16 +283,16 @@ dotnet_diagnostic.CA1823.severity = suggestion
 dotnet_diagnostic.CA1824.severity = warning
 
 # Avoid zero-length array allocations.
-dotnet_diagnostic.CA1825.severity = suggestion
+dotnet_diagnostic.CA1825.severity = warning
 
 # Do not use Count() or LongCount() when Any() can be used
-dotnet_diagnostic.CA1827.severity = suggestion
+dotnet_diagnostic.CA1827.severity = warning
 
 # Do not use CountAsync() or LongCountAsync() when AnyAsync() can be used
 dotnet_diagnostic.CA1828.severity = warning
 
 # Use Length/Count property instead of Count() when available
-dotnet_diagnostic.CA1829.severity = suggestion
+dotnet_diagnostic.CA1829.severity = warning
 
 # Prefer strongly-typed Append and Insert method overloads on StringBuilder.
 dotnet_diagnostic.CA1830.severity = warning
@@ -307,10 +307,10 @@ dotnet_diagnostic.CA1832.severity = warning
 dotnet_diagnostic.CA1833.severity = warning
 
 # Consider using 'StringBuilder.Append(char)' when applicable.
-dotnet_diagnostic.CA1834.severity = suggestion
+dotnet_diagnostic.CA1834.severity = warning
 
 # Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
-dotnet_diagnostic.CA1835.severity = suggestion
+dotnet_diagnostic.CA1835.severity = warning
 
 # Prefer IsEmpty over Count
 dotnet_diagnostic.CA1836.severity = suggestion
@@ -352,7 +352,7 @@ dotnet_diagnostic.CA2014.severity = warning
 dotnet_diagnostic.CA2015.severity = warning
 
 # Forward the 'CancellationToken' parameter to methods that take one
-dotnet_diagnostic.CA2016.severity = suggestion
+dotnet_diagnostic.CA2016.severity = warning
 
 # Review SQL queries for security vulnerabilities
 dotnet_diagnostic.CA2100.severity = none
@@ -711,13 +711,13 @@ dotnet_diagnostic.SA1002.severity = suggestion
 dotnet_diagnostic.SA1003.severity = none
 
 # Documentation line should begin with a space
-dotnet_diagnostic.SA1004.severity = suggestion
+dotnet_diagnostic.SA1004.severity = warning
 
 # Single line comment should begin with a space
 dotnet_diagnostic.SA1005.severity = suggestion
 
 # Region should not be preceded by a space
-dotnet_diagnostic.SA1006.severity = suggestion
+dotnet_diagnostic.SA1006.severity = warning
 
 # Opening parenthesis should not be preceded by a space
 dotnet_diagnostic.SA1008.severity = suggestion
@@ -726,7 +726,7 @@ dotnet_diagnostic.SA1008.severity = suggestion
 dotnet_diagnostic.SA1009.severity = suggestion
 
 # Opening square brackets should not be preceded by a space
-dotnet_diagnostic.SA1010.severity = suggestion
+dotnet_diagnostic.SA1010.severity = warning
 
 # Closing square bracket should be followed by a space
 dotnet_diagnostic.SA1011.severity = suggestion
@@ -738,21 +738,21 @@ dotnet_diagnostic.SA1012.severity = suggestion
 dotnet_diagnostic.SA1013.severity = suggestion
 
 # Opening generic brackets should not be preceded by a space
-dotnet_diagnostic.SA1014.severity = suggestion
+dotnet_diagnostic.SA1014.severity = warning
 
 # Closing generic bracket should not be followed by a space
-dotnet_diagnostic.SA1015.severity = suggestion
+dotnet_diagnostic.SA1015.severity = warning
 
 dotnet_diagnostic.SA1019.severity = none
 
 # Increment symbol '++' should not be preceded by a space
-dotnet_diagnostic.SA1020.severity = suggestion
+dotnet_diagnostic.SA1020.severity = warning
 
 # Negative sign should be preceded by a space
 dotnet_diagnostic.SA1021.severity = suggestion
 
-# Dereference symbol '*' should not be preceded by a space."
-dotnet_diagnostic.SA1023.severity = suggestion
+# Dereference symbol '*' should not be preceded by a space.
+dotnet_diagnostic.SA1023.severity = warning
 
 # Colon should be followed by a space
 dotnet_diagnostic.SA1024.severity = suggestion
@@ -837,7 +837,7 @@ dotnet_diagnostic.SA1130.severity = suggestion
 dotnet_diagnostic.SA1131.severity = suggestion
 
 # Do not combine fields
-dotnet_diagnostic.SA1132.severity = suggestion
+dotnet_diagnostic.SA1132.severity = warning
 
 # Do not combine attributes
 dotnet_diagnostic.SA1133.severity = suggestion

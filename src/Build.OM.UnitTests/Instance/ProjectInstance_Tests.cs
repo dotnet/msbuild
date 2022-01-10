@@ -404,13 +404,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance instance1 = new Project().CreateProjectInstance();
 
-            BuildRequestData buildRequestData1 = new BuildRequestData(instance1, new string[] { });
+            BuildRequestData buildRequestData1 = new BuildRequestData(instance1, Array.Empty<string>());
 
             BuildManager.DefaultBuildManager.Build(new BuildParameters(), buildRequestData1);
 
             new Project().CreateProjectInstance();
 
-            BuildRequestData buildRequestData2 = new BuildRequestData(instance1, new string[] { });
+            BuildRequestData buildRequestData2 = new BuildRequestData(instance1, Array.Empty<string>());
 
             BuildManager.DefaultBuildManager.Build(new BuildParameters(), buildRequestData2);
         }
