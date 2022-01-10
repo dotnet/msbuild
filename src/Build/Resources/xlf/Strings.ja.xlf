@@ -2080,7 +2080,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
         <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
-        <target state="translated">プロジェクトが ProjectLoadSettings.RecordDuplicateButNotCircularImports フラグで読み込まれていません。</target>
+        <target state="new">Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
