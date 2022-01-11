@@ -220,7 +220,6 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
 
             ProjectFullPath = FileUtilities.NormalizePath(projectFullPath);
-            TargetNames = (ICollection<string>)targetsToBuild.Clone();
             GlobalPropertiesDictionary = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
             foreach (KeyValuePair<string, string> propertyPair in globalProperties)
             {
@@ -238,7 +237,11 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(targetsToBuild, nameof(targetsToBuild));
 
             HostServices = hostServices;
-            TargetNames = new List<string>(targetsToBuild);
+
+            var targetsToBuildCopy = new string[targetsToBuild.Length];
+            targetsToBuild.CopyTo(targetsToBuildCopy, 0);
+            TargetNames = targetsToBuildCopy;
+
             Flags = flags;
         }
 
