@@ -1,4 +1,3 @@
-Microsoft.DotNet.MSBuildSdkResolver.Tests
 Microsoft.DotNet.PackageInstall.Tests
 Microsoft.DotNet.Cli.Sln.Internal.Tests
 dotnet-msbuild.Tests
