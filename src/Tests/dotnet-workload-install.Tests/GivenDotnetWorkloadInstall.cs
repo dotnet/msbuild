@@ -183,7 +183,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                         (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
                             null)
                     };
-            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal)).Path,
+            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal) + sdkVersion).Path,
                 "mockCachePath");
             var parseResult = Parser.Instance.Parse(new string[]
             {
@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [InlineData(false, "6.0.100")]
         public void GivenWorkloadInstallItCanDownloadToOfflineCache(bool userLocal, string sdkVersion)
         {
-            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal)).Path, "mockCachePath");
+            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal) + sdkVersion).Path, "mockCachePath");
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--download-to-cache", cachePath });
             (_, var installManager, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, userLocal, sdkVersion, tempDirManifestPath: _manifestPath);
 
