@@ -5,7 +5,6 @@
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;

@@ -37,7 +37,7 @@ namespace Microsoft.TemplateEngine.Cli
             _postActionDispatcher = new PostActionDispatcher(_environmentSettings, _callbacks, _inputGetter);
         }
 
-        internal async Task<NewCommandStatus> InvokeTemplateAsync(TemplateArgs templateArgs, CancellationToken cancellationToken)
+        internal async Task<NewCommandStatus> InvokeTemplateAsync(TemplateCommandArgs templateArgs, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -108,7 +108,7 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        private async Task<NewCommandStatus> CreateTemplateAsync(TemplateArgs templateArgs, CancellationToken cancellationToken)
+        private async Task<NewCommandStatus> CreateTemplateAsync(TemplateCommandArgs templateArgs, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             char[] invalidChars = Path.GetInvalidFileNameChars();
@@ -249,7 +249,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private NewCommandStatus HandlePostActions(ITemplateCreationResult creationResult, TemplateArgs args)
+        private NewCommandStatus HandlePostActions(ITemplateCreationResult creationResult, TemplateCommandArgs args)
         {
             PostActionExecutionStatus result = _postActionDispatcher.Process(creationResult, args.IsDryRun, args.AllowScripts ?? AllowRunScripts.Prompt);
 

@@ -6,7 +6,6 @@
 using System.CommandLine.Completions;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.Commands.Exceptions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands

@@ -7,13 +7,13 @@ using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class TemplateArgs
+    internal class TemplateCommandArgs
     {
         private readonly ParseResult _parseResult;
         private readonly TemplateCommand _command;
         private Dictionary<string, OptionResult> _templateOptions = new Dictionary<string, OptionResult>();
 
-        public TemplateArgs(TemplateCommand command, ParseResult parseResult)
+        public TemplateCommandArgs(TemplateCommand command, ParseResult parseResult)
         {
             _parseResult = parseResult ?? throw new ArgumentNullException(nameof(parseResult));
             _command = command ?? throw new ArgumentNullException(nameof(command));

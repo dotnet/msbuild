@@ -10,7 +10,6 @@ using System.CommandLine.Parsing;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
-using Microsoft.TemplateEngine.Cli.Commands.Exceptions;
 using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -437,29 +436,5 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return null;
             }
         }
-    }
-
-    internal class InstantiateCommandArgs : GlobalArgs
-    {
-        public InstantiateCommandArgs(InstantiateCommand command, ParseResult parseResult) : base(command, parseResult)
-        {
-            RemainingArguments = parseResult.GetValueForArgument(command.RemainingArguments) ?? Array.Empty<string>();
-            ShortName = parseResult.GetValueForArgument(command.ShortNameArgument);
-
-            var tokens = new List<string>();
-            if (!string.IsNullOrWhiteSpace(ShortName))
-            {
-                tokens.Add(ShortName);
-            }
-            tokens.AddRange(RemainingArguments);
-            TokensToInvoke = tokens.ToArray();
-
-        }
-
-        internal string? ShortName { get; }
-
-        internal string[] RemainingArguments { get; }
-
-        internal string[] TokensToInvoke { get; }
     }
 }

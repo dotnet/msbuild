@@ -5,7 +5,7 @@
 
 using System.Text;
 
-namespace Microsoft.TemplateEngine.Cli.Commands.Exceptions
+namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class InvalidTemplateParametersException : Exception
     {

@@ -11,35 +11,6 @@ using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class UninstallCommand : BaseUninstallCommand
-    {
-        public UninstallCommand(
-            NewCommand parentCommand,
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
-            NewCommandCallbacks callbacks)
-            : base(host, logger, callbacks, "uninstall")
-        {
-            parentCommand.AddNoLegacyUsageValidators(this);
-        }
-    }
-
-    internal class LegacyUninstallCommand : BaseUninstallCommand
-    {
-        public LegacyUninstallCommand(
-            NewCommand parentCommand,
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
-            NewCommandCallbacks callbacks)
-            : base(host, logger, callbacks, "--uninstall")
-        {
-            this.IsHidden = true;
-            this.AddAlias("-u");
-
-            parentCommand.AddNoLegacyUsageValidators(this);
-        }
-    }
-
     internal class BaseUninstallCommand : BaseCommand<UninstallCommandArgs>
     {
         internal BaseUninstallCommand(
@@ -73,21 +44,5 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return new UninstallCommandArgs(this, parseResult);
         }
-    }
-
-    internal class UninstallCommandArgs : GlobalArgs
-    {
-        public UninstallCommandArgs(BaseUninstallCommand uninstallCommand, ParseResult parseResult) : base(uninstallCommand, parseResult)
-        {
-            TemplatePackages = parseResult.GetValueForArgument(uninstallCommand.NameArgument) ?? Array.Empty<string>();
-
-            //workaround for --install source1 --install source2 case
-            if (uninstallCommand is LegacyUninstallCommand && uninstallCommand.Aliases.Any(alias => TemplatePackages.Contains(alias)))
-            {
-                TemplatePackages = TemplatePackages.Where(package => !uninstallCommand.Aliases.Contains(package)).ToList();
-            }
-        }
-
-        public IReadOnlyList<string> TemplatePackages { get; }
     }
 }

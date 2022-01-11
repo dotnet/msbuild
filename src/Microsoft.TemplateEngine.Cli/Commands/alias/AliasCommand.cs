@@ -26,11 +26,4 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected override AliasCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
     }
-
-    internal class AliasCommandArgs : GlobalArgs
-    {
-        public AliasCommandArgs(AliasCommand command, ParseResult parseResult) : base(command, parseResult)
-        {
-        }
-    }
 }

@@ -7,7 +7,6 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
-using Microsoft.TemplateEngine.Cli.Commands.Exceptions;
 using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -157,7 +156,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
-            TemplateArgs args = new TemplateArgs(this, context.ParseResult);
+            TemplateCommandArgs args = new TemplateCommandArgs(this, context.ParseResult);
 
             TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, _instantiateCommand.TelemetryLogger, () => Console.ReadLine() ?? string.Empty, _instantiateCommand.Callbacks);
             if (!args.NoUpdateCheck)

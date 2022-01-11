@@ -264,7 +264,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-            var templateArgs = new TemplateArgs(templateCommand, templateParseResult);
+            var templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
 
             Assert.Equal(expectedValue, templateArgs.Name);
         }
@@ -330,7 +330,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-            var templateArgs = new TemplateArgs(templateCommand, templateParseResult);
+            var templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
 
             if (string.IsNullOrWhiteSpace(expectedValue))
             {
@@ -374,7 +374,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-            var templateArgs = new TemplateArgs(templateCommand, templateParseResult);
+            var templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
 
             if (string.IsNullOrWhiteSpace(expectedValue))
             {
@@ -515,7 +515,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
 
-            TemplateArgs templateArgs = new TemplateArgs(templateCommand, templateParseResult);
+            TemplateCommandArgs templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
             Assert.Null(templateArgs.AllowScripts);
         }
 
@@ -549,7 +549,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
 
-            TemplateArgs templateArgs = new TemplateArgs(templateCommand, templateParseResult);
+            TemplateCommandArgs templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
             Assert.Equal(result, templateArgs.AllowScripts);
         }
 
