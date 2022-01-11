@@ -243,7 +243,7 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                //FIXME: handle ; in path on Unix
+                // FIXME: handle ; in path on Unix
                 var paths = property.Value
                     .Split(s_separatorForExtensionsPathSearchPaths, StringSplitOptions.RemoveEmptyEntries)
                     .Distinct()

@@ -372,7 +372,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="message"></param>
         protected override void LogToolCommand(string message)
         {
-            //Dont print the command line if Echo is Off.
+            // Dont print the command line if Echo is Off.
             if (!EchoOff)
             {
                 base.LogToolCommand(Command);

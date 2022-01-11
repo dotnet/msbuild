@@ -1380,7 +1380,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                         else
                         {
-                            //there is not enough room just print the message out and let the console do the formatting
+                            // there is not enough room just print the message out and let the console do the formatting
                             WriteBasedOnPrefix(nonNullMessage, prefixAlreadyWritten, adjustedPrefixWidth);
                         }
                     }
@@ -1688,7 +1688,7 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal void AddEventStarted(string projectTargetNames, BuildEventContext buildEventContext, DateTime eventTimeStamp, IEqualityComparer<BuildEventContext> comparer)
             {
-                //If the projectTargetNames are set then we should be a project started event
+                // If the projectTargetNames are set then we should be a project started event
                 if (!string.IsNullOrEmpty(projectTargetNames))
                 {
                     // Create a new performance counter for the project entry point to calculate how much time and how many calls
@@ -1781,10 +1781,10 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Per-build Members
-        //Holds messages that were going to be shown before the project started event, buffer them until the project started event is shown
+        // Holds messages that were going to be shown before the project started event, buffer them until the project started event is shown
         private Dictionary<BuildEventContext, List<BuildMessageEventArgs>> _deferredMessages;
         private BuildEventManager _buildEventManager;
-        //  Has the build started
+        // Has the build started
         private bool _hasBuildStarted;
         private bool? _showCommandLine;
         private bool _showTimeStamp;

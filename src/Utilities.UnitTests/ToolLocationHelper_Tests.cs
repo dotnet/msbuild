@@ -4192,7 +4192,7 @@ namespace Microsoft.Build.UnitTests
         {
             // create directories and files in them
 
-            //  root1
+            // root1
             //     subdir
             //         file1.txt
             //     file1.txt
@@ -4607,11 +4607,11 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(
                     Path.Combine(tempPath, "MyPlatform", "9.0", "Platforms", "Sparkle", "3.3.3.3")); // no platform.xml
 
-                //Bad because of v in the sdk version
+                // Bad because of v in the sdk version
                 Directory.CreateDirectory(
                     Path.Combine(tempPath, "Windows", "v1.0", "ExtensionSDKs", "AnotherAssembly", "v1.1"));
 
-                //Bad because no extensionsdks directory under the platform version
+                // Bad because no extensionsdks directory under the platform version
                 Directory.CreateDirectory(Path.Combine(tempPath, "Windows", "v3.0") + Path.DirectorySeparatorChar);
 
                 // Bad because the directory under the identifier is not a version

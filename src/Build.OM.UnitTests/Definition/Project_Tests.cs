@@ -2054,7 +2054,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             result.ShouldBeFalse();
 
-            mockLogger.Errors[0].Code.ShouldBe("MSB4112"); //                 "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
+            mockLogger.Errors[0].Code.ShouldBe("MSB4112"); // "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
         }
 
         /// <summary>
@@ -2116,9 +2116,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             result.ShouldBeTrue();
 
-            mockLogger.WarningCount.ShouldBe(0); //                 "Log should not contain MSB4011 because the build logger will not receive evaluation messages."
+            mockLogger.WarningCount.ShouldBe(0); // "Log should not contain MSB4011 because the build logger will not receive evaluation messages."
 
-            collectionLogger.Warnings[0].Code.ShouldBe("MSB4011"); //                 "Log should contain MSB4011 because the project collection logger should have been used for evaluation."
+            collectionLogger.Warnings[0].Code.ShouldBe("MSB4011"); // "Log should contain MSB4011 because the project collection logger should have been used for evaluation."
         }
 
         /// <summary>
@@ -3679,25 +3679,25 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-//        [InlineData(
+// [InlineData(
 //            @"
-//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-//<A Remove=`e*;f*`/>
-//",
+// <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+// <A Remove=`e*;f*`/>
+// ",
 //        new[] {"ba"},
 //        new[] {"a", "ca", "da", "ea", "fa"}
 //        )]
 //        [InlineData(
 //            @"
-//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-//",
+// <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+// ",
 //        new[] {"ba", "ea", "fa"},
 //        new[] {"a", "ca", "da"}
 //        )]
 //        [InlineData(
 //            @"
-//<A Include=`a;b*;c*;d*;e*;f*`/>
-//",
+// <A Include=`a;b*;c*;d*;e*;f*`/>
+// ",
 //        new[] {"ba", "ca", "da", "ea", "fa"},
 //        new[] {"a"}
 //        )]

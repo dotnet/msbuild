@@ -2210,7 +2210,7 @@ namespace Microsoft.Build.Evaluation
                             }
                             catch (ArgumentException)
                             {
-                                //  Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
+                                // Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
                                 //  Since MethodInfo.CreateDelegate doesn't have this option, we catch the ArgumentException to preserve the previous behavior
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
                             }

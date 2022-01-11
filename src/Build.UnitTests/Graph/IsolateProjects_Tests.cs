@@ -284,9 +284,9 @@ BuildEngine5.BuildProjectFilesInParallel(
 
         [Theory]
         [InlineData(false, "BuildUndeclaredReference")]
-//        [InlineData(false, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
+// [InlineData(false, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
         [InlineData(true, "BuildUndeclaredReference")]
-//        [InlineData(true, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
+// [InlineData(true, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
         public void UndeclaredReferenceEnforcementShouldFailOnUndeclaredReference(bool addContinueOnError, string targetName)
         {
             AssertBuild(new[] { targetName },
@@ -303,7 +303,7 @@ BuildEngine5.BuildProjectFilesInParallel(
 
         [Theory]
         [InlineData("BuildUndeclaredReference")]
-//        [InlineData("BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
+// [InlineData("BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
         public void UndeclaredReferenceEnforcementShouldFailOnPreviouslyBuiltButUndeclaredReferences(string targetName)
         {
             AssertBuild(new[] { targetName },

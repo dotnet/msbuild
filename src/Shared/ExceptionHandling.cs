@@ -319,7 +319,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void DumpExceptionToFile(Exception ex)
         {
-            //  Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
+            // Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
             //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
             //  applied to a static method.
             lock (typeof(ExceptionHandling))

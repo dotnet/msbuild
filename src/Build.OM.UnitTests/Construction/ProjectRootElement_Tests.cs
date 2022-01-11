@@ -1026,7 +1026,7 @@ Project(""{";
         /// Open lots of projects concurrently to try to trigger problems
         /// </summary>
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  //This test is platform specific for Windows
+        [PlatformSpecific(TestPlatforms.Windows)]  // This test is platform specific for Windows
         public void ConcurrentProjectOpenAndCloseThroughProject()
         {
             int iterations = 500;

@@ -267,15 +267,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             catch (ArgumentException)
             {
-                //continue
+                // continue
             }
             catch (FormatException)
             {
-                //continue
+                // continue
             }
             catch (OverflowException)
             {
-                //continue 
+                // continue 
             }
 
             return version;

@@ -3263,7 +3263,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Assert.True(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
         }
 
-        //  Regression test for https://github.com/dotnet/msbuild/issues/2206
+        // Regression test for https://github.com/dotnet/msbuild/issues/2206
         [Theory]
         [InlineData("\n")]
         [InlineData("\r\n")]

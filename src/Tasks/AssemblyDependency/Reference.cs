@@ -1123,7 +1123,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            //  It was resolved locally, so copy it.
+            // It was resolved locally, so copy it.
             CopyLocal = CopyLocalState.YesBecauseOfHeuristic;
         }
 

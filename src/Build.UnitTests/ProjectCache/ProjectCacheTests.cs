@@ -159,7 +159,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             public override string ToString()
             {
-                //return base.ToString();
+                // return base.ToString();
                 return string.Join(
                     ", ",
                     GraphEdges.Select(e => $"{Node(e.Key)}->{FormatChildren(e.Value)}"));
@@ -1496,7 +1496,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Theory]
         [InlineData(false, false)]
         // TODO: Reenable when this gets into the main branch.
-        //[InlineData(true, true)]
+        // [InlineData(true, true)]
         public void ParallelStressTestForVsWorkaround(bool useSynchronousLogging, bool disableInprocNode)
         {
             var currentBuildEnvironment = BuildEnvironmentHelper.Instance;

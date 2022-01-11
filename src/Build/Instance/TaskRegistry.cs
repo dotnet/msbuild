@@ -1766,13 +1766,13 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        //todo make nested after C# 7
+        // todo make nested after C# 7
         void TranslateTaskRegistrationKey(ITranslator translator, ref RegisteredTaskIdentity taskIdentity)
         {
             translator.Translate(ref taskIdentity);
         }
 
-        //todo make nested after C# 7
+        // todo make nested after C# 7
         void TranslateTaskRegistrationValue(ITranslator translator, ref List<RegisteredTaskRecord> taskRecords)
         {
             translator.Translate(ref taskRecords, RegisteredTaskRecord.FactoryForDeserialization);

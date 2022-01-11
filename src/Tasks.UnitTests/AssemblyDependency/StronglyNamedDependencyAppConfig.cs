@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - A single reference to DependsOnUnified was passed in.
         ///   - This assembly depends on version 1.0.0.0 of UnifyMe.
         /// - An app.config was passed in that promotes a *different* assembly version name from
-        //    1.0.0.0 to 2.0.0.0
+        // 1.0.0.0 to 2.0.0.0
         /// - Version 1.0.0.0 of the file exists.
         /// - Version 2.0.0.0 of the file exists.
         /// Expected:

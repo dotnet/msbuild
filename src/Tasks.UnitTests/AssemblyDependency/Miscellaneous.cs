@@ -931,7 +931,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = assemblies;
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
             t.SearchPaths = DefaultPaths;
-            t.AllowedRelatedFileExtensions = new string[] { @".licenses", ".xml" }; //no .pdb or .config
+            t.AllowedRelatedFileExtensions = new string[] { @".licenses", ".xml" }; // no .pdb or .config
             Execute(t);
 
             Assert.Single(t.ResolvedFiles);
@@ -1781,7 +1781,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Single(t.ResolvedFiles);
-            Assert.Equal("{HintPathFromItem}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom")); //                 "Assembly should have been resolved from HintPathFromItem!"
+            Assert.Equal("{HintPathFromItem}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom")); // "Assembly should have been resolved from HintPathFromItem!"
         }
 
         /// <summary>
@@ -3591,7 +3591,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
             ResourceManager resources = new ResourceManager("Microsoft.Build.Tasks.Strings", Assembly.GetExecutingAssembly());
 
-            //Unresolved primary reference with itemspec "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null".
+            // Unresolved primary reference with itemspec "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null".
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_ADllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_CDllPath);
@@ -4540,13 +4540,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m1.netmodule")); //                 "Expected to find scatter file m1."
+            Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m1.netmodule")); // "Expected to find scatter file m1."
 
-            Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m2.netmodule")); //                 "Expected to find scatter file m2."
+            Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m2.netmodule")); // "Expected to find scatter file m2."
 
-            Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m1.netmodule")); //                 "Expected to find scatter file m1 in CopyLocalFiles."
+            Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m1.netmodule")); // "Expected to find scatter file m1 in CopyLocalFiles."
 
-            Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m2.netmodule")); //                 "Expected to find scatter file m2 in CopyLocalFiles."
+            Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m2.netmodule")); // "Expected to find scatter file m2 in CopyLocalFiles."
         }
 
         /// <summary>
@@ -4600,7 +4600,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assert.Equal(0, String.Compare(i.GetMetadata("CopyLocal"), "false", StringComparison.OrdinalIgnoreCase));
             }
 
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"C:\Regress317975\B.dll")); //                 "Expected to find lower version listed in dependencies."
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"C:\Regress317975\B.dll")); // "Expected to find lower version listed in dependencies."
         }
 
         /// <summary>

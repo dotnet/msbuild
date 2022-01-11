@@ -815,7 +815,7 @@ namespace Microsoft.Build.UnitTests
                         includeVersionInInteropName,
                         tlbRefInfo.attr.wMajorVerNum,
                         tlbRefInfo.attr.wMinorVerNum
-                        )); //                     "Expected Ax reference's RCW name to match the new TLB"
+                        )); // "Expected Ax reference's RCW name to match the new TLB"
         }
     }
 }

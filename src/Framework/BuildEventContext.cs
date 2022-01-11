@@ -217,7 +217,7 @@ namespace Microsoft.Build.Framework
         {
             var hash = 17;
             // submission ID does not contribute to equality
-            //hash = hash * 31 + _submissionId;
+            // hash = hash * 31 + _submissionId;
             hash = (hash * 31) + _nodeId;
             hash = (hash * 31) + _evaluationId;
             hash = (hash * 31) + _targetId;

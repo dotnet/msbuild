@@ -3439,7 +3439,7 @@ namespace Microsoft.Build.Tasks
             // Generate the STR class
             String[] errors;
             bool generateInternalClass = !_stronglyTypedClassIsPublic;
-            //StronglyTypedResourcesNamespace can be null and this is ok.
+            // StronglyTypedResourcesNamespace can be null and this is ok.
             // If it is null then the default namespace (=stronglyTypedNamespace) is used.
             CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
                     reader.resourcesHashTable,

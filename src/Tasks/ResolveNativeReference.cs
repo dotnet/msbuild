@@ -241,7 +241,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (assemblyref.IsVirtual)
                         {
-                            //It is a CLR virtual reference, not a real reference.
+                            // It is a CLR virtual reference, not a real reference.
                             continue;
                         }
 

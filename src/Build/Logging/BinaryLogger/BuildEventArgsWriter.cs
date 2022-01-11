@@ -923,10 +923,10 @@ Build
 
             // Don't sort metadata because we want the binary log to be fully roundtrippable
             // and we need to preserve the original order.
-            //if (nameValueListBuffer.Count > 1)
-            //{
+            // if (nameValueListBuffer.Count > 1)
+            // {
             //    nameValueListBuffer.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
-            //}
+            // }
 
             WriteNameValueList();
 
