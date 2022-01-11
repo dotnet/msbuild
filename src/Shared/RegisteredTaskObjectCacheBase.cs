@@ -148,13 +148,8 @@ namespace Microsoft.Build.Shared
                         IDisposable disposable = obj as IDisposable;
                         disposable?.Dispose();
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                     {
-                        if (ExceptionHandling.IsCriticalException(ex))
-                        {
-                            throw;
-                        }
-
                         // Eat it.  We don't have a way to log here because at a minimum the build has already completed.
                     }
                 }

@@ -22,6 +22,7 @@ using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Build.Shared;
+using Shouldly;
 
 #nullable disable
 
@@ -128,11 +129,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Fact]
         public void SemicolonInPropertyPassedIntoITaskItemParam()
         {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(String.Format(@"
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@$"
 
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
 
-                    <UsingTask TaskName=`Microsoft.Build.UnitTests.EscapingInProjects_Tests.MyTestTask` AssemblyFile=`{0}` />
+                    <UsingTask TaskName=`Microsoft.Build.UnitTests.EscapingInProjects_Tests.MyTestTask` AssemblyFile=`{new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath}` />
 
                     <PropertyGroup>
                         <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
@@ -144,7 +145,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 </Project>
 
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath),
+                ",
                 logger: new MockLogger(_output));
 
             logger.AssertLogContains("Received TaskItemParam: 123 abc ; def ; ghi 789");
@@ -717,14 +718,14 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Trait("Category", "mono-osx-failing")]
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new();
 
             try
             {
                 // Populate the project directory with three physical files on disk -- a.weirdo, b.weirdo, c.weirdo.
                 EscapingInProjectsHelper.CreateThreeWeirdoFiles();
                 Project project = ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project>
                     <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
 
                     <Target Name=`t`>
@@ -736,8 +737,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 </Project>
                 ");
 
-                bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
+                project.Build(logger).ShouldBeTrue("Build failed.  See test output (Attachments in Azure Pipelines) for details");
                 logger.AssertLogContains("[*]");
             }
             finally

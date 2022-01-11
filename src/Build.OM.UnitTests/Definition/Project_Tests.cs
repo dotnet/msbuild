@@ -2109,10 +2109,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 result = project.Build(new ILogger[] { mockLogger });
             }
-            catch
-            {
-                throw;
-            }
             finally
             {
                 project.ProjectCollection.UnregisterAllLoggers();

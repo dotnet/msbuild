@@ -224,8 +224,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_resultsByConfiguration)
             {
-                BuildResult removedResult;
-                _resultsByConfiguration.TryRemove(configurationId, out removedResult);
+                _resultsByConfiguration.TryRemove(configurationId, out BuildResult removedResult);
 
                 removedResult?.ClearCachedFiles();
             }

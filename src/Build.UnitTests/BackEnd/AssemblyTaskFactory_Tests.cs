@@ -11,6 +11,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Construction;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using Shouldly;
 
 #nullable disable
 
@@ -257,8 +258,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false);
-                Assert.NotNull(createdTask);
-                Assert.False(createdTask is TaskHostTask);
+                createdTask.ShouldNotBeNull();
+                createdTask.ShouldNotBeOfType<TaskHostTask>();
             }
             finally
             {

@@ -100,13 +100,8 @@ namespace Microsoft.Build.Tasks
                 xmlinput = new XmlInput(XmlInputPaths, XmlContent);
                 xsltinput = new XsltInput(XslInputPath, XslContent, XslCompiledDllPath, Log);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.ArgumentError", e.Message);
                 return false;
             }
@@ -132,13 +127,8 @@ namespace Microsoft.Build.Tasks
             {
                 arguments = ProcessXsltArguments(Parameters);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.XsltArgumentsError", e.Message);
                 return false;
             }
@@ -155,13 +145,8 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("XslTransform.PrecompiledXsltError");
                 return false;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.XsltLoadError", e.Message);
                 return false;
             }
@@ -182,13 +167,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.TransformError", e.Message);
                 return false;
             }

@@ -449,13 +449,8 @@ namespace Microsoft.Build.BackEnd
 
                     ChangeLinkStatus(LinkStatus.Active);
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     CommunicationsUtilities.Trace("Client connection failed.  Exiting comm thread. {0}", e);
                     if (localPipeServer.IsConnected)
                     {
