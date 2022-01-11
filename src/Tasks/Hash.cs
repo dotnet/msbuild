@@ -18,6 +18,20 @@ namespace Microsoft.Build.Tasks
     /// </remarks>
     public class Hash : TaskExtension
     {
+        private static readonly char s_itemSeparatorCharacter = '\u2028';
+
+        private static readonly Encoding s_encoding = Encoding.UTF8;
+
+        private static readonly byte[] s_itemSeparatorCharacterBytes = s_encoding.GetBytes(new char[] { s_itemSeparatorCharacter });
+
+        // Size of buffer where bytes of the strings are stored until sha1.TransformBlock is be run on them.
+        // It is needed to get a balance between amount of costly sha1.TransformBlock calls and amount of allocated memory.
+        private const int sha1BufferSize = 512;
+
+        // Size of chunks in which ItemSpecs would be cut.
+        // String of size 169 gives no more than ~512 bytes in utf8 encoding.
+        private const int maxInputChunkLength = 169;
+
         /// <summary>
         /// Items from which to generate a hash.
         /// </summary>
@@ -35,16 +49,6 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string HashResult { get; set; }
 
-        private static readonly char s_itemSeparatorCharacter = '\u2028';
-
-        private static readonly Encoding s_encoding = Encoding.UTF8;
-
-        private static readonly byte[] s_itemSeparatorCharacterBytes = s_encoding.GetBytes(new char[] { s_itemSeparatorCharacter });
-
-        private const int sha1BufferSize = 512;
-
-        private const int maxInputChunkLength = 256;
-
         /// <summary>
         /// Execute the task.
         /// </summary>
@@ -56,36 +60,54 @@ namespace Microsoft.Build.Tasks
                 {
                     // Buffer in which bytes of the strings are to be stored until their number reaches the limit size.
                     // Once the limit is reached, the sha1.TransformBlock is be run on all the bytes of this buffer.
-                    byte[] sha1Buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(sha1BufferSize);
+                    byte[] sha1Buffer = null;
 
-                    byte[] byteBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(s_encoding.GetMaxByteCount(maxInputChunkLength));
+                    // Buffer in which bytes of items' ItemSpec are to be stored.
+                    byte[] byteBuffer = null;
 
-                    int sha1BufferPosition = 0;
-                    for (int i = 0; i < ItemsToHash.Length; i++)
+                    try
                     {
-                        string itemSpec = IgnoreCase ? ItemsToHash[i].ItemSpec.ToUpperInvariant() : ItemsToHash[i].ItemSpec;
+                        sha1Buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(sha1BufferSize);
+                        byteBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(s_encoding.GetMaxByteCount(maxInputChunkLength));
 
-                        // Slice the itemSpec string into chunks of reasonable size and add them to sha1 buffer.
-                        for (int itemSpecPosition = 0; itemSpecPosition < itemSpec.Length; itemSpecPosition += maxInputChunkLength)
+                        int sha1BufferPosition = 0;
+                        for (int i = 0; i < ItemsToHash.Length; i++)
                         {
-                            int charsToProcess = Math.Min(itemSpec.Length - itemSpecPosition, maxInputChunkLength);
-                            int byteCount = s_encoding.GetBytes(itemSpec, itemSpecPosition, charsToProcess, byteBuffer, 0);
+                            string itemSpec = IgnoreCase ? ItemsToHash[i].ItemSpec.ToUpperInvariant() : ItemsToHash[i].ItemSpec;
 
-                            AddBytesToSha1Buffer(sha1, sha1Buffer, ref sha1BufferPosition, sha1BufferSize, byteBuffer, byteCount);
+                            // Slice the itemSpec string into chunks of reasonable size and add them to sha1 buffer.
+                            for (int itemSpecPosition = 0; itemSpecPosition < itemSpec.Length; itemSpecPosition += maxInputChunkLength)
+                            {
+                                int charsToProcess = Math.Min(itemSpec.Length - itemSpecPosition, maxInputChunkLength);
+                                int byteCount = s_encoding.GetBytes(itemSpec, itemSpecPosition, charsToProcess, byteBuffer, 0);
+
+                                AddBytesToSha1Buffer(sha1, sha1Buffer, ref sha1BufferPosition, sha1BufferSize, byteBuffer, byteCount);
+                            }
+
+                            AddBytesToSha1Buffer(sha1, sha1Buffer, ref sha1BufferPosition, sha1BufferSize, s_itemSeparatorCharacterBytes, s_itemSeparatorCharacterBytes.Length);
                         }
 
-                        AddBytesToSha1Buffer(sha1, sha1Buffer, ref sha1BufferPosition, sha1BufferSize, s_itemSeparatorCharacterBytes, s_itemSeparatorCharacterBytes.Length);
+                        sha1.TransformFinalBlock(sha1Buffer, 0, sha1BufferPosition);
+
+                        using (var stringBuilder = new ReuseableStringBuilder(sha1.HashSize))
+                        {
+                            foreach (var b in sha1.Hash)
+                            {
+                                stringBuilder.Append(b.ToString("x2"));
+                            }
+                            HashResult = stringBuilder.ToString();
+                        }
                     }
-
-                    sha1.TransformFinalBlock(sha1Buffer, 0, sha1BufferPosition);
-
-                    using (var stringBuilder = new ReuseableStringBuilder(sha1.HashSize))
+                    finally
                     {
-                        foreach (var b in sha1.Hash)
+                        if (sha1Buffer != null)
                         {
-                            stringBuilder.Append(b.ToString("x2"));
+                            System.Buffers.ArrayPool<byte>.Shared.Return(sha1Buffer);
                         }
-                        HashResult = stringBuilder.ToString();
+                        if (byteBuffer != null)
+                        {
+                            System.Buffers.ArrayPool<byte>.Shared.Return(byteBuffer);
+                        }
                     }
                 }
             }
