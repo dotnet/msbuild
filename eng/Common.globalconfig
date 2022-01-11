@@ -1025,7 +1025,7 @@ dotnet_diagnostic.SA1518.severity = suggestion
 dotnet_diagnostic.SA1519.severity = suggestion
 
 # Use braces consistently
-dotnet_diagnostic.SA1520.severity = suggestion
+dotnet_diagnostic.SA1520.severity = warning
 
 dotnet_diagnostic.SA1600.severity = none
 
