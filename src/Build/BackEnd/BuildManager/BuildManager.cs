@@ -518,8 +518,6 @@ namespace Microsoft.Build.Execution
                     throw;
                 }
 
-                MSBuildEventSource.Log.BuildStop();
-
                 return loggingService;
             }
 
@@ -930,6 +928,8 @@ namespace Microsoft.Build.Execution
 
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
+
+                    MSBuildEventSource.Log.BuildStop();
 
                     _threadException?.Throw();
 
