@@ -188,7 +188,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.NotSame(realExistingItemGroup, newDeepCopy.Real);
             // TODO XmlLocation is (correctly) different for the items, need to find a way to bypass it.
             var context = new ValidationContext();
-            context.ValidateLocation = delegate (ElementLocation a, ElementLocation e) { return;};
+            context.ValidateLocation = delegate (ElementLocation a, ElementLocation e) { return; };
 
             ViewValidation.Verify(newDeepCopy.View, realExistingItemGroup, context);
             newDeepCopy.View.Label = "DeepCopyFrom";

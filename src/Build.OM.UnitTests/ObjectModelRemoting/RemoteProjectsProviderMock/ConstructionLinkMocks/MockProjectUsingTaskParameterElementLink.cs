@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         object ILinkMock.Remoter => this.Proxy;
         MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
 
-        public override string Name { get => Proxy.Name ; set =>Proxy.Name = value; }
+        public override string Name { get => Proxy.Name; set =>Proxy.Name = value; }
         #region ProjectElementLink redirectors
         private IProjectElementLinkHelper EImpl => (IProjectElementLinkHelper)this;
         public override ProjectElementContainer Parent => EImpl.GetParent();
