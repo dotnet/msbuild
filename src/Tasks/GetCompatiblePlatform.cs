@@ -44,7 +44,7 @@ namespace Microsoft.Build.Tasks
 
         public GetCompatiblePlatform()
         {
-            AnnotatedProjects = new ITaskItem[0];
+            AnnotatedProjects = Array.Empty<ITaskItem>();
             CurrentProjectPlatform = string.Empty;
             PlatformLookupTable = string.Empty;
         }

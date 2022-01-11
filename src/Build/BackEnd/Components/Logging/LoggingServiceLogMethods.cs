@@ -135,9 +135,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(messageResourceName), "Need resource string for error message.");
 
-                string errorCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, messageResourceName, messageArgs);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, messageResourceName, messageArgs);
 
                 LogErrorFromText(buildEventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
             }
@@ -187,8 +185,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 buildEvent.BuildEventContext = buildEventContext;
                 if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
-                    string projectFile;
-                    _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out projectFile);
+                    _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
                     ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
                     buildEvent.ProjectFile = projectFile;
                 }
@@ -233,8 +230,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     buildEvent.BuildEventContext = buildEventContext;
                     if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                     {
-                        string projectFile;
-                        _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out projectFile);
+                        _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
                         ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
                         buildEvent.ProjectFile = projectFile;
                     }
@@ -295,9 +291,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(messageResourceName), "Need resource string for error message.");
 
-                string errorCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, messageResourceName, messageArgs);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, messageResourceName, messageArgs);
 #if DEBUG
                 message += Environment.NewLine + "This is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.";
 #endif
@@ -334,9 +328,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(taskName), "Must specify the name of the task that failed.");
 
-                string warningCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out warningCode, out helpKeyword, "FatalTaskError", taskName);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out string helpKeyword, "FatalTaskError", taskName);
 #if DEBUG
                 message += Environment.NewLine + "This is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.";
 #endif
@@ -364,9 +356,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(messageResourceName), "Need resource string for warning message.");
 
-                string warningCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out warningCode, out helpKeyword, messageResourceName, messageArgs);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out string helpKeyword, messageResourceName, messageArgs);
                 LogWarningFromText(buildEventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
             }
         }
@@ -412,8 +402,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 buildEvent.BuildEventContext = buildEventContext;
                 if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
-                    string projectFile;
-                    _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out projectFile);
+                    _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
                     ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
                     buildEvent.ProjectFile = projectFile;
                 }

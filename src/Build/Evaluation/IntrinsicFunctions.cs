@@ -350,7 +350,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        ///<summary>
+        /// <summary>
         /// Hash the string independent of bitness and target framework.
         /// </summary>
         internal static int StableStringHash(string toHash)

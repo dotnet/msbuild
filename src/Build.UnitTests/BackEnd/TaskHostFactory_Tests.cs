@@ -29,7 +29,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     </Target>
 </Project>";
                 TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
-                ProjectInstance projectInstance = new ProjectInstance(project.Path);
+                ProjectInstance projectInstance = new(project.Path);
                 projectInstance.Build().ShouldBeTrue();
                 string processId = projectInstance.GetPropertyValue("PID");
                 string.IsNullOrEmpty(processId).ShouldBeFalse();

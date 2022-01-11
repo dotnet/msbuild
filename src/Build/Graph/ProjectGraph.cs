@@ -62,7 +62,7 @@ namespace Microsoft.Build.Graph
 
         internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
 
-        public GraphConstructionMetrics ConstructionMetrics { get; private set;}
+        public GraphConstructionMetrics ConstructionMetrics { get; private set; }
 
         /// <summary>
         /// Various metrics on graph construction.
@@ -524,7 +524,7 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            sb.Append("}");
+            sb.Append('}');
 
             return sb.ToString();
 

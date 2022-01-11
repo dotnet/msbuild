@@ -119,29 +119,19 @@ namespace Microsoft.Build.CommandLine
                 TypeLoader typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
                 taskType = typeLoader.Load(taskName, AssemblyLoadInfo.Create(null, taskLocation));
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
-                Exception exceptionToReturn = e;
-
                 // If it's a TargetInvocationException, we only care about the contents of the inner exception, 
-                // so just save that instead. 
-                if (e is TargetInvocationException)
-                {
-                    exceptionToReturn = e.InnerException;
-                }
+                // so just save that instead.
+                Exception exceptionToReturn = e is TargetInvocationException ? e.InnerException : e;
 
                 return new OutOfProcTaskHostTaskResult
-                                (
-                                    TaskCompleteType.CrashedDuringInitialization,
-                                    exceptionToReturn,
-                                    "TaskInstantiationFailureError",
-                                    new string[] { taskName, taskLocation, String.Empty }
-                                );
+                            (
+                                TaskCompleteType.CrashedDuringInitialization,
+                                exceptionToReturn,
+                                "TaskInstantiationFailureError",
+                                new string[] { taskName, taskLocation, String.Empty }
+                            );
             }
 
             OutOfProcTaskHostTaskResult taskResult;
@@ -241,13 +231,8 @@ namespace Microsoft.Build.CommandLine
                                                 taskParams
                                             );
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
                         exceptionFromExecution = e;
                     }
                     finally
@@ -323,13 +308,8 @@ namespace Microsoft.Build.CommandLine
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Exception exceptionToReturn = e;
 
                 // If it's a TargetInvocationException, we only care about the contents of the inner exception, 
@@ -355,29 +335,16 @@ namespace Microsoft.Build.CommandLine
                     PropertyInfo paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
                     paramInfo.SetValue(wrappedTask, param.Value?.WrappedParameter, null);
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
-                    Exception exceptionToReturn = e;
-
-                    // If it's a TargetInvocationException, we only care about the contents of the inner exception, 
-                    // so just save that instead. 
-                    if (e is TargetInvocationException)
-                    {
-                        exceptionToReturn = e.InnerException;
-                    }
-
                     return new OutOfProcTaskHostTaskResult
-                                    (
-                                        TaskCompleteType.CrashedDuringInitialization,
-                                        exceptionToReturn,
-                                        "InvalidTaskAttributeError",
-                                        new string[] { param.Key, param.Value.ToString(), taskName }
-                                    );
+                            (
+                                TaskCompleteType.CrashedDuringInitialization,
+                                // If it's a TargetInvocationException, we only care about the contents of the inner exception, so save that instead.
+                                e is TargetInvocationException ? e.InnerException : e,
+                                "InvalidTaskAttributeError",
+                                new string[] { param.Key, param.Value.ToString(), taskName }
+                            );
                 }
             }
 
@@ -392,13 +359,8 @@ namespace Microsoft.Build.CommandLine
                 // If it didn't crash and return before now, we're clear to go ahead and execute here. 
                 success = wrappedTask.Execute();
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 return new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
             }
 
@@ -408,19 +370,14 @@ namespace Microsoft.Build.CommandLine
             foreach (PropertyInfo value in finalPropertyValues)
             {
                 // only record outputs
-                if (value.GetCustomAttributes(typeof(OutputAttribute), true).Count() > 0)
+                if (value.GetCustomAttributes(typeof(OutputAttribute), true).Length > 0)
                 {
                     try
                     {
                         finalParameterValues[value.Name] = value.GetValue(wrappedTask, null);
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
                         // If it's not a critical exception, we assume there's some sort of problem in the parameter getter -- 
                         // so save the exception, and we'll re-throw once we're back on the main node side of the 
                         // communications pipe.  

@@ -16,8 +16,8 @@ namespace Microsoft.Build.UnitTests
     public class TypeLoader_Tests
     {
         private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "PortableTask");
-        private static readonly string ProjectFileName = "portableTaskTest.proj";
-        private static readonly string DLLFileName = "PortableTask.dll";
+        private const string ProjectFileName = "portableTaskTest.proj";
+        private const string DLLFileName = "PortableTask.dll";
 
         [Fact]
         public void Basic()

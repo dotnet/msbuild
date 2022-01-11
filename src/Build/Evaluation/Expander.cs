@@ -1646,13 +1646,8 @@ namespace Microsoft.Build.Evaluation
                             result = String.Empty;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
                     {
-                        if (ExceptionHandling.NotExpectedRegistryException(ex))
-                        {
-                            throw;
-                        }
-
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", ex.Message);
                     }
                 }
@@ -2299,15 +2294,10 @@ namespace Microsoft.Build.Evaluation
 
                             result = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, item.Key, definingProjectEscaped, functionName);
                         }
-                        catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                        // InvalidOperationException is how GetItemSpecModifier communicates invalid conditions upwards, so
+                        // we do not want to rethrow in that case.
+                        catch (Exception e) when (!ExceptionHandling.NotExpectedException(e) || e is InvalidOperationException)
                         {
-                            // InvalidOperationException is how GetItemSpecModifier communicates invalid conditions upwards, so
-                            // we do not want to rethrow in that case.
-                            if (ExceptionHandling.NotExpectedException(e) && !(e is InvalidOperationException))
-                            {
-                                throw;
-                            }
-
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
                         }
 
@@ -3506,23 +3496,13 @@ namespace Microsoft.Build.Evaluation
                                 // First use InvokeMember using the standard binder - this will match and coerce as needed
                                 functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
                             }
-                            catch (MissingMethodException ex) // Don't catch and retry on any other exception
+                            // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
+                            // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coersion is possible, so throw.
+                            catch (MissingMethodException ex) when ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                             {
-                                // If we're invoking a method, then there are deeper attempts that
-                                // can be made to invoke the method
-                                if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
-                                {
-                                    // The standard binder failed, so do our best to coerce types into the arguments for the function
-                                    // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true.
-                                    functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
-                                }
-                                else
-                                {
-                                    // We were asked to get a property or field, and we found that we cannot
-                                    // locate it. Since there is no further argument coersion possible
-                                    // we'll throw right now.
-                                    throw;
-                                }
+                                // The standard binder failed, so do our best to coerce types into the arguments for the function
+                                // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true.
+                                functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
                             }
                         }
                     }
@@ -3567,13 +3547,8 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Any other exception was thrown by trying to call it
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.NotExpectedFunctionException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedFunctionException(ex))
-                    {
-                        throw;
-                    }
-
                     // If there's a :: in the expression, they were probably trying for a static function
                     // invocation. Give them some more relevant info in that case
                     if (s_invariantCompareInfo.IndexOf(_expression, "::", CompareOptions.OrdinalIgnoreCase) > -1)

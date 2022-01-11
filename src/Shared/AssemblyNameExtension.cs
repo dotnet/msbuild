@@ -822,11 +822,15 @@ namespace Microsoft.Build.Shared
             // Some assemblies (real case was interop assembly) may have null PKTs.
             if (aPKT == null)
             {
+#pragma warning disable CA1825 // Avoid zero-length array allocations
                 aPKT = new byte[0];
+#pragma warning restore CA1825 // Avoid zero-length array allocations
             }
             if (bPKT == null)
             {
+#pragma warning disable CA1825 // Avoid zero-length array allocations
                 bPKT = new byte[0];
+#pragma warning restore CA1825 // Avoid zero-length array allocations
             }
 
             if (aPKT.Length != bPKT.Length)

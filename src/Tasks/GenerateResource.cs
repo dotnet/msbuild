@@ -1550,13 +1550,8 @@ namespace Microsoft.Build.Tasks
             {
                 resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources);
             }
-            catch (Exception e)  // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e)  when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
             {
-                if (ExceptionHandling.NotExpectedIoOrXmlException(e) && !(e is MSBuildResXException))
-                {
-                    throw;
-                }
-
                 // Return true, so that resource processing will display the error
                 // No point logging a duplicate error here as well
                 return true;
@@ -1940,7 +1935,7 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
                         // DDB#9819
                         // Customers have reported the following exceptions coming out of this method's call to GetType():
@@ -1951,8 +1946,6 @@ namespace Microsoft.Build.Tasks
                         // Any problem loading the type will get logged later when the resource reader tries it.
                         //
                         // XmlException or an IO exception is also possible from an invalid input file.
-                        if (ExceptionHandling.IsCriticalException(e))
-                            throw;
 
                         // If there was any problem parsing the .resx then log a message and
                         // fall back to using a separate AppDomain.
@@ -2793,13 +2786,9 @@ namespace Microsoft.Build.Tasks
                     {
                         Directory.Delete(currentOutputDirectory); // Remove output directory if empty
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
                         // Fail silently (we are not even checking if the call to File.Delete succeeded)
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
                     }
                 }
                 return false;
@@ -3596,7 +3585,9 @@ namespace Microsoft.Build.Tasks
                     {
                         String skip = sr.ReadLine();
                         if (skip.Equals("strings]"))
+                        {
                             _logger.LogWarningWithCodeFromResources(null, fileName, sr.LineNumber - 1, 1, 0, 0, "GenerateResource.ObsoleteStringsTag");
+                        }
                         else
                         {
                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.UnexpectedInfBracket", "[" + skip), fileName, sr.LineNumber - 1, 1);
@@ -3915,7 +3906,9 @@ namespace Microsoft.Build.Tasks
                         _col = 0;
                     }
                     else
+                    {
                         _col++;
+                    }
                 }
                 return r;
             }
@@ -4051,12 +4044,8 @@ namespace Microsoft.Build.Tasks
                 {
                     _cachedAssemblies[pathToAssembly] = Assembly.UnsafeLoadFrom(pathToAssembly);
                 }
-                catch
+                catch when (!throwOnError)
                 {
-                    if (throwOnError)
-                    {
-                        throw;
-                    }
                 }
             }
 

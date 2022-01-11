@@ -1542,7 +1542,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Project has not been given a path to save to.</value>
   </data>
   <data name="OM_MustSetRecordDuplicateInputs" xml:space="preserve">
-    <value>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</value>
+    <value>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</value>
   </data>
   <data name="OM_CannotSaveFileLoadedAsReadOnly" xml:space="preserve">
     <value>Project or targets file "{0}" was loaded in read-only mode, and cannot be saved.</value>

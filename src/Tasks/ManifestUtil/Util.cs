@@ -208,7 +208,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             GetFileInfoImpl(path, targetFrameworkVersion, out hash, out length);
         }
 
-        [SuppressMessage("Microsoft.Security.Cryptography", "CA5354: SHA1CannotBeUsed.", Justification = ".NET 4.0 and earlier versions cannot parse SHA-2.")]
+        [SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = ".NET 4.0 and earlier versions cannot parse SHA-2.")]
         private static void GetFileInfoImpl(string path, string targetFrameWorkVersion, out string hash, out long length)
         {
             FileInfo fi = new FileInfo(path);

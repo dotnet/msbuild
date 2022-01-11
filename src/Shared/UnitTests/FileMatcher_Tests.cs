@@ -1294,7 +1294,7 @@ namespace Microsoft.Build.UnitTests
             string workingPath = _env.CreateFolder().Path;
             string workingPathSubfolder = Path.Combine(workingPath, "SubDir");
             string offendingPattern = Path.Combine(workingPath, @"*\..\bar");
-            string[] files = new string[0];
+            string[] files = Array.Empty<string>();
 
             Directory.CreateDirectory(workingPath);
             Directory.CreateDirectory(workingPathSubfolder);
@@ -1360,11 +1360,11 @@ namespace Microsoft.Build.UnitTests
                     Array.Sort(files);
                     Assert.Equal(new []{"a.cs", "b.cs", "c.cs"}, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> {"a.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs", "c.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> {"a.cs", "c.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs" }, files);
                 }
@@ -1520,9 +1520,7 @@ namespace Microsoft.Build.UnitTests
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new string[]    //  Non matching files that shouldn't be touched
-                {
-                }
+                Array.Empty<string>()    //  Non matching files that shouldn't be touched
             );
         }
 

@@ -252,7 +252,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Initialize a ProjectRootElement instance from an existing document.
-        /// Helper constructor for the <see cref="ReloadFrom(string,bool,System.Nullable{bool})"/>> mehtod which needs to check if the document parses
+        /// Helper constructor for the <see cref="ReloadFrom(string,bool,bool?)"/>> mehtod which needs to check if the document parses
         /// </summary>
         /// <remarks>
         /// Do not make public: we do not wish to expose particular XML API's.
@@ -2084,13 +2084,8 @@ namespace Microsoft.Build.Construction
                     StreamTimeUtc = null;
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.NotExpectedIoOrXmlException(ex))
             {
-                if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
-                {
-                    throw;
-                }
-
                 BuildEventFileInfo fileInfo = ex is XmlException xmlException
                     ? new BuildEventFileInfo(fullPath, xmlException)
                     : new BuildEventFileInfo(fullPath);

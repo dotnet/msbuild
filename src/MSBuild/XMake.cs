@@ -139,17 +139,12 @@ namespace Microsoft.Build.CommandLine
 
                 s_initialized = true;
             }
-            catch (TypeInitializationException ex)
-            {
-                if (ex.InnerException == null
-#if !FEATURE_SYSTEM_CONFIGURATION
-                )
-#else
-                    || ex.InnerException.GetType() != typeof(ConfigurationErrorsException))
+            catch (TypeInitializationException ex) when (ex.InnerException is not null
+#if FEATURE_SYSTEM_CONFIGURATION
+            && ex.InnerException is ConfigurationErrorsException
 #endif
-                {
-                    throw;
-                }
+            )
+            {
                 HandleConfigurationException(ex);
             }
 #if FEATURE_SYSTEM_CONFIGURATION
@@ -187,9 +182,9 @@ namespace Microsoft.Build.CommandLine
                 // One of the exceptions is missing a period!
                 if (message[message.Length - 1] != '.')
                 {
-                    builder.Append(".");
+                    builder.Append('.');
                 }
-                builder.Append(" ");
+                builder.Append(' ');
 
                 exception = exception.InnerException;
             }
@@ -212,7 +207,7 @@ namespace Microsoft.Build.CommandLine
         [MTAThread]
         public static int Main(
 #if !FEATURE_GET_COMMANDLINE
-            string [] args
+            string[] args
 #endif
             )
         {
@@ -482,7 +477,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
             string commandLine
 #else
-            string [] commandLine
+            string[] commandLine
 #endif
             )
         {
@@ -541,11 +536,11 @@ namespace Microsoft.Build.CommandLine
                 // process the detected command line switches -- gather build information, take action on non-build switches, and
                 // check for non-trivial errors
                 string projectFile = null;
-                string[] targets = { };
+                string[] targets = Array.Empty<string>();
                 string toolsVersion = null;
                 Dictionary<string, string> globalProperties = null;
                 Dictionary<string, string> restoreProperties = null;
-                ILogger[] loggers = { };
+                ILogger[] loggers = Array.Empty<ILogger>();
                 LoggerVerbosity verbosity = LoggerVerbosity.Normal;
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
 #if FEATURE_XML_SCHEMA_VALIDATION
@@ -1615,7 +1610,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
             string commandLine,
 #else
-            string [] commandLine,
+            string[] commandLine,
 #endif
             out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile)
         {

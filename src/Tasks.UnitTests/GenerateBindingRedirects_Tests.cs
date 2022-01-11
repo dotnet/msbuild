@@ -312,7 +312,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             GenerateBindingRedirects bindingRedirects = new GenerateBindingRedirects
             {
                 BuildEngine = engine,
-                SuggestedRedirects = suggestedRedirects ?? new ITaskItem[] { },
+                SuggestedRedirects = suggestedRedirects ?? System.Array.Empty<ITaskItem>(),
                 AppConfigFile = new TaskItem(appConfigFile),
                 OutputAppConfigFile = new TaskItem(outputAppConfig)
             };

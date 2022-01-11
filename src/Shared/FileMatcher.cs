@@ -2228,7 +2228,7 @@ namespace Microsoft.Build.Shared
             }
             else if (aString.StartsWith(@"\", StringComparison.Ordinal))
             {
-                sb.Append(@"\");
+                sb.Append('\\');
                 index = SkipSlashes(aString, 1);
             }
 
@@ -2529,14 +2529,9 @@ namespace Microsoft.Build.Shared
                     taskOptions);
             }
             // Catch exceptions that are thrown inside the Parallel.ForEach
-            catch (AggregateException ex)
+            catch (AggregateException ex) when (InnerExceptionsAreAllIoRelated(ex))
             {
-                // Flatten to get exceptions than are thrown inside a nested Parallel.ForEach
-                if (ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException))
-                {
-                    return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
-                }
-                throw;
+                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
@@ -2552,6 +2547,11 @@ namespace Microsoft.Build.Shared
                 : listOfFiles.SelectMany(list => list).ToArray();
 
             return files;
+        }
+
+        private bool InnerExceptionsAreAllIoRelated(AggregateException ex)
+        {
+            return ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException);
         }
 
         private static bool IsSubdirectoryOf(string possibleChild, string possibleParent)
