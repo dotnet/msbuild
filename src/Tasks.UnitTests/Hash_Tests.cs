@@ -44,6 +44,100 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void HashTaskLargeInputCountTest()
+        {
+            // This hash was pre-computed. If the implementation changes it may need to be adjusted.
+            var expectedHash = "8a996bbcb5e481981c2fba7ac408e20d0b4360a5";
+
+            ITaskItem[] itemsToHash = new ITaskItem[1000];
+            for (int i = 0; i < itemsToHash.Length; i++)
+            {
+                itemsToHash[i] = new TaskItem($"Item{i}");
+            }
+
+            var actualHash = ExecuteHashTask(itemsToHash);
+            Assert.Equal(expectedHash, actualHash);
+        }
+
+        [Fact]
+        public void HashTaskLargeInputSizeTest()
+        {
+            // This hash was pre-computed. If the implementation changes it may need to be adjusted.
+            var expectedHash = "0509142dd3d3a733f30a52a0eec37cd727d46122";
+
+            string[] array = new string[1000];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = $"Item{i}";
+            }
+            ITaskItem[] itemsToHash = new ITaskItem[] { new TaskItem(string.Join("", array)) };
+
+            var actualHash = ExecuteHashTask(itemsToHash);
+            Assert.Equal(expectedHash, actualHash);
+        }
+
+        [Fact]
+        public void HashTaskLargeInputCountAndSizeTest()
+        {
+            // This hash was pre-computed. If the implementation changes it may need to be adjusted.
+            var expectedHash = "be23ae7b09f1e14fa5a17de87ddae2c3ec62f967";
+
+            int inputSize = 1000;
+            string[][] array = new string[inputSize][];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = new string[inputSize];
+                for (int j = 0; j < array[i].Length; j++)
+                {
+                    array[i][j] = $"Item{i}{j}";
+                }
+            }
+
+            ITaskItem[] itemsToHash = new ITaskItem[inputSize];
+            for (int i = 0; i < itemsToHash.Length; i++)
+            {
+                itemsToHash[i] = new TaskItem(string.Join("", array[i]));
+            }
+
+            var actualHash = ExecuteHashTask(itemsToHash);
+
+            Assert.Equal(expectedHash, actualHash);
+        }
+
+#pragma warning disable CA5350
+        [Fact]
+        public void HashTaskDifferentInputSizesTest()
+        {
+            int maxInputSize = 2000;
+            string input = "";
+            using (var sha1 = System.Security.Cryptography.SHA1.Create())
+            {
+                using (var stringBuilder = new ReuseableStringBuilder(sha1.HashSize))
+                {
+                    for (int i = 0; i < maxInputSize; i++)
+                    {
+                        input += "a";
+                        ITaskItem[] itemsToHash = new ITaskItem[] { new TaskItem(input) };
+
+                        var actualHash = ExecuteHashTask(itemsToHash);
+
+                        byte[] hash = sha1.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input+'\u2028'));
+                        stringBuilder.Clear();
+                        foreach (var b in hash)
+                        {
+                            stringBuilder.Append(b.ToString("x2"));
+                        }
+                        string expectedHash = stringBuilder.ToString();
+
+                        Assert.Equal(expectedHash, actualHash);
+                    }
+                }
+            }
+
+        }
+#pragma warning restore CA5350
+
+        [Fact]
         public void HashTaskIgnoreCaseTest()
         {
             var uppercaseHash =
@@ -88,5 +182,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             return hashTask.HashResult;
         }
+
     }
 }
