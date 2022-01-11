@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -10,7 +12,7 @@ namespace Microsoft.Build.Framework
     {
 
         /// <summary>
-        ///     Options specified as Import attribute.
+        ///    Gets Options specified as an attribute of the Import element.
         /// </summary>
         public virtual string Options { get; protected set; }
     }
