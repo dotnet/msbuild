@@ -9,6 +9,8 @@ using System.Runtime.ConstrainedExecution;
 #endif
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>

@@ -7,28 +7,38 @@ EventSource is primarily used to profile code. For MSBuild specifically, a major
 
 | Event | Description |
 | ------| ------------|
-| MSBuildExe | Executes MSBuild from the command line. |
+| ApplyLazyItemOperations | Collects a set of items, mutates them in a specified way, and saves the results in a lazy way. |
 | Build | Sets up a BuildManager to receive build requests. |
 | BuildProject | Builds a project file. |
-| RequestThreadProc | A function to requesting a new builder thread. |
-| LoadDocument | Loads an XMLDocumentWithLocation from a path.
-| RarRemoveReferencesMarkedForExclusion | Removes blacklisted references from the reference table, putting primary and dependency references in invalid file lists. |
-| RarComputeClosure | Resolves references from, for example, properties to explicit values. Used in resolving assembly references (RAR). |
-| EvaluateCondition | Checks whether a condition is true and removes false conditionals. |
-| Parse | Parses an XML document into a ProjectRootElement. |
-| Evaluate | Evaluates a project, running several other parts of MSBuild in the process. |
-| GenerateResourceOverall | Uses resource APIs to transform resource files into strongly-typed resource classes. |
-| ExpandGlob | Identifies a list of files that correspond to an item, potentially with a wildcard. |
-| ApplyLazyItemOperations | Collects a set of items, mutates them in a specified way, and saves the results in a lazy way. |
-| RarOverall | Initiates the process of resolving assembly references (RAR). |
-| Save | Saves a project to the file system if dirty, creating directories as necessary. |
-| Target | Executes a target. |
-| RarLogResults | Logs the results from having resolved assembly references (RAR). |
-| SdkResolverServiceInitialize | Initializes SDK resolvers. |
-| SdkResolverResolveSdk | A single SDK resolver is called. |
 | CachedSdkResolverServiceResolveSdk | The caching SDK resolver service is resolving an SDK. |
-| SdkResolverEvent | An SDK resolver logs an event. |
+| CopyUpToDate | Checks whether the Copy task needs to execute. |
+| Evaluate | Evaluates a project, running several other parts of MSBuild in the process. |
+| EvaluateCondition | Checks whether a condition is true and removes false conditionals. |
+| ExecuteTask | Executes a task. |
+| ExecuteTaskReacquire | Requests to reacquire the node, often after the task has completed other work. |
+| ExecuteTaskYield | Requests to yield the node, often while the task completes other work. |
+| ExpandGlob | Identifies a list of files that correspond to an item, potentially with a wildcard. |
+| GenerateResourceOverall | Uses resource APIs to transform resource files into strongly-typed resource classes. |
+| LoadDocument | Loads an XMLDocumentWithLocation from a path.
+| MSBuildExe | Executes MSBuild from the command line. |
 | OutOfProcSdkResolverServiceRequestSdkPathFromMainNode | An out-of-proc node requests an SDK be resolved from the main node. |
+| PacketReadSize | Reports the size of a packet sent between nodes. Note that this does not include time information. |
+| Parse | Parses an XML document into a ProjectRootElement. |
+| ProjectGraphConstruction | Constructs a dependency graph among projects. |
+| RarComputeClosure | Resolves references from, for example, properties to explicit values. Used in resolving assembly references (RAR). |
+| RarLogResults | Logs the results from having resolved assembly references (RAR). |
+| RarOverall | Initiates the process of resolving assembly references (RAR). |
+| RarRemoveReferencesMarkedForExclusion | Removes blacklisted references from the reference table, putting primary and dependency references in invalid file lists. |
+| RequestThreadProc | A function to requesting a new builder thread. |
+| ReusableStringBuilderFactory | Uses and resizes (if necessary) of ReusableStringBuilders. |
+| ReusableStringBuilderFactoryUnbalanced | Identifies improper usage from multiple threads or buggy code: multiple Gets were called without a Relase. |
+| Save | Saves a project to the file system if dirty, creating directories as necessary. |
+| SdkResolverEvent | An SDK resolver logs an event. |
+| SdkResolverResolveSdk | A single SDK resolver is called. |
+| SdkResolverServiceInitialize | Initializes SDK resolvers. |
+| Target | Executes a target. |
+| TargetUpToDate | Checks whether a particular target needs to run or is up-to-date. |
+| WriteLinesToFile | Checks whether the WriteLinesToFile task needs to execute. |
 
 One can run MSBuild with eventing using the following command:
 

@@ -54,6 +54,8 @@ using Microsoft.Build.Shared;
 */
 
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     internal static class StronglyTypedResourceBuilder

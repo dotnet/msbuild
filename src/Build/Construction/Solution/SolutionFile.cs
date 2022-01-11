@@ -22,6 +22,8 @@ using System.Collections.ObjectModel;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <remarks>
@@ -497,10 +499,9 @@ namespace Microsoft.Build.Construction
                 SolutionReader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
                 ParseSolution();
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionUtilities.IsIoRelatedException(e))
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(!ExceptionUtilities.IsIoRelatedException(e), new BuildEventFileInfo(_solutionFile), "InvalidProjectFile", e.Message);
-                throw;
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(_solutionFile), "InvalidProjectFile", e.Message);
             }
             finally
             {

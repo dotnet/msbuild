@@ -20,6 +20,8 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -285,7 +287,7 @@ namespace Microsoft.Build.Shared
             if (fullPath != null)
             {
                 int i = fullPath.Length;
-                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar) ;
+                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar);
                 return FixFilePath(fullPath.Substring(0, i));
             }
             return null;
@@ -447,7 +449,7 @@ namespace Microsoft.Build.Shared
 
         internal static string FixFilePath(string path)
         {
-            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
+            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/'); //.Replace("//", "/");
         }
 
 #if !CLR2COMPATIBILITY

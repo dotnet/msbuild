@@ -8,6 +8,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>

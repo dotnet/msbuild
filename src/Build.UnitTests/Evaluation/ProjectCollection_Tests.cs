@@ -2,6 +2,8 @@
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     public class ProjectCollection_Tests

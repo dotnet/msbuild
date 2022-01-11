@@ -4,6 +4,8 @@
 // TYPELIBATTR clashes with the one in InteropServices.
 using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

@@ -4,6 +4,8 @@
 using System.Xml;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     [ComVisible(false)]

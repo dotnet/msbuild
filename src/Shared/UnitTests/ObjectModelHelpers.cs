@@ -26,6 +26,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /*
@@ -877,19 +879,10 @@ namespace Microsoft.Build.UnitTests
 
                     break;
                 }
-                catch (Exception ex)
+                // After all the retries fail, we fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
         }
@@ -924,19 +917,10 @@ namespace Microsoft.Build.UnitTests
                     }
                     break;
                 }
-                catch (Exception ex)
+                // After all the retries fail, we fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
 
@@ -1408,7 +1392,7 @@ namespace Microsoft.Build.UnitTests
                     projectFile,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    new string[] {},
+                    Array.Empty<string>(),
                     null);
 
                 var result = buildManager.Build(
@@ -1982,7 +1966,7 @@ namespace Microsoft.Build.UnitTests
                 var buildRequestData = new BuildRequestData(projectFile,
                     globalProperties ?? new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    entryTargets ?? new string[0],
+                    entryTargets ?? Array.Empty<string>(),
                     null);
 
                 var completion = new TaskCompletionSource<BuildResult>();
@@ -2002,7 +1986,7 @@ namespace Microsoft.Build.UnitTests
 
             public GraphBuildResult BuildGraph(ProjectGraph graph, string[] entryTargets = null)
             {
-                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? new string[0]));
+                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? Array.Empty<string>()));
             }
 
             public void Dispose()

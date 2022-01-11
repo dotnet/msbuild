@@ -11,6 +11,8 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>

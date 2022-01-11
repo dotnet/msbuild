@@ -2079,8 +2079,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
-        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</source>
-        <target state="translated">프로젝트가 ProjectLoadSettings.RecordDuplicateImports 플래그가 지정된 상태에서 로드되지 않았습니다.</target>
+        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
+        <target state="new">Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">

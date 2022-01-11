@@ -22,6 +22,8 @@ using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -1718,7 +1720,7 @@ true, true, true)]
             AssertProjectFileAfterReload(
                 true,
                 false,
-                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile);});
+                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile); });
         }
 
         [Fact]

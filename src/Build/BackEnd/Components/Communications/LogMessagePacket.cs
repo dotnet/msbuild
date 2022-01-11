@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class BuildRequestEntry_Tests
@@ -20,8 +22,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorGood()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0] { });
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, "2.0");
             BuildRequestEntry entry = new BuildRequestEntry(request, config);
 
@@ -43,7 +45,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             // Start in Ready
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
             BuildRequestEntry entry = new BuildRequestEntry(request, config);
             Assert.Equal(BuildRequestEntryState.Ready, entry.State);
             Assert.Equal(entry.Request, request);
@@ -91,7 +93,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestResolveConfiguration()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
-            BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null);
+            BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
             BuildRequestEntry entry = new BuildRequestEntry(request, config);
 
@@ -113,7 +115,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestMultipleWaitingRequests()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
-            BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null);
+            BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
             BuildRequestEntry entry = new BuildRequestEntry(request, config);
 
@@ -143,7 +145,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestMixedWaitingRequests()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
             BuildRequestEntry entry = new BuildRequestEntry(request, config);
             Assert.Equal(BuildRequestEntryState.Ready, entry.State);
 
@@ -180,7 +182,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
-                BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null);
+                BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
                 BuildRequestEntry entry = new BuildRequestEntry(request, config);
                 Assert.Equal(BuildRequestEntryState.Ready, entry.State);
@@ -197,7 +199,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
-                BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null);
+                BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
                 BuildRequestEntry entry = new BuildRequestEntry(request, config);
                 Assert.Equal(BuildRequestEntryState.Ready, entry.State);
@@ -215,7 +217,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
-                BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null);
+                BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
                 BuildRequestEntry entry = new BuildRequestEntry(request, config);
                 Assert.Equal(BuildRequestEntryState.Ready, entry.State);
@@ -240,7 +242,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
-                BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
+                BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
                 BuildRequestEntry entry = new BuildRequestEntry(request, config);
                 Assert.Equal(BuildRequestEntryState.Ready, entry.State);
 
@@ -261,7 +263,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestResultsWithNoMatch1()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
             BuildRequestEntry entry = new BuildRequestEntry(request, config);
             Assert.Equal(BuildRequestEntryState.Ready, entry.State);
 
@@ -272,7 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             entry.WaitForResult(waitingRequest1);
             Assert.Equal(BuildRequestEntryState.Waiting, entry.State);
 
-            BuildRequest randomRequest = CreateNewBuildRequest(3, new string[0]);
+            BuildRequest randomRequest = CreateNewBuildRequest(3, Array.Empty<string>());
             BuildResult requiredResult = new BuildResult(randomRequest);
             requiredResult.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
             entry.ReportResult(requiredResult);

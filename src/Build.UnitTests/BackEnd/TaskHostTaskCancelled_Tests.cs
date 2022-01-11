@@ -5,6 +5,8 @@ using Microsoft.Build.BackEnd;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
