@@ -3,9 +3,6 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
-using Microsoft.DotNet.Workloads.Workload.Install;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -62,28 +59,19 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> TempDirOption = new Option<string>("--temp-dir", LocalizableStrings.TempDirOptionDescription);
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption;
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
 
         public static readonly Option<string> FromRollbackFileOption = new Option<string>("--from-rollback-file", Microsoft.DotNet.Workloads.Workload.Update.LocalizableStrings.FromRollbackDefinitionOptionDescription)
         {
             IsHidden = true
         };
 
-        private static readonly Command Command = ConstructCommand();
-
         public static Command GetCommand()
-        {
-            return Command;
-        }
-
-        private static Command ConstructCommand()
         {
             var command = new Command("install", LocalizableStrings.CommandDescription);
 
             command.AddArgument(WorkloadIdArgument);
             AddWorkloadInstallCommandOptions(command);
-
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadInstallCommand(parseResult).Execute());
 
             return command;
         }

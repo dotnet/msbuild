@@ -50,20 +50,20 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         ) : base(result)
         {
             _reporter = reporter ?? Reporter.Output;
-            _machineReadableOption = result.GetValueForOption(WorkloadListCommandParser.MachineReadableOption);
-            _verbosity = result.GetValueForOption(WorkloadListCommandParser.VerbosityOption);
+            _machineReadableOption = result.ValueForOption<bool>(WorkloadListCommandParser.MachineReadableOption);
+            _verbosity = result.ValueForOption<VerbosityOptions>(WorkloadListCommandParser.VerbosityOption);
 
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             ReleaseVersion currentSdkReleaseVersion = new(currentSdkVersion ?? Product.Version);
             _currentSdkFeatureBand = new SdkFeatureBand(currentSdkReleaseVersion);
             
-            _includePreviews = result.GetValueForOption(WorkloadListCommandParser.IncludePreviewsOption);
+            _includePreviews = result.ValueForOption<bool>(WorkloadListCommandParser.IncludePreviewsOption);
             _tempDirPath = tempDirPath ??
                            (string.IsNullOrWhiteSpace(
-                               result.GetValueForOption(WorkloadListCommandParser.TempDirOption))
+                               result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption))
                                ? Path.GetTempPath()
-                               : result.GetValueForOption(WorkloadListCommandParser.TempDirOption));
-            _targetSdkVersion = result.GetValueForOption(WorkloadListCommandParser.VersionOption);
+                               : result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption));
+            _targetSdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             var workloadManifestProvider =
                 new SdkDirectoryWorkloadManifestProvider(_dotnetPath,

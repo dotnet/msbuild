@@ -6,7 +6,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Cli;
 using System;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Tools.Clean
 {
@@ -19,22 +18,18 @@ namespace Microsoft.DotNet.Tools.Clean
 
         public static CleanCommand FromArgs(string[] args, string msbuildPath = null)
         {
-
-            var parser = Cli.Parser.Instance;
-            var result = parser.ParseFrom("dotnet clean", args);
-            return FromParseResult(result, msbuildPath);
-        }
-
-        public static CleanCommand FromParseResult(ParseResult result, string msbuildPath = null)
-        {
             var msbuildArgs = new List<string>
             {
                 "-verbosity:normal"
             };
 
+            var parser = Parser.Instance;
+
+            var result = parser.ParseFrom("dotnet clean", args);
+
             result.ShowHelpOrErrorIfAppropriate();
 
-            msbuildArgs.AddRange(result.GetValueForArgument(CleanCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.ValueForArgument<IEnumerable<string>>(CleanCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             msbuildArgs.Add("-target:Clean");
 
@@ -43,11 +38,11 @@ namespace Microsoft.DotNet.Tools.Clean
             return new CleanCommand(msbuildArgs, msbuildPath);
         }
 
-        public static int Run(ParseResult parseResult)
+        public static int Run(string[] args)
         {
-            parseResult.HandleDebugSwitch();
+            DebugHelper.HandleDebugSwitch(ref args);
 
-            return FromParseResult(parseResult).Execute();
+            return FromArgs(args).Execute();
         }
     }
 }

@@ -38,12 +38,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;
-            _workloadIds = parseResult.GetValueForArgument(WorkloadUninstallCommandParser.WorkloadIdArgument)
+            _workloadIds = parseResult.ValueForArgument<IEnumerable<string>>(WorkloadUninstallCommandParser.WorkloadIdArgument)
                 .Select(workloadId => new WorkloadId(workloadId)).ToList().AsReadOnly();
             var dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir);
-            var verbosity = parseResult.GetValueForOption(WorkloadUninstallCommandParser.VerbosityOption);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir);
+            var verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUninstallCommandParser.VerbosityOption);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
             nugetPackageDownloader ??= new NuGetPackageDownloader(new DirectoryPath(Path.GetTempPath()), filePermissionSetter: null, verboseLogger: new NullLogger());

@@ -10,19 +10,12 @@ namespace Microsoft.DotNet.Cli
 {
     public class CompleteCommand
     {
-        public static int Run(ParseResult parseResult)
+        public static int Run(string[] args)
         {
-            return RunWithReporter(parseResult, Reporter.Output);
+            return RunWithReporter(args, Reporter.Output);
         }
 
-        public static int RunWithReporter(string[] args, IReporter reporter)
-        {
-            var parser = Parser.Instance;
-            var result = parser.ParseFrom("dotnet complete", args);
-            return RunWithReporter(result, reporter);
-        }
-
-        public static int RunWithReporter(ParseResult result, IReporter reporter)
+        public static int RunWithReporter(string [] args, IReporter reporter)
         {
             if (reporter == null)
             {
@@ -31,7 +24,13 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                result.HandleDebugSwitch();
+                DebugHelper.HandleDebugSwitch(ref args);
+
+                // get the parser for the current subcommand
+                var parser = Parser.Instance;
+
+                // parse the arguments
+                var result = parser.ParseFrom("dotnet complete", args);
 
                 var suggestions = Suggestions(result);
 
@@ -50,9 +49,9 @@ namespace Microsoft.DotNet.Cli
 
         private static string[] Suggestions(ParseResult complete)
         {
-            var input = complete.GetValueForArgument(CompleteCommandParser.PathArgument) ?? string.Empty;
+            var input = complete.ValueForArgument(CompleteCommandParser.PathArgument) ?? string.Empty;
 
-            var position = complete.GetValueForOption(CompleteCommandParser.PositionOption);
+            var position = complete.ValueForOption(CompleteCommandParser.PositionOption);
 
             if (position > input.Length)
             {

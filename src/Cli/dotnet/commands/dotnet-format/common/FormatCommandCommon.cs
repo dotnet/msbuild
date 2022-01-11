@@ -72,21 +72,21 @@ namespace Microsoft.DotNet.Tools.Format
             }
 
             if (parseResult.HasOption(VerbosityOption) &&
-                parseResult.GetValueForOption(VerbosityOption) is string { Length: > 0 } verbosity)
+                parseResult.ValueForOption(VerbosityOption) is string { Length: > 0 } verbosity)
             {
                 dotnetFormatArgs.Add("--verbosity");
                 dotnetFormatArgs.Add(verbosity);
             }
 
             if (parseResult.HasOption(IncludeOption) &&
-                parseResult.GetValueForOption(IncludeOption) is string[] { Length: > 0 } fileToInclude)
+                parseResult.ValueForOption(IncludeOption) is string[] { Length: > 0 } fileToInclude)
             {
                 dotnetFormatArgs.Add("--include");
                 dotnetFormatArgs.Add(string.Join(" ", fileToInclude));
             }
 
             if (parseResult.HasOption(ExcludeOption) &&
-                parseResult.GetValueForOption(ExcludeOption) is string[] { Length: > 0 } fileToExclude)
+                parseResult.ValueForOption(ExcludeOption) is string[] { Length: > 0 } fileToExclude)
             {
                 dotnetFormatArgs.Add("--exclude");
                 dotnetFormatArgs.Add(string.Join(" ", fileToExclude));
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Tools.Format
             if (parseResult.HasOption(ReportOption))
             {
                 dotnetFormatArgs.Add("--report");
-                if (parseResult.GetValueForOption(ReportOption) is string { Length: > 0 } reportPath)
+                if (parseResult.ValueForOption(ReportOption) is string { Length: > 0 } reportPath)
                 {
                     dotnetFormatArgs.Add(reportPath);
                 }
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Tools.Format
             if (parseResult.HasOption(BinarylogOption))
             {
                 dotnetFormatArgs.Add("--binarylog");
-                if (parseResult.GetValueForOption(BinarylogOption) is string { Length: > 0 } binaryLogPath)
+                if (parseResult.ValueForOption(BinarylogOption) is string { Length: > 0 } binaryLogPath)
                 {
                     dotnetFormatArgs.Add(binaryLogPath);
                 }
@@ -119,8 +119,8 @@ namespace Microsoft.DotNet.Tools.Format
         public static void AddStyleDotnetFormatArgs(this List<string> dotnetFormatArgs, ParseResult parseResult)
         {
             dotnetFormatArgs.Add("--fix-style");
-            if (parseResult.HasOption(SeverityOption) && 
-                parseResult.GetValueForOption(SeverityOption) is string { Length: > 0 } styleSeverity)
+            if (parseResult.HasOption(SeverityOption) &&
+                parseResult.ValueForOption(SeverityOption) is string { Length: > 0 } styleSeverity)
             {
                 dotnetFormatArgs.Add(styleSeverity);
             }
@@ -130,13 +130,13 @@ namespace Microsoft.DotNet.Tools.Format
         {
             dotnetFormatArgs.Add("--fix-analyzers");
             if (parseResult.HasOption(SeverityOption) &&
-                parseResult.GetValueForOption(SeverityOption) is string { Length: > 0 } analyzerSeverity)
+                parseResult.ValueForOption(SeverityOption) is string { Length: > 0 } analyzerSeverity)
             {
                 dotnetFormatArgs.Add(analyzerSeverity);
             }
 
             if (parseResult.HasOption(DiagnosticsOption) &&
-                parseResult.GetValueForOption(DiagnosticsOption) is string[] { Length: > 0 } diagnostics)
+                parseResult.ValueForOption(DiagnosticsOption) is string[] { Length: > 0 } diagnostics)
             {
                 dotnetFormatArgs.Add("--diagnostics");
                 dotnetFormatArgs.Add(string.Join(" ", diagnostics));
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Tools.Format
 
         public static void AddProjectOrSolutionDotnetFormatArgs(this List<string> dotnetFormatArgs, ParseResult parseResult)
         {
-            if (parseResult.GetValueForArgument(SlnOrProjectArgument) is string { Length: > 0 } slnOrProject)
+            if (parseResult.ValueForArgument<string>(SlnOrProjectArgument) is string { Length: > 0 } slnOrProject)
             {
                 dotnetFormatArgs.Add(slnOrProject);
             }

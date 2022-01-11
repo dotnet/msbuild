@@ -60,25 +60,25 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             : base(parseResult)
         {
             _printDownloadLinkOnly =
-                parseResult.GetValueForOption(WorkloadUpdateCommandParser.PrintDownloadLinkOnlyOption);
-            _fromCacheOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromCacheOption);
+                parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.PrintDownloadLinkOnlyOption);
+            _fromCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromCacheOption);
             _reporter = reporter ?? Reporter.Output;
-            _includePreviews = parseResult.GetValueForOption(WorkloadUpdateCommandParser.IncludePreviewsOption);
-            _fromPreviousSdk = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromPreviousSdkOption);
-            _adManifestOnlyOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.AdManifestOnlyOption);
-            _downloadToCacheOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.DownloadToCacheOption);
-            _verbosity = parseResult.GetValueForOption(WorkloadUpdateCommandParser.VerbosityOption);
+            _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
+            _fromPreviousSdk = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.FromPreviousSdkOption);
+            _adManifestOnlyOption = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.AdManifestOnlyOption);
+            _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
+            _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
-            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadUpdateCommandParser.TempDirOption)) ?
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
+            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
-                parseResult.GetValueForOption(WorkloadUpdateCommandParser.TempDirOption));
-            _printRollbackDefinitionOnly = parseResult.GetValueForOption(WorkloadUpdateCommandParser.PrintRollbackOption);
-            _fromRollbackDefinition = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromRollbackFileOption);
+                parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
+            _printRollbackDefinitionOnly = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.PrintRollbackOption);
+            _fromRollbackDefinition = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromRollbackFileOption);
 
-            var configOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.ConfigOption);
-            var sourceOption = parseResult.GetValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
+            var configOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.ConfigOption);
+            var sourceOption = parseResult.ValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  sourceOption);
 

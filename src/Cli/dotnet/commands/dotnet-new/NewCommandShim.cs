@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.CommandLine.Parsing;
 using System.Linq;
-using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;

@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.CommandLine.IO;
-using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -308,19 +306,6 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 }
             }
             throw new InvalidDataException("Expected path to be under a NuGet root: " + absoluteNuGetPath);
-        }
-
-        [Theory]
-        [InlineData("build")]
-        [InlineData("run")]
-        public void It_uses_correct_runtime_help_description(string command)
-        {
-            var console = new TestConsole();
-            var parseResult = Parser.Instance.Parse(new string[] { command, "-h" });
-            parseResult.Invoke(console);
-            console.Out.ToString().Should().Contain(command.Equals("build") ?
-                Tools.Build.LocalizableStrings.RuntimeOptionDescription :
-                Tools.Run.LocalizableStrings.RuntimeOptionDescription);
         }
     }
 }

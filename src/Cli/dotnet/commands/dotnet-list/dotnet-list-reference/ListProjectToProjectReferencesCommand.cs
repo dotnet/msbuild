@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
         {
             ShowHelpOrErrorIfAppropriate(parseResult);
 
-            _fileOrDirectory = parseResult.GetValueForArgument(ListCommandParser.SlnOrProjectArgument);
+            _fileOrDirectory = parseResult.ValueForArgument<string>(ListCommandParser.SlnOrProjectArgument);
         }
 
         public override int Execute()
