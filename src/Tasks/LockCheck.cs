@@ -56,8 +56,10 @@ namespace Microsoft.Build.Tasks
             string[] rgsServiceNames);
 
         [DllImport(RestartManagerDll, CharSet = CharSet.Unicode)]
-        private static extern int RmStartSession(out uint pSessionHandle,
-            int dwSessionFlags, StringBuilder strSessionKey);
+        private static extern int RmStartSession(
+            out uint pSessionHandle,
+            int dwSessionFlags,
+            char[] strSessionKey);
 
         [DllImport(RestartManagerDll)]
         private static extern int RmEndSession(uint pSessionHandle);
@@ -211,7 +213,8 @@ namespace Microsoft.Build.Tasks
             const int maxRetries = 6;
 
             // See http://blogs.msdn.com/b/oldnewthing/archive/2012/02/17/10268840.aspx.
-            var key = new StringBuilder(new string('\0', CCH_RM_SESSION_KEY + 1));
+            char[] key = new char[CCH_RM_SESSION_KEY + 1];
+            key[0] = '\0';
 
             int res = RmStartSession(out uint handle, 0, key);
             if (res != 0)

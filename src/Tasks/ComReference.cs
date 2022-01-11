@@ -407,21 +407,27 @@ namespace Microsoft.Build.Tasks
         private static string GetModuleFileName(IntPtr handle)
         {
             bool success = false;
-            var buffer = new StringBuilder();
+            char[] buffer = null;
 
             // Try increased buffer sizes if on longpath-enabled Windows
             for (int bufferSize = NativeMethodsShared.MAX_PATH; !success && bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
             {
-                buffer.EnsureCapacity(bufferSize);
-
+                buffer = System.Buffers.ArrayPool<char>.Shared.Rent(bufferSize);
+                try
+                {
                 var handleRef = new System.Runtime.InteropServices.HandleRef(buffer, handle);
-                int pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, buffer.Capacity);
+                int pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, bufferSize);
 
-                bool isBufferTooSmall = ((uint)Marshal.GetLastWin32Error() == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
+                bool isBufferTooSmall = (uint)Marshal.GetLastWin32Error() == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER;
                 success = pathLength != 0 && !isBufferTooSmall;
+                }
+                finally
+                {
+                    System.Buffers.ArrayPool<char>.Shared.Return(buffer);
+                }
             }
 
-            return success ? buffer.ToString() : string.Empty;
+            return success ? new string(buffer) : string.Empty;
         }
 
         /// <summary>

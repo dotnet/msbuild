@@ -1051,7 +1051,7 @@ namespace Microsoft.Build.Tasks
         /// to allocate a mutable buffer of characters and pass it around.
         /// </summary>
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
-        internal static extern int GetCachePath(AssemblyCacheFlags cacheFlags, StringBuilder cachePath, ref int pcchPath);
+        internal static extern int GetCachePath(AssemblyCacheFlags cacheFlags, char[] cachePath, ref int pcchPath);
 #endif
 
         //------------------------------------------------------------------------------
@@ -1125,7 +1125,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="dwLength">The size, in bytes, of the returned szBuffer.</param>
         /// <returns>HResult</returns>
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern uint GetFileVersion(String szFullPath, StringBuilder szBuffer, int cchBuffer, out uint dwLength);
+        internal static extern uint GetFileVersion(string szFullPath, char[] szBuffer, int cchBuffer, out uint dwLength);
 #endif
         #endregion
 

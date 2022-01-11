@@ -567,7 +567,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_MSCOREE
             if (NativeMethodsShared.IsWindows)
             {
-                StringBuilder runtimeVersion;
+                char[] runtimeVersion;
                 uint hresult;
 #if DEBUG
                 // Just to make sure and exercise the code that doubles the size
@@ -578,18 +578,19 @@ namespace Microsoft.Build.Tasks
 #endif
                 do
                 {
-                    runtimeVersion = new StringBuilder(bufferLength);
+                    runtimeVersion = new char[bufferLength];
                     hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out _);
                     bufferLength *= 2;
-                } while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
+                }
+                while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
 
                 if (hresult == NativeMethodsShared.S_OK)
                 {
-                    return runtimeVersion.ToString();
+                    return new string(runtimeVersion);
                 }
                 else
                 {
-                    return String.Empty;
+                    return string.Empty;
                 }
             }
             else

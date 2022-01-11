@@ -959,7 +959,7 @@ internal static class NativeMethods
 
             if (length > 0)
             {
-                StringBuilder fullPathBuffer = new StringBuilder(length);
+                char[] fullPathBuffer = new char[length];
                 length = GetShortPathName(path, fullPathBuffer, length);
                 errorCode = Marshal.GetLastWin32Error();
 
@@ -998,13 +998,13 @@ internal static class NativeMethods
 
             if (length > 0)
             {
-                StringBuilder fullPathBuffer = new StringBuilder(length);
+                char[] fullPathBuffer = new char[length];
                 length = GetLongPathName(path, fullPathBuffer, length);
                 errorCode = Marshal.GetLastWin32Error();
 
                 if (length > 0)
                 {
-                    string fullPath = fullPathBuffer.ToString();
+                    string fullPath = new(fullPathBuffer);
                     path = fullPath;
                 }
             }
@@ -1478,15 +1478,13 @@ internal static class NativeMethods
     internal static extern bool GetFileAttributesEx(String name, int fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation);
 
     [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-    private static extern uint SearchPath
-    (
+    private static extern uint SearchPath(
         string path,
         string fileName,
         string extension,
         int numBufferChars,
-        [Out] StringBuilder buffer,
-        int[] filePart
-    );
+        [Out] char[] buffer,
+        int[] filePart);
 
     [DllImport("kernel32.dll", PreserveSig = true, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -1504,10 +1502,10 @@ internal static class NativeMethods
                                             String pConfigurationFile,
                                             uint startupFlags,
                                             uint runtimeInfoFlags,
-                                            [Out] StringBuilder pDirectory,
+                                            [Out] char[] pDirectory,
                                             int dwDirectory,
                                             out uint dwDirectoryLength,
-                                            [Out] StringBuilder pVersion,
+                                            [Out] char[] pVersion,
                                             int cchBuffer,
                                             out uint dwlength);
 
@@ -1521,7 +1519,7 @@ internal static class NativeMethods
 #else
             IntPtr hModule,
 #endif
-            [Out] StringBuilder buffer, int length);
+            [Out] char[] buffer, int length);
 
     [DllImport("kernel32.dll")]
     internal static extern IntPtr GetStdHandle(int nStdHandle);
@@ -1570,10 +1568,10 @@ internal static class NativeMethods
     private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatus lpBuffer);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-    internal static extern int GetShortPathName(string path, [Out] StringBuilder fullpath, [In] int length);
+    internal static extern int GetShortPathName(string path, [Out] char[] fullpath, [In] int length);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-    internal static extern int GetLongPathName([In] string path, [Out] StringBuilder fullpath, [In] int length);
+    internal static extern int GetLongPathName([In] string path, [Out] char[] fullpath, [In] int length);
 
     [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
     internal static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, int nSize);

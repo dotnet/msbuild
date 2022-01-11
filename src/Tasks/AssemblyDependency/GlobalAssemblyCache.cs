@@ -373,10 +373,10 @@ namespace Microsoft.Build.Tasks
         {
             int gacPathLength = 0;
             NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, null, ref gacPathLength);
-            StringBuilder gacPath = new StringBuilder(gacPathLength);
+            char[] gacPath = new char[gacPathLength];
             NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, gacPath, ref gacPathLength);
 
-            return gacPath.ToString();
+            return new string(gacPath);
         }
     }
 }
