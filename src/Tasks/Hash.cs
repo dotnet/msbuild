@@ -45,6 +45,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Execute the task.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "This is not intended as a cryptographic security measure, only for uniqueness between build executions.")]
         public override bool Execute()
         {
             if (ItemsToHash?.Length > 0)
