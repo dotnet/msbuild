@@ -820,7 +820,7 @@ dotnet_diagnostic.SA1123.severity = suggestion
 dotnet_diagnostic.SA1124.severity = none
 
 # Use shorthand for nullable types
-dotnet_diagnostic.SA1125.severity = suggestion
+dotnet_diagnostic.SA1125.severity = warning
 
 # Generic type constraints should be on their own line
 dotnet_diagnostic.SA1127.severity = suggestion
