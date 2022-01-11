@@ -812,7 +812,7 @@ dotnet_diagnostic.SA1120.severity = suggestion
 dotnet_diagnostic.SA1121.severity = none
 
 # Use string.Empty for empty strings
-dotnet_diagnostic.SA1122.severity = suggestion
+dotnet_diagnostic.SA1122.severity = none
 
 # Region should not be located within a code element
 dotnet_diagnostic.SA1123.severity = suggestion
