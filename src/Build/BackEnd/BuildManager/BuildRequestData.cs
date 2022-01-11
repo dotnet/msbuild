@@ -237,11 +237,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(targetsToBuild, nameof(targetsToBuild));
 
             HostServices = hostServices;
-
-            var targetsToBuildCopy = new string[targetsToBuild.Length];
-            targetsToBuild.CopyTo(targetsToBuildCopy, 0);
-            TargetNames = targetsToBuildCopy;
-
+            TargetNames = new List<string>(targetsToBuild);
             Flags = flags;
         }
 
