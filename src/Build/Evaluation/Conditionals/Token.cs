@@ -35,21 +35,26 @@ namespace Microsoft.Build.Evaluation
             Comma,
             LeftParenthesis,
             RightParenthesis,
+
             LessThan,
             GreaterThan,
             LessThanOrEqualTo,
             GreaterThanOrEqualTo,
+
             And,
             Or,
+
             EqualTo,
             NotEqualTo,
             Not,
+
             Property,
             String,
             Numeric,
             ItemList,
             ItemMetadata,
             Function,
+
             EndOfInput,
         }
 
