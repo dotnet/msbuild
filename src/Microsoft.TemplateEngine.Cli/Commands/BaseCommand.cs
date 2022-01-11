@@ -10,6 +10,7 @@ using System.CommandLine.Parsing;
 using System.Reflection;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
+using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
@@ -271,19 +272,27 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Reporter.Output.WriteLine(LocalizableStrings.CurrentConfiguration);
             Reporter.Output.WriteLine(" ");
 
-            TableFormatter.Print(environmentSettings.Components.OfType<IMountPointFactory>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
-            {
-                { LocalizableStrings.MountPointFactories, x => x.Id },
-                { LocalizableStrings.Type, x => x.GetType().FullName ?? string.Empty },
-                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName ?? string.Empty }
-            });
+            TabularOutput<IMountPointFactory> mountPointsFormatter =
+                    TabularOutput.TabularOutput
+                        .For(
+                            new TabularOutputSettings(environmentSettings.Environment),
+                            environmentSettings.Components.OfType<IMountPointFactory>())
+                        .DefineColumn(mp => mp.Id.ToString(), LocalizableStrings.MountPointFactories, showAlways: true)
+                        .DefineColumn(mp => mp.GetType().FullName ?? string.Empty, LocalizableStrings.Type, showAlways: true)
+                        .DefineColumn(mp => mp.GetType().GetTypeInfo().Assembly.FullName ?? string.Empty, LocalizableStrings.Assembly, showAlways: true);
+            Reporter.Output.WriteLine(mountPointsFormatter.Layout());
+            Reporter.Output.WriteLine();
 
-            TableFormatter.Print(environmentSettings.Components.OfType<IGenerator>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IGenerator, object>>
-            {
-                { LocalizableStrings.Generators, x => x.Id },
-                { LocalizableStrings.Type, x => x.GetType().FullName ?? string.Empty },
-                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName ?? string.Empty }
-            });
+            TabularOutput<IGenerator> generatorsFormatter =
+              TabularOutput.TabularOutput
+                  .For(
+                      new TabularOutputSettings(environmentSettings.Environment),
+                      environmentSettings.Components.OfType<IGenerator>())
+                  .DefineColumn(g => g.Id.ToString(), LocalizableStrings.Generators, showAlways: true)
+                  .DefineColumn(g => g.GetType().FullName ?? string.Empty, LocalizableStrings.Type, showAlways: true)
+                  .DefineColumn(g => g.GetType().GetTypeInfo().Assembly.FullName ?? string.Empty, LocalizableStrings.Assembly, showAlways: true);
+            Reporter.Output.WriteLine(generatorsFormatter.Layout());
+            Reporter.Output.WriteLine();
         }
     }
 }
