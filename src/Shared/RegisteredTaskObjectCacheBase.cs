@@ -95,7 +95,7 @@ namespace Microsoft.Build.Shared
         protected bool IsCollectionEmptyOrUncreated(RegisteredTaskObjectLifetime lifetime)
         {
             var collection = GetCollectionForLifetime(lifetime, dontCreate: true);
-            return (collection == null) || (collection.Count == 0);
+            return (collection == null) || collection.IsEmpty;
         }
 
         /// <summary>
