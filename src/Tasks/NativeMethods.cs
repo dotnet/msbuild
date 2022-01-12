@@ -343,7 +343,9 @@ namespace Microsoft.Build.Tasks
         public uint cchBuf;
     }
 
-    [ComImport, Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport]
+    [Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAssemblyCache
     {
         /* Unused.
@@ -382,7 +384,9 @@ namespace Microsoft.Build.Tasks
         DOWNLOAD = 4
     }
 
-    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E")]
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E")]
     internal interface IAssemblyName
     {
         [PreserveSig]
@@ -434,7 +438,9 @@ namespace Microsoft.Build.Tasks
         int Clone(out IAssemblyName pAsmName);
     }// IAssemblyName
 
-    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
     internal interface IAssemblyEnum
     {
         [PreserveSig]
