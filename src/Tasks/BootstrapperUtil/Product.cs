@@ -14,8 +14,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal enum CopyAllFilesType
     {
-        CopyAllFilesFalse, CopyAllFilesTrue, CopyAllFilesIfNotHomeSite
-    };
+        CopyAllFilesFalse,
+        CopyAllFilesTrue,
+        CopyAllFilesIfNotHomeSite,
+    }
 
     /// <summary>
     /// This class represents a product in the found by the BootstrapperBuilder in the Path property.
