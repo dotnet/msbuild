@@ -32,6 +32,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     public class Expander_Tests
@@ -3725,7 +3727,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new string[] {"$(Reg:AAA)", ""}
                                    };
 
-            var errorTests = new List<string>{
+            var errorTests = new List<string> {
             "$(input[)",
             "$(input.ToString()])",
             "$(input.ToString()[)",

@@ -9,6 +9,8 @@ using Microsoft.Build.Framework;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class LoggerExceptionTests

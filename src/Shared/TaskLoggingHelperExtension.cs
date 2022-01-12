@@ -14,6 +14,8 @@ using Microsoft.Build.Utilities;
 
 //This is in the Tasks namespace because that's where it was before and it is public.
 
+#nullable disable
+
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd
 #else

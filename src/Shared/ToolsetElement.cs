@@ -9,6 +9,8 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -131,7 +133,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                return (string)base["toolsVersion"];
+                return (string)base[nameof(toolsVersion)];
             }
 
             set
@@ -737,7 +739,7 @@ namespace Microsoft.Build.Evaluation
                 // whenever the base class gives us an empty string.
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
-                string defaultValue = (string)base["DefaultOverrideToolsVersion"];
+                string defaultValue = (string)base[nameof(DefaultOverrideToolsVersion)];
                 return String.IsNullOrEmpty(defaultValue) ? null : defaultValue;
             }
 

@@ -23,6 +23,8 @@ using Microsoft.Build.BackEnd.Components.Caching;
 using System.Reflection;
 using Microsoft.Build.Eventing;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

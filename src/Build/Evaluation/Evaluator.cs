@@ -33,6 +33,8 @@ using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

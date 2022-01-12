@@ -16,6 +16,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

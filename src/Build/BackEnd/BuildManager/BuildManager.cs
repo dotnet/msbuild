@@ -35,6 +35,8 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -294,7 +296,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Finalizer
+        /// Finalizes an instance of the <see cref="BuildManager"/> class.
         /// </summary>
         ~BuildManager()
         {
@@ -514,8 +516,6 @@ namespace Microsoft.Build.Execution
                     ShutdownLoggingService(loggingService);
                     throw;
                 }
-
-                MSBuildEventSource.Log.BuildStop();
 
                 return loggingService;
             }
@@ -928,6 +928,8 @@ namespace Microsoft.Build.Execution
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
 
+                    MSBuildEventSource.Log.BuildStop();
+
                     _threadException?.Throw();
 
                     if (BuildParameters.DumpOpportunisticInternStats)
@@ -1199,7 +1201,7 @@ namespace Microsoft.Build.Execution
 
         private static bool ProjectCachePresentViaVisualStudioWorkaround()
         {
-            return BuildEnvironmentHelper.Instance.RunningInVisualStudio && ProjectCacheItems.Count > 0;
+            return BuildEnvironmentHelper.Instance.RunningInVisualStudio && ProjectCacheItems.Any();
         }
 
         // Cache requests on configuration N do not block future build submissions depending on configuration N.
@@ -1258,7 +1260,7 @@ namespace Microsoft.Build.Execution
         private void AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio()
         {
             if (BuildEnvironmentHelper.Instance.RunningInVisualStudio &&
-                ProjectCacheItems.Count > 0 &&
+                ProjectCacheItems.Any() &&
                 _projectCacheService == null &&
                 _buildParameters.ProjectCacheDescriptor == null)
             {
@@ -1724,10 +1726,9 @@ namespace Microsoft.Build.Execution
                         HandleNewRequest(Scheduler.VirtualNode, blocker);
                     }
                 }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                catch (Exception ex) when (IsInvalidProjectOrIORelatedException(ex))
                 {
-                    var projectException = ex as InvalidProjectFileException;
-                    if (projectException != null)
+                    if (ex is InvalidProjectFileException projectException)
                     {
                         if (!projectException.HasBeenLogged)
                         {
@@ -1735,10 +1736,6 @@ namespace Microsoft.Build.Execution
                             ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
                             projectException.HasBeenLogged = true;
                         }
-                    }
-                    else if ((ex is BuildAbortedException) || ExceptionHandling.NotExpectedException(ex))
-                    {
-                        throw;
                     }
 
                     lock (_syncLock)
@@ -1749,7 +1746,7 @@ namespace Microsoft.Build.Execution
                             _legacyThreadingData.MainThreadSubmissionId = -1;
                         }
 
-                        if (projectException == null)
+                        if (ex is not InvalidProjectFileException)
                         {
                             var buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                             ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
@@ -1767,6 +1764,11 @@ namespace Microsoft.Build.Execution
 
                 }
             }
+        }
+
+        private bool IsInvalidProjectOrIORelatedException(Exception e)
+        {
+            return !ExceptionHandling.IsCriticalException(e) && !ExceptionHandling.NotExpectedException(e) && e is not BuildAbortedException;
         }
 
         private void ExecuteGraphBuildScheduler(GraphBuildSubmission submission)
@@ -1852,7 +1854,7 @@ namespace Microsoft.Build.Execution
                         submission.SubmissionId,
                         new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
             }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            catch (Exception ex) when (IsInvalidProjectOrIORelatedException(ex))
             {
                 GraphBuildResult result = null;
 
@@ -1860,7 +1862,7 @@ namespace Microsoft.Build.Execution
                 if (ex is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException))
                 {
                     // Log each InvalidProjectFileException encountered during ProjectGraph creation
-                    foreach (var innerException in aggregateException.InnerExceptions)
+                    foreach (Exception innerException in aggregateException.InnerExceptions)
                     {
                         var projectException = (InvalidProjectFileException) innerException;
                         if (!projectException.HasBeenLogged)
@@ -1878,23 +1880,16 @@ namespace Microsoft.Build.Execution
                     BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                     ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, new InvalidProjectFileException(ex.Message, ex));
                 }
-                else if (ex is BuildAbortedException || ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
                 else
                 {
                     // Arbitrarily just choose the first entry point project's path
-                    var projectFile = submission.BuildRequestData.ProjectGraph?.EntryPointNodes.First().ProjectInstance.FullPath
+                    string projectFile = submission.BuildRequestData.ProjectGraph?.EntryPointNodes.First().ProjectInstance.FullPath
                         ?? submission.BuildRequestData.ProjectGraphEntryPoints?.First().ProjectFile;
                     BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                     ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(projectFile));
                 }
 
-                if (result == null)
-                {
-                    result = new GraphBuildResult(submission.SubmissionId, ex);
-                }
+                result ??= new GraphBuildResult(submission.SubmissionId, ex);
 
                 ReportResultsToSubmission(result);
 

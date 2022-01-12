@@ -17,7 +17,7 @@ namespace Microsoft.Build.Framework
     public class SdkResultItem
     {
         public string ItemSpec { get; set; }
-        public Dictionary<string, string>? Metadata { get;}
+        public Dictionary<string, string>? Metadata { get; }
 
         public SdkResultItem()
         {

@@ -6,6 +6,8 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     partial class ProjectXmlUtilities

@@ -13,6 +13,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

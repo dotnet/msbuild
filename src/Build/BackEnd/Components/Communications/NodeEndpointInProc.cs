@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

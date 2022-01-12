@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
 #else
@@ -373,7 +375,7 @@ namespace Microsoft.Build.Shared
                 {
                     builder.Append(Environment.NewLine);
                     builder.Append(file);
-                    builder.Append(":");
+                    builder.Append(':');
                     builder.Append(Environment.NewLine);
                     builder.Append(File.ReadAllText(file));
                     builder.Append(Environment.NewLine);

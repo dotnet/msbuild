@@ -8,6 +8,8 @@ using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class PerfLogTests

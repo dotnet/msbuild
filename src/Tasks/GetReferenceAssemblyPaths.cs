@@ -11,6 +11,8 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

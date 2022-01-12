@@ -8,6 +8,8 @@ using System.Diagnostics;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>
@@ -406,7 +408,7 @@ namespace Microsoft.Build.Collections
             }
 
             /// <summary>
-            /// Finalizer
+            /// Finalizes an instance of the <see cref="Enumerator"/> class.
             /// </summary>
             ~Enumerator()
             {

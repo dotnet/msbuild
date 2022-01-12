@@ -10,27 +10,29 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph.UnitTests
 {
     internal static class GraphTestingUtilities
     {
         public static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> {{PropertyNames.IsGraphBuild, "true"}}.ToImmutableDictionary();
 
-        public static readonly string InnerBuildPropertyName = "InnerBuild";
-        public static readonly string InnerBuildPropertiesName = "InnerBuildProperties";
+        public const string InnerBuildPropertyName = "InnerBuild";
+        public const string InnerBuildPropertiesName = "InnerBuildProperties";
 
-        public static readonly string MultitargetingSpecificationPropertyGroup = $@"<PropertyGroup>
+        public const string MultitargetingSpecificationPropertyGroup = $@"<PropertyGroup>
                                                                         <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
                                                                         <{InnerBuildPropertiesName}>a;b</{InnerBuildPropertiesName}>
                                                                      </PropertyGroup>";
-        public static readonly string HardCodedInnerBuildWithMultitargetingSpecification = $@"<PropertyGroup>
+        public const string HardCodedInnerBuildWithMultitargetingSpecification = $@"<PropertyGroup>
                                                                         <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
                                                                         <{InnerBuildPropertyName}>a</{InnerBuildPropertyName}>
                                                                      </PropertyGroup>";
 
-        public static readonly string EnableTransitiveProjectReferencesPropertyGroup = @"<PropertyGroup>
+        public const string EnableTransitiveProjectReferencesPropertyGroup = @"<PropertyGroup>
                                                                                             <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
                                                                                          </PropertyGroup>";
 

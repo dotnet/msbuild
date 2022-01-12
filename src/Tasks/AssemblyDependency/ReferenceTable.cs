@@ -17,6 +17,8 @@ using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -2983,13 +2985,8 @@ namespace Microsoft.Build.Tasks
 
                 return true;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 _log.LogErrorWithCodeFromResources("ResolveAssemblyReference.ProblemReadingImplementationDll", dllPath, e.Message);
                 return false;
             }
