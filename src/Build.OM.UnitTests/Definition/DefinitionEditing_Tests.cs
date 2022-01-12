@@ -1156,7 +1156,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
         public void RenameThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
-            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => {i.Rename("foo");});
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => {i.Rename("foo"); });
         }
 
         /// <summary>

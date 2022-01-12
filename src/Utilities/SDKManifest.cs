@@ -354,13 +354,8 @@ namespace Microsoft.Build.Utilities
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 ReadError = true;
                 ReadErrorMessage = e.Message;
             }

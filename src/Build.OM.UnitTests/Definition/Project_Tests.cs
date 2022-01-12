@@ -2109,10 +2109,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 result = project.Build(new ILogger[] { mockLogger });
             }
-            catch
-            {
-                throw;
-            }
             finally
             {
                 project.ProjectCollection.UnregisterAllLoggers();
@@ -4257,7 +4253,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static void AssertGlobResult(GlobResultList expected, string project, string itemType)
         {
-            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs(itemType) ;
+            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs(itemType);
             AssertGlobResultsEqual(expected, globs);
         }
 

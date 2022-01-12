@@ -1681,11 +1681,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CancelledBuildInTaskHostWithDelay40()
         {
-            string contents = CleanupFileContents(@"
+            string contents = CleanupFileContents(@$"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
-    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+    <Exec Command='{Helpers.GetSleepCommand(TimeSpan.FromSeconds(10))}'/>
     <Message Text='[errormessage]'/>
  </Target>
 </Project>

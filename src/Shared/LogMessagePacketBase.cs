@@ -490,17 +490,13 @@ namespace Microsoft.Build.Shared
                     delegateMethod = methodInfo.CreateDelegate(type, firstArgument);
 #endif
                 }
-                catch (FileLoadException)
+                catch (FileLoadException) when (i < 5)
                 {
                     // Sometimes, in 64-bit processes, the fusion load of Microsoft.Build.Framework.dll
-                    // spontaneously fails when trying to bind to the delegate.  However, it seems to 
-                    // not repeat on additional tries -- so we'll try again a few times.  However, if 
-                    // it keeps happening, it's probably a real problem, so we want to go ahead and 
-                    // throw to let the user know what's up.  
-                    if (i == 5)
-                    {
-                        throw;
-                    }
+                    // spontaneously fails when trying to bind to the delegate.  However, it seems to
+                    // not repeat on additional tries -- so we'll try again a few times.  However, if
+                    // it keeps happening, it's probably a real problem, so we want to go ahead and
+                    // throw to let the user know what's up.
                 }
             }
 

@@ -75,7 +75,7 @@ Before you contribute, please read through the contributing and developer guides
 
 * See our [up for grabs issues](https://github.com/Microsoft/msbuild/issues?q=is%3Aopen+is%3Aissue+label%3Aup-for-grabs) for a list of issues we think are great to onboard new developers.
    - **Note:** Please leave a comment asking to be assigned the issue if you want to work on it.
-* See our [label documentation](documentation/wiki/labels.md) for descriptions of labels we use throughout the repo.
+* See our [label documentation](documentation/wiki/Labels.md) for descriptions of labels we use throughout the repo.
 
 ### Other ways to contribute
 We encourage any contributions you decide to make to the repo!

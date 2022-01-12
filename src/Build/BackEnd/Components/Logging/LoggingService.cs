@@ -286,8 +286,7 @@ namespace Microsoft.Build.BackEnd.Logging
             string queueCapacityEnvironment = Environment.GetEnvironmentVariable("MSBUILDLOGGINGQUEUECAPACITY");
             if (!String.IsNullOrEmpty(queueCapacityEnvironment))
             {
-                uint localQueueCapacity;
-                if (UInt32.TryParse(queueCapacityEnvironment, out localQueueCapacity))
+                if (UInt32.TryParse(queueCapacityEnvironment, out uint localQueueCapacity))
                 {
                     _queueCapacity = localQueueCapacity;
                 }
@@ -1325,17 +1324,8 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 logger?.Shutdown();
             }
-            catch (LoggerException)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
-                throw;
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 InternalLoggerException.Throw(e, null, "FatalErrorDuringLoggerShutdown", false, logger.GetType().Name);
             }
         }
@@ -1503,8 +1493,7 @@ namespace Microsoft.Build.BackEnd.Logging
             TryRaiseProjectStartedEvent(nodeEvent.Value);
 
             // Get the sink which will handle the build event, then send the event to that sink
-            IBuildEventSink sink;
-            bool gotSink = _eventSinkDictionary.TryGetValue(nodeEvent.Key, out sink);
+            bool gotSink = _eventSinkDictionary.TryGetValue(nodeEvent.Key, out IBuildEventSink sink);
             if (gotSink && sink != null)
             {
                 // Sinks in the eventSinkDictionary are expected to not be null.
@@ -1596,17 +1585,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     logger.Initialize(sourceForLogger);
                 }
             }
-            catch (LoggerException)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
-                throw;
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 InternalLoggerException.Throw(e, null, "FatalErrorWhileInitializingLogger", true, logger.GetType().Name);
             }
 
