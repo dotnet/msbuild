@@ -593,7 +593,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             this.VerifyStack(!contextStack.IsEmpty(), "Bad project stack");
 
-            //Pop the current project
+            // Pop the current project
             Frame outerMost = contextStack.Pop();
 
             this.VerifyStack(!outerMost.displayed, "Bad project stack on {0}", outerMost.ID);
@@ -727,9 +727,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 ShowDeferredMessages();
 
-                //push now, so that the stack is in a good state
-                //for WriteProjectStarted() and WriteLinePretty()
-                //because we use the stack to control indenting
+                // push now, so that the stack is in a good state
+                // for WriteProjectStarted() and WriteLinePretty()
+                // because we use the stack to control indenting
                 contextStack.Push(f);
 
                 switch (f.type)

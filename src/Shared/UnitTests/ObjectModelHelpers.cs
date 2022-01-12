@@ -427,7 +427,7 @@ namespace Microsoft.Build.UnitTests
                         Assert.Equal(
                                 expectedMetadataValue,
                                 actualMetadataValue
-                            //string.Format
+                            // string.Format
                             //    (
                             //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
                             //        actualItem.ItemSpec,

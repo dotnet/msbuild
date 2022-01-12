@@ -562,9 +562,9 @@ namespace Microsoft.Build.Tasks
         }
 
         // Set of IMAGE_FILE constants which represent the processor architectures for native assemblies.
-        internal const UInt16 IMAGE_FILE_MACHINE_UNKNOWN = 0x0; //	The contents of this field are assumed to be applicable to any machine type
+        internal const UInt16 IMAGE_FILE_MACHINE_UNKNOWN = 0x0; // The contents of this field are assumed to be applicable to any machine type
         internal const UInt16 IMAGE_FILE_MACHINE_INVALID = UInt16.MaxValue; // Invalid value for the machine type.
-        internal const UInt16 IMAGE_FILE_MACHINE_AMD64 = 0x8664; //	x64
+        internal const UInt16 IMAGE_FILE_MACHINE_AMD64 = 0x8664; // x64
         internal const UInt16 IMAGE_FILE_MACHINE_ARM = 0x1c0; // ARM little endian
         internal const UInt16 IMAGE_FILE_MACHINE_ARMV7 = 0x1c4; // ARMv7 (or higher) Thumb mode only
         internal const UInt16 IMAGE_FILE_MACHINE_I386 = 0x14c; // Intel 386 or later processors and compatible processors

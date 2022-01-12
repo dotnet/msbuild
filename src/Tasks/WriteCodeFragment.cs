@@ -146,7 +146,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_SYSTEM_CONFIGURATION
             (e is ConfigurationException || e is SecurityException)
 #else
-            (e.GetType().Name == "ConfigurationErrorsException") //TODO: catch specific exception type once it is public https://github.com/dotnet/corefx/issues/40456
+            (e.GetType().Name == "ConfigurationErrorsException") // TODO: catch specific exception type once it is public https://github.com/dotnet/corefx/issues/40456
 #endif
             {
                 Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, e.Message);

@@ -172,7 +172,7 @@ namespace Microsoft.Build.Evaluation
 
         private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
         {
-            //  Code corresponds to Evaluator.CreateItemsFromInclude
+            // Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
 
             if (string.IsNullOrEmpty(evaluatedItemspecEscaped))
@@ -223,7 +223,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // The expression is not of the form "@(X)". Treat as string
 
-                        //  Code corresponds to EngineFileUtilities.GetFileList
+                        // Code corresponds to EngineFileUtilities.GetFileList
                         if (!FileMatcher.HasWildcards(splitEscaped))
                         {
                             // No real wildcards means we just return the original string.  Don't even bother
@@ -261,7 +261,7 @@ namespace Microsoft.Build.Evaluation
         {
             isItemListExpression = false;
 
-            //  Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
+            // Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
             if (expression.Length == 0)
             {
                 return null;

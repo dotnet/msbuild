@@ -1924,7 +1924,7 @@ $@"
             {
                 var globalVariablesArray = new[]
                 {
-                    //todo add null
+                    // todo add null
                     new Dictionary<string, string>(),
                     new Dictionary<string, string>
                     {
