@@ -88,7 +88,7 @@ namespace Microsoft.Build.Evaluation
 
         private string GetNonZeroVersionParts(Version version, int minVersionPartCount)
         {
-            var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3: 4;
+            var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3 : 4;
             return version.ToString(Math.Max(nonZeroVersionParts, minVersionPartCount));
         }
     }

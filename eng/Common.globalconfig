@@ -755,7 +755,7 @@ dotnet_diagnostic.SA1021.severity = suggestion
 dotnet_diagnostic.SA1023.severity = warning
 
 # Colon should be followed by a space
-dotnet_diagnostic.SA1024.severity = suggestion
+dotnet_diagnostic.SA1024.severity = warning
 
 # Code should not contain multiple whitespace characters in a row
 dotnet_diagnostic.SA1025.severity = suggestion

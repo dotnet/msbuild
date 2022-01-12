@@ -2679,7 +2679,7 @@ namespace Microsoft.Build.UnitTests
                                                     (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
                                                         => ToolLocationHelper.GetPathToReferenceAssemblies(
                                                                             frameworkName, "v" + frameworkVersion, frameworkProfile,
-                                                                            targetFrameworkRootPath:null, targetFrameworkFallbackSearchPaths:fallbackSearchPaths));
+                                                                            targetFrameworkRootPath: null, targetFrameworkFallbackSearchPaths: fallbackSearchPaths));
             }
         }
 

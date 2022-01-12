@@ -1735,7 +1735,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void ResetToolsetsForTests(ToolsetConfigurationReader configurationReaderForTestsOnly)
         {
-            InitializeToolsetCollection(configReader:configurationReaderForTestsOnly);
+            InitializeToolsetCollection(configReader: configurationReaderForTestsOnly);
         }
 
 #if FEATURE_WIN32_REGISTRY
@@ -1744,7 +1744,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void ResetToolsetsForTests(ToolsetRegistryReader registryReaderForTestsOnly)
         {
-            InitializeToolsetCollection(registryReader:registryReaderForTestsOnly);
+            InitializeToolsetCollection(registryReader: registryReaderForTestsOnly);
         }
 #endif
 

@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_itemType} Include={_include} Exclude={_exclude} Remove={_remove} Condition={_condition}")]
-    public class ProjectItemGroupTaskItemInstance: ITranslatable
+    public class ProjectItemGroupTaskItemInstance : ITranslatable
     {
         /// <summary>
         /// Item type, for example "Compile"

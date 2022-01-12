@@ -236,7 +236,7 @@ namespace Microsoft.Build.Framework
                     // If user wants bigger capacity than maximum capacity, respect it.
                     returned = new StringBuilder(SelectBracketedCapacity(capacity));
 #if DEBUG
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity:capacity, oldCapacity:0, type:"miss");
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: capacity, oldCapacity: 0, type: "miss");
 #endif
                 }
                 else if (returned.Capacity < capacity)

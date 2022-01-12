@@ -97,7 +97,7 @@ namespace Microsoft.Build.Framework
             int targetId,
             int taskId
         )
-            :this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
+            : this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
 

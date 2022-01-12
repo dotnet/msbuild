@@ -1295,8 +1295,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 {
                     {1, new []{2}}
                 },
-                extraContentPerProjectNumber:null,
-                extraContentForAllNodes:@$"
+                extraContentPerProjectNumber: null,
+                extraContentForAllNodes: @$"
 <ItemGroup>
     <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
     <{ItemTypeNames.ProjectReferenceTargets} Include=`Build` Targets=`Build` />

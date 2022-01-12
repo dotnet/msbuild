@@ -3738,7 +3738,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <returns>The name of the resx file</returns>
         public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null, TestEnvironment env = null)
         {
-            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite:resxFileToWrite);
+            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite: resxFileToWrite);
         }
 
         /// <summary>
