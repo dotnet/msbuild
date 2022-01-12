@@ -144,7 +144,6 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(@"../", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/"));
                 Assert.Equal(@"../ghi/", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/ghi/"));
                 Assert.Equal(@".", FileUtilities.MakeRelative(@"/abc/def", @"/abc/def/"));
-
             }
         }
 

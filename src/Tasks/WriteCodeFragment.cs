@@ -445,7 +445,6 @@ namespace Microsoft.Build.Tasks
                         }
 
                         break;
-
                 }
 
                 attribute.Arguments.Add(new CodeAttributeArgument(parameter.Name, value));

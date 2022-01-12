@@ -732,7 +732,6 @@ namespace Microsoft.Build.UnitTests
             // If there's a space in the %TEMP% path, the config file is read in the static constructor by the URI class and we catch there;
             // if there's not, we will catch when we try to read the toolsets. Either is fine; we just want to not crash.
             (output.Contains("MSB1043") || output.Contains("MSB4136")).ShouldBeTrue("Output should contain 'MSB1043' or 'MSB4136'");
-
         }
 #endif
 

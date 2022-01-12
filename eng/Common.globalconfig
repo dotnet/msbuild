@@ -993,7 +993,7 @@ dotnet_diagnostic.SA1506.severity = suggestion
 dotnet_diagnostic.SA1507.severity = suggestion
 
 # A closing brace should not be preceded by a blank line
-dotnet_diagnostic.SA1508.severity = suggestion
+dotnet_diagnostic.SA1508.severity = warning
 
 # Opening braces should not be preceded by blank line
 dotnet_diagnostic.SA1509.severity = suggestion
