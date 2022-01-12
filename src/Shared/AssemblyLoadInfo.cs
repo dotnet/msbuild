@@ -174,7 +174,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal AssemblyLoadInfoWithFile(string assemblyFile)
             {
-                ErrorUtilities.VerifyThrow(Path.IsPathRooted(assemblyFile), "Assembly file path should be rooted");
+                ErrorUtilities.VerifyThrow(Path.IsPathRooted(assemblyFile), $"Assembly file path should be rooted: {assemblyFile}");
 
                 _assemblyFile = assemblyFile;
             }

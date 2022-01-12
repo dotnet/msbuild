@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -421,10 +422,14 @@ namespace Microsoft.Build.Shared
                                 {
                                     TypeInformationPropertyInfo toAdd = new();
                                     toAdd.Name = metadataReader.GetString(propertyDefinition.Name);
+                                    SignatureDecoder<string, object> decoder = new(ConstantSignatureVisualizer.Instance, metadataReader, genericContext: null);
+                                    BlobReader blob = metadataReader.GetBlobReader(propertyDefinition.Signature);
+                                    MethodSignature<string> signature = decoder.DecodeMethodSignature(ref blob);
+                                    toAdd.PropertyType = StringToType(signature.ReturnType);
                                     //MethodSignature<RuntimeTypeInfo> sign = propertyDefinition.DecodeSignature<RuntimeTypeInfo, TypeContext>(new SignatureDecoder<RuntimeTypeInfo, TypeContext>(), null);
                                     //toAdd.PropertyType = sign.ReturnType ?? sign.ParameterTypes[0];
-                                    byte[] bytes = metadataReader.GetBlobReader(propertyDefinition.Signature).ReadBytes(metadataReader.GetBlobReader(propertyDefinition.Signature).Length);
-                                    toAdd.PropertyType = ByteSignatureToType(bytes);
+                                    //byte[] bytes = metadataReader.GetBlobReader(propertyDefinition.Signature).ReadBytes(metadataReader.GetBlobReader(propertyDefinition.Signature).Length);
+                                    //toAdd.PropertyType = ByteSignatureToType(bytes);
                                     toAdd.OutputAttribute = false;
                                     toAdd.RequiredAttribute = false;
                                     foreach (CustomAttributeHandle attr in propertyDefinition.GetCustomAttributes())
@@ -550,6 +555,83 @@ namespace Microsoft.Build.Shared
                 };
             }
 
+            private Type StringToType(string s)
+            {
+                //return Type.GetType(s, false, true) ?? typeof(object);
+                return s switch
+                {
+                    "String" => typeof(String),
+                    "Microsoft.Build.Framework.ITaskItem" => typeof(ITaskItem),
+                    "Boolean" => typeof(Boolean),
+                    "Int32" => typeof(Int32),
+                    "Char" => typeof(Char),
+                    "Single" => typeof(Single),
+                    "Int64" => typeof(Int64),
+                    "Double" => typeof(Double),
+                    "Byte" => typeof(Byte),
+                    "SByte" => typeof(SByte),
+                    "Decimal" => typeof(Decimal),
+                    "UInt32" => typeof(UInt32),
+                    "IntPtr" => typeof(IntPtr),
+                    "UIntPtr" => typeof(UIntPtr),
+                    "UInt64" => typeof(UInt64),
+                    "Int16" => typeof(Int16),
+                    "UInt16" => typeof(UInt16),
+                    "String[]" => typeof(String[]),
+                    "Microsoft.Build.Framework.ITaskItem[]" => typeof(ITaskItem[]),
+                    "Boolean[]" => typeof(Boolean[]),
+                    "Int32[]" => typeof(Int32[]),
+                    "Char[]" => typeof(Char[]),
+                    "Single[]" => typeof(Single[]),
+                    "Int64[]" => typeof(Int64[]),
+                    "Double[]" => typeof(Double[]),
+                    "Byte[]" => typeof(Byte[]),
+                    "SByte[]" => typeof(SByte[]),
+                    "Decimal[]" => typeof(Decimal[]),
+                    "UInt32[]" => typeof(UInt32[]),
+                    "IntPtr[]" => typeof(IntPtr[]),
+                    "UIntPtr[]" => typeof(UIntPtr[]),
+                    "UInt64[]" => typeof(UInt64[]),
+                    "Int16[]" => typeof(Int16[]),
+                    "UInt16[]" => typeof(UInt16[]),
+                    "String?" => typeof(String),
+                    "Microsoft.Build.Framework.ITaskItem?" => typeof(ITaskItem),
+                    "Boolean?" => typeof(Boolean?),
+                    "Int32?" => typeof(Int32?),
+                    "Char?" => typeof(Char?),
+                    "Single?" => typeof(Single?),
+                    "Int64?" => typeof(Int64?),
+                    "Double?" => typeof(Double?),
+                    "Byte?" => typeof(Byte?),
+                    "SByte?" => typeof(SByte?),
+                    "Decimal?" => typeof(Decimal?),
+                    "UInt32?" => typeof(UInt32?),
+                    "IntPtr?" => typeof(IntPtr?),
+                    "UIntPtr?" => typeof(UIntPtr?),
+                    "UInt64?" => typeof(UInt64?),
+                    "Int16?" => typeof(Int16?),
+                    "UInt16?" => typeof(UInt16?),
+                    "String?[]" => typeof(String[]),
+                    "Microsoft.Build.Framework.ITaskItem?[]" => typeof(ITaskItem[]),
+                    "Boolean?[]" => typeof(Boolean?[]),
+                    "Int32?[]" => typeof(Int32?[]),
+                    "Char?[]" => typeof(Char?[]),
+                    "Single?[]" => typeof(Single?[]),
+                    "Int64?[]" => typeof(Int64?[]),
+                    "Double?[]" => typeof(Double?[]),
+                    "Byte?[]" => typeof(Byte?[]),
+                    "SByte?[]" => typeof(SByte?[]),
+                    "Decimal?[]" => typeof(Decimal?[]),
+                    "UInt32?[]" => typeof(UInt32?[]),
+                    "IntPtr?[]" => typeof(IntPtr?[]),
+                    "UIntPtr?[]" => typeof(UIntPtr?[]),
+                    "UInt64?[]" => typeof(UInt64?[]),
+                    "Int16?[]" => typeof(Int16?[]),
+                    "UInt16?[]" => typeof(UInt16?[]),
+                    _ => typeof(object),
+                };
+            }
+
             /// <summary>
             /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on 
             /// to find tasks, loggers, and task factories.
@@ -569,6 +651,65 @@ namespace Microsoft.Build.Shared
                         _publicTypeNameToType.Add(publicType.FullName, publicType);
                     }
                 }
+            }
+        }
+
+        // Copied from https://github.com/dotnet/roslyn/blob/a9027f3d3bddcd77eb3c97bf0caba61335c08426/src/Compilers/Test/Core/Metadata/MetadataReaderUtils.cs#L405
+        private sealed class ConstantSignatureVisualizer : ISignatureTypeProvider<string, object>
+        {
+            public static readonly ConstantSignatureVisualizer Instance = new();
+
+            public string GetArrayType(string elementType, ArrayShape shape)
+                => elementType + "[" + new string(',', shape.Rank) + "]";
+
+            public string GetByReferenceType(string elementType)
+                => elementType + "&";
+
+            public string GetFunctionPointerType(MethodSignature<string> signature)
+                => "method-ptr";
+
+            public string GetGenericInstantiation(string genericType, ImmutableArray<string> typeArguments)
+                => genericType + "{" + string.Join(", ", typeArguments) + "}";
+
+            public string GetGenericMethodParameter(object genericContext, int index)
+                => "!!" + index;
+
+            public string GetGenericTypeParameter(object genericContext, int index)
+                => "!" + index;
+
+            public string GetModifiedType(string modifier, string unmodifiedType, bool isRequired)
+                => (isRequired ? "modreq" : "modopt") + "(" + modifier + ") " + unmodifiedType;
+
+            public string GetPinnedType(string elementType)
+                => "pinned " + elementType;
+
+            public string GetPointerType(string elementType)
+                => elementType + "*";
+
+            public string GetPrimitiveType(PrimitiveTypeCode typeCode)
+                => typeCode.ToString();
+
+            public string GetSZArrayType(string elementType)
+                => elementType + "[]";
+
+            public string GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind)
+            {
+                var typeDef = reader.GetTypeDefinition(handle);
+                var name = reader.GetString(typeDef.Name);
+                return typeDef.Namespace.IsNil ? name : reader.GetString(typeDef.Namespace) + "." + name;
+            }
+
+            public string GetTypeFromReference(MetadataReader reader, TypeReferenceHandle handle, byte rawTypeKind)
+            {
+                var typeRef = reader.GetTypeReference(handle);
+                var name = reader.GetString(typeRef.Name);
+                return typeRef.Namespace.IsNil ? name : reader.GetString(typeRef.Namespace) + "." + name;
+            }
+
+            public string GetTypeFromSpecification(MetadataReader reader, object genericContext, TypeSpecificationHandle handle, byte rawTypeKind)
+            {
+                var sigReader = reader.GetBlobReader(reader.GetTypeSpecification(handle).Signature);
+                return new SignatureDecoder<string, object>(Instance, reader, genericContext).DecodeType(ref sigReader);
             }
         }
     }

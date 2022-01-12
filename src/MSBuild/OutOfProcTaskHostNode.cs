@@ -893,7 +893,7 @@ namespace Microsoft.Build.CommandLine
 
                 taskResult = _taskWrapper.ExecuteTask
                 (
-                    this as IBuildEngine,
+                    this,
                     taskName,
                     taskLocation,
                     taskConfiguration.ProjectFileOfTask,

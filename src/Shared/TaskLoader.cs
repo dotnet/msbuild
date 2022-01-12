@@ -110,7 +110,7 @@ namespace Microsoft.Build.Shared
 
                         taskAppDomain = AppDomain.CreateDomain(isOutOfProc ? "taskAppDomain (out-of-proc)" : "taskAppDomain (in-proc)", null, appDomainInfo);
 
-                        if (typeInformation.LoadedType.LoadedAssembly != null)
+                        if (typeInformation.LoadedType?.LoadedAssembly != null)
                         {
                             taskAppDomain.Load(typeInformation.AssemblyName);
                         }

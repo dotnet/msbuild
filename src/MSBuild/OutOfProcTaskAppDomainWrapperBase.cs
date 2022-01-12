@@ -10,6 +10,7 @@ using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.IO;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
@@ -115,7 +116,7 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 TypeLoader typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
-                taskType = typeLoader.Load(taskName, AssemblyLoadInfo.Create(null, taskLocation), false).LoadedType;
+                taskType = typeLoader.Load(taskName, Path.IsPathRooted(taskLocation) ? AssemblyLoadInfo.Create(null, taskLocation) : AssemblyLoadInfo.Create(taskLocation, null), false).LoadedType;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
