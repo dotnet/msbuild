@@ -9,7 +9,6 @@ using System.IO;
 
 namespace Microsoft.Build.Shared.FileSystem
 {
-
     /*
      * This is a clone of Microsoft.Build.FileSystem.MSBuildFileSystemBase.
      * MSBuildFileSystemBase is the public, reference interface. Changes should be made to MSBuildFileSystemBase and cloned in IFileSystem.

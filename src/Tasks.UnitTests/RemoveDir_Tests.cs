@@ -47,7 +47,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SimpleDelete()
         {
-
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
                 List<TaskItem> list = new List<TaskItem>();

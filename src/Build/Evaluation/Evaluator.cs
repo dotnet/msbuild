@@ -1860,7 +1860,6 @@ namespace Microsoft.Build.Evaluation
 
                     if (sdkResult.AdditionalPaths != null)
                     {
-
                         foreach (var additionalPath in sdkResult.AdditionalPaths)
                         {
                             ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(additionalPath, project),

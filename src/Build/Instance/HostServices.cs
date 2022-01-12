@@ -121,7 +121,6 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void RegisterHostObject(string projectFile, string targetName, string taskName, ITaskHost hostObject)
         {
-
 /* Unmerged change from project 'Microsoft.Build (netcoreapp2.1)'
 Before:
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");

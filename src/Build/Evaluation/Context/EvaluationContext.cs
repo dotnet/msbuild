@@ -67,7 +67,6 @@ namespace Microsoft.Build.Evaluation.Context
         /// </summary>
         public static EvaluationContext Create(SharingPolicy policy)
         {
-            
             // ReSharper disable once IntroduceOptionalParameters.Global
             // do not remove this method to avoid breaking binary compatibility
             return Create(policy, fileSystem: null);

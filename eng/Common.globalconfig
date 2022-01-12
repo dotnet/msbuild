@@ -984,7 +984,7 @@ dotnet_diagnostic.SA1503.severity = suggestion
 dotnet_diagnostic.SA1504.severity = suggestion
 
 # An opening brace should not be followed by a blank line
-dotnet_diagnostic.SA1505.severity = suggestion
+dotnet_diagnostic.SA1505.severity = warning
 
 # Element documentation headers should not be followed by blank line
 dotnet_diagnostic.SA1506.severity = suggestion

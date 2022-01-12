@@ -1773,7 +1773,6 @@ namespace Microsoft.Build.CommandLine
             int switchIndicatorsLength
         )
         {
-
             // find the parameter indicator again using the quoted arg
             // NOTE: since the parameter indicator cannot be part of a switch name, quoting around it is not relevant, because a
             // parameter indicator cannot be escaped or made into a literal

@@ -814,7 +814,6 @@ namespace Microsoft.Build.BackEnd
 
                     if (itemVectorContents.Count > 0)
                     {
-
                         // Expander set the item type it found
                         string itemVectorType = itemFactory.ItemType;
 

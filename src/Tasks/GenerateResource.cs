@@ -51,7 +51,6 @@ namespace Microsoft.Build.Tasks
     [RequiredRuntime("v2.0")]
     public sealed partial class GenerateResource : TaskExtension
     {
-
 #region Fields
 
         // This cache helps us track the linked resource files listed inside of a resx resource file

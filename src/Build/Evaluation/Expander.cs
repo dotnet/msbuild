@@ -5056,7 +5056,6 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor)
             {
-
                 // First let's try for a method where all arguments are strings..
                 Type[] types = new Type[_arguments.Length];
                 for (int n = 0; n < _arguments.Length; n++)

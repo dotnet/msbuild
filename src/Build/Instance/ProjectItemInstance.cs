@@ -1835,7 +1835,6 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private ProjectMetadataInstance GetItemDefinitionMetadata(string metadataName)
             {
-
                 // Check any inherited item definition metadata first. It's more like
                 // direct metadata, but we didn't want to copy the tables.
                 if (_itemDefinitions != null)
