@@ -1050,8 +1050,12 @@ namespace Microsoft.Build.Tasks
         /// and then again to pass the client-allocated character buffer. StringBuilder is the most straightforward way
         /// to allocate a mutable buffer of characters and pass it around.
         /// </summary>
+        /// <param name="cacheFlags">Value that indicates the source of the cached assembly.</param>
+        /// <param name="cachePath">The returned pointer to the path.</param>
+        /// <param name="pcchPath">The requested maximum length of CachePath, and upon return, the actual length of CachePath.</param>
+        /// 
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
-        internal static extern int GetCachePath(AssemblyCacheFlags cacheFlags, char[] cachePath, ref int pcchPath);
+        internal static extern int GetCachePath([In] AssemblyCacheFlags cacheFlags, char[] cachePath, ref int pcchPath);
 #endif
 
         //------------------------------------------------------------------------------
@@ -1117,15 +1121,15 @@ namespace Microsoft.Build.Tasks
 
 #if FEATURE_MSCOREE
         /// <summary>
-        /// Get the runtime version for a given file
+        /// Get the runtime version for a given file.
         /// </summary>
-        /// <param name="szFullPath">The path of the file to be examined</param>
+        /// <param name="szFileName">The path of the file to be examined.</param>
         /// <param name="szBuffer">The buffer allocated for the version information that is returned.</param>
-        /// <param name="cchBuffer">The size, in wide characters, of szBuffer</param>
+        /// <param name="cchBuffer">The size, in wide characters, of szBuffer.</param>
         /// <param name="dwLength">The size, in bytes, of the returned szBuffer.</param>
-        /// <returns>HResult</returns>
+        /// <returns>HResult.</returns>
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern uint GetFileVersion(string szFullPath, char[] szBuffer, int cchBuffer, out uint dwLength);
+        internal static extern uint GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, char[] szBuffer, int cchBuffer, out int dwLength);
 #endif
         #endregion
 
