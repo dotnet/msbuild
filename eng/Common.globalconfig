@@ -999,7 +999,7 @@ dotnet_diagnostic.SA1508.severity = suggestion
 dotnet_diagnostic.SA1509.severity = suggestion
 
 # 'else' statement should not be preceded by a blank line
-dotnet_diagnostic.SA1510.severity = suggestion
+dotnet_diagnostic.SA1510.severity = warning
 
 # Single-line comments should not be followed by blank line
 dotnet_diagnostic.SA1512.severity = suggestion
