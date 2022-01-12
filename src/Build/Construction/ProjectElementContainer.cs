@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         /// External projects support
         /// </summary>
         internal ProjectElementContainer(ProjectElementContainerLink link)
-            :base(link)
+            : base(link)
         {
         }
 

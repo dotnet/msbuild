@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
             string indent = "    ";
             var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: aligned);
 
-            string output = aligner.AlignConsoleOutput(message:input, prefixAlreadyWritten: false, prefixWidth: indent.Length);
+            string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: false, prefixWidth: indent.Length);
 
             output.ShouldBe(indent + input + Environment.NewLine);
         }

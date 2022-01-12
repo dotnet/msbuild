@@ -759,7 +759,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Action<string, string> runTest = (include, exclude) =>
             {
-                TestIncludeExclude(projectContents, inputFiles, expectedInclude, include, exclude, normalizeSlashes: true, makeExpectedIncludeAbsolute:makeExpectedIncludeAbsolute);
+                TestIncludeExclude(projectContents, inputFiles, expectedInclude, include, exclude, normalizeSlashes: true, makeExpectedIncludeAbsolute: makeExpectedIncludeAbsolute);
             };
 
             var includeWithForwardSlash = Helpers.ToForwardSlash(includeString);

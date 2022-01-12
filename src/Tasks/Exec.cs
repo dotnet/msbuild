@@ -183,7 +183,7 @@ namespace Microsoft.Build.Tasks
         /// if they aren't used.  ConsoleOutput is a combination of stdout and stderr.
         /// </summary>
         [Output]
-        public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray();
+        public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>() : _nonEmptyOutput.ToArray();
 
         #endregion
 
