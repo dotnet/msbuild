@@ -35,6 +35,21 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IsHidden = true
         };
 
+        internal IEnumerable<Option> LegacyOptions
+        {
+            get
+            {
+                yield return InteractiveOption;
+                yield return AddSourceOption;
+                yield return ColumnsAllOption;
+                yield return ColumnsOption;
+                foreach (Option filter in LegacyFilters.Values)
+                {
+                    yield return filter;
+                }
+            }
+        }
+
         internal Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption().AsHidden();
 
         internal Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption().AsHidden().DisableAllowMultipleArgumentsPerToken();
@@ -124,7 +139,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        private void BuildLegacySymbols(ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks)
+        private void BuildLegacySymbols(Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder, NewCommandCallbacks callbacks)
         {
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
@@ -145,14 +160,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             this.TreatUnmatchedTokensAsErrors = true;
 
-            this.Add(new LegacyInstallCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new LegacyUninstallCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new LegacyUpdateCheckCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new LegacyUpdateApplyCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new LegacySearchCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new LegacyListCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new LegacyAliasAddCommand(host, telemetryLogger, callbacks));
-            this.Add(new LegacyAliasShowCommand(host, telemetryLogger, callbacks));
+            this.Add(new LegacyInstallCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new LegacyUninstallCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new LegacyUpdateCheckCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new LegacyUpdateApplyCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new LegacySearchCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new LegacyListCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new LegacyAliasAddCommand(hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new LegacyAliasShowCommand(hostBuilder, telemetryLoggerBuilder, callbacks));
         }
     }
 }

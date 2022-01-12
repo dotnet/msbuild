@@ -11,8 +11,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class LegacyListCommand : BaseListCommand
     {
-        public LegacyListCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
-            : base(parentCommand, host, logger, callbacks, "--list")
+        public LegacyListCommand(
+            NewCommand parentCommand,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
+            NewCommandCallbacks callbacks)
+            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, callbacks, "--list")
         {
             this.IsHidden = true;
             this.AddAlias("-l");

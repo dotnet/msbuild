@@ -12,13 +12,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal class BaseAliasShowCommand : BaseCommand<AliasShowCommandArgs>
     {
         internal BaseAliasShowCommand(
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks,
             string commandName)
-            : base(host, logger, callbacks, commandName, SymbolStrings.Command_AliasShow_Description) { }
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_AliasShow_Description) { }
 
-        protected override Task<NewCommandStatus> ExecuteAsync(AliasShowCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context) => throw new NotImplementedException();
+        protected override Task<NewCommandStatus> ExecuteAsync(
+            AliasShowCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            ITelemetryLogger telemetryLogger,
+            InvocationContext context) => throw new NotImplementedException();
 
         protected override AliasShowCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
     }

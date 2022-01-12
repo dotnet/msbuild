@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -11,10 +12,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public LegacyUninstallCommand(
             NewCommand parentCommand,
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks)
-            : base(host, logger, callbacks, "--uninstall")
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, "--uninstall")
         {
             this.IsHidden = true;
             this.AddAlias("-u");

@@ -41,7 +41,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             ITemplateEngineHost host = CreateHost();
             host.VirtualizeDirectory(outputPath);
 
-            var command = NewCommandFactory.Create(CommandName, host, new TelemetryLogger(null), new NewCommandCallbacks());
+            var command = NewCommandFactory.Create(CommandName, _ => host, _ => new TelemetryLogger(null), new NewCommandCallbacks());
 
             int result = ParserFactory.CreateParser(command).Parse(passThroughArgs.ToArray()).Invoke();
 

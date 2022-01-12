@@ -573,6 +573,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">沒有要還原的主要輸出。</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoTemplatesFound">
+        <source>No templates installed.</source>
+        <target state="new">No templates installed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">找不到符合的範本: {0}。</target>

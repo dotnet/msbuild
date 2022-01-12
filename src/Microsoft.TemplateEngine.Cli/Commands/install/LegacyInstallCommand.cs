@@ -4,14 +4,15 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class LegacyInstallCommand : BaseInstallCommand
     {
-        public LegacyInstallCommand(NewCommand parentCommand, ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks)
-            : base(parentCommand, host, logger, callbacks, "--install")
+        public LegacyInstallCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder, NewCommandCallbacks callbacks)
+            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, callbacks, "--install")
         {
             this.IsHidden = true;
             this.AddAlias("-i");

@@ -71,22 +71,32 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                // No templates found matching the following input parameter(s): {0}.
-                Reporter.Error.WriteLine(
-                    string.Format(
-                        LocalizableStrings.NoTemplatesMatchingInputParameters,
-                        GetInputParametersString(args/*, appliedParameterMatches*/))
-                    .Bold().Red());
-
-                if (resolutionResult.HasTemplateGroupMatches)
+                //if there is no criteria and filters it means that dotnet new list was run but there is no templates installed.
+                if (args.ListNameCriteria == null && !args.AppliedFilters.Any())
                 {
-                    // {0} template(s) partially matched, but failed on {1}.
+                    //No templates installed.
+                    Reporter.Error.WriteLine(LocalizableStrings.NoTemplatesFound.Bold().Red());
+                }
+                else
+                {
+                    // at least one criteria was specified.
+                    // No templates found matching the following input parameter(s): {0}.
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.TemplatesNotValidGivenTheSpecifiedFilter,
-                            resolutionResult.TemplateGroups.Count(),
-                            GetPartialMatchReason(resolutionResult, args/*, appliedParameterMatches*/))
+                            LocalizableStrings.NoTemplatesMatchingInputParameters,
+                            GetInputParametersString(args/*, appliedParameterMatches*/))
                         .Bold().Red());
+
+                    if (resolutionResult.HasTemplateGroupMatches)
+                    {
+                        // {0} template(s) partially matched, but failed on {1}.
+                        Reporter.Error.WriteLine(
+                            string.Format(
+                                LocalizableStrings.TemplatesNotValidGivenTheSpecifiedFilter,
+                                resolutionResult.TemplateGroups.Count(),
+                                GetPartialMatchReason(resolutionResult, args/*, appliedParameterMatches*/))
+                            .Bold().Red());
+                    }
                 }
 
                 Reporter.Error.WriteLine();

@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_CanParseAddSourceOption(string optionName)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new install source {optionName} my-custom-source");
             InstallCommandArgs args = new InstallCommandArgs((InstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -32,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_Error_NoArguments()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new install");
 
@@ -46,7 +46,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_Legacy_Error_NoArguments()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new --install --interactive");
 
@@ -62,7 +62,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_CanParseAddSourceOption_MultipleEntries(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             var parseResult = myCommand.Parse(testCase);
             InstallCommandArgs args = new InstallCommandArgs((InstallCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -77,7 +77,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_CanParseInteractiveOption()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new install source --interactive");
             InstallCommandArgs args = new InstallCommandArgs((InstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -98,7 +98,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_CanParseMultipleArgs()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new install source1 source2");
             InstallCommandArgs args = new InstallCommandArgs((InstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -115,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_Legacy_CanParseAddSourceOption(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse(testCase);
             InstallCommandArgs args = new InstallCommandArgs((LegacyInstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -132,7 +132,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_Legacy_CanParseInteractiveOption(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse(testCase);
             InstallCommandArgs args = new InstallCommandArgs((LegacyInstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -148,7 +148,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_Legacy_CanParseMultipleArgs(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
              
             var parseResult = myCommand.Parse(testCase);
             InstallCommandArgs args = new InstallCommandArgs((LegacyInstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -165,7 +165,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_Legacy_CanParseAddSourceOption_MultipleEntries(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             var parseResult = myCommand.Parse(testCase);
             InstallCommandArgs args = new InstallCommandArgs((LegacyInstallCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -186,7 +186,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_CanReturnParseError(string command, string expectedInvalidTokens)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse(command);
             var errorMessages = parseResult.Errors.Select(error => error.Message);

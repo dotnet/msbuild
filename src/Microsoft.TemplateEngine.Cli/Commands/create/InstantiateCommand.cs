@@ -22,10 +22,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private NewCommand? _parentCommand;
 
         internal InstantiateCommand(
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks)
-            : base(host, logger, callbacks, "create", SymbolStrings.Command_Instantiate_Description)
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, "create", SymbolStrings.Command_Instantiate_Description)
         {
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
@@ -63,12 +63,19 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 command.Add(subcommand);
             }
+            foreach (var option in parentCommand.Children.OfType<Option>())
+            {
+                if (!command.Children.OfType<Option>().Any(eo => eo.Name == option.Name))
+                {
+                    command.Add(option);
+                }
+            }
             return command;
         }
 
-        internal Task<NewCommandStatus> ExecuteAsync(ParseResult parseResult, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        internal Task<NewCommandStatus> ExecuteAsync(ParseResult parseResult, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
         {
-            return ExecuteAsync(ParseContext(parseResult), environmentSettings, context);
+            return ExecuteAsync(ParseContext(parseResult), environmentSettings, telemetryLogger, context);
         }
 
         internal HashSet<TemplateCommand> GetTemplateCommand(
@@ -183,7 +190,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        protected async override Task<NewCommandStatus> ExecuteAsync(InstantiateCommandArgs instantiateArgs, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected async override Task<NewCommandStatus> ExecuteAsync(
+            InstantiateCommandArgs instantiateArgs,
+            IEngineEnvironmentSettings environmentSettings,
+            ITelemetryLogger telemetryLogger,
+            InvocationContext context)
         {
             var cancellationToken = context.GetCancellationToken();
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
@@ -194,7 +205,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     environmentSettings,
                     templatePackageManager,
                     hostSpecificDataLoader,
-                    TelemetryLogger);
+                    telemetryLogger);
 
                 return await templateListCoordinator.DisplayCommandDescriptionAsync(instantiateArgs, cancellationToken).ConfigureAwait(false);
             }
@@ -217,6 +228,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return await HandleTemplateInstantationAsync(
                 instantiateArgs,
                 environmentSettings,
+                telemetryLogger,
                 templatePackageManager,
                 selectedTemplateGroups.Single(),
                 cancellationToken).ConfigureAwait(false);
@@ -259,6 +271,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private async Task<NewCommandStatus> HandleTemplateInstantationAsync(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
+            ITelemetryLogger telemetryLogger,
             TemplatePackageManager templatePackageManager,
             TemplateGroup templateGroup,
             CancellationToken cancellationToken)
@@ -267,7 +280,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (candidates.Count == 1)
             {
                 Command commandToRun = _parentCommand is null ? this : _parentCommand;
-                commandToRun.AddCommand(candidates.First());
+                TemplateCommand templateCommandToRun = candidates.Single();
+                templateCommandToRun.SetHandler((InvocationContext context) => templateCommandToRun.InvokeAsync(context, telemetryLogger));
+                commandToRun.AddCommand(templateCommandToRun);
                 return (NewCommandStatus)await commandToRun.InvokeAsync(args.TokensToInvoke).ConfigureAwait(false);
             }
             else if (candidates.Any())

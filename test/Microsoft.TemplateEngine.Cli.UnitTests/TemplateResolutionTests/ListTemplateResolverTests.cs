@@ -517,7 +517,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         private static ListCommandArgs GetListCommandArgsFor(string commandInput)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse(commandInput);
             return new ListCommandArgs((ListCommand)parseResult.CommandResult.Command, parseResult);

@@ -154,7 +154,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new {command}");
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);

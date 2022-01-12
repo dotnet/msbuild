@@ -14,11 +14,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal class BaseUninstallCommand : BaseCommand<UninstallCommandArgs>
     {
         internal BaseUninstallCommand(
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks,
             string commandName)
-            : base(host, logger, callbacks, commandName, SymbolStrings.Command_Uninstall_Description)
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_Uninstall_Description)
         {
             this.AddArgument(NameArgument);
         }
@@ -29,11 +29,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(0, 99)
         };
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(UninstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected override async Task<NewCommandStatus> ExecuteAsync(
+            UninstallCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            ITelemetryLogger telemetryLogger,
+            InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
-                TelemetryLogger,
+                telemetryLogger,
                 environmentSettings,
                 templatePackageManager);
 

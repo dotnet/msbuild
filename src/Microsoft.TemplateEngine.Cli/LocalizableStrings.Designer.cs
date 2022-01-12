@@ -1060,6 +1060,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No templates installed..
+        /// </summary>
+        internal static string NoTemplatesFound {
+            get {
+                return ResourceManager.GetString("NoTemplatesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No templates found matching: {0}..
         /// </summary>
         internal static string NoTemplatesMatchingInputParameters {

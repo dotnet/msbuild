@@ -19,18 +19,19 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal abstract class BaseCommand : Command
     {
-        private readonly ITemplateEngineHost _host;
+        private readonly Func<ParseResult, ITemplateEngineHost> _host;
+        private readonly Func<ParseResult, ITelemetryLogger> _telemetryLogger;
 
         protected BaseCommand(
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks,
             string name,
             string description)
             : base(name, description)
         {
-            _host = host;
-            TelemetryLogger = logger;
+            _hostBuilder = hostBuilder;
+            _telemetryLoggerBuilder = telemetryLoggerBuilder;
             Callbacks = callbacks;
             this.AddOption(DebugCustomSettingsLocationOption);
             this.AddOption(DebugVirtualizeSettingsOption);
@@ -41,7 +42,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         }
 
         protected BaseCommand(BaseCommand baseCommand, string name, string description)
-             : this(baseCommand._host, baseCommand.TelemetryLogger, baseCommand.Callbacks, name, description) { }
+             : this(baseCommand._host, baseCommand._telemetryLogger, baseCommand.Callbacks, name, description) { }
 
         internal Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive")
         {
@@ -79,8 +80,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IsHidden = true
         };
 
-        internal ITelemetryLogger TelemetryLogger { get; }
-
         internal NewCommandCallbacks Callbacks { get; }
 
         protected IEngineEnvironmentSettings CreateEnvironmentSettings(GlobalArgs args, ParseResult parseResult)
@@ -90,11 +89,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //for template instantiaton it has to be reparsed
             string? outputPath = ParseOutputOption(parseResult);
             IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
-                new CliTemplateEngineHost(_host, outputPath),
+                new CliTemplateEngineHost(_host(parseResult), outputPath),
                 settingsLocation: args.DebugCustomSettingsLocation,
                 virtualizeSettings: args.DebugVirtualizeSettings,
                 environment: new CliEnvironment());
             return environmentSettings;
+        }
+
+        protected ITelemetryLogger CreateTelemetryLogger(ParseResult parseResult)
+        {
+            return _telemetryLogger(parseResult);
         }
 
         private static string? ParseOutputOption(ParseResult commandParseResult)
@@ -117,12 +121,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal abstract class BaseCommand<TArgs> : BaseCommand, ICommandHandler where TArgs : GlobalArgs
     {
         internal BaseCommand(
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks,
             string name,
             string description)
-            : base(host, logger, callbacks, name, description)
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, name, description)
         {
             this.Handler = this;
         }
@@ -135,6 +139,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             TArgs args = ParseContext(context.ParseResult);
             IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
+            ITelemetryLogger telemetryLogger = CreateTelemetryLogger(context.ParseResult);
 
             CancellationToken cancellationToken = context.GetCancellationToken();
 
@@ -143,7 +148,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
                 {
                     await HandleGlobalOptionsAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
-                    return (int)await ExecuteAsync(args, environmentSettings, context).ConfigureAwait(false);
+                    return (int)await ExecuteAsync(args, environmentSettings, telemetryLogger, context).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -193,7 +198,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return base.GetCompletions(context);
         }
 
-        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
+        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context);
 
         protected abstract TArgs ParseContext(ParseResult parseResult);
 

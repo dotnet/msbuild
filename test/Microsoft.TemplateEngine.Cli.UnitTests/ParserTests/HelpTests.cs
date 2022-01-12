@@ -73,7 +73,7 @@ Author: Me
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             StringWriter sw = new StringWriter();
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
@@ -87,7 +87,7 @@ Author: Me
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             StringWriter sw = new StringWriter();
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
@@ -108,7 +108,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -132,7 +132,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -156,7 +156,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -180,7 +180,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -205,7 +205,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -232,7 +232,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand1 = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
@@ -258,7 +258,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -287,7 +287,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand1 = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
@@ -313,7 +313,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -338,7 +338,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -362,7 +362,7 @@ Author: Me
 
             ITemplateEngineHost host = TestHost.GetVirtualHost();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             StringWriter sw = new StringWriter();
@@ -384,7 +384,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -409,7 +409,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());

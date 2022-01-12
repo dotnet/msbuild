@@ -3,7 +3,7 @@ Microsoft.TemplateEngine.Cli.Commands.ICustomHelp.CustomHelpLayout() -> System.C
 Microsoft.TemplateEngine.Cli.NewCommandCallbacks
 Microsoft.TemplateEngine.Cli.NewCommandCallbacks.NewCommandCallbacks() -> void
 Microsoft.TemplateEngine.Cli.NewCommandFactory
-static Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(string! commandName, Microsoft.TemplateEngine.Abstractions.ITemplateEngineHost! host, Microsoft.TemplateEngine.Cli.ITelemetryLogger! telemetryLogger, Microsoft.TemplateEngine.Cli.NewCommandCallbacks! callbacks) -> System.CommandLine.Command!
+static Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(string! commandName, System.Func<System.CommandLine.Parsing.ParseResult!, Microsoft.TemplateEngine.Abstractions.ITemplateEngineHost!>! hostBuilder, System.Func<System.CommandLine.Parsing.ParseResult!, Microsoft.TemplateEngine.Cli.ITelemetryLogger!>! telemetryLoggerBuilder, Microsoft.TemplateEngine.Cli.NewCommandCallbacks! callbacks) -> System.CommandLine.Command!
 ~Microsoft.TemplateEngine.Cli.NewCommandCallbacks.OnFirstRun.get -> System.Action<Microsoft.TemplateEngine.Abstractions.IEngineEnvironmentSettings>
 ~Microsoft.TemplateEngine.Cli.NewCommandCallbacks.OnFirstRun.set -> void
 ~Microsoft.TemplateEngine.Cli.NewCommandCallbacks.RestoreProject.get -> System.Func<string, bool>

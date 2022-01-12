@@ -3,13 +3,18 @@
 
 #nullable enable
 
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class AliasAddCommand : BaseAliasAddCommand
     {
-        internal AliasAddCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "add")
+        internal AliasAddCommand(
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
+            NewCommandCallbacks callbacks)
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, "add")
         {
             IsHidden = true;
         }

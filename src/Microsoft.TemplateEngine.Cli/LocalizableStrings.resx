@@ -767,4 +767,7 @@ The header is followed by the list of parameters and their errors (might be seve
     <value>Default value for argument missing for option: '{0}'.</value>
     <comment>{0} - option name</comment>
   </data>
+  <data name="NoTemplatesFound" xml:space="preserve">
+    <value>No templates installed.</value>
+  </data>
 </root>

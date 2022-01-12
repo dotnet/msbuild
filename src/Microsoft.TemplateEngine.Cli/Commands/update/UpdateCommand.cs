@@ -13,10 +13,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public UpdateCommand(
                 NewCommand parentCommand,
-                ITemplateEngineHost host,
-                ITelemetryLogger logger,
+                Func<ParseResult, ITemplateEngineHost> hostBuilder,
+                Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
                 NewCommandCallbacks callbacks)
-            : base(parentCommand, host, logger, callbacks, "update", SymbolStrings.Command_Update_Description)
+            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, callbacks, "update", SymbolStrings.Command_Update_Description)
         {
             parentCommand.AddNoLegacyUsageValidators(this);
             this.AddOption(CheckOnlyOption);

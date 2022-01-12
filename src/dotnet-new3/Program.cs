@@ -4,6 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text;
+using Microsoft.TemplateEngine.Cli;
 
 namespace Dotnet_new3
 {
@@ -22,7 +23,9 @@ namespace Dotnet_new3
                     Console.OutputEncoding = Encoding.UTF8;
                 }
             }
-            return ParserFactory.CreateParser(new New3Command(), disableHelp: true).Parse(args).InvokeAsync();
+
+            Command newCommand = New3CommandFactory.Create();
+            return ParserFactory.CreateParser(newCommand).Parse(args).InvokeAsync();
         }
     }
 }

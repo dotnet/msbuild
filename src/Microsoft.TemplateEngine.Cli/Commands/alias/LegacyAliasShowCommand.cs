@@ -3,13 +3,18 @@
 
 #nullable enable
 
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class LegacyAliasShowCommand : BaseAliasShowCommand
     {
-        internal LegacyAliasShowCommand(ITemplateEngineHost host, ITelemetryLogger logger, NewCommandCallbacks callbacks) : base(host, logger, callbacks, "--show-alias")
+        internal LegacyAliasShowCommand(
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
+            NewCommandCallbacks callbacks)
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, "--show-alias")
         {
             IsHidden = true;
         }

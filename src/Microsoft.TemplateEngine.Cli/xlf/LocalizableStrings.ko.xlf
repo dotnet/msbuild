@@ -573,6 +573,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">복원할 기본 출력이 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoTemplatesFound">
+        <source>No templates installed.</source>
+        <target state="new">No templates installed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">일치하는 템플릿이 없음:{0}.</target>

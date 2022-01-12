@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Uninstall_NoArguments(string commandName)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new {commandName}");
             UninstallCommandArgs args = new UninstallCommandArgs((BaseUninstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -34,7 +34,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Uninstall_WithArgument(string commandName)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new {commandName} source");
             UninstallCommandArgs args = new UninstallCommandArgs((BaseUninstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -51,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Uninstall_WithMultipleArgument(string command)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse(command);
             UninstallCommandArgs args = new UninstallCommandArgs((BaseUninstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -72,7 +72,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Uninstall_CanReturnParseError(string command, string expectedInvalidTokens)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse(command);
             var errorMessages = parseResult.Errors.Select(error => error.Message);

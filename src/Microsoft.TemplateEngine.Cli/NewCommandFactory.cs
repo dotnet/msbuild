@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 
@@ -11,18 +12,18 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public static class NewCommandFactory
     {
-        public static Command Create(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks)
+        public static Command Create(string commandName, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder, NewCommandCallbacks callbacks)
         {
             if (string.IsNullOrWhiteSpace(commandName))
             {
                 throw new ArgumentException($"'{nameof(commandName)}' cannot be null or whitespace.", nameof(commandName));
             }
 
-            _ = host ?? throw new ArgumentNullException(nameof(host));
-            _ = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
+            _ = hostBuilder ?? throw new ArgumentNullException(nameof(hostBuilder));
+            _ = telemetryLoggerBuilder ?? throw new ArgumentNullException(nameof(telemetryLoggerBuilder));
             _ = callbacks ?? throw new ArgumentNullException(nameof(callbacks));
 
-            return new NewCommand(commandName, host, telemetryLogger, callbacks);
+            return new NewCommand(commandName, hostBuilder, telemetryLoggerBuilder, callbacks);
         }
     }
 }

@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -12,10 +13,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public LegacyUpdateCheckCommand(
             NewCommand parentCommand,
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks)
-            : base(parentCommand, host, logger, callbacks, "--update-check", SymbolStrings.Command_Update_Description)
+            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, callbacks, "--update-check", SymbolStrings.Command_Update_Description)
         {
             this.IsHidden = true;
             parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });

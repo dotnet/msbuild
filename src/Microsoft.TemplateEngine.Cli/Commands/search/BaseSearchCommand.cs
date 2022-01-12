@@ -27,11 +27,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal BaseSearchCommand(
             NewCommand parentCommand,
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks,
             string commandName)
-            : base(host, logger, callbacks, commandName, SymbolStrings.Command_Search_Description)
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_Search_Description)
         {
             ParentCommand = parentCommand;
             Filters = SetupFilterOptions(SupportedFilters);
@@ -54,7 +54,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal NewCommand ParentCommand { get; }
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(SearchCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected override async Task<NewCommandStatus> ExecuteAsync(
+            SearchCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            ITelemetryLogger telemetryLogger,
+            InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             //we need to await, otherwise templatePackageManager will be disposed.

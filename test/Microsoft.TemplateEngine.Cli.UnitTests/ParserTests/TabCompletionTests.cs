@@ -23,7 +23,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Instantiate_CanSuggestTemplateOption_StartsWith()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new console --framework net7.0 --l");
             var suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
@@ -39,7 +39,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Instantiate_CanSuggestLanguages()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new console --language ");
             var suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
@@ -56,7 +56,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_GetSuggestionsAfterInteractive()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new install --interactive ");
             var result = parseResult.GetCompletions().Select(l => l.Label).ToArray();
@@ -69,7 +69,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_GetSuggestionsAfterOptionWithoutArg()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new install --nuget-source ");
             var result = parseResult.GetCompletions().ToArray();
@@ -83,7 +83,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_GetSuggestionsAfterOptionWithArg()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new install --nuget-source me");
             var result = parseResult.GetCompletions().Select(l => l.Label).ToArray();
@@ -96,7 +96,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Instantiate_CanSuggestTemplate_StartsWith()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new co");
             var suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
@@ -118,7 +118,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo --testChoice ");
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
@@ -144,7 +144,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo --testChoice v");
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
@@ -169,7 +169,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo --testChoice v --name test");
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
@@ -198,7 +198,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo --testChoice ");
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
@@ -226,7 +226,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo --testChoice v");
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
@@ -256,7 +256,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo ");
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
@@ -298,7 +298,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo --t");
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
@@ -342,7 +342,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo --foo val1 --bar val2 --t");
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
@@ -384,7 +384,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo {optionName} ");
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
@@ -412,7 +412,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             var parseResult = instantiateCommand.Parse($" new foo --type ");
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);

@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_CanParseAddSourceOption(string optionName)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new update {optionName} my-custom-source");
             UpdateCommandArgs args = new UpdateCommandArgs((UpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -33,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_Error_WhenArguments(string commandName)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new {commandName} source");
 
@@ -47,7 +47,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_CanParseAddSourceOption_MultipleEntries(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((UpdateCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -60,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_CanParseInteractiveOption()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new update --interactive");
             UpdateCommandArgs args = new UpdateCommandArgs((UpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -79,7 +79,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_CanParseCheckOnlyOption(string optionAlias)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new update {optionAlias}");
             UpdateCommandArgs args = new UpdateCommandArgs((UpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -96,7 +96,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_Legacy_CanParseCheckOnlyOption()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse($"new --update-check");
             UpdateCommandArgs args = new UpdateCommandArgs((LegacyUpdateCheckCommand)parseResult.CommandResult.Command, parseResult);
@@ -116,7 +116,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_Legacy_CanParseAddSourceOption(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((BaseUpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -131,7 +131,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_Legacy_CanParseInteractiveOption(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((BaseUpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -146,7 +146,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_Legacy_CanParseAddSourceOption_MultipleEntries(string testCase)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((BaseUpdateCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -166,7 +166,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Update_CanReturnParseError(string command, string expectedInvalidTokens)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse(command);
             var errorMessages = parseResult.Errors.Select(error => error.Message);

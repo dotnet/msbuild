@@ -15,11 +15,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal BaseInstallCommand(
             NewCommand parentCommand,
-            ITemplateEngineHost host,
-            ITelemetryLogger logger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks,
             string commandName)
-            : base(host, logger, callbacks, commandName, SymbolStrings.Command_Install_Description)
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_Install_Description)
         {
             ParentCommand = parentCommand;
             this.AddArgument(NameArgument);
@@ -39,11 +39,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected NewCommand ParentCommand { get; }
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected override async Task<NewCommandStatus> ExecuteAsync(
+            InstallCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            ITelemetryLogger telemetryLogger,
+            InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
-                TelemetryLogger,
+                telemetryLogger,
                 environmentSettings,
                 templatePackageManager);
 

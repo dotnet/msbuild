@@ -14,7 +14,7 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class TemplateCommand : Command, ICommandHandler
+    internal class TemplateCommand : Command
     {
         private static readonly string[] _helpAliases = new[] { "-h", "/h", "--help", "-?", "/?" };
         private readonly TemplatePackageManager _templatePackageManager;
@@ -110,7 +110,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
 
             AddTemplateOptionsToCommand(template);
-            this.Handler = this;
         }
 
         internal static IReadOnlyList<string> KnownHelpAliases => _helpAliases;
@@ -153,14 +152,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal CliTemplateInfo Template => _template;
 
-        public async Task<int> InvokeAsync(InvocationContext context)
+        public async Task<int> InvokeAsync(InvocationContext context, ITelemetryLogger telemetryLogger)
         {
             TemplateCommandArgs args = new TemplateCommandArgs(this, context.ParseResult);
 
-            TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, _instantiateCommand.TelemetryLogger, () => Console.ReadLine() ?? string.Empty, _instantiateCommand.Callbacks);
+            TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, telemetryLogger, () => Console.ReadLine() ?? string.Empty, _instantiateCommand.Callbacks);
             if (!args.NoUpdateCheck)
             {
-                TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_instantiateCommand.TelemetryLogger, _environmentSettings, _templatePackageManager);
+                TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(telemetryLogger, _environmentSettings, _templatePackageManager);
                 Task<CheckUpdateResult?> checkForUpdateTask = packageCoordinator.CheckUpdateForTemplate(args.Template, context.GetCancellationToken());
                 Task<NewCommandStatus> instantiateTask = invoker.InvokeTemplateAsync(args, context.GetCancellationToken());
                 await Task.WhenAll(checkForUpdateTask, instantiateTask).ConfigureAwait(false);

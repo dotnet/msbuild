@@ -41,19 +41,8 @@ namespace Dotnet_new3
                     input += " ";
                 }
 
-                Command new3Command = new New3Command();
-
-                //help is disabled for pre-parsing and should be handled by NewCommand instead.
-                ParseResult preParseResult = ParserFactory
-                    .CreateParser(new3Command, disableHelp: true)
-                    .Parse(input);
-
-                DefaultTemplateEngineHost host = HostFactory.CreateHost(preParseResult.GetValueForOption(New3Command.DebugDisableBuiltInTemplatesOption));
-                ITelemetryLogger telemetryLogger = new TelemetryLogger(null, preParseResult.GetValueForOption(New3Command.DebugEmitTelemetryOption));
-                string[] remainingArgs = preParseResult.GetValueForArgument(New3Command.RemainingTokensArgument) ?? Array.Empty<string>();
-
-                Command newCommand = NewCommandFactory.Create(new3Command.Name, host, telemetryLogger, new NewCommandCallbacks());
-                ParseResult newCommandResult = ParserFactory.CreateParser(newCommand).Parse(remainingArgs, rawInput: input);
+                Command newCommand = New3CommandFactory.Create();
+                ParseResult newCommandResult = ParserFactory.CreateParser(newCommand).Parse(input);
                 foreach (CompletionItem suggestion in newCommandResult.GetCompletions(position).Distinct())
                 {
                     Console.WriteLine(suggestion.Label);

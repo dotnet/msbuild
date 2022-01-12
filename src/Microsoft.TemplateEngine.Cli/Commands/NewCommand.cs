@@ -14,23 +14,23 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal NewCommand(
             string commandName,
-            ITemplateEngineHost host,
-            ITelemetryLogger telemetryLogger,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder,
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             NewCommandCallbacks callbacks)
-            : base(host, telemetryLogger, callbacks, commandName, SymbolStrings.Command_New_Description)
+            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_New_Description)
         {
             this.TreatUnmatchedTokensAsErrors = true;
 
             //it is important that legacy commands are built before non-legacy, as non legacy commands are building validators that rely on legacy stuff
-            BuildLegacySymbols(host, telemetryLogger, callbacks);
+            BuildLegacySymbols(hostBuilder, telemetryLoggerBuilder, callbacks);
 
-            this.Add(new InstantiateCommand(host, telemetryLogger, callbacks));
-            this.Add(new InstallCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new UninstallCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new UpdateCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new SearchCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new ListCommand(this, host, telemetryLogger, callbacks));
-            this.Add(new AliasCommand(host, telemetryLogger, callbacks));
+            this.Add(new InstantiateCommand(hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new InstallCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new UninstallCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new UpdateCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new SearchCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new ListCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new AliasCommand(hostBuilder, telemetryLoggerBuilder, callbacks));
         }
 
         protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
@@ -53,11 +53,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         }
 
-        protected override Task<NewCommandStatus> ExecuteAsync(NewCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(
+            NewCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            ITelemetryLogger telemetryLogger,
+            InvocationContext context)
         {
             InstantiateCommand command = InstantiateCommand.FromNewCommand(this);
             ParseResult reparseResult = ParserFactory.CreateParser(command).Parse(args.Tokens);
-            return command.ExecuteAsync(reparseResult, environmentSettings, context);
+            return command.ExecuteAsync(reparseResult, environmentSettings, telemetryLogger, context);
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

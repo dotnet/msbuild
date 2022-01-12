@@ -24,7 +24,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public Task RootCommand_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new ");
             var result = parseResult.GetCompletions().ToArray();
@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public Task RootCommand_GetStartsWtihSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new c");
             var result = parseResult.GetCompletions().ToArray();
@@ -48,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public Task Install_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new install ");
             var result = parseResult.GetCompletions().ToArray();
@@ -60,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public Task Uninstall_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new uninstall ");
             var result = parseResult.GetCompletions().ToArray();
@@ -72,7 +72,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public Task Update_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new update ");
             var result = parseResult.GetCompletions().ToArray();
@@ -84,7 +84,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public Task List_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new list ");
             var result = parseResult.GetCompletions().ToArray();
@@ -96,7 +96,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public Task Search_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new search ");
             var result = parseResult.GetCompletions().ToArray();
@@ -108,7 +108,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public Task Create_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new create ");
             var result = parseResult.GetCompletions().ToArray();
@@ -120,7 +120,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public Task TemplateCommand_GetAllSuggestions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", host, new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
             var parseResult = myCommand.Parse("new console ");
             var result = parseResult.GetCompletions().ToArray();

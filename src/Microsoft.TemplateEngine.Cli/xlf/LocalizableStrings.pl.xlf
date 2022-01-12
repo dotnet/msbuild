@@ -573,6 +573,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Brak podstawowych danych wyjściowych do przywrócenia.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoTemplatesFound">
+        <source>No templates installed.</source>
+        <target state="new">No templates installed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="translated">Nie stwierdzono dopasowania żadnych szablonów: {0}.</target>
