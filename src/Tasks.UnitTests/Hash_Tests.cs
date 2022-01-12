@@ -105,6 +105,8 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
 #pragma warning disable CA5350
+        // This test verifies that hash computes correctly for various numbers of characters.
+        // We would like to process edge of the buffer use cases regardless on the size of the buffer.
         [Fact]
         public void HashTaskDifferentInputSizesTest()
         {
