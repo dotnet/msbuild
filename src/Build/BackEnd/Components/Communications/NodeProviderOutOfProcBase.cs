@@ -208,7 +208,7 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_NODE_REUSE
             // Try to connect to idle nodes if node reuse is enabled.
-            if (_componentHost.BuildParameters.EnableNodeReuse)
+            if (_componentHost.BuildParameters.EnableNodeReuse && ((hostHandshake.RetrieveHandshakeComponents()[0] & 0x01) == 0 || Traits.Instance.EscapeHatches.ReuseTaskHostNodes))
             {
                 (string expectedProcessName, List<Process> processes) runningNodesTuple = GetPossibleRunningNodes(msbuildLocation);
 

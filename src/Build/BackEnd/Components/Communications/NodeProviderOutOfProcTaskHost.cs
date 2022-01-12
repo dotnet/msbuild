@@ -3,12 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -457,26 +458,16 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
-            NodeContext context;
-            bool nodeCreationSucceeded;
-            if (!_nodeContexts.TryGetValue(hostContext, out context))
-            {
-                nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration);
-            }
-            else
-            {
-                // node already exists, so "creation" automatically succeeded
-                nodeCreationSucceeded = true;
-            }
+            bool nodeCreationSucceeded = (Traits.Instance.EscapeHatches.ReuseTaskHostNodes && _nodeContexts.ContainsKey(hostContext)) // Node already exists, so "creation" automatically succeeded.
+                || CreateNode(hostContext, factory, handler, configuration);
 
             if (nodeCreationSucceeded)
             {
-                context = _nodeContexts[hostContext];
                 _nodeIdToPacketFactory[(int)hostContext] = factory;
                 _nodeIdToPacketHandler[(int)hostContext] = handler;
 
                 // Configure the node.
-                context.SendData(configuration);
+                _nodeContexts[hostContext].SendData(configuration);
                 return true;
             }
 
