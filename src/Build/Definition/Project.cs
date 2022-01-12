@@ -38,7 +38,7 @@ using Microsoft.Build.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
-    using Utilities = Internal.Utilities;
+    using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
     /// Represents an evaluated project with design time semantics.
