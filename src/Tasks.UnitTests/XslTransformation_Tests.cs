@@ -864,7 +864,6 @@ namespace Microsoft.Build.UnitTests
             string doubleTypePath = Path.Combine(dir, "double.dll");
 
             CompileDoubleType(doubleTypePath);
-
             {
                 XslTransformation t = new XslTransformation();
                 t.BuildEngine = engine;
@@ -912,7 +911,6 @@ namespace Microsoft.Build.UnitTests
             // outputPaths have one output path, lets duplicate it
             TaskItem[] outputMultiPaths = new TaskItem[] { new TaskItem(outputPaths[0].ItemSpec + ".1.xml"),
                 new TaskItem(outputPaths[0].ItemSpec + ".2.xml"), new TaskItem(outputPaths[0].ItemSpec + ".3.xml"), new TaskItem(outputPaths[0].ItemSpec + ".4.xml") };
-
             {
                 XslTransformation t = new XslTransformation();
                 t.BuildEngine = engine;

@@ -53,7 +53,6 @@ namespace Microsoft.Build.Internal
             string directoryEscaped,
             string filespecEscaped
             )
-
         {
             return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: false, forceEvaluateWildCards: false, excludeSpecsEscaped: null, fileMatcher: FileMatcher.Default);
         }
