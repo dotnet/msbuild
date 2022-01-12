@@ -282,7 +282,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 ErrorUtilities.VerifyThrowInternalError(
                     LateInitializationForVSWorkaroundCompleted is null ||
-                    _projectCacheDescriptor.VsWorkaround && LateInitializationForVSWorkaroundCompleted.Task.IsCompleted,
+                    (_projectCacheDescriptor.VsWorkaround && LateInitializationForVSWorkaroundCompleted.Task.IsCompleted),
                     "Completion source should be null when this is not the VS workaround");
 
                 BuildRequestData buildRequest = new BuildRequestData(
@@ -314,7 +314,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 var buildingProject = project.GlobalPropertiesDictionary[DesignTimeProperties.BuildingProject]?.EvaluatedValue;
 
                 return MSBuildStringIsTrue(designTimeBuild) ||
-                       buildingProject != null && !MSBuildStringIsTrue(buildingProject);
+                       (buildingProject != null && !MSBuildStringIsTrue(buildingProject));
             }
 
             void EvaluateProjectIfNecessary(CacheRequest request)
