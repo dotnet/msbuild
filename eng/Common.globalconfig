@@ -956,7 +956,7 @@ dotnet_diagnostic.SA1405.severity = suggestion
 dotnet_diagnostic.SA1407.severity = suggestion
 
 # Conditional expressions should declare precedence
-dotnet_diagnostic.SA1408.severity = suggestion
+dotnet_diagnostic.SA1408.severity = warning
 
 dotnet_diagnostic.SA1410.severity = none
 
