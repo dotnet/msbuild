@@ -3454,7 +3454,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     return new Project(p, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, c)
                         .Items
                         .Where(i => i.ItemType.Equals("i"))
-                        .Select(i => (ObjectModelHelpers.TestItem) new ObjectModelHelpers.ProjectItemTestItemAdapter(i))
+                        .Select(i => (ObjectModelHelpers.ITestItem) new ObjectModelHelpers.ProjectItemTestItemAdapter(i))
                         .ToList();
                 },
                 project,
