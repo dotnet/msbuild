@@ -771,7 +771,7 @@ dotnet_diagnostic.SA1100.severity = suggestion
 
 dotnet_diagnostic.SA1101.severity = none
 
-dotnet_diagnostic.SA1102.severity = suggestion
+dotnet_diagnostic.SA1102.severity = warning
 
 # Code should not contain empty statements
 dotnet_diagnostic.SA1106.severity = suggestion
