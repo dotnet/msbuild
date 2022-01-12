@@ -413,8 +413,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             foreach (XmlAttribute xa in xe.Attributes)
                 se.AddAttribute(xa.Name, xa.Value);
             foreach (XmlNode xn in xe.ChildNodes)
+            {
                 if (xn.NodeType == XmlNodeType.Element)
                     se.AddChild(XmlElementToSecurityElement((XmlElement)xn));
+            }
+
             return se;
         }
 

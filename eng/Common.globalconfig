@@ -1022,7 +1022,7 @@ dotnet_diagnostic.SA1517.severity = none
 dotnet_diagnostic.SA1518.severity = suggestion
 
 # Braces should not be omitted from multi-line child statement
-dotnet_diagnostic.SA1519.severity = suggestion
+dotnet_diagnostic.SA1519.severity = warning
 
 # Use braces consistently
 dotnet_diagnostic.SA1520.severity = warning

@@ -3291,8 +3291,11 @@ namespace Microsoft.Build.Tasks
         {
             String postfix = mainAssembly ? ".resources" : a.GetName().CultureInfo.Name + ".resources";
             foreach (String manifestResourceName in a.GetManifestResourceNames())
+            {
                 if (manifestResourceName.EndsWith(postfix, StringComparison.OrdinalIgnoreCase))
                     return true;
+            }
+
             return false;
         }
 #endif
