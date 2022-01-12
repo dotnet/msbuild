@@ -597,7 +597,8 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Extension to IEnumerable of KVP of string, something to just return the somethings.
         /// </summary>
-        public static IEnumerable<T> Values<T>(this IEnumerable<KeyValuePair<string, T>> source) where T : class, IKeyed
+        public static IEnumerable<T> Values<T>(this IEnumerable<KeyValuePair<string, T>> source)
+            where T : class, IKeyed
         {
             foreach (var entry in source)
             {

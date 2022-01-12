@@ -11,7 +11,8 @@ namespace Microsoft.Build.Evaluation
     /// This interface represents an object which can act as a source of items for the Expander.
     /// </summary>
     /// <typeparam name="T">The type of items provided by the implementation.</typeparam>
-    internal interface IItemProvider<T> where T : IItem
+    internal interface IItemProvider<T>
+        where T : IItem
     {
         /// <summary>
         /// Returns a list of items with the specified item type.

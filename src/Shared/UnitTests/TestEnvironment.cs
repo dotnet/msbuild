@@ -99,7 +99,8 @@ namespace Microsoft.Build.UnitTests
         ///     Evaluate the test with the given invariant.
         /// </summary>
         /// <param name="invariant">Test invariant to assert unchanged on completion.</param>
-        public T WithInvariant<T>(T invariant) where T : TestInvariant
+        public T WithInvariant<T>(T invariant)
+            where T : TestInvariant
         {
             _invariants.Add(invariant);
             return invariant;
@@ -109,7 +110,8 @@ namespace Microsoft.Build.UnitTests
         ///     Evaluate the test with the given transient test state.
         /// </summary>
         /// <returns>Test state to revert on completion.</returns>
-        public T WithTransientTestState<T>(T transientState) where T : TransientTestState
+        public T WithTransientTestState<T>(T transientState)
+            where T : TransientTestState
         {
             _variants.Add(transientState);
             return transientState;

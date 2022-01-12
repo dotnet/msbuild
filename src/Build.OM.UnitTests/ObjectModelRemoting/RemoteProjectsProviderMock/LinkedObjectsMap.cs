@@ -173,7 +173,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return GetOrCreate(source.Key, source, context, out linked, slow);
         }
 
-        public bool GetOrCreate<LinkType, SourceType>(KeyType key, SourceType source, object context, out LinkType linked, bool slow = false) where LinkType : LinkedObject<SourceType>, new()
+        public bool GetOrCreate<LinkType, SourceType>(KeyType key, SourceType source, object context, out LinkType linked, bool slow = false)
+            where LinkType : LinkedObject<SourceType>, new()
         {
             if (source == null)
             {

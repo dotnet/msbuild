@@ -286,7 +286,8 @@ namespace Microsoft.Build.BackEnd
                 list = (List<T>) listAsInterface;
             }
 
-            public void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>
+            public void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory)
+                where L : IList<T>
             {
                 if (!TranslateNullable(list))
                 {
@@ -313,7 +314,8 @@ namespace Microsoft.Build.BackEnd
             /// <param name="collectionFactory">The factory to create the ICollection.</param>
             /// <typeparam name="T">The type contained in the collection.</typeparam>
             /// <typeparam name="L">The type of collection to be created.</typeparam>
-            public void Translate<T, L>(ref ICollection<T> collection, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : ICollection<T>
+            public void Translate<T, L>(ref ICollection<T> collection, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory)
+                where L : ICollection<T>
             {
                 if (!TranslateNullable(collection))
                 {
@@ -931,7 +933,8 @@ namespace Microsoft.Build.BackEnd
             /// <param name="collectionFactory">factory to create the IList</param>
             /// <typeparam name="T">A TaskItemType</typeparam>
             /// <typeparam name="L">IList subtype</typeparam>
-            public void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>
+            public void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory)
+                where L : IList<T>
             {
                 if (!TranslateNullable(list))
                 {
@@ -956,7 +959,8 @@ namespace Microsoft.Build.BackEnd
             /// <param name="collectionFactory">The factory to create the ICollection.</param>
             /// <typeparam name="T">The type contained in the collection.</typeparam>
             /// <typeparam name="L">The type of collection to be created.</typeparam>
-            public void Translate<T, L>(ref ICollection<T> collection, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : ICollection<T>
+            public void Translate<T, L>(ref ICollection<T> collection, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory)
+                where L : ICollection<T>
             {
                 if (!TranslateNullable(collection))
                 {

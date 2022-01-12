@@ -180,7 +180,8 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">An ITranslatable subtype</typeparam>
         /// <typeparam name="L">An IList subtype</typeparam>
         /// <param name="collectionFactory">factory to create a collection</param>
-        void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>;
+        void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory)
+            where L : IList<T>;
 
         /// <summary>
         /// Translates a collection of T into the specified type using an <see cref="ObjectTranslator{T}"/> and <see cref="NodePacketCollectionCreator{L}"/>
@@ -190,7 +191,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="collectionFactory">The factory to create the ICollection.</param>
         /// <typeparam name="T">The type contained in the collection.</typeparam>
         /// <typeparam name="L">The type of collection to be created.</typeparam>
-        void Translate<T, L>(ref ICollection<T> collection, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : ICollection<T>;
+        void Translate<T, L>(ref ICollection<T> collection, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory)
+            where L : ICollection<T>;
 
         /// <summary>
         /// Translates a DateTime.

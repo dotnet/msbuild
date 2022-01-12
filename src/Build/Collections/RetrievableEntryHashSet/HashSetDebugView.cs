@@ -12,7 +12,8 @@ namespace Microsoft.Build.Collections
     /// Debug view for HashSet
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class HashSetDebugView<T> where T : class, IKeyed
+    internal class HashSetDebugView<T>
+        where T : class, IKeyed
     {
         private readonly RetrievableEntryHashSet<T> _set;
 

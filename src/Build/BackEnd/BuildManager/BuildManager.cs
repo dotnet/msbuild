@@ -3022,7 +3022,8 @@ namespace Microsoft.Build.Execution
         /// Ensures that the packet type matches the expected type
         /// </summary>
         /// <typeparam name="I">The instance-type of packet being expected</typeparam>
-        private static I ExpectPacketType<I>(INodePacket packet, NodePacketType expectedType) where I : class, INodePacket
+        private static I ExpectPacketType<I>(INodePacket packet, NodePacketType expectedType)
+            where I : class, INodePacket
         {
             I castPacket = packet as I;
 

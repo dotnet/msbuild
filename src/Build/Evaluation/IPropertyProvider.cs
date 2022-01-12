@@ -9,7 +9,8 @@ namespace Microsoft.Build.Evaluation
     /// An interface representing an object which can provide properties to the Expander.
     /// </summary>
     /// <typeparam name="T">The type of properties provided.</typeparam>
-    internal interface IPropertyProvider<T> where T : class
+    internal interface IPropertyProvider<T>
+        where T : class
     {
         /// <summary>
         /// Returns a property with the specified name, or null if it was not found.

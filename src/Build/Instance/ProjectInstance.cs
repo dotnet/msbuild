@@ -2640,7 +2640,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <typeparam name="TValue">The value stored in the dictionary</typeparam>
         /// <param name="dictionary">Dictionary to clone.</param>
-        private static IDictionary<string, TValue> CreateCloneDictionary<TValue>(IDictionary<string, TValue> dictionary) where TValue : class, IKeyed
+        private static IDictionary<string, TValue> CreateCloneDictionary<TValue>(IDictionary<string, TValue> dictionary)
+            where TValue : class, IKeyed
         {
             if (dictionary == null)
             {

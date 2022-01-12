@@ -15,7 +15,8 @@ namespace Microsoft.Build.Tasks.InteropUtilities
     /// cache marshalled pointers for an RCW created in the current context.
     /// </summary>
     /// <typeparam name="T">Type of the RCW object</typeparam>
-    internal class RCWForCurrentContext<T> : IDisposable where T : class
+    internal class RCWForCurrentContext<T> : IDisposable
+        where T : class
     {
         /// <summary>
         /// The last RCW that was created for the current context.

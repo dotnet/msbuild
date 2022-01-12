@@ -29,7 +29,8 @@ namespace Microsoft.Build.BackEnd
         public static void Translate<T>(
             this ITranslator translator,
             ref T instance,
-            NodePacketValueFactory<T> valueFactory) where T : ITranslatable
+            NodePacketValueFactory<T> valueFactory)
+            where T : ITranslatable
         {
             if (!translator.TranslateNullable(instance))
             {
@@ -45,7 +46,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        static ObjectTranslator<T> AdaptFactory<T>(NodePacketValueFactory<T> valueFactory) where T : ITranslatable
+        static ObjectTranslator<T> AdaptFactory<T>(NodePacketValueFactory<T> valueFactory)
+            where T : ITranslatable
         {
             void TranslateUsingValueFactory(ITranslator translator, ref T objectToTranslate)
             {
@@ -58,7 +60,8 @@ namespace Microsoft.Build.BackEnd
         public static void Translate<T>(
             this ITranslator translator,
             ref List<T> list,
-            NodePacketValueFactory<T> valueFactory) where T : class, ITranslatable
+            NodePacketValueFactory<T> valueFactory)
+            where T : class, ITranslatable
         {
             translator.Translate(ref list, AdaptFactory(valueFactory));
         }
@@ -67,7 +70,9 @@ namespace Microsoft.Build.BackEnd
             this ITranslator translator,
             ref IList<T> list,
             NodePacketValueFactory<T> valueFactory,
-            NodePacketCollectionCreator<L> collectionFactory) where L : IList<T> where T : ITranslatable
+            NodePacketCollectionCreator<L> collectionFactory)
+            where L : IList<T>
+            where T : ITranslatable
         {
             translator.Translate(ref list, AdaptFactory(valueFactory), collectionFactory);
         }
@@ -75,7 +80,8 @@ namespace Microsoft.Build.BackEnd
         public static void TranslateArray<T>(
             this ITranslator translator,
             ref T[] array,
-            NodePacketValueFactory<T> valueFactory) where T : class, ITranslatable
+            NodePacketValueFactory<T> valueFactory)
+            where T : class, ITranslatable
         {
             translator.TranslateArray(ref array, AdaptFactory(valueFactory));
         }
@@ -84,7 +90,8 @@ namespace Microsoft.Build.BackEnd
             this ITranslator translator,
             ref Dictionary<string, T> dictionary,
             IEqualityComparer<string> comparer,
-            NodePacketValueFactory<T> valueFactory) where T : class, ITranslatable
+            NodePacketValueFactory<T> valueFactory)
+            where T : class, ITranslatable
         {
             translator.TranslateDictionary(ref dictionary, comparer, AdaptFactory(valueFactory));
         }
@@ -114,7 +121,8 @@ namespace Microsoft.Build.BackEnd
             this ITranslator translator,
             ref HashSet<T> hashSet,
             NodePacketValueFactory<T> valueFactory,
-            NodePacketCollectionCreator<HashSet<T>> collectionFactory) where T : class, ITranslatable
+            NodePacketCollectionCreator<HashSet<T>> collectionFactory)
+            where T : class, ITranslatable
         {
             if (!translator.TranslateNullable(hashSet))
                 return;

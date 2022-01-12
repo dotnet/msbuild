@@ -907,7 +907,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="commonKeys"></param>
         /// <param name="uniqueKeysInH1"></param>
         /// <param name="uniqueKeysInH2"></param>
-        private static void DiffHashtables<K, V>(IDictionary<K, V> h1, IDictionary<K, V> h2, out List<K> commonKeys, out List<K> uniqueKeysInH1, out List<K> uniqueKeysInH2) where K : class, IEquatable<K> where V : class
+        private static void DiffHashtables<K, V>(IDictionary<K, V> h1, IDictionary<K, V> h2, out List<K> commonKeys, out List<K> uniqueKeysInH1, out List<K> uniqueKeysInH2)
+            where K : class, IEquatable<K>
+            where V : class
         {
             commonKeys = new List<K>();
             uniqueKeysInH1 = new List<K>();

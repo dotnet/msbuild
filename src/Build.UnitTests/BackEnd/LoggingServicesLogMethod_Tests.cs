@@ -1925,7 +1925,8 @@ namespace Microsoft.Build.UnitTests.Logging
             #endregion
         }
 
-        private class EventArgsEqualityComparer<T> : IEqualityComparer<T> where T : BuildEventArgs
+        private class EventArgsEqualityComparer<T> : IEqualityComparer<T>
+            where T : BuildEventArgs
         {
             public bool Equals(T x, T y)
             {
