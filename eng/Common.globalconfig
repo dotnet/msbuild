@@ -892,7 +892,7 @@ dotnet_diagnostic.SA1212.severity = none
 dotnet_diagnostic.SA1214.severity = suggestion
 
 # Using static directives should be placed at the correct location
-dotnet_diagnostic.SA1216.severity = suggestion
+dotnet_diagnostic.SA1216.severity = warning
 
 # The using static directives within a C# code file are not sorted alphabetically by full type name.
 dotnet_diagnostic.SA1217.severity = suggestion
