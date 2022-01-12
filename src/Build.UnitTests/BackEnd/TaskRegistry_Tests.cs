@@ -701,7 +701,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         testProject.ProjectFile,
                         new Dictionary<string, string>(),
                         MSBuildConstants.CurrentToolsVersion,
-                        new string[] { },
+                        Array.Empty<string>(),
                         null);
 
                     var result = buildManager.Build(
