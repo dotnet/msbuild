@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if FEATURE_CULTUREINFO_CONSOLE_FALLBACK
 using System.Globalization;
-#endif
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -619,7 +617,6 @@ namespace Microsoft.Build.UnitTests
            );
         }
 
-#if FEATURE_CULTUREINFO_CONSOLE_FALLBACK
         /// <summary>
         /// Regression test for bug where the MSBuild.exe command-line app
         /// would sometimes set the UI culture to just "en" which is considered a "neutral" UI
@@ -645,7 +642,6 @@ namespace Microsoft.Build.UnitTests
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
         }
-#endif
 
 #if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
