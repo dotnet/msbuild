@@ -484,7 +484,11 @@ namespace Microsoft.Build.Tasks
         /// <value>The full path to this assembly.</value>
         internal string FullPath
         {
-            get { return _fullPath; }
+            get
+            {
+                return _fullPath;
+            }
+
             set
             {
                 if (_fullPath != value)

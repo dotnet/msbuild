@@ -52,10 +52,13 @@ namespace Microsoft.Build.Evaluation
 
                 public ItemData this[int index]
                 {
-                    get { return _listBuilder[index]; }
+                    get
+                    {
+                        return _listBuilder[index];
+                    }
+
                     set
                     {
-                        // Update the dictionary if it exists.
                         if (_dictionaryBuilder is not null)
                         {
                             ItemData oldItemData = _listBuilder[index];

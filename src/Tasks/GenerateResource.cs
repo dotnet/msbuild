@@ -259,11 +259,13 @@ namespace Microsoft.Build.Tasks
         {
             set
             {
-                // Since this string is passed directly into the framework, we don't want to
-                // try to validate it -- that might prevent future expansion of supported languages.
                 _stronglyTypedLanguage = value;
             }
-            get { return _stronglyTypedLanguage; }
+
+            get
+            {
+                return _stronglyTypedLanguage;
+            }
         }
 
         /// <summary>

@@ -150,16 +150,35 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string RelativePath
         {
+
+/* Unmerged change from project 'Microsoft.Build (net6.0)'
+Before:
             get { return _relativePath; }
+After:
+            get { return _relativePath;
+*/
+            get
+            {
+                return _relativePath;
+            }
+
+            }
+
             internal set
             {
+
+/* Unmerged change from project 'Microsoft.Build (net6.0)'
+Before:
 #if NETFRAMEWORK && !MONO
                 // Avoid loading System.Runtime.InteropServices.RuntimeInformation in full-framework
                 // cases. It caused https://github.com/NuGet/Home/issues/6918.
                 _relativePath = value;
 #else
                 _relativePath = FileUtilities.MaybeAdjustFilePath(value, ParentSolution.SolutionFileDirectory);
-#endif
+After:
+                _relativePath = FileUtilities.MaybeAdjustFilePath(value, ParentSolution.SolutionFileDirectory);
+*/
+                _relativePath = value;
             }
         }
 
