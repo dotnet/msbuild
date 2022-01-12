@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks
     /// </remarks>
     public class Hash : TaskExtension
     {
-        private static readonly char s_itemSeparatorCharacter = '\u2028';
+        private const char s_itemSeparatorCharacter = '\u2028';
 
         private static readonly Encoding s_encoding = Encoding.UTF8;
 
