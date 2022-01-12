@@ -840,7 +840,7 @@ dotnet_diagnostic.SA1131.severity = suggestion
 dotnet_diagnostic.SA1132.severity = warning
 
 # Do not combine attributes
-dotnet_diagnostic.SA1133.severity = suggestion
+dotnet_diagnostic.SA1133.severity = warning
 
 # Each attribute should be placed on its own line of code
 dotnet_diagnostic.SA1134.severity = suggestion
