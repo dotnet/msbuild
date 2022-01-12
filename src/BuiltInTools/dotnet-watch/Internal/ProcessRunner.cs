@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Watcher.Internal
                 process.Start();
 
                 var args = processSpec.EscapedArguments ?? string.Join(" ", processSpec.Arguments);
-                _reporter.Verbose($"Started '{processSpec.Executable}' '{args}' with process id {process.Id}");
+                _reporter.Verbose($"Started '{processSpec.Executable}' '{args}' with process id {process.Id}", emoji: "🚀");
 
                 if (readOutput)
                 {

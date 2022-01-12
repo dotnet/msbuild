@@ -1,5 +1,8 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Tools.Internal
 {
@@ -7,12 +10,8 @@ namespace Microsoft.Extensions.Tools.Internal
     /// This API supports infrastructure and is not intended to be used
     /// directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public interface IReporter
+    public interface IRequester
     {
-        public bool IsVerbose => false;
-        void Verbose(string message, string emoji = "⌚");
-        void Output(string message, string emoji = "⌚");
-        void Warn(string message, string emoji = "⌚");
-        void Error(string message, string emoji = "❌");
+        Task<ConsoleKey> GetKeyAsync(string prompt, Func<ConsoleKey, bool> validateInput, CancellationToken cancellationToken);
     }
 }

@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         [Fact]
         public async Task LaunchesBrowserOnStart()
         {
-            var expected = "watch : Launching browser: https://localhost:5001/";
+            var expected = "dotnet watch ⌚ Launching browser: https://localhost:5001/";
             var testAsset = _testAssetsManager.CopyTestAsset(AppName)
                 .WithSource()
                 .Path;
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         [Fact]
         public async Task UsesBrowserSpecifiedInEnvironment()
         {
-            var launchBrowserMessage = "watch : Launching browser: mycustombrowser.bat https://localhost:5001/";
+            var launchBrowserMessage = "dotnet watch ⌚ Launching browser: mycustombrowser.bat https://localhost:5001/";
             var testAsset = _testAssetsManager.CopyTestAsset(AppName)
                 .WithSource()
                 .Path;

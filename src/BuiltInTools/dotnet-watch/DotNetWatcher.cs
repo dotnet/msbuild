@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Watcher
                     var args = string.Join(" ", processSpec.Arguments);
                     _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: {args}");
 
-                    _reporter.Output("Started");
+                    _reporter.Output("Started", emoji: "🚀");
 
                     Task<FileItem?> fileSetTask;
                     Task finishedTask;
@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.Watcher
                         // Process exited. Redo evaludation
                         context.RequiresMSBuildRevaluation = true;
                         // Now wait for a file to change before restarting process
-                        context.ChangedFile = await fileSetWatcher.GetChangedFileAsync(cancellationToken, () => _reporter.Warn("Waiting for a file to change before restarting dotnet..."));
+                        context.ChangedFile = await fileSetWatcher.GetChangedFileAsync(cancellationToken, () => _reporter.Warn("Waiting for a file to change before restarting dotnet...", emoji: "⏳"));
                     }
                     else
                     {

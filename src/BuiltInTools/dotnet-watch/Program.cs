@@ -60,6 +60,7 @@ Examples:
         private readonly string _workingDirectory;
         private readonly CancellationTokenSource _cts;
         private IReporter _reporter;
+        private IRequester _requester;
 
         public Program(IConsole console, string workingDirectory)
         {
@@ -84,6 +85,7 @@ Examples:
             _cts = new CancellationTokenSource();
             console.CancelKeyPress += OnCancelKeyPress;
             _reporter = CreateReporter(verbose: true, quiet: false, console: _console);
+            _requester = new ConsoleRequester(_console, quiet: false);
 
             // Register listeners that load Roslyn-related assemblies from the `Rosyln/bincore` directory.
             RegisterAssemblyResolutionEvents(sdkRootDirectory);
@@ -164,6 +166,7 @@ Examples:
         {
             // update reporter as configured by options
             _reporter = CreateReporter(options.Verbose, options.Quiet, _console);
+            _requester = new ConsoleRequester(_console, quiet: options.Quiet);
 
             try
             {
@@ -180,7 +183,7 @@ Examples:
                 }
                 else
                 {
-                    return await MainInternalAsync(_reporter, options, _cts.Token);
+                    return await MainInternalAsync(options, _cts.Token);
                 }
             }
             catch (Exception ex)
@@ -204,13 +207,13 @@ Examples:
 
             if (args.Cancel)
             {
-                _reporter.Output("Shutdown requested. Press Ctrl+C again to force exit.");
+                _reporter.Output("Shutdown requested. Press Ctrl+C again to force exit.", emoji: "🛑");
             }
 
             _cts.Cancel();
         }
 
-        private async Task<int> MainInternalAsync(IReporter reporter, CommandLineOptions options, CancellationToken cancellationToken)
+        private async Task<int> MainInternalAsync(CommandLineOptions options, CancellationToken cancellationToken)
         {
             // TODO multiple projects should be easy enough to add here
             string projectFile;
@@ -220,7 +223,7 @@ Examples:
             }
             catch (FileNotFoundException ex)
             {
-                reporter.Error(ex.Message);
+                _reporter.Error(ex.Message);
                 return 1;
             }
 
@@ -240,7 +243,7 @@ Examples:
             var watchOptions = DotNetWatchOptions.Default;
             watchOptions.NonInteractive = options.NonInteractive;
 
-            var fileSetFactory = new MsBuildFileSetFactory(reporter,
+            var fileSetFactory = new MsBuildFileSetFactory(_reporter,
                 watchOptions,
                 projectFile,
                 waitOnError: true,
@@ -261,7 +264,7 @@ Examples:
                 _reporter.Output("Polling file watcher is enabled");
             }
 
-            var defaultProfile = LaunchSettingsProfile.ReadDefaultProfile(processInfo.WorkingDirectory, reporter) ?? new();
+            var defaultProfile = LaunchSettingsProfile.ReadDefaultProfile(processInfo.WorkingDirectory, _reporter) ?? new();
 
             var context = new DotNetWatchContext
             {
@@ -281,7 +284,7 @@ Examples:
                 // a) watch was invoked with no args or with exactly one arg - the run command e.g. `dotnet watch` or `dotnet watch run`
                 // b) The launch profile supports hot-reload based watching.
                 // The watcher will complain if users configure this for runtimes that would not support it.
-                await using var watcher = new HotReloadDotNetWatcher(reporter, fileSetFactory, watchOptions, _console);
+                await using var watcher = new HotReloadDotNetWatcher(_reporter, _requester, fileSetFactory, watchOptions, _console, _workingDirectory);
                 await watcher.WatchAsync(context, cancellationToken);
             }
             else
@@ -290,7 +293,7 @@ Examples:
 
                 // We'll use the presence of a profile to decide if we're going to use the hot-reload based watching.
                 // The watcher will complain if users configure this for runtimes that would not support it.
-                await using var watcher = new DotNetWatcher(reporter, fileSetFactory, watchOptions);
+                await using var watcher = new DotNetWatcher(_reporter, fileSetFactory, watchOptions);
                 await watcher.WatchAsync(context, cancellationToken);
             }
 
@@ -370,7 +373,7 @@ Examples:
         }
 
         private static IReporter CreateReporter(bool verbose, bool quiet, IConsole console)
-            => new PrefixConsoleReporter("watch : ", console, verbose || IsGlobalVerbose(), quiet);
+            => new ConsoleReporter(console, verbose || IsGlobalVerbose(), quiet);
 
         private static bool IsGlobalVerbose()
         {

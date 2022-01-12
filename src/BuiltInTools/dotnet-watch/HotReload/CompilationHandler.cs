@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
             if (applyState)
             {
-                _reporter.Output($"Hot reload of changes succeeded.");
+                _reporter.Output($"Hot reload of changes succeeded.", emoji: "🔥");
             }
 
             return applyState;

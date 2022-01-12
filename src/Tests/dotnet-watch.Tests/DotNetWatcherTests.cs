@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync(arguments: new[] { "wait" });
             var source = Path.Combine(app.SourceDirectory, "Program.cs");
-            const string messagePrefix = "watch : Running dotnet with the following arguments: run";
+            const string messagePrefix = "dotnet watch ⌚ Running dotnet with the following arguments: run";
 
             // Verify that the first run does not use --no-restore
             Assert.Contains(app.Process.Output, p => string.Equals(messagePrefix + " -- wait", p.Trim()));
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync(arguments: new[] { "wait" });
             var source = Path.Combine(app.SourceDirectory, "KitchenSink.csproj");
-            const string messagePrefix = "watch : Running dotnet with the following arguments: run";
+            const string messagePrefix = "dotnet watch ⌚ Running dotnet with the following arguments: run";
 
             // Verify that the first run does not use --no-restore
             Assert.Contains(app.Process.Output, p => string.Equals(messagePrefix + " -- wait", p.Trim()));

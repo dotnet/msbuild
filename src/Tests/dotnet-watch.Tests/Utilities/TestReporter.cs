@@ -14,24 +14,24 @@ namespace Microsoft.Extensions.Tools.Internal
             _output = output;
         }
 
-        public void Verbose(string message)
+        public void Verbose(string message, string emoji = "⌚")
         {
-            _output.WriteLine("verbose: " + message);
+            _output.WriteLine($"verbose {emoji} " + message);
         }
 
-        public void Output(string message)
+        public void Output(string message, string emoji = "⌚")
         {
-            _output.WriteLine("output: " + message);
+            _output.WriteLine($"output {emoji} " + message);
         }
 
-        public void Warn(string message)
+        public void Warn(string message, string emoji = "⌚")
         {
-            _output.WriteLine("warn: " + message);
+            _output.WriteLine($"warn {emoji} " + message);
         }
 
-        public void Error(string message)
+        public void Error(string message, string emoji = "❌")
         {
-            _output.WriteLine("error: " + message);
+            _output.WriteLine($"error {emoji} " + message);
         }
     }
 }

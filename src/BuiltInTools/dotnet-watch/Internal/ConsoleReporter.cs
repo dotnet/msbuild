@@ -2,7 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Tools.Internal
 {
@@ -31,10 +34,14 @@ namespace Microsoft.Extensions.Tools.Internal
         public bool IsVerbose { get; set; }
         public bool IsQuiet { get; set; }
 
-        protected virtual void WriteLine(TextWriter writer, string message, ConsoleColor? color)
+        private void WriteLine(TextWriter writer, string message, ConsoleColor? color, string emoji)
         {
             lock (_writeLock)
             {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                writer.Write($"dotnet watch {emoji} ");
+                Console.ResetColor();
+
                 if (color.HasValue)
                 {
                     Console.ForegroundColor = color.Value;
@@ -49,28 +56,34 @@ namespace Microsoft.Extensions.Tools.Internal
             }
         }
 
-        public virtual void Error(string message)
-            => WriteLine(Console.Error, message, ConsoleColor.Red);
-        public virtual void Warn(string message)
-            => WriteLine(Console.Out, message, ConsoleColor.Yellow);
+        public virtual void Error(string message, string emoji = "❌")
+        {
+            WriteLine(Console.Error, message, ConsoleColor.Red, emoji);
+        }
 
-        public virtual void Output(string message)
+        public virtual void Warn(string message, string emoji = "⌚")
+        {
+            WriteLine(Console.Out, message, ConsoleColor.Yellow, emoji);
+        }
+
+        public virtual void Output(string message, string emoji = "⌚")
         {
             if (IsQuiet)
             {
                 return;
             }
-            WriteLine(Console.Out, message, color: null);
+
+            WriteLine(Console.Out, message, color: null, emoji);
         }
 
-        public virtual void Verbose(string message)
+        public virtual void Verbose(string message, string emoji = "⌚")
         {
             if (!IsVerbose)
             {
                 return;
             }
 
-            WriteLine(Console.Out, message, ConsoleColor.DarkGray);
+            WriteLine(Console.Out, message, ConsoleColor.DarkGray, emoji);
         }
     }
 }
