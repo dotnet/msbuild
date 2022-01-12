@@ -16,6 +16,8 @@ using Xunit.Abstractions;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
@@ -523,7 +525,7 @@ namespace Microsoft.Build.UnitTests
 
                 MethodInfo generateCommandLineCommandsMethod = execType.GetMethod("GenerateCommandLineCommands", BindingFlags.Instance | BindingFlags.NonPublic);
 
-                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, new object[0]) as string;
+                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, Array.Empty<object>()) as string;
 
                 if (autoRunShouldBeDisabled)
                 {

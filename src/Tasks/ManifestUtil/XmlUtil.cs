@@ -13,6 +13,8 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal static class XmlUtil

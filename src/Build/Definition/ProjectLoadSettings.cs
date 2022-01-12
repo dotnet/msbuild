@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

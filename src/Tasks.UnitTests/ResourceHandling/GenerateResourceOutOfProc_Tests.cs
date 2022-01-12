@@ -13,6 +13,8 @@ using System.IO;
 using System.Threading;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 {
     [Trait("Category", "mono-osx-failing")]

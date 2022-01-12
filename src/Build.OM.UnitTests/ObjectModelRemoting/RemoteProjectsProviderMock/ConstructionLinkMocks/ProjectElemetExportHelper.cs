@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
@@ -77,7 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return exporter.Export<ProjectElement, RMock>(xml);
         }
 
-        private static bool IsOfType<T> (ProjectElement xml) { return xml is T; }
+        private static bool IsOfType<T>(ProjectElement xml) { return xml is T; }
 
         private static Dictionary<Type, ExporterFactory> knownTypes = new Dictionary<Type, ExporterFactory>();
 

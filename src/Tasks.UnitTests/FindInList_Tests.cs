@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class FindInList_Tests
@@ -90,7 +92,7 @@ namespace Microsoft.Build.UnitTests
             f.BuildEngine = new MockEngine();
             f.ItemSpecToFind = "a.cs";
             f.FindLastMatch = true;
-            f.List = new ITaskItem[] { };
+            f.List = Array.Empty<ITaskItem>();
             Assert.True(f.Execute());
             Assert.Null(f.ItemFound);
         }

@@ -11,6 +11,8 @@ using Xunit;
 
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class NativeMethodsShared_Tests

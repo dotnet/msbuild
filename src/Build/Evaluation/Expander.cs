@@ -28,6 +28,8 @@ using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.T
 
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

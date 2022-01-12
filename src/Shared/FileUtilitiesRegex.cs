@@ -3,6 +3,8 @@
 
 using System.Runtime.CompilerServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -13,8 +15,8 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class FileUtilitiesRegex
     {
-        private static readonly char _backSlash = '\\';
-        private static readonly char _forwardSlash = '/';
+        private const char _backSlash = '\\';
+        private const char _forwardSlash = '/';
 
         /// <summary>
         /// Indicates whether the specified string follows the pattern drive pattern (for example "C:", "D:").

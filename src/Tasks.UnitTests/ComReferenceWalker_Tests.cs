@@ -8,6 +8,8 @@ using System.Runtime.InteropServices.ComTypes;
 using COMException = System.Runtime.InteropServices.COMException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ComReferenceWalker_Tests

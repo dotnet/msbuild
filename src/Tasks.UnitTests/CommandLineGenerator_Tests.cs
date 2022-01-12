@@ -9,6 +9,8 @@ using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.Build.Tasks.Xaml;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class CommandLineGenerator_Tests

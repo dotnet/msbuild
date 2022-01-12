@@ -30,6 +30,8 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -1055,7 +1057,7 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-            private bool ReadAndRoutePacket(NodePacketType packetType, byte [] packetData, int packetLength)
+            private bool ReadAndRoutePacket(NodePacketType packetType, byte[] packetData, int packetLength)
             {
                 try
                 {

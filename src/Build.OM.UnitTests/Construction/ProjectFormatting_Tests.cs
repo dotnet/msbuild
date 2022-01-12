@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 {
     public class ProjectFormatting_Tests : IDisposable

@@ -17,6 +17,8 @@ using Microsoft.Win32;
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -348,7 +350,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        ///<summary>
+        /// <summary>
         /// Hash the string independent of bitness and target framework.
         /// </summary>
         internal static int StableStringHash(string toHash)

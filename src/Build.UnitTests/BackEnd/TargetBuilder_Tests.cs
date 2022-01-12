@@ -23,6 +23,8 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -1616,7 +1618,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             }
 
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testFile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0");
             Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
 
             config.Project = project.CreateProjectInstance();

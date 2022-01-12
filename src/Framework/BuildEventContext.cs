@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -25,7 +27,7 @@ namespace Microsoft.Build.Framework
         private readonly int _targetId;
 
         /// <summary>
-        ///The node-unique project request context the event was in
+        /// The node-unique project request context the event was in
         /// </summary>
         private readonly int _projectContextId;
 
