@@ -467,7 +467,6 @@ namespace Microsoft.Build.Collections
                     _listEnumerator.Dispose();
                     _listEnumerator = null;
                 }
-                GC.SuppressFinalize(this);
             }
 
             /// <summary>
