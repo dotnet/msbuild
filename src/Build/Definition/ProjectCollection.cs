@@ -31,7 +31,7 @@ using ObjectModel = System.Collections.ObjectModel;
 
 namespace Microsoft.Build.Evaluation
 {
-    using Utilities = Internal.Utilities;
+    using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
     /// Flags for controlling the toolset initialization.

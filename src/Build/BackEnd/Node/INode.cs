@@ -7,7 +7,7 @@ using System;
 
 namespace Microsoft.Build.BackEnd
 {
-    using NodeEngineShutdownReason = Execution.NodeEngineShutdownReason;
+    using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
 
     #region Delegates
     /// <summary>
