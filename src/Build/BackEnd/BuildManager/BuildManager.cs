@@ -1762,7 +1762,6 @@ namespace Microsoft.Build.Execution
                         ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
                         _overallBuildSuccess = false;
                     }
-
                 }
             }
         }

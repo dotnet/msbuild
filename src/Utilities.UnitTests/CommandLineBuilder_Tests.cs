@@ -467,7 +467,6 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
-        
     }
 
     internal static class CommandLineBuilderExtensionMethods

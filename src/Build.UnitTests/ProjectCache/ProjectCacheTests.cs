@@ -836,7 +836,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
             buildSession.Logger.AssertMessageCount("MSB4274", 1);
-
         }
 
         private void AssertCacheBuild(
