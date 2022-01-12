@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 #if FEATURE_APPDOMAIN
 using System.Threading;
 #endif
