@@ -75,28 +75,32 @@ namespace Microsoft.TemplateEngine.Cli
                 if (args.ListNameCriteria == null && !args.AppliedFilters.Any())
                 {
                     //No templates installed.
-                    Reporter.Error.WriteLine(LocalizableStrings.NoTemplatesFound.Bold().Red());
+                    Reporter.Output.WriteLine(LocalizableStrings.NoTemplatesFound);
+                    Reporter.Output.WriteLine();
+                    // To search for the templates on NuGet.org, run:
+                    Reporter.Output.WriteLine(LocalizableStrings.SearchTemplatesCommand);
+                    Reporter.Output.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, usePlaceholder: true));
+                    Reporter.Output.WriteLine();
+                    return NewCommandStatus.Success;
                 }
-                else
+
+                // at least one criteria was specified.
+                // No templates found matching the following input parameter(s): {0}.
+                Reporter.Error.WriteLine(
+                    string.Format(
+                        LocalizableStrings.NoTemplatesMatchingInputParameters,
+                        GetInputParametersString(args/*, appliedParameterMatches*/))
+                    .Bold().Red());
+
+                if (resolutionResult.HasTemplateGroupMatches)
                 {
-                    // at least one criteria was specified.
-                    // No templates found matching the following input parameter(s): {0}.
+                    // {0} template(s) partially matched, but failed on {1}.
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.NoTemplatesMatchingInputParameters,
-                            GetInputParametersString(args/*, appliedParameterMatches*/))
+                            LocalizableStrings.TemplatesNotValidGivenTheSpecifiedFilter,
+                            resolutionResult.TemplateGroups.Count(),
+                            GetPartialMatchReason(resolutionResult, args/*, appliedParameterMatches*/))
                         .Bold().Red());
-
-                    if (resolutionResult.HasTemplateGroupMatches)
-                    {
-                        // {0} template(s) partially matched, but failed on {1}.
-                        Reporter.Error.WriteLine(
-                            string.Format(
-                                LocalizableStrings.TemplatesNotValidGivenTheSpecifiedFilter,
-                                resolutionResult.TemplateGroups.Count(),
-                                GetPartialMatchReason(resolutionResult, args/*, appliedParameterMatches*/))
-                            .Bold().Red());
-                    }
                 }
 
                 Reporter.Error.WriteLine();

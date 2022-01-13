@@ -19,8 +19,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal abstract class BaseCommand : Command
     {
-        private readonly Func<ParseResult, ITemplateEngineHost> _host;
-        private readonly Func<ParseResult, ITelemetryLogger> _telemetryLogger;
+        private readonly Func<ParseResult, ITemplateEngineHost> _hostBuilder;
+        private readonly Func<ParseResult, ITelemetryLogger> _telemetryLoggerBuilder;
 
         protected BaseCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
@@ -33,52 +33,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             _hostBuilder = hostBuilder;
             _telemetryLoggerBuilder = telemetryLoggerBuilder;
             Callbacks = callbacks;
-            this.AddOption(DebugCustomSettingsLocationOption);
-            this.AddOption(DebugVirtualizeSettingsOption);
-            this.AddOption(DebugAttachOption);
-            this.AddOption(DebugReinitOption);
-            this.AddOption(DebugRebuildCacheOption);
-            this.AddOption(DebugShowConfigOption);
+
         }
 
         protected BaseCommand(BaseCommand baseCommand, string name, string description)
-             : this(baseCommand._host, baseCommand._telemetryLogger, baseCommand.Callbacks, name, description) { }
-
-        internal Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive")
-        {
-            Description = SymbolStrings.Option_Debug_CustomSettings,
-            IsHidden = true
-        };
-
-        internal Option<bool> DebugVirtualizeSettingsOption { get; } = new("--debug:ephemeral-hive")
-        {
-            Description = SymbolStrings.Option_Debug_VirtualSettings,
-            IsHidden = true
-        };
-
-        internal Option<bool> DebugAttachOption { get; } = new("--debug:attach")
-        {
-            Description = SymbolStrings.Option_Debug_Attach,
-            IsHidden = true
-        };
-
-        internal Option<bool> DebugReinitOption { get; } = new("--debug:reinit")
-        {
-            Description = SymbolStrings.Option_Debug_Reinit,
-            IsHidden = true
-        };
-
-        internal Option<bool> DebugRebuildCacheOption { get; } = new(new[] { "--debug:rebuild-cache", "--debug:rebuildcache" })
-        {
-            Description = SymbolStrings.Option_Debug_RebuildCache,
-            IsHidden = true
-        };
-
-        internal Option<bool> DebugShowConfigOption { get; } = new(new[] { "--debug:show-config", "--debug:showconfig" })
-        {
-            Description = SymbolStrings.Option_Debug_ShowConfig,
-            IsHidden = true
-        };
+             : this(baseCommand._hostBuilder, baseCommand._telemetryLoggerBuilder, baseCommand.Callbacks, name, description) { }
 
         internal NewCommandCallbacks Callbacks { get; }
 
@@ -89,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //for template instantiaton it has to be reparsed
             string? outputPath = ParseOutputOption(parseResult);
             IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
-                new CliTemplateEngineHost(_host(parseResult), outputPath),
+                new CliTemplateEngineHost(_hostBuilder(parseResult), outputPath),
                 settingsLocation: args.DebugCustomSettingsLocation,
                 virtualizeSettings: args.DebugVirtualizeSettings,
                 environment: new CliEnvironment());
@@ -98,7 +57,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected ITelemetryLogger CreateTelemetryLogger(ParseResult parseResult)
         {
-            return _telemetryLogger(parseResult);
+            return _telemetryLoggerBuilder(parseResult);
         }
 
         private static string? ParseOutputOption(ParseResult commandParseResult)

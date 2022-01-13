@@ -63,12 +63,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 command.Add(subcommand);
             }
-            foreach (var option in parentCommand.Children.OfType<Option>())
+
+            //do not re-add legacy options - they are not needed
+            //do not hardcode option as the caller of CLI (SDK) can add extra options that should be moved
+            foreach (var option in parentCommand.Children.OfType<Option>().Where(o => !parentCommand.LegacyOptions.Contains(o)))
             {
-                if (!command.Children.OfType<Option>().Any(eo => eo.Name == option.Name))
-                {
-                    command.Add(option);
-                }
+                command.Add(option);
             }
             return command;
         }

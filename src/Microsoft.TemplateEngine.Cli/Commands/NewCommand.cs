@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System.CommandLine;
 using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
@@ -31,7 +32,50 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.Add(new SearchCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
             this.Add(new ListCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
             this.Add(new AliasCommand(hostBuilder, telemetryLoggerBuilder, callbacks));
+
+            this.AddGlobalOption(DebugCustomSettingsLocationOption);
+            this.AddGlobalOption(DebugVirtualizeSettingsOption);
+            this.AddGlobalOption(DebugAttachOption);
+            this.AddGlobalOption(DebugReinitOption);
+            this.AddGlobalOption(DebugRebuildCacheOption);
+            this.AddGlobalOption(DebugShowConfigOption);
         }
+
+        internal static Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive")
+        {
+            Description = SymbolStrings.Option_Debug_CustomSettings,
+            IsHidden = true
+        };
+
+        internal static Option<bool> DebugVirtualizeSettingsOption { get; } = new(new[] { "--debug:ephemeral-hive", "--debug:virtual-hive" })
+        {
+            Description = SymbolStrings.Option_Debug_VirtualSettings,
+            IsHidden = true
+        };
+
+        internal static Option<bool> DebugAttachOption { get; } = new("--debug:attach")
+        {
+            Description = SymbolStrings.Option_Debug_Attach,
+            IsHidden = true
+        };
+
+        internal static Option<bool> DebugReinitOption { get; } = new("--debug:reinit")
+        {
+            Description = SymbolStrings.Option_Debug_Reinit,
+            IsHidden = true
+        };
+
+        internal static Option<bool> DebugRebuildCacheOption { get; } = new(new[] { "--debug:rebuild-cache", "--debug:rebuildcache" })
+        {
+            Description = SymbolStrings.Option_Debug_RebuildCache,
+            IsHidden = true
+        };
+
+        internal static Option<bool> DebugShowConfigOption { get; } = new(new[] { "--debug:show-config", "--debug:showconfig" })
+        {
+            Description = SymbolStrings.Option_Debug_ShowConfig,
+            IsHidden = true
+        };
 
         protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {

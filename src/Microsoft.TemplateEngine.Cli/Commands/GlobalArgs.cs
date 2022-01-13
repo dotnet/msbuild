@@ -11,12 +11,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public GlobalArgs(BaseCommand command, ParseResult parseResult)
         {
-            DebugCustomSettingsLocation = parseResult.GetValueForOption(command.DebugCustomSettingsLocationOption);
-            DebugVirtualizeSettings = parseResult.GetValueForOption(command.DebugVirtualizeSettingsOption);
-            DebugAttach = parseResult.GetValueForOption(command.DebugAttachOption);
-            DebugReinit = parseResult.GetValueForOption(command.DebugReinitOption);
-            DebugRebuildCache = parseResult.GetValueForOption(command.DebugRebuildCacheOption);
-            DebugShowConfig = parseResult.GetValueForOption(command.DebugShowConfigOption);
+            DebugCustomSettingsLocation = parseResult.GetValueForOption(NewCommand.DebugCustomSettingsLocationOption);
+            DebugVirtualizeSettings = parseResult.GetValueForOption(NewCommand.DebugVirtualizeSettingsOption);
+            DebugAttach = parseResult.GetValueForOption(NewCommand.DebugAttachOption);
+            DebugReinit = parseResult.GetValueForOption(NewCommand.DebugReinitOption);
+            DebugRebuildCache = parseResult.GetValueForOption(NewCommand.DebugRebuildCacheOption);
+            DebugShowConfig = parseResult.GetValueForOption(NewCommand.DebugShowConfigOption);
             CommandName = parseResult.GetNewCommandName();
             ParseResult = parseResult;
         }
