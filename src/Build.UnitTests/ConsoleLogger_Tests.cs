@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
         private Dictionary<string, string> _environment;
 
         private static string s_dummyProjectContents = @"
-         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+         <Project>
             <Target Name='XXX'>
                <Message Text='[hee haw]'/>
             </Target>
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests
                 _simulatedConsole.Append("<reset color>");
             }
 
-            public static implicit operator string (SimulatedConsole sc)
+            public static implicit operator string(SimulatedConsole sc)
             {
                 return sc.ToString();
             }
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests
             <ItemGroup>
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
-    
+
                 <ProjectConfigurationDescription Include='Number=$(Number)' />
                 <ProjectConfigurationDescription Include='TargetFramework=$(TargetFramework)' />
             </ItemGroup>

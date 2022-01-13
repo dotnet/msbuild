@@ -459,14 +459,14 @@ namespace Microsoft.Build.UnitTests.Logging
             string targetsFile = Path.Combine(testTempPath, "x.targets");
             string projectfileContent =
                 @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='x.targets'/>
                     </Project>
                 ";
 
             string targetsfileContent = @"
-                 <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                   <UsingTask TaskName='RandomTask' AssemblyName='NotARealTaskLocaiton'/>    
+                 <Project DefaultTargets='Build'>
+                   <UsingTask TaskName='RandomTask' AssemblyName='NotARealTaskLocaiton'/>
                    <Target Name='Build'>
                        <RandomTask/>
                    </Target>
