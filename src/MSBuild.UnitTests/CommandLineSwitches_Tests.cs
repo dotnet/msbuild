@@ -278,12 +278,6 @@ namespace Microsoft.Build.UnitTests
         [InlineData("Property")]
         [InlineData("p")]
         [InlineData("P")]
-        // RestoreProperty - properties specific to restore target
-        [InlineData("restoreproperty")]
-        [InlineData("RESTOREPROPERTY")]
-        [InlineData("RestoreProperty")]
-        [InlineData("rp")]
-        [InlineData("RP")]
         public void PropertySwitchIdentificationTests(string property)
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
