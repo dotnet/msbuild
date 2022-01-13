@@ -76,34 +76,6 @@ namespace Microsoft.Build.Tasks.UnitTests
             Assert.Equal(expectedHash, actualHash);
         }
 
-        [Fact]
-        public void HashTaskLargeInputCountAndSizeTest()
-        {
-            // This hash was pre-computed. If the implementation changes it may need to be adjusted.
-            var expectedHash = "be23ae7b09f1e14fa5a17de87ddae2c3ec62f967";
-
-            int inputSize = 1000;
-            string[][] array = new string[inputSize][];
-            for (int i = 0; i < array.Length; i++)
-            {
-                array[i] = new string[inputSize];
-                for (int j = 0; j < array[i].Length; j++)
-                {
-                    array[i][j] = $"Item{i}{j}";
-                }
-            }
-
-            ITaskItem[] itemsToHash = new ITaskItem[inputSize];
-            for (int i = 0; i < itemsToHash.Length; i++)
-            {
-                itemsToHash[i] = new TaskItem(string.Join("", array[i]));
-            }
-
-            var actualHash = ExecuteHashTask(itemsToHash);
-
-            Assert.Equal(expectedHash, actualHash);
-        }
-
 #pragma warning disable CA5350
         // This test verifies that hash computes correctly for various numbers of characters.
         // We would like to process edge of the buffer use cases regardless on the size of the buffer.
@@ -116,14 +88,21 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 using (var stringBuilder = new ReuseableStringBuilder(sha1.HashSize))
                 {
+                    MockEngine mockEngine = new();
                     for (int i = 0; i < maxInputSize; i++)
                     {
                         input += "a";
-                        ITaskItem[] itemsToHash = new ITaskItem[] { new TaskItem(input) };
 
-                        var actualHash = ExecuteHashTask(itemsToHash);
+                        Hash hashTask = new()
+                        {
+                            BuildEngine = mockEngine,
+                            ItemsToHash = new ITaskItem[] { new TaskItem(input) },
+                            IgnoreCase = false
+                        };
+                        Assert.True(hashTask.Execute());
+                        string actualHash = hashTask.HashResult;
 
-                        byte[] hash = sha1.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input+'\u2028'));
+                        byte[] hash = sha1.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + '\u2028'));
                         stringBuilder.Clear();
                         foreach (var b in hash)
                         {
