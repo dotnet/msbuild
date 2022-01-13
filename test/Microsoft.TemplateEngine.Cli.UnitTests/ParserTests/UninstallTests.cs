@@ -67,7 +67,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new --interactive uninstall source", "'--interactive'")]
         [InlineData("new --language F# --uninstall source", "'--language','F#'")]
         [InlineData("new --language F# uninstall source", "'--language','F#'")]
-        [InlineData("new source1 source2 source3 --uninstall source", "'source1'|'source2','source3'")]
+        [InlineData("new source1 source2 source3 --uninstall source", "'source1'")] //only first error is added
         [InlineData("new source1 --uninstall source", "'source1'")]
         public void Uninstall_CanReturnParseError(string command, string expectedInvalidTokens)
         {

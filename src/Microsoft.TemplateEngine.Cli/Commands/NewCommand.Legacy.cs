@@ -67,17 +67,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        internal string? ValidateShortNameArgumentIsNotUsed(CommandResult commandResult)
+        internal void ValidateShortNameArgumentIsNotUsed(CommandResult commandResult)
         {
-            return ValidateArgumentUsage(commandResult, ShortNameArgument);
+            ValidateArgumentUsage(commandResult, ShortNameArgument);
         }
 
-        internal string? ValidateArgumentsAreNotUsed(CommandResult commandResult)
+        internal void ValidateArgumentsAreNotUsed(CommandResult commandResult)
         {
-            return ValidateArgumentUsage(commandResult, ShortNameArgument, RemainingArguments);
+            ValidateArgumentUsage(commandResult, ShortNameArgument, RemainingArguments);
         }
 
-        private static string? ValidateOptionUsage(CommandResult commandResult, Option option)
+        private static void ValidateOptionUsage(CommandResult commandResult, Option option)
         {
             OptionResult? optionResult = commandResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == option) as OptionResult;
             if (optionResult != null)
@@ -95,12 +95,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     }
                 }
                 //Unrecognized command or argument(s): {0}
-                return string.Format(LocalizableStrings.Commands_Validator_WrongTokens, string.Join(",", wrongTokens));
+                commandResult.ErrorMessage = string.Format(LocalizableStrings.Commands_Validator_WrongTokens, string.Join(",", wrongTokens));
             }
-            return null;
         }
 
-        private static string? ValidateArgumentUsage(CommandResult commandResult, params Argument[] arguments)
+        private static void ValidateArgumentUsage(CommandResult commandResult, params Argument[] arguments)
         {
             List<string> wrongTokens = new List<string>();
             foreach (Argument argument in arguments)
@@ -121,9 +120,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (wrongTokens.Any())
             {
                 //Unrecognized command or argument(s): {0}
-                return string.Format(LocalizableStrings.Commands_Validator_WrongTokens, string.Join(",", wrongTokens));
+                commandResult.ErrorMessage = string.Format(LocalizableStrings.Commands_Validator_WrongTokens, string.Join(",", wrongTokens));
             }
-            return null;
         }
 
         private void BuildLegacySymbols(ITemplateEngineHost host, ITelemetryLogger telemetryLogger, NewCommandCallbacks callbacks)

@@ -30,14 +30,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return ParentCommand.LegacyFilters[def];
         }
 
-        private string? ValidateParentCommandArguments(CommandResult commandResult)
+        private void ValidateParentCommandArguments(CommandResult commandResult)
         {
             var nameArgumentResult = commandResult.Children.FirstOrDefault(symbol => symbol.Symbol == this.NameArgument);
             if (nameArgumentResult == null)
             {
-                return null;
+                return;
             }
-            return ParentCommand.ValidateShortNameArgumentIsNotUsed(commandResult);
+            ParentCommand.ValidateShortNameArgumentIsNotUsed(commandResult);
         }
     }
 }

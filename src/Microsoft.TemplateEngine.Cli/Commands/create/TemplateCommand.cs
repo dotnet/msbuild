@@ -72,9 +72,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         var value = optionResult.GetValueOrDefault<string>();
                         if (value != template.GetLanguage())
                         {
-                            return "Languages don't match";
+                            optionResult.ErrorMessage = "Languages don't match";
                         }
-                        return null;
                     }
                     );
                 }

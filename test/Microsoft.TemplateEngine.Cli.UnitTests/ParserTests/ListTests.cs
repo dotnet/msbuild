@@ -248,8 +248,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Theory]
         [InlineData("new --interactive list source", "'--interactive'")]
         [InlineData("new --interactive --list source", "'--interactive'")]
-        [InlineData("new foo bar --list source", "'foo'|'bar'")]
-        [InlineData("new foo bar list source", "'foo'|'bar'")]
+        [InlineData("new foo bar --list source", "'foo'")] //only first error is added
+        [InlineData("new foo bar list source", "'foo'")] //only first error is added
         public void List_HandleParseErrors(string command, string expectedInvalidTokens)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));

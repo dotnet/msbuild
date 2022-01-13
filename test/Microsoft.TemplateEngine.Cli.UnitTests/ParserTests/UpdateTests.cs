@@ -161,7 +161,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new --language F# --update-check", "'--language','F#'")]
         [InlineData("new --language F# --update-apply", "'--language','F#'")]
         [InlineData("new --language F# update", "'--language','F#'")]
-        [InlineData("new source1 source2 source3 --update-apply source", "'source1'|'source2','source3'|'source'")]
+        [InlineData("new source1 source2 source3 --update-apply source", "'source1'|'source'")] //only first custom validation error is added
         [InlineData("new source1 --update-apply source", "'source1'|'source'")]
         public void Update_CanReturnParseError(string command, string expectedInvalidTokens)
         {
