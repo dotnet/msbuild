@@ -22,3 +22,4 @@
 - Stage 0 Update -- https://github.com/dotnet/installer/pull/11750/commits/02286315b221895b8181fc350b44bcdf399f7d92
 - Install RC version of runtime -- https://github.com/dotnet/installer/commit/ea68501d392ab28b32af5d62946a764e2fadf88c
 - Update Templates -- https://github.com/dotnet/installer/pull/12946
+- Update DefaultKnownFrameworkReference to be the .0 versions -- https://github.com/dotnet/installer/pull/12654/commits/0e9ba442710970aabef42bbd3a2da69e30f031d4
