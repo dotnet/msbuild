@@ -296,6 +296,29 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("restoreproperty")]
+        [InlineData("RESTOREPROPERTY")]
+        [InlineData("RestoreProperty")]
+        [InlineData("rp")]
+        [InlineData("RP")]
+        public void RestorePropertySwitchIdentificationTests(string property)
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
+            string duplicateSwitchErrorMessage;
+            bool multipleParametersAllowed;
+            string missingParametersErrorMessage;
+            bool unquoteParameters;
+            bool emptyParametersAllowed;
+
+            CommandLineSwitches.IsParameterizedSwitch(property, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.RestoreProperty);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
+        }
+
+        [Theory]
         [InlineData("logger")]
         [InlineData("LOGGER")]
         [InlineData("Logger")]
