@@ -343,7 +343,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Persist the type library
-                IUCOMICreateITypeLib createTypeLib = (IUCOMICreateITypeLib)convertedTypeLib;
+                ICreateTypeLib createTypeLib = (ICreateTypeLib)convertedTypeLib;
 
                 createTypeLib.SaveAllChanges();
             }
