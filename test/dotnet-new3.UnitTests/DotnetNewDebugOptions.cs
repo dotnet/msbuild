@@ -3,6 +3,8 @@
 
 #nullable enable
 
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
@@ -66,6 +68,56 @@ namespace Dotnet_new3.IntegrationTests
             Assert.Equal(commandResult.StdOut, reinitCommandResult.StdOut);
             Assert.True(File.Exists(cacheFilePath));
             Assert.True(lastUpdateDate < File.GetLastWriteTimeUtc(cacheFilePath));
+        }
+
+        [Fact]
+        public void CanShowConfigWithDebugShowConfig()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            var commandResult = new DotnetNewCommand(_log, "--debug:show-config")
+               .WithCustomHive(home)
+               .Execute();
+
+            commandResult.Should().ExitWith(0).And.NotHaveStdErr();
+            ApprovalTests.Approvals.Verify(commandResult.StdOut, (output) =>
+            {
+                //remove versions
+                var finalOutput = Regex.Replace(output, "Version=[A-Za-z0-9\\.]+", "Version=<version>");
+                //remove tokens
+                finalOutput = Regex.Replace(finalOutput, "PublicKeyToken=[A-Za-z0-9]+", "PublicKeyToken=<token>");
+                return finalOutput;
+            });
+        }
+
+        [Fact]
+        public void DoesNotCreateCacheWhenVirtualHiveIsUsed()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            var envVariable = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME";
+
+            new DotnetNewCommand(_log, "--debug:ephemeral-hive")
+               .WithoutCustomHive()
+               .WithEnvironmentVariable(envVariable, home)
+               .Execute()
+               .Should().Pass().And.NotHaveStdErr();
+
+            Assert.Empty(new DirectoryInfo(home).EnumerateFiles());
+        }
+
+        [Fact]
+        public void DoesCreateCacheInDifferentLocationWhenCustomHiveIsUsed()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            new DotnetNewCommand(_log, "--debug:custom-hive", home)
+               .WithoutCustomHive()
+               .Execute()
+               .Should().Pass().And.NotHaveStdErr();
+
+            var createdCacheEntries = Directory.GetFileSystemEntries(home);
+
+            Assert.Equal(2, createdCacheEntries.Count());
+            Assert.Contains(Path.Combine(home, "packages"), createdCacheEntries);
+            Assert.True(File.Exists(Path.Combine(home, "dotnetcli-preview", "v2.0.0", "templatecache.json")));
         }
     }
 }

@@ -31,9 +31,9 @@ namespace Dotnet_new3.IntegrationTests
 
             commandResult
                 .Should()
-                .Fail()
+                .Pass()
                 .And.NotHaveStdOutContaining("console")
-                .And.HaveStdErrContaining("No templates installed.");
+                .And.HaveStdOutContaining("No templates installed.");
         }
 
         [Fact]
