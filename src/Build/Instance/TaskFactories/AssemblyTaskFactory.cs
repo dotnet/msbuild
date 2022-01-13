@@ -280,12 +280,13 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
                 _typeInformation = _typeLoader.Load(taskName, loadInfo, taskHostFactoryExplicitlyRequested);
-                _typeInformation.LoadInfo = loadInfo;
-                _typeInformation.TypeName ??= taskName;
 
                 // If the user specifically requests a code task factory, and the type wasn't already loaded, we need a way to verify that it really found a matching type. Properties is an array, so it should never be null,
                 // though it could be an empty array.
-                ProjectErrorUtilities.VerifyThrowInvalidProject(_typeInformation.LoadedType != null || _typeInformation.Properties != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
+                ProjectErrorUtilities.VerifyThrowInvalidProject(_typeInformation is not null && (_typeInformation.LoadedType != null || _typeInformation.Properties != null), elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
+
+                _typeInformation.LoadInfo = loadInfo;
+                _typeInformation.TypeName ??= taskName;
             }
             catch (TargetInvocationException e)
             {

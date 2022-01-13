@@ -214,7 +214,7 @@ namespace Microsoft.Build.Shared
             AssemblyLoadInfo assembly
         )
         {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, false).LoadedType;
+            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, false)?.LoadedType;
         }
 
         /// <summary>
@@ -271,6 +271,11 @@ namespace Microsoft.Build.Shared
             private ConcurrentDictionary<string, TypeInformation> _typeNameToTypeInformation;
 
             /// <summary>
+            /// What is the type for the given type name, this may be null if the typeName does not map to a type.
+            /// </summary>
+            private ConcurrentDictionary<string, TypeInformation> _typeNameToTypeInformationTaskHost;
+
+            /// <summary>
             /// List of public types in the assembly which match the type filter and their corresponding types
             /// </summary>
             private Dictionary<string, Type> _publicTypeNameToType;
@@ -298,6 +303,7 @@ namespace Microsoft.Build.Shared
                 _isDesiredType = typeFilter;
                 _assemblyLoadInfo = loadInfo;
                 _typeNameToTypeInformation = new ConcurrentDictionary<string, TypeInformation>(StringComparer.OrdinalIgnoreCase);
+                _typeNameToTypeInformationTaskHost = new ConcurrentDictionary<string, TypeInformation>(StringComparer.OrdinalIgnoreCase);
                 _publicTypeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
             }
 
@@ -309,60 +315,61 @@ namespace Microsoft.Build.Shared
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
                 // Only one thread should be doing operations on this instance of the object at a time.
-                TypeInformation typeInfo = _typeNameToTypeInformation.GetOrAdd(typeName, (key) =>
-                {
-                    if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
-                    {
-                        try
-                        {
-                            // try to load the type using its assembly qualified name
-                            Type t2 = Type.GetType(typeName + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
-                            if (t2 != null)
-                            {
-                                return _isDesiredType(t2, null) ? new TypeInformation(new LoadedType(t2, _assemblyLoadInfo, _loadedAssembly)) : FindTypeInformationUsingSystemReflectionMetadata(typeName);
-                            }
-                        }
-                        catch (ArgumentException)
-                        {
-                            // Type.GetType() will throw this exception if the type name is invalid -- but we have no idea if it's the
-                            // type or the assembly name that's the problem -- so just ignore the exception, because we're going to
-                            // check the existence/validity of the assembly and type respectively, below anyway
-                        }
-                    }
-
-                    if (!taskHostFactoryExplicitlyRequested)
-                    {
-                        if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
-                        {
-                            lock (_lockObject)
-                            {
-                                if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
-                                {
-                                    ScanAssemblyForPublicTypes();
-                                    Interlocked.Exchange(ref _haveScannedPublicTypes, ~0);
-                                }
-                            }
-                        }
-
-                        foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
-                        {
-                            // if type matches partially on its name
-                            if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
-                            {
-                                return new TypeInformation(new LoadedType(desiredTypeInAssembly.Value, _assemblyLoadInfo, _loadedAssembly));
-                            }
-                        }
-                    }
-
-                    return FindTypeInformationUsingSystemReflectionMetadata(typeName);
-                });
+                TypeInformation typeInfo = taskHostFactoryExplicitlyRequested ?
+                    _typeNameToTypeInformationTaskHost.GetOrAdd(typeName, key => FindTypeInformationUsingSystemReflectionMetadata(typeName)) :
+                    _typeNameToTypeInformation.GetOrAdd(typeName, key => FindTypeInformationUsingLoadedType(typeName)
+                    );
 
                 return typeInfo;
             }
 
+            private TypeInformation FindTypeInformationUsingLoadedType(string typeName)
+            {
+                if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
+                {
+                    try
+                    {
+                        // try to load the type using its assembly qualified name
+                        Type t2 = Type.GetType(typeName + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
+                        if (t2 != null)
+                        {
+                            return _isDesiredType(t2, null) ? new TypeInformation(new LoadedType(t2, _assemblyLoadInfo, _loadedAssembly)) : null;
+                        }
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Type.GetType() will throw this exception if the type name is invalid -- but we have no idea if it's the
+                        // type or the assembly name that's the problem -- so just ignore the exception, because we're going to
+                        // check the existence/validity of the assembly and type respectively, below anyway
+                    }
+                }
+
+                if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
+                {
+                    lock (_lockObject)
+                    {
+                        if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
+                        {
+                            ScanAssemblyForPublicTypes();
+                            Interlocked.Exchange(ref _haveScannedPublicTypes, ~0);
+                        }
+                    }
+                }
+
+                foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
+                {
+                    // if type matches partially on its name
+                    if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
+                    {
+                        return new TypeInformation(new LoadedType(desiredTypeInAssembly.Value, _assemblyLoadInfo, _loadedAssembly));
+                    }
+                }
+
+                return null;
+            }
+
             private TypeInformation FindTypeInformationUsingSystemReflectionMetadata(string typeName)
             {
-                TypeInformation typeInformation = new();
                 string path = _assemblyLoadInfo.AssemblyFile;
                 if (path is null)
                 {
@@ -372,8 +379,7 @@ namespace Microsoft.Build.Shared
                     AppDomain.Unload(appDomain);
 #else
                     AssemblyLoadContext alc = new("loadContextToFindPath", true);
-                    alc.LoadFromAssemblyName(new AssemblyName(_assemblyLoadInfo.AssemblyName));
-                    path = alc.Assemblies.First().Location;
+                    path = alc.LoadFromAssemblyName(new AssemblyName(_assemblyLoadInfo.AssemblyName)).Location;
                     alc.Unload();
 #endif
                 }
@@ -386,173 +392,159 @@ namespace Microsoft.Build.Shared
                     foreach (TypeDefinitionHandle typeDefHandle in metadataReader.TypeDefinitions)
                     {
                         TypeDefinition typeDef = metadataReader.GetTypeDefinition(typeDefHandle);
-                        if (!typeDef.Attributes.HasFlag(TypeAttributes.Public) || !typeDef.Attributes.HasFlag(TypeAttributes.Class))
+                        if (TryGetTypeInformationFromDefinition(metadataReader, typeDef, typeName, out TypeInformation typeInformation))
                         {
-                            continue;
-                        }
-                        else
-                        {
-                            string currentTypeName = metadataReader.GetString(typeDef.Name);
-                            if (currentTypeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(currentTypeName, typeName))
-                            {
-                                // We found the right type! Now get its information.
-                                foreach (CustomAttributeHandle customAttrHandle in typeDef.GetCustomAttributes())
-                                {
-                                    CustomAttribute customAttribute = metadataReader.GetCustomAttribute(customAttrHandle);
-                                    MemberReference constructorReference = metadataReader.GetMemberReference((MemberReferenceHandle)customAttribute.Constructor);
-                                    if (constructorReference.Parent.Kind == HandleKind.TypeReference)
-                                    {
-                                        TypeReference typeReference = metadataReader.GetTypeReference((TypeReferenceHandle)constructorReference.Parent);
-                                        string customAttributeName = metadataReader.GetString(typeReference.Name);
-                                        switch (customAttributeName)
-                                        {
-                                            case "RunInSTAAttribute":
-                                                typeInformation.HasSTAThreadAttribute = true;
-                                                break;
-                                            case "LoadInSeparateAppDomainAttribute":
-                                                typeInformation.HasLoadInSeparateAppDomainAttribute = true;
-                                                break;
-                                        }
-                                    }
-                                }
-
-                                IEnumerable<PropertyDefinition> propertyDefinitions = typeDef.GetProperties().Select(prop => metadataReader.GetPropertyDefinition(prop));
-                                List<TypeInformationPropertyInfo> typePropertyInfos = new();
-                                foreach (PropertyDefinition propertyDefinition in propertyDefinitions)
-                                {
-                                    TypeInformationPropertyInfo toAdd = new();
-                                    toAdd.Name = metadataReader.GetString(propertyDefinition.Name);
-                                    SignatureDecoder<string, object> decoder = new(ConstantSignatureVisualizer.Instance, metadataReader, genericContext: null);
-                                    BlobReader blob = metadataReader.GetBlobReader(propertyDefinition.Signature);
-                                    MethodSignature<string> signature = decoder.DecodeMethodSignature(ref blob);
-                                    toAdd.PropertyType = StringToType(signature.ReturnType);
-                                    //MethodSignature<RuntimeTypeInfo> sign = propertyDefinition.DecodeSignature<RuntimeTypeInfo, TypeContext>(new SignatureDecoder<RuntimeTypeInfo, TypeContext>(), null);
-                                    //toAdd.PropertyType = sign.ReturnType ?? sign.ParameterTypes[0];
-                                    //byte[] bytes = metadataReader.GetBlobReader(propertyDefinition.Signature).ReadBytes(metadataReader.GetBlobReader(propertyDefinition.Signature).Length);
-                                    //toAdd.PropertyType = ByteSignatureToType(bytes);
-                                    toAdd.OutputAttribute = false;
-                                    toAdd.RequiredAttribute = false;
-                                    foreach (CustomAttributeHandle attr in propertyDefinition.GetCustomAttributes())
-                                    {
-                                        EntityHandle referenceHandle = metadataReader.GetMemberReference((MemberReferenceHandle)metadataReader.GetCustomAttribute(attr).Constructor).Parent;
-                                        if (referenceHandle.Kind == HandleKind.TypeReference)
-                                        {
-                                            string name = metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)referenceHandle).Name);
-                                            if (name.Equals("OutputAttribute", StringComparison.OrdinalIgnoreCase))
-                                            {
-                                                toAdd.OutputAttribute = true;
-                                            }
-                                            else if (name.Equals("RequiredAttribute", StringComparison.OrdinalIgnoreCase))
-                                            {
-                                                toAdd.RequiredAttribute = true;
-                                            }
-                                        }
-                                    }
-                                    typePropertyInfos.Add(toAdd);
-                                }
-                                typeInformation.Properties = typePropertyInfos.ToArray();
-
-                                TypeDefinition parentTypeDefinition = typeDef;
-                                while (true)
-                                {
-                                    foreach (InterfaceImplementationHandle interfaceHandle in parentTypeDefinition.GetInterfaceImplementations())
-                                    {
-                                        if (metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)metadataReader.GetInterfaceImplementation(interfaceHandle).Interface).Name).Equals("IGeneratedTask"))
-                                        {
-                                            typeInformation.ImplementsIGeneratedTask = true;
-                                        }
-                                    }
-
-                                    if (parentTypeDefinition.BaseType.IsNil)
-                                    {
-                                        break;
-                                    }
-
-                                    // If the baseType is not a TypeDefinitionHandle, we won't be able to chase it without actually loading the assembly. We would need to find the assembly containing the base type
-                                    // and load it using System.Reflection.Metdata just as we're doing here, but we don't know its path without loading this assembly. Just assume it didn't implement IGeneratedTask.
-                                    bool shouldBreakLoop = false;
-                                    switch (parentTypeDefinition.BaseType.Kind)
-                                    {
-                                        case HandleKind.TypeDefinition:
-                                            parentTypeDefinition = metadataReader.GetTypeDefinition((TypeDefinitionHandle)parentTypeDefinition.BaseType);
-                                            break;
-                                        case HandleKind.TypeReference:
-                                            string parentName = metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)parentTypeDefinition.BaseType).Name);
-                                            if (parentName.Equals("IGeneratedTask"))
-                                            {
-                                                typeInformation.ImplementsIGeneratedTask = true;
-                                            }
-                                            else if (parentName.Equals("MarshalByRefObject"))
-                                            {
-                                                typeInformation.IsMarshalByRef = true;
-                                            }
-                                            shouldBreakLoop = true;
-                                            break;
-                                        case HandleKind.TypeSpecification:
-                                            shouldBreakLoop = true;
-                                            break;
-                                    }
-
-                                    string typeDefinitionName = metadataReader.GetString(parentTypeDefinition.Name);
-                                    if (typeDefinitionName.Equals("MarshalByRefObject"))
-                                    {
-                                        typeInformation.IsMarshalByRef = true;
-                                    }
-                                    if (shouldBreakLoop || typeDefinitionName.Equals("object"))
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                foreach (InterfaceImplementationHandle interfaceHandle in typeDef.GetInterfaceImplementations())
-                                {
-                                    if (metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)metadataReader.GetInterfaceImplementation(interfaceHandle).Interface).Name).Equals("IGeneratedTask"))
-                                    {
-                                        typeInformation.ImplementsIGeneratedTask = true;
-                                    }
-                                }
-
-                                typeInformation.AssemblyName = _assemblyLoadInfo.AssemblyName is null ? new AssemblyName(Path.GetFileNameWithoutExtension(_assemblyLoadInfo.AssemblyFile)) : new AssemblyName(_assemblyLoadInfo.AssemblyName);
-
-                                typeInformation.Namespace = metadataReader.GetString(metadataReader.GetNamespaceDefinition(metadataReader.GetNamespaceDefinitionRoot().NamespaceDefinitions.First()).Name);
-
-                                break;
-                            }
+                            return typeInformation;
                         }
                     }
                 }
 
-                return typeInformation;
+                return null;
             }
 
-            private Type ByteSignatureToType(byte[] bytes)
+            private bool TryGetTypeInformationFromDefinition(MetadataReader metadataReader, TypeDefinition typeDef, string typeName, out TypeInformation typeInformation)
             {
-                string stringBytes = string.Join(string.Empty, bytes.Select(b => b.ToString("X2")));
-                return stringBytes switch
+                typeInformation = null;
+                string currentTypeName = metadataReader.GetString(typeDef.Name);
+
+                if (!(typeDef.Attributes.HasFlag(TypeAttributes.Public) || typeDef.Attributes.HasFlag(TypeAttributes.NestedPublic)) || !typeDef.Attributes.HasFlag(TypeAttributes.Class))
                 {
-                    "280002" => typeof(bool),
-                    "280003" => typeof(char),
-                    "280008" => typeof(int),
-                    "28000C" => typeof(float),
-                    "28000E" => typeof(string),
-                    "2800128095" => typeof(ITaskItem),
-                    "28001D02" => typeof(bool[]),
-                    "28001D03" => typeof(char[]),
-                    "28001D08" => typeof(int[]),
-                    "28001D0C" => typeof(float[]),
-                    "28001D0E" => typeof(string[]),
-                    "28001D128095" => typeof(ITaskItem[]),
-                    "28001D1281E1" => typeof(ITaskItem[]),
-                    "2800151182110102" => typeof(bool?),
-                    "2800151182110103" => typeof(char?),
-                    "2800151182110108" => typeof(int?),
-                    "280015118211010C" => typeof(float?),
-                    "28001D151182110102" => typeof(bool?[]),
-                    "28001D151182110103" => typeof(char?[]),
-                    "28001D151182110108" => typeof(int?[]),
-                    "28001D15118211010c" => typeof(float?[]),
-                    _ => stringBytes.StartsWith("28001185") && stringBytes.Length == 10 ? typeof(Enum) : null,
-                };
+                    return false;
+                }
+
+                if (currentTypeName.Length != 0 && !TypeLoader.IsPartialTypeNameMatch(currentTypeName, typeName))
+                {
+                    foreach (TypeDefinitionHandle typeDefHandle in typeDef.GetNestedTypes())
+                    {
+                        TypeDefinition childTypeDef = metadataReader.GetTypeDefinition(typeDefHandle);
+                        if (TryGetTypeInformationFromDefinition(metadataReader, childTypeDef, typeName, out typeInformation))
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                // We found the right type! Now get its information.
+                typeInformation = new();
+
+                foreach (CustomAttributeHandle customAttrHandle in typeDef.GetCustomAttributes())
+                {
+                    CustomAttribute customAttribute = metadataReader.GetCustomAttribute(customAttrHandle);
+                    MemberReference constructorReference = metadataReader.GetMemberReference((MemberReferenceHandle)customAttribute.Constructor);
+                    if (constructorReference.Parent.Kind == HandleKind.TypeReference)
+                    {
+                        TypeReference typeReference = metadataReader.GetTypeReference((TypeReferenceHandle)constructorReference.Parent);
+                        string customAttributeName = metadataReader.GetString(typeReference.Name);
+                        switch (customAttributeName)
+                        {
+                            case "RunInSTAAttribute":
+                                typeInformation.HasSTAThreadAttribute = true;
+                                break;
+                            case "LoadInSeparateAppDomainAttribute":
+                                typeInformation.HasLoadInSeparateAppDomainAttribute = true;
+                                break;
+                        }
+                    }
+                }
+
+                IEnumerable<PropertyDefinition> propertyDefinitions = typeDef.GetProperties().Select(prop => metadataReader.GetPropertyDefinition(prop));
+                List<TypeInformationPropertyInfo> typePropertyInfos = new();
+                foreach (PropertyDefinition propertyDefinition in propertyDefinitions)
+                {
+                    TypeInformationPropertyInfo toAdd = new();
+                    toAdd.Name = metadataReader.GetString(propertyDefinition.Name);
+                    SignatureDecoder<string, object> decoder = new(ConstantSignatureVisualizer.Instance, metadataReader, genericContext: null);
+                    BlobReader blob = metadataReader.GetBlobReader(propertyDefinition.Signature);
+                    MethodSignature<string> signature = decoder.DecodeMethodSignature(ref blob);
+                    toAdd.PropertyType = StringToType(signature.ReturnType);
+                    toAdd.OutputAttribute = false;
+                    toAdd.RequiredAttribute = false;
+                    foreach (CustomAttributeHandle attr in propertyDefinition.GetCustomAttributes())
+                    {
+                        EntityHandle referenceHandle = metadataReader.GetMemberReference((MemberReferenceHandle)metadataReader.GetCustomAttribute(attr).Constructor).Parent;
+                        if (referenceHandle.Kind == HandleKind.TypeReference)
+                        {
+                            string name = metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)referenceHandle).Name);
+                            if (name.Equals("OutputAttribute", StringComparison.OrdinalIgnoreCase))
+                            {
+                                toAdd.OutputAttribute = true;
+                            }
+                            else if (name.Equals("RequiredAttribute", StringComparison.OrdinalIgnoreCase))
+                            {
+                                toAdd.RequiredAttribute = true;
+                            }
+                        }
+                    }
+                    typePropertyInfos.Add(toAdd);
+                }
+                typeInformation.Properties = typePropertyInfos.ToArray();
+
+                TypeDefinition parentTypeDefinition = typeDef;
+                while (true)
+                {
+                    foreach (InterfaceImplementationHandle interfaceHandle in parentTypeDefinition.GetInterfaceImplementations())
+                    {
+                        if (metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)metadataReader.GetInterfaceImplementation(interfaceHandle).Interface).Name).Equals("IGeneratedTask"))
+                        {
+                            typeInformation.ImplementsIGeneratedTask = true;
+                        }
+                    }
+
+                    if (parentTypeDefinition.BaseType.IsNil)
+                    {
+                        break;
+                    }
+
+                    // If the baseType is not a TypeDefinitionHandle, we won't be able to chase it without actually loading the assembly. We would need to find the assembly containing the base type
+                    // and load it using System.Reflection.Metdata just as we're doing here, but we don't know its path without loading this assembly. Just assume it didn't implement IGeneratedTask.
+                    bool shouldBreakLoop = false;
+                    switch (parentTypeDefinition.BaseType.Kind)
+                    {
+                        case HandleKind.TypeDefinition:
+                            parentTypeDefinition = metadataReader.GetTypeDefinition((TypeDefinitionHandle)parentTypeDefinition.BaseType);
+                            break;
+                        case HandleKind.TypeReference:
+                            string parentName = metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)parentTypeDefinition.BaseType).Name);
+                            if (parentName.Equals("IGeneratedTask"))
+                            {
+                                typeInformation.ImplementsIGeneratedTask = true;
+                            }
+                            else if (parentName.Equals("MarshalByRefObject"))
+                            {
+                                typeInformation.IsMarshalByRef = true;
+                            }
+                            shouldBreakLoop = true;
+                            break;
+                        case HandleKind.TypeSpecification:
+                            shouldBreakLoop = true;
+                            break;
+                    }
+
+                    string typeDefinitionName = metadataReader.GetString(parentTypeDefinition.Name);
+                    if (typeDefinitionName.Equals("MarshalByRefObject"))
+                    {
+                        typeInformation.IsMarshalByRef = true;
+                    }
+                    if (shouldBreakLoop || typeDefinitionName.Equals("object"))
+                    {
+                        break;
+                    }
+                }
+
+                foreach (InterfaceImplementationHandle interfaceHandle in typeDef.GetInterfaceImplementations())
+                {
+                    if (metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)metadataReader.GetInterfaceImplementation(interfaceHandle).Interface).Name).Equals("IGeneratedTask"))
+                    {
+                        typeInformation.ImplementsIGeneratedTask = true;
+                    }
+                }
+
+                typeInformation.AssemblyName = _assemblyLoadInfo.AssemblyName is null ? new AssemblyName(Path.GetFileNameWithoutExtension(_assemblyLoadInfo.AssemblyFile)) : new AssemblyName(_assemblyLoadInfo.AssemblyName);
+
+                typeInformation.Namespace = metadataReader.GetString(metadataReader.GetNamespaceDefinition(metadataReader.GetNamespaceDefinitionRoot().NamespaceDefinitions.First()).Name);
+
+                return true;
             }
 
             private Type StringToType(string s)
