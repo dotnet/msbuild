@@ -126,10 +126,8 @@ Examples:
             {
                 if (v.FindResultFor(quiet) is not null && v.FindResultFor(verbose) is not null)
                 {
-                    return Resources.Error_QuietAndVerboseSpecified;
+                    v.ErrorMessage = Resources.Error_QuietAndVerboseSpecified;
                 }
-
-                return null;
             });
 
             var listOption = new Option<bool>(
