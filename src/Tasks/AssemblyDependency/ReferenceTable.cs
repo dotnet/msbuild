@@ -1434,7 +1434,7 @@ namespace Microsoft.Build.Tasks
                         // we want to know if any primary references have specific version set to true.
                         bool hasSpecificVersionTrue = assemblyReference.CheckForSpecificVersionMetadataOnParentsReference(true);
 
-                        //A dependency is "good" if it is not in the black list or any of its parents have specific version set to true
+                        // A dependency is "good" if it is not in the black list or any of its parents have specific version set to true
                         if (!isMarkedForExclusion || hasSpecificVersionTrue)
                         {
                             // Do not add the reference to the good list if it has been added to the removed references list, possibly because of us processing another reference.
@@ -2289,7 +2289,7 @@ namespace Microsoft.Build.Tasks
             return false;
         }
 
-        //  Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
+        // Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
         private static bool RefMatchesDef(AssemblyName @ref, AssemblyName def)
         {
             if (IsStrongNamed(@ref))
@@ -2309,7 +2309,7 @@ namespace Microsoft.Build.Tasks
             return refPkt != null && refPkt.Length != 0;
         }
 
-        //  Based on https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L241
+        // Based on https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L241
         private static bool CompareRefToDef(AssemblyName @ref, AssemblyName def)
         {
             if (!@ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase))
@@ -2382,7 +2382,7 @@ namespace Microsoft.Build.Tasks
                 string leftConflictFusionName = assemblyReference0.assemblyName.FullName;
                 string rightConflictFusionName = assemblyReference1.assemblyName.FullName;
 
-                //  If both assemblies being compared are primary references, the caller should pass in a zero-flag 
+                // If both assemblies being compared are primary references, the caller should pass in a zero-flag 
                 // (non-unified) for both. (This conforms to the C# assumption that two direct references are meant to be 
                 // SxS.)
                 bool isNonUnified = leftConflictReference.IsPrimary && rightConflictReference.IsPrimary;

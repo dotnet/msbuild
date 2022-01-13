@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             _logger.WarningCount.ShouldBe(0);
         }
 
-        //  When two different SdkResults (ie from the Sdk.props and Sdk.targets imports) return the same combination of items / properties:
+        // When two different SdkResults (ie from the Sdk.props and Sdk.targets imports) return the same combination of items / properties:
         //  - Test that there aren't warnings for duplicate imports
         //  - Test that items from resolver are duplicated in final evaluation result
         [Fact]
@@ -416,7 +416,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void SdkResolverCanReturnSpecialCharacters()
         {
-            //  %3B - semicolon
+            // %3B - semicolon
             //  %24 - $
             //  %0A - LF
 

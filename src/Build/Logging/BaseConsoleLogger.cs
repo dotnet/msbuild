@@ -441,7 +441,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="background">current background</param>
         internal static ConsoleColor TransformColor(ConsoleColor foreground, ConsoleColor background)
         {
-            ConsoleColor result = foreground; //typically do nothing ...
+            ConsoleColor result = foreground; // typically do nothing ...
 
             if (foreground == background)
             {

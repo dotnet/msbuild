@@ -29,7 +29,7 @@ namespace Microsoft.Build.Evaluation
             protected readonly Expander<P, I> _expander;
             protected readonly bool _conditionResult;
 
-            //  This is used only when evaluating an expression, which instantiates
+            // This is used only when evaluating an expression, which instantiates
             //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
             internal ItemSpec<P, I> Spec => _itemSpec;

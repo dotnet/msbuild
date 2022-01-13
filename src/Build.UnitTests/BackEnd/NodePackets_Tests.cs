@@ -429,8 +429,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftTargetFinished.Succeeded, rightTargetFinished.Succeeded);
                     Assert.Equal(leftTargetFinished.TargetFile, rightTargetFinished.TargetFile);
                     Assert.Equal(leftTargetFinished.TargetName, rightTargetFinished.TargetName);
-                    //TODO: target output translation is a special case and is done in TranslateTargetFinishedEvent
-                    //Assert.Equal(leftTargetFinished.TargetOutputs, rightTargetFinished.TargetOutputs);
+                    // TODO: target output translation is a special case and is done in TranslateTargetFinishedEvent
+                    // Assert.Equal(leftTargetFinished.TargetOutputs, rightTargetFinished.TargetOutputs);
                     break;
 
                 case LoggingEventType.TargetStartedEvent:

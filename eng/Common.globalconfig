@@ -714,7 +714,7 @@ dotnet_diagnostic.SA1003.severity = none
 dotnet_diagnostic.SA1004.severity = warning
 
 # Single line comment should begin with a space
-dotnet_diagnostic.SA1005.severity = suggestion
+dotnet_diagnostic.SA1005.severity = warning
 
 # Region should not be preceded by a space
 dotnet_diagnostic.SA1006.severity = warning
@@ -843,7 +843,7 @@ dotnet_diagnostic.SA1132.severity = warning
 dotnet_diagnostic.SA1133.severity = warning
 
 # Each attribute should be placed on its own line of code
-dotnet_diagnostic.SA1134.severity = suggestion
+dotnet_diagnostic.SA1134.severity = warning
 
 # Using directive should be qualified
 dotnet_diagnostic.SA1135.severity = warning

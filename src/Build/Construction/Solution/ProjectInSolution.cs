@@ -47,7 +47,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Web Deployment (.wdproj) projects
         /// </summary>
-        WebDeploymentProject, //  MSBuildFormat, but Whidbey-era ones specify ProjectReferences differently
+        WebDeploymentProject, // MSBuildFormat, but Whidbey-era ones specify ProjectReferences differently
         /// <summary>
         /// Project inside an Enterprise Template project
         /// </summary>

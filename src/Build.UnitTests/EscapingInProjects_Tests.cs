@@ -829,8 +829,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         {
             Project project = new Project();
             ProjectItem item = project.AddItem("None", "MetadataTests", new Dictionary<string, string> {
-                {"EscapedSemicolon", "%3B"}, //Microsoft.Build.Evaluation.ProjectCollection.Escape(";")
-                {"EscapedDollarSign", "%24"}, //Microsoft.Build.Evaluation.ProjectCollection.Escape("$")
+                {"EscapedSemicolon", "%3B"}, // Microsoft.Build.Evaluation.ProjectCollection.Escape(";")
+                {"EscapedDollarSign", "%24"}, // Microsoft.Build.Evaluation.ProjectCollection.Escape("$")
             }).Single();
 
             EscapingInProjectsHelper.SpecialCharactersInMetadataValueTests(item);
@@ -1593,7 +1593,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             MockLogger log = new MockLogger(_testOutput);
             ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null, log);
 
-            Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                     @"Did not find expected file Console;!@(foo)'^(Application1.exe"
+            Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); // @"Did not find expected file Console;!@(foo)'^(Application1.exe"
         }
 
         /// <summary>
@@ -1764,7 +1764,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 MockLogger log = new MockLogger(_testOutput);
                 ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null, log);
 
-                Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                         @"Did not find expected file Console;!@(foo)'^(Application1.exe"
+                Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); // @"Did not find expected file Console;!@(foo)'^(Application1.exe"
             }
             finally
             {

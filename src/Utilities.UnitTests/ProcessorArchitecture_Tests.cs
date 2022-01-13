@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests
 
                     procArchitecture = ToolLocationHelper.ConvertDotNetFrameworkArchitectureToProcessorArchitecture(Utilities.DotNetFrameworkArchitecture.Bitness64);
 
-                    //We should also allow NULL if the machine is true x86 only.
+                    // We should also allow NULL if the machine is true x86 only.
                     bool isValidResult = procArchitecture?.Equals(ProcessorArchitecture.AMD64) != false || procArchitecture.Equals(ProcessorArchitecture.IA64);
 
                     isValidResult.ShouldBeTrue();

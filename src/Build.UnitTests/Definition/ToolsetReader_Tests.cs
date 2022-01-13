@@ -566,7 +566,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                //this should throw ...
+                // this should throw ...
                 string msbuildOverrideTasksPath = null;
                 string defaultOverrideToolsVersion = null;
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
@@ -629,7 +629,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                //this should throw ...
+                // this should throw ...
                 string msbuildOverrideTasksPath = null;
                 string defaultOverrideToolsVersion = null;
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
@@ -729,7 +729,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
 
-            //this should not throw ...
+            // this should not throw ...
             string msbuildOverrideTasksPath;
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
@@ -823,7 +823,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                //this should throw ...
+                // this should throw ...
                 string msbuildOverrideTasksPath = null;
                 string defaultOverrideToolsVersion = null;
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
@@ -1355,7 +1355,7 @@ namespace Microsoft.Build.UnitTests.Definition
             key1.SetValue("TaskLocation", @"somePathToTasks");
             key1.SetValue("TargetsLocation", @"D:\somePathToTargets");
             key1.SetValue("SchemaLocation", @"Schemas");
-            key1.SetValue(null, @"D:\somePathToDefault");  //this sets the default value for this key
+            key1.SetValue(null, @"D:\somePathToDefault");  // this sets the default value for this key
 
 #if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"

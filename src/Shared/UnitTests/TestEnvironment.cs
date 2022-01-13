@@ -388,7 +388,7 @@ namespace Microsoft.Build.UnitTests
         {
             var currentValue = _accessorFunc();
 
-            //  Something like the following might be preferrable, but the assertion method truncates the values leaving us without
+            // Something like the following might be preferrable, but the assertion method truncates the values leaving us without
             //  useful information.  So use Assert.True instead
             //  Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
 
