@@ -318,8 +318,6 @@ namespace Microsoft.Build.Tasks
             }
 
             public HttpStatusCode StatusCode { get; }
-
-
         }
 #endif
 
