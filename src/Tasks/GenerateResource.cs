@@ -252,13 +252,15 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The language to use when generating the class source for the strongly typed resource.
+        /// Gets or sets the language to use when generating the class source for the strongly typed resource.
         /// This parameter must match exactly one of the languages used by the CodeDomProvider.
         /// </summary>
         public string StronglyTypedLanguage
         {
             set
             {
+                // Since this string is passed directly into the framework, we don't want to
+                // try to validate it -- that might prevent future expansion of supported languages.
                 _stronglyTypedLanguage = value;
             }
 
