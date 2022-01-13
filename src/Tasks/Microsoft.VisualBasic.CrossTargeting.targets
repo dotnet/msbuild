@@ -10,7 +10,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
 
   <!-- Import design time targets for Roslyn Project System. These are only available if Visual Studio is installed. -->
   <!-- Import design time targets before the common crosstargeting targets, which import targets from Nuget. -->

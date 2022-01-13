@@ -14,7 +14,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build">
 
   <PropertyGroup>
     <CommonTargetsPath>$(MSBuildToolsPath)\Microsoft.Common.CurrentVersion.targets</CommonTargetsPath>
