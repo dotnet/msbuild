@@ -10,11 +10,16 @@
       <Output TaskParameter="ConsoleOutput" PropertyName="Stage0SdkVersion"/>
     </Exec>
 
+    <PropertyGroup>
+      <Stage0IncludedWorkloadManifestsFile>$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/IncludedWorkloadManifests.txt</Stage0IncludedWorkloadManifestsFile>
+    </PropertyGroup>
+
     <ItemGroup>
       <OverlaySDK Include="$(_DotNetHiveRoot)/**/*" Exclude="$(_DotNetHiveRoot)sdk/**/*"/>
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledCliTools.props" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/RuntimeIdentifierGraph.json" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/NETCoreSdkRuntimeIdentifierChain.txt" />
+      <OverlaySdkFilesFromStage0 Include="$(Stage0IncludedWorkloadManifestsFile)" Condition="Exists('$(Stage0IncludedWorkloadManifestsFile)')"/>
       <!-- Ignore dotnet-watch files from the SDK since we're building a newer version of it in this repo. -->
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"
         Exclude="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-watch/**" />
@@ -32,6 +37,11 @@
 
     <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
           DestinationFiles="@(OverlaySdkFilesFromStage0->'$(SdkOutputDirectory)\%(RelativeDestination)\%(RecursiveDir)%(Filename)%(Extension)')"/>
+    
+    <!-- If the stage 0 SDK doesn't have IncludedWorkloadManifests.txt, then write a default version -->
+    <WriteLinesToFile File="$(SdkOutputDirectory)\IncludedWorkloadManifests.txt"
+                      Condition="!Exists('$(Stage0IncludedWorkloadManifestsFile)')"
+                      Lines="microsoft.net.sdk.android;microsoft.net.sdk.ios;microsoft.net.sdk.maccatalyst;microsoft.net.sdk.macos;microsoft.net.sdk.maui;microsoft.net.sdk.tvos;microsoft.net.workload.mono.toolchain;microsoft.net.workload.emscripten"/>
 
     <OverrideAndCreateBundledNETCoreAppPackageVersion
       Stage0MicrosoftNETCoreAppRefPackageVersionPath="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledVersions.props"

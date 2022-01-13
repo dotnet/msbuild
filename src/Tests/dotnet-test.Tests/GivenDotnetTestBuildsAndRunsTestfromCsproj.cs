@@ -472,7 +472,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [PlatformSpecificFact(TestPlatforms.Windows)]
+        [PlatformSpecificFact(TestPlatforms.Windows | TestPlatforms.OSX | TestPlatforms.Linux)]
         public void ItCreatesCoverageFileInResultsDirectory()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("12");
@@ -508,7 +508,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [PlatformSpecificFact(TestPlatforms.FreeBSD | TestPlatforms.OSX)]
+        [PlatformSpecificFact(TestPlatforms.FreeBSD)]
         public void ItShouldShowWarningMessageOnCollectCodeCoverage()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
@@ -547,7 +547,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!TestContext.IsLocalized())
             {
-                result.StdOut.Should().Contain("No code coverage data available. Profiler was not initialized.");
+               result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows, Linux x64 and macOS x64.");
                 result.StdOut.Should().Contain("Total:     1");
                 result.StdOut.Should().Contain("Passed:     1");
                 result.StdOut.Should().NotContain("Failed!");
@@ -603,6 +603,31 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StartInfo.EnvironmentVariables[dotnetRoot].Should().Be(Path.GetDirectoryName(dotnet));
         }
 
+        [Fact]
+        public void TestsFromCsprojAndArchSwitchShouldFlowToMsBuild()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
+                .WithVersionVariables()
+                .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
+
+            var testProjectDirectory = testInstance.Path;
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--arch", "wrongArchitecture");
+
+            // Verify
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("error NETSDK1083: The specified RuntimeIdentifier");
+                result.StdOut.Should().Contain("wrongArchitecture");
+            }
+
+            result.ExitCode.Should().Be(1);
+        }
 
         private string CopyAndRestoreVSTestDotNetCoreTestApp([CallerMemberName] string callingMethod = "")
         {

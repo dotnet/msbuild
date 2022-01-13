@@ -278,8 +278,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
-        <target state="translated">Die Workload "{0}" ist bereits installiert.</target>
+        <source>Workload(s) '{0}' are already installed.</source>
+        <target state="translated">Workloads '{0}' sind bereits installiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">

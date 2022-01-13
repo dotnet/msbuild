@@ -278,7 +278,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
+        <source>Workload(s) '{0}' are already installed.</source>
         <target state="translated">ワークロード '{0}' は既にインストールされています。</target>
         <note />
       </trans-unit>

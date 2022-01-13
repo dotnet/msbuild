@@ -180,7 +180,8 @@ namespace Microsoft.DotNet.Tools.Run
             var buildResult =
                 new RestoringCommand(
                     restoreArgs.Prepend(Project),
-                    NoRestore
+                    NoRestore,
+                    advertiseWorkloadUpdates: false
                 ).Execute();
 
             if (buildResult != 0)

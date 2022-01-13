@@ -169,7 +169,7 @@
     <value>Download of workload packs to offline cache failed: {0}</value>
   </data>
   <data name="WorkloadAlreadyInstalled" xml:space="preserve">
-    <value>Workload '{0}' is already installed.</value>
+    <value>Workload(s) '{0}' are already installed.</value>
   </data>
   <data name="InvalidNuGetVersionRange" xml:space="preserve">
     <value>Specified version '{0}' isn't a valid NuGet version range.</value>

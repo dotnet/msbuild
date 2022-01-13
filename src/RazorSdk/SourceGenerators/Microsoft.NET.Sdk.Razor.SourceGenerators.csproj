@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Internal.SourceGenerator.Transport" Version="$(MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion)" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="$(MicrosoftAspNetCoreRazorSourceGeneratorToolingInternalPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,7 +27,7 @@
 
   <Target Name="GetDependencyTargetPaths">
     <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="$(PkgMicrosoft_AspNetCore_Razor_Internal_SourceGenerator_Transport)\lib\netstandard2.0\Microsoft.AspNetCore.Razor.Internal.SourceGenerator.Transport.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PkgMicrosoft_AspNetCore_Razor_SourceGenerator_Tooling_Internal)\lib\netstandard2.0\Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal.dll" IncludeRuntimeDependency="false" />
     </ItemGroup>
   </Target>
 
