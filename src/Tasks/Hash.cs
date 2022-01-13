@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
         private static readonly Encoding s_encoding = Encoding.UTF8;
         private static readonly byte[] s_itemSeparatorCharacterBytes = s_encoding.GetBytes(new char[] { ItemSeparatorCharacter });
 
-        // Size of buffer where bytes of the strings are stored until sha1.TransformBlock is be run on them.
+        // Size of buffer where bytes of the strings are stored until sha1.TransformBlock is to be run on them.
         // It is needed to get a balance between amount of costly sha1.TransformBlock calls and amount of allocated memory.
         private const int Sha1BufferSize = 512;
 
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Tasks
                 using (var sha1 = SHA1.Create())
                 {
                     // Buffer in which bytes of the strings are to be stored until their number reaches the limit size.
-                    // Once the limit is reached, the sha1.TransformBlock is be run on all the bytes of this buffer.
+                    // Once the limit is reached, the sha1.TransformBlock is to be run on all the bytes of this buffer.
                     byte[] sha1Buffer = null;
 
                     // Buffer in which bytes of items' ItemSpec are to be stored.

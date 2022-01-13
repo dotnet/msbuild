@@ -86,35 +86,32 @@ namespace Microsoft.Build.Tasks.UnitTests
             string input = "";
             using (var sha1 = System.Security.Cryptography.SHA1.Create())
             {
-                using (var stringBuilder = new ReuseableStringBuilder(sha1.HashSize))
+                var stringBuilder = new System.Text.StringBuilder(sha1.HashSize);
+                MockEngine mockEngine = new();
+                for (int i = 0; i < maxInputSize; i++)
                 {
-                    MockEngine mockEngine = new();
-                    for (int i = 0; i < maxInputSize; i++)
+                    input += "a";
+
+                    Hash hashTask = new()
                     {
-                        input += "a";
+                        BuildEngine = mockEngine,
+                        ItemsToHash = new ITaskItem[] { new TaskItem(input) },
+                        IgnoreCase = false
+                    };
+                    Assert.True(hashTask.Execute());
+                    string actualHash = hashTask.HashResult;
 
-                        Hash hashTask = new()
-                        {
-                            BuildEngine = mockEngine,
-                            ItemsToHash = new ITaskItem[] { new TaskItem(input) },
-                            IgnoreCase = false
-                        };
-                        Assert.True(hashTask.Execute());
-                        string actualHash = hashTask.HashResult;
-
-                        byte[] hash = sha1.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + '\u2028'));
-                        stringBuilder.Clear();
-                        foreach (var b in hash)
-                        {
-                            stringBuilder.Append(b.ToString("x2"));
-                        }
-                        string expectedHash = stringBuilder.ToString();
-
-                        Assert.Equal(expectedHash, actualHash);
+                    byte[] hash = sha1.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + '\u2028'));
+                    stringBuilder.Clear();
+                    foreach (var b in hash)
+                    {
+                        stringBuilder.Append(b.ToString("x2"));
                     }
+                    string expectedHash = stringBuilder.ToString();
+
+                    Assert.Equal(expectedHash, actualHash);
                 }
             }
-
         }
 #pragma warning restore CA5350
 
@@ -163,6 +160,5 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             return hashTask.HashResult;
         }
-
     }
 }
