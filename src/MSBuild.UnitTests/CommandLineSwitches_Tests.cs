@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets:targets.txt" }, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets:targets.txt" }, switches, command);
 
             switches.HaveErrors().ShouldBeFalse();
             switches[CommandLineSwitches.ParameterizedSwitch.Targets].ShouldBe(new[] { "targets.txt" });
@@ -472,7 +472,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets /targets" }, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets /targets" }, switches, command);
 
             switches.HaveErrors().ShouldBeTrue();
         }
@@ -551,7 +551,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches, command);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new[] {"true", "  NoBuild  ", "  ", "foo"});
 
@@ -564,7 +564,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph" }, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph" }, switches, command);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(Array.Empty<string>());
 
@@ -577,7 +577,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/irc", "/irc:a;b", "/irc:c;d"}, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/irc", "/irc:a;b", "/irc:c;d"}, switches, command);
 
             switches[CommandLineSwitches.ParameterizedSwitch.InputResultsCaches].ShouldBe(new []{null, "a", "b", "c", "d"});
 
@@ -590,7 +590,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a"}, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a"}, switches, command);
 
             switches[CommandLineSwitches.ParameterizedSwitch.OutputResultsCache].ShouldBe(new []{"a"});
 
@@ -603,7 +603,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a", "/orc:b"}, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a", "/orc:b"}, switches, command);
 
             switches.HaveErrors().ShouldBeTrue();
         }
@@ -1084,7 +1084,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "" }), commandLineSwitches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "" }), commandLineSwitches, command);
 
             Assert.Null(MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches));
         }
@@ -1108,7 +1108,7 @@ namespace Microsoft.Build.UnitTests
                 "/err:D,d;E,e",               // A different source with new items and uses the short form
                 "/warnaserror:a",             // A different source with a single duplicate
                 "/warnaserror:a,b",           // A different source with  multiple duplicates
-            }), commandLineSwitches, ref command);
+            }), commandLineSwitches, command);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1130,7 +1130,7 @@ namespace Microsoft.Build.UnitTests
             {
                 "/warnaserror:a;b;c",
                 "/warnaserror",
-            }), commandLineSwitches, ref command);
+            }), commandLineSwitches, command);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.UnitTests
                 "/warnaserror:a;b;c",
                 "/warnaserror",
                 "/warnaserror:e;f;g",
-            }), commandLineSwitches, ref command);
+            }), commandLineSwitches, command);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1173,7 +1173,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new [] { "/warnaserror" }), commandLineSwitches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new [] { "/warnaserror" }), commandLineSwitches, command);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1191,7 +1191,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
             string command = "{0}"; // This is a hack so the error message contains the exact resource string.
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches, command);
 
             VerifySwitchError(commandLineSwitches, "/warnasmessage", AssemblyResources.GetString("MissingWarnAsMessageParameterError"));
         }
@@ -1209,12 +1209,12 @@ namespace Microsoft.Build.UnitTests
 
                 CommandLineSwitches commandLineSwitches = new();
                 string fullCommandLine = "msbuild validProject.csproj %ENVIRONMENTVARIABLE%";
-                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "validProject.csproj", "%ENVIRONMENTVARIABLE%" }, commandLineSwitches, ref fullCommandLine);
+                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "validProject.csproj", "%ENVIRONMENTVARIABLE%" }, commandLineSwitches, fullCommandLine);
                 VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
 
                 commandLineSwitches = new();
                 fullCommandLine = "msbuild %ENVIRONMENTVARIABLE% validProject.csproj";
-                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "%ENVIRONMENTVARIABLE%", "validProject.csproj" }, commandLineSwitches, ref fullCommandLine);
+                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "%ENVIRONMENTVARIABLE%", "validProject.csproj" }, commandLineSwitches, fullCommandLine);
                 VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
             }
         }
@@ -1238,7 +1238,7 @@ namespace Microsoft.Build.UnitTests
                 "/nowarn:D,d;E,e",              // A different source with new items and uses the short form
                 "/warnasmessage:a",             // A different source with a single duplicate
                 "/warnasmessage:a,b",           // A different source with  multiple duplicates
-            }), commandLineSwitches, ref command);
+            }), commandLineSwitches, command);
 
             ISet<string> actualWarningsAsMessages = MSBuildApp.ProcessWarnAsMessageSwitch(commandLineSwitches);
 
@@ -1256,7 +1256,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/profileevaluation" }), commandLineSwitches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/profileevaluation" }), commandLineSwitches, command);
             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
         }
 

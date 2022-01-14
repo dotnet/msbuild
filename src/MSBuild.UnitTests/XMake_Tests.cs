@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
             arguments.AddRange(new[] { "/p:a=b", "/p:c=d" });
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
             parameters[0].ShouldBe("a=b");
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
             parameters[0].ShouldBe("a=b");
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
             arguments.AddRange(new[] { "/m:2" });
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters[0].ShouldBe("2");
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             arguments.AddRange(new[] { "/m:3", "/m" });
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters[1].ShouldBe(Convert.ToString(NativeMethodsShared.GetLogicalCoreCount()));
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
             arguments.AddRange(new[] { "/m:" });
 
             string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, ref command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters.Length.ShouldBe(0);

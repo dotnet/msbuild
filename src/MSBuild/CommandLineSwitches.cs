@@ -5,6 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -399,6 +401,8 @@ namespace Microsoft.Build.CommandLine
         // line, and it provides a store for the switch parameters
         private DetectedParameterizedSwitch[] _parameterizedSwitches;
         // NOTE: the above arrays are instance members because this class is not required to be a singleton
+
+        internal static Dictionary<string, string> SwitchesFromResponseFiles = new();
 
         /// <summary>
         /// Default constructor.
@@ -808,7 +812,12 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    CommandLineSwitchException.Throw(_errorMessage, _badCommandLineArg, _commandLine);
+                    StringBuilder sb = StringBuilderCache.Acquire();
+                    foreach (KeyValuePair<string, string> kvp in SwitchesFromResponseFiles)
+                    {
+                        sb.Append($"\n{ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResponseFileSwitchFromLocation", kvp.Value, kvp.Key)}");
+                    }
+                    CommandLineSwitchException.Throw("SwitchErrorWithArguments", _badCommandLineArg, ResourceUtilities.GetResourceString(_errorMessage), _commandLine, sb.ToString());
                 }
             }
         }
