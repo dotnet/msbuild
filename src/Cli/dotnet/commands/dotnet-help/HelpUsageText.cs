@@ -1,4 +1,6 @@
-﻿using Microsoft.DotNet.Tools;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Microsoft.DotNet.Tools.Help;
 
 internal static class HelpUsageText
@@ -36,6 +38,7 @@ sdk-options:
   build             {LocalizableStrings.BuildDefinition}
   build-server      {LocalizableStrings.BuildServerDefinition}
   clean             {LocalizableStrings.CleanDefinition}
+  format            {LocalizableStrings.FormatDefinition}
   help              {LocalizableStrings.HelpDefinition}
   list              {LocalizableStrings.ListDefinition}
   msbuild           {LocalizableStrings.MsBuildDefinition}
@@ -46,11 +49,13 @@ sdk-options:
   remove            {LocalizableStrings.RemoveDefinition}
   restore           {LocalizableStrings.RestoreDefinition}
   run               {LocalizableStrings.RunDefinition}
+  sdk               {LocalizableStrings.SdkDefinition}
   sln               {LocalizableStrings.SlnDefinition}
   store             {LocalizableStrings.StoreDefinition}
   test              {LocalizableStrings.TestDefinition}
   tool              {LocalizableStrings.ToolDefinition}
   vstest            {LocalizableStrings.VsTestDefinition}
+  workload          {LocalizableStrings.WorkloadDefinition}
 
 {LocalizableStrings.AdditionalTools}
   dev-certs         {LocalizableStrings.DevCertsDefinition}

@@ -1,5 +1,9 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using System.Collections.Generic;
+using System.CommandLine.Parsing;
+using System.CommandLine.Suggestions;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
@@ -11,39 +15,70 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class Suggest
     {
-        public static IEnumerable<string> TargetFrameworksFromProjectFile()
+        public static SuggestDelegate TargetFrameworksFromProjectFile()
         {
-            var msBuildProject = GetMSBuildProject();
-
-            if (msBuildProject == null)
+            return (ParseResult parseResult, string textToMatch) =>
             {
-                yield break;
-            }
+                try
+                {
+                    return GetMSBuildProject()?.GetTargetFrameworks().Select(tf => tf.GetShortFolderName()) ?? Empty<string>();
+                }
+                catch (Exception)
+                {
+                    return Empty<string>();
+                }
+            };
 
-            foreach (var tfm in msBuildProject.GetTargetFrameworks())
-            {
-                yield return tfm.GetShortFolderName();
-            }
         }
 
         private static void Report(Exception e) =>
             Reporter.Verbose.WriteLine($"Exception occurred while getting suggestions: {e}");
 
-        public static IEnumerable<string> RunTimesFromProjectFile() =>
-            GetMSBuildProject()
-                .GetRuntimeIdentifiers() ??
-            Empty<string>();
+        public static SuggestDelegate RunTimesFromProjectFile()
+        {
+            return (ParseResult parseResult, string textToMatch) =>
+            {
+                try
+                {
+                    return GetMSBuildProject()?.GetRuntimeIdentifiers() ?? Empty<string>();
+                }
+                catch (Exception)
+                {
+                    return Empty<string>();
+                }
+            };
+        }
+            
 
-        public static IEnumerable<string> ProjectReferencesFromProjectFile() =>
-            GetMSBuildProject()
-                ?.GetProjectToProjectReferences()
-                .Select(r => r.Include) ??
-            Empty<string>();
+        public static SuggestDelegate ProjectReferencesFromProjectFile()
+        {
+            return (ParseResult parseResult, string textToMatch) =>
+            {
+                try
+                {
+                    return GetMSBuildProject()?.GetProjectToProjectReferences().Select(r => r.Include) ?? Empty<string>();
+                }
+                catch (Exception)
+                {
+                    return Empty<string>();
+                }
+            };
+        }
 
-        public static IEnumerable<string> ConfigurationsFromProjectFileOrDefaults() =>
-            GetMSBuildProject()
-                ?.GetConfigurations() ??
-            new[] { "Debug", "Release" };
+        public static SuggestDelegate ConfigurationsFromProjectFileOrDefaults()
+        {
+            return (ParseResult parseResult, string textToMatch) =>
+            {
+                try
+                {
+                    return GetMSBuildProject()?.GetConfigurations() ?? new[] { "Debug", "Release" };
+                }
+                catch (Exception)
+                {
+                    return Empty<string>();
+                }
+            };
+        }
 
         private static MsbuildProject GetMSBuildProject()
         {

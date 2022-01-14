@@ -36,22 +36,22 @@ Use 'dotnet --help' para ver os comandos disponíveis ou visite: https://aka.ms/
         <source>Welcome to .NET {0}!
 ---------------------
 SDK Version: {1}</source>
-        <target state="new">Welcome to .NET {0}!
+        <target state="translated">Bem-vindo(a) ao .NET {0}.
 ---------------------
-SDK Version: {1}</target>
+Versão do SDK: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
         <source>Telemetry
 ---------
-The .NET tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="needs-review-translation">Telemetria!
+        <target state="translated">Telemetria
 ---------
-As ferramentas do .NET Core coletam dados de uso para nos ajudar a melhorar sua experiência. Os dados são anônimos. Eles são coletados pela Microsoft e compartilhados com a comunidade. Você pode sair de telemetria definindo a variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT para '1' ou 'true' usando o shell favorito.
+As ferramentas do .NET coletam dados de uso para ajudar-nos a aprimorar sua experiência. Eles são coletados pela Microsoft e compartilhados com a comunidade. Você pode recusar a telemetria definindo a variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT como '1' ou 'true' usando seu shell favorito.
 
-Leia mais sobre a telemetria de Ferramentas da CLI do .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
+Leia mais sobre a telemetria das Ferramentas da CLI do .NET: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

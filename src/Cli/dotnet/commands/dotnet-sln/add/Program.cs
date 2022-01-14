@@ -3,64 +3,61 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
-using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.Sln.Add
 {
     internal class AddProjectToSolutionCommand : CommandBase
     {
-        private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
         private readonly bool _inRoot;
         private readonly IList<string> _relativeRootSolutionFolders;
 
-        private const string InRootOption = "in-root";
-        private const string SolutionFolderOption = "solution-folder";
-
         public AddProjectToSolutionCommand(
-            AppliedOption appliedCommand,
-            string fileOrDirectory,
             ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-            _appliedCommand = appliedCommand;
+            _fileOrDirectory = parseResult.GetValueForArgument(SlnCommandParser.SlnArgument);
 
-            _fileOrDirectory = fileOrDirectory;
-
-            _inRoot = appliedCommand.ValueOrDefault<bool>(InRootOption);
-            string relativeRoot = _appliedCommand.ValueOrDefault<string>(SolutionFolderOption);
-
-            if (_inRoot && !string.IsNullOrEmpty(relativeRoot))
+            _inRoot = parseResult.GetValueForOption(SlnAddParser.InRootOption);
+            string relativeRoot = parseResult.GetValueForOption(SlnAddParser.SolutionFolderOption);
+            bool hasRelativeRoot = !string.IsNullOrEmpty(relativeRoot);
+            
+            if (_inRoot && hasRelativeRoot)
             {
                 // These two options are mutually exclusive
                 throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
             }
 
-            _relativeRootSolutionFolders = relativeRoot?.Split(Path.DirectorySeparatorChar);
+            if (hasRelativeRoot)
+            {
+                relativeRoot = PathUtility.GetPathWithDirectorySeparator(relativeRoot);
+                _relativeRootSolutionFolders = relativeRoot.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            }
+            else
+            {
+                _relativeRootSolutionFolders = null;
+            }
         }
 
         public override int Execute()
         {
             SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
-            if (_appliedCommand.Arguments.Count == 0)
+            var arguments = (_parseResult.GetValueForArgument<IEnumerable<string>>(SlnAddParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
+            if (arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
             }
 
-            PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
+            PathUtility.EnsureAllPathsExist(arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
 
-            var fullProjectPaths = _appliedCommand.Arguments.Select(p =>
+            var fullProjectPaths = arguments.Select(p =>
             {
                 var fullPath = Path.GetFullPath(p);
                 return Directory.Exists(fullPath) ?

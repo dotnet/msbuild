@@ -19,22 +19,21 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [WindowsOnlyTheory]
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.8.0.41402")]
         [InlineData("netcoreapp3.1", ".NETCoreApp", "v3.1", "Windows", "7.0")] // Default values pre-5.0
         [InlineData("net5.0", ".NETCoreApp", "v5.0", "", "")]
         [InlineData("net5.0-Windows7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
         [InlineData("net5.0-WINDOWS7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
         [InlineData("net5.0-windows", ".NETCoreApp", "v5.0", "Windows", "7.0")]
-        [InlineData("net5.0-windows10.0.19041", ".NETCoreApp", "v5.0", "Windows", "10.0.19041")]
+        [InlineData("net5.0-windows10.0.19041.0", ".NETCoreApp", "v5.0", "Windows", "10.0.19041.0")]
         public void It_defines_target_platform_from_target_framework(string targetFramework, string expectedTargetFrameworkIdentifier, string expectedTargetFrameworkVersion, string expectedTargetPlatformIdentifier, string expectedTargetPlatformVersion)
         {
             var testProj = new TestProject()
             {
                 Name = "TargetPlatformTests",
-                IsSdkProject = true, 
                 TargetFrameworks = targetFramework
             };
-            var testAsset = _testAssetsManager.CreateTestProject(testProj);
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: targetFramework);
 
             Action<string, string> assertValue = (string valueName, string expected) =>
             {
@@ -45,11 +44,11 @@ namespace Microsoft.NET.Build.Tests
                     .Pass();
                 if (expected.Trim().Equals(string.Empty))
                 {
-                    getValuesCommand.GetValues().Count.Should().Be(0);
+                    getValuesCommand.GetValues().Count.Should().Be(0, $"expect '{valueName}' to be '{expected}'. But get {string.Join(";", getValuesCommand.GetValues())}");
                 }
                 else
                 {
-                    getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { expected });
+                    getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { expected }, $"Asserting \"{valueName}\"'s value");
                 }
             };
 
@@ -58,8 +57,30 @@ namespace Microsoft.NET.Build.Tests
             assertValue("TargetPlatformIdentifier", expectedTargetPlatformIdentifier);
             assertValue("TargetPlatformIdentifier", expectedTargetPlatformIdentifier);
             assertValue("TargetPlatformVersion", expectedTargetPlatformVersion);
-            assertValue("TargetPlatformMoniker", $"{expectedTargetPlatformIdentifier},Version={expectedTargetPlatformVersion}");
+            assertValue("TargetPlatformMoniker", expectedTargetPlatformIdentifier.Equals(string.Empty) && expectedTargetPlatformVersion.Equals(string.Empty) ?
+                string.Empty : $"{expectedTargetPlatformIdentifier},Version={expectedTargetPlatformVersion}");
             assertValue("TargetPlatformDisplayName", $"{expectedTargetPlatformIdentifier} {expectedTargetPlatformVersion}");
+        }
+
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0.41402")]
+        public void It_defines_target_platform_from_target_framework_with_explicit_version()
+        {
+            var targetPlatformVersion = "10.0.19041.0";
+            var targetFramework = "net5.0-windows";
+            var testProj = new TestProject()
+            {
+                Name = "TargetPlatformTests",
+                TargetFrameworks = targetFramework
+            };
+            testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
+            var testAsset = _testAssetsManager.CreateTestProject(testProj);
+
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.Path, testProj.Name), targetFramework, "TargetPlatformIdentifier");
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "Windows" });
         }
 
         [Fact]
@@ -68,7 +89,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "UnsupportedOS",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0-unsupported"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

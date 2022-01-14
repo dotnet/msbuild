@@ -2,10 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine.Parsing;
 using System.IO;
-using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -15,6 +14,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 {
     internal class ToolInstallLocalInstaller
     {
+        private readonly ParseResult _parseResult;
         public string TargetFrameworkToInstall { get; private set; }
 
         private readonly IToolPackageInstaller _toolPackageInstaller;
@@ -25,19 +25,15 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly string _verbosity;
 
         public ToolInstallLocalInstaller(
-            AppliedOption appliedOption,
+            ParseResult parseResult,
             IToolPackageInstaller toolPackageInstaller = null)
         {
-            if (appliedOption == null)
-            {
-                throw new ArgumentNullException(nameof(appliedOption));
-            }
-
-            _packageId = new PackageId(appliedOption.Arguments.Single());
-            _packageVersion = appliedOption.ValueOrDefault<string>("version");
-            _configFilePath = appliedOption.ValueOrDefault<string>("configfile");
-            _sources = appliedOption.ValueOrDefault<string[]>("add-source");
-            _verbosity = appliedOption.SingleArgumentOrDefault("verbosity");
+            _parseResult = parseResult;
+            _packageId = new PackageId(parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
+            _packageVersion = parseResult.GetValueForOption(ToolInstallCommandParser.VersionOption);
+            _configFilePath = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
+            _sources = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
+            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolInstallCommandParser.VerbosityOption));
 
             if (toolPackageInstaller == null)
             {
@@ -45,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                     IToolPackageStoreQuery,
                     IToolPackageInstaller installer) toolPackageStoresAndInstaller
                         = ToolPackageFactory.CreateToolPackageStoresAndInstaller(
-                            additionalRestoreArguments: appliedOption.OptionValuesToBeForwarded());
+                            additionalRestoreArguments: parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand()));
                 _toolPackageInstaller = toolPackageStoresAndInstaller.installer;
             }
             else
@@ -58,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 
         public IToolPackage Install(FilePath manifestFile)
         {
-            if (_configFilePath != null && !File.Exists(_configFilePath))
+            if (!string.IsNullOrEmpty(_configFilePath) && !File.Exists(_configFilePath))
             {
                 throw new GracefulException(
                     string.Format(
@@ -66,17 +62,10 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         Path.GetFullPath(_configFilePath)));
             }
 
-            VersionRange versionRange = null;
-            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
-            {
-                throw new GracefulException(
-                    string.Format(
-                        LocalizableStrings.InvalidNuGetVersionRange,
-                        _packageVersion));
-            }
+            VersionRange versionRange = _parseResult.GetVersionRange();
 
             FilePath? configFile = null;
-            if (_configFilePath != null)
+            if (!string.IsNullOrEmpty(_configFilePath))
             {
                 configFile = new FilePath(_configFilePath);
             }

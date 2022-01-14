@@ -2,6 +2,26 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchitectureOptionDescription">
+        <source>The target architecture.</source>
+        <target state="translated">Cílová architektura</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotResolveRuntimeIdentifier">
+        <source>Resolving the current runtime identifier failed.</source>
+        <target state="translated">Nepovedlo se vyřešit aktuální identifikátor modulu runtime.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndArchOptions">
+        <source>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</source>
+        <target state="translated">Zadání možností -r|--runtime a -a|--arch zároveň se nepodporuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndOsOptions">
+        <source>Specifying both the `-r|--runtime` and `-os` options is not supported.</source>
+        <target state="translated">Zadání možností -r|--runtime a -os zároveň se nepodporuje.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="translated">Umožňuje, aby se příkaz zastavil a počkal na vstup nebo akci uživatele (například na dokončení ověření).</target>
@@ -9,7 +29,7 @@
       </trans-unit>
       <trans-unit id="CommandPrereleaseOptionDescription">
         <source>Allows prerelease packages to be installed.</source>
-        <target state="new">Allows prerelease packages to be installed.</target>
+        <target state="translated">Umožňuje instalaci předběžných verzí balíčků.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
@@ -75,9 +95,19 @@ export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>
+      <trans-unit id="FrameworkDependentOptionDescription">
+        <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
+        <target state="translated">Publikujte svoji aplikaci jako aplikaci závislou na architektuře. Aby bylo možné vaši aplikaci spustit, musí být na cílovém počítači nainstalovaný kompatibilní modul runtime .NET.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">V {0} se našlo několik projektů. Vyberte, který z nich chcete použít.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperatingSystemOptionDescription">
+        <source>The target operating system.</source>
+        <target state="translated">Cílový operační systém</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -133,6 +163,18 @@ export PATH="$PATH:{0}"
       <trans-unit id="Package">
         <source>Package</source>
         <target state="translated">Balíček</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
+        <target state="translated">Možnosti --self-contained a --no-self-contained nelze použít společně.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="translated">Publikujte se svou aplikací modul runtime pro .NET, aby ho nebylo nutné instalovat na cílovém počítači.
+Pokud se zadá identifikátor modulu runtime, výchozí hodnota je true.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -714,17 +756,17 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="needs-review-translation">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje se odhlásit nebo restartovat relaci.</target>
+        <target state="translated">Právě jste nainstalovali sadu .NET SDK, před spuštěním nainstalovaného nástroje proto bude nutné se odhlásit nebo restartovat relaci.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="needs-review-translation">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít terminál.</target>
+        <target state="translated">Právě jste nainstalovali sadu .NET SDK, před spuštěním nainstalovaného nástroje proto bude nutné znovu otevřít terminál.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="needs-review-translation">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít okno příkazového řádku.</target>
+        <target state="translated">Právě jste nainstalovali sadu .NET SDK, před spuštěním nainstalovaného nástroje proto bude nutné znovu otevřít okno příkazového řádku.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
@@ -941,7 +983,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
-        <target state="translated">PROJEKT | ŘEŠENÍ</target>
+        <target state="translated">PROJECT | SOLUTION</target>
         <note />
       </trans-unit>
     </body>

@@ -7,9 +7,14 @@
         <target state="translated">Consente di archiviare gli assembly specificati per la piattaforma .NET. Per impostazione predefinita, gli assembly verranno ottimizzati per il framework e il runtime di destinazione.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CurrentRuntimeOptionDescription">
+        <source>Use current runtime as the target runtime.</source>
+        <target state="translated">Usa il runtime corrente come runtime di destinazione.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
-        <target state="translated">DIR_OUTPUT</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
@@ -19,7 +24,7 @@
       </trans-unit>
       <trans-unit id="FrameworkVersionOption">
         <source>FRAMEWORK_VERSION</source>
-        <target state="translated">VERSIONE_FRAMEWORK</target>
+        <target state="translated">FRAMEWORK_VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOptionDescription">
@@ -29,7 +34,7 @@
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOption">
         <source>WORKING_DIR</source>
-        <target state="translated">DIR_LAVORO</target>
+        <target state="translated">WORKING_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOptionDescription">
@@ -49,7 +54,7 @@
       </trans-unit>
       <trans-unit id="ProjectManifest">
         <source>PROJECT_MANIFEST</source>
-        <target state="translated">MANIFESTO_PROGETTO</target>
+        <target state="translated">PROJECT_MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectManifestDescription">

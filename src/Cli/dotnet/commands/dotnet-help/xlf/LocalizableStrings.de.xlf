@@ -2,9 +2,19 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="FormatDefinition">
+        <source>Apply style preferences to a project or solution.</source>
+        <target state="translated">Wenden Sie Formatvorlageneinstellungen auf ein Projekt oder eine Lösung an.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
         <target state="translated">Rollforward zu Frameworkversion (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkDefinition">
+        <source>Manage .NET SDK installation.</source>
+        <target state="translated">.NET SDK-Installation verwalten</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -48,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="VersionDescription">
-        <source>Display .NET CLI Version Number</source>
-        <target state="translated">.NET-CLI-Versionsnummer anzeigen</target>
+        <source>Display the version of the .NET SDK, including the effects of any global.json</source>
+        <target state="translated">Hiermit wird die .NET SDK-Version angezeigt, einschließlich der Auswirkungen einer beliebigen "global.json".</target>
         <note />
       </trans-unit>
       <trans-unit id="InfoDescription">
@@ -184,12 +194,12 @@
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET SDK version in use.</source>
-        <target state="needs-review-translation">Die verwendete .NET Core SDK-Version anzeigen.</target>
+        <target state="translated">Hiermit wird die verwendete .NET SDK-Version angezeigt.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET information.</source>
-        <target state="needs-review-translation">.NET Core-Informationen anzeigen.</target>
+        <target state="translated">Hiermit werden .NET-Informationen angezeigt.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
@@ -279,17 +289,22 @@
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET SDK command.</source>
-        <target state="needs-review-translation">Hiermit wird ein .NET Core SDK-Befehl ausgeführt.</target>
+        <target state="translated">Hiermit wird ein .NET SDK-Befehl ausgeführt.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET application.</source>
-        <target state="needs-review-translation">Hiermit wird eine .NET Core-Anwendung ausgeführt.</target>
+        <target state="translated">Hiermit wird eine .NET-Anwendung ausgeführt.</target>
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">F# Interactive starten/F#-Skripts ausführen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">Verwalten Sie optionale Workloads.</target>
         <note />
       </trans-unit>
     </body>

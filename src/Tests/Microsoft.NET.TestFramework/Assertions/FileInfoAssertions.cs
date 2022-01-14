@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Microsoft.NET.TestFramework.Assertions
@@ -27,7 +28,7 @@ namespace Microsoft.NET.TestFramework.Assertions
         {
             Execute.Assertion
                 .ForCondition(_fileInfo.Exists)
-                .BecauseOf(because, reasonArgs) 
+                .BecauseOf(because, reasonArgs)
                 .FailWith($"Expected File {_fileInfo.FullName} to exist, but it does not.");
             return new AndConstraint<FileInfoAssertions>(this);
         }
@@ -36,7 +37,7 @@ namespace Microsoft.NET.TestFramework.Assertions
         {
             Execute.Assertion
                 .ForCondition(!_fileInfo.Exists)
-                .BecauseOf(because, reasonArgs) 
+                .BecauseOf(because, reasonArgs)
                 .FailWith($"Expected File {_fileInfo.FullName} to not exist, but it does.");
             return new AndConstraint<FileInfoAssertions>(this);
         }
@@ -45,11 +46,43 @@ namespace Microsoft.NET.TestFramework.Assertions
         {
             var lastWriteTimeUtc = _fileInfo.LastWriteTimeUtc;
 
-            Execute.Assertion
-                .ForCondition(lastWriteTimeUtc != null)
-                .BecauseOf(because, reasonArgs) 
-                .FailWith($"Expected File {_fileInfo.FullName} to have a LastWriteTimeUTC, but it is null.");
             return new AndWhichConstraint<FileInfoAssertions, DateTimeOffset>(this, lastWriteTimeUtc);
         }
+
+        public AndConstraint<FileInfoAssertions> HashEquals(string expectedSha)
+        {
+            using var algorithm = SHA256.Create();
+            var actualSha256 = algorithm.ComputeHash(File.ReadAllBytes(_fileInfo.FullName));
+            var actualSha256Base64 = Convert.ToBase64String(actualSha256);
+
+            Execute.Assertion
+                .ForCondition(actualSha256Base64 == expectedSha)
+                .FailWith($"File {_fileInfo.FullName} did not have SHA matching {expectedSha}. Found {actualSha256Base64}.");
+
+            return new AndConstraint<FileInfoAssertions>(this);
+        }
+
+        public AndConstraint<FileInfoAssertions> Contain(string expectedContent)
+        {
+            var actualContent = File.ReadAllText(_fileInfo.FullName);
+
+            Execute.Assertion
+                .ForCondition(actualContent.Contains(expectedContent))
+                .FailWith($"File {_fileInfo.FullName} did not have content: {expectedContent}.");
+
+            return new AndConstraint<FileInfoAssertions>(this);
+        }
+
+        public AndConstraint<FileInfoAssertions> NotContain(string expectedContent)
+        {
+            var actualContent = File.ReadAllText(_fileInfo.FullName);
+
+            Execute.Assertion
+                .ForCondition(!actualContent.Contains(expectedContent))
+                .FailWith($"File {_fileInfo.FullName} had content: {expectedContent}.");
+
+            return new AndConstraint<FileInfoAssertions>(this);
+        }
+
     }
 }

@@ -2,12 +2,12 @@
 
 <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
   <ItemGroup>
-    <LayoutFile Include="@(Content)" Condition="'%(Content.PackagePath)' != '' and '%(Content.PackagePath)' != 'Icon.png' and '%(Content.PackagePath)' != 'analyzers/cs'">
-      <TargetPath>%(Content.PackagePath)\%(Content.RecursiveDir)%(Content.Filename)%(Content.Extension)</TargetPath>
+    <LayoutFile Include="@(AdditionalContent)" Condition="'%(AdditionalContent.PackagePath)' != '' and '%(AdditionalContent.PackagePath)' != 'Icon.png' and '%(AdditionalContent.PackagePath)' != 'analyzers/cs'">
+      <TargetPath>%(AdditionalContent.PackagePath)\%(AdditionalContent.RecursiveDir)%(AdditionalContent.Filename)%(AdditionalContent.Extension)</TargetPath>
     </LayoutFile>
     <!-- Analyzers needs to be copied to the root -->
-    <LayoutFile Include="@(Content)" Condition="'%(Content.PackagePath)' != '' and '%(Content.PackagePath)' != 'Icon.png' and '%(Content.PackagePath)' == 'analyzers/cs'">
-      <TargetPath>%(Content.PackagePath)\%(Content.Filename)%(Content.Extension)</TargetPath>
+    <LayoutFile Include="@(AdditionalContent)" Condition="'%(AdditionalContent.PackagePath)' != '' and '%(AdditionalContent.PackagePath)' != 'Icon.png' and '%(AdditionalContent.PackagePath)' == 'analyzers/cs'">
+      <TargetPath>%(AdditionalContent.PackagePath)\%(AdditionalContent.Filename)%(AdditionalContent.Extension)</TargetPath>
     </LayoutFile>
   </ItemGroup>
 </Target>

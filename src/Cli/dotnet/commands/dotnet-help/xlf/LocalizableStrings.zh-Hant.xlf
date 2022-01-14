@@ -2,9 +2,19 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="FormatDefinition">
+        <source>Apply style preferences to a project or solution.</source>
+        <target state="translated">將樣式喜好設定套用至專案或解決方案。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
         <target state="translated">復原為架構版本 (LatestPatch、Minor、LatestMinor、Major、LatestMajor、Disable)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkDefinition">
+        <source>Manage .NET SDK installation.</source>
+        <target state="translated">管理 .NET SDK 安裝。</target>
         <note />
       </trans-unit>
       <trans-unit id="Usage">
@@ -48,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="VersionDescription">
-        <source>Display .NET CLI Version Number</source>
-        <target state="translated">顯示 .NET CLI 版本號碼</target>
+        <source>Display the version of the .NET SDK, including the effects of any global.json</source>
+        <target state="translated">顯示 .NET SDK 的版本，包括任何 global.json 的影響</target>
         <note />
       </trans-unit>
       <trans-unit id="InfoDescription">
@@ -184,12 +194,12 @@
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET SDK version in use.</source>
-        <target state="needs-review-translation">顯示使用中的 .NET Core SDK 版本。</target>
+        <target state="translated">顯示使用中的 .NET SDK 版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET information.</source>
-        <target state="needs-review-translation">顯示 .NET Core 資訊。</target>
+        <target state="translated">顯示 .NET 資訊。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
@@ -279,17 +289,22 @@
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET SDK command.</source>
-        <target state="needs-review-translation">執行 .NET Core SDK 命令。</target>
+        <target state="translated">執行 .NET SDK 命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET application.</source>
-        <target state="needs-review-translation">執行 .NET Core 應用程式。</target>
+        <target state="translated">執行 .NET 應用程式。</target>
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
         <target state="translated">啟動 F# Interactive/執行 F# 指令碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">管理選擇性工作負載。</target>
         <note />
       </trans-unit>
     </body>

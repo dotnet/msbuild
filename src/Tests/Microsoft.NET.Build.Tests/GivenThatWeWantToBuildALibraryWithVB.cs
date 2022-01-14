@@ -15,10 +15,6 @@ using System.Collections.Generic;
 using System;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using NuGet.ProjectModel;
-using NuGet.Common;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -185,27 +181,29 @@ namespace Microsoft.NET.Build.Tests
 
             var definedConstants = ExpandSequence(getValuesCommand.GetValues()).ToList();
 
-            definedConstants.Should().BeEquivalentTo(expectedDefines.Concat(new[] { "PLATFORM=\"AnyCPU\"", "NETSTANDARD=-1", "NETSTANDARD1_5=-1" }));
+            definedConstants.Should().BeEquivalentTo(expectedDefines.Concat(new[] { "PLATFORM=\"AnyCPU\"", "NETSTANDARD=-1", "NETSTANDARD1_5=-1", "NETSTANDARD1_0_OR_GREATER=-1", 
+                "NETSTANDARD1_1_OR_GREATER=-1", "NETSTANDARD1_2_OR_GREATER=-1", "NETSTANDARD1_3_OR_GREATER=-1", "NETSTANDARD1_4_OR_GREATER=-1", "NETSTANDARD1_5_OR_GREATER=-1" }));
         }
 
-        [RequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
-        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD=-1", "NETSTANDARD1_0=-1", "_MyType=\"Empty\"" }, false)]
-        [InlineData("netstandard1.3", new[] { "NETSTANDARD=-1", "NETSTANDARD1_3=-1", "_MyType=\"Empty\"" }, false)]
-        [InlineData("netstandard1.6", new[] { "NETSTANDARD=-1", "NETSTANDARD1_6=-1", "_MyType=\"Empty\"" }, false)]
-        [InlineData("net45", new[] { "NETFRAMEWORK=-1", "NET45=-1" }, true)]
-        [InlineData("net461", new[] { "NETFRAMEWORK=-1", "NET461=-1" }, true)]
-        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP=-1", "NETCOREAPP1_0=-1", "_MyType=\"Empty\"" }, false)]
-        [InlineData("net5.0", new[] { "NET=-1", "NET5_0=-1", "NETCOREAPP=-1", "NETCOREAPP3_1=-1", "_MyType=\"Empty\"" }, false)]
-        [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { "_MyType=\"Empty\"" }, false)]
-        [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK=-1", "NET40=-1" }, false)]
-        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS=-1", "XAMARINIOS1_0=-1", "_MyType=\"Empty\"" }, false)]
-        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK=-1", "UNKNOWNFRAMEWORK3_14=-1", "_MyType=\"Empty\"" }, false)]
-        public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines, bool buildOnlyOnWindows)
+        [Theory]
+        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD=-1", "NETSTANDARD1_0=-1", "NETSTANDARD1_0_OR_GREATER=-1", "_MyType=\"Empty\"" })]
+        [InlineData("netstandard1.3", new[] { "NETSTANDARD=-1", "NETSTANDARD1_3=-1", "NETSTANDARD1_0_OR_GREATER=-1", "NETSTANDARD1_1_OR_GREATER=-1", "NETSTANDARD1_2_OR_GREATER=-1", "NETSTANDARD1_3_OR_GREATER=-1", "_MyType=\"Empty\"" })]
+        [InlineData("netstandard1.6", new[] { "NETSTANDARD=-1", "NETSTANDARD1_6=-1", "NETSTANDARD1_0_OR_GREATER=-1", "NETSTANDARD1_1_OR_GREATER=-1", "NETSTANDARD1_2_OR_GREATER=-1", "NETSTANDARD1_3_OR_GREATER=-1", 
+            "NETSTANDARD1_4_OR_GREATER=-1", "NETSTANDARD1_5_OR_GREATER=-1", "NETSTANDARD1_6_OR_GREATER=-1", "_MyType=\"Empty\"" })]
+        [InlineData("net45", new[] { "NETFRAMEWORK=-1", "NET45=-1", "NET20_OR_GREATER=-1", "NET30_OR_GREATER=-1", "NET35_OR_GREATER=-1", "NET40_OR_GREATER=-1", "NET45_OR_GREATER=-1" })]
+        [InlineData("net461", new[] { "NETFRAMEWORK=-1", "NET461=-1", "NET20_OR_GREATER=-1", "NET30_OR_GREATER=-1", "NET35_OR_GREATER=-1", "NET40_OR_GREATER=-1", "NET45_OR_GREATER=-1", "NET451_OR_GREATER=-1", 
+            "NET452_OR_GREATER=-1", "NET46_OR_GREATER=-1", "NET461_OR_GREATER=-1" })]
+        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP=-1", "NETCOREAPP1_0=-1", "_MyType=\"Empty\"", "NETCOREAPP1_0_OR_GREATER=-1" })]
+        [InlineData("net5.0", new[] { "NET=-1", "NET5_0=-1", "NETCOREAPP=-1", "_MyType=\"Empty\"", "NETCOREAPP1_0_OR_GREATER=-1", "NETCOREAPP1_1_OR_GREATER=-1", "NETCOREAPP2_0_OR_GREATER=-1", "NETCOREAPP2_1_OR_GREATER=-1", 
+            "NETCOREAPP2_2_OR_GREATER=-1", "NETCOREAPP3_0_OR_GREATER=-1", "NETCOREAPP3_1_OR_GREATER=-1", "NET5_0_OR_GREATER=-1" })]
+        [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { "_MyType=\"Empty\"" })]
+        [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK=-1", "NET40=-1", "NET20_OR_GREATER=-1", "NET30_OR_GREATER=-1", "NET35_OR_GREATER=-1", "NET40_OR_GREATER=-1" })]
+        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS=-1", "XAMARINIOS1_0=-1", "_MyType=\"Empty\"" })]
+        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK=-1", "UNKNOWNFRAMEWORK3_14=-1", "_MyType=\"Empty\"" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines)
         {
-            bool shouldCompile = true;
-
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibraryVB", "ImplicitFrameworkConstantsVB", targetFramework)
+                .CopyTestAsset("AppWithLibraryVB", "ImplicitFrameworkConstantsVB", targetFramework, identifier: targetFramework)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
@@ -220,9 +218,6 @@ namespace Microsoft.NET.Build.Tests
 
                     if (targetFramework.Contains(",Version="))
                     {
-                        //  We use the full TFM for frameworks we don't have built-in support for targeting, so we don't want to run the Compile target
-                        shouldCompile = false;
-
                         var frameworkName = new FrameworkName(targetFramework);
 
                         var targetFrameworkProperty = targetFrameworkProperties.Single();
@@ -239,22 +234,16 @@ namespace Microsoft.NET.Build.Tests
                     }
                     else
                     {
-                        shouldCompile = true;
                         targetFrameworkProperties.Single().SetValue(targetFramework);
                     }
                 });
-
-            if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                shouldCompile = false;
-            }
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
                 targetFramework, "FinalDefineConstants")
             {
-                ShouldCompile = shouldCompile
+                DependsOnTargets = "AddImplicitDefineConstants"
             };
 
             getValuesCommand

@@ -1,0 +1,98 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!--
+=========================================================================
+GenerateWatchList
+
+Main target called by dotnet-watch. It gathers MSBuild items and writes
+them to a file.
+=========================================================================
+-->
+  <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)DotNetWatchTasks.dll" TaskName="FileSetSerializer" />
+
+  <Target Name="GenerateWatchList"
+          DependsOnTargets="_CollectWatchItems">
+
+    <PropertyGroup>
+      <_IsNetCoreApp Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</_IsNetCoreApp>
+      <_IsNetCoreApp Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">false</_IsNetCoreApp>
+    </PropertyGroup>
+
+    <FileSetSerializer
+       IsNetCoreApp="$(_IsNetCoreApp)"
+       TargetFrameworkVersion="$(TargetFrameworkVersion)"
+       RunCommand="$(RunCommand)"
+       RunArguments="$(RunArguments)"
+       RunWorkingDirectory="$(RunWorkingDirectory)"
+       OutputPath="$(_DotNetWatchListFile)"
+       WatchFiles="@(Watch)" />
+  </Target>
+
+<!--
+=========================================================================
+_CollectWatchItems
+
+Gathers all files to be watched.
+Returns: @(Watch)
+=========================================================================
+-->
+  <PropertyGroup>
+    <_CollectWatchItemsDependsOn Condition=" '$(TargetFrameworks)' != '' AND '$(TargetFramework)' == '' ">
+      _CollectWatchItemsPerFramework;
+    </_CollectWatchItemsDependsOn>
+    <_CollectWatchItemsDependsOn Condition=" '$(TargetFramework)' != '' ">
+      _CoreCollectWatchItems;
+      $(CustomCollectWatchItems);
+    </_CollectWatchItemsDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_CollectWatchItems" DependsOnTargets="$(_CollectWatchItemsDependsOn)" Returns="@(Watch)">
+    <ItemGroup>
+      <Watch ProjectFullPath="$(MSBuildProjectFullPath)" Condition="'%(Watch.ProjectFullPath)' == ''" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_CollectWatchItemsPerFramework">
+    <ItemGroup>
+      <_TargetFramework Include="$(TargetFrameworks)" />
+    </ItemGroup>
+
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Targets="_CoreCollectWatchItems"
+             Properties="TargetFramework=%(_TargetFramework.Identity)">
+      <Output TaskParameter="TargetOutputs" ItemName="Watch" />
+    </MSBuild>
+  </Target>
+
+  <Target Name="_CoreCollectWatchItems" Returns="@(Watch)">
+    <!-- message used to debug -->
+    <Message Importance="High" Text="Collecting watch items from '$(MSBuildProjectName)'" Condition="'$(_DotNetWatchTraceOutput)'=='true'" />
+
+    <Error Text="TargetFramework should be set" Condition="'$(TargetFramework)' == '' "/>
+
+    <PropertyGroup Condition="'$(_DotNetWatchUseStaticWebAssetBasePath)' == 'true'">
+      <_DotNetWatchStaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' != ''">$(StaticWebAssetBasePath)/</_DotNetWatchStaticWebAssetBasePath>
+      <_DotNetWatchStaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' == ''">_content/$(PackageId)/</_DotNetWatchStaticWebAssetBasePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Watch Include="%(Compile.FullPath)" Condition="'%(Compile.Watch)' != 'false'" />
+      <Watch Include="%(EmbeddedResource.FullPath)" Condition="'%(EmbeddedResource.Watch)' != 'false'"/>
+      <Watch Include="$(MSBuildProjectFullPath)" />
+
+      <!-- In RazorSDK (Blazor, RCL, and Web) targeting apps also watch content files under wwwroot -->
+      <Watch Include="%(Content.FullPath)"
+             Condition="'$(UsingMicrosoftNETSdkRazor)'=='true' AND '$(DotNetWatchContentFiles)'!='false' AND '%(Content.Watch)' != 'false' AND $([System.String]::Copy('%(Identity)').Replace('\','/').StartsWith('wwwroot/'))"
+             StaticWebAssetPath="$(_DotNetWatchStaticWebAssetBasePath)$([System.String]::Copy('%(Identity)').Replace('\','/').Substring(8))" />
+
+      <_WatchProjects Include="%(ProjectReference.Identity)" Condition="'%(ProjectReference.Watch)' != 'false'" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_WatchProjects)"
+             Targets="_CollectWatchItems"
+             BuildInParallel="true">
+      <Output TaskParameter="TargetOutputs" ItemName="Watch" />
+    </MSBuild>
+
+  </Target>
+
+</Project>

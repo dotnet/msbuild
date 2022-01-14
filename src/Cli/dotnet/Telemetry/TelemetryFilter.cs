@@ -4,15 +4,15 @@
 using System.Collections.Generic;
 using System;
 using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 using System.Globalization;
+using System.CommandLine;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {
     internal class TelemetryFilter : ITelemetryFilter
     {
-        private const string DotnetName = "dotnet";
         private const string ExceptionEventName = "mainCatchException/exception";
         private readonly Func<string, string> _hash;
 
@@ -24,28 +24,33 @@ namespace Microsoft.DotNet.Cli.Telemetry
         public IEnumerable<ApplicationInsightsEntryFormat> Filter(object objectToFilter)
         {
             var result = new List<ApplicationInsightsEntryFormat>();
+            Dictionary<string,double> measurements = null;
+             if (objectToFilter is Tuple<ParseResult, Dictionary<string,double>> parseResultWithMeasurements)
+            {
+                objectToFilter = parseResultWithMeasurements.Item1;
+                measurements = parseResultWithMeasurements.Item2;
+                measurements = RemoveZeroTimes(measurements);
+            }
 
             if (objectToFilter is ParseResult parseResult)
             {
-                var topLevelCommandName = parseResult[DotnetName]?.AppliedOptions?.FirstOrDefault()?.Name;
+                var topLevelCommandName = parseResult.RootSubCommandResult();
                 if (topLevelCommandName != null)
                 {
-                    LogVerbosityForAllTopLevelCommand(result, parseResult, topLevelCommandName);
+                    result.Add(new ApplicationInsightsEntryFormat(
+                        "toplevelparser/command",
+                        new Dictionary<string, string>()
+                        {{ "verb", topLevelCommandName }}
+                        , measurements
+                        ));
+
+                    LogVerbosityForAllTopLevelCommand(result, parseResult, topLevelCommandName, measurements);
 
                     foreach (IParseResultLogRule rule in ParseResultLogRules)
                     {
-                        result.AddRange(rule.AllowList(parseResult));
+                        result.AddRange(rule.AllowList(parseResult, measurements));
                     }
                 }
-            }
-            else if (objectToFilter is TopLevelCommandParserResult topLevelCommandParserResult)
-            {
-                result.Add(new ApplicationInsightsEntryFormat(
-                            "toplevelparser/command",
-                            new Dictionary<string, string>()
-                        {{ "verb", topLevelCommandParserResult.Command}}
-                ));
-
             }
             else if (objectToFilter is InstallerSuccessReport installerSuccessReport)
             {
@@ -87,53 +92,57 @@ namespace Microsoft.DotNet.Cli.Telemetry
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"new"},
-                optionsToLog: new HashSet<string> {"language"}
+                optionsToLog: new HashSet<Option> { NewCommandParser.LanguageOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"build", "publish"},
-                optionsToLog: new HashSet<string> {"framework", "runtime", "configuration"}
+                optionsToLog: new HashSet<Option> { BuildCommandParser.FrameworkOption, PublishCommandParser.FrameworkOption,
+                    BuildCommandParser.RuntimeOption, PublishCommandParser.RuntimeOption, BuildCommandParser.ConfigurationOption,
+                    PublishCommandParser.ConfigurationOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"run", "clean", "test"},
-                optionsToLog: new HashSet<string> {"framework", "configuration"}
+                optionsToLog: new HashSet<Option> { RunCommandParser.FrameworkOption, CleanCommandParser.FrameworkOption,
+                    TestCommandParser.FrameworkOption, RunCommandParser.ConfigurationOption, CleanCommandParser.ConfigurationOption,
+                    TestCommandParser.ConfigurationOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"pack"},
-                optionsToLog: new HashSet<string> {"configuration"}
+                optionsToLog: new HashSet<Option> { PackCommandParser.ConfigurationOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"vstest"},
-                optionsToLog: new HashSet<string> {"platform", "framework", "logger"}
+                optionsToLog: new HashSet<Option> { CommonOptions.TestPlatformOption,
+                    CommonOptions.TestFrameworkOption, CommonOptions.TestLoggerOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"publish"},
-                optionsToLog: new HashSet<string> {"runtime"}
-            )
+                optionsToLog: new HashSet<Option> { PublishCommandParser.RuntimeOption }
+            ),
+            new AllowListToSendVerbSecondVerbFirstArgument(new HashSet<string> {"workload", "tool"}),
         };
 
         private static void LogVerbosityForAllTopLevelCommand(
             ICollection<ApplicationInsightsEntryFormat> result,
             ParseResult parseResult,
-            string topLevelCommandName)
+            string topLevelCommandName,
+            Dictionary<string, double> measurements = null)
         {
-            if (parseResult[DotnetName][topLevelCommandName]?.AppliedOptions != null &&
-                parseResult[DotnetName][topLevelCommandName].AppliedOptions.Contains("verbosity"))
+            if (parseResult.IsDotnetBuiltInCommand() && parseResult.HasOption(CommonOptions.VerbosityOption))
             {
-                AppliedOption appliedOptions =
-                    parseResult[DotnetName][topLevelCommandName].AppliedOptions["verbosity"];
-
                 result.Add(new ApplicationInsightsEntryFormat(
                     "sublevelparser/command",
                     new Dictionary<string, string>()
                     {
                         { "verb", topLevelCommandName},
-                        {"verbosity", appliedOptions.Arguments.ElementAt(0)}
-                    }));
+                        {"verbosity", Enum.GetName(parseResult.GetValueForOption(CommonOptions.VerbosityOption))}
+                    },
+                    measurements));
             }
         }
 
@@ -187,6 +196,25 @@ namespace Microsoft.DotNet.Cli.Telemetry
             }
 
             return s;
+        }
+
+        private Dictionary<string,double> RemoveZeroTimes(Dictionary<string,double> measurements)
+        {
+            if (measurements != null)
+            {
+                foreach (var measurement in measurements)
+                {
+                    if (measurement.Value == 0)
+                    {
+                        measurements.Remove(measurement.Key);
+                    }
+                }
+                if (measurements.Count == 0)
+                {
+                    measurements = null;
+                }
+            }
+            return measurements;
         }
     }
 }

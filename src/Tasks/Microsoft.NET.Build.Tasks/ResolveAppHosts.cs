@@ -51,6 +51,10 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] KnownAppHostPacks { get; set; }
 
+        public bool NuGetRestoreSupported { get; set; } = true;
+
+        public string NetCoreTargetingPackRoot { get; set; }
+
         [Output]
         public ITaskItem[] PackagesToDownload { get; set; }
 
@@ -217,15 +221,17 @@ namespace Microsoft.NET.Build.Tasks
             string appHostRuntimeIdentifiers = selectedAppHostPack.GetMetadata("AppHostRuntimeIdentifiers");
             string appHostPackPattern = selectedAppHostPack.GetMetadata("AppHostPackNamePattern");
             string appHostPackVersion = selectedAppHostPack.GetMetadata("AppHostPackVersion");
+            string runtimeIdentifiersToExclude = selectedAppHostPack.GetMetadata(MetadataKeys.ExcludedRuntimeIdentifiers);
 
             if (!string.IsNullOrEmpty(RuntimeFrameworkVersion))
             {
                 appHostPackVersion = RuntimeFrameworkVersion;
             }
 
-            string bestAppHostRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
+            string bestAppHostRuntimeIdentifier = NuGetUtils.GetBestMatchingRidWithExclusion(
                 new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath),
                 runtimeIdentifier,
+                runtimeIdentifiersToExclude.Split(';'),
                 appHostRuntimeIdentifiers.Split(';'),
                 out bool wasInGraph);
 
@@ -279,6 +285,19 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
+                    // C++/CLI does not support package download && dedup error
+                    if (!NuGetRestoreSupported && !packagesToDownload.Any(p => p.ItemSpec == hostPackName))
+                    {
+                        Log.LogError(
+                                    Strings.TargetingApphostPackMissingCannotRestore,
+                                    "Apphost",
+                                    $"{NetCoreTargetingPackRoot}\\{hostPackName}",
+                                    selectedAppHostPack.GetMetadata("TargetFramework") ?? "",
+                                    hostPackName,
+                                    appHostPackVersion
+                                    );
+                    }
+
                     //  Download apphost pack
                     TaskItem packageToDownload = new TaskItem(hostPackName);
                     packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);

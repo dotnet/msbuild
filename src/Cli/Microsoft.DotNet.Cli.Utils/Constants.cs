@@ -27,8 +27,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static readonly string AnyRid = "any";
 
-        public static readonly string RestoreInteractiveOption= "--interactive";
-        public const string MsBuildInteractivePropertyName = "NuGetInteractive";
-        public static readonly string MsBuildInteractiveOption= $"-property:{MsBuildInteractivePropertyName}=true";
+        public static readonly string RestoreInteractiveOption = "--interactive";
     }
 }

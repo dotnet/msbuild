@@ -2,14 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Common;
@@ -17,25 +15,22 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.Uninstall
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageUninstaller) CreateToolPackageStoresAndUninstaller(DirectoryPath? nonGlobalLocation = null);
     internal class ToolUninstallGlobalOrToolPathCommand : CommandBase
     {
-        private readonly AppliedOption _options;
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private CreateShellShimRepository _createShellShimRepository;
         private CreateToolPackageStoresAndUninstaller _createToolPackageStoresAndUninstaller;
 
         public ToolUninstallGlobalOrToolPathCommand(
-            AppliedOption options,
             ParseResult result,
             CreateToolPackageStoresAndUninstaller createToolPackageStoreAndUninstaller = null,
             CreateShellShimRepository createShellShimRepository = null,
             IReporter reporter = null)
             : base(result)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
 
@@ -46,8 +41,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
         public override int Execute()
         {
-            var global = _options.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
-            var toolPath = _options.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
+            var global = _parseResult.GetValueForOption(ToolAppliedOption.GlobalOption);
+            var toolPath = _parseResult.GetValueForOption(ToolAppliedOption.ToolPathOption);
 
             DirectoryPath? toolDirectoryPath = null;
             if (!string.IsNullOrWhiteSpace(toolPath))
@@ -65,9 +60,10 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
             (IToolPackageStore toolPackageStore, IToolPackageStoreQuery toolPackageStoreQuery, IToolPackageUninstaller toolPackageUninstaller)
                 = _createToolPackageStoresAndUninstaller(toolDirectoryPath);
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolDirectoryPath);
+            var appHostSourceDirectory = ShellShimTemplateFinder.GetDefaultAppHostSourceDirectory();
+            IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolDirectoryPath);
 
-            var packageId = new PackageId(_options.Arguments.Single());
+            var packageId = new PackageId(_parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
             IToolPackage package = null;
             try
             {

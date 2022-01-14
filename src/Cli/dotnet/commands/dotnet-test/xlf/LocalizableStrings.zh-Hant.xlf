@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdBlameCrashCollectAlwaysDescription">
         <source>Enables collecting crash dump on expected as well as unexpected testhost exit.</source>
-        <target state="new">Enables collecting crash dump on expected as well as unexpected testhost exit.</target>
+        <target state="translated">允許在測試主機如預期或未預期地結束時收集損毀傾印。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDescription">
@@ -23,26 +23,26 @@ This option is currently only supported on Windows, and requires procdump.exe an
 Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
 The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and enables collecting crash dump when testhost exits unexpectedly. 
-This option is currently only supported on Windows, and requires procdump.exe and procdump64.exe to be available in PATH.
-Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump 
-Implies --blame.</target>
+        <target state="translated">當測試主機意外結束時，在改動者模式中執行測試，並允許收集損毀傾印。
+目前只有 Windows 支援此選項，而且必須在 PATH 中提供 procdump.exe 與 procdump64.exe。
+也可以設定 PROCDUMP_PATH 環境變數，並指向包含 procdump.exe 與 procdump64.exe 的目錄。
+這些工具可從下列網址下載: https://docs.microsoft.com/sysinternals/downloads/procdump 
+表示 --blame。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Implies --blame-crash.</source>
-        <target state="new">The type of crash dump to be collected. Implies --blame-crash.</target>
+        <target state="translated">要收集的損毀傾印類型。Implies --blame-crash。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
         <source>Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout. Implies --blame-hang.</source>
-        <target state="new">Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout. Implies --blame-hang.</target>
+        <target state="translated">當測試超過指定的逾時時，請在改動者模式中執行測試，並啟用收集停止回應傾印。Implies --blame-hang。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="new">The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
+        <target state="translated">要收集之損毀傾印的類型。若使用 [無]，測試主機將會在逾時時終止，但不會收集任何傾印。Implies --blame-hang。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -51,11 +51,41 @@ The timeout value is specified in the following format: 1.5h / 90m / 5400s / 540
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
 For MSTest, the timeout is used for all testcases.
 This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. 
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
-For MSTest, the timeout is used for all testcases.
-This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</target>
+        <target state="translated">每個測試的逾時，在此之後將會觸發停止回應傾印，而且測試主機處理序將會終止。
+指定此逾時值時，請使用下列格式: 1.5 h/90m/5400s/5400000ms。若未使用單位 (例如 5400000)，將會假設該值的單位為毫秒。
+當與資料驅動型測試並用時，逾時行為取決於使用的測試配接器。對於 xUnit 與 NUnit，此逾時值會在每次執行測試案例之後更新。
+對於 MSTest，此逾時值會套用到所有測試案例。
+目前只有安裝有 netcoreapp 2.1 及更新版本的 Windows 支援此選項。此外安裝有 netcoreapp 3.1 及更新版本的 Linux 也支援此選項。不支援 OSX 與 UWP。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableDescription">
+        <source>Sets the value of an environment variable. 
+Creates the variable if it does not exist, overrides if it does. 
+This will force the tests to be run in an isolated process. 
+This argument can be specified multiple times to provide multiple variables.
+
+Examples:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</source>
+        <target state="translated">設定環境變數的值。
+若變數不存在，則加以建立; 若有，則予以覆寫。
+這會強制在隔離流程中執行測試。
+此引數可多次指定，以提供多項變數。
+
+範例:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableExpression">
+        <source>NAME="VALUE"</source>
+        <target state="translated">NAME="VALUE"</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoLogo">
@@ -167,17 +197,17 @@ The specified directory will be created if it does not exist.</source>
       </trans-unit>
       <trans-unit id="CrashDumpTypeArgumentName">
         <source>DUMP_TYPE</source>
-        <target state="new">DUMP_TYPE</target>
+        <target state="translated">DUMP_TYPE</target>
         <note />
       </trans-unit>
       <trans-unit id="HangDumpTypeArgumentName">
         <source>DUMP_TYPE</source>
-        <target state="new">DUMP_TYPE</target>
+        <target state="translated">DUMP_TYPE</target>
         <note />
       </trans-unit>
       <trans-unit id="HangTimeoutArgumentName">
         <source>TIMESPAN</source>
-        <target state="new">TIMESPAN</target>
+        <target state="translated">TIMESPAN</target>
         <note />
       </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
@@ -226,8 +256,17 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">以 Blame 模式執行測試。此選項有助於釐清造成測試主機損毀的出錯測試。
-其會在目前的目錄 (擷取損毀前執行測試的順序) 中輸出 'Sequence.xml' 檔案。</target>
+        <target state="translated">在改動者模式中執行測試。此選項可用於找出導致測試主機損毀或停止回應的問題測試。
+當偵測到損毀時，其會在 TestResults/guid/guid_Sequence.xml 中建立所擷取在損毀前，測試之執行順序的順序檔案。
+依據其他設定，也可收集損毀或停止回應的傾印。
+範例: 
+  當測試進行時間超過預設的 1 小時時，將測試逾時，並在測試主機未預期地結束時收集損毀傾印
+  (損毀傾印需要其他的設定，請參閱下文)。
+  dotnet test --blame-hang --blame-crash
+範例: 
+  當測試進行時間超過 20 分鐘時，將測試逾時，並收集停止回應傾印。
+  dotnet test --blame-hang-timeout 20min
+</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">

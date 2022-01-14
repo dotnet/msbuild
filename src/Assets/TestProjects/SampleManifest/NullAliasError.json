@@ -1,0 +1,14 @@
+﻿{
+    "version": 5,
+    "packs": {
+        "Xamarin.Android.BuildTools": {
+            "version": "8.4.7",
+            "kind": "sdk",
+            "alias-to": {
+                "osx-x64": "Xamarin.Android.BuildTools.MacHost",
+                "win-x64": "Xamarin.Android.BuildTools.Win64Host",
+                "linux-x64": null
+            }
+        }
+    }
+}

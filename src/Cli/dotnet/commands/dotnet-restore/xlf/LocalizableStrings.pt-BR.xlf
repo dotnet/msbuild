@@ -22,9 +22,14 @@
         <target state="translated">Caminho opcional para um arquivo de projeto ou argumentos do MSBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdCurrentRuntimeOptionDescription">
+        <source>Use current runtime as the target runtime.</source>
+        <target state="translated">Usar o runtime atual como o runtime de destino.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
-        <target state="translated">ORIGEM</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
@@ -49,7 +54,7 @@
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
         <source>FILE</source>
-        <target state="translated">ARQUIVO</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOptionDescription">

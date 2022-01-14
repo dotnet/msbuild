@@ -25,12 +25,12 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("ComServer")
                 .WithSource();
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute()
                 .Should()
                 .Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("netcoreapp3.1");
+            var publishDirectory = publishCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
             var outputDirectory = publishDirectory.Parent;
 
             var filesPublished = new[] {

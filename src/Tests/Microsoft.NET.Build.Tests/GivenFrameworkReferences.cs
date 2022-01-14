@@ -34,14 +34,15 @@ namespace FrameworkReferenceTest
     }
 }";
 
-        [WindowsOnlyFact]
-        public void Multiple_frameworks_are_written_to_runtimeconfig_when_there_are_multiple_FrameworkReferences()
+        [WindowsOnlyRequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("net6.0", true)]
+        [InlineData("netcoreapp3.1", false)]
+        public void Multiple_frameworks_are_written_to_runtimeconfig_when_there_are_multiple_FrameworkReferences(string targetFramework, bool shouldIncludeBaseFramework)
         {
             var testProject = new TestProject()
             {
                 Name = "MultipleFrameworkReferenceTest",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
+                TargetFrameworks = targetFramework,
                 IsExe = true
             };
 
@@ -50,7 +51,7 @@ namespace FrameworkReferenceTest
 
             testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var buildCommand = new BuildCommand(testAsset);
 
@@ -64,9 +65,14 @@ namespace FrameworkReferenceTest
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
 
-            //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
-            //  Microsoft.NETCore.App will need to be added to this list
-            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
+            if (shouldIncludeBaseFramework)
+            {
+                runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App", "Microsoft.NETCore.App");
+            }
+            else
+            {
+                runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
+            }
         }
 
         [Theory]
@@ -78,7 +84,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "MultipleFrameworkReferenceTest",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -92,7 +97,7 @@ namespace FrameworkReferenceTest
 
             testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
 
-            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject)
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: tfm)
                 .Restore(Log, testProject.Name);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -123,7 +128,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "NETFrameworkTFMTest",
                 TargetFrameworks = "net472",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -145,14 +149,13 @@ namespace FrameworkReferenceTest
             Assert.True(File.Exists(runtimeConfigFile), $"Expected to generate runtime config file '{runtimeConfigFile}'");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void DuplicateFrameworksAreNotWrittenToRuntimeConfigWhenThereAreDifferentProfiles()
         {
             var testProject = new TestProject()
             {
                 Name = "MultipleProfileFrameworkReferenceTest",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 
@@ -175,9 +178,7 @@ namespace FrameworkReferenceTest
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
 
-            //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
-            //  Microsoft.NETCore.App will need to be added to this list
-            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.WindowsDesktop.App");
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.WindowsDesktop.App", "Microsoft.NETCore.App");
         }
 
         [Fact]
@@ -187,7 +188,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "UnknownFrameworkReferenceTest",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -227,7 +227,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "FrameworkReferenceTest",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -262,13 +261,51 @@ namespace FrameworkReferenceTest
         }
 
         [Fact]
+        public void KnownFrameworkReferencesOnlyApplyToCorrectTargetPlatform()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "FrameworkReferenceTest",
+                TargetFrameworks = "net5.0-windows",
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+
+                    //  Add a KnownFrameworkReference where the TargetPlatformVersion matches but the TargetPlatformIdentifier does not
+
+                    itemGroup.Add(new XElement(ns + "KnownFrameworkReference",
+                                               new XAttribute("Include", "NonExistentTestFrameworkReference"),
+                                               new XAttribute("TargetFramework", "net5.0-notwindows7.0"),
+                                               new XAttribute("RuntimeFrameworkName", "NonExistentTestFrameworkReference"),
+                                               new XAttribute("DefaultRuntimeFrameworkVersion", "7.0"),
+                                               new XAttribute("LatestRuntimeFrameworkVersion", "7.0"),
+                                               new XAttribute("TargetingPackName", "NonExistentTestFrameworkReference"),
+                                               new XAttribute("TargetingPackVersion", "7.0")));
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            //  The build should succeed because the fake KnownFrameworkReference should not match, and the SDK shouldn't try to download
+            //  the nonexistent targeting pack.
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
         public void TargetingPackDownloadCanBeDisabled()
         {
             var testProject = new TestProject()
             {
                 Name = "DisableTargetingPackDownload",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -309,13 +346,12 @@ namespace FrameworkReferenceTest
             {
                 Name = "RollForwardSetting",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsExe = true
             };
 
             testProject.AdditionalProperties["RollForward"] = rollForwardValue;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: rollForwardValue + tfm);
 
             var buildCommand = new BuildCommand(testAsset);
 
@@ -359,13 +395,12 @@ namespace FrameworkReferenceTest
             {
                 Name = "RollForwardSettingNotSupported",
                 TargetFrameworks = "netcoreapp2.2",
-                IsSdkProject = true,
                 IsExe = true
             };
 
             testProject.AdditionalProperties["RollForward"] = rollForwardValue;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: rollForwardValue.GetHashCode().ToString());
 
             var buildCommand = new BuildCommand(testAsset);
 
@@ -394,7 +429,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "RuntimePackNotAvailable",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
                 RuntimeIdentifier = "linux-x64"
             };
@@ -432,7 +466,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "RuntimePackNotAvailable",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
                 RuntimeIdentifier = "invalid-rid"
             };
@@ -459,10 +492,9 @@ namespace FrameworkReferenceTest
             {
                 Name = "RuntimePackNotRestored",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
-            
+
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
 
@@ -644,22 +676,20 @@ namespace FrameworkReferenceTest
         //  Transitive framework references require NuGet support, which isn't currently
         //  in the full Framework MSBuild we use in CI, so only run these tests for
         //  core MSBuild for now
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void TransitiveFrameworkReferenceFromProjectReference()
         {
             var testProject = new TestProject()
             {
                 Name = "TransitiveFrameworkReference",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 
             var referencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
+                TargetFrameworks = "net6.0",
             };
 
             referencedProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
@@ -682,7 +712,7 @@ namespace FrameworkReferenceTest
 
             //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
             //  Microsoft.NETCore.App will need to be added to this list
-            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App");
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.NETCore.App");
         }
 
         [Fact]
@@ -692,7 +722,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "ReferencedPackage",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
             };
             referencedPackage.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
 
@@ -710,7 +739,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "TransitiveFrameworkReference",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -791,7 +819,6 @@ namespace FrameworkReferenceTest
             var testProject = new TestProject()
             {
                 Name = "ResolvedFrameworkReferenceTest",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = "netcoreapp3.0",
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
@@ -903,6 +930,35 @@ namespace FrameworkReferenceTest
                 selfContained);
         }
 
+        [CoreMSBuildOnlyFact]
+        public void TransitiveFrameworkReferencesAreNotIncludedInRestore()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "TransitiveFrameworkRef",
+                TargetFrameworks = "net5.0",
+                IsSdkProject = true
+            };
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Authentication.JwtBearer", "5.0.0"));
+            var testAsset = _testAssetsManager.CreateTestProject(testProject).WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var target = XElement.Parse(@"  <Target Name=""GetFrameworkRefResults"" AfterTargets=""Build"" DependsOnTargets=""CollectFrameworkReferences"" >
+    <Message Text=""Framework References: @(_FrameworkReferenceForRestore)"" Importance=""High"" />
+  </Target>");
+                project.Root.Add(target);
+            });
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Microsoft.NETCore.App")
+                .And
+                .NotHaveStdOutContaining("Microsoft.AspNetCore.App");
+        }
+
         private void TestFrameworkReferenceProfiles(
             IEnumerable<string> frameworkReferences,
             IEnumerable<string> expectedReferenceNames,
@@ -914,7 +970,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "WindowsFormsFrameworkReference",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
             testProject.FrameworkReferences.AddRange(frameworkReferences);
@@ -1004,7 +1059,6 @@ namespace FrameworkReferenceTest
         {
             testProject.Name = "ResolvedVersionsTest";
             testProject.TargetFrameworks = "netcoreapp3.0";
-            testProject.IsSdkProject = true;
             testProject.IsExe = true;
             testProject.AdditionalProperties["DisableImplicitFrameworkReferences"] = "true";
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
@@ -1080,7 +1134,6 @@ namespace FrameworkReferenceTest
 
             testProject.Name = "TrimInfoTest";
             testProject.TargetFrameworks = targetFramework;;
-            testProject.IsSdkProject = true;
             testProject.IsExe = true;
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 

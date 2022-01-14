@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -48,7 +48,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          the define will be ignored:
             warning MSB3052: The parameter to the compiler is invalid, '/define:0BAD_DEFINE' will be ignored.
          -->
-    
+
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('-', '_'))</ImplicitConfigurationDefine>
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('.', '_'))</ImplicitConfigurationDefine>
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace(' ', '_'))</ImplicitConfigurationDefine>
@@ -58,6 +58,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <FinalDefineConstants Condition="'$(VersionlessImplicitFrameworkDefine)' != ''">$(FinalDefineConstants),$(VersionlessImplicitFrameworkDefine)=-1</FinalDefineConstants>
     <FinalDefineConstants Condition="'$(ImplicitFrameworkDefine)' != ''">$(FinalDefineConstants),$(ImplicitFrameworkDefine)=-1</FinalDefineConstants>
+    <FinalDefineConstants Condition="'$(BackwardsCompatFrameworkDefine)' != ''">$(FinalDefineConstants),$(BackwardsCompatFrameworkDefine)=-1</FinalDefineConstants>
     <FinalDefineConstants Condition="'$(DefineDebug)' != 'true' and '$(ImplicitConfigurationDefine)' != ''">$(FinalDefineConstants),$(ImplicitConfigurationDefine)=-1</FinalDefineConstants>
   </PropertyGroup>
 
@@ -113,11 +114,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!--
       VB Runtime does not yet have enough support for My.* outside .NET Framework,
       so default MyType=Empty for non .NET Framework. Project templates will be
-      responsible for setting MyType to non-Empty (Console, Windows, etc.) when 
+      responsible for setting MyType to non-Empty (Console, Windows, etc.) when
       the VB Runtime can allow it and as appropriate for the project type.
      -->
     <FinalDefineConstants Condition="'$(MyType)' == ''">$(FinalDefineConstants),_MyType=&quot;Empty&quot;</FinalDefineConstants>
   </PropertyGroup>
+
+  <!-- Enable hot reload in 6.0 and newer VB projects -->
+  <ItemGroup Condition="'$(SupportsHotReload)' != 'false' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
+    <ProjectCapability Include="SupportsHotReload" />
+  </ItemGroup>
 
   <!--
     NOTE: We must hook directly to CoreCompile for compatibility with two phase XAML

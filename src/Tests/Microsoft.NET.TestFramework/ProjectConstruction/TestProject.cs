@@ -21,7 +21,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public string Name { get; set; }
 
-        public bool IsSdkProject { get; set; }
+        public bool IsSdkProject { get; set; } = true;
 
         public bool IsExe { get; set; }
 
@@ -59,7 +59,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
 
-        public Dictionary<string, string> AdditionalItems { get; } = new Dictionary<string, string>();
+        public List<KeyValuePair<string, Dictionary<string, string>>> AdditionalItems { get; } = new ();
+
+        public List<Action<XDocument>> ProjectChanges { get; } = new List<Action<XDocument>>();
 
         public IEnumerable<string> TargetFrameworkIdentifiers
         {
@@ -230,9 +232,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         additionalItemGroup = new XElement(ns + "ItemGroup");
                         projectXml.Root.Add(packageReferenceItemGroup);
                     }
-                    additionalItemGroup.Add(new XElement(
-                        ns + additionalItem.Key, 
-                        new XAttribute("Include", additionalItem.Value)));
+                    var item = new XElement(ns + additionalItem.Key);
+                    foreach (var attribute in additionalItem.Value)
+                        item.Add(new XAttribute(attribute.Key, attribute.Value));
+                    additionalItemGroup.Add(item);
                 }
             }
 
@@ -311,6 +314,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 }
             }
 
+            foreach (var projectChange in ProjectChanges)
+            {
+                projectChange(projectXml);
+            }
+
             using (var file = File.CreateText(targetProjectPath))
             {
                 projectXml.Save(file);
@@ -381,6 +389,16 @@ namespace {this.Name}
             {
                 File.WriteAllText(Path.Combine(targetFolder, kvp.Key), kvp.Value);
             }
+        }
+
+        public void AddItem(string itemName, string attributeName, string attributeValue)
+        {
+            AddItem(itemName, new Dictionary<string, string>() { { attributeName, attributeValue } } );
+        }
+
+        public void AddItem(string itemName, Dictionary<string, string> attributes)
+        {
+            AdditionalItems.Add(new(itemName, attributes));
         }
 
         public static bool ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion targetFrameworkVersion)

@@ -39,6 +39,10 @@ namespace Microsoft.NET.Build.Tasks
             {
                 assetInfo.AssetType = AssetType.Resources;
             }
+            else if (assetTypeString.Equals("pgodata", StringComparison.OrdinalIgnoreCase))
+            {
+                assetInfo.AssetType = AssetType.PgoData;
+            }
             else
             {
                 throw new InvalidOperationException("Unexpected asset type: " + item.GetMetadata(MetadataKeys.AssetType));

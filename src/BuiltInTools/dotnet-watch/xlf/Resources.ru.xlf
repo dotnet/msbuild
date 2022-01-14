@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../Resources.resx">
+    <body>
+      <trans-unit id="Error_MultipleProjectsFound">
+        <source>Multiple MSBuild project files found in '{0}'. Specify which to use with the --project option.</source>
+        <target state="translated">В "{0}" обнаружено несколько файлов проекта MSBuild. Укажите файл, который нужно использовать, с помощью параметра --project.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error_NoProjectsFound">
+        <source>Could not find a MSBuild project file in '{0}'. Specify which project to use with the --project option.</source>
+        <target state="translated">Не удалось найти файл проекта MSBuild в "{0}". Укажите проект, который нужно использовать, с помощью параметра --project.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error_ProjectPath_NotFound">
+        <source>The project file '{0}' does not exist.</source>
+        <target state="translated">Файл проекта "{0}" не существует.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error_QuietAndVerboseSpecified">
+        <source>Cannot specify both '--quiet' and '--verbose' options.</source>
+        <target state="translated">Невозможно одновременно указать параметры "--quiet" и "--verbose".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Warning_ProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="translated">Предупреждение NETSDK1174: сокращение "-p" для "--project" не рекомендуется. Используйте "--project".</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,39 +1,33 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Command = Microsoft.DotNet.Cli.CommandLine.Command;
-using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Help
 {
     public class HelpCommand
     {
-        private readonly AppliedOption _appliedOption;
+        private readonly ParseResult _parseResult;
 
-        public HelpCommand(AppliedOption appliedOption)
+        public HelpCommand(ParseResult parseResult)
         {
-            _appliedOption = appliedOption;
+            _parseResult = parseResult;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult result)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            result.HandleDebugSwitch();
 
-            var parser = Parser.Instance;
-            var result = parser.ParseFrom("dotnet help", args);
-            var helpAppliedOption = result["dotnet"]["help"];
+            result.ShowHelpOrErrorIfAppropriate();
 
-            result.ShowHelpIfRequested();
-
-            if (helpAppliedOption.Arguments.Any())
+            if (!string.IsNullOrEmpty(result.GetValueForArgument(HelpCommandParser.Argument)))
             {
-                return new HelpCommand(helpAppliedOption).Execute();
+                return new HelpCommand(result).Execute();
             }
 
             PrintHelp();
@@ -55,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Help
         public static Process ConfigureProcess(string docUrl)
         {
             ProcessStartInfo psInfo;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 psInfo = new ProcessStartInfo
                 {
@@ -63,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Help
                     Arguments = $"/c start {docUrl}"
                 };
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            else if (OperatingSystem.IsMacOS())
             {
                 psInfo = new ProcessStartInfo
                 {
@@ -88,12 +82,12 @@ namespace Microsoft.DotNet.Tools.Help
 
         public int Execute()
         {
-            if (BuiltInCommandsCatalog.Commands.TryGetValue(
-                _appliedOption.Arguments.Single(),
-                out BuiltInCommandMetadata builtIn) &&
-                !string.IsNullOrEmpty(builtIn.DocLink))
+            if (TryGetDocsLink(
+                _parseResult.GetValueForArgument(HelpCommandParser.Argument),
+                out var docsLink) &&
+                !string.IsNullOrEmpty(docsLink))
             {
-                var process = ConfigureProcess(builtIn.DocLink);
+                var process = ConfigureProcess(docsLink);
                 process.Start();
                 process.WaitForExit();
                 return 0;
@@ -103,10 +97,22 @@ namespace Microsoft.DotNet.Tools.Help
                 Reporter.Error.WriteLine(
                     string.Format(
                         LocalizableStrings.CommandDoesNotExist,
-                        _appliedOption.Arguments.Single()).Red());
+                        _parseResult.GetValueForArgument(HelpCommandParser.Argument)).Red());
                 Reporter.Output.WriteLine(HelpUsageText.UsageText);
                 return 1;
             }
+        }
+
+        private bool TryGetDocsLink(string commandName, out string docsLink)
+        {
+            var command = Cli.Parser.GetBuiltInCommand(commandName);
+            if (command != null && command as DocumentedCommand != null)
+            {
+                docsLink = (command as DocumentedCommand).DocsLink;
+                return true;
+            }
+            docsLink = null;
+            return false;
         }
     }
 }

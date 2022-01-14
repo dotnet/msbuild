@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdBlameCrashCollectAlwaysDescription">
         <source>Enables collecting crash dump on expected as well as unexpected testhost exit.</source>
-        <target state="new">Enables collecting crash dump on expected as well as unexpected testhost exit.</target>
+        <target state="translated">Habilita a coleta de despejo de memória nas saídas esperada e inesperada do host de teste.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDescription">
@@ -23,26 +23,26 @@ This option is currently only supported on Windows, and requires procdump.exe an
 Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
 The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and enables collecting crash dump when testhost exits unexpectedly. 
-This option is currently only supported on Windows, and requires procdump.exe and procdump64.exe to be available in PATH.
-Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump 
-Implies --blame.</target>
+        <target state="translated">Executa os testes no modo blame e habilita a coleta de despejo de memória quando o host de teste é encerrado inesperadamente. 
+No momento, há suporte para essa opção somente no Windows e ela exige que o procdump.exe e o procdump64.exe estejam disponíveis em PATH.
+Ou exige que a variável de ambiente PROCDUMP_PATH esteja definida e aponte para um diretório que contenha o procdump.exe e o procdump64.exe. 
+As ferramentas podem ser baixadas aqui: https://docs.microsoft.com/sysinternals/downloads/procdump 
+Implica --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Implies --blame-crash.</source>
-        <target state="new">The type of crash dump to be collected. Implies --blame-crash.</target>
+        <target state="translated">O tipo de despejo de memória a ser coletado. Implica --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
         <source>Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout. Implies --blame-hang.</source>
-        <target state="new">Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout. Implies --blame-hang.</target>
+        <target state="translated">Executar os testes no modo blame e habilitar a coleta de despejo de memória quando o teste exceder o tempo limite determinado. Implica --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="new">The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
+        <target state="translated">O tipo de despejo de memória a ser coletado. Quando a opção None é usada, o host de teste é encerrado ao atingir o tempo limite, mas o despejo de memória não é coletado. Implica --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -51,11 +51,41 @@ The timeout value is specified in the following format: 1.5h / 90m / 5400s / 540
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
 For MSTest, the timeout is used for all testcases.
 This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. 
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
-For MSTest, the timeout is used for all testcases.
-This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</target>
+        <target state="translated">Tempo limite por teste, após o qual o despejo do travamento é disparado e o processo do host de teste é encerrado. 
+O valor do tempo limite é especificado no seguinte formato: 1.5h / 90m / 5400s / 5400000ms. Quando não é usada nenhuma unidade (por exemplo, 5400000), considera-se que o valor esteja em milissegundos.
+Quando usado juntamente com testes controlados por dados, o comportamento do tempo limite depende do adaptador de teste usado. Para xUnit e NUnit, o tempo limite é renovado após cada caso de teste,
+Para o MSTest, o tempo limite é usado para todos os casos teste.
+No momento, há suporte para essa opção somente no Windows juntamente com o netcoreapp2.1 e mais recentes. E no Linux com o netcoreapp3.1 e mais recentes. Não há suporte para OSX e UWP.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableDescription">
+        <source>Sets the value of an environment variable. 
+Creates the variable if it does not exist, overrides if it does. 
+This will force the tests to be run in an isolated process. 
+This argument can be specified multiple times to provide multiple variables.
+
+Examples:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</source>
+        <target state="translated">Define o valor de uma variável de ambiente. 
+Criará a variável quando ela não existir e a substituirá quando existir. 
+Isso forçará a execução dos testes em um processo isolado. 
+Esse argumento pode ser especificado várias vezes para fornecer várias variáveis.
+
+Exemplos:
+-e VARIABLE=abc
+-e VARIABLE="valor com espaços"
+-e VARIABLE="valor;separado com;ponto e vírgula"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableExpression">
+        <source>NAME="VALUE"</source>
+        <target state="translated">NAME="VALUE"</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoLogo">
@@ -167,17 +197,17 @@ O diretório especificado será criado se ele ainda não existir.</target>
       </trans-unit>
       <trans-unit id="CrashDumpTypeArgumentName">
         <source>DUMP_TYPE</source>
-        <target state="new">DUMP_TYPE</target>
+        <target state="translated">DUMP_TYPE</target>
         <note />
       </trans-unit>
       <trans-unit id="HangDumpTypeArgumentName">
         <source>DUMP_TYPE</source>
-        <target state="new">DUMP_TYPE</target>
+        <target state="translated">DUMP_TYPE</target>
         <note />
       </trans-unit>
       <trans-unit id="HangTimeoutArgumentName">
         <source>TIMESPAN</source>
-        <target state="new">TIMESPAN</target>
+        <target state="translated">TIMESPAN</target>
         <note />
       </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
@@ -226,8 +256,17 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">Executar os testes no modo de acusação. Essa opção é útil para isolar um teste problemático que esteja causando falha no host de teste.
-Emite um arquivo 'Sequence.xml' no diretório atual que captura a ordem de execução de teste antes da falha.</target>
+        <target state="translated">Executa os testes no modo blame. Essa opção é útil para isolar testes problemáticos que fazem com que o host de teste falhe ou trave. 
+Quando uma falha é detectada, ele cria um arquivo de sequência em TestResults/guid/guid_Sequence.xml que captura a ordem dos testes que foram executados antes da falha.
+Com base nas configurações adicionais, o despejo de travamento ou o despejo de memória também podem ser coletados.
+Exemplo 
+  Atingir o tempo limite de execução de teste quando o teste durar mais que o tempo limite padrão de uma hora e coletar o despejo de memória quando o host de teste for encerrado inesperadamente. 
+  (Os despejos de memória exigem uma configuração adicional, veja abaixo.)
+  dotnet test --blame-hang --blame-crash
+Exemplo 
+  Atingir o tempo limite de execução do teste quando um teste durar mais de 20 minutos e coletar o despejo de travamento. 
+  dotnet test --blame-hang-timeout 20min
+</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">

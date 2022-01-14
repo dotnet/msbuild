@@ -251,7 +251,7 @@ namespace Microsoft.NET.Publish.Tests
             nugetPackage.Version.Should().BeGreaterThan(NuGetVersion.Parse("4.0.0-rc2"));
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void It_creates_profiling_symbols()
         {
             TestAsset targetManifestsAsset = _testAssetsManager
@@ -310,12 +310,11 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "Test",
-                IsSdkProject = true,
                 TargetFrameworks = TFM,
                 IsExe = isExe,
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: isExe.ToString());
 
@@ -336,7 +335,7 @@ namespace Microsoft.NET.Publish.Tests
 
             new DirectoryInfo(outputFolder).Should().OnlyHaveFiles(new List<string> {
                "artifact.xml",
-               "newtonsoft.json/12.0.1/lib/netstandard2.0/Newtonsoft.Json.dll",
+               "newtonsoft.json/13.0.1/lib/netstandard2.0/Newtonsoft.Json.dll",
             });
         }
 

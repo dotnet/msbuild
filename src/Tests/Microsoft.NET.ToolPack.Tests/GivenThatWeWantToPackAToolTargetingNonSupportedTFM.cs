@@ -36,7 +36,7 @@ namespace Microsoft.NET.ToolPack.Tests
             string expectedErrorResourceName)
         {
             TestAsset helloWorldAsset = _testAssetsManager
-                                        .CopyTestAsset("PortableTool", "PackNonSupportedTFM")
+                                        .CopyTestAsset("PortableTool", "PackNonSupportedTFM", identifier: targetFrameworkProperty + targetFramework)
                                         .WithSource()
                                         .WithProjectChanges(project =>
                                         {

@@ -12,7 +12,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
   <UsingTask TaskName="ZipDeploy" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
   <UsingTask TaskName="CreateZipFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
   <UsingTask TaskName="GetPassword" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
-  
+
   <PropertyGroup>
     <_DotNetPublishFiles>
       ZipDeploy;
@@ -26,7 +26,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
  -->
 
   <Target Name="CreateZipFile">
-    <CreateZipFile 
+    <CreateZipFile
       FolderToZip="$(PublishIntermediateOutputPath)"
       ProjectName="$(MSBuildProjectName)"
       PublishIntermediateTempPath="$(PublishIntermediateTempPath)">
@@ -51,7 +51,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
        Condition="'$(Password)' == '' And '$(IsGetPasswordEnabled)' == 'true'">
       <Output TaskParameter="ClearPassword" PropertyName="Password"/>
     </GetPassword>
-    
+
     <ZipDeploy
       ZipToPublishPath="$(ZippedPublishContentsPath)"
       SiteName="$(DeployIisAppPath)"
@@ -60,5 +60,5 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
       DestinationPassword="$(Password)"
       UserAgentVersion="$(ZipDeployUserAgent)"/>
   </Target>
-  
+
 </Project>

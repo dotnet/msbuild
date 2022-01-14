@@ -2,11 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
@@ -30,12 +28,17 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--list-runtimes",
                 "--list-sdks",
                 "--version",
+                "-?",
                 "-d",
                 "-h",
+                "/?",
+                "/h",
                 "add",
                 "build",
                 "build-server",
                 "clean",
+                "format",
+                "sdk",
                 "fsi",
                 "help",
                 "list",
@@ -51,12 +54,13 @@ namespace Microsoft.DotNet.Tests.Commands
                 "store",
                 "test",
                 "tool",
-                "vstest"
+                "vstest",
+                "workload"
             };
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -69,21 +73,23 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--list-runtimes",
                 "--list-sdks",
                 "--version",
+                "-?",
                 "-d",
                 "-h",
-                "build-server" // This should be removed when completion is based on "starts with" rather than "contains".
-                               // See https://github.com/dotnet/cli/issues/8958.
+                "build-server", // These should be removed when completion is based on "starts with" rather than "contains".
+                                // See https://github.com/dotnet/cli/issues/8958.
             };
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet -" }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
         public void GivenNewCommandItDisplaysCompletions()
         {
             var expected = new[] {
+                "--columns",
                 "--dry-run",
                 "--force",
                 "--help",
@@ -96,6 +102,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--output",
                 "--type",
                 "--uninstall",
+                "-?",
                 "-h",
                 "-i",
                 "-l",
@@ -103,13 +110,15 @@ namespace Microsoft.DotNet.Tests.Commands
                 "-n",
                 "-o",
                 "-u",
+                "/?",
+                "/h",
                 "--update-check",
                 "--update-apply"
             };
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet new " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Contain(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -119,16 +128,22 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--help",
                 "--verbosity",
                 "--version",
+                "-?",
                 "-h",
                 "-v",
+                "/?",
+                "/h",
                 "delete",
                 "locals",
                 "push",
+                "verify",
+                "trust",
+                "sign"
             };
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -142,14 +157,17 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--non-interactive",
                 "--source",
                 "--interactive",
+                "-?",
                 "-h",
                 "-k",
                 "-s",
+                "/?",
+                "/h",
             };
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget delete " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -160,9 +178,12 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--force-english-output",
                 "--help",
                 "--list",
+                "-?",
                 "-c",
                 "-h",
                 "-l",
+                "/?",
+                "/h",
                 "all",
                 "global-packages",
                 "http-cache",
@@ -172,7 +193,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget locals " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -191,6 +212,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--symbol-source",
                 "--timeout",
                 "--interactive",
+                "-?",
                 "-d",
                 "-h",
                 "-k",
@@ -198,12 +220,132 @@ namespace Microsoft.DotNet.Tests.Commands
                 "-s",
                 "-sk",
                 "-ss",
-                "-t"
+                "-t",
+                "/?",
+                "/h",
             };
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget push " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        [Fact]
+        public void GivenNuGetVerifyCommandItDisplaysCompletions()
+        {
+            var expected = new[] {
+                "--all",
+                "--certificate-fingerprint",
+                "--verbosity",
+                "--help",
+                "-v",
+                "-?",
+                "-h",
+                "/?",
+                "/h",
+            };
+
+            var reporter = new BufferedReporter();
+            CompleteCommand.RunWithReporter(new[] { "dotnet nuget verify " }, reporter).Should().Be(0);
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        [Fact]
+        public void GivenNuGetTrustCommandItDisplaysCompletions()
+        {
+            var expected = new[] {
+                "--algorithm",
+                "--allow-untrusted-root",
+                "--configfile",
+                "--owners",
+                "--verbosity",
+                "--help",
+                "-v",
+                "-?",
+                "-h",
+                "/?",
+                "/h",
+                "author",
+                "certificate",
+                "list",
+                "remove",
+                "repository",
+                "source",
+                "sync"
+            };
+
+            var reporter = new BufferedReporter();
+            CompleteCommand.RunWithReporter(new[] { "dotnet nuget trust " }, reporter).Should().Be(0);
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        [Fact]
+        public void GivenNuGetSignCommandItDisplaysCompletions()
+        {
+            var expected = new[] {
+                "--certificate-fingerprint",
+                "--certificate-path",
+                "--certificate-store-name",
+                "--certificate-store-location",
+                "--certificate-subject-name",
+                "--certificate-password",
+                "--hash-algorithm",
+                "--timestamper",
+                "--timestamp-hash-algorithm",
+                "--verbosity",
+                "--output",
+                "--overwrite",
+                "-o",
+                "--help",
+                "-v",
+                "-?",
+                "-h",
+                "/?",
+                "/h"
+            };
+
+            var reporter = new BufferedReporter();
+            CompleteCommand.RunWithReporter(new[] { "dotnet nuget sign " }, reporter).Should().Be(0);
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        [Fact]
+        public void GivenDotnetAddPackWithPosition()
+        {
+            var expected = new[] {
+                "package"
+            };
+
+            var reporter = new BufferedReporter();
+            CompleteCommand.RunWithReporter(GetArguments("dotnet add pack$ abc"), reporter).Should().Be(0);
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        [Fact]
+        public void GivenDotnetToolInWithPosition()
+        {
+            var expected = new[] {
+                "install",
+                "uninstall",
+                "--info"
+            };
+
+            var reporter = new BufferedReporter();
+            CompleteCommand.RunWithReporter(GetArguments("dotnet tool in$ abc"), reporter).Should().Be(0);
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        /// <summary>
+        /// Converts command annotated with dollar sign($) into string array with "--position" option pointing at dollar sign location.
+        /// </summary>
+        private string[] GetArguments(string command)
+        {
+            var indexOfDollar = command.IndexOf("$");
+            if (indexOfDollar == -1)
+            {
+                throw new ArgumentException("Does not contain $", nameof(command));
+            }
+            return new[] { command.Replace("$", ""), "--position", indexOfDollar.ToString() };
         }
     }
 }

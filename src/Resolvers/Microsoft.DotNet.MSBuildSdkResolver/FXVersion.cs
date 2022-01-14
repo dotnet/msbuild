@@ -1,6 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
+using System.Text;
+using System;
+
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
     // Note: This is SemVer 2.0.0 https://semver.org/spec/v2.0.0.html
@@ -221,7 +226,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 return false;
             }
 
-            int majorSeparator = fxVersionString.IndexOf(".");
+            int majorSeparator = fxVersionString.IndexOf(".", StringComparison.Ordinal);
             if (majorSeparator == -1)
             {
                 return false;
@@ -240,7 +245,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             }
 
             int minorStart = majorSeparator + 1;
-            int minorSeparator = fxVersionString.IndexOf(".", minorStart);
+            int minorSeparator = fxVersionString.IndexOf(".", minorStart, StringComparison.Ordinal);
             if (minorSeparator == -1)
             {
                 return false;
@@ -288,7 +293,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             }
 
             int preStart = patchSeparator;
-            int preSeparator = fxVersionString.IndexOf("+", preStart);
+            int preSeparator = fxVersionString.IndexOf("+", preStart, StringComparison.Ordinal);
 
             string pre = (preSeparator == -1) ? fxVersionString.Substring(preStart) : fxVersionString.Substring(preStart, preSeparator - preStart);
 
@@ -311,5 +316,14 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             return true;
         }
+
+        public override string ToString()
+            => (!string.IsNullOrEmpty(Pre), !string.IsNullOrEmpty(Build)) switch
+            {
+                (false, false) => $"{Major}.{Minor}.{Patch}",
+                (true, false) => $"{Major}.{Minor}.{Patch}{Pre}",
+                (false, true) => $"{Major}.{Minor}.{Patch}{Build}",
+                (true, true) => $"{Major}.{Minor}.{Patch}{Pre}{Build}",
+            };
     }
 }

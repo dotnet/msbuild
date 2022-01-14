@@ -16,7 +16,7 @@ namespace Microsoft.NET.Pack.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_packs_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager
@@ -33,11 +33,12 @@ namespace Microsoft.NET.Pack.Tests
             var outputDirectory = new DirectoryInfo(Path.Combine(libraryProjectDirectory, "bin", "Debug"));
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "NetStandardAndNetCoreApp.1.0.0.nupkg",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.dll",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.pdb",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.runtimeconfig.json",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.runtimeconfig.dev.json",
-                "netcoreapp1.1/NetStandardAndNetCoreApp.deps.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.dll",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.pdb",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.runtimeconfig.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.deps.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/Newtonsoft.Json.dll",
+                $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp{EnvironmentInfo.ExecutableExtension}",
                 "netstandard1.5/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.pdb",
                 "netstandard1.5/NetStandardAndNetCoreApp.deps.json"

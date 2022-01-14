@@ -31,15 +31,14 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "PublishFilteredSatelliteAssemblies",
                 TargetFrameworks = tfm,
                 IsExe = true,
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
             testProject.AdditionalProperties.Add("SatelliteResourceLanguages", "en-US;it;fr");
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: tfm);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -56,7 +55,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.runtimeconfig.json"
             };
 
-            if (tfm == "netcoreapp3.0" && !RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (tfm == "netcoreapp3.0")
             {
                 files.Add($"{testProject.Name}{Constants.ExeSuffix}");
             }
@@ -71,14 +70,13 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "PublishSatelliteAssemblies",
                 TargetFrameworks = "netcoreapp2.0",
                 IsExe = true,
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();

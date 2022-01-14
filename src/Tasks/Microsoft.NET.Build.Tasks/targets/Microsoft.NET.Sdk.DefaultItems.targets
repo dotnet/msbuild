@@ -6,23 +6,23 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- Don't get the default item globs by default when the flag is not set. -->
   <PropertyGroup Condition="'$(UsingNETSdkDefaults)' == 'true'">
-   <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">true</EnableDefaultItems>
-   <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
+    <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">true</EnableDefaultItems>
+    <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">true</EnableDefaultCompileItems>
     <EnableDefaultEmbeddedResourceItems Condition=" '$(EnableDefaultEmbeddedResourceItems)' == '' ">true</EnableDefaultEmbeddedResourceItems>
     <EnableDefaultNoneItems Condition=" '$(EnableDefaultNoneItems)' == '' ">true</EnableDefaultNoneItems>
   </PropertyGroup>
 
-  <PropertyGroup>    
+  <PropertyGroup>
     <!-- Set DefaultItemExcludes property for items that should be excluded from the default Compile, etc items.
          This is in the .targets because it needs to come after the final BaseOutputPath has been evaluated. -->
-    
+
     <!-- bin folder, by default -->
     <DefaultItemExcludes>$(DefaultItemExcludes);$(BaseOutputPath)/**</DefaultItemExcludes>
     <!-- obj folder, by default -->
@@ -33,12 +33,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultItemExcludes>$(DefaultItemExcludes);**/*.*proj</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);**/*.sln</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);**/*.vssscc</DefaultItemExcludes>
-    
+
     <!-- WARNING: This pattern is there to ignore folders such as .git and .vs, but it will also match items included with a
          relative path outside the project folder (for example "..\Shared\Shared.cs").  So be sure only to apply it to items
          that are in the project folder. -->
     <DefaultExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
-   
+
   </PropertyGroup>
 
   <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.
@@ -49,138 +49,13 @@ Copyright (c) .NET Foundation. All rights reserved.
          updating to the 2.0 or higher SDK.  When targeting .NET Standard 2.0 or higher, the NETStandard.Library reference won't show up as a dependency of the package
          produced, so we will roll forward to the latest version. -->
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' &lt; '2.0'">1.6.1</NETStandardImplicitPackageVersion>
-    
+
     <!-- Default to use the latest stable 2.0.x release. -->
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">2.0.3</NETStandardImplicitPackageVersion>
   </PropertyGroup>
 
-  <!--
-    Determine the version (including patch) of .NET Core to target.
-    
-    When targeting .NET Core, the TargetFramework is used to specify the major and minor version of the runtime to use.  By default,
-    the patch version is inferred.  The general logic is that self-contained apps will target the latest patch that the SDK
-    knows about, while framework-dependent apps will target the ".0" patch (and roll forward to the latest patch installed at
-    runtime).
-    
-    When targeting .NET Core 1.0 and 1.1, framework-dependent apps use 1.0.5 and 1.1.2, respectively.  This is done for compatibility
-    with previous releases that bumped the self-contained and framework-dependent versions together.
-    
-    The TargetLatestRuntimePatch property can be set to true or false to explicitly opt in or out of the logic to roll forward
-    to the latest patch, regardless of whether the app is self-contained or framework-dependent.
-    
-    The RuntimeFrameworkVersion is where the actual version of the .NET Core runtime to target can be set.  If set, it will be
-    used in the implicit PackageReference to Microsoft.NETCore.App.  
-    
-    The framework version that is written to the runtimeconfig.json file is based on the actual resolved package version
-    of Microsoft.NETCore.App.  This is to allow floating the verion number (ie the RuntimeFrameworkVersion could be set to
-    "2.0-*".
-  
-  -->
-  
-  <PropertyGroup Condition="'$(TargetLatestRuntimePatch)' == ''">
-    <TargetLatestRuntimePatch Condition="'$(SelfContained)' == 'true' ">true</TargetLatestRuntimePatch>
-    <TargetLatestRuntimePatch Condition="'$(SelfContained)' != 'true' ">false</TargetLatestRuntimePatch>
-    <_TargetLatestRuntimePatchIsDefault>true</_TargetLatestRuntimePatchIsDefault>
-  </PropertyGroup>
+  <Import Project="Microsoft.NET.Sdk.DefaultItems.Shared.targets" />
 
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DisableImplicitFrameworkReferences)' != 'true'">
-    <VerifyMatchingImplicitPackageVersion Condition="'$(VerifyMatchingImplicitPackageVersion)' == ''">true</VerifyMatchingImplicitPackageVersion>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <!-- Set implicit metadata on ASP.NET package references -->
-    <PackageReference Update="Microsoft.AspNetCore.App">
-      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">all</PrivateAssets>
-      <Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
-    </PackageReference>
-  
-    <PackageReference Update="Microsoft.AspNetCore.All">
-      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">all</PrivateAssets>
-      <Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
-    </PackageReference>
-  
-    <!-- Allow RuntimeFrameworkVersion to be used to explicitly specify the version of Microsoft.NETCore.App -->
-    <PackageReference Update="Microsoft.NETCore.App"
-                      Version="$(RuntimeFrameworkVersion)"
-                      Condition="'$(RuntimeFrameworkVersion)' != ''" 
-                      AllowExplicitVersion="true"/>
-    
-    <!-- If implicit PackageReferences are disabled, then don't warn about explicit versions at all -->
-    <PackageReference Update="@(PackageReference)"
-                      Condition="'$(DisableImplicitFrameworkReferences)' == 'true'"
-                      AllowExplicitVersion="true"/>
-  </ItemGroup>
-
-  <UsingTask TaskName="ApplyImplicitVersions" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <UsingTask TaskName="CheckIfPackageReferenceShouldBeFrameworkReference" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-
-  <Target Name="UpdateAspNetToFrameworkReference"
-          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
-
-    <CheckIfPackageReferenceShouldBeFrameworkReference
-          PackageReferences="@(PackageReference)"
-          FrameworkReferences="@(FrameworkReference)"
-          PackageReferenceToReplace="Microsoft.AspNetCore.All"
-          FrameworkReferenceToUse="Microsoft.AspNetCore.App">
-      <Output TaskParameter="ShouldRemovePackageReference" PropertyName="_ShouldRemoveAspNetCoreAll" />
-    </CheckIfPackageReferenceShouldBeFrameworkReference>
-
-    <!-- NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.
-         A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web. -->
-    <NETSdkError Condition="'$(_ShouldRemoveAspNetCoreAll)' == 'true'"
-                 ResourceName="AspNetCoreAllNotSupported" />
-
-    <CheckIfPackageReferenceShouldBeFrameworkReference
-      PackageReferences="@(PackageReference)"
-      FrameworkReferences="@(FrameworkReference)"
-      PackageReferenceToReplace="Microsoft.AspNetCore.App"
-      FrameworkReferenceToUse="Microsoft.AspNetCore.App">
-      <Output TaskParameter="ShouldRemovePackageReference" PropertyName="_ShouldRemoveAspNetCoreApp" />
-      <Output TaskParameter="ShouldAddFrameworkReference" PropertyName="_ShouldAddAspNetCoreAppFrameworkReference" />
-    </CheckIfPackageReferenceShouldBeFrameworkReference>
-
-    <ItemGroup>
-      <PackageReference Remove="Microsoft.AspNetCore.App" Condition="'$(_ShouldRemoveAspNetCoreApp)' == 'true'" />
-      <FrameworkReference Include="Microsoft.AspNetCore.App" Condition="'$(_ShouldAddAspNetCoreAppFrameworkReference)' == 'true'" />
-    </ItemGroup>
-    
-    <!-- NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher.
-         If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference
-         should be replaced with a FrameworkReference. -->
-
-    <NETSdkWarning Condition="'$(_ShouldRemoveAspNetCoreApp)' == 'true'"
-                   ResourceName="AspNetCoreUsesFrameworkReference" />
-    
-  </Target>
-
-  <Target Name="ApplyImplicitVersions" 
-          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;ProcessFrameworkReferences"
-          DependsOnTargets="UpdateAspNetToFrameworkReference;CheckForImplicitPackageReferenceOverrides"
-          Condition="'@(PackageReference)' != ''">
-    
-    <ApplyImplicitVersions TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
-                           TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
-                           PackageReferences="@(PackageReference)"
-                           ImplicitPackageReferenceVersions="@(ImplicitPackageReferenceVersion)">
-      <Output TaskParameter="PackageReferencesToUpdate" ItemName="PackageReferenceToUpdate" />
-      <Output TaskParameter="SdkBuildWarnings" ItemName="SdkBuildWarning" />
-    </ApplyImplicitVersions>
-
-    <ItemGroup>
-      <PackageReference Remove="@(PackageReferenceToUpdate)" />
-      <PackageReference Include="@(PackageReferenceToUpdate)" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <!-- Support using a patch version in the TargetFramework, ie netcoreapp1.1.1
-           Note that this isn't officially supported, but it worked in the past so
-           this should prevent breaking it. -->
-      <PackageReference Condition="'%(PackageReference.Identity)' == 'Microsoft.NETCore.App'">
-        <Version Condition="'%(PackageReference.Version)' == ''">$(_TargetFrameworkVersionWithoutV)</Version>
-      </PackageReference>
-    </ItemGroup>
-  </Target>
-  
   <!-- This target runs before build but not before restore, to avoid duplicating these warnings
        if building with an implicit restore. -->
   <Target Name="WarnForExplicitVersions" BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
@@ -197,12 +72,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup Condition="'$(SetLinkMetadataAutomatically)' != 'false'">
     <Compile Update="@(Compile)">
       <!-- First, add a trailing slash to the LinkBase metadata if necessary.  This allows us to use the same value
-           for the Link metadata whether or not LinkBase metadata is set: %(LinkBase)%(RecursiveDir)%(Filename)%(Extension) 
-           
+           for the Link metadata whether or not LinkBase metadata is set: %(LinkBase)%(RecursiveDir)%(Filename)%(Extension)
+
            Note that RecursiveDir already includes the trailing slash.
       -->
       <LinkBase Condition="'%(LinkBase)' != ''">$([MSBuild]::EnsureTrailingSlash(%(LinkBase)))</LinkBase>
-    
+
       <!-- Set the Link metadata if it's not already set, if the item wasn't defined in a shared project,  and the item is outside of the project directory.
            Check whether the item was defined in a shared project by checking whether the extension of the defining project was .projitems.
            Check whether an item is inside the project directory by seeing if the FullPath starts with EnsureTrailingSlash(MSBuildProjectDirectory)
@@ -211,7 +86,7 @@ Copyright (c) .NET Foundation. All rights reserved.
            not possible to call a string method on a metadata item directly.  The intrinsic ValueOrDefault() will be more
            performant than calling String.Copy(), which has been used for this in other contexts, but actually makes a copy
            of the string data.
-      -->    
+      -->
       <Link Condition="'%(Link)' == '' And '%(DefiningProjectExtension)' != '.projitems' And !$([MSBuild]::ValueOrDefault('%(FullPath)', '').StartsWith($([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))))">%(LinkBase)%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
 
@@ -219,7 +94,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <LinkBase Condition="'%(LinkBase)' != ''">$([MSBuild]::EnsureTrailingSlash(%(LinkBase)))</LinkBase>
       <Link Condition="'%(Link)' == '' And '%(DefiningProjectExtension)' != '.projitems' And !$([MSBuild]::ValueOrDefault('%(FullPath)', '').StartsWith($([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))))">%(LinkBase)%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AdditionalFiles>
-    
+
     <None Update="@(None)">
       <LinkBase Condition="'%(LinkBase)' != ''">$([MSBuild]::EnsureTrailingSlash(%(LinkBase)))</LinkBase>
       <Link Condition="'%(Link)' == '' And '%(DefiningProjectExtension)' != '.projitems' And !$([MSBuild]::ValueOrDefault('%(FullPath)', '').StartsWith($([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))))">%(LinkBase)%(RecursiveDir)%(Filename)%(Extension)</Link>
@@ -246,103 +121,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Resource>
   </ItemGroup>
 
-  <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-
-  <!-- Remove package references with metadata IsImplicitlyDefined = true, if there are other PackageReference items with the same identity -->
-  <Target Name="CheckForImplicitPackageReferenceOverrides" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
-    <PropertyGroup>
-      <ImplicitPackageReferenceInformationLink>https://aka.ms/sdkimplicitrefs</ImplicitPackageReferenceInformationLink>
-    </PropertyGroup>
-
-    <CheckForImplicitPackageReferenceOverrides
-        PackageReferenceItems="@(PackageReference)"
-        MoreInformationLink="$(ImplicitPackageReferenceInformationLink)">
-      <Output TaskParameter="ItemsToRemove" ItemName="_PackageReferenceToRemove" />
-      <Output TaskParameter="ItemsToAdd" ItemName="_PackageReferenceToAdd" />
-    </CheckForImplicitPackageReferenceOverrides>
-
-    <ItemGroup>
-      <!-- Remove and add the PackageReference items according to the output from the task -->
-      <PackageReference Remove="@(_PackageReferenceToRemove)" />
-
-      <PackageReference Include="@(_PackageReferenceToAdd)" />
-
-      <!-- Clear items for other targets to use -->
-      <_PackageReferenceToAdd Remove="@(_PackageReferenceToAdd)" />
-
-    </ItemGroup>
-    
-    <!-- If any implicit package references were overridden, then don't check that RuntimeFrameworkVersion matches the package version -->
-    <PropertyGroup Condition="'@(_PackageReferenceToRemove)' != ''">
-      <VerifyMatchingImplicitPackageVersion>false</VerifyMatchingImplicitPackageVersion>
-    </PropertyGroup>
-
-  </Target>
-
-  <UsingTask TaskName="CheckForDuplicateItems" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-
-  <Target Name="CheckForDuplicateItems" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CoreCompile">
-
-    <PropertyGroup>
-      <DefaultItemsMoreInformationLink>https://aka.ms/sdkimplicititems</DefaultItemsMoreInformationLink>
-    </PropertyGroup>
-
-    <!-- NOTE for design-time builds we continue on errors and remove the duplicate items.
-         This is because otherwise there won't be any references to pass to the compiler, leading to design-time
-         compilation errors for every API that is used in the project.  Amidst all the compile errors, it would
-         be easy to miss the duplicate items error which is the real source of the problem. -->
-
-    <CheckForDuplicateItems
-      Items="@(Compile)"
-      ItemName="Compile"
-      DefaultItemsEnabled="$(EnableDefaultItems)"
-      DefaultItemsOfThisTypeEnabled="$(EnableDefaultCompileItems)"
-      PropertyNameToDisableDefaultItems="EnableDefaultCompileItems"
-      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      ContinueOnError="$(ContinueOnError)">
-      <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedCompileItems" />
-    </CheckForDuplicateItems>
-
-    <CheckForDuplicateItems
-      Items="@(EmbeddedResource)"
-      ItemName="EmbeddedResource"
-      DefaultItemsEnabled="$(EnableDefaultItems)"
-      DefaultItemsOfThisTypeEnabled="$(EnableDefaultEmbeddedResourceItems)"
-      PropertyNameToDisableDefaultItems="EnableDefaultEmbeddedResourceItems"
-      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      ContinueOnError="$(ContinueOnError)">
-      <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedEmbeddedResourceItems" />
-    </CheckForDuplicateItems>
-    
-    <!-- Default content items are enabled by the Web SDK, not the .NET SDK, but we check it here for simplicity -->
-    <CheckForDuplicateItems
-      Items="@(Content)"
-      ItemName="Content"
-      DefaultItemsEnabled="$(EnableDefaultItems)"
-      DefaultItemsOfThisTypeEnabled="$(EnableDefaultContentItems)"
-      PropertyNameToDisableDefaultItems="EnableDefaultContentItems"
-      MoreInformationLink="$(DefaultItemsMoreInformationLink)"
-      ContinueOnError="$(ContinueOnError)">
-      <Output TaskParameter="DeduplicatedItems" ItemName="DeduplicatedContentItems" />
-    </CheckForDuplicateItems>
-
-    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' And '@(DeduplicatedCompileItems)' != ''">
-      <Compile Remove="@(Compile)" />
-      <Compile Include="@(DeduplicatedCompileItems)" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' And '@(DeduplicatedEmbeddedResourceItems)' != ''">
-      <EmbeddedResource Remove="@(EmbeddedResource)" />
-      <EmbeddedResource Include="@(DeduplicatedEmbeddedResourceItems)" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' And '@(DeduplicatedContentItems)' != ''">
-      <Content Remove="@(Content)" />
-      <Content Include="@(DeduplicatedContentItems)" />
-    </ItemGroup>
-    
-  </Target>
-
   <Target Name="_CheckForFailedSDKResolution"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
         Condition="'$(SdkResolverHonoredGlobalJson)' == 'false'">
@@ -350,17 +128,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(SdkResolverGlobalJsonPath)" />
   </Target>
 
-  <Target Name="_CheckForTransitiveWindowsDesktopDependencies"
-          AfterTargets="ResolvePackageAssets"
-          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(TargetPlatformIdentifier)' != 'Windows' and '@(TransitiveFrameworkReference)' != ''">
-    <ItemGroup>
-      <_WindowsDesktopTransitiveFrameworkReference Include="@(TransitiveFrameworkReference)"
-                                                   Condition="'%(Identity)' == 'Microsoft.WindowsDesktop.App' Or
-                                                              '%(Identity)' == 'Microsoft.WindowsDesktop.App.WPF' Or
-                                                              '%(Identity)' == 'Microsoft.WindowsDesktop.App.WindowsForms'" />
-    </ItemGroup>
-    <NetSdkError Condition="'@(_WindowsDesktopTransitiveFrameworkReference)' != ''"
-                 ResourceName="WindowsDesktopTargetPlatformMustBeWindows" />
+  <Target Name="_WarnWhenUsingNET6AndVSPriorTo17"
+        BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+        Condition="$([MSBuild]::VersionLessThan($(VisualStudioVersion), '17.0')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
+    <NetSdkWarning ResourceName="Net6NotCompatibleWithDev16"/>
   </Target>
 
   <Target Name="_CheckForInvalidWindowsDesktopTargetingConfiguration"
@@ -372,7 +143,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_CheckForUnnecessaryWindowsDesktopSDK"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-        Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(_MicrosoftWindowsDesktopSdkImported)' == 'true'">
+        Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(_MicrosoftWindowsDesktopSdkImported)' == 'true' and '$(TargetFrameworks)' == ''">
     <NETSdkWarning ResourceName="UnnecessaryWindowsDesktopSDK" />
   </Target>
+
 </Project>

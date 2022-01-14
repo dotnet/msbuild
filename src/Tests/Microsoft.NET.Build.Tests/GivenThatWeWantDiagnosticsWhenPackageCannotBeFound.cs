@@ -29,7 +29,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "MissingPackageDeletedSinceRestore",
                 TargetFrameworks = "netstandard1.3",
-                IsSdkProject = true,
                 PackageReferences = { package },
             };
 
@@ -87,7 +86,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "packagethatwillgomissing",
                 TargetFrameworks = "netstandard1.3",
-                IsSdkProject = true,
             };
 
             var asset = _testAssetsManager

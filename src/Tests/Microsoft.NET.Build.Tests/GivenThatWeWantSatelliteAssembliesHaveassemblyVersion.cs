@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 using System.Diagnostics;
 using FluentAssertions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -21,10 +22,10 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        private void RestoreAndBuildTestAssets()
+        private void RestoreAndBuildTestAssets([CallerMemberName] string callingMethod = "")
         {
             TestAsset testAsset = _testAssetsManager
-              .CopyTestAsset("AllResourcesInSatelliteDisableVersionGenerate")
+              .CopyTestAsset("AllResourcesInSatelliteDisableVersionGenerate", callingMethod)
               .WithSource();
 
             var buildCommand = new BuildCommand(testAsset);
@@ -33,7 +34,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1");
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
             _mainAssemblyPath = Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll");
             _satelliteAssemblyPath = Path.Combine(outputDirectory.FullName, "en", "AllResourcesInSatellite.resources.dll");
         }

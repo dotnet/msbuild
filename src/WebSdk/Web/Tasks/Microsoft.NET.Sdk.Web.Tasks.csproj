@@ -14,15 +14,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(WebRoot)\Targets\**\*.*">
+    <AdditionalContent Include="$(WebRoot)\Targets\**\*.*">
       <Pack>true</Pack>
       <PackagePath>targets</PackagePath>
-    </Content>
+    </AdditionalContent>
 
-    <Content Include="$(WebRoot)\Sdk\**\*.*">
+    <AdditionalContent Include="$(WebRoot)\Sdk\**\*.*">
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>
-    </Content>
+    </AdditionalContent>
   </ItemGroup>
 
   <ItemGroup>
@@ -43,7 +43,7 @@
     <Error Text="No files found for analyzer for @(PackageReference) at path $(_AnalyzerPath)" Condition="'@(_AnalyzerFile-&gt;Count())' == '0'" />
 
     <ItemGroup>
-      <Content Include="@(_AnalyzerFile)" Pack="true" PackagePath="analyzers/cs" />
+      <AdditionalContent Include="@(_AnalyzerFile)" Pack="true" PackagePath="analyzers/cs" />
     </ItemGroup>
   </Target>
 

@@ -95,10 +95,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </CreateProperty>
 
     <!-- Normalize service url such as convert a server name to format like https://<server>:8172/msdeploy.axd-->
-    <NormalizeServiceUrl 
-      ServiceUrl="$(MsDeployServiceUrl)" 
-      UseWMSVC="$(_UseWMSVC)" 
-      UseRemoteAgent="$(_UseRemoteAgent)" 
+    <NormalizeServiceUrl
+      ServiceUrl="$(MsDeployServiceUrl)"
+      UseWMSVC="$(_UseWMSVC)"
+      UseRemoteAgent="$(_UseRemoteAgent)"
       SiteName="$(DeployIisAppPath)"
       Condition="$(NormalizePublishSettings) == 'true'" >
       <Output TaskParameter="ResultUrl" PropertyName="MsDeployServiceUrl" />
@@ -109,7 +109,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Condition="'$(Password)' == '' And '$(IsGetPasswordEnabled)' == 'true'">
       <Output TaskParameter="ClearPassword" PropertyName="Password"/>
     </GetPassword>
-    
+
     <!--  Data Passed to MSDeploy -->
     <ItemGroup>
       <MsDeploySourceProviderSetting Remove="@(MsDeploySourceProviderSetting)" />
@@ -167,7 +167,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <_EnableRuleList>@(_EnableRuleListItems)</_EnableRuleList>
     </PropertyGroup>
-    
+
     <MSdeploy
           Condition="'$(UseMsdeployExe)' == 'true'"
           Verb="sync"
@@ -225,7 +225,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Path>$(PublishIntermediateOutputPath)</Path>
       </MsDeploySourceManifest>
     </ItemGroup>
-    
+
     <ItemGroup Condition="'@(_EFSQLScripts)' != ''">
       <MsDeploySourceManifest Include="dbfullsql" >
         <Path>%(_EFSQLScripts.Identity)</Path>
@@ -260,7 +260,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <ExcludeFromSetParameter>false</ExcludeFromSetParameter>
       </MsDeployDeclareParameters>
     </ItemGroup>
-    
+
     <ItemGroup Condition="'@(_EFSQLScripts)' != ''">
       <MsDeployDeclareParameters Include="%(_EFSQLScripts.DBContext)">
         <Kind>ProviderPath</Kind>
@@ -276,13 +276,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup>
-      <ParametersXMLFiles Include="$(MSBuildProjectDirectory)\Parameters.xml" 
+      <ParametersXMLFiles Include="$(MSBuildProjectDirectory)\Parameters.xml"
                           Condition="Exists('$(MSBuildProjectDirectory)\Parameters.xml')"/>
     </ItemGroup>
 
-    <ImportParameterFile Condition="'@(ParametersXMLFiles)' != ''" 
+    <ImportParameterFile Condition="'@(ParametersXMLFiles)' != ''"
                          Files="@(ParametersXMLFiles)">
-      <Output TaskParameter="Result" 
+      <Output TaskParameter="Result"
               ItemName="_ImportedMSDeployDeclareParameters" />
     </ImportParameterFile>
 

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>List workloads available.</source>
+        <target state="translated">Список доступных рабочих нагрузок.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdColumn">
+        <source>Installed Workload Ids</source>
+        <target state="translated">Идентификаторы установленных рабочих нагрузок</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadListFooter">
+        <source>Use `dotnet workload search` to find additional workloads to install.</source>
+        <target state="translated">Используйте "Поиск рабочей нагрузки DotNet", чтобы найти дополнительные рабочие нагрузки для установки.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadListHeader">
+        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
+        <target state="translated">Эта команда выводит только рабочие нагрузки, которые были установлены с помощью команды "Устаовка рабочей нагрузки DotNet" в этой версии пакета SDK, а не те, которые были установлены с помощью Visual Studio.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">Обновления доступны для следующих рабочих нагрузок: {0}. Чтобы получить последнюю версию, запустите обновление рабочей нагрузки DotNet.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

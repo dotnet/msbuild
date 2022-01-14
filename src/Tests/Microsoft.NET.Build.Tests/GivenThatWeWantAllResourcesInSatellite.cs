@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_retrieves_strings_successfully()
         {
             TestSatelliteResources(Log, _testAssetsManager);
@@ -56,7 +56,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            foreach (var targetFramework in new[] { "net46", "netcoreapp1.1" })
+            foreach (var targetFramework in new[] { "net46", ToolsetInfo.CurrentTargetFramework })
             {
                 if (targetFramework == "net46" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
@@ -80,10 +80,10 @@ namespace Microsoft.NET.Build.Tests
                 }
                 else
                 {
+                    outputFiles.Add($"AllResourcesInSatellite{EnvironmentInfo.ExecutableExtension}");
                     outputFiles.Add("AllResourcesInSatellite.dll");
                     outputFiles.Add("AllResourcesInSatellite.deps.json");
                     outputFiles.Add("AllResourcesInSatellite.runtimeconfig.json");
-                    outputFiles.Add("AllResourcesInSatellite.runtimeconfig.dev.json");
                     command = new DotnetCommand(log, Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll"));
                 }
 

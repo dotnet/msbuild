@@ -3,13 +3,14 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
@@ -126,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                          .And.HaveStdOutContaining("Hello World!");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19487#issuecomment-898765210")]
         public void ItCanRunAMSBuildProjectWhenSpecifyingAFramework()
         {
             var testAppName = "MSBuildTestApp";
@@ -172,7 +173,8 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(Directory.GetParent(testInstance.Path).FullName)
                 .Execute($"--project", projectFile)
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.NotHaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
         }
 
         [Fact]
@@ -188,7 +190,38 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(Directory.GetParent(testInstance.Path).FullName)
                 .Execute("--project", testProjectDirectory)
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.NotHaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
+        }
+
+        [Fact]
+        public void ItWarnsWhenShortFormOfProjectArgumentIsUsed()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var projectFile = Path.Combine(testInstance.Path, testAppName + ".csproj");
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(Directory.GetParent(testInstance.Path).FullName)
+                .Execute($"-p", projectFile)
+                .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.HaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
+        }
+
+        [Theory]
+        [InlineData("-p project1 -p project2")]
+        [InlineData("--project project1 -p project2")]
+        public void ItErrorsWhenMultipleProjectsAreSpecified(string args)
+        {
+            new DotnetCommand(Log, "run")
+                .Execute(args.Split(" "))
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(LocalizableStrings.OnlyOneProjectAllowed);
         }
 
         [Fact]
@@ -216,7 +249,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(rootPath)
                 .Execute("--no-restore")
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World");
+                         .And.HaveStdOutContaining("Hello, World");
         }
 
         [Fact]
@@ -250,6 +283,23 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should()
                 .Pass()
                 .And.HaveStdOutContaining("echo args:foo;bar;baz");
+        }
+
+        [Fact]
+        public void ItCanPassOptionArgumentsToSubjectAppByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--", "-d", "-a")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:-d;-a");
         }
 
         [Fact]
@@ -526,6 +576,21 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             result.Should().Pass()
                 .And.HaveStdOutContaining("Important text");
+        }
+
+        [Fact]
+        public void ItPrintsDuplicateArguments()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var result = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("a", "b", "c", "a", "c");
+
+            result.Should().Pass()
+                .And.HaveStdOutContaining("echo args:a;b;c;a;c");
         }
 
         [Fact]

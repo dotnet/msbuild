@@ -27,7 +27,7 @@ Run the following command from the root of the repository:
 build.cmd
 ```
 
-The build script will output a `dotnet` installation to `artifacts\tmp\Debug\dotnet` that will include any local changes to the .NET Core CLI.
+The build script will output a `dotnet` installation to `artifacts\bin\redist\Debug\dotnet` that will include any local changes to the .NET Core CLI.
 
 To open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated `artifacts\sdk-build-env.bat`. Finally, open Visual Studio with `devenv sdk.sln`.
 
@@ -39,7 +39,7 @@ Run the following command from the root of the repository:
 ./build.sh
 ```
 
-The build script will output a .NET Core installation to `artifacts/tmp/Debug/dotnet` that will include any local changes to the .NET Core CLI.
+The build script will output a .NET Core installation to `artifacts\bin\redist\Debug\dotnet` that will include any local changes to the .NET Core CLI.
 
 ## Running tests
 
@@ -79,7 +79,7 @@ Ensure the `dotnet` being used is from the artifacts directory:
 where dotnet
 ```
 
-This should output `..\artifacts\tmp\Debug\dotnet\dotnet.exe`.
+This should output `..\artifacts\bin\redist\Debug\dotnet\dotnet.exe`.
 
 You can now run `dotnet` commands to test changes.
 
@@ -97,9 +97,32 @@ Ensure the `dotnet` being used is from the artifacts directory:
 which dotnet
 ```
 
-This should output `.../artifacts/tmp/Debug/dotnet/dotnet`.
+This should output `.../artifacts/bin/redist/Debug/dotnet/dotnet`.
 
 You can now run `dotnet` commands to test changes.
+
+### Debugging
+
+Run "dotnet --debug <command>" which will launch dotnet and pause waiting for user input. This will give you time to attach a debugger to the running dotnet process, set the breakpoints you want to stop at in your built copy of the sdk, and then you can hit enter for the dotnet command to continue.
+
+## Run tests from the command line
+
+```shell
+build.cmd # to have a full build first
+.\artifacts\sdk-build-env.bat
+cd src\Tests\YOURTEST.Tests # cd to the test folder that contains the test csproj file
+dotnet test --filter "FullyQualifiedName~TESTNAME" # run individual test
+```
+
+## Run tests in Visual Studio
+
+Use developer command prompt for Visual Studio or put devenv on you PATH
+
+```shell
+build.cmd # to have a full build first
+.\artifacts\sdk-build-env.bat
+devenv sdk.sln
+```
 
 ## A simple test
 
@@ -113,6 +136,18 @@ dotnet run
 ```
 
 This should print `Hello World!`.
+
+## Locked files
+
+If you see error like ` error MSB3021: Unable to copy file "toolset-tasks.dll" to "toolset-tasks.dll". The process cannot access the file 'toolset-tasks.dll' because it is being used by another process.`
+
+You could run the following to stop all dotnet related processes
+
+```batch
+taskkill /F /IM dotnet.exe /T ||
+taskkill /F /IM VSTest.Console.exe /T ||
+taskkill /F /IM msbuild.exe /T
+```
 
 ## Adding a Command
 

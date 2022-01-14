@@ -33,7 +33,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "ContentFiles",
                 IsExe = true,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
                 PackageReferences = { new TestPackageReference("ContentFilesExample", "1.0.2") },
             };
 

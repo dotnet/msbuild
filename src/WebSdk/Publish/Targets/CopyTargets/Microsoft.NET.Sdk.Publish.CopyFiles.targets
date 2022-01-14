@@ -28,11 +28,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Target _RemoveExcludeFiles -->
   <!--********************************************************************-->
   <Target Name="_RemoveExcludeFiles" >
-    
+
     <ItemGroup>
       <DotNetPublishFiles Remove="@(DotNetPublishFiles)"  Condition="'%(Exclude)' == 'true'" />
     </ItemGroup>
-    
+
   </Target>
 
   <!--********************************************************************-->
@@ -51,19 +51,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MakeDir Directories="$(PublishIntermediateOutputPath)" Condition="!Exists('$(PublishIntermediateOutputPath)')"/>
 
   </Target>
-         
-  
+
+
   <!--********************************************************************-->
   <!-- Target _CopyAllFilesToPublishIntermediateOutputPath -->
   <!--********************************************************************-->
   <Target Name="_CopyFilesToPublishIntermediateOutputPath">
-    
+
     <Copy
     SourceFiles="@(DotNetPublishFiles)"
     DestinationFiles="@(DotNetPublishFiles ->'$(PublishIntermediateOutputPath)%(DestinationRelativePath)')"  />
-    
+
   </Target>
-  
+
   <!--********************************************************************-->
   <!-- Target _CopyAspNetCoreFilesToIntermediateOutputPath -->
   <!--********************************************************************-->
@@ -74,8 +74,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Publish;
     </_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn>
   </PropertyGroup>
-  
-  <Target Name="_CopyAspNetCoreFilesToIntermediateOutputPath" 
+
+  <Target Name="_CopyAspNetCoreFilesToIntermediateOutputPath"
     Condition="'$(_PublishProjectType)' == 'AspNetCore'"
     DependsOnTargets="$(_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn)">
   </Target>
@@ -89,7 +89,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Configuration>$(PublishConfiguration)</Configuration>
     </PropertyGroup>
   </Target>
-  
+
    <!--********************************************************************-->
   <!-- Target _CopyWebJobFilesToIntermediateOutputPath -->
   <!--********************************************************************-->

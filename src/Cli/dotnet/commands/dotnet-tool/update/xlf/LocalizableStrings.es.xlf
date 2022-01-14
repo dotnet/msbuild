@@ -149,7 +149,7 @@ y los identificadores de paquete correspondientes de las herramientas instaladas
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="translated">ORIGEN</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
@@ -159,7 +159,7 @@ y los identificadores de paquete correspondientes de las herramientas instaladas
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="translated">PLATAFORMA</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">

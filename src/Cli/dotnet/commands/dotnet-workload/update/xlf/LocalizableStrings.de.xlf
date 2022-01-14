@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AdManifestOnlyOptionDescription">
+        <source>Only update advertising manifests.</source>
+        <target state="translated">Aktualisieren Sie nur Werbemanifeste.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Update all installed workloads.</source>
+        <target state="translated">Aktualisieren Sie alle installierten Workloads.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromPreviousSdkOptionDescription">
+        <source>Include workloads installed with earlier SDK versions in update.</source>
+        <target state="translated">Schließen Sie Workloads in die Aktualisierung ein, die mit früheren SDK-Versionen installiert wurden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FromRollbackDefinitionOptionDescription">
+        <source>Update workloads based on specified rollback definition file.</source>
+        <target state="translated">Aktualisieren Sie Workloads basierend auf der angegebenen Rollbackdefinitionsdatei.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoWorkloadsToUpdate">
+        <source>No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</source>
+        <target state="translated">Für diesen Featurebereich sind keine Workloads installiert. Um Workloads zu aktualisieren, die mit früheren SDK-Versionen installiert wurden, schließen Sie die Option „--from-previous-sdk“ ein.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollBackFailedMessage">
+        <source>Installation rollback failed: {0}</source>
+        <target state="translated">Fehler beim Installationsrollback: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackInstall">
+        <source>Workload installation failed. Rolling back installed packs...</source>
+        <target state="translated">Fehler bei der Workloadinstallation. Für die installierten Pakete wird ein Rollback ausgeführt...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateFailed">
+        <source>Workload '{0}' failed to update due to the following:</source>
+        <target state="translated">Fehler beim Update der Workload "{0}". Ursache:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceeded">
+        <source>Successfully updated workload(s): {0}.</source>
+        <target state="translated">Workload(s) erfolgreich aktualisiert: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadCacheDownloadFailed">
+        <source>Failed to download workload update packages to cache: {0}</source>
+        <target state="translated">Fehler beim Herunterladen von Paketen zur Workloadaktualisierung in den Cache: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadUpdateAdManifestsSucceeded">
+        <source>Successfully updated advertising manifests.</source>
+        <target state="translated">Werbemanifeste wurden erfolgreich aktualisiert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadUpdateFailed">
+        <source>Workload update failed: {0}</source>
+        <target state="translated">Fehler bei der Workloadaktualisierung: {0}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

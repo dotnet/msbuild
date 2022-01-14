@@ -23,6 +23,7 @@
     <Compile Include="..\dotnet-back-compat.Tests\**\*.cs" LinkBase="dotnet-back-compat" />
     <Compile Include="..\dotnet-build.Tests\**\*.cs" LinkBase="dotnet-build" />
     <Compile Include="..\dotnet-clean.Tests\**\*.cs" LinkBase="dotnet-clean" />
+    <Compile Include="..\dotnet-sdk-check.Tests\**\*.cs" LinkBase="dotnet-sdk-check" />
     <Compile Include="..\dotnet-fsi.Tests\**\*.cs" LinkBase="dotnet-fsi" />
     <Compile Include="..\dotnet-help.Tests\**\*.cs" LinkBase="dotnet-help" />
     <Compile Include="..\dotnet-install-tool.Tests\**\*.cs" LinkBase="dotnet-install-tool" />
@@ -39,11 +40,17 @@
     <Compile Include="..\dotnet-store.Tests\**\*.cs" LinkBase="dotnet-store" />
     <Compile Include="..\dotnet-test.Tests\**\*.cs" LinkBase="dotnet-test" />
     <Compile Include="..\dotnet-vstest.Tests\**\*.cs" LinkBase="dotnet-vstest" />
+    <Compile Include="..\dotnet-workload-install.Tests\**\*.cs" LinkBase="dotnet-workload-install" />
+    <Compile Include="..\dotnet-workload-uninstall.Tests\**\*.cs" LinkBase="dotnet-workload-uninstall" />
+    <Compile Include="..\dotnet-workload-list.Tests\**\*.cs" LinkBase="dotnet-workload-list" />
+    <Compile Include="..\dotnet-workload-update.Tests\**\*.cs" LinkBase="dotnet-workload-update" />
+    <Compile Include="..\dotnet-workload-search.Tests\**\*.cs" LinkBase="dotnet-workload-search" />
+    <Compile Include="..\dotnet-workload-repair.Tests\**\*.cs" LinkBase="dotnet-workload-repair" />
+    <Compile Include="..\dotnet-workload-restore.Tests\**\*.cs" LinkBase="dotnet-workload-restore" />
     <Compile Include="..\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests\**\*.cs" LinkBase="Telemetry.PersistenceChannel" />
     <Compile Include="..\Microsoft.DotNet.CommandFactory.Tests\**\*.cs" LinkBase="CommandFactory" />
     <Compile Include="..\Microsoft.DotNet.Configurer.UnitTests\**\*.cs" LinkBase="Configurer" />
     <Compile Include="..\Microsoft.DotNet.ShellShim.Tests\**\*.cs" LinkBase="ShellShim" />
-    
 
     <None Include="..\Microsoft.DotNet.ShellShim.Tests\WpfBinaryTestAsssets\testwpf.dll" LinkBase="WpfBinaryTestAsssets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -136,6 +143,7 @@
   </Target>
 
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.PackageInstall.Tests\Microsoft.DotNet.PackageInstall.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
     <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
@@ -145,8 +153,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Moq" Version="4.7.25" />
-    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <!-- This package comes from dotnet/runtime-assets -->
+    <PackageReference Include="Microsoft.DotNet.Installer.Windows.Security.TestData" Version="$(MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>
 </Project>

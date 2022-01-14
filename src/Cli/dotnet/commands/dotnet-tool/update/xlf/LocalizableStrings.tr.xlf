@@ -159,7 +159,7 @@ karşılık gelen paket kimliklerini bulmak için
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="translated">ÇERÇEVE</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
@@ -174,7 +174,7 @@ karşılık gelen paket kimliklerini bulmak için
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">SÜRÜM</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
     </body>

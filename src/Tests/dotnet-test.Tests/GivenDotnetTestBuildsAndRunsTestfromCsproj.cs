@@ -19,12 +19,13 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Utilities;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
-    public class GivenDotnettestBuildsAndRunsTestfromCsproj : SdkTest
+    public class GivenDotnetTestBuildsAndRunsTestFromCsproj : SdkTest
     {
-        public GivenDotnettestBuildsAndRunsTestfromCsproj(ITestOutputHelper log) : base(log)
+        public GivenDotnetTestBuildsAndRunsTestFromCsproj(ITestOutputHelper log) : base(log)
         {
         }
 
@@ -307,7 +308,6 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .WithVersionVariables()
                 .Path;
 
-
             string pkgDir;
             //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             //{
@@ -316,7 +316,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             //}
             //else
             {
-                pkgDir = Path.Combine(rootPath, "pkgs");
+                pkgDir = _testAssetsManager.CreateTestDirectory(identifier: "pkgs").Path;
+                Log.WriteLine("pkgDir, package restored path is: " + pkgDir);
             }
 
             new DotnetRestoreCommand(Log)
@@ -471,7 +472,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [WindowsOnlyFact]
+        [PlatformSpecificFact(TestPlatforms.Windows | TestPlatforms.OSX | TestPlatforms.Linux)]
         public void ItCreatesCoverageFileInResultsDirectory()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("12");
@@ -507,7 +508,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [UnixOnlyFact]
+        [PlatformSpecificFact(TestPlatforms.FreeBSD)]
         public void ItShouldShowWarningMessageOnCollectCodeCoverage()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
@@ -522,7 +523,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!TestContext.IsLocalized())
             {
-                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows.");
+                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows, Linux x64 and macOS x64.");
                 result.StdOut.Should().Contain("Total:     1");
                 result.StdOut.Should().Contain("Passed:     1");
                 result.StdOut.Should().NotContain("Failed!");
@@ -551,6 +552,54 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Important text");
+            }
+
+            result.ExitCode.Should().Be(1);
+        }
+
+        [Fact]
+        public void ItSetsDotnetRootToTheLocationOfDotnetExecutableWhenRunningDotnetTestWithProject()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource()
+                            .WithVersionVariables();
+
+            var testProjectDirectory = testInstance.Path;
+
+            CommandResult result = new DotnetTestCommand(Log)
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .Execute(ConsoleLoggerOutputNormal);
+
+            result.ExitCode.Should().Be(1);
+            var dotnet = result.StartInfo.FileName;
+            Path.GetFileNameWithoutExtension(dotnet).Should().Be("dotnet");
+            string dotnetRoot = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
+            result.StartInfo.EnvironmentVariables.ContainsKey(dotnetRoot).Should().BeTrue($"because {dotnetRoot} should be set");
+            result.StartInfo.EnvironmentVariables[dotnetRoot].Should().Be(Path.GetDirectoryName(dotnet));
+        }
+
+        [Fact]
+        public void TestsFromCsprojAndArchSwitchShouldFlowToMsBuild()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
+                .WithVersionVariables()
+                .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
+
+            var testProjectDirectory = testInstance.Path;
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--arch", "wrongArchitecture");
+
+            // Verify
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("error NETSDK1083: The specified RuntimeIdentifier");
+                result.StdOut.Should().Contain("wrongArchitecture");
             }
 
             result.ExitCode.Should().Be(1);

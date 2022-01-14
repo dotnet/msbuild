@@ -22,22 +22,21 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
+using NuGet.Frameworks;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {
     public class ShellShimRepositoryTests : SdkTest
     {
-        private Lazy<FilePath> _reusedHelloWorldExecutableDll;
-
         public ShellShimRepositoryTests(ITestOutputHelper output) : base(output)
         {
-            _reusedHelloWorldExecutableDll = new Lazy<FilePath>(() => MakeHelloWorldExecutableDll("reused"));
         }
 
         [Fact]
         public void GivenAnExecutablePathItCanGenerateShimFile()
         {
-            var outputDll = _reusedHelloWorldExecutableDll.Value;
+            var outputDll = MakeHelloWorldExecutableDll();
             var pathToShim = GetNewCleanFolderUnderTempRoot();
             ShellShimRepository shellShimRepository = ConfigBasicTestDependencyShellShimRepository(pathToShim);
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
@@ -53,7 +52,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [Fact]
         public void GivenAnExecutableAndRelativePathToShimPathItCanGenerateShimFile()
         {
-            var outputDll = MakeHelloWorldExecutableDll("GivenAnExecutableAndRelativePath");
+            var outputDll = MakeHelloWorldExecutableDll();
             // To reproduce the bug, dll need to be nested under the shim
             var parentPathAsShimPath = outputDll.GetDirectoryPath().GetParentPath().GetParentPath().Value;
             var relativePathToShim = Path.GetRelativePath(
@@ -80,7 +79,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [Fact]
         public void GivenAnExecutablePathItCanGenerateShimFileInTransaction()
         {
-            var outputDll = _reusedHelloWorldExecutableDll.Value;
+            var outputDll = MakeHelloWorldExecutableDll();
             var pathToShim = GetNewCleanFolderUnderTempRoot();
             var shellShimRepository = ConfigBasicTestDependencyShellShimRepository(pathToShim);
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
@@ -101,7 +100,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [Fact]
         public void GivenAnExecutablePathDirectoryThatDoesNotExistItCanGenerateShimFile()
         {
-            var outputDll = _reusedHelloWorldExecutableDll.Value;
+            var outputDll = MakeHelloWorldExecutableDll();
             var testFolder = _testAssetsManager.CreateTestDirectory().Path;
             var extraNonExistDirectory = Path.GetRandomFileName();
             var shellShimRepository = new ShellShimRepository(new DirectoryPath(Path.Combine(testFolder, extraNonExistDirectory)), GetAppHostTemplateFromStage2());
@@ -118,7 +117,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [InlineData(" \"arg with ' quote\" ", new[] { "arg with ' quote" })]
         public void GivenAShimItPassesThroughArguments(string arguments, string[] expectedPassThru)
         {
-            var outputDll = _reusedHelloWorldExecutableDll.Value;
+            var outputDll = MakeHelloWorldExecutableDll(identifier: arguments);
             var pathToShim = GetNewCleanFolderUnderTempRoot();
             var shellShimRepository = ConfigBasicTestDependencyShellShimRepository(pathToShim);
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
@@ -202,7 +201,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                     TransactionScopeOption.Required,
                     TimeSpan.Zero))
                 {
-                    FilePath targetExecutablePath = _reusedHelloWorldExecutableDll.Value;
+                    FilePath targetExecutablePath = MakeHelloWorldExecutableDll(identifier: testMockBehaviorIsInSync.ToString());
                     shellShimRepository.CreateShim(targetExecutablePath, new ToolCommandName(shellCommandName));
 
                     intendedError();
@@ -259,7 +258,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().BeEmpty();
 
-            FilePath targetExecutablePath = _reusedHelloWorldExecutableDll.Value;
+            FilePath targetExecutablePath = MakeHelloWorldExecutableDll(identifier: testMockBehaviorIsInSync.ToString());
             shellShimRepository.CreateShim(targetExecutablePath, new ToolCommandName(shellCommandName));
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().NotBeEmpty();
@@ -289,7 +288,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().BeEmpty();
 
-            FilePath targetExecutablePath = _reusedHelloWorldExecutableDll.Value;
+            FilePath targetExecutablePath = MakeHelloWorldExecutableDll(identifier: testMockBehaviorIsInSync.ToString());
             shellShimRepository.CreateShim(targetExecutablePath, new ToolCommandName(shellCommandName));
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().NotBeEmpty();
@@ -326,7 +325,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().BeEmpty();
 
-            FilePath targetExecutablePath = _reusedHelloWorldExecutableDll.Value;
+            FilePath targetExecutablePath = MakeHelloWorldExecutableDll(identifier: testMockBehaviorIsInSync.ToString());
             shellShimRepository.CreateShim(targetExecutablePath, new ToolCommandName(shellCommandName));
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().NotBeEmpty();
@@ -406,6 +405,17 @@ namespace Microsoft.DotNet.ShellShim.Tests
                            string.Join(';', filePaths)));
         }
 
+        [WindowsOnlyTheory]
+        [InlineData("net5.0")]
+        [InlineData("netcoreapp3.1")]
+        public void WhenRidNotSupportedOnWindowsItIsImplicit(string tfm)
+        {
+            var tempDir = _testAssetsManager.CreateTestDirectory(identifier: tfm).Path;
+            var templateFinder = new ShellShimTemplateFinder(new MockNuGetPackageDownloader(), new DirectoryPath(tempDir), null);
+            var path = templateFinder.ResolveAppHostSourceDirectoryAsync(null, NuGetFramework.Parse(tfm), Architecture.Arm64).Result;
+            path.Should().Contain(tfm.Equals("net5.0") ? "AppHostTemplate" : "win-x64");
+        }
+
         private static void MakeNameConflictingCommand(string pathToPlaceShim, string shellCommandName)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -471,18 +481,11 @@ namespace Microsoft.DotNet.ShellShim.Tests
             return stage2AppHostTemplateDirectory;
         }
 
-        private FilePath MakeHelloWorldExecutableDll(string instanceName = null)
+        private FilePath MakeHelloWorldExecutableDll([CallerMemberName] string callingMethod = "", string identifier = null)
         {
             const string testAppName = "TestAppSimple";
-            const string emptySpaceToTestSpaceInPath = " ";
-            const string directoryNamePostFix = "Test";
 
-            if (instanceName == null)
-            {
-                instanceName = testAppName + emptySpaceToTestSpaceInPath + directoryNamePostFix;
-            }
-
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, callingMethod: instanceName)
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, callingMethod: callingMethod, identifier: identifier)
                 .WithSource();
 
             new BuildCommand(testInstance)
@@ -508,6 +511,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             return new ShellShimRepository(
                     new DirectoryPath(pathToShim),
+                    string.Empty,
                     appHostShellShimMaker: new AppHostShellShimMakerMock());
         }
     }

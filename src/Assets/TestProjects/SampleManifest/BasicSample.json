@@ -1,0 +1,23 @@
+﻿{
+    "version": "1.0.0",
+    "workloads": {
+        "simple-workload": {
+            "description": "mock workload",
+            "kind": "dev",
+            "packs": [
+                "mock-pack-1",
+		"mock-pack-2"
+            ]
+        }
+    },
+    "packs": {
+        "mock-pack-1": {
+            "version": "1.0.0",
+            "kind": "framework"
+        },
+        "mock-pack-2": {
+            "version": "2.0.0",
+            "kind": "framework"
+        }
+    }
+}

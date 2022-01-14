@@ -4,6 +4,7 @@
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -19,26 +20,17 @@ namespace Microsoft.DotNet.Cli.Sln.List.Tests
 {
     public class GivenDotnetSlnList : SdkTest
     {
-        private const string HelpText = @"Usage: dotnet sln <SLN_FILE> list [options]
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
+  List all projects in a solution file.
+
+Usage:
+  dotnet sln <SLN_FILE> list [options]
 
 Arguments:
-  <SLN_FILE>   The solution file to operate on. If not specified, the command will search the current directory for one.
+  <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -h, --help   Show command line help.";
-
-        private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
-
-Arguments:
-  <SLN_FILE>   The solution file to operate on. If not specified, the command will search the current directory for one.
-
-Options:
-  -h, --help   Show command line help.
-
-Commands:
-  add <PROJECT_PATH>      Add one or more projects to a solution file.
-  list                    List all projects in a solution file.
-  remove <PROJECT_PATH>   Remove one or more projects from a solution file.";
+  -?, -h, --help    Show command line help.";
 
         public GivenDotnetSlnList(ITestOutputHelper log) : base(log)
         {
@@ -52,7 +44,7 @@ Commands:
             var cmd = new DotnetCommand(Log)
                 .Execute($"sln", "list", helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory()));
         }
 
         [Theory]
@@ -64,7 +56,6 @@ Commands:
                 .Execute($"sln", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(SlnCommandHelpText);
         }
 
         [Fact]
@@ -73,8 +64,8 @@ Commands:
             var cmd = new DotnetCommand(Log)
                 .Execute("sln", "one.sln", "two.sln", "three.sln", "list");
             cmd.Should().Fail();
-            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two.sln")}
-{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three.sln")}");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLineValidation.LocalizableStrings.UnrecognizedCommandOrArgument, "two.sln")}
+{string.Format(CommandLineValidation.LocalizableStrings.UnrecognizedCommandOrArgument, "three.sln")}");
         }
 
         [Theory]
@@ -89,14 +80,14 @@ Commands:
                 .Execute($"sln", solutionName, "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindSolutionOrDirectory, solutionName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory()));
         }
 
         [Fact]
         public void WhenInvalidSolutionIsPassedItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("InvalidSolution")
+                .CopyTestAsset("InvalidSolution", identifier: "GivenDotnetSlnList")
                 .WithSource()
                 .Path;
             
@@ -105,7 +96,7 @@ Commands:
                 .Execute("sln", "InvalidSolution.sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
@@ -122,7 +113,7 @@ Commands:
                 .Execute("sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionFullPath, LocalizableStrings.FileHeaderMissingError));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
@@ -139,14 +130,14 @@ Commands:
                 .Execute("sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.SolutionDoesNotExist, solutionDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(solutionDir));
         }
 
         [Fact]
         public void WhenMoreThanOneSolutionExistsInTheDirectoryItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithMultipleSlnFiles")
+                .CopyTestAsset("TestAppWithMultipleSlnFiles", identifier: "GivenDotnetSlnList")
                 .WithSource()
                 .Path;
 
@@ -155,7 +146,7 @@ Commands:
                 .Execute("sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneSolutionInDirectory, projectDirectory + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]

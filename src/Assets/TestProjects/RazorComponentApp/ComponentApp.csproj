@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>$(AspNetTestTfm)</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- We don't want to run build server when not running as tests. -->
+    <UseRazorBuildServer>false</UseRazorBuildServer>
+  </PropertyGroup>
+
+  <Target Name="_IntrospectGetCopyToOutputDirectoryItems">
+    <Message Text="AllItemsFullPathWithTargetPath: %(AllItemsFullPathWithTargetPath.TargetPath)" Importance="High" />
+  </Target>
+
+  <Target Name="_IntrospectWatchItems" DependsOnTargets="_RazorSdkCustomCollectWatchItems">
+    <Message Text="Watch: %(Watch.FileName)%(Watch.Extension)" Importance="High" />
+  </Target>
+
+  <Target Name="_IntrospectRazorGenerateComponentDesignTime" DependsOnTargets="RazorGenerateComponentDesignTime">
+    <Message Text="RazorComponentWithTargetPath: %(RazorComponentWithTargetPath.FileName) %(RazorComponentWithTargetPath.TargetPath)" Importance="High" />
+  </Target>
+
+</Project>

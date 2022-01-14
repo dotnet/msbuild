@@ -26,8 +26,7 @@ namespace dotnet.Tests
         [InlineData("clean -h")]
         [InlineData("list -h")]
         [InlineData("msbuild -h")]
-        //  "new -h" test disabled until fix from https://github.com/dotnet/cli/pull/12899 flows to new repo
-        //[InlineData("new -h")]
+        [InlineData("new -h")]
         [InlineData("nuget -h")]
         [InlineData("pack -h")]
         [InlineData("publish -h")]
@@ -46,6 +45,16 @@ namespace dotnet.Tests
                 .Execute(commandLine.Split());
 
             result.ExitCode.Should().Be(0);
+        }
+
+        [Theory]
+        [InlineData("faketool -h")]
+        public void TheResponseIsAnError(string commandLine)
+        {
+            var result = new DotnetCommand(Log)
+                .Execute(commandLine.Split());
+
+            result.ExitCode.Should().Be(1);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Http
+namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
     internal class HttpResponseMessageForStatusCode : IHttpResponse
     {

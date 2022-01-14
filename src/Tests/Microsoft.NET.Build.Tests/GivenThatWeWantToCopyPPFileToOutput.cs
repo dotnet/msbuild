@@ -26,7 +26,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "CopyPPToOutputTest",
-                IsSdkProject = true, 
                 IsExe = true, 
                 TargetFrameworks = "netcoreapp3.0"
             };
@@ -54,7 +53,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "CopyPPFilesToOutput",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
             };
 
             var packageAsset = _testAssetsManager.CreateTestProject(referencedPackage);

@@ -6,34 +6,34 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!--
-    .NETFramework cannot load native package dependencies dynamically
-    based on the current architecture.  We have must have a RID to
-    resolve and copy native dependencies to the output directory.
+    .NET Framework cannot load native package dependencies dynamically
+    based on the current architecture.  We must have a RID to resolve
+    and copy native dependencies to the output directory.
 
-     When building a .NETFramework exe on Windows and not given a RID,
-     we'll pick either win7-x64 or win7-x86 (based on PlatformTarget)
-     if we're not given an explicit RID. However, if after resolving
-     NuGet assets we find no copy-local native dependencies, we will
-     emit the binary as AnyCPU.
+    When building a .NET Framework exe on Windows and not given a RID,
+    we'll pick either win7-x64 or win7-x86 (based on PlatformTarget)
+    if we're not given an explicit RID. However, if after resolving
+    NuGet assets we find no copy-local native dependencies, we will
+    emit the binary as AnyCPU.
 
-     Note that we must set the RID here early (to be seen during NuGet
-     restore) in order for the project.assets.json to include the
-     native dependencies that will let us make the final call on
-     AnyCPU or platform-specific.
+    Note that we must set the RID here early (to be seen during NuGet
+    restore) in order for the project.assets.json to include the
+    native dependencies that will let us make the final call on
+    AnyCPU or platform-specific.
 
-     This allows these common cases to work without requiring mention
-     of RuntimeIdentifier in the user project PlatformTarget:
+    This allows these common cases to work without requiring mention
+    of RuntimeIdentifier in the user project PlatformTarget:
 
-      1. Building an AnyCPU .NETFramework application on any host OS
-         with no native NuGet dependencies. (*)
+      1. Building an AnyCPU .NET Framework application on any host OS
+         with no native NuGet dependencies.
 
-      2. Building an x86 or x64 NETFramework application on and for
+      2. Building an x86 or x64 .NET Framework application on and for
          Windows with native NuGet dependencies that do not require
          greater than win7.
 
@@ -52,13 +52,17 @@ Copyright (c) .NET Foundation. All rights reserved.
           work without user intervention. The current static evaluation
           requirement limits us.
    -->
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and 
-                            '$(HasRuntimeOutput)' == 'true' and 
-                            '$(OS)' == 'Windows_NT' and
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and
+                            '$(HasRuntimeOutput)' == 'true' and
+                            $([MSBuild]::IsOSPlatform(`Windows`))and
                             '$(RuntimeIdentifier)' == ''">
     <_UsingDefaultRuntimeIdentifier>true</_UsingDefaultRuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x64'">win7-x64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true'">
+    <RuntimeIdentifier>$(NETCoreSdkPortableRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PlatformTarget)' == ''">
@@ -87,7 +91,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       </PropertyGroup>
     </When>
 
-    <!-- NOTE: PlatformTarget=arm64 is not currently supported and therefore no inference of that here. -->
+    <When Condition="$(RuntimeIdentifier.EndsWith('-arm64')) or $(RuntimeIdentifier.Contains('-arm64-'))">
+      <PropertyGroup>
+        <PlatformTarget>arm64</PlatformTarget>
+      </PropertyGroup>
+    </When>
+
     <Otherwise>
       <PropertyGroup>
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -96,23 +105,20 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Choose>
 
   <!--
-    SelfContained was not an option in .NET Core SDK 1.0. 
+    SelfContained was not an option in .NET Core SDK 1.0.
     Default SelfContained based on the RuntimeIdentifier, so projects don't have to explicitly set SelfContained.
     This avoids a breaking change from 1.0 behavior.
-
-    Due to https://github.com/dotnet/sdk/issues/4012 we decided to disable UseAppHost to be the default on mac
     -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
-    <_OnOsx>$(NETCoreSdkRuntimeIdentifier.StartsWith('osx'))</_OnOsx>
-    <_RuntimeIdentifierUsesAppHost Condition="$(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('android')) or $(RuntimeIdentifier.StartsWith('browser'))">false</_RuntimeIdentifierUsesAppHost>
+    <_RuntimeIdentifierUsesAppHost Condition="$(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('maccatalyst')) or $(RuntimeIdentifier.StartsWith('android')) or $(RuntimeIdentifier.StartsWith('browser'))">false</_RuntimeIdentifierUsesAppHost>
     <_RuntimeIdentifierUsesAppHost Condition="'$(_RuntimeIdentifierUsesAppHost)' == ''">true</_RuntimeIdentifierUsesAppHost>
     <UseAppHost Condition="'$(UseAppHost)' == '' and
                            '$(_RuntimeIdentifierUsesAppHost)' == 'true' and
                            ('$(SelfContained)' == 'true' or
                             ('$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1') or
-                            ('$(_TargetFrameworkVersionWithoutV)' >= '3.0' and $(_OnOsx) != 'true'))">true</UseAppHost>
+                            '$(_TargetFrameworkVersionWithoutV)' >= '3.0')">true</UseAppHost>
     <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
   </PropertyGroup>
 
@@ -127,6 +133,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x86'">win-x86</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'ARM'">win-arm</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'ARM64'">win-arm64</DefaultAppHostRuntimeIdentifier>
+    <!-- If we are running on an M1 with a native SDK and the TFM is < 6.0, we have to use a x64 apphost since there are no osx-arm64 apphosts previous to .NET 6.0. -->
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.EndsWith('arm64')) and
+                                  $(DefaultAppHostRuntimeIdentifier.StartsWith('osx')) and
+                                  $([MSBuild]::VersionLessThan('$(_TargetFrameworkVersionWithoutV)', '6.0'))">$(DefaultAppHostRuntimeIdentifier.Replace("arm64", "x64"))</DefaultAppHostRuntimeIdentifier>
+    <!-- If we are running on win-arm64 and the TFM is < 5.0, we have to use a x64 apphost since there are no win-arm64 apphosts previous to .NET 5.0. -->
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.EndsWith('arm64')) and
+                                  $(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and
+                                  $([MSBuild]::VersionLessThan('$(_TargetFrameworkVersionWithoutV)', '5.0'))">$(DefaultAppHostRuntimeIdentifier.Replace("arm64", "x64"))</DefaultAppHostRuntimeIdentifier>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedAppHostUsage"
@@ -139,17 +153,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(UseAppHost)' != 'true' and '$(_RuntimeIdentifierUsesAppHost)' == 'true'"
                  ResourceName="CannotUseSelfContainedWithoutAppHost" />
 
-    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == ''"
-                 ResourceName="CannotHaveSingleFileWithoutRuntimeIdentifier" />
-
-    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(UseAppHost)' != 'true'"
-                 ResourceName="CannotHaveSingleFileWithoutAppHost" />
-
     <NETSdkError Condition="'$(SelfContained)' != 'true' and '$(UseAppHost)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '2.1'"
                  ResourceName="FrameworkDependentAppHostRequiresVersion21" />
 
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                  ResourceName="PublishSingleFileRequiresVersion30" />
+
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and $(RuntimeIdentifier.StartsWith('win7-'))"
+                 ResourceName="SingleFileWin7Incompatible"
+                 FormatArguments="$(RuntimeIdentifier)" />
 
     <!-- The TFM version checks for PublishReadyToRun PublishTrimmed only generate warnings in .Net core 3.1
          because we do not want the behavior to be a breaking change compared to version 3.0 -->
@@ -159,6 +171,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkWarning Condition="'$(PublishTrimmed)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                    ResourceName="PublishTrimmedRequiresVersion30" />
+
+    <!-- Generate Trimming warnings for WinForms and Wpf applications-->
+    <NetSdkError Condition="('$(UseWindowsForms)' == 'true') and ('$(PublishTrimmed)' == 'true') and ('$(_SuppressWinFormsTrimError)' != 'true')"
+                 ResourceName="TrimmingWindowsFormsIsNotSupported" />
+    <NetSdkError Condition="('$(UseWpf)' == 'true') and ('$(PublishTrimmed)' == 'true') and ('$(_SuppressWpfTrimError)' != 'true')"
+                 ResourceName="TrimmingWpfIsNotSupported" />
 
   </Target>
 
@@ -184,13 +202,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForLanguageAndFeatureCombinationSupport"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform;ProcessFrameworkReferences">
 
-    <NETSdkError Condition="'$(Language)' == 'C++' and $(OutputType) != 'library' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+    <NETSdkError Condition="('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true') and $(OutputType) != 'library' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
                  ResourceName="NoSupportCppNonDynamicLibraryDotnetCore" />
 
-    <NETSdkError Condition="'$(Language)' == 'C++' and $(EnableComHosting) == 'true'"
+    <NETSdkError Condition="('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true') and $(EnableComHosting) == 'true'"
                  ResourceName="NoSupportCppEnableComHosting" />
 
-    <NETSdkError Condition="'$(Language)' == 'C++' and $(SelfContained) == 'true'"
+    <NETSdkError Condition="('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true') and $(SelfContained) == 'true'"
                  ResourceName="NoSupportCppSelfContained" />
 
   </Target>
@@ -210,9 +228,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     Append $(RuntimeIdentifier) directory to output and intermediate paths to prevent bin clashes between
-    targets. 
+    targets.
 
-    But do not append the implicit default runtime identifier for .NET Framework apps as that would 
+    But do not append the implicit default runtime identifier for .NET Framework apps as that would
     append a RID the user never mentioned in the path and do so even in the AnyCPU case.
    -->
   <PropertyGroup Condition="'$(AppendRuntimeIdentifierToOutputPath)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(_UsingDefaultRuntimeIdentifier)' != 'true'">
@@ -223,10 +241,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetDefaultPlatformTargetForNetFramework"
            AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
-
-  <!-- 
-    Switch our default .NETFramework CPU architecture choice back to AnyCPU before 
-    compiling the exe if no copy-local native dependencies were resolved from NuGet 
+  <!--
+    Switch our default .NETFramework CPU architecture choice back to AnyCPU before
+    compiling the exe if no copy-local native dependencies were resolved from NuGet
   -->
   <Target Name="AdjustDefaultPlatformTargetForNetFrameworkExeWithNoNativeCopyLocalItems"
           AfterTargets="ResolvePackageAssets"
@@ -238,7 +255,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                              NativeCopyLocalItems="@(NativeCopyLocalItems)">
 
       <Output TaskParameter="DefaultPlatformTarget" PropertyName="PlatformTarget" />
-      
+
     </GetDefaultPlatformTargetForNetFramework>
   </Target>
 

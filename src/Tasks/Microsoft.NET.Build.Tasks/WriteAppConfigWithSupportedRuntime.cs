@@ -86,7 +86,7 @@ namespace Microsoft.NET.Build.Tasks
                   && startupNode.Nodes().OfType<XElement>().Any(e => e.Name.LocalName == "supportedRuntime");
         }
 
-        //https://github.com/dotnet/docs/blob/master/docs/framework/configure-apps/file-schema/startup/supportedruntime-element.md
+        //https://github.com/dotnet/docs/blob/main/docs/framework/configure-apps/file-schema/startup/supportedruntime-element.md
         private static bool TryGetSupportRuntimeNode(
             string targetFrameworkIdentifier,
             string targetFrameworkVersion,

@@ -7,6 +7,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.Assertions;
 
 namespace Microsoft.DotNet.New.Tests
 {
@@ -25,8 +26,36 @@ namespace Microsoft.DotNet.New.Tests
 
             if (!TestContext.IsLocalized())
             {
-                cmd.StdErr.Should().StartWith("No templates matched the input template name: Web1.1.");
+                cmd.StdErr.Should().StartWith("No templates found");
             }
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate()
+        {
+            var tempDir = _testAssetsManager.CreateTestDirectory();
+            var cmd = new DotnetCommand(Log).Execute("new", "console", "-o", tempDir.Path);
+            cmd.Should().Pass();
+        }
+
+        [Fact]
+        public void ItCanShowHelp()
+        {
+            var tempDir = _testAssetsManager.CreateTestDirectory();
+            var cmd = new DotnetCommand(Log).Execute("new", "--help");
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Usage: new [options]");
+        }
+
+        [Fact]
+        public void ItCanShowHelpForTemplate()
+        {
+            var tempDir = _testAssetsManager.CreateTestDirectory();
+            var cmd = new DotnetCommand(Log).Execute("new", "classlib", "--help");
+            cmd.Should().Pass()
+                .And.NotHaveStdOutContaining("Usage: new [options]")
+                .And.HaveStdOutContaining("Class Library (C#)")
+                .And.HaveStdOutContaining("--framework");
         }
 
         [Fact(Skip = "https://github.com/dotnet/templating/issues/1971")]

@@ -5,15 +5,15 @@
       <trans-unit id="NonRetriableNugetSearchFailure">
         <source>Failed to search. NuGet Search API response detail:
     RequestUrl: {0}. ReasonPhrase: {1}. StatusCode: {2}.</source>
-        <target state="new">Failed to search. NuGet Search API response detail:
-    RequestUrl: {0}. ReasonPhrase: {1}. StatusCode: {2}.</target>
+        <target state="translated">検索に失敗しました。NuGet Search API からの応答の詳細:
+    RequestUrl: {0}。ReasonPhrase: {1}。StatusCode: {2}。</target>
         <note />
       </trans-unit>
       <trans-unit id="RetriableNugetSearchFailure">
         <source>Failed to search. Retry later may resolve the issue. NuGet Search API response detail:
     RequestUrl: {0}. ReasonPhrase: {1}. StatusCode: {2}.</source>
-        <target state="new">Failed to search. Retry later may resolve the issue. NuGet Search API response detail:
-    RequestUrl: {0}. ReasonPhrase: {1}. StatusCode: {2}.</target>
+        <target state="translated">検索に失敗しました。後でもう一度試すと、問題が解決する可能性があります。NuGet Search API からの応答の詳細:
+    RequestUrl: {0}。ReasonPhrase: {1}。StatusCode: {2}。</target>
         <note />
       </trans-unit>
     </body>

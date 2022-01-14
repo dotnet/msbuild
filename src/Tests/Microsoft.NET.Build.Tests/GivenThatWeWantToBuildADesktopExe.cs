@@ -65,7 +65,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AutoRuntimeIdentifierTest",
                 TargetFrameworks = "net472",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -194,7 +193,7 @@ namespace Microsoft.NET.Build.Tests
                     .Should()
                     .Pass();
 
-                var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute(multiTarget ? new[] { "/p:TargetFramework=net46" } : Array.Empty<string>())
                     .Should()
@@ -244,9 +243,8 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("win8-x64-aot", "x64")]
         [InlineData("win10-arm", "arm")]
         [InlineData("win10-arm-aot", "arm")]
-        //PlatformTarget=arm64 is not supported and never inferred
-        [InlineData("win10-arm64", "AnyCPU")]
-        [InlineData("win10-arm64-aot", "AnyCPU")]
+        [InlineData("win10-arm64", "arm64")]
+        [InlineData("win10-arm64-aot", "arm64")]
         // cpu architecture is never expected at the front
         [InlineData("x86-something", "AnyCPU")]
         [InlineData("x64-something", "AnyCPU")]
@@ -300,7 +298,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "DefaultReferences",
                 //  TODO: Add net35 to the TargetFrameworks list once https://github.com/Microsoft/msbuild/issues/1333 is fixed
                 TargetFrameworks = "net40;net45;net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -341,7 +338,6 @@ namespace DefaultReferences
                 Name = "MissingReferenceAssemblies",
                 //  A version of .NET we don't expect to exist
                 TargetFrameworks = "net469",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -371,7 +367,6 @@ namespace DefaultReferences
             {
                 Name = "DuplicateFrameworkReferences",
                 TargetFrameworks = "net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -403,7 +398,6 @@ namespace DefaultReferences
             {
                 Name = "DesktopConflictsNuGet",
                 TargetFrameworks = "net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -442,7 +436,6 @@ namespace DefaultReferences
             {
                 Name = "DesktopConflictsHttp4_1",
                 TargetFrameworks = "net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -468,7 +461,6 @@ namespace DefaultReferences
             {
                 Name = "DesktopConflictsRuntimeTargets",
                 TargetFrameworks = "net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -528,7 +520,6 @@ namespace DefaultReferences
 
             if (useSdkProject)
             {
-                testProject.IsSdkProject = true;
                 testProject.TargetFrameworks = "net472";
             }
             else
@@ -612,7 +603,6 @@ class Program
             {
                 Name = "OverriddenAlias",
                 IsExe = true,
-                IsSdkProject = true,
                 TargetFrameworks = "net461"
             };
 
@@ -806,7 +796,6 @@ class Program
             {
                 Name = "DesktopUsingPackageWithSatellites",
                 TargetFrameworks = "net46",
-                IsSdkProject = true,
                 IsExe = true
             };
 

@@ -3,11 +3,7 @@
 
 using System;
 using System.IO;
-using System.Linq;
-using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -70,6 +66,20 @@ namespace Microsoft.DotNet.New.Tests
                 .Should().Pass();
 
             string expectedCsprojPath = Path.Combine(rootPath, "c1", "c1.csproj");
+            Assert.True(File.Exists(expectedCsprojPath), $"expected '{expectedCsprojPath}' but was not found");
+        }
+
+        [Fact]
+        public void Dotnet_new_can_be_invoked_with_lang_option()
+        {
+            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
+
+            new DotnetCommand(Log, "new")
+                .WithWorkingDirectory(rootPath)
+                .Execute($"console", "--debug:ephemeral-hive", "--no-restore", "-n", "vb1", "-lang", "vb")
+                .Should().Pass();
+
+            string expectedCsprojPath = Path.Combine(rootPath, "vb1", "vb1.vbproj");
             Assert.True(File.Exists(expectedCsprojPath), $"expected '{expectedCsprojPath}' but was not found");
         }
 

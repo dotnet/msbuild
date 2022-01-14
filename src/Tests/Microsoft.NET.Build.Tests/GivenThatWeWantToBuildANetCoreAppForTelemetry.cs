@@ -25,7 +25,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "FrameworkTargetTelemetryTest",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
             var TelemetryTestLogger = new[]
@@ -51,7 +50,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "MultitargetTelemetry",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
             var TelemetryTestLogger = new[]

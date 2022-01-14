@@ -2,10 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
+using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Store
@@ -19,35 +20,36 @@ namespace Microsoft.DotNet.Tools.Store
 
         public static StoreCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var msbuildArgs = new List<string>();
-
             var parser = Parser.Instance;
-
             var result = parser.ParseFrom("dotnet store", args);
+            return FromParseResult(result, msbuildPath);
+        }
+
+        public static StoreCommand FromParseResult(ParseResult result, string msbuildPath = null)
+        {
+            var msbuildArgs = new List<string>();
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            var appliedBuildOptions = result["dotnet"]["store"];
-
-            if (!appliedBuildOptions.HasOption("-m"))
+            if (!result.HasOption(StoreCommandParser.ManifestOption))
             {
                 throw new GracefulException(LocalizableStrings.SpecifyManifests);
             }
 
             msbuildArgs.Add("-target:ComposeStore");
 
-            msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(result.OptionValuesToBeForwarded(StoreCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(appliedBuildOptions.Arguments);
+            msbuildArgs.AddRange(result.GetValueForArgument(StoreCommandParser.Argument) ?? Array.Empty<string>());
 
             return new StoreCommand(msbuildArgs, msbuildPath);
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            parseResult.HandleDebugSwitch();
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

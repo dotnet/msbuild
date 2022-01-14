@@ -37,7 +37,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var command = new PublishCommand(Log, testAsset.TestRoot);
+            var command = new PublishCommand(testAsset);
 
             command
                 .Execute(args)
@@ -45,16 +45,14 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             var publishDirectory =
-                command.GetOutputDirectory(targetFramework: "netcoreapp2.0", configuration: "Release");
+                command.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework, configuration: "Release");
 
             publishDirectory.Should().NotHaveSubDirectories();
-            publishDirectory.Should().OnlyHaveFiles(new[] {
+            publishDirectory.Should().HaveFiles(new[] {
                 "web.config",
                 "web.deps.json",
                 "web.dll",
                 "web.pdb",
-                "web.PrecompiledViews.dll",
-                "web.PrecompiledViews.pdb",
                 "web.runtimeconfig.json",
             });
         }
@@ -68,7 +66,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WebTest",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
                 IsExe = true,
             };
@@ -79,7 +76,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var command = new PublishCommand(testProjectInstance);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
             command
@@ -126,7 +123,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WebTest",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
                 IsExe = true,
             };
@@ -135,9 +131,9 @@ namespace Microsoft.NET.Publish.Tests
             testProject.PackageReferences.Add(new TestPackageReference(platformLibrary));
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Razor.Design", version: "2.2.0", privateAssets: "all"));
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, platformLibrary);
 
-            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var command = new PublishCommand(testProjectInstance);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
             command
@@ -169,7 +165,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(true, false)]
         [InlineData(false, true)]
         [InlineData(true, true)]
-        public void It_publishes_with_a_publish_profile(bool? selfContained, bool? useAppHost)
+        public void PublishWebAppWithPublishProfile(bool? selfContained, bool? useAppHost)
         {
             var tfm = "netcoreapp2.2";
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
@@ -178,7 +174,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WebWithPublishProfile",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
                 IsExe = true,
             };
@@ -187,7 +182,8 @@ namespace Microsoft.NET.Publish.Tests
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.App"));
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Razor.Design", version: "2.2.0", privateAssets: "all"));
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var identifier = (selfContained == null ? "null" : selfContained.ToString()) + (useAppHost == null ? "null" : useAppHost.ToString());
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: identifier);
 
             var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
             var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
@@ -203,7 +199,7 @@ namespace Microsoft.NET.Publish.Tests
 </Project>
 ");
 
-            var command = new PublishCommand(Log, projectDirectory);
+            var command = new PublishCommand(testProjectInstance);
             command
                 .Execute("/p:PublishProfile=test")
                 .Should()

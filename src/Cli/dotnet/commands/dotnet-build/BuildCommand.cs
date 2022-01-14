@@ -2,14 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.MSBuild;
-using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Tools.Restore;
-using Parser = Microsoft.DotNet.Cli.Parser;
+using System.CommandLine.Parsing;
+using System;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -17,52 +13,59 @@ namespace Microsoft.DotNet.Tools.Build
     {
         public BuildCommand(
             IEnumerable<string> msbuildArgs,
-            IEnumerable<string> userDefinedArguments,
-            IEnumerable<string> trailingArguments,
             bool noRestore,
             string msbuildPath = null)
-            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
+            : base(msbuildArgs, noRestore, msbuildPath)
         {
         }
 
         public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
         {
+            var parser = Cli.Parser.Instance;
+            var parseResult = parser.ParseFrom("dotnet build", args);
+            return FromParseResult(parseResult, msbuildPath);
+        }
+
+        public static BuildCommand FromParseResult(ParseResult parseResult, string msbuildPath = null)
+        {
+            PerformanceLogEventSource.Log.CreateBuildCommandStart();
+             
             var msbuildArgs = new List<string>();
 
-            var parser = Parser.Instance;
+            parseResult.ShowHelpOrErrorIfAppropriate();
 
-            var result = parser.ParseFrom("dotnet build", args);
-
-            result.ShowHelpOrErrorIfAppropriate();
-
-            var appliedBuildOptions = result["dotnet"]["build"];
+            CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(BuildCommandParser.SelfContainedOption),
+                parseResult.HasOption(BuildCommandParser.NoSelfContainedOption));
 
             msbuildArgs.Add($"-consoleloggerparameters:Summary");
 
-            if (appliedBuildOptions.HasOption("--no-incremental"))
+            if (parseResult.HasOption(BuildCommandParser.NoIncrementalOption))
             {
                 msbuildArgs.Add("-target:Rebuild");
             }
+            var arguments = parseResult.GetValueForArgument(BuildCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>();
 
-            msbuildArgs.AddRange(appliedBuildOptions.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(BuildCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(appliedBuildOptions.Arguments);
+            msbuildArgs.AddRange(arguments);
 
-            bool noRestore = appliedBuildOptions.HasOption("--no-restore");
+            bool noRestore = parseResult.HasOption(BuildCommandParser.NoRestoreOption);
 
-            return new BuildCommand(
+            BuildCommand command = new BuildCommand(
                 msbuildArgs,
-                appliedBuildOptions.OptionValuesToBeForwarded(),
-                appliedBuildOptions.Arguments,
                 noRestore,
                 msbuildPath);
+
+            PerformanceLogEventSource.Log.CreateBuildCommandStop();
+
+            return command;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            parseResult.HandleDebugSwitch();
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

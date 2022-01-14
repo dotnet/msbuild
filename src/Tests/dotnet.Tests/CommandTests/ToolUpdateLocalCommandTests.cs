@@ -3,15 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.DotNet.Tools.Tool.Restore;
 using Microsoft.DotNet.Tools.Tool.Update;
@@ -31,7 +30,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
     {
         private readonly IFileSystem _fileSystem;
         private readonly string _temporaryDirectoryParent;
-        private readonly AppliedOption _appliedCommand;
         private readonly ParseResult _parseResult;
         private readonly BufferedReporter _reporter;
         private readonly string _temporaryDirectory;
@@ -103,9 +101,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _toolManifestEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             _parseResult = Parser.Instance.Parse($"dotnet tool update {_packageIdA.ToString()}");
-            _appliedCommand = _parseResult["dotnet"]["tool"]["update"];
 
-            _toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
+            _toolRestoreCommand = new ToolRestoreCommand(
                 _parseResult,
                 _toolPackageInstallerMock,
                 _toolManifestFinder,
@@ -115,7 +112,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             );
 
             _defaultToolUpdateLocalCommand = new ToolUpdateLocalCommand(
-                _appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
                 _toolManifestFinder,
@@ -142,10 +138,9 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
 
             var toolUpdateCommand = new ToolUpdateCommand(
-                _appliedCommand,
                 _parseResult,
                 _reporter,
-                new ToolUpdateGlobalOrToolPathCommand(_appliedCommand, _parseResult),
+                new ToolUpdateGlobalOrToolPathCommand(_parseResult),
                 _defaultToolUpdateLocalCommand);
 
             toolUpdateCommand.Execute().Should().Be(0);
@@ -200,13 +195,11 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             ParseResult parseResult
                 = Parser.Instance.Parse(
                     $"dotnet tool update {_packageIdA.ToString()} --tool-manifest {explicitManifestFilePath}");
-            AppliedOption appliedCommand = parseResult["dotnet"]["tool"]["update"];
 
             _toolRestoreCommand.Execute();
             _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
 
             ToolUpdateLocalCommand toolUpdateLocalCommand = new ToolUpdateLocalCommand(
-                appliedCommand,
                 parseResult,
                 _toolPackageInstallerMock,
                 _toolManifestFinder,
@@ -222,13 +215,11 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void WhenRunFromToolUpdateRedirectCommandWithPackageIdItShouldUpdateFromManifestFile()
         {
             ParseResult parseResult = Parser.Instance.Parse($"dotnet tool update {_packageIdA.ToString()}");
-            AppliedOption appliedCommand = parseResult["dotnet"]["tool"]["update"];
 
             _toolRestoreCommand.Execute();
             _mockFeed.Packages[0].Version = _packageNewVersionA.ToNormalizedString();
 
             ToolUpdateLocalCommand toolUpdateLocalCommand = new ToolUpdateLocalCommand(
-                appliedCommand,
                 parseResult,
                 _toolPackageInstallerMock,
                 _toolManifestFinder,
@@ -236,7 +227,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 _localToolsResolverCache,
                 _reporter);
             ToolUpdateCommand toolUpdateCommand = new ToolUpdateCommand(
-                appliedCommand,
                 parseResult,
                 toolUpdateLocalCommand: toolUpdateLocalCommand);
 

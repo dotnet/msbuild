@@ -15,7 +15,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public sealed class GenerateShims : TaskBase
+    public sealed class GenerateShims : TaskWithAssemblyResolveHooks
     {
         /// <summary>
         /// Relative paths for Apphost for different ShimRuntimeIdentifiers with RuntimeIdentifier as meta data
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     else
                     {
-                        // by passing null to assemblyToCopyResorcesFrom, it will skip coping resorces,
+                        // by passing null to assemblyToCopyResorcesFrom, it will skip copying resources,
                         // which is only supported on Windows
                         if (windowsGraphicalUserInterface)
                         {

@@ -19,6 +19,9 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     
     <DebugType>embedded</DebugType>
+
+    <!-- Don't generate separate symbol packages for the test packages -->
+    <IncludeSymbols>false</IncludeSymbols>
   </PropertyGroup>
 
 </Project>

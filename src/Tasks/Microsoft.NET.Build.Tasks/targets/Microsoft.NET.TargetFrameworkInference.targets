@@ -6,12 +6,12 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- 
+  <!--
     Note that this file is only included when $(TargetFramework) is set and so we do not need to check that here.
 
     Common targets require that $(TargetFrameworkIdentifier) and $(TargetFrameworkVersion) are set by static evaluation
@@ -54,20 +54,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetFrameworkIdentifier>$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)'))</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)', 2))</TargetFrameworkVersion>
   </PropertyGroup>
-    
+
   <!--
     Parse TargetPlatform properties.
   -->
-  <PropertyGroup Condition="'$(TargetFramework)' != '' and ('$(TargetPlatformIdentifier)' == '' and '$(TargetPlatformVersion)' == '')">
-    <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
-    <TargetPlatformVersion>$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)', 2))</TargetPlatformVersion>
-    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == '0.0'" ></TargetPlatformVersion>
+  <PropertyGroup Condition="'$(TargetFramework)' != '' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformVersion)' == '')">
+    <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == ''">$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+    <TargetPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'Windows'" >$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)', 4))</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == '' or ('$(TargetPlatformIdentifier)' == 'Windows' and !$([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), 10.0)))" >$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)', 2))</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="$([MSBuild]::VersionEquals($(TargetPlatformVersion), 0.0))" ></TargetPlatformVersion>
     <!-- Normalize casing of windows to Windows -->
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == 'Windows'">Windows</TargetPlatformIdentifier>
   </PropertyGroup>
 
-  <!-- 
-    Trigger an error if we're unable to infer the framework identifier and version. 
+  <!--
+    Trigger an error if we're unable to infer the framework identifier and version.
 
     We have to evaluate this here and not in the target because by the time the target runs,
     Microsoft.Common.targets will have defaulted to .NETFramework,Version=v4.0
@@ -76,21 +77,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_UnsupportedTargetFrameworkError>true</_UnsupportedTargetFrameworkError>
   </PropertyGroup>
 
-  <!--Default MinimumOSPlatform to TargetPlatformVersion-->
-  <PropertyGroup Condition="'$(MinimumOSPlatform)' == '' and '$(TargetPlatformVersion)' != ''">
-    <MinimumOSPlatform>$(TargetPlatformVersion)</MinimumOSPlatform>
-  </PropertyGroup>
-
   <!--
-    NOTE: We must not validate the TFM before restore target runs as it prevents adding additional TFM 
+    NOTE: We must not validate the TFM before restore target runs as it prevents adding additional TFM
           support from being provided by a nuget package such as MSBuild.Sdk.Extras.
 
           We run before RunResolvePackageDependencies and GetReferenceAssemblyPaths so that design-time builds
-          which do not currently invoke _CheckForInvalidConfigurationAndPlatform, will not trigger spurious 
+          which do not currently invoke _CheckForInvalidConfigurationAndPlatform, will not trigger spurious
           errors that are only consequences of the root cause identified here.
   -->
   <Target Name="_CheckForUnsupportedTargetFramework"
-          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths;Restore"
           Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'"
           >
     <NETSdkError Condition="!$(TargetFramework.Contains(';'))"
@@ -102,9 +98,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
   </Target>
 
+  <!-- Skip this target for design time builds when there are missing workload packs.
+       This will prevent design time builds from failing and therefore allow
+       Visual Studio to collect the workloads from the GetSuggestedWorkloads target -->
   <Target Name="_CheckForUnsupportedTargetPlatformIdentifier"
-          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths"
-          Condition="'$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))" >
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths;CollectPackageReferences"
+          Condition="'$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) And ('$(DesignTimeBuild)' != 'true' Or '@(MissingWorkloadPack)' == '')" >
 
     <PropertyGroup>
       <TargetPlatformSupported Condition="'$(TargetPlatformIdentifier)' == 'Windows'">true</TargetPlatformSupported>
@@ -135,7 +134,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == ''">
     <TargetFrameworkIdentifier>_</TargetFrameworkIdentifier>
   </PropertyGroup>
-  
+
   <!--
     Trigger an error if targeting a higher version of .NET Core or .NET Standard than is supported by the current SDK.
   -->
@@ -144,7 +143,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETCoreAppMaximumVersion)'"
                  ResourceName="UnsupportedTargetFrameworkVersion"
-                 FormatArguments=".NET Core;$(_TargetFrameworkVersionWithoutV);$(NETCoreAppMaximumVersion)"
+                 FormatArguments=".NET;$(_TargetFrameworkVersionWithoutV);$(NETCoreAppMaximumVersion)"
       />
   </Target>
 
@@ -152,21 +151,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     Trigger an error if C++ project targeting a lower version of .NET Core than 3.1.
   -->
   <Target Name="_CheckForUnsupportedCppNETCoreVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences">
-    <NETSdkError Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.1' and '$(Language)' == 'C++'"
+    <NETSdkError Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.1' and ('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true')"
                  ResourceName="CppRequiresTFMVersion31"
       />
   </Target>
 
-  <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+  <!--C++/CLI has its own logic of determine TargetPlatformIdentifier and TargetPlatformVersion-->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(Language)' != 'C++' or '$(_EnablePackageReferencesInVCProjects)' == 'true')">
     <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
     <UseOSWinMdReferences>false</UseOSWinMdReferences>
   </PropertyGroup>
 
-  <!-- https://github.com/dotnet/sdk/issues/12492 -->
-  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == '' and ('$(UseWPF)' == 'true' or '$(UseWindowsForms)' == 'true')">
-    <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
-  </PropertyGroup>
-    
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">
     <NETStandardMaximumVersion>2.1</NETStandardMaximumVersion>
   </PropertyGroup>
@@ -177,7 +172,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETStandardMaximumVersion)'"
                  ResourceName="UnsupportedTargetFrameworkVersion"
                  FormatArguments=".NET Standard;$(_TargetFrameworkVersionWithoutV);$(NETStandardMaximumVersion)"
-      />    
+      />
   </Target>
 
   <Target Name="_CheckForUnsupportedTargetFrameworkAndFeatureCombination" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"
@@ -187,18 +182,20 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="NETFrameworkWithoutUsingNETSdkDefaults" />
   </Target>
 
-  <Target Name="_CheckForMinimumOSPlatformHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform" >
+  <Target Name="_CheckForSupportedOSPlatformVersionHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
 
-    <NETSdkError Condition="'$(MinimumOSPlatform)' != '' and $(TargetPlatformVersion) != '' and $([MSBuild]::VersionGreaterThan($(MinimumOSPlatform), $(TargetPlatformVersion)))"
-                 ResourceName="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion"
-                 FormatArguments="$(MinimumOSPlatform);$(TargetPlatformVersion)"/>
+    <NETSdkError Condition="'$(SupportedOSPlatformVersion)' != '' and $(TargetPlatformVersion) != '' and $([MSBuild]::VersionGreaterThan($(SupportedOSPlatformVersion), $(TargetPlatformVersion)))"
+                 ResourceName="CannotHaveSupportedOSPlatformVersionHigherThanTargetPlatformVersion"
+                 FormatArguments="$(SupportedOSPlatformVersion);$(TargetPlatformVersion)"/>
   </Target>
 
+  <!--C++/CLI targets rely on the patch version of the Windows SDK version as TargetPlatformVersion. Skip the normalization.-->
   <Target Name="_NormalizeTargetPlatformVersion"
     BeforeTargets="ProcessFrameworkReferences"
-    Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+    Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(Language)' != 'C++' or '$(_EnablePackageReferencesInVCProjects)' == 'true')">
     <ItemGroup>
-      <_ValidTargetPlatformVersion Include="@(SupportedTargetPlatform)" Condition="'@(SupportedTargetPlatform)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
+      <_ValidTargetPlatformVersion Include="@(SdkSupportedTargetPlatformVersion)" Condition="'@(SdkSupportedTargetPlatformVersion)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -209,11 +206,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForInvalidTargetPlatformVersion"
       BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
       DependsOnTargets="_NormalizeTargetPlatformVersion"
-      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(Language)' != 'C++' or '$(_EnablePackageReferencesInVCProjects)' == 'true')">
     <PropertyGroup>
       <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(_ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
-      <_ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' != ''" >@(SupportedTargetPlatform, '%0a')</_ValidTargetPlatformVersions>
-      <_ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' == ''" >None</_ValidTargetPlatformVersions>
+      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatformVersion)' != ''" >@(SdkSupportedTargetPlatformVersion, '%0a')</_ValidTargetPlatformVersions>
+      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatformVersion)' == ''" >None</_ValidTargetPlatformVersions>
     </PropertyGroup>
 
     <NetSdkError Condition="'$(TargetPlatformVersionSupported)' != 'true'"
@@ -223,11 +220,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
        of these properties before the TargetFramework is appended, so that if these values are specified
-       in the project file, the specified value will be used for the exclude.
-       
-       We may be able to move this to Microsoft.NET.Sdk.DefaultItems.targets (where the other DefaultItemExcludes
-       are defined) if we fix https://github.com/dotnet/sdk/issues/550
-       -->
+       in the project file, the specified value will be used for the exclude. -->
   <PropertyGroup>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(OutputPath)/**</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
@@ -240,7 +233,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))" >true</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true')" >true</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <!--

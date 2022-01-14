@@ -17,15 +17,16 @@ namespace Microsoft.NET.Build.Tasks
         public const string AllowExplicitVersion = "AllowExplicitVersion";
         public const string RelativePath = "RelativePath";
         public const string DiagnosticLevel = "DiagnosticLevel";
+        public const string Implementation = "Implementation";      //  Metadata on WinMD references
 
         // Target Metadata
         public const string RuntimeIdentifier = "RuntimeIdentifier";
         public const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
+        public const string TargetFramework = "TargetFramework";
         public const string FrameworkName = "FrameworkName";
         public const string FrameworkVersion = "FrameworkVersion";
-        public const string IsTrimmable = "IsTrimmable"; 
+        public const string IsTrimmable = "IsTrimmable";
         public const string RuntimeFrameworkName = "RuntimeFrameworkName";
-        public const string RuntimePackRuntimeIdentifiers = "RuntimePackRuntimeIdentifiers";
 
         // SDK Metadata
         public const string SDKPackageItemSpec = "SDKPackageItemSpec";
@@ -79,13 +80,18 @@ namespace Microsoft.NET.Build.Tasks
         public const string TargetPath = "TargetPath";
         public const string CopyLocal = "CopyLocal";
 
-        //  Targeting packs
+        // Targeting packs
         public const string PackageConflictPreferredPackages = "PackageConflictPreferredPackages";
+        public const string RuntimePackRuntimeIdentifiers = "RuntimePackRuntimeIdentifiers";
+        public const string RuntimePackExcludedRuntimeIdentifiers = "RuntimePackExcludedRuntimeIdentifiers";
 
-        //  Runtime packs
-		public const string DropFromSingleFile = "DropFromSingleFile";
+        // Runtime packs
+        public const string DropFromSingleFile = "DropFromSingleFile";
         public const string RuntimePackLabels = "RuntimePackLabels";
         public const string AdditionalFrameworkReferences = "AdditionalFrameworkReferences";
+
+        //  Apphost packs
+        public const string ExcludedRuntimeIdentifiers = "ExcludedRuntimeIdentifiers";
 
         // Content files
         public const string PPOutputPath = "PPOutputPath";
@@ -109,5 +115,19 @@ namespace Microsoft.NET.Build.Tasks
         public const string ReferenceOnly = "ReferenceOnly";
 
         public const string Aliases = "Aliases";
+
+        // ReadyToRun
+        public const string DotNetHostPath = "DotNetHostPath";
+        public const string JitPath = "JitPath";
+        public const string TargetOS = "TargetOS";
+        public const string TargetArch = "TargetArch";
+        public const string DiaSymReader = "DiaSymReader";
+        public const string CreatePDBCommand = "CreatePDBCommand";
+        public const string OutputR2RImage = "OutputR2RImage";
+        public const string OutputPDBImage = "OutputPDBImage";
+        public const string EmitSymbols = "EmitSymbols";
+        public const string IsVersion5 = "IsVersion5";
+        public const string CreateCompositeImage = "CreateCompositeImage";
+        public const string PerfmapFormatVersion = "PerfmapFormatVersion";
     }
 }

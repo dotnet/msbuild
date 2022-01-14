@@ -59,7 +59,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "RuntimeConfigPartialBuild",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
@@ -105,7 +104,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "UpdateRuntimeConfigPartialBuild",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"

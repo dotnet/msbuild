@@ -29,7 +29,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "UseComReferences",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = true,
                 SourceFiles =
@@ -77,7 +76,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "MultiComReference",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = true,
                 SourceFiles =
@@ -130,7 +128,7 @@ namespace Microsoft.NET.Build.Tests
             Assert.True(outputDirectory.File($"Interop.{vslangProj70ComRef}").Exists);
             Assert.True(outputDirectory.File($"Interop.{vslangProj80ComRef}").Exists);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute().Should().Pass();
 
             outputDirectory = publishCommand.GetOutputDirectory(targetFramework);

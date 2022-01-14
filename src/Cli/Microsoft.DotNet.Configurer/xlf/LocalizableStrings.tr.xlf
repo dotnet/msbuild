@@ -36,22 +36,22 @@ Kullanılabilir komutları görmek için 'dotnet --help' komutunu kullanın veya
         <source>Welcome to .NET {0}!
 ---------------------
 SDK Version: {1}</source>
-        <target state="new">Welcome to .NET {0}!
+        <target state="translated">.NET {0} sürümüne hoş geldiniz!
 ---------------------
-SDK Version: {1}</target>
+SDK Sürümü: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
         <source>Telemetry
 ---------
-The .NET tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="needs-review-translation">Telemetri
+        <target state="translated">Telemetri
 ----------
-.NET Core araçları, deneyiminizi geliştirmemize yardımcı olmak için kullanım verileri toplar. Veriler anonimdir. Veriler Microsoft tarafından toplanır ve toplulukla paylaşılır. Telemetriden çıkmak için dilediğiniz kabuğu kullanarak DOTNET_CLI_TELEMETRY_OPTOUT ortam değişkenini '1' veya 'true' olarak ayarlayabilirsiniz.
+.NET araçları, deneyiminizi geliştirmemize yardımcı olmak amacıyla kullanım verilerini toplar. Bu veriler Microsoft tarafından toplanır ve toplulukla paylaşılır. Telemetriyi geri çevirmek için dilediğiniz kabuğu kullanarak DOTNET_CLI_TELEMETRY_OPTOUT ortam değişkenini '1' veya 'true' olarak ayarlayabilirsiniz.
 
-.NET Core CLI Araçları telemetrisi hakkında daha fazla bilgi: https://aka.ms/dotnet-cli-telemetry</target>
+.NET CLI Araçları telemetrisi hakkında daha fazla bilgi edinin: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

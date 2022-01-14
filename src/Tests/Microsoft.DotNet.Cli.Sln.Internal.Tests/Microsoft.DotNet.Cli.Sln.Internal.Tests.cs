@@ -104,9 +104,9 @@ EndGlobal
         {
         }
 
-        private string CreateFile([CallerMemberName] string callerName = null)
+        private string CreateFile([CallerMemberName] string callerName = null, string identifier = null)
         {
-            var folder = _testAssetsManager.CreateTestDirectory(testName: callerName);
+            var folder = _testAssetsManager.CreateTestDirectory(testName: callerName +  identifier);
             var filename = Path.Combine(folder.Path, Guid.NewGuid().ToString() + ".tmp");
             using (new FileStream(filename, FileMode.CreateNew)) { }
             return filename;
@@ -324,7 +324,7 @@ EndGlobal
         [InlineData("First Line\nSecondLine\nMicrosoft Visual Studio Solution File, Format Version \nFourth Line", 3)]
         public void WhenGivenASolutionWithMissingHeaderVersionItThrows(string fileContents, int lineNum)
         {
-            var tmpFile = CreateFile();
+            var tmpFile = CreateFile(identifier: fileContents.GetHashCode().ToString());
             File.WriteAllText(tmpFile, fileContents);
 
             Action action = () =>
@@ -342,7 +342,7 @@ EndGlobal
         [InlineData("Microsoft Visual\nStudio Solution File,\nFormat Version ")]
         public void WhenGivenASolutionWithMissingHeaderItThrows(string fileContents)
         {
-            var tmpFile = CreateFile();
+            var tmpFile = CreateFile(identifier: fileContents.GetHashCode().ToString());
             File.WriteAllText(tmpFile, fileContents);
 
             Action action = () =>

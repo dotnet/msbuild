@@ -88,7 +88,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ConvertToAbsolutePath Paths="$(PublishDir)">
       <Output TaskParameter="AbsolutePaths" PropertyName="PublishDirFullPath"/>
     </ConvertToAbsolutePath>
-    
+
     <PropertyGroup>
       <PublishIntermediateOutputPath>$(PublishDirFullPath)</PublishIntermediateOutputPath>
     </PropertyGroup>
@@ -100,9 +100,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </_PublishFilesDependsOn>
   </PropertyGroup>
 
-  <Target Name="_PublishFiles" 
+  <Target Name="_PublishFiles"
           DependsOnTargets="$(_PublishFilesDependsOn)"
-          Condition="'$(PublishProtocol)' != 'FileSystem' And '$(PublishProtocol)' != ''"> 
+          Condition="'$(PublishProtocol)' != 'FileSystem' And '$(PublishProtocol)' != ''">
   </Target>
-  
+
 </Project>

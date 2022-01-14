@@ -52,28 +52,25 @@ namespace Microsoft.DotNet.Cli.Utils
             
             Reporter.Verbose.WriteLine($"> {FormatProcessInfo(_process.StartInfo)}".White());
 #endif
-            using (PerfTrace.Current.CaptureTiming($"{Path.GetFileNameWithoutExtension(_process.StartInfo.FileName)} {_process.StartInfo.Arguments}"))
+            using (var reaper = new ProcessReaper(_process))
             {
-                using (var reaper = new ProcessReaper(_process))
+                _process.Start();
+                if (processStarted != null)
                 {
-                    _process.Start();
-                    if (processStarted != null)
-                    {
-                        processStarted(_process);
-                    }
-                    reaper.NotifyProcessStarted();
-
-                    Reporter.Verbose.WriteLine(string.Format(
-                        LocalizableStrings.ProcessId,
-                        _process.Id));
-
-                    var taskOut = _stdOut?.BeginRead(_process.StandardOutput);
-                    var taskErr = _stdErr?.BeginRead(_process.StandardError);
-                    _process.WaitForExit();
-
-                    taskOut?.Wait();
-                    taskErr?.Wait();
+                    processStarted(_process);
                 }
+                reaper.NotifyProcessStarted();
+
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.ProcessId,
+                    _process.Id));
+
+                var taskOut = _stdOut?.BeginRead(_process.StandardOutput);
+                var taskErr = _stdErr?.BeginRead(_process.StandardError);
+                _process.WaitForExit();
+
+                taskOut?.Wait();
+                taskErr?.Wait();
             }
 
             var exitCode = _process.ExitCode;

@@ -41,14 +41,12 @@ namespace Microsoft.NET.Publish.Tests
             var testLibraryProject = new TestProject()
             {
                 Name = "TestLibrary",
-                IsSdkProject = true,
                 TargetFrameworks = libraryTargetFramework
             };
 
             var testProject = new TestProject()
             {
                 Name = "TestApp",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = appTargetFramework,
                 RuntimeIdentifier = "win7-x86"
@@ -67,14 +65,12 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: appTargetFramework + withoutCopyingRefs);
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-
-            var getValuesCommand = new GetValuesCommand(Log, appProjectDirectory, testProject.TargetFrameworks, "LangVersion");
+            var getValuesCommand = new GetValuesCommand(testAsset, "LangVersion");
             getValuesCommand.Execute().Should().Pass();
 
             var langVersion = getValuesCommand.GetValues().FirstOrDefault() ?? string.Empty;
 
-            var publishCommand = new PublishCommand(Log, appProjectDirectory);
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand
                 .Execute()
@@ -117,7 +113,7 @@ namespace Microsoft.NET.Publish.Tests
                     expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP", appTargetFramework.ToUpperInvariant().Replace('.', '_') };
                 }
 
-                dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
+                dependencyContext.CompilationOptions.Defines.Should().Contain(expectedDefines);
                 dependencyContext.CompilationOptions.LanguageVersion.Should().Be(langVersion);
                 dependencyContext.CompilationOptions.Platform.Should().Be("x86");
                 dependencyContext.CompilationOptions.Optimize.Should().Be(false);

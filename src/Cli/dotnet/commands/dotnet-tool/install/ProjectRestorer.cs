@@ -46,11 +46,11 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 Constants.AnyRid
             });
 
-            argsToPassToRestore.Add($"-verbosity:{verbosity ?? GetDefaultVerbosity()}");
+            argsToPassToRestore.Add($"--verbosity:{verbosity ?? GetDefaultVerbosity()}");
 
             if (_additionalRestoreArguments != null)
             {
-                argsToPassToRestore.AddRange(_additionalRestoreArguments);
+                argsToPassToRestore.AddRange(_additionalRestoreArguments.Where(arg => !arg.StartsWith("-verbosity")));
             }
 
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)

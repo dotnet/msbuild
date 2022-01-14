@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+     <AssemblyName>consoledemo</AssemblyName>
+     <RestoreSources>
+      $(RestoreSources);
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;
+     </RestoreSources>
+     <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
+     <EnableSourceLink>false</EnableSourceLink>
+     <DeterministicSourcePaths>false</DeterministicSourcePaths>
+     <CheckEolTargetFramework>false</CheckEolTargetFramework>
+  </PropertyGroup>
+</Project>

@@ -1,21 +1,34 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.CommandLine;
+using System;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using LocalizableStrings = Microsoft.DotNet.Tools.BuildServer.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class BuildServerCommandParser
     {
-        public static Command CreateCommand()
+        public static readonly string DocsLink = "https://aka.ms/dotnet-build-server";
+
+        private static readonly Command Command = ConstructCommand();
+
+        public static Command GetCommand()
         {
-            return Create.Command(
-                "build-server",
-                LocalizableStrings.CommandDescription,
-                Accept.NoArguments(),
-                CommonOptions.HelpOption(),
-                ServerShutdownCommandParser.CreateCommand());
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
+            var command = new DocumentedCommand("build-server", DocsLink, LocalizableStrings.CommandDescription);
+
+            command.AddCommand(ServerShutdownCommandParser.GetCommand());
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => parseResult.HandleMissingCommand());
+
+            return command;
         }
     }
 }

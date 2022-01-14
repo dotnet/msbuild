@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 
@@ -15,6 +15,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="Microsoft.NET.DefaultPackageConflictOverrides.targets" />
 
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="CheckForDuplicateItemMetadata" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!--
     _HandlePackageFileConflicts
@@ -37,6 +38,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ResolvePackageFileConflicts References="@(Reference)"
+                                 Analyzers="@(Analyzer)"
                                  ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                  OtherRuntimeItems="@(_RuntimeAssetsForConflictResolution)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
@@ -44,17 +46,20 @@ Copyright (c) .NET Foundation. All rights reserved.
                                  PackageOverrides="@(PackageConflictOverrides)"
                                  PreferredPackages="$(PackageConflictPreferredPackages)">
       <Output TaskParameter="ReferencesWithoutConflicts" ItemName="_ReferencesWithoutConflicts" />
+      <Output TaskParameter="AnalyzersWithoutConflicts" ItemName="_AnalyzersWithoutConflicts" />
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReferenceCopyLocalPathsWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_ConflictPackageFiles" />
     </ResolvePackageFileConflicts>
 
     <!-- Replace Reference / ReferenceCopyLocalPaths with the filtered lists.
          We must remove all and include rather than just remove since removal is based
-         only on ItemSpec and duplicate ItemSpecs may exist with different metadata 
+         only on ItemSpec and duplicate ItemSpecs may exist with different metadata
          (eg: HintPath) -->
     <ItemGroup>
       <Reference Remove="@(Reference)" />
       <Reference Include="@(_ReferencesWithoutConflicts)" />
+      <Analyzer Remove="@(Analyzer)" />
+      <Analyzer Include="@(_AnalyzersWithoutConflicts)" />
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
       <ReferenceCopyLocalPaths Include="@(_ReferenceCopyLocalPathsWithoutConflicts)" />
     </ItemGroup>
@@ -86,6 +91,27 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ResolvedCopyLocalPublishAssets Remove="@(_ResolvedCopyLocalPublishAssets)" />
       <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalPublishAssetsWithoutConflicts)" />
     </ItemGroup>
+
+  </Target>
+
+  <!--
+  _HandleFileConflictsForPublish
+  Ensures there are no duplicate files being written to the publish output.
+  -->
+  <Target Name="_HandleFileConflictsForPublish"
+          AfterTargets="ComputeFilesToPublish"
+          Condition="'$(ErrorOnDuplicatePublishOutputFiles)' != 'false'">
+
+    <CheckForDuplicateItemMetadata
+      Items="@(ResolvedFileToPublish->Distinct())"
+      MetadataName="RelativePath">
+      <Output TaskParameter="DuplicatesExist" PropertyName="_ResolvedFileToPublishContainsDuplicates" />
+      <Output TaskParameter="DuplicateItems" ItemName="_ResolvedFileToPublishDuplicatedItems" />
+    </CheckForDuplicateItemMetadata>
+
+    <NETSdkError Condition="'$(_ResolvedFileToPublishContainsDuplicates)' == 'true'"
+                 ResourceName="DuplicatePublishOutputFiles"
+                 FormatArguments="@(_ResolvedFileToPublishDuplicatedItems, ', ')" />
 
   </Target>
 

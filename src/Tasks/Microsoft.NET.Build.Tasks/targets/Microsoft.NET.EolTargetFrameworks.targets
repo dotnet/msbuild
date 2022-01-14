@@ -20,7 +20,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     receive servicing updates and security fixes.
   -->
   <ItemGroup>
-    <_EolNetCoreTargetFrameworkVersions Include="1.0;1.1;2.0;2.2;3.0" />
+    <_EolNetCoreTargetFrameworkVersions Include="1.0;1.1;2.0;2.1;2.2;3.0" />
   </ItemGroup>
 
   <Target Name="_CheckForEolTargetFrameworks" AfterTargets="_CheckForUnsupportedNETCoreVersion"

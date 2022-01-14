@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Restore workloads required for a project.</source>
+        <target state="translated">프로젝트에 필요한 워크로드를 복원합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindAProject">
+        <source>Couldn't find a project. Ensure that a project exists in {0}, or pass the path to the project using {1}.</source>
+        <target state="translated">프로젝트를 찾을 수 없습니다. 프로젝트가 {0}에 있는지 확인하거나 {1}을(를) 사용하여 프로젝트에 경로를 전달하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRunTarget">
+        <source>Failed to restore workload for project {0}: Failed to run MSBuild Target _GetRequiredWorkloads.</source>
+        <target state="translated">프로젝트 {0}에 대한 워크로드를 복원하지 못했습니다. MSBuild Target _GetRequiredWorkloads를 실행하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingWorkloads">
+        <source>Installing workloads: {0}</source>
+        <target state="translated">워크로드 {0} 설치 중...</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

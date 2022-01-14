@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 ツール '{1}' (バージョン '{2}') が正常にインストールされました。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">ランタイム識別子 {0} は無効です。有効なランタイム識別子は {1} です。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">ツールをインストールし、ローカル ツール マニフェスト (既定値) に追加します。</target>
@@ -66,6 +71,11 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">ツールをインストールするターゲット フレームワーク。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">--prerelease および --version オプションは同じコマンド内ではサポートされません</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -142,12 +152,12 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">ツール '{0}' をインストールできませんでした。この失敗は次の原因で生じた可能性があります。
+        <target state="translated">ツール '{0}' をインストールできませんでした。この失敗は次の原因で生じた可能性があります。
 
 * プレビュー リリースをインストールしようとしており、--version オプションを使用してバージョンを指定しなかった。
-* この名前のパッケージが見つかったが、.NET Core ツールではなかった。
+* この名前のパッケージが見つかったが、.NET ツールではなかった。
 * 恐らくインターネットの接続の問題で、必須の NuGet フィードにアクセスできない。
-* ツールの名前のタイプミス。
+* ツールの名前の誤入力。
 
 パッケージの名前付けの強制を含む他の理由については、https://aka.ms/failure-installing-tool にアクセスしてください</target>
         <note />

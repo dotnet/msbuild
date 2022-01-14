@@ -12,6 +12,7 @@ using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
+#pragma warning disable CA1416
     internal class WindowsRegistryEnvironmentPathEditor : IWindowsRegistryEnvironmentPathEditor
     {
         private static string Path = "PATH";
@@ -72,4 +73,5 @@ namespace Microsoft.DotNet.Cli.Utils
         private const int HWND_BROADCAST = 0xffff;
         private const int WM_SETTINGCHANGE = 0x001A;
     }
+#pragma warning restore CA1416
 }

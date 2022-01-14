@@ -37,6 +37,11 @@
         <target state="translated">NETSDK1072: 无法将“{0}”用作应用程序主机可执行文件，因为它不是 CUI (控制台)子系统的 Windows 可执行文件。</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
+      <trans-unit id="AppHostSigningFailed">
+        <source>NETSDK1177: Failed to sign apphost with error code {1}: {0}</source>
+        <target state="translated">NETSDK1177: 无法对 Apphost 进行签名，错误代码为 {1}: {0}</target>
+        <note>{StrBegin="NETSDK1177: "}</note>
+      </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
         <target state="translated">NETSDK1079: 当面向 .NET Core 3.0 或更高版本时，不支持 Microsoft.AspNetCore.All 包。应改为使用 Microsoft.AspNetCore.App 的 FrameworkReference，并且 Microsoft.NET.Sdk.Web 将隐式包含它。</target>
@@ -107,11 +112,6 @@
         <target state="translated">NETSDK1007: 找不到“{0}”的项目信息。这可以指示缺少一个项目引用。</target>
         <note>{StrBegin="NETSDK1007: "}</note>
       </trans-unit>
-      <trans-unit id="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion">
-        <source>NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</source>
-        <target state="new">NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</target>
-        <note>{StrBegin="NETSDK1135: "}</note>
-      </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
         <target state="translated">NETSDK1032: RuntimeIdentifier 平台“{0}”和 PlatformTarget“{1}”必须兼容。</target>
@@ -119,17 +119,17 @@
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="needs-review-translation">NETSDK1031: 不可在未指定 RuntimeIdentifier 的情况下生成或发布自包含应用程序。请指定 RuntimeIdentifier 或将 SelfContained 设置为 false。</target>
+        <target state="translated">NETSDK1031: 不可在未指定 RuntimeIdentifier 的情况下生成或发布自包含应用程序。必须指定 RuntimeIdentifier 或将 SelfContained 设置为 false。</target>
         <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
         <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="needs-review-translation">NETSDK1097: 不可在未指定 RuntimeIdentifier 的情况下发布将应用程序发布到单一文件中。请指定 RuntimeIdentifier 或将 PublishSingleFile 设置为 false。</target>
+        <target state="translated">NETSDK1097: 不可在未指定 RuntimeIdentifier 的情况下发布将应用程序发布到单一文件中。必须指定 RuntimeIdentifier 或将 PublishSingleFile 设置为 false。</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
         <source>NETSDK1098: Applications published to a single-file are required to use the application host. You must either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="needs-review-translation">NETSDK1098: 使用应用程序主机需要发布到单一文件中的应用程序。请将 PublishSingleFile 设置为 false，或将 UseAppHost 设置为 true。</target>
+        <target state="translated">NETSDK1098: 要使用应用程序主机，需具备发布到单一文件中的应用程序。必须将 PublishSingleFile 设置为 false，或将 UseAppHost 设置为 true。</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
@@ -139,17 +139,22 @@
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
         <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</source>
-        <target state="new">NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</target>
+        <target state="translated">NETSDK1134: 不支持使用特定 RuntimeIdentifier 生成解决方案。如果要为单个 RID 发布，请改为在单独的项目级别指定 RID。</target>
         <note>{StrBegin="NETSDK1134: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotHaveSupportedOSPlatformVersionHigherThanTargetPlatformVersion">
+        <source>NETSDK1135: SupportedOSPlatformVersion {0} cannot be higher than TargetPlatformVersion {1}.</source>
+        <target state="translated">NETSDK1135: SupportedOSPlatformVersion {0} 不能高于 TargetPlatformVersion {1}。</target>
+        <note>{StrBegin="NETSDK1135: "}</note>
       </trans-unit>
       <trans-unit id="CannotIncludeAllContentButNotNativeLibrariesInSingleFile">
         <source>NETSDK1143: Including all content in a single file bundle also includes native libraries. If IncludeAllContentForSelfExtract is true, IncludeNativeLibrariesForSelfExtract must not be false.</source>
-        <target state="new">NETSDK1143: Including all content in a single file bundle also includes native libraries. If IncludeAllContentForSelfExtract is true, IncludeNativeLibrariesForSelfExtract must not be false.</target>
+        <target state="translated">NETSDK1143: 包含单个文件包中的所有内容意味着也包括本机库。如果 IncludeAllContentForSelfExtract 为 true，则 IncludeNativeLibrariesForSelfExtract 不能为 false。</target>
         <note>{StrBegin="NETSDK1143: "}</note>
       </trans-unit>
       <trans-unit id="CannotIncludeSymbolsInSingleFile">
         <source>NETSDK1142: Including symbols in a single file bundle is not supported when publishing for .NET5 or higher.</source>
-        <target state="new">NETSDK1142: Including symbols in a single file bundle is not supported when publishing for .NET5 or higher.</target>
+        <target state="translated">NETSDK1142: 针对 .NET5 或更高版本发布时，不支持在单个文件包中包括符号。</target>
         <note>{StrBegin="NETSDK1142: "}</note>
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
@@ -164,7 +169,7 @@
       </trans-unit>
       <trans-unit id="CanOnlyHaveSingleFileWithNetCoreApp">
         <source>NETSDK1125: Publishing to a single-file is only supported for netcoreapp target.</source>
-        <target state="translated">NETSDK1125: netcoreapp 目标仅支持发布到单个文件。</target>
+        <target state="translated">NETSDK1125: 仅 netcoreapp 目标支持发布到单个文件。</target>
         <note>{StrBegin="NETSDK1125: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion_Info">
@@ -212,10 +217,20 @@
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
       </trans-unit>
+      <trans-unit id="CompressionInSingleFileRequires60">
+        <source>NETSDK1167: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
+        <target state="translated">NETSDK1167: 仅支持在为 .NET6 或更高版本发布时进行单个文件包的压缩。</target>
+        <note>{StrBegin="NETSDK1167: "}</note>
+      </trans-unit>
+      <trans-unit id="CompressionInSingleFileRequiresSelfContained">
+        <source>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="translated">NETSDK1174: 仅支持在发布独立的应用程序时进行单个文件包中的压缩。</target>
+        <note>{StrBegin="NETSDK1174: "}</note>
+      </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
 {1}</source>
-        <target state="new">NETSDK1133: There was conflicting information about runtime packs available for {0}:
+        <target state="translated">NETSDK1133: 可供{0} 使用的运行时包的信息存在冲突:
 {1}</target>
         <note>{StrBegin="NETSDK1133: "}</note>
       </trans-unit>
@@ -249,6 +264,11 @@
         <target state="translated">“{0}”不是程序集，因此无法确定优胜者。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotGetPackVersionFromWorkloadManifests">
+        <source>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</source>
+        <target state="translated">NETSDK1181: 获取包版本时出错: 包“{0}”在工作负载清单中不存在。</target>
+        <note>{StrBegin="NETSDK1181: "}</note>
+      </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</source>
         <target state="translated">NETSDK1042: 无法从“{0}”中加载 PlatformManifest，因为它不存在。</target>
@@ -259,10 +279,55 @@
         <target state="translated">NETSDK1120: 面向 .NET Core 的 C++/CLI 项目要求目标框架至少为 "netcoreapp 3.1"。</target>
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
+      <trans-unit id="Crossgen2MissingRequiredMetadata">
+        <source>NETSDK1158: Required '{0}' metadata missing on Crossgen2Tool item.</source>
+        <target state="translated">NETSDK1158: Crossgen2Tool 项上缺少必需的“{0}”元数据。</target>
+        <note>{StrBegin="NETSDK1158: "}</note>
+      </trans-unit>
       <trans-unit id="Crossgen2RequiresSelfContained">
         <source>NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</source>
-        <target state="new">NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</target>
+        <target state="translated">NETSDK1126: 仅独立式应用程序支持使用 Crossgen2 发布 ReadyToRun。</target>
         <note>{StrBegin="NETSDK1126: "}</note>
+      </trans-unit>
+      <trans-unit id="Crossgen2ToolExecutableNotFound">
+        <source>NETSDK1155: Crossgen2Tool executable '{0}' not found.</source>
+        <target state="translated">NETSDK1155: 找不到 Crossgen2Tool 可执行文件“{0}”。</target>
+        <note>{StrBegin="NETSDK1155: "}</note>
+      </trans-unit>
+      <trans-unit id="Crossgen2ToolMissingWhenUseCrossgen2IsSet">
+        <source>NETSDK1154: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</source>
+        <target state="translated">NETSDK1154: 当 UseCrossgen2 设置为 true 时，必须指定 Crossgen2Tool。</target>
+        <note>{StrBegin="NETSDK1154: "}</note>
+      </trans-unit>
+      <trans-unit id="Crossgen5CannotEmitSymbolsInCompositeMode">
+        <source>NETSDK1166: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</source>
+        <target state="translated">NETSDK1166: 使用复合模式针对具有 Crossgen2 的 .NET 5 发布时，无法发出符号。</target>
+        <note>{StrBegin="NETSDK1166: "}</note>
+      </trans-unit>
+      <trans-unit id="CrossgenToolExecutableNotFound">
+        <source>NETSDK1160: CrossgenTool executable '{0}' not found.</source>
+        <target state="translated">NETSDK1160: 找不到 CrossgenTool 可执行文件“{0}”。</target>
+        <note>{StrBegin="NETSDK1160: "}</note>
+      </trans-unit>
+      <trans-unit id="CrossgenToolMissingInPDBCompilationMode">
+        <source>NETSDK1153: CrossgenTool not specified in PDB compilation mode.</source>
+        <target state="translated">NETSDK1153: 在 PDB 编译模式下未指定 CrossgenTool。</target>
+        <note>{StrBegin="NETSDK1153: "}</note>
+      </trans-unit>
+      <trans-unit id="CrossgenToolMissingWhenUseCrossgen2IsNotSet">
+        <source>NETSDK1159: CrossgenTool must be specified when UseCrossgen2 is set to false.</source>
+        <target state="translated">NETSDK1159: UseCrossgen2 设置为 false 时，必须指定 CrossgenTool。</target>
+        <note>{StrBegin="NETSDK1159: "}</note>
+      </trans-unit>
+      <trans-unit id="DiaSymReaderLibraryNotFound">
+        <source>NETSDK1161: DiaSymReader library '{0}' not found.</source>
+        <target state="translated">NETSDK1161: 未找到 DiaSymReader 库“{0}”。</target>
+        <note>{StrBegin="NETSDK1161: "}</note>
+      </trans-unit>
+      <trans-unit id="DotNetHostExecutableNotFound">
+        <source>NETSDK1156: .NET host executable '{0}' not found.</source>
+        <target state="translated">NETSDK1156: 找不到 .NET 主机可执行文件“{0}”。</target>
+        <note>{StrBegin="NETSDK1156: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</source>
@@ -284,10 +349,20 @@
         <target state="translated">NETSDK1015: 已向预处理器标记“{0}”提供多个值。选择“{1}”作为值。</target>
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
+      <trans-unit id="DuplicatePublishOutputFiles">
+        <source>NETSDK1152: Found multiple publish output files with the same relative path: {0}.</source>
+        <target state="translated">NETSDK1152: 找到了多个具有相同相对路径的发布输出文件: {0}。</target>
+        <note>{StrBegin="NETSDK1152: "}</note>
+      </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="needs-review-translation">NETSDK1110: 运行时包中的多个资源具有 "{0}" 的相同目标子路径。请访问以下网站将此问题报告给 .NET Core 团队https://aka.ms/dotnet-sdk-issue。</target>
+        <target state="translated">NETSDK1110: 运行时包中的多个资产具有“{0}”的相同目标子路径。请在此处将此错误报告给 .NET 团队: https://aka.ms/dotnet-sdk-issue。</target>
         <note>{StrBegin="NETSDK1110: "}</note>
+      </trans-unit>
+      <trans-unit id="DuplicateTypeLibraryIds">
+        <source>NETSDK1169: The same resource ID {0} was specified for two type libraries '{1}' and '{2}'. Duplicate type library IDs are not allowed.</source>
+        <target state="translated">NETSDK1169: 为两个类型库“{1}”和“{2}”指定了相同的资源 ID {0}。不允许使用重复的类型库 ID。</target>
+        <note>{StrBegin="NETSDK1169: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
@@ -361,12 +436,12 @@
       </trans-unit>
       <trans-unit id="GlobalJsonSDKResolutionFailed">
         <source>NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</source>
-        <target state="new">NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</target>
+        <target state="translated">NETSDK1141: 无法解析位于 {0} 的 global.json 中指定的 .NET SDK 版本。</target>
         <note>{StrBegin="NETSDK1141: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkFailed">
         <source>NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</source>
-        <target state="new">NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</target>
+        <target state="translated">NETSDK1144: 优化程序集的大小失败。通过将 PublishTrimmed 属性设置为 false 可禁用优化。</target>
         <note>{StrBegin="NETSDK1144: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
@@ -388,6 +463,11 @@
         <source>NETSDK1025: The target manifest {0} provided is of not the correct format</source>
         <target state="translated">NETSDK1025: 提供的目标清单 {0} 的格式不正确</target>
         <note>{StrBegin="NETSDK1025: "}</note>
+      </trans-unit>
+      <trans-unit id="InputAssemblyNotFound">
+        <source>NETSDK1163: Input assembly '{0}' not found.</source>
+        <target state="translated">NETSDK1163: 找不到输入程序集“{0}”。</target>
+        <note>{StrBegin="NETSDK1163: "}</note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>NETSDK1003: Invalid framework name: '{0}'.</source>
@@ -418,9 +498,24 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="InvalidTargetPlatformVersion">
         <source>NETSDK1140: {0} is not a valid TargetPlatformVersion for {1}. Valid versions include:
 {2}</source>
-        <target state="new">NETSDK1140: {0} is not a valid TargetPlatformVersion for {1}. Valid versions include:
+        <target state="translated">NETSDK1140: {0} 不是 {1} 的有效的 TargetPlatformVersion。有效版本包括:
 {2}</target>
         <note>{StrBegin="NETSDK1140: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidTypeLibrary">
+        <source>NETSDK1173: The provided type library '{0}' is in an invalid format.</source>
+        <target state="translated">NETSDK1173: 提供的类型库“{0}”的格式无效。</target>
+        <note>{StrBegin="NETSDK1173: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidTypeLibraryId">
+        <source>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
+        <target state="translated">NETSDK1170: 为类型库“{1}”提供的类型库 ID“{0}”无效。该 ID 必须是小于 65536 的正整数。</target>
+        <note>{StrBegin="NETSDK1170: "}</note>
+      </trans-unit>
+      <trans-unit id="JitLibraryNotFound">
+        <source>NETSDK1157: JIT library '{0}' not found.</source>
+        <target state="translated">NETSDK1157: 找不到 JIT 库“{0}”。</target>
+        <note>{StrBegin="NETSDK1157: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
@@ -434,6 +529,21 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</source>
         <target state="translated">NETSDK1008: 在“{1}”项“{2}”上缺少“{0}”元数据。</target>
         <note>{StrBegin="NETSDK1008: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingOutputPDBImagePath">
+        <source>NETSDK1164: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</source>
+        <target state="translated">NETSDK1164: PDB 生成模式下缺少输出 PDB 路径(OutputPDBImage 元数据)。</target>
+        <note>{StrBegin="NETSDK1164: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingOutputR2RImageFileName">
+        <source>NETSDK1165: Missing output R2R image path (OutputR2RImage metadata).</source>
+        <target state="translated">NETSDK1165: 缺少输出 R2R 映像路径(OutputR2RImage 元数据)。</target>
+        <note>{StrBegin="NETSDK1165: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingTypeLibraryId">
+        <source>NETSDK1171: An integer ID less than 65536 must be provided for type library '{0}' because more than one type library is specified.</source>
+        <target state="translated">NETSDK1171: 必须为类型库“{0}”提供小于 65536 的整数 ID，因为指定了多个类型库。</target>
+        <note>{StrBegin="NETSDK1171: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>NETSDK1021: More than one file found for {0}</source>
@@ -449,6 +559,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
         <target state="translated">NETSDK1115: 未使用 .NET SDK 默认设置的情况下，当前 .NET SDK 不支持 .NET Framework。很可能是因为 C++/CLI 项目的 CLRSupport 属性和 TargetFramework 之间存在不匹配情况。</target>
         <note>{StrBegin="NETSDK1115: "}</note>
+      </trans-unit>
+      <trans-unit id="Net6NotCompatibleWithDev16">
+        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: 不支持在 Visual Studio 2019 中以 .NET 6.0 为目标。</target>
+        <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
@@ -472,12 +587,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoRuntimePackInformation">
         <source>NETSDK1132: No runtime pack information was available for {0}.</source>
-        <target state="new">NETSDK1132: No runtime pack information was available for {0}.</target>
+        <target state="translated">NETSDK1132: 没有可用于 {0} 的运行时包信息。</target>
         <note>{StrBegin="NETSDK1132: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportComSelfContained">
         <source>NETSDK1128: COM hosting does not support self-contained deployments.</source>
-        <target state="new">NETSDK1128: COM hosting does not support self-contained deployments.</target>
+        <target state="translated">NETSDK1128: COM 托管不支持自包含的部署。</target>
         <note>{StrBegin="NETSDK1128: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppEnableComHosting">
@@ -505,10 +620,25 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1121: 面向 .NET Core 的 C++/CLI 项目不能使用 SelfContained=true。</target>
         <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
+      <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
+        <source>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.  For more information, see https://aka.ms/netsdk1151</source>
+        <target state="translated">NETSDK1151: 引用的项目“{0}”是自包含的可执行文件。自包含可执行文件不能由非自包含可执行文件引用。如需获取更多信息，请访问 https://aka.ms/netsdk1151</target>
+        <note>{StrBegin="NETSDK1151: "}</note>
+      </trans-unit>
+      <trans-unit id="PDBGeneratorInputExecutableNotFound">
+        <source>NETSDK1162: PDB generation: R2R executable '{0}' not found.</source>
+        <target state="translated">NETSDK1162: PDB 生成: 未找到 R2R 可执行文件“{0}”。</target>
+        <note>{StrBegin="NETSDK1162: "}</note>
+      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: 打包为工具不支持自包含。</target>
         <note>{StrBegin="NETSDK1053: "}</note>
+      </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportTargetPlatformIdentifier">
+        <source>NETSDK1146: PackAsTool does not support TargetPlatformIdentifier being set. For example, TargetFramework cannot be net5.0-windows, only net5.0. PackAsTool also does not support UseWPF or UseWindowsForms when targeting .NET 5 and higher.</source>
+        <target state="translated">NETSDK1146: PackAsTool 不支持正在设置的 TargetPlatformIdentifier。例如，TargetFramework 不能是 net5.0-windows，只能是 net5.0。面向 .NET 5 及以上版本时，PackAsTool 也不支持 UseWPF 或 UseWindowsForms。</target>
+        <note>{StrBegin="NETSDK1146: "}</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
@@ -525,6 +655,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1071: “{0}”的 PackageReference 指定了版本“{1}”。不建议指定此包的版本。有关详细信息，请查看 https://aka.ms/sdkimplicitrefs</target>
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
+      <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
+        <source>NETSDK1176: Placeholder</source>
+        <target state="translated">NETSDK1176: 占位符</target>
+        <note>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+      </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
         <target state="translated">NETSDK1011: 从项目“{0}”消耗资产，但在“{1}”中找不到相应的 MSBuild 项目路径。</target>
@@ -532,7 +667,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>NETSDK1059: The tool '{0}' is now included in the .NET SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="needs-review-translation">NETSDK1059: .NET Core SDK 中现已包含工具“{0}”。有关解决此警告的信息，请参阅(https://aka.ms/dotnetclitools-in-box)。</target>
+        <target state="translated">NETSDK1059: .NET SDK 中现已包含工具“{0}”。要了解如何处理此警告，可查看 (https://aka.ms/dotnetclitools-in-box)。</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
@@ -557,7 +692,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PublishUnsupportedWithoutTargetFramework">
         <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</source>
-        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</target>
+        <target state="translated">NETSDK1129: 如果未指定目标框架，则不支持 "Publish" 目标。当前项目面向多个框架，你必须为已发布的应用程序指定框架。</target>
         <note>{StrBegin="NETSDK1129: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
@@ -597,13 +732,28 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
         <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="needs-review-translation">NETSDK1109: 找不到运行时列表文件 "{0}"。请访问以下网站将此问题报告给 .NET Core 团队: https://aka.ms/dotnet-sdk-issue。</target>
+        <target state="translated">NETSDK1109: 找不到运行时列表文件“{0}”。请在此处将此错误报告给 .NET 团队: https://aka.ms/dotnet-sdk-issue。</target>
         <note>{StrBegin="NETSDK1109: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotDownloaded">
         <source>NETSDK1112: The runtime pack for {0} was not downloaded. Try running a NuGet restore with the RuntimeIdentifier '{1}'.</source>
         <target state="translated">NETSDK1112: 未下载 {0} 的运行时包。请尝试使用 RuntimeIdentifier“{1}”运行 NuGet 还原。</target>
         <note>{StrBegin="NETSDK1112: "}</note>
+      </trans-unit>
+      <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
+        <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
+        <target state="translated">NETSDK1150: 引用的项目“{0}”是非自包含的可执行文件。非自包含可执行文件不能由自包含可执行文件引用。如需获取更多信息，请访问 https://aka.ms/netsdk1150</target>
+        <note>{StrBegin="NETSDK1150: "}</note>
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
+        <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
+        <target state="translated">NETSDK1179: 使用“--runtime”时，必需选择“--自包含”或“--非自包含”选项。</target>
+        <note>{StrBegin="NETSDK1179: "}</note>
+      </trans-unit>
+      <trans-unit id="SingleFileWin7Incompatible">
+        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
+        <target state="translated">NETSDK1180: 指定的运行时标识符“{0}”不意味着 Windows 7 兼容性。单个文件发布与 Windows 7 不兼容。</target>
+        <note>{StrBegin="NETSDK1180: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
@@ -612,7 +762,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="TargetFrameworkIsEol">
         <source>NETSDK1138: The target framework '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>
-        <target state="new">NETSDK1138: The target framework '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</target>
+        <target state="translated">NETSDK1138: 目标框架“{0}”不受支持，将来不会收到安全更新。有关支持策略的详细信息，请参阅 {1}。</target>
         <note>{StrBegin="NETSDK1138: "}</note>
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
@@ -620,10 +770,30 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1046: TargetFramework 值“{0}”无效。若要设置多个目标，请改用 "TargetFrameworks" 属性。</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
+      <trans-unit id="TargetingApphostPackMissingCannotRestore">
+        <source>NETSDK1145: The {0} pack is not installed and NuGet package restore is not supported. Upgrade Visual Studio, remove global.json if it specifies a certain SDK version, and uninstall the newer SDK. For more options visit   https://aka.ms/targeting-apphost-pack-missing  Pack Type:{0}, Pack directory: {1}, targetframework: {2}, Pack PackageId: {3}, Pack Package Version: {4}</source>
+        <target state="translated">NETSDK1145: {0} 包未安装，不支持 NuGet 包还原。升级 Visual Studio，删除 global.json (如果它指定特定 SDK 版本)，并卸载较新的 SDK。如需了解更多选项，请访问 https://aka.ms/targeting-apphost-pack-missing  包类型:{0}，包目录: {1}，targetframework: {2}, 包 Id: {3}，包版本: {4}</target>
+        <note>{StrBegin="NETSDK1145: "}</note>
+      </trans-unit>
       <trans-unit id="TargetingPackNeedsRestore">
         <source>NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</source>
-        <target state="new">NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</target>
+        <target state="translated">NETSDK1127: 未安装目标包 {0}。请还原并重试。</target>
         <note>{StrBegin="NETSDK1127: "}</note>
+      </trans-unit>
+      <trans-unit id="TrimmingWindowsFormsIsNotSupported">
+        <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
+        <target state="translated">NETSDK1175: 启用剪裁时，不支持或不推荐使用 Windows 窗体。请转到 https://aka.ms/dotnet-illink/windows-forms 以了解详细信息。</target>
+        <note>{StrBegin="NETSDK1175: "}</note>
+      </trans-unit>
+      <trans-unit id="TrimmingWpfIsNotSupported">
+        <source>NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
+        <target state="translated">NETSDK1168: 启用剪裁时，不支持或不推荐使用 WPF。请转到 https://aka.ms/dotnet-illink/wpf 以了解详细信息。</target>
+        <note>{StrBegin="NETSDK1168: "}</note>
+      </trans-unit>
+      <trans-unit id="TypeLibraryDoesNotExist">
+        <source>NETSDK1172: The provided type library '{0}' does not exist.</source>
+        <target state="translated">NETSDK1172: 提供的类型库“{0}”不存在。</target>
+        <note>{StrBegin="NETSDK1172: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>
@@ -646,8 +816,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
-        <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</source>
-        <target state="new">NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</target>
+        <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Consider changing the Sdk attribute of the root Project element to 'Microsoft.NET.Sdk'.</source>
+        <target state="translated">NETSDK1137: 不再需要使用 Microsoft.NET.Sdk.WindowsDesktop SDK。请考虑将根项目元素的 Sdk 属性更改为 "Microsoft.NET.Sdk"。</target>
         <note>{StrBegin="NETSDK1137: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -682,7 +852,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
         <source>NETSDK1139: The target platform identifier {0} was not recognized.</source>
-        <target state="new">NETSDK1139: The target platform identifier {0} was not recognized.</target>
+        <target state="translated">NETSDK1139: 无法识别目标平台标识符 {0}。</target>
         <note>{StrBegin="NETSDK1139: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
@@ -692,18 +862,23 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
         <source>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">你正在使用 .NET Core 的预览版。请查看 https://aka.ms/dotnet-core-preview</target>
+        <target state="translated">你正在使用 .NET 的预览版。请查看 https://aka.ms/dotnet-core-preview</target>
         <note />
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
         <source>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</source>
-        <target state="new">NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</target>
+        <target state="translated">NETSDK1131: 当目标为 {0} 时，不支持使用 WinMDExp 生成托管 Windows 元数据组件。</target>
         <note>{StrBegin="NETSDK1131: "}</note>
       </trans-unit>
       <trans-unit id="WinMDReferenceNotSupportedOnTargetFramework">
-        <source>NETSDK1130: Referencing a Windows Metadata component directly when targeting {0} is not supported. Use the C#/WinRT projection tool (https://aka.ms/cswinrt) or a provided projection for this target.</source>
-        <target state="new">NETSDK1130: Referencing a Windows Metadata component directly when targeting {0} is not supported. Use the C#/WinRT projection tool (https://aka.ms/cswinrt) or a provided projection for this target.</target>
+        <source>NETSDK1130: {1} cannot be referenced. Referencing a Windows Metadata component directly when targeting .NET 5 or higher is not supported. For more information, see https://aka.ms/netsdk1130</source>
+        <target state="translated">NETSDK1130: 无法引用 {1}。不支持在以 .NET 5 或更高版本为目标时直接引用 Windows 元数据组件。有关详细信息，请参阅 https://aka.ms/netsdk1130</target>
         <note>{StrBegin="NETSDK1130: "}</note>
+      </trans-unit>
+      <trans-unit id="WinMDTransitiveReferenceNotSupported">
+        <source>NETSDK1149: {0} cannot be referenced because it uses built-in support for WinRT, which is no longer supported in .NET 5 and higher.  An updated version of the component supporting .NET 5 is needed. For more information, see https://aka.ms/netsdk1149</source>
+        <target state="translated">NETSDK1149: 无法引用 {0}，因为它使用了对 WinRT 的内置支持，而 .NET 5 和更高版本中不再支持它。需要支持 .NET 5 的更新版本组件。有关详细信息，请参阅 https://aka.ms/netsdk1149</target>
+        <note>{StrBegin="NETSDK1149: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">
         <source>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</source>
@@ -722,8 +897,27 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">
         <source>NETSDK1136: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</source>
-        <target state="new">NETSDK1136: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</target>
+        <target state="translated">NETSDK1136: 如果使用 Windows 窗体或 WPF，或者引用使用 Windows 窗体或 WPF 的项目或包，则必须将目标平台设置为 Windows (通常通过在 TargetFramework 属性中添加 "-windows")。 </target>
         <note>{StrBegin="NETSDK1136: "}</note>
+      </trans-unit>
+      <trans-unit id="WindowsSDKVersionConflicts">
+        <source>NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</source>
+        <target state="translated">NETSDK1148: 使用更新版本的 Microsoft.Windows.SDK.NET.dll 编译了引用的程序集。请更新为更新的 .NET SDK 以引用此程序集。</target>
+        <note>{StrBegin="NETSDK1148: "}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadNotAvailable">
+        <source>NETSDK1178: The project depends on the following workload packs that do not exist in any of the workloads available in this installation: {0}
+You may need to build the project on another operating system or architecture, or update the .NET SDK.</source>
+        <target state="translated">NETSDK1178: 此安装文件中任何可用的工作负载中，不存在该项目依赖的以下工作负载包: {0}
+可能需要在另一个操作系统或体系结构上生成项目，或者更新 .NET SDK。</target>
+        <note>{StrBegin="NETSDK1178: "}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadNotInstalled">
+        <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: {1}</source>
+        <target state="translated">NETSDK1147: 要构建此项目，必须安装以下工作负载: {0}
+ 要安装这些工作负载，请运行以下命令: {1}</target>
+        <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>
   </file>

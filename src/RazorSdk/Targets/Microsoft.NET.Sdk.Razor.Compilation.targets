@@ -1,0 +1,383 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Razor.Compilation.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="14.0">
+  <!--
+  What follows in this file is based on:
+     https://github.com/dotnet/roslyn/blob/efee485eda1c504c4f51d73f81ce0caa574a25be/src/Compilers/Core/MSBuildTask/Microsoft.CSharp.Core.targets
+
+  We need to keep this basically up to date, as well as track the set of modifications we've made. Try to keep the formatting
+  similar to the original to reduce noise. In general try to only deviate from the CoreCompile target when we need to for
+  correctness.
+
+  We also want to avoid doubling up on things that don't make a ton of sense in the Razor views assembly, like
+  embedded files and resources, these are already present in the application's assembly.
+
+  Changes:
+    Name="RazorCoreCompile"
+
+    Replace Name="CoreCompile" with Name="RazorCoreCompile"
+    Replace @(Compile) with @(RazorCompile)
+    Replace @(_DebugSymbolsIntermediatePath) with @(_RazorDebugSymbolsIntermediatePath)
+    Replace @(IntermediateAssembly) with @(RazorIntermediateAssembly)
+    Replace @(ReferencePathWithRefAssemblies) with @(RazorReferencePath)
+    Replace @(_CoreCompileResourceInputs) with @(_RazorCoreCompileResourceInputs)
+    Replace <Csc Condition="'%(_CoreCompileResourceInputs.WithCulture)' != 'true'" with <Csc
+    Remove comment above ^
+
+    Set TargetType="$(OutputType)" to TargetType="Library" - Razor is always a .dll
+
+    Remove Returns="@(CscCommandLineArgs)"
+    Remove <Import Project="Microsoft.Managed.Core.targets"/>
+    Remove Returns="@(CscCommandLineArgs)"
+    Remove @(EmbeddedFiles)
+    Remove $(ApplicationIcon) $(Win32Resource) $(Win32Manifest)
+    Remove @(EmbeddedDocumentation) and @(EmbeddedFiles)
+    Remove @(CustomAdditionalCompileInputs) and @(CustomAdditionalCompileOutputs)
+    Remove @(DocFileItem)
+    Remove PdbFile="$(PdbFile)"
+    Remove $(IntermediateRefAssembly)
+    Remove OutputRefAssembly="@(IntermediateRefAssembly)"
+    Remove MainEntryPoint="$(StartupObject)"
+    Remove winmdobj <PdbFile  ....> and comment
+    Remove RefOnly="$(ProduceOnlyReferenceAssembly)"
+    Remove Win32Icon="$(ApplicationIcon)"
+    Remove Win32Manifest="$(Win32Manifest)"
+    Remove Win32Resource="$(Win32Resource)"
+    Remove DocumentationFile="@(DocFileItem)"
+
+    Remove EmbedAllSources="$(EmbedAllSources)" - not supported by our supported version of MSBuild
+
+    Remove additional steps after calling CSC
+
+    Add our FileWrites after the call to CSC
+
+    Add Condition="'@(RazorCompile)'!=''" as a condition to the RazorCoreCompile target.
+
+    Add GeneratedFilesOutputPath="$(GeneratedFilesOutputPath)"
+  -->
+  <Target Name="RazorCoreCompile"
+          Inputs="$(MSBuildAllProjects);
+                  @(RazorCompile);
+                  @(RazorGenerate);
+                  $(AssemblyOriginatorKeyFile);
+                  @(ReferencePath);
+                  @(IntermediateAssembly);
+                  @(CompiledLicenseFile);
+                  @(LinkResource);
+                  $(ResolvedCodeAnalysisRuleSet);
+                  @(AdditionalFiles);
+                  @(_RazorCoreCompileResourceInputs)"
+          Outputs="@(RazorIntermediateAssembly);
+                   @(_RazorDebugSymbolsIntermediatePath);
+                   $(NonExistentFile)"
+          Condition="'@(RazorCompile)'!=''">
+    <!-- These two compiler warnings are raised when a reference is bound to a different version
+             than specified in the assembly reference version number.  MSBuild raises the same warning in this case,
+             so the compiler warning would be redundant. -->
+    <PropertyGroup Condition="('$(TargetFrameworkVersion)' != 'v1.0') and ('$(TargetFrameworkVersion)' != 'v1.1')">
+      <NoWarn>$(NoWarn);1701;1702</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <!-- To match historical behavior, when inside VS11+ disable the warning from csc.exe indicating that no sources were passed in-->
+      <NoWarn Condition="'$(BuildingInsideVisualStudio)' == 'true' AND '$(VisualStudioVersion)' != '' AND '$(VisualStudioVersion)' &gt; '10.0'">$(NoWarn);2008</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <!-- If the user has specified AppConfigForCompiler, we'll use it. If they have not, but they set UseAppConfigForCompiler,
+                 then we'll use AppConfig -->
+      <AppConfigForCompiler Condition="'$(AppConfigForCompiler)' == '' AND '$(UseAppConfigForCompiler)' == 'true'">$(AppConfig)</AppConfigForCompiler>
+    </PropertyGroup>
+
+    <!-- Prefer32Bit was introduced in .NET 4.5. Set it to false if we are targeting 4.0 -->
+    <PropertyGroup Condition="('$(TargetFrameworkVersion)' == 'v4.0')">
+      <Prefer32Bit>false</Prefer32Bit>
+    </PropertyGroup>
+
+    <!-- TODO: Remove this ItemGroup once it has been moved to "_GenerateCompileInputs" target in Microsoft.Common.CurrentVersion.targets.
+         https://github.com/dotnet/roslyn/issues/12223 -->
+    <ItemGroup Condition="('$(AdditionalFileItemNames)' != '')">
+      <AdditionalFileItems Include="$(AdditionalFileItemNames)" />
+      <AdditionalFiles Include="@(%(AdditionalFileItems.Identity))" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(UseSharedCompilation)' == ''">
+      <UseSharedCompilation>true</UseSharedCompilation>
+    </PropertyGroup>
+
+    <Csc
+         AdditionalLibPaths="$(AdditionalLibPaths)"
+         AddModules="@(AddModules)"
+         AdditionalFiles="@(AdditionalFiles)"
+         AllowUnsafeBlocks="$(AllowUnsafeBlocks)"
+         Analyzers="@(Analyzer)"
+         ApplicationConfiguration="$(AppConfigForCompiler)"
+         BaseAddress="$(BaseAddress)"
+         CheckForOverflowUnderflow="$(CheckForOverflowUnderflow)"
+         ChecksumAlgorithm="$(ChecksumAlgorithm)"
+         CodeAnalysisRuleSet="$(ResolvedCodeAnalysisRuleSet)"
+         CodePage="$(CodePage)"
+         DebugType="$(DebugType)"
+         DefineConstants="$(DefineConstants)"
+         DelaySign="$(DelaySign)"
+         DisabledWarnings="$(NoWarn)"
+         DisableSdkPath="$(DisableSdkPath)"
+         EmitDebugInformation="$(DebugSymbols)"
+         EnvironmentVariables="$(CscEnvironment)"
+         ErrorEndLocation="$(ErrorEndLocation)"
+         ErrorLog="$(RazorCompilationErrorLog)"
+         ErrorReport="$(ErrorReport)"
+         Features="$(Features)"
+         FileAlignment="$(FileAlignment)"
+         GenerateFullPaths="$(GenerateFullPaths)"
+         GeneratedFilesOutputPath="$(GeneratedFilesOutputPath)"
+         HighEntropyVA="$(HighEntropyVA)"
+         Instrument="$(Instrument)"
+         KeyContainer="$(KeyContainerName)"
+         KeyFile="$(KeyOriginatorFile)"
+         LangVersion="$(LangVersion)"
+         LinkResources="@(LinkResource)"
+         ModuleAssemblyName="$(ModuleAssemblyName)"
+         NoConfig="true"
+         NoLogo="$(NoLogo)"
+         NoStandardLib="$(NoCompilerStandardLib)"
+         NoWin32Manifest="$(NoWin32Manifest)"
+         Nullable="$(Nullable)"
+         Optimize="$(Optimize)"
+         Deterministic="$(Deterministic)"
+         PublicSign="$(PublicSign)"
+         OutputAssembly="@(RazorIntermediateAssembly)"
+         Platform="$(PlatformTarget)"
+         Prefer32Bit="$(Prefer32Bit)"
+         PreferredUILang="$(PreferredUILang)"
+         ProvideCommandLineArgs="$(ProvideCommandLineArgs)"
+         References="@(ReferencePath);@(IntermediateAssembly)"
+         ReportAnalyzer="$(ReportAnalyzer)"
+         Resources="@(_RazorCoreCompileResourceInputs);@(CompiledLicenseFile)"
+         ResponseFiles="$(CompilerResponseFile)"
+         RuntimeMetadataVersion="$(RuntimeMetadataVersion)"
+         SharedCompilationId="$(SharedCompilationId)"
+         SkipCompilerExecution="$(SkipCompilerExecution)"
+         Sources="@(RazorCompile)"
+         SubsystemVersion="$(SubsystemVersion)"
+         TargetType="Library"
+         ToolExe="$(CscToolExe)"
+         ToolPath="$(CscToolPath)"
+         TreatWarningsAsErrors="$(TreatWarningsAsErrors)"
+         UseHostCompilerIfAvailable="$(UseHostCompilerIfAvailable)"
+         UseSharedCompilation="$(UseSharedCompilation)"
+         Utf8Output="$(Utf8Output)"
+         VsSessionGuid="$(VsSessionGuid)"
+         WarningLevel="$(WarningLevel)"
+         WarningsAsErrors="$(WarningsAsErrors)"
+         WarningsNotAsErrors="$(WarningsNotAsErrors)"
+         PathMap="$(PathMap)"
+         SourceLink="$(SourceLink)">
+      <Output TaskParameter="CommandLineArgs" ItemName="CscCommandLineArgs" />
+    </Csc>
+
+    <ItemGroup>
+      <FileWrites Include="@(_RazorIntermediateAssembly)" Condition="Exists('@(_RazorIntermediateAssembly)')" />
+      <FileWrites Include="@(_RazorDebugSymbolsIntermediatePath)" Condition="Exists('@(_RazorDebugSymbolsIntermediatePath)')" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    Called as part of GetCopyToOutputDirectoryItems - this target populates the list of items that get
+    copied to the output directory when building as a project reference.
+  -->
+  <Target
+    Name="_RazorGetCopyToOutputDirectoryItems"
+    DependsOnTargets="ResolveRazorGenerateInputs"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnBuild)'=='true'">
+
+    <!--
+      This condition needs to be inside the target because it the itemgroup will be populated after the target's
+      condition is evaluated.
+    -->
+    <ItemGroup Condition="'@(RazorGenerate)'!=''">
+      <AllItemsFullPathWithTargetPath Include="@(RazorIntermediateAssembly->'%(FullPath)')">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AllItemsFullPathWithTargetPath>
+      <AllItemsFullPathWithTargetPath Include="@(_RazorDebugSymbolsIntermediatePath->'%(FullPath)')">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AllItemsFullPathWithTargetPath>
+    </ItemGroup>
+
+  </Target>
+
+    <!--
+    Called as part of CopyFilesToOutputDirectory - this target is called when building the project to copy
+    files to the output directory.
+  -->
+  <Target
+    Name="_RazorCopyFilesToOutputDirectory"
+    DependsOnTargets="_ResolveRazorTargetPath;RazorCompile"
+    AfterTargets="CopyFilesToOutputDirectory"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnBuild)'=='true'">
+
+    <!-- Copy the Razor dll  -->
+    <Copy
+      SourceFiles="@(RazorIntermediateAssembly)"
+      DestinationFiles="$(RazorTargetPath)"
+      SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+      Condition="Exists('@(RazorIntermediateAssembly)') and '$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'">
+
+      <Output TaskParameter="DestinationFiles" ItemName="_RazorAssembly"/>
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+
+    <Message
+      Importance="High"
+      Text="$(MSBuildProjectName) -&gt; @(_RazorAssembly->'%(FullPath)')"
+      Condition="Exists('@(RazorIntermediateAssembly)') and '$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)'!='true'" />
+
+    <!-- Copy the Razor debug information file (.pdb), if any -->
+    <Copy
+      SourceFiles="@(_RazorDebugSymbolsIntermediatePath)"
+      DestinationFolder="$(RazorOutputPath)"
+      SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+      Condition="Exists('@(_RazorDebugSymbolsIntermediatePath)') and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+
+    <!--
+    FastUpToDate check in VS does not consider the Views dll when determining if referencing projects need to be rebuilt.
+    We'll touch a marker file that is used during as input for up to date check. Based on
+    https://github.com/Microsoft/msbuild/blob/637f06e31ef46892faeb40044899a62a15b77f79/src/Tasks/Microsoft.Common.CurrentVersion.targets#L4364-L4368
+    -->
+    <Touch Files="@(CopyUpToDateMarker)" AlwaysCreate="true" Condition="'@(_RazorAssembly)' != ''">
+      <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
+    </Touch>
+
+  </Target>
+
+    <!--
+    Called after ComputeResolvedFilesToPublishList but before CopyFilesToPublishDirectory - this target is called when
+    publishing the project to get a list of files to the output directory.
+  -->
+  <Target
+    Name="_RazorComputeFilesToPublish"
+    AfterTargets="ComputeResolvedFilesToPublishList"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnPublish)'=='true' and '@(RazorGenerate)'!=''">
+
+    <!-- If we generated an assembly/pdb then include those -->
+    <ItemGroup>
+      <ResolvedFileToPublish Include="@(RazorIntermediateAssembly)" Condition="'$(CopyBuildOutputToPublishDirectory)'=='true'">
+        <RelativePath>@(RazorIntermediateAssembly->'%(Filename)%(Extension)')</RelativePath>
+        <!-- Pass assembly to linker and crossgen -->
+        <PostprocessAssembly>true</PostprocessAssembly>
+      </ResolvedFileToPublish>
+      <ResolvedFileToPublish Include="@(_RazorDebugSymbolsIntermediatePath)" Condition="'$(CopyOutputSymbolsToPublishDirectory)'=='true'">
+        <RelativePath>@(_RazorDebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+
+    <!--
+      RazorGenerate items are usually populated from the '.cshtml' files in @(Content). These are published by default
+      so all we need to do is exclude them.
+    -->
+    <ItemGroup Condition="'$(CopyRazorGenerateFilesToPublishDirectory)'=='false'">
+      <ResolvedFileToPublish Remove="%(RazorGenerate.FullPath)"/>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    This target adds the Razor assembly to the BuiltProjectOutputGroupOutput - which is used as input to the Pack target.
+  -->
+  <Target
+    Name="_RazorAddBuiltProjectOutputGroupOutput"
+    DependsOnTargets="_ResolveRazorTargetPath;ResolveRazorGenerateInputs"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnBuild)'=='true'">
+
+    <ItemGroup Condition="'@(RazorGenerate)'!= ''">
+      <BuiltProjectOutputGroupOutput Include="%(RazorIntermediateAssembly.FullPath)" FinalOutputPath="$(RazorTargetPath)" />
+    </ItemGroup>
+
+  </Target>
+
+    <!--
+    Called as part of GetCopyToPublishDirectoryItems - this target populates the list of items that get
+    copied to the publish directory when publishing as a project reference.
+
+    The dependency on RazorCompile is needed because this will be called during publish on each P2P
+    reference without calling RazorCompile for the P2P references.
+  -->
+  <Target
+    Name="_RazorGetCopyToPublishDirectoryItems"
+    BeforeTargets="GetCopyToPublishDirectoryItems"
+    DependsOnTargets="ResolveRazorGenerateInputs"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnPublish)'=='true'">
+
+    <!--
+      This condition needs to be inside the target because it the itemgroup will be populated after the target's
+      condition is evaluated.
+    -->
+    <ItemGroup Condition="'@(RazorGenerate)'!=''">
+      <AllPublishItemsFullPathWithTargetPath Include="@(RazorIntermediateAssembly->'%(FullPath)')">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <!-- .Views.dll and .Views.pdb were part of the single file bundle in 3.1 apps. Lets keep this unchanged. -->
+        <ExcludeFromSingleFile Condition="'$(_TargetingNET50OrLater)' == 'true'">true</ExcludeFromSingleFile>
+      </AllPublishItemsFullPathWithTargetPath>
+      <AllPublishItemsFullPathWithTargetPath Include="@(_RazorDebugSymbolsIntermediatePath->'%(FullPath)')">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile Condition="'$(_TargetingNET50OrLater)' == 'true'">true</ExcludeFromSingleFile>
+      </AllPublishItemsFullPathWithTargetPath>
+    </ItemGroup>
+
+  </Target>
+
+  <PropertyGroup>
+    <GetCopyToOutputDirectoryItemsDependsOn>
+      _RazorGetCopyToOutputDirectoryItems;
+      $(GetCopyToOutputDirectoryItemsDependsOn)
+    </GetCopyToOutputDirectoryItemsDependsOn>
+
+    <BuiltProjectOutputGroupDependsOn>
+      $(BuiltProjectOutputGroupDependsOn);
+      _RazorAddBuiltProjectOutputGroupOutput
+    </BuiltProjectOutputGroupDependsOn>
+
+    <RazorCompileDependsOn>
+      PrepareForRazorCompile;
+      RazorCoreCompile
+    </RazorCompileDependsOn>
+
+    <CoreCompileDependsOn Condition="'$(DesignTimeBuild)'!='true'">
+      RazorComponentGenerate;
+      $(CoreCompileDependsOn)
+    </CoreCompileDependsOn>
+
+    <CoreCompileDependsOn Condition="'$(DesignTimeBuild)'=='true'">
+      RazorGenerateComponentDeclarationDesignTime;
+      $(CoreCompileDependsOn)
+    </CoreCompileDependsOn>
+
+  </PropertyGroup>
+
+</Project>

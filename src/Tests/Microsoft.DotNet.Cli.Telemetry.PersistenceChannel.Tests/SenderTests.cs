@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -19,16 +20,11 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
 
         private Mock<BaseStorageService> StorageBaseMock { get; }
 
-        private SenderUnderTest Sender { get; }
-
         public SenderTests(ITestOutputHelper log) : base(log)
         {
             StorageBaseMock = new Mock<BaseStorageService>();
             TransmissionMock = new Mock<StorageTransmission>(string.Empty, new Uri("http://some/url"), new byte[] { },
                 string.Empty, string.Empty);
-            StorageService storageService = CreateStorageService();
-            PersistenceTransmitter transmitter = new PersistenceTransmitter(storageService, 0);
-            Sender = new SenderUnderTest(StorageBaseMock.Object, transmitter);
             _deleteCount = 0;
             StorageBaseMock.Setup(storage => storage.Delete(It.IsAny<StorageTransmission>()))
                 .Callback(() => _deleteCount++);
@@ -37,6 +33,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         [Fact]
         public void WhenServerReturn503TransmissionWillBeRetried()
         {
+            var Sender = GetSenderUnderTest();
             int peekCounts = 0;
 
             // Setup transmission.SendAsync() to throw WebException that has 503 status Code
@@ -63,6 +60,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         [Fact]
         public void WhenServerReturn400IntervalWillBe10Seconds()
         {
+            var Sender = GetSenderUnderTest();
             int peekCounts = 0;
 
             // Setup transmission.SendAsync() to throw WebException that has 400 status Code
@@ -104,6 +102,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         [Fact]
         public void WhenServerReturnDnsErrorRequestWillBeRetried()
         {
+            var Sender = GetSenderUnderTest();
             int peekCounts = 0;
 
             // Setup transmission.SendAsync() to throw WebException with ProxyNameResolutionFailure failure
@@ -170,12 +169,19 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
             }
         }
 
-        private StorageService CreateStorageService()
+        private StorageService CreateStorageService([CallerMemberName] string testName = null)
         {
-            string tempPath = Path.Combine(_testAssetsManager.CreateTestDirectory("TestStorageService").Path, Path.GetTempFileName());
+            string tempPath = Path.Combine(_testAssetsManager.CreateTestDirectory("TestStorageService", identifier: testName).Path, Path.GetTempFileName());
             StorageService storageService = new StorageService();
             storageService.Init(tempPath);
             return storageService;
+        }
+
+        private SenderUnderTest GetSenderUnderTest([CallerMemberName] string testName = null)
+        {
+            StorageService storageService = CreateStorageService(testName);
+            PersistenceTransmitter transmitter = new PersistenceTransmitter(storageService, 0);
+            return new SenderUnderTest(StorageBaseMock.Object, transmitter);
         }
     }
 }

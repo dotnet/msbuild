@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Restore workloads required for a project.</source>
+        <target state="translated">Restaure las cargas de trabajo necesarias para un proyecto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindAProject">
+        <source>Couldn't find a project. Ensure that a project exists in {0}, or pass the path to the project using {1}.</source>
+        <target state="translated">No se ha podido encontrar un proyecto. Asegúrese de que exista uno en {0} o pase la ruta de acceso al proyecto mediante {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRunTarget">
+        <source>Failed to restore workload for project {0}: Failed to run MSBuild Target _GetRequiredWorkloads.</source>
+        <target state="translated">No se ha podido restaurar la carga de trabajo del proyecto {0}: no se pudo ejecutar el _GetRequiredWorkloads de destino de MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingWorkloads">
+        <source>Installing workloads: {0}</source>
+        <target state="translated">Instalación de cargas de trabajo: {0}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

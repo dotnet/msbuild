@@ -28,11 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Não foi possível executar porque o comando ou o arquivo especificado não foi encontrado.
+        <target state="translated">Não foi possível executar porque o comando ou o arquivo especificado não foi encontrado.
 Possíveis motivos para isso incluem:
- * Você digitou incorretamente um comando de dotnet embutido.
- * Você pretendia executar um programa .NET Core, mas {0} não existe.
- * Você pretendia executar uma ferramenta global, mas não foi possível encontrar um executável com prefixo de dotnet com esse nome no CAMINHO.</target>
+  * Você digitou incorretamente um comando de dotnet interno.
+  * Você pretendia executar um programa .NET, mas {0} não existe.
+  * Você pretendia executar uma ferramenta global, mas não foi possível encontrar um executável com prefixo de dotnet com esse nome no CAMINHO.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -77,7 +77,7 @@ Possíveis motivos para isso incluem:
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
         <source>.NET SDK (reflecting any global.json):</source>
-        <target state="needs-review-translation">SDK do .NET Core (refletindo qualquer global.json):</target>
+        <target state="translated">SDK do .NET (refletindo qualquer global.json):</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -111,7 +111,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET SDK</source>
-        <target state="needs-review-translation">SDK do .NET Core</target>
+        <target state="translated">SDK do .NET</target>
         <note />
       </trans-unit>
     </body>

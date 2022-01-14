@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdBlameCrashCollectAlwaysDescription">
         <source>Enables collecting crash dump on expected as well as unexpected testhost exit.</source>
-        <target state="new">Enables collecting crash dump on expected as well as unexpected testhost exit.</target>
+        <target state="translated">Включает сбор аварийного дампа при ожидаемом и неожиданном завершении работы узла тестирования.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDescription">
@@ -23,26 +23,26 @@ This option is currently only supported on Windows, and requires procdump.exe an
 Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
 The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and enables collecting crash dump when testhost exits unexpectedly. 
-This option is currently only supported on Windows, and requires procdump.exe and procdump64.exe to be available in PATH.
-Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump 
-Implies --blame.</target>
+        <target state="translated">Запускает тесты в режиме обвинения и включает сбор аварийного дампа при неожиданном завершении работы узла тестирования. 
+Этот параметр сейчас поддерживается только в Windows, и для его использования необходимо добавить путь к файлам procdump.exe и procdump64.exe в переменную среды PATH.
+Также можно установить переменную среды PROCDUMP_PATH, указав в ней путь к каталогу, в котором находятся файлы procdump.exe и procdump64.exe. 
+Инструменты можно скачать на следующей странице: https://docs.microsoft.com/sysinternals/downloads/procdump. 
+Подразумевается использование параметра --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Implies --blame-crash.</source>
-        <target state="new">The type of crash dump to be collected. Implies --blame-crash.</target>
+        <target state="translated">Тип собираемого аварийного дампа. Подразумевается использование параметра --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
         <source>Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout. Implies --blame-hang.</source>
-        <target state="new">Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout. Implies --blame-hang.</target>
+        <target state="translated">Выполнение тестов в режиме обвинения и включение сбора дампа зависания при превышении заданного времени ожидания для теста. Подразумевается использование параметра --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="new">The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
+        <target state="translated">Тип собираемого аварийного дампа. Если задано значение "None", то узел тестирования завершает работу после истечения времени ожидания, но сбор дампа не выполняется. Подразумевается использование параметра --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -51,11 +51,41 @@ The timeout value is specified in the following format: 1.5h / 90m / 5400s / 540
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
 For MSTest, the timeout is used for all testcases.
 This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. 
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
-For MSTest, the timeout is used for all testcases.
-This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</target>
+        <target state="translated">Время ожидания каждого теста, по истечении которого выполняется сбор дампа зависания и процесс узла тестирования завершается. 
+Значение времени ожидания задается в следующем формате: 1.5h / 90m / 5400s / 5400000ms. Если единица измерения не указана (например, 5400000), предполагается, что время задано в миллисекундах.
+При использовании времени ожидания для тестов, управляемых данными, время ожидания зависит от используемого адаптера теста. Для xUnit и NUnit отсчет времени ожидания начинается заново для каждого тестового случая.
+Для MSTest время ожидания подсчитывается суммарно для всех тестовых случаев.
+Сейчас этот параметр поддерживается только в Windows с netcoreapp2.1 и более поздних версий и в Linux с netcoreapp3.1 и более поздних версий. OSX и UWP не поддерживаются.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableDescription">
+        <source>Sets the value of an environment variable. 
+Creates the variable if it does not exist, overrides if it does. 
+This will force the tests to be run in an isolated process. 
+This argument can be specified multiple times to provide multiple variables.
+
+Examples:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</source>
+        <target state="translated">Устанавливает значение переменной среды. 
+Если переменной среды не существует, она создается. Если переменная среды существует, она переопределяется. 
+Этот аргумент подразумевает принудительное выполнение тестов в изолированном процессе. 
+Этот аргумент может быть указан несколько раз для нескольких переменных среды.
+
+Примеры:
+-e VARIABLE=abc
+-e VARIABLE="значение с пробелами"
+-e VARIABLE="значение;разделенное;точками;с;запятыми"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableExpression">
+        <source>NAME="VALUE"</source>
+        <target state="translated">NAME="VALUE"</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoLogo">
@@ -167,17 +197,17 @@ The specified directory will be created if it does not exist.</source>
       </trans-unit>
       <trans-unit id="CrashDumpTypeArgumentName">
         <source>DUMP_TYPE</source>
-        <target state="new">DUMP_TYPE</target>
+        <target state="translated">DUMP_TYPE</target>
         <note />
       </trans-unit>
       <trans-unit id="HangDumpTypeArgumentName">
         <source>DUMP_TYPE</source>
-        <target state="new">DUMP_TYPE</target>
+        <target state="translated">DUMP_TYPE</target>
         <note />
       </trans-unit>
       <trans-unit id="HangTimeoutArgumentName">
         <source>TIMESPAN</source>
-        <target state="new">TIMESPAN</target>
+        <target state="translated">TIMESPAN</target>
         <note />
       </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
@@ -226,8 +256,17 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">Выполнение тестов в режиме обвинения. Этот параметр помогает изолировать проблемный тест, из-за которого в хосте для тестов возникает сбой.
-В текущем каталоге создается выходной файл "Sequence.xml", в который записывается порядок выполнения теста перед сбоем.</target>
+        <target state="translated">Запускает тесты в режиме обвинения. Этот параметр удобно использовать для изоляции проблемных тестов, которые приводят к сбою или зависанию узла тестирования. 
+При обнаружении сбоя создается файл последовательности TestResults/guid/guid_Sequence.xml с указанием порядка тестов, которые были выполнены до возникновения сбоя.
+На основе дополнительных параметров также можно выполнить сбор дампа зависания или аварийного дампа.
+Пример: 
+  Прервать выполнение теста из-за истечения времени ожидания, когда время выполнения теста превышает время ожидания по умолчанию в 1 час, и собрать аварийный дамп при неожиданном завершении работы узла тестирования. 
+  (Для сбора аварийного дампа необходимо задать дополнительные параметры, см. ниже).
+  dotnet test --blame-hang --blame-crash
+Пример: 
+  Прервать выполнение теста из-за истечения времени ожидания, когда время выполнения теста превышает 20 минут, и собрать дамп зависания. 
+  dotnet test --blame-hang-timeout 20min
+</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">

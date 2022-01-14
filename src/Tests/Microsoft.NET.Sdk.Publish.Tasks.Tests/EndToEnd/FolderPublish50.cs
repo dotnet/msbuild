@@ -119,7 +119,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             int? exitCode = 0;
 
             // dotnet restore
-            string dotnetRestoreArguments = "restore --source https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json --source https://api.nuget.org/v3/index.json";
+            string dotnetRestoreArguments = "restore --source https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json";
             exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotnetRestoreArguments, testFolder, out int? processId2);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 

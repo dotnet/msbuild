@@ -59,7 +59,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "App",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 

@@ -4,117 +4,117 @@
     <body>
       <trans-unit id="Authors">
         <source>Authors</source>
-        <target state="new">Authors</target>
+        <target state="translated">作成者</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Search dotnet tools in nuget.org</source>
-        <target state="new">Search dotnet tools in nuget.org</target>
+        <target state="translated">nuget.org で dotnet ツールを検索します</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">コマンド</target>
         <note />
       </trans-unit>
       <trans-unit id="Description">
         <source>Description</source>
-        <target state="new">Description</target>
+        <target state="translated">説明</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="DetailArgumentName">
         <source>Detail</source>
-        <target state="new">Detail</target>
+        <target state="translated">詳細</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailDescription">
         <source>Show detail result of the query.</source>
-        <target state="new">Show detail result of the query.</target>
+        <target state="translated">クエリの詳細な結果を表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="Downloads">
         <source>Downloads</source>
-        <target state="new">Downloads</target>
+        <target state="translated">ダウンロード</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="InvalidInputTypeInteger">
         <source>{0} should be an integer</source>
-        <target state="new">{0} should be an integer</target>
+        <target state="translated">{0} は整数でなければなりません</target>
         <note />
       </trans-unit>
       <trans-unit id="LatestVersion">
         <source>Latest Version</source>
-        <target state="new">Latest Version</target>
+        <target state="translated">最新バージョン</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="NoResult">
         <source>Could not find any results.</source>
-        <target state="new">Could not find any results.</target>
+        <target state="translated">結果が見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageId">
         <source>Package ID</source>
-        <target state="new">Package ID</target>
+        <target state="translated">パッケージ ID</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
         <source>determining whether to include pre-release packages.</source>
-        <target state="new">determining whether to include pre-release packages.</target>
+        <target state="translated">プレリリース パッケージを含めるかどうかを決定します。</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
         <source>Search Term</source>
-        <target state="new">Search Term</target>
+        <target state="translated">検索語句</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">
         <source>Search term from package id or package description. Require at least one character.</source>
-        <target state="new">Search term from package id or package description. Require at least one character.</target>
+        <target state="translated">パッケージ ID またはパッケージの説明から語句を検索します。少なくとも 1 文字が必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipArgumentName">
         <source>Skip</source>
-        <target state="new">Skip</target>
+        <target state="translated">スキップ</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipDescription">
         <source>The number of results to skip, for pagination.</source>
-        <target state="new">The number of results to skip, for pagination.</target>
+        <target state="translated">改ページ位置の自動修正のためにスキップする結果の数。</target>
         <note />
       </trans-unit>
       <trans-unit id="Summary">
         <source>Summary</source>
-        <target state="new">Summary</target>
+        <target state="translated">概要</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Tags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">タグ</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="TakeArgumentName">
         <source>Take</source>
-        <target state="new">Take</target>
+        <target state="translated">取得</target>
         <note />
       </trans-unit>
       <trans-unit id="TakeDescription">
         <source>The number of results to return, for pagination.</source>
-        <target state="new">The number of results to return, for pagination.</target>
+        <target state="translated">改ページ位置の自動修正のために返す結果の数。</target>
         <note />
       </trans-unit>
       <trans-unit id="Verified">
         <source>Verified</source>
-        <target state="new">Verified</target>
+        <target state="translated">確認済み</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Version">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">バージョン</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Versions">
         <source>Versions</source>
-        <target state="new">Versions</target>
+        <target state="translated">バージョン</target>
         <note>Table lable</note>
       </trans-unit>
     </body>

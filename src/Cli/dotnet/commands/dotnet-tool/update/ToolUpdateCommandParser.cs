@@ -1,66 +1,69 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Tool.Common;
+using Microsoft.DotNet.Tools.Tool.Update;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class ToolUpdateCommandParser
     {
-        public static Command ToolUpdate()
+        public static readonly Argument<string> PackageIdArgument = ToolInstallCommandParser.PackageIdArgument;
+
+        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption;
+
+        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption;
+
+        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption;
+
+        public static readonly Option<string> ConfigOption = ToolInstallCommandParser.ConfigOption;
+
+        public static readonly Option<string[]> AddSourceOption = ToolInstallCommandParser.AddSourceOption;
+
+        public static readonly Option<string> FrameworkOption = ToolInstallCommandParser.FrameworkOption;
+
+        public static readonly Option<string> VersionOption = ToolInstallCommandParser.VersionOption;
+
+        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption;
+
+        public static readonly Option<bool> PrereleaseOption = ToolSearchCommandParser.PrereleaseOption;
+
+        public static readonly Option<VerbosityOptions> VerbosityOption = ToolInstallCommandParser.VerbosityOption;
+
+        private static readonly Command Command = ConstructCommand();
+
+        public static Command GetCommand()
         {
-            return Create.Command("update",
-                LocalizableStrings.CommandDescription,
-                Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageId)
-                    .With(name: LocalizableStrings.PackageIdArgumentName,
-                          description: LocalizableStrings.PackageIdArgumentDescription),
-                Create.Option(
-                    $"-g|--{ToolAppliedOption.GlobalOption}",
-                    LocalizableStrings.GlobalOptionDescription,
-                    Accept.NoArguments()),
-                Create.Option(
-                    $"--{ToolAppliedOption.ToolPathOption}",
-                    LocalizableStrings.ToolPathOptionDescription,
-                    Accept.ExactlyOneArgument()
-                          .With(name: LocalizableStrings.ToolPathOptionName)),
-                Create.Option(
-                    $"--{ToolAppliedOption.LocalOption}",
-                    LocalizableStrings.LocalOptionDescription,
-                    Accept.NoArguments()),
-                Create.Option(
-                    "--configfile",
-                    LocalizableStrings.ConfigFileOptionDescription,
-                    Accept.ExactlyOneArgument()
-                        .With(name: LocalizableStrings.ConfigFileOptionName)),
-                Create.Option(
-                    "--add-source",
-                    LocalizableStrings.AddSourceOptionDescription,
-                    Accept.OneOrMoreArguments()
-                        .With(name: LocalizableStrings.AddSourceOptionName)),
-                Create.Option(
-                    "--framework",
-                    LocalizableStrings.FrameworkOptionDescription,
-                    Accept.ExactlyOneArgument()
-                          .With(name: LocalizableStrings.FrameworkOptionName)),
-                Create.Option(
-                    "--version",
-                    LocalizableStrings.VersionOptionDescription,
-                    Accept.ExactlyOneArgument()
-                        .With(name: LocalizableStrings.VersionOptionName)),
-                Create.Option(
-                    $"--{ToolAppliedOption.ToolManifest}",
-                    LocalizableStrings.ManifestPathOptionDescription,
-                    Accept.ZeroOrOneArgument()
-                        .With(name: LocalizableStrings.ManifestPathOptionName)),
-                ToolCommandRestorePassThroughOptions.DisableParallelOption(),
-                ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption(),
-                ToolCommandRestorePassThroughOptions.NoCacheOption(),
-                ToolCommandRestorePassThroughOptions.InteractiveRestoreOption(),
-                CommonOptions.HelpOption(),
-                CommonOptions.VerbosityOption());
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
+            var command = new Command("update", LocalizableStrings.CommandDescription);
+
+            command.AddArgument(PackageIdArgument);
+            command.AddOption(GlobalOption.WithHelpDescription(command, LocalizableStrings.GlobalOptionDescription));
+            command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
+            command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
+            command.AddOption(ConfigOption);
+            command.AddOption(AddSourceOption);
+            command.AddOption(FrameworkOption);
+            command.AddOption(VersionOption);
+            command.AddOption(ToolManifestOption.WithHelpDescription(command, LocalizableStrings.ManifestPathOptionDescription));
+            command.AddOption(PrereleaseOption);
+            command.AddOption(ToolCommandRestorePassThroughOptions.DisableParallelOption);
+            command.AddOption(ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
+            command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);
+            command.AddOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption);
+            command.AddOption(VerbosityOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ToolUpdateCommand(parseResult).Execute());
+
+            return command;
         }
     }
 }

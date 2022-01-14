@@ -292,7 +292,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
 
 
-            var embeddedResourceItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "EmbeddedResource", setup, projectChanges: projectChanges);
+            var embeddedResourceItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "EmbeddedResource", setup, projectChanges: projectChanges, identifier: "EmbeddedResource");
 
             var expectedEmbeddedResourceItems = new[]
             {
@@ -343,7 +343,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
 
 
-            var contentItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "Content", setup, projectChanges: projectChanges);
+            var contentItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "Content", setup, projectChanges: projectChanges, identifier: "Content");
 
             var expectedContentItems = new[]
             {
@@ -354,7 +354,7 @@ namespace Microsoft.NET.Build.Tests
 
             contentItems.Should().BeEquivalentTo(expectedContentItems);
 
-            var noneItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "None", setup, projectChanges: projectChanges);
+            var noneItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "None", setup, projectChanges: projectChanges, identifier: expectedContentItems.GetHashCode().ToString());
 
             var expectedNoneItems = new[]
             {
@@ -374,7 +374,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "DontIncludeSourceFilesInNone",
                 TargetFrameworks = "netcoreapp2.0",
                 IsExe = true,
-                IsSdkProject = true
             };
             testProject.AdditionalProperties["EnableDefaultCompileItems"] = "false";
             testProject.AdditionalProperties["EnableDefaultResourceItems"] = "false";
@@ -466,8 +465,8 @@ namespace Microsoft.NET.Build.Tests
                 "wwwroot/wwwsubfolder/wwwsubfolder.txt",
             });
         }
- 
-        [Fact]
+
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void Compile_items_can_be_explicitly_specified_while_default_EmbeddedResource_items_are_used()
         {
             Action<XDocument> projectChanges = project =>
@@ -498,7 +497,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DuplicateCompileItems",
                 TargetFrameworks = "netstandard1.6",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -531,7 +529,6 @@ namespace Microsoft.NET.Build.Tests
                 //  Underscore is in the project name so we can verify that the warning message output contained "PackageReference"
                 Name = "DeduplicatePackage_Reference",
                 TargetFrameworks = "netstandard1.6",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, "DeduplicatePackage_Reference")
@@ -569,7 +566,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "OverrideImplicitFrameworkReference",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -608,7 +604,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DuplicateFrameworkReference",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -647,7 +642,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "OverrideNetCoreApp",
                 TargetFrameworks = "netcoreapp2.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -685,11 +679,10 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DuplicatePackageReference",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             
             testProject.SourceFiles["Test.cs"] = @"
 public class Class1

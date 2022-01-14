@@ -6,15 +6,14 @@ using System.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-
 using FluentAssertions;
-
 using Xunit.Abstractions;
 using Xunit;
 using System;
 using System.IO;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Microsoft.Build.Utilities;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -45,7 +44,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = isExe,
                 SourceFiles =
@@ -134,14 +132,15 @@ namespace Microsoft.NET.Build.Tests
                     });
 
                 case ("netcoreapp3.0", true):
-                    return (VBRuntime.Referenced, AssertionHelper.AppendApphostOnNonMacOS("HelloWorld", new[]
+                    return (VBRuntime.Referenced, new[]
                     {
+                        $"HelloWorld{Constants.ExeSuffix}",
                         "HelloWorld.dll",
                         "HelloWorld.pdb",
                         "HelloWorld.runtimeconfig.json",
                         "HelloWorld.runtimeconfig.dev.json",
                         "HelloWorld.deps.json",
-                    }));
+                    });
 
                 case ("netcoreapp3.0", false):
                    return (VBRuntime.Referenced, new[]
@@ -181,7 +180,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [WindowsOnlyFact(Skip="https://github.com/dotnet/sdk/issues/3678")]
+        [WindowsOnlyFact]
         public void It_builds_a_vb_wpf_app()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;

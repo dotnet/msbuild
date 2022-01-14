@@ -36,22 +36,22 @@ Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cl
         <source>Welcome to .NET {0}!
 ---------------------
 SDK Version: {1}</source>
-        <target state="new">Welcome to .NET {0}!
+        <target state="translated">欢迎使用 .NET {0}!
 ---------------------
-SDK Version: {1}</target>
+SDK 版本: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
         <source>Telemetry
 ---------
-The .NET tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
 Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="needs-review-translation">遥测
+        <target state="translated">遥测
 ---------
-.NET Core 工具收集使用数据，以帮助我们改善你的体验。数据是匿名的。它由 Microsoft 收集并与社区共享。你可以通过使用喜欢的 shell 将 DOTNET_CLI_TELEMETRY_OPTOUT 环境变量设置为 "1" 或 "true" 来选择退出遥测。
+.NET 工具会收集用法数据，帮助我们改善你的体验。它由 Microsoft 收集并与社区共享。你可通过使用喜欢的 shell 将 DOTNET_CLI_TELEMETRY_OPTOUT 环境变量设置为 "1" 或 "true" 来选择退出遥测。
 
-阅读有关 .NET Core CLI 工具遥测的更多信息: https://aka.ms/dotnet-cli-telemetry</target>
+阅读有关 .NET CLI 工具遥测的更多信息: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

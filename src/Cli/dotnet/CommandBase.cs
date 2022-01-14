@@ -1,18 +1,17 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli
 {
     public abstract class CommandBase
     {
-        protected CommandBase()
-        {
-        }
+        protected ParseResult _parseResult;
 
         protected CommandBase(ParseResult parseResult)
         {
+            _parseResult = parseResult;
             ShowHelpOrErrorIfAppropriate(parseResult);
         }
 

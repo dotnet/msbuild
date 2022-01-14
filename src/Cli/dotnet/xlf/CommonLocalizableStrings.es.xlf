@@ -2,6 +2,26 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchitectureOptionDescription">
+        <source>The target architecture.</source>
+        <target state="translated">La arquitectura de destino.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotResolveRuntimeIdentifier">
+        <source>Resolving the current runtime identifier failed.</source>
+        <target state="translated">No se ha podido resolver el identificador en el tiempo de ejecución actual.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndArchOptions">
+        <source>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</source>
+        <target state="translated">No se admite la especificación de las opciones '-r|--runtime' y '-a|--arch'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndOsOptions">
+        <source>Specifying both the `-r|--runtime` and `-os` options is not supported.</source>
+        <target state="translated">No se admite la especificación de las opciones '-r|--runtime' y '-os'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
@@ -9,7 +29,7 @@
       </trans-unit>
       <trans-unit id="CommandPrereleaseOptionDescription">
         <source>Allows prerelease packages to be installed.</source>
-        <target state="new">Allows prerelease packages to be installed.</target>
+        <target state="translated">Permite que se instalen paquetes de versión preliminar.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
@@ -75,9 +95,19 @@ export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>
+      <trans-unit id="FrameworkDependentOptionDescription">
+        <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
+        <target state="translated">Publique la aplicación como una aplicación dependiente del marco de trabajo. para ejecutar la aplicación debe instalarse un entorno de ejecución de .NET compatible en el equipo de destino.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">Se han encontrado varios proyectos en "{0}". Especifique el que debe usarse.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperatingSystemOptionDescription">
+        <source>The target operating system.</source>
+        <target state="translated">El sistema operativo de destino.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -133,6 +163,18 @@ export PATH="$PATH:{0}"
       <trans-unit id="Package">
         <source>Package</source>
         <target state="translated">Paquete</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
+        <target state="translated">Las opciones '--self-contained' y '--no-self-contained' no se pueden usar juntas.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="translated">Publique el entorno de ejecución .NET con la aplicación para que no sea necesario instalar dicho entorno en la máquina de destino.
+El valor predeterminado es "true" si se especifica un identificador de entorno de ejecución.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -647,7 +689,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="translated">PLATAFORMA</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
@@ -714,17 +756,17 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="needs-review-translation">Dado que acaba de instalar el SDK de .Net Core, tendrá que cerrar sesión o reiniciarla antes de ejecutar la herramienta instalada.</target>
+        <target state="translated">Dado que acaba de instalar el SDK de .NET, tendrá que cerrar la sesión o reiniciarla antes de ejecutar la herramienta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="needs-review-translation">Dado que acaba de instalar el SDK de .Net Core, tendrá que volver a abrir el terminal antes de ejecutar la herramienta instalada.</target>
+        <target state="translated">Dado que acaba de instalar el SDK de .NET, tendrá que volver a abrir el terminal antes de ejecutar la herramienta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="needs-review-translation">Dado que acaba de instalar el SDK de .Net Core, tendrá que volver a abrir la ventana del símbolo del sistema antes de ejecutar la herramienta instalada.</target>
+        <target state="translated">Dado que acaba de instalar el SDK de .NET, tendrá que volver a abrir la ventana del símbolo del sistema antes de ejecutar la herramienta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
@@ -901,7 +943,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ProjectArgumentName">
         <source>PROJECT</source>
-        <target state="translated">PROYECTO</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
@@ -916,22 +958,22 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="translated">PLATAFORMA</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="translated">ID_DEL_ENTORNO_DE_TIEMPO_DE_EJECUCIÓN</target>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationArgumentName">
         <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURACIÓN</target>
+        <target state="translated">CONFIGURATION</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="translated">SUFIJO_DE_VERSIÓN</target>
+        <target state="translated">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentDescription">
@@ -941,7 +983,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
-        <target state="translated">PROYECTO | SOLUCIÓN</target>
+        <target state="translated">PROJECT | SOLUTION</target>
         <note />
       </trans-unit>
     </body>

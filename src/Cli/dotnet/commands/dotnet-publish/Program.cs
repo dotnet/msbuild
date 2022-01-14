@@ -1,12 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.MSBuild;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Publish
@@ -15,56 +14,50 @@ namespace Microsoft.DotNet.Tools.Publish
     {
         private PublishCommand(
             IEnumerable<string> msbuildArgs,
-            IEnumerable<string> userDefinedArguments,
-            IEnumerable<string> trailingArguments,
             bool noRestore,
             string msbuildPath = null)
-            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
+            : base(msbuildArgs, noRestore, msbuildPath)
         {
         }
 
         public static PublishCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            var parser = Parser.Instance;
+            var parseResult = parser.ParseFrom("dotnet publish", args);
+            return FromParseResult(parseResult);
+        }
+
+        public static PublishCommand FromParseResult(ParseResult parseResult, string msbuildPath = null)
+        {
+            parseResult.HandleDebugSwitch();
 
             var msbuildArgs = new List<string>();
 
-            var parser = Parser.Instance;
-
-            var result = parser.ParseFrom("dotnet publish", args);
-
-            result.ShowHelpOrErrorIfAppropriate();
+            parseResult.ShowHelpOrErrorIfAppropriate();
 
             msbuildArgs.Add("-target:Publish");
 
-            var appliedPublishOption = result["dotnet"]["publish"];
+            CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(PublishCommandParser.SelfContainedOption),
+                parseResult.HasOption(PublishCommandParser.NoSelfContainedOption));
 
-            if (appliedPublishOption.HasOption("--self-contained") &&
-                appliedPublishOption.HasOption("--no-self-contained"))
-            {
-                throw new GracefulException(LocalizableStrings.SelfContainAndNoSelfContainedConflict);
-            }
+            msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PublishCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(appliedPublishOption.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
-            msbuildArgs.AddRange(appliedPublishOption.Arguments);
-
-            bool noRestore = appliedPublishOption.HasOption("--no-restore")
-                          || appliedPublishOption.HasOption("--no-build");
+            bool noRestore = parseResult.HasOption(PublishCommandParser.NoRestoreOption)
+                          || parseResult.HasOption(PublishCommandParser.NoBuildOption);
 
             return new PublishCommand(
                 msbuildArgs,
-                appliedPublishOption.OptionValuesToBeForwarded(),
-                appliedPublishOption.Arguments,
                 noRestore,
                 msbuildPath);
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            parseResult.HandleDebugSwitch();
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

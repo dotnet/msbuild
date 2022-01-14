@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Razor is a markup syntax for adding server-side logic to web pages. This assembly contains infrastructure supporting Razor MSBuild integration.</Description>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>rzc</AssemblyName>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+
+    <!-- This is not a package, it is part of Razor SDK. -->
+    <IsPackable>false</IsPackable>
+    <IsShipping>false</IsShipping>
+
+    <!-- Don't produce rzc.exe -->
+    <UseAppHost>false</UseAppHost>
+    <RuntimeIdentifier />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="$(MicrosoftCodeAnalysisRazorToolingInternalVersion)" />
+    <!-- We include a package reference to the M.C.C version used in the repo to ensure that NuGet's dependency
+    resolution favors this version when writing the assembly reference metadata to `rzc.dll`. Without this package
+    reference, NuGet will resolve the version of M.C.C at the next level of the dependency tree. M.A.R.L uses M.C.C
+    version 3.8.0. By including this reference, NuGet will resolve the assembly associated with $(MicrosoftCodeAnalysisCSharpPackageVersion)
+    since it is higher up the dependency tree.
+
+    This is needed to ensure that the assembly reference to M.C.C in rzc.dll always matches what is available in
+    `Roslyn/bincore` for our consolidate loading logic. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
+    <PackageReference Include="Microsoft.Css.Parser" Version="$(MicrosoftCssParserVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal"
+      Version="$(MicrosoftAspNetCoreMvcRazorExtensionsToolingInternalPackageVersion)"
+      ReferenceOutputAssembly="false"
+      SkipGetTargetFrameworkProperties="true"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculatorCore.cs" LinkBase="Common"/>
+  </ItemGroup>
+
+  <!-- This makes it so that the runtimeconfig.json is included as part of the build output of the project that references this project. -->
+  <Target Name="PreserveRuntimeConfig" BeforeTargets="GetCopyToOutputDirectoryItems">
+    <ItemGroup>
+      <AllItemsFullPathWithTargetPath Include="$(ProjectRuntimeConfigFilePath)">
+        <TargetPath>$(ProjectRuntimeConfigFileName)</TargetPath>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AllItemsFullPathWithTargetPath>
+    </ItemGroup>
+  </Target>
+</Project>

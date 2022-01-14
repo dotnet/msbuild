@@ -1,0 +1,45 @@
+﻿{
+    "version": "6.0.0",
+    "workloads": {
+        "mock-workload-1": {
+            "description": "mock-workload-1",
+            "kind": "dev",
+            "packs": [
+                "Test.Pack.A",
+                "Test.Pack.B",
+                "Test.Pack.C"
+            ]
+        },
+        "mock-workload-2": {
+            "description": "mock-workload-2",
+            "packs": [
+                "Test.Pack.C",
+                "Test.Pack.D"
+            ]
+        },
+        "mock-workload-3": {
+            "description": "mock-workload-3",
+            "packs": [
+                "Test.Pack.A"
+            ]
+        }
+    },
+    "packs": {
+        "Test.Pack.A": {
+            "version": "2.0.0",
+            "kind": "sdk"
+        },
+        "Test.Pack.B": {
+            "version": "2.0.0",
+            "kind": "framework"
+        },
+        "Test.Pack.C": {
+            "version": "3.0.0",
+            "kind": "template"
+        },
+        "Test.Pack.D": {
+            "version": "4.0.0",
+            "kind": "framework"
+        }
+    }
+}

@@ -29,25 +29,24 @@ namespace Microsoft.NET.Build.Tests
         {
             BuildAppWithTransitiveDependenciesAndTransitiveCompileReference(new []{"/p:DisableTransitiveProjectReferences=true"});
         }
-        
+
         [Fact]
         public void It_builds_the_project_successfully_with_static_graph_and_isolation()
         {
-            BuildAppWithTransitiveDependenciesAndTransitiveCompileReference(new []{"/graph", "/isolate"});
+            BuildAppWithTransitiveDependenciesAndTransitiveCompileReference(new []{"/graph"});
         }
         
         [Fact]
         public void It_cleans_the_project_successfully_with_static_graph_and_isolation()
         {
-            var (testAsset, outputDirectories) = BuildAppWithTransitiveDependenciesAndTransitiveCompileReference(new []{"/graph", "/isolate"});
+            var (testAsset, outputDirectories) = BuildAppWithTransitiveDependenciesAndTransitiveCompileReference(new []{"/graph"});
 
             var cleanCommand = new DotnetCommand(
                 Log,
                 "msbuild",
                 Path.Combine(testAsset.TestRoot, "1", "1.csproj"),
                 "/t:clean",
-                "/graph",
-                "/isolate");
+                "/graph");
 
             cleanCommand
                 .Execute()
@@ -224,7 +223,6 @@ namespace _{0}
             var project4 = new TestProject
             {
                 Name = "4",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard1.3",
                 SourceFiles =
                 {
@@ -235,7 +233,6 @@ namespace _{0}
             var project3 = new TestProject
             {
                 Name = "3",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard1.6",
                 ReferencedProjects = { project4 },
                 SourceFiles =
@@ -247,7 +244,6 @@ namespace _{0}
             var project2 = new TestProject
             {
                 Name = "2",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0",
                 ReferencedProjects = { project3 },
                 SourceFiles =
@@ -260,7 +256,6 @@ namespace _{0}
             {
                 Name = "1",
                 IsExe = true,
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.1",
                 ReferencedProjects = { project2 },
                 SourceFiles =
@@ -277,7 +272,6 @@ namespace _{0}
             var project5 = new TestProject
             {
                 Name = "5",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard1.3",
                 SourceFiles =
                 {
@@ -288,7 +282,6 @@ namespace _{0}
             var project4 = new TestProject
             {
                 Name = "4",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard1.3;netstandard1.6;net461",
                 ReferencedProjects = { project5 },
                 SourceFiles =
@@ -300,7 +293,6 @@ namespace _{0}
             var project3 = new TestProject
             {
                 Name = "3",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0;net462",
                 ReferencedProjects = { project4 },
                 SourceFiles =
@@ -312,7 +304,6 @@ namespace _{0}
             var project2 = new TestProject
             {
                 Name = "2",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard1.5",
                 ReferencedProjects = { project4 },
                 SourceFiles =
@@ -325,7 +316,6 @@ namespace _{0}
             {
                 Name = "1",
                 IsExe = true,
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.1;net472",
                 ReferencedProjects = { project2, project3 },
                 SourceFiles =

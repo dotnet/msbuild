@@ -3,14 +3,13 @@
 
 using System;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Tool.Update;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
-using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine.Parsing;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
@@ -29,10 +28,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void WhenRunWithBothGlobalAndToolPathShowErrorMessage()
         {
             var result = Parser.Instance.Parse($"dotnet tool update -g --tool-path /tmp/folder {PackageId}");
-            var appliedCommand = result["dotnet"]["tool"]["update"];
 
             var toolUpdateCommand = new ToolUpdateCommand(
-                appliedCommand,
                 result);
 
             Action a = () => toolUpdateCommand.Execute();
@@ -47,10 +44,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void WhenRunWithBothGlobalAndLocalShowErrorMessage()
         {
             var result = Parser.Instance.Parse($"dotnet tool update --local --tool-path /tmp/folder {PackageId}");
-            var appliedCommand = result["dotnet"]["tool"]["update"];
 
             var toolUpdateCommand = new ToolUpdateCommand(
-                appliedCommand,
                 result);
 
             Action a = () => toolUpdateCommand.Execute();
@@ -66,10 +61,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         {
             var result =
                 Parser.Instance.Parse($"dotnet tool update -g --tool-manifest folder/my-manifest.format {PackageId}");
-            var appliedCommand = result["dotnet"]["tool"]["update"];
 
             var toolUpdateCommand = new ToolUpdateCommand(
-                appliedCommand,
                 result);
 
             Action a = () => toolUpdateCommand.Execute();
@@ -84,10 +77,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var result =
                 Parser.Instance.Parse(
                     $"dotnet tool update --tool-path /tmp/folder --tool-manifest folder/my-manifest.format {PackageId}");
-            var appliedCommand = result["dotnet"]["tool"]["update"];
 
             var toolUpdateCommand = new ToolUpdateCommand(
-                appliedCommand,
                 result);
 
             Action a = () => toolUpdateCommand.Execute();

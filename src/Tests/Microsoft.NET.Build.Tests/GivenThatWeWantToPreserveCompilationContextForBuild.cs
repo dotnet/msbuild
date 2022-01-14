@@ -30,7 +30,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "CopyLocalFalseReferences",
                 TargetFrameworks = "net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -45,7 +44,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandardLibrary",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
                 IsExe = false
             };
 
@@ -94,7 +92,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NuGetCopyLocalFalse",
                 TargetFrameworks = "netcoreapp2.0",
-                IsSdkProject = true,
                 IsExe = true
             };
             testProject.AdditionalProperties.Add("PreserveCompilationContext", "true");

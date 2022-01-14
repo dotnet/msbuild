@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
@@ -26,13 +27,19 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("net46")]
         [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0-windows")]
         public void It_provides_runtime_configuration_and_shadow_copy_files_via_outputgroup(string targetFramework)
         {
+            if (targetFramework == "net5.0-windows" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // net5.0-windows is windows only scenario
+                return;
+            }
+
             var projectRef = new TestProject
             {
                 Name = "ReferencedProject",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
 
             var project = new TestProject
@@ -40,8 +47,7 @@ namespace Microsoft.NET.Build.Tests
                 Name = "DesignerTest",
                 IsExe = true,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
-                PackageReferences = { new TestPackageReference("NewtonSoft.Json", "12.0.1") },
+                PackageReferences = { new TestPackageReference("NewtonSoft.Json", "13.0.1") },
                 ReferencedProjects = { projectRef }
             };
 
@@ -95,12 +101,15 @@ namespace Microsoft.NET.Build.Tests
             switch (targetFramework)
             {
                 case "netcoreapp3.0":
+                case "net5.0-windows":
                     var depsFileLibraries = GetRuntimeLibraryFileNames(depsFile);
                     depsFileLibraries.Should().BeEquivalentTo(new[] { "Newtonsoft.Json.dll" });
                     
                     var options = GetRuntimeOptions(runtimeConfig);
                     options["configProperties"]["Microsoft.NETCore.DotNetHostPolicy.SetAppPaths"].Value<bool>().Should().BeTrue();
-                    options["tfm"].Value<string>().Should().Be(targetFramework);
+                    // runtimeconfiguration should not have platform.
+                    // it should be net5.0 instead of net5.0-windows
+                    options["tfm"].Value<string>().Should().Be(targetFramework.Split('-')[0]);
                     options["additionalProbingPaths"].Value<JArray>().Should().NotBeEmpty();
 
                     otherFiles.Should().BeEquivalentTo(new[] { "ReferencedProject.dll", "ReferencedProject.pdb" });

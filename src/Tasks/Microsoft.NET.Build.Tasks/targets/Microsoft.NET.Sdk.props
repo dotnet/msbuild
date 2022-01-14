@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -16,7 +16,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DisableHandlePackageFileConflicts>true</DisableHandlePackageFileConflicts>
   </PropertyGroup>
 
-  <!-- Default configuration and platform to Debug|AnyCPU--> 
+  <!-- Default configuration and platform to Debug|AnyCPU-->
   <PropertyGroup>
     <Configurations Condition=" '$(Configurations)' == '' ">Debug;Release</Configurations>
     <Platforms Condition=" '$(Platforms)' == '' ">AnyCPU</Platforms>
@@ -46,10 +46,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- User-facing platform-specific defaults -->
 
-  <!-- 
+  <!--
     NOTE:
-    
-     * We cannot compare against $(Platform) directly as that will give VS cause to instantiate extra 
+
+     * We cannot compare against $(Platform) directly as that will give VS cause to instantiate extra
        configurations, for each combination, which leads to performance problems and clutter in the sln
        in the common AnyCPU-only case.
 
@@ -60,7 +60,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
   <PropertyGroup>
     <_PlatformWithoutConfigurationInference>$(Platform)</_PlatformWithoutConfigurationInference>
-  </PropertyGroup>  
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(_PlatformWithoutConfigurationInference)' == 'x64' ">
     <PlatformTarget Condition=" '$(PlatformTarget)' == '' ">x64</PlatformTarget>
   </PropertyGroup>
@@ -81,12 +81,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Skip import of Microsoft.NuGet.props and Microsoft.NuGet.targets -->
     <SkipImportNuGetProps>true</SkipImportNuGetProps>
     <SkipImportNuGetBuildTargets>true</SkipImportNuGetBuildTargets>
-    
+
     <!-- NuGet should always restore .NET SDK projects with "PackageReference" style restore.  Setting this property will
          cause the right thing to happen even if there aren't any PackageReference items in the project, such as when
          a project targets .NET Framework and doesn't have any direct package dependencies. -->
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-    
+
     <!-- Exclude GAC, registry, output directory from search paths. -->
     <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == '' ">{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
     <DesignTimeAssemblySearchPaths Condition=" '$(DesignTimeAssemblySearchPaths)' == '' ">$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
@@ -101,9 +101,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DebugSymbols Condition="'$(DebugSymbols)'==''">false</DebugSymbols>
     <CheckForOverflowUnderflow Condition="'$(CheckForOverflowUnderflow)'==''">false</CheckForOverflowUnderflow>
     <AutomaticallyUseReferenceAssemblyPackages Condition="'$(AutomaticallyUseReferenceAssemblyPackages)'==''">true</AutomaticallyUseReferenceAssemblyPackages>
-    <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.0</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
+    <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.2</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
     <CopyConflictingTransitiveContent>false</CopyConflictingTransitiveContent>
     <MSBuildCopyContentTransitively Condition="'$(MSBuildCopyContentTransitively)' == ''">true</MSBuildCopyContentTransitively>
+    <ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts Condition="'$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)' == ''">true</ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts>
 
     <!-- Uncomment this once https://github.com/Microsoft/visualfsharp/issues/3207 gets fixed -->
     <!-- <WarningsAsErrors>$(WarningsAsErrors);NU1605</WarningsAsErrors> -->
@@ -113,23 +114,40 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Path to project that the .NET CLI will build in order to generate deps.json files for .NET CLI tools -->
     <ToolDepsJsonGeneratorProject>$(MSBuildThisFileDirectory)GenerateDeps\GenerateDeps.proj</ToolDepsJsonGeneratorProject>
   </PropertyGroup>
-  
+
   <!-- Default item includes (globs and implicit references) -->
   <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
-  
+
+  <!-- Put workload resolution behind a feature flag.  It can be enabled either by setting the MSBuildEnableWorkloadResolver environment variable to true, or by
+       putting an EnableWorkloadResolver.sentinel file beside the MSBuild SDK resolver DLL -->
+  <PropertyGroup Condition="'$(MSBuildEnableWorkloadResolver)' == ''">
+    <__DisableWorkloadResolverSentinelPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildBinPath)\DisableWorkloadResolver.sentinel</__DisableWorkloadResolverSentinelPath>
+    <__DisableWorkloadResolverSentinelPath Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildBinPath)\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\DisableWorkloadResolver.sentinel</__DisableWorkloadResolverSentinelPath>
+    <MSBuildEnableWorkloadResolver Condition="!Exists('$(__DisableWorkloadResolverSentinelPath)')">true</MSBuildEnableWorkloadResolver>
+  </PropertyGroup>
+
+  <!-- Import workload props -->
+  <Import Project="Microsoft.NET.Sdk.ImportWorkloads.props" Condition="'$(MSBuildEnableWorkloadResolver)' == 'true'" />
+
   <!-- List of supported .NET Core and .NET Standard TFMs -->
   <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
-  
+
+  <!-- List of supported target platforms -->
+  <Import Project="Microsoft.NET.SupportedPlatforms.props" />
+
   <!-- List of supported .NET windows target platform versions -->
-  <Import Project="Microsoft.NET.WindowsSupportedTargetPlatforms.props" />
+  <Import Project="Microsoft.NET.WindowsSdkSupportedTargetPlatforms.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.props" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ILLink.props" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Compatibility.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.props" />
 
-  <Import Project="$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.props"/>
+  <Import Project="$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.props" Condition="Exists('$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.props')" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.props" />
+
 </Project>

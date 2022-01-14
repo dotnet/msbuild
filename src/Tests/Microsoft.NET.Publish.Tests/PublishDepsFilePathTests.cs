@@ -81,7 +81,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "TestsPublishDepsFilePath",
                 TargetFrameworks = "netcoreapp3.1",
-                IsSdkProject = true,
                 IsExe = true
             };
 

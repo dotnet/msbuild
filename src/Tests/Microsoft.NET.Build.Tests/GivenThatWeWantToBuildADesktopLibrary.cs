@@ -39,7 +39,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net46",
-                IsSdkProject = true,
             };
 
             netFrameworkLibrary.PackageReferences.Add(new TestPackageReference("System.Collections.Immutable", "1.4.0"));
@@ -66,7 +65,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NETStandardLibrary",
                 TargetFrameworks = "netstandard1.4",
-                IsSdkProject = true
             };
 
             netStandardLibrary.SourceFiles["NETStandard.cs"] = @"
@@ -84,7 +82,6 @@ public class NETStandard
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net461",
-                IsSdkProject = true
             };
 
             netFrameworkLibrary.ReferencedProjects.Add(netStandardLibrary);
@@ -131,7 +128,6 @@ public class NETFramework
             {
                 Name = "NETStandardLibrary",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             netStandardLibrary.SourceFiles["NETStandard.cs"] = @"
@@ -147,7 +143,6 @@ public class NETStandard
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net461",
-                IsSdkProject = true
             };
             netFrameworkLibrary.ReferencedProjects.Add(netStandardLibrary);
 
@@ -183,7 +178,6 @@ public class NETFramework
             {
                 Name = "NETStandardLibrary",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             netStandardLibrary.SourceFiles["NETStandard.cs"] = @"
@@ -201,7 +195,6 @@ public class NETStandard
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net47",
-                IsSdkProject = true
             };
             netFrameworkLibrary.ReferencedProjects.Add(netStandardLibrary);
 
@@ -254,7 +247,6 @@ public class NETFramework
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
-                IsSdkProject = true
             };
 
             project.SourceFiles[project.Name + ".cs"] = $@"
@@ -306,7 +298,6 @@ public static class {project.Name}
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
-                IsSdkProject = true
             };
 
             if (useFacades)
@@ -315,7 +306,6 @@ public static class {project.Name}
                 {
                     Name = "NETStandard20Project",
                     TargetFrameworks = "netstandard2.0",
-                    IsSdkProject = true
                 };
 
                 project.ReferencedProjects.Add(netStandard2Project);
@@ -388,7 +378,6 @@ public static class {project.Name}
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
-                IsSdkProject = true
             };
 
             TestAsset testAsset = _testAssetsManager.CreateTestProject(project, "SimpleNamesWithHintPathsWithNewLines")
@@ -417,7 +406,6 @@ public static class {project.Name}
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
-                IsSdkProject = true
             };
 
             TestAsset referencedTestAsset = _testAssetsManager
@@ -440,7 +428,6 @@ public static class {project.Name}
             TestProject testProject = new TestProject()
             {
                 Name = "DependsOnPublish",
-                IsSdkProject = true,
                 TargetFrameworks = "net461",
                 IsExe = false
             };

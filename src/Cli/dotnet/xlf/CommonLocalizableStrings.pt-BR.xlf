@@ -2,6 +2,26 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchitectureOptionDescription">
+        <source>The target architecture.</source>
+        <target state="translated">A arquitetura de destino.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotResolveRuntimeIdentifier">
+        <source>Resolving the current runtime identifier failed.</source>
+        <target state="translated">Falha ao resolver o identificador de tempo de execução atual.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndArchOptions">
+        <source>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</source>
+        <target state="translated">Não há suporte para especificar as opções '-r |--runtime ' e '-a |--arch '.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndOsOptions">
+        <source>Specifying both the `-r|--runtime` and `-os` options is not supported.</source>
+        <target state="translated">Não há suporte para especificar as opções '-r |--runtime ' e '-a |--os '.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="translated">Permite que o comando seja interrompido e aguarde a ação ou entrada do usuário (por exemplo, para concluir a autenticação).</target>
@@ -9,7 +29,7 @@
       </trans-unit>
       <trans-unit id="CommandPrereleaseOptionDescription">
         <source>Allows prerelease packages to be installed.</source>
-        <target state="new">Allows prerelease packages to be installed.</target>
+        <target state="translated">Permite a instalação de pacotes de pré-lançamento.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
@@ -75,9 +95,19 @@ export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>
+      <trans-unit id="FrameworkDependentOptionDescription">
+        <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
+        <target state="translated">Publique o seu aplicativo como um aplicativo dependente de estrutura. Um runtime do .NET compatível precisa ser instalado no computador de destino para executar o aplicativo.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual deve ser usado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperatingSystemOptionDescription">
+        <source>The target operating system.</source>
+        <target state="translated">O sistema operacional de destino.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -133,6 +163,18 @@ export PATH="$PATH:{0}"
       <trans-unit id="Package">
         <source>Package</source>
         <target state="translated">Pacote</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
+        <target state="translated">As opções '--auto--contidas ' e '--não-independentes ' não podem ser usadas juntas.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="translated">Publique o runtime do .NET com seu aplicativo para que ele não precise estar instalado no computador de destino.
+O padrão é 'true' se um identificador de runtime for especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -714,17 +756,17 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="needs-review-translation">Já que você acabou de instalar o SDK do .NET Core, você ainda precisará fazer logoff ou reiniciar a sessão antes de executar a ferramenta instalada.</target>
+        <target state="translated">Já que você acabou de instalar o SDK do .NET, ainda precisará fazer logoff ou reiniciar a sessão antes de executar a ferramenta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="needs-review-translation">Já que você acabou de instalar o SDK do .NET Core, você ainda precisará reabrir o terminal antes de executar a ferramenta instalada.</target>
+        <target state="translated">Já que você acabou de instalar o SDK do .NET, ainda precisará reabrir o terminal antes de executar a ferramenta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="needs-review-translation">Já que você acabou de instalar o SDK do .NET Core, você ainda precisará reabrir a janela do Prompt de Comando antes de executar a ferramenta instalada.</target>
+        <target state="translated">Já que você acabou de instalar o SDK do .NET, ainda precisará reabrir a janela do Prompt de Comando antes de executar a ferramenta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
@@ -931,7 +973,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="translated">SUFIXO_DA_VERSÃO</target>
+        <target state="translated">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentDescription">
@@ -941,7 +983,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
-        <target state="translated">PROJETO | SOLUÇÃO</target>
+        <target state="translated">PROJECT | SOLUTION</target>
         <note />
       </trans-unit>
     </body>

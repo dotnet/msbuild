@@ -29,12 +29,17 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("netcoreapp3.0")]
         public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -78,7 +83,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:CopyLocalLockFileAssemblies=true");
 
             publishResult.Should().Pass();
@@ -130,7 +135,6 @@ namespace Microsoft.NET.Publish.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "Hello.World",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = rid,
                 IsExe = true,
@@ -149,7 +153,7 @@ public static class Program
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute().Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(
@@ -175,7 +179,6 @@ public static class Program
             TestProject testProject = new TestProject()
             {
                 Name = "Hello",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = runtimeIdentifier,
                 IsExe = true,
@@ -194,7 +197,7 @@ public static class Program
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: runtimeIdentifier);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -263,7 +266,6 @@ public static class Program
             {
                 Name = selfContained ? "SelfContainedWithConflicts" :
                     (ridSpecific ? "RidSpecificSharedConflicts" : "PortableWithConflicts"),
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = rid,
                 IsExe = true,
@@ -310,7 +312,7 @@ public static class Program
                     }
                 });
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -415,7 +417,7 @@ public static class Program
                 .CopyTestAsset("HelloWorld")
                 .WithSource();
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute("/p:RuntimeIdentifier=notvalid");
 
             publishResult.Should().Fail();
@@ -426,9 +428,10 @@ public static class Program
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
-                .WithSource();
+                .WithSource()
+                .WithTargetFramework("netcoreapp2.1");
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute("/p:RuntimeIdentifier=notvalid", "/p:EnsureNETCoreAppRuntime=false");
 
             publishResult.Should().Pass();
@@ -442,14 +445,13 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "PreserveNewestFilesOnPublish",
-                IsSdkProject = true,
                 TargetFrameworks = tfm,
                 IsExe = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: tfm);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand
                 .Execute("-v:n")
@@ -472,7 +474,6 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "InvokeBuildOnPublish",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true
             };
@@ -488,7 +489,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute("/p:NoBuild=true")
                 .Should()
                 .Fail()
@@ -509,7 +510,6 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "NoDuplicatesInResolvedPublishAssets",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 RuntimeIdentifier = "win-x64",
                 IsExe = true
@@ -552,7 +552,7 @@ public static class Program
 </Target>"));
                 });
 
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass()
@@ -581,12 +581,12 @@ public static class Program
             {
                 Name = "ConsoleWithPublishProfile",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish",
                 IsExe = true,
             };
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var identifer = (selfContained == null ? "null" : selfContained.ToString()) + (useAppHost == null ? "null" : useAppHost.ToString());
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: identifer);
 
             var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
             var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
@@ -602,7 +602,7 @@ public static class Program
 </Project>
 ");
 
-            var command = new PublishCommand(Log, projectDirectory);
+            var command = new PublishCommand(testProjectInstance);
             command
                 .Execute("/p:PublishProfile=test")
                 .Should()
@@ -649,14 +649,12 @@ public static class Program
             {
                 Name = "LibProjectWithDifferentTFM",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
             };
 
             var testProject = new TestProject()
             {
                 Name = "ExeWithPublishProfile",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -687,7 +685,7 @@ public static class Program
 </Project>
 ");
 
-            var command = new PublishCommand(Log, projectDirectory);
+            var command = new PublishCommand(testProjectInstance);
             command
                 .Execute(
                     $"/p:WebPublishProfileFile={publishProfilePath}",
@@ -695,6 +693,26 @@ public static class Program
                 )
                 .Should()
                 .Pass();
+        }
+
+        [Fact]
+        public void IsPublishableIsRespectedWhenMultitargeting()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "PublishMultitarget",
+                TargetFrameworks = "net472;net5.0"
+            };
+            testProject.AdditionalProperties.Add("IsPublishable", "false");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("The 'Publish' target is not supported without specifying a target framework.");
         }
     }
 }

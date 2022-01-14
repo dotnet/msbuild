@@ -56,7 +56,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     i => true);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
-                FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName(),
                 runtime,
                 Constants.DefaultPlatformLibrary,
                 runtimeFrameworks: null,
@@ -254,7 +254,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
-                FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName(),
                 runtime: null,
                 platformLibraryName: Constants.DefaultPlatformLibrary,
                 runtimeFrameworks: null,
@@ -306,7 +306,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 new ITaskItem[] { });
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
-                FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName(),
                 runtime: null,
                 platformLibraryName: Constants.DefaultPlatformLibrary,
                 runtimeFrameworks: null,

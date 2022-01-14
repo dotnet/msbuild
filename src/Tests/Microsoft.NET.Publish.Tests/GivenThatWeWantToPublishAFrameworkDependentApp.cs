@@ -64,7 +64,7 @@ namespace Microsoft.NET.Publish.Tests
                 msbuildArgs.Add("/p:TargetLatestRuntimePatch=true");
             }
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(msbuildArgs.ToArray())
                 .Should()
@@ -113,7 +113,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .WithTargetFramework("netcoreapp2.0");
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(
                     "/p:SelfContained=false",
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(Strings.FrameworkDependentAppHostRequiresVersion21);
+                .HaveStdOutContaining(Strings.FrameworkDependentAppHostRequiresVersion21.Replace("“", "\"").Replace("”", "\""));
         }
     }
 }

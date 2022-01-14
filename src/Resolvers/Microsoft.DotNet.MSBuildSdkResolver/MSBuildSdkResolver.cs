@@ -2,12 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
+using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.DotNetSdkResolver;
+using Microsoft.DotNet.NativeWrapper;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver;
+
+#nullable disable
 
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
@@ -16,7 +21,6 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
     //  2. Nevertheless, in the IDE, project re-evaluation can create new instances for each evaluation.
     //
     // As such, all state (instance or static) must be guarded against concurrent access/updates.
-    // Caches of minimum versions, compatible SDKs are static to benefit multiple IDE evaluations.
     // VSSettings are also effectively static (singleton instance that can be swapped by tests).
 
     public sealed class DotNetMSBuildSdkResolver : SdkResolver
@@ -29,52 +33,63 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         private readonly Func<string, string> _getEnvironmentVariable;
         private readonly NETCoreSdkResolver _netCoreSdkResolver;
 
+        private static CachingWorkloadResolver _staticWorkloadResolver = new CachingWorkloadResolver();
+
         public DotNetMSBuildSdkResolver() 
             : this(Environment.GetEnvironmentVariable, VSSettings.Ambient)
         {
         }
 
         // Test constructor
-        internal DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
+        public DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
         {
             _getEnvironmentVariable = getEnvironmentVariable;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
         }
 
-        private sealed class CachedResult
+        private sealed class CachedState
         {
+            public string DotnetRoot;
             public string MSBuildSdksDir;
             public string NETCoreSdkVersion;
+            public IDictionary<string, string> PropertiesToAdd;
+            public CachingWorkloadResolver WorkloadResolver;
         }
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory)
         {
+            string dotnetRoot = null;
             string msbuildSdksDir = null;
             string netcoreSdkVersion = null;
             IDictionary<string, string> propertiesToAdd = null;
             IDictionary<string, SdkResultItem> itemsToAdd = null;
             List<string> warnings = null;
+            CachingWorkloadResolver workloadResolver = null;
 
-            if (context.State is CachedResult priorResult)
+            if (context.State is CachedState priorResult)
             {
+                dotnetRoot = priorResult.DotnetRoot;
                 msbuildSdksDir = priorResult.MSBuildSdksDir;
                 netcoreSdkVersion = priorResult.NETCoreSdkVersion;
+                propertiesToAdd = priorResult.PropertiesToAdd;
+                workloadResolver = priorResult.WorkloadResolver;
+            }
+
+            if (context.IsRunningInVisualStudio)
+            {
+                workloadResolver = _staticWorkloadResolver;
+            }
+
+            if (workloadResolver == null)
+            {
+                workloadResolver = new CachingWorkloadResolver();
             }
 
             if (msbuildSdksDir == null)
             {
-                // These are overrides that are used to force the resolved SDK tasks and targets to come from a given
-                // base directory and report a given version to msbuild (which may be null if unknown. One key use case
-                // for this is to test SDK tasks and targets without deploying them inside the .NET Core SDK.
-                msbuildSdksDir = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR");
-                netcoreSdkVersion = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
-            }
-
-            if (msbuildSdksDir == null)
-            {
-                string dotnetExeDir = _netCoreSdkResolver.GetDotnetExeDirectory();
+                dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable);
                 string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
-                var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetExeDir);
+                var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetRoot);
 
                 if (resolverResult.ResolvedSdkDirectory == null)
                 {
@@ -85,6 +100,20 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
                 msbuildSdksDir = Path.Combine(resolverResult.ResolvedSdkDirectory, "Sdks");
                 netcoreSdkVersion = new DirectoryInfo(resolverResult.ResolvedSdkDirectory).Name;
+
+                // These are overrides that are used to force the resolved SDK tasks and targets to come from a given
+                // base directory and report a given version to msbuild (which may be null if unknown. One key use case
+                // for this is to test SDK tasks and targets without deploying them inside the .NET Core SDK.
+                var msbuildSdksDirFromEnv = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR");
+                var netcoreSdkVersionFromEnv = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
+                if (!string.IsNullOrEmpty(msbuildSdksDirFromEnv))
+                {
+                    msbuildSdksDir = msbuildSdksDirFromEnv;
+                }
+                if (!string.IsNullOrEmpty(netcoreSdkVersionFromEnv))
+                {
+                    netcoreSdkVersion = netcoreSdkVersionFromEnv;
+                }
 
                 if (IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, sdkReference.MinimumVersion))
                 {
@@ -132,11 +161,23 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 }
             }
 
-            context.State = new CachedResult
+            context.State = new CachedState
             {
+                DotnetRoot = dotnetRoot,
                 MSBuildSdksDir = msbuildSdksDir,
-                NETCoreSdkVersion = netcoreSdkVersion
+                NETCoreSdkVersion = netcoreSdkVersion,
+                PropertiesToAdd = propertiesToAdd,
+                WorkloadResolver = workloadResolver
             };
+
+            //  First check if requested SDK resolves to a workload SDK pack
+            string userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
+            var workloadResult = workloadResolver.Resolve(sdkReference.Name, dotnetRoot, netcoreSdkVersion, userProfileDir);
+
+            if (workloadResult is not CachingWorkloadResolver.NullResolutionResult)
+            {
+                return workloadResult.ToSdkResult(sdkReference, factory);
+            }
 
             string msbuildSdkDir = Path.Combine(msbuildSdksDir, sdkReference.Name, "Sdk");
             if (!Directory.Exists(msbuildSdkDir))

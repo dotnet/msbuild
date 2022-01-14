@@ -165,6 +165,18 @@ namespace Microsoft.NET.TestFramework
 
                 testContext.TestPackages = Path.Combine(artifactsDir, "tmp", repoConfiguration, "testpackages");
             }
+            else if (runAsTool)
+            {
+                testContext.NuGetFallbackFolder = Path.Combine(testContext.TestAssetsDirectory, ".nuget", "NuGetFallbackFolder");
+                testContext.NuGetExePath = Path.Combine(testContext.TestAssetsDirectory, ".nuget", $"nuget{Constants.ExeSuffix}");
+                testContext.NuGetCachePath = Path.Combine(testContext.TestAssetsDirectory, ".nuget", "packages");
+
+                var testPackages = Path.Combine(testContext.TestExecutionDirectory, "Testpackages");
+                if (Directory.Exists(testPackages))
+                {
+                    testContext.TestPackages = testPackages;
+                }
+            }
             else
             {
                 var nugetFolder = FindFolderInTree(".nuget", AppContext.BaseDirectory, false)
@@ -196,15 +208,17 @@ namespace Microsoft.NET.TestFramework
                 "MSBuildSDKsPath",
                 Path.Combine(testContext.ToolsetUnderTest.SdksPath));
 
+#if NETCOREAPP
             DotNet.Cli.Utils.MSBuildForwardingAppWithoutLogging.MSBuildExtensionsPathTestHook =
                 testContext.ToolsetUnderTest.SdkFolderUnderTest;
+#endif
         }
 
         public static string GetRepoRoot()
         {
             string directory = AppContext.BaseDirectory;
 
-            while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
+            while (directory != null && !Directory.Exists(Path.Combine(directory, ".git")))
             {
                 directory = Directory.GetParent(directory)?.FullName;
             }

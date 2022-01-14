@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Http
+namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 { 
     public class HttpResponseMessageWrapper : IHttpResponse
     {

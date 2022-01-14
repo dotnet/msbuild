@@ -149,22 +149,22 @@ i odpowiednie identyfikatory pakietów zainstalowanych narzędzi można znaleź�
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="translated">ŹRÓDŁO</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="translated">PLIK</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="translated">PLATFORMA</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="translated">ŚCIEŻKA</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
@@ -174,7 +174,7 @@ i odpowiednie identyfikatory pakietów zainstalowanych narzędzi można znaleź�
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">WERSJA</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
     </body>

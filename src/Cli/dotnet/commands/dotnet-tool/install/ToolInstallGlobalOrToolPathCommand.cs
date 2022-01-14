@@ -3,25 +3,28 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Common;
+using NuGet.Frameworks;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
-		DirectoryPath? nonGlobalLocation = null,
-		IEnumerable<string> forwardRestoreArguments = null);
+        DirectoryPath? nonGlobalLocation = null,
+        IEnumerable<string> forwardRestoreArguments = null);
 
     internal class ToolInstallGlobalOrToolPathCommand : CommandBase
     {
@@ -30,6 +33,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly IReporter _errorReporter;
         private CreateShellShimRepository _createShellShimRepository;
         private CreateToolPackageStoresAndInstaller _createToolPackageStoresAndInstaller;
+        private readonly ShellShimTemplateFinder _shellShimTemplateFinder;
 
         private readonly PackageId _packageId;
         private readonly string _packageVersion;
@@ -39,37 +43,44 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly bool _global;
         private readonly string _verbosity;
         private readonly string _toolPath;
+        private readonly string _architectureOption;
         private IEnumerable<string> _forwardRestoreArguments;
 
         public ToolInstallGlobalOrToolPathCommand(
-            AppliedOption appliedCommand,
             ParseResult parseResult,
             CreateToolPackageStoresAndInstaller createToolPackageStoreAndInstaller = null,
             CreateShellShimRepository createShellShimRepository = null,
             IEnvironmentPathInstruction environmentPathInstruction = null,
-            IReporter reporter = null)
+            IReporter reporter = null,
+            INuGetPackageDownloader nugetPackageDownloader = null)
             : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-
-            _packageId = new PackageId(appliedCommand.Arguments.Single());
-            _packageVersion = appliedCommand.ValueOrDefault<string>("version");
-            _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
-            _framework = appliedCommand.ValueOrDefault<string>("framework");
-            _source = appliedCommand.ValueOrDefault<string[]>("add-source");
-            _global = appliedCommand.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
-            _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
-            _toolPath = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
+            _packageId = new PackageId(parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
+            _packageVersion = parseResult.GetValueForOption(ToolInstallCommandParser.VersionOption);
+            _configFilePath = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
+            _framework = parseResult.GetValueForOption(ToolInstallCommandParser.FrameworkOption);
+            _source = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
+            _global = parseResult.GetValueForOption(ToolAppliedOption.GlobalOption);
+            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolInstallCommandParser.VerbosityOption));
+            _toolPath = parseResult.GetValueForOption(ToolAppliedOption.ToolPathOption);
+            _architectureOption = parseResult.GetValueForOption(ToolInstallCommandParser.ArchitectureOption);
 
             _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;
-			_forwardRestoreArguments = appliedCommand.OptionValuesToBeForwarded();
+            _forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand());
 
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
             _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
+            var tempDir = new DirectoryPath(Path.Combine(Path.GetTempPath(), "dotnet-tool-install"));
+            var configOption = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
+            var sourceOption = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
+            var packageSourceLocation = new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), additionalSourceFeeds: sourceOption);
+            var restoreAction = new RestoreActionConfig(DisableParallel: parseResult.GetValueForOption(ToolCommandRestorePassThroughOptions.DisableParallelOption),
+                NoCache: parseResult.GetValueForOption(ToolCommandRestorePassThroughOptions.NoCacheOption),
+                IgnoreFailedSources: parseResult.GetValueForOption(ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption),
+                Interactive: parseResult.GetValueForOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption));
+            nugetPackageDownloader ??= new NuGetPackageDownloader(tempDir, verboseLogger: new NullLogger(), restoreActionConfig: restoreAction);
+            _shellShimTemplateFinder = new ShellShimTemplateFinder(nugetPackageDownloader, tempDir, packageSourceLocation);
 
             _reporter = (reporter ?? Reporter.Output);
             _errorReporter = (reporter ?? Reporter.Error);
@@ -77,7 +88,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 
         public override int Execute()
         {
-            if (_configFilePath != null && !File.Exists(_configFilePath))
+            if (!string.IsNullOrEmpty(_configFilePath) && !File.Exists(_configFilePath))
             {
                 throw new GracefulException(
                     string.Format(
@@ -85,24 +96,16 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         Path.GetFullPath(_configFilePath)));
             }
 
-            VersionRange versionRange = null;
-            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
-            {
-                throw new GracefulException(
-                    string.Format(
-                        LocalizableStrings.InvalidNuGetVersionRange,
-                        _packageVersion));
-            }
+            VersionRange versionRange = _parseResult.GetVersionRange();
 
             DirectoryPath? toolPath = null;
-            if (_toolPath != null)
+            if (!string.IsNullOrEmpty(_toolPath))
             {
                 toolPath = new DirectoryPath(_toolPath);
             }
 
             (IToolPackageStore toolPackageStore, IToolPackageStoreQuery toolPackageStoreQuery, IToolPackageInstaller toolPackageInstaller) =
                 _createToolPackageStoresAndInstaller(toolPath, _forwardRestoreArguments);
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
 
             // Prevent installation if any version of the package is installed
             if (toolPackageStoreQuery.EnumeratePackageVersions(_packageId).FirstOrDefault() != null)
@@ -112,7 +115,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             }
 
             FilePath? configFile = null;
-            if (_configFilePath != null)
+            if (!string.IsNullOrEmpty(_configFilePath))
             {
                 configFile = new FilePath(_configFilePath);
             }
@@ -129,6 +132,23 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         packageId: _packageId,
                         versionRange: versionRange,
                         targetFramework: _framework, verbosity: _verbosity);
+
+                    NuGetFramework framework;
+                    if (string.IsNullOrEmpty(_framework) && package.Frameworks.Count() > 0)
+                    {
+                        framework = package.Frameworks
+                            .Where(f => f.Version < (new NuGetVersion(Product.Version)).Version)
+                            .MaxBy(f => f.Version);
+                    }
+                    else
+                    {
+                        framework = string.IsNullOrEmpty(_framework)  ?
+                            null :
+                            NuGetFramework.Parse(_framework);
+                    }
+
+                    string appHostSourceDirectory = _shellShimTemplateFinder.ResolveAppHostSourceDirectoryAsync(_architectureOption, framework, RuntimeInformation.ProcessArchitecture).Result;
+                    IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolPath);
 
                     foreach (var command in package.Commands)
                     {
@@ -160,7 +180,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             {
                 throw new GracefulException(
                     messages: InstallToolCommandLowLevelErrorConverter.GetUserFacingMessages(ex, _packageId),
-                    verboseMessages: new[] {ex.ToString()},
+                    verboseMessages: new[] { ex.ToString() },
                     isUserError: false);
             }
         }

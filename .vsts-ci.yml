@@ -3,30 +3,30 @@ trigger:
   branches:
     include:
     - master
+    - main
     - release/*
     - internal/release/3.*
     - internal/release/5.*
+    - internal/release/6.*
 
 variables:
   - name: teamName
     value: Roslyn-Project-System
-  - name: PB_PublishBlobFeedUrl
-    value: ''
   - name: _DotNetPublishToBlobFeed
     value: false
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCore
-  - name: _PublishToAzure
-    value: false
+  - name: PostBuildSign
+    value: true
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - name: PB_PublishBlobFeedUrl
-      value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
     - name: _DotNetPublishToBlobFeed
       value: true
-    - name: _PublishToAzure
-      value: true
+    - group: DotNet-MSRC-Storage
+    - name: _InternalRuntimeDownloadArgs
+      value: /p:DotNetRuntimeSourceFeed=https://dotnetclimsrc.blob.core.windows.net/dotnet
+        /p:DotNetRuntimeSourceFeedKey=$(dotnetclimsrc-read-sas-token-base64)
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-CLI-SDLValidation-Params
 
@@ -34,53 +34,63 @@ stages:
 - stage: build
   displayName: Build
   jobs:
+  - job: Publish_Build_Configuration
+    steps:
+      - publish: $(Build.SourcesDirectory)\eng\BuildConfiguration
+        artifact: BuildConfiguration
+        displayName: Publish Build Config
   - template: /eng/build.yml
     parameters:
       agentOs: Windows_NT
       pool:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          name: NetCorePublic-Pool
-          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+          name: NetCore1ESPool-Svc-Public
+          demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          name: NetCoreInternal-Pool
-          queue: buildpool.windows.10.amd64.vs2017
-      helixTargetQueue: Windows.10.Amd64.ClientRS5.VS2019.BT.Open
+          name: NetCore1ESPool-Svc-Internal
+          demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
+      helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
       strategy:
         matrix:
-          ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            Build_Debug:
-              _BuildConfig: Debug
-              _PublishType: none
-              _SignType: test
-              _Test: -test
           Build_Release:
             _BuildConfig: Release
-            ${{ if eq(variables['System.TeamProject'], 'public') }}:
-              _PublishType: none
+            _PublishArgs: '-publish /p:DotNetPublishUsingPipelines=true'
+            ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
               _SignType: test
               _Test: -test
-            ${{ if ne(variables['System.TeamProject'], 'public') }}:
-              _PublishType: blob
+            ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
               _SignType: real
               _Test: ''
-  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+  - template: /eng/common/templates/job/source-build.yml
+    parameters:
+      platform:
+        name: 'Managed'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
+  - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
         agentOs: Windows_NT_FullFramework
         pool:
-          name: NetCorePublic-Pool
-          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
-        helixTargetQueue: Windows.10.Amd64.ClientRS5.VS2019.BT.Open
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
+            name: NetCore1ESPool-Svc-Public
+            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
+          ${{ if ne(variables['System.TeamProject'], 'public') }}:
+            name: NetCore1ESPool-Svc-Internal
+            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
+        ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
         strategy:
           matrix:
             Build_Debug:
               _BuildConfig: Debug
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
               _Test: -test
             Build_Release:
               _BuildConfig: Release
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
               _Test: -test
 
@@ -88,49 +98,57 @@ stages:
       parameters:
         agentOs: Windows_NT_TestAsTools
         pool:
-          name: NetCorePublic-Pool
-          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
+            name: NetCore1ESPool-Svc-Public
+            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
+          ${{ if ne(variables['System.TeamProject'], 'public') }}:
+            name: NetCore1ESPool-Svc-Internal
+            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
         strategy:
           matrix:
             Build_Debug:
               _BuildConfig: Debug
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
 
     - template: /eng/build.yml
       parameters:
-        agentOs: Ubuntu_16_04
+        agentOs: Ubuntu_18_04
         pool:
-          name: NetCorePublic-Pool
-          queue: BuildPool.Ubuntu.1604.Amd64.Open
-        helixTargetQueue: Ubuntu.1604.Amd64.Open
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
+            name: NetCore1ESPool-Svc-Public
+            demands: ImageOverride -equals Build.Ubuntu.1804.Amd64.Open
+          ${{ if ne(variables['System.TeamProject'], 'public') }}:
+            name: NetCore1ESPool-Svc-Internal
+            demands: ImageOverride -equals Build.Ubuntu.1804.Amd64
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: Ubuntu.1804.Amd64.Open
+        ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: Ubuntu.1804.Amd64
         strategy:
           matrix:
-            Build_Debug:
-              _BuildConfig: Debug
-              _PublishType: none
-              _SignType: test
             Build_Release:
               _BuildConfig: Release
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
+              _Test: -test
 
     - template: /eng/build.yml
       parameters:
         agentOs: Darwin
         pool:
-          name: Hosted macOS
-        helixTargetQueue: OSX.1014.Amd64.Open
+          vmImage: 'macOS-latest'
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: OSX.1015.Amd64.Open
+        ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: OSX.1015.Amd64
         strategy:
           matrix:
-            Build_Debug:
-              _BuildConfig: Debug
-              _PublishType: none
-              _SignType: test
             Build_Release:
               _BuildConfig: Release
-              _PublishType: none
+              _PublishArgs: ''
               _SignType: test
+              _Test: -test
 
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/common/templates/job/publish-build-assets.yml
@@ -143,10 +161,12 @@ stages:
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/post-build/post-build.yml
     parameters:
+      publishingInfraVersion: 3
       enableSymbolValidation: false
       enableSigningValidation: false
       enableNugetValidation: false
       enableSourceLinkValidation: false
+      publishInstallersAndChecksums: true
       SDLValidationParameters:
         enable: false
         params: ' -SourceToolsList @("policheck","credscan")

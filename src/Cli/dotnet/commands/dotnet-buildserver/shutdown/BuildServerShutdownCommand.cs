@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.BuildServer;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
@@ -21,16 +21,15 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
         private readonly IReporter _errorReporter;
 
         public BuildServerShutdownCommand(
-            AppliedOption options,
             ParseResult result,
             IBuildServerProvider serverProvider = null,
             bool useOrderedWait = false,
             IReporter reporter = null)
             : base(result)
         {
-            bool msbuild = options.ValueOrDefault<bool>("msbuild");
-            bool vbcscompiler  = options.ValueOrDefault<bool>("vbcscompiler");
-            bool razor = options.ValueOrDefault<bool>("razor");
+            bool msbuild = result.GetValueForOption(ServerShutdownCommandParser.MSBuildOption);
+            bool vbcscompiler = result.GetValueForOption(ServerShutdownCommandParser.VbcsOption);
+            bool razor = result.GetValueForOption(ServerShutdownCommandParser.RazorOption);
             bool all = !msbuild && !vbcscompiler && !razor;
 
             _enumerationFlags = ServerEnumerationFlags.None;

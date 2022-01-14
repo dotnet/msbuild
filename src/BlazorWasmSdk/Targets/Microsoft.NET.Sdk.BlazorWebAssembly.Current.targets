@@ -1,0 +1,46 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.BlazorWebAssembly.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0">
+
+  <PropertyGroup>
+    <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
+
+    <!-- Trimmer defaults that depend on user-definable settings.
+        This must be configured before it's initialized in the .NET SDK targets (which are imported by the Razor SDK). -->
+    <SuppressTrimAnalysisWarnings Condition="'$(SuppressTrimAnalysisWarnings)' == '' And '$(TrimmerDefaultAction)' != 'link'">true</SuppressTrimAnalysisWarnings>
+  </PropertyGroup>
+
+  <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.targets" />
+  <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.targets" />
+  <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.targets" />
+
+  <!--
+    Targets supporting Razor MSBuild integration. Contain support for generating C# code using Razor
+    and including the generated code in the project lifecycle, including compiling, publishing and producing
+    nuget packages.
+  -->
+
+  <!--
+    This is a hook to import a set of targets before the Blazor targets. By default this is unused.
+  -->
+  <Import Project="$(CustomBeforeBlazorWebAssemblySdkTargets)" Condition="'$(CustomBeforeBlazorWebAssemblySdkTargets)' != '' and Exists('$(CustomBeforeBlazorWebAssemblySdkTargets)')"/>
+
+  <PropertyGroup>
+    <_BlazorWebAssemblyVersionedTargetsFile Condition="'$(_BlazorWebAssemblyVersionedTargetsFile)' == '' And '$(UseStaticWebAssetsV2)' == 'true'">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.6_0.targets</_BlazorWebAssemblyVersionedTargetsFile>
+    <_BlazorWebAssemblyVersionedTargetsFile Condition="'$(_BlazorWebAssemblyVersionedTargetsFile)' == ''">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.5_0.targets</_BlazorWebAssemblyVersionedTargetsFile>
+  </PropertyGroup>
+
+  <Import Project="$(_BlazorWebAssemblyVersionedTargetsFile)" />
+
+  <Import Project="$(CustomAfterBlazorWebAssemblySdkTargets)" Condition="'$(CustomAfterBlazorWebAssemblySdkTargets)' != '' and Exists('$(CustomAfterBlazorWebAssemblySdkTargets)')"/>
+
+</Project>

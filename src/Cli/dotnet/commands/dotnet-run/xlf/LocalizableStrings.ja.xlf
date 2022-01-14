@@ -32,9 +32,19 @@
         <target state="translated">プロパティ '{0}' の値を文字列に変換できませんでした。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneProjectAllowed">
+        <source>Only one project can be specified at a time using the `-p` option.</source>
+        <target state="translated">`-p` オプションで指定できるプロジェクトは、一度に 1 つだけです。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyOptionDescription">
+        <source>Properties to be passed to MSBuild.</source>
+        <target state="translated">MSBuild に渡されるプロパティ。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
-        <target state="new">Building...</target>
+        <target state="translated">ビルドしています...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
@@ -64,9 +74,9 @@ Your project targets multiple frameworks. Specify which framework to run using '
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">プロジェクトを実行できません。
+        <target state="translated">プロジェクトを実行できません。
 プロジェクト タイプが実行可能であること、このプロジェクトが '{0}' でサポートされていることを確認してください。
-実行可能なプロジェクトは実行可能な TFM (たとえば、netcoreapp2.0) を対象としている必要があり、OutputType 'Exe' が必要です。
+実行可能なプロジェクトは実行可能な TFM (たとえば、net5.0) を対象としている必要があり、OutputType 'Exe' が必要です。
 現在の {1} は '{2}' です。</target>
         <note />
       </trans-unit>
@@ -105,6 +115,11 @@ The current {1} is '{2}'.</source>
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
         <target state="translated">(既定)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="translated">警告 NETSDK1174: --project の省略形である -p は推奨されていません。--Project を使用してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">

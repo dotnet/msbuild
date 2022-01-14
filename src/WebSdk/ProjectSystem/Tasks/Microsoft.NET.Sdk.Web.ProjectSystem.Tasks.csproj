@@ -13,15 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(ProjectSystemRoot)\Targets\**\*.*">
+    <AdditionalContent Include="$(ProjectSystemRoot)\Targets\**\*.*">
       <Pack>true</Pack>
       <PackagePath>targets</PackagePath>
-    </Content>
+    </AdditionalContent>
 
-    <Content Include="$(ProjectSystemRoot)\Sdk\**\*.*">
+    <AdditionalContent Include="$(ProjectSystemRoot)\Sdk\**\*.*">
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>
-    </Content>
+    </AdditionalContent>
   </ItemGroup>
 
   <Import Project="$(RepoRoot)\src\WebSdk\CopyPackageLayout.targets" />

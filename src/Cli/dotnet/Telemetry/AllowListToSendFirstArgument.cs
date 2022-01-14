@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Telemetry
@@ -18,16 +18,15 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         private HashSet<string> _topLevelCommandNameAllowList { get; }
 
-        public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult)
+        public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult, Dictionary<string, double> measurements = null)
         {
             var result = new List<ApplicationInsightsEntryFormat>();
-            var topLevelCommandNameFromParse = parseResult["dotnet"]?.AppliedOptions?.FirstOrDefault()?.Name;
+            var topLevelCommandNameFromParse = parseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
             if (topLevelCommandNameFromParse != null)
             {
                 if (_topLevelCommandNameAllowList.Contains(topLevelCommandNameFromParse))
                 {
-                    var firstArgument = parseResult["dotnet"][topLevelCommandNameFromParse].Arguments
-                        ?.FirstOrDefault();
+                    var firstArgument = parseResult.RootCommandResult.Children.FirstOrDefault()?.Tokens.Where(t => t.Type.Equals(TokenType.Argument)).FirstOrDefault()?.Value ?? null;
                     if (firstArgument != null)
                     {
                         result.Add(new ApplicationInsightsEntryFormat(
@@ -36,7 +35,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
                             {
                                 {"verb", topLevelCommandNameFromParse},
                                 {"argument", firstArgument}
-                            }));
+                            },
+                            measurements));
                     }
                 }
             }

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.Sdk.Publish.Tasks.Properties;
@@ -44,15 +45,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             foreach (ITaskItem dbContext in EFMigrations)
             {
                 string outputFileFullPath = Path.Combine(EFPublishDirectory, EFSQLScriptsFolderName, dbContext.ItemSpec + ".sql");
-                bool isScriptGeneratioNSuccessful = GenerateSQLScript(outputFileFullPath, dbContext.ItemSpec, isLoggingEnabled);
-                if (!isScriptGeneratioNSuccessful)
+                bool isScriptGenerationSuccessful = GenerateSQLScript(outputFileFullPath, dbContext.ItemSpec, isLoggingEnabled);
+                if (!isScriptGenerationSuccessful)
                 {
                     return false;
                 }
 
                 ITaskItem sqlScriptItem = new TaskItem(outputFileFullPath);
                 sqlScriptItem.SetMetadata("DBContext", dbContext.ItemSpec);
-                sqlScriptItem.SetMetadata("ConnectionString", dbContext.GetMetadata("Value"));
+                string connectionStringEscaped = ProjectCollection.Escape(dbContext.GetMetadata("Value"));
+                sqlScriptItem.SetMetadata("ConnectionString", connectionStringEscaped);
                 EFSQLScripts[index] = sqlScriptItem;
 
                 index++;

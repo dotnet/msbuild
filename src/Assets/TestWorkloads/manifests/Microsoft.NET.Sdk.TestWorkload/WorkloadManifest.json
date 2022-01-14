@@ -1,0 +1,32 @@
+{
+  "version": "6.0.0-preview1",
+  "workloads": {
+    "microsoft-net-sdk-testworkload": {
+      "description": "SDK Test Workload",
+      "packs": [
+        "Microsoft.NET.Sdk.TestWorkload.Pack"
+      ]
+    },
+    "microsoft-net-sdk-missingtestworkload": {
+      "description": "SDK Test Workload (missing)",
+      "packs": [
+        "Microsoft.NET.Sdk.MissingTestWorkload.Pack"
+      ]
+    }
+  },
+  "packs": {
+    "Microsoft.NET.Sdk.TestWorkload.Pack": {
+      "kind": "sdk",
+      "version": "0.42.42",
+      "alias-to":
+      {
+        "win": "Microsoft.NET.Sdk.TestWorkload.Pack.Win",
+        "unix": "Microsoft.NET.Sdk.TestWorkload.Pack.Unix"
+      }
+    },
+    "Microsoft.NET.Sdk.MissingTestWorkload.Pack": {
+      "kind": "sdk",
+      "version": "0.42.42"
+    }
+  }
+}

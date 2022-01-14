@@ -40,7 +40,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "TestFilesCopiedToPublishDir",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -56,7 +55,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishSingleFile"] = "true";
             }
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: specifyRid.ToString() + singleFile.ToString());
 
             var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand

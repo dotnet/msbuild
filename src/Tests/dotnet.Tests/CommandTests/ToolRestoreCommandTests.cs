@@ -3,20 +3,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.DotNet.Tools.Tool.Restore;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.TestFramework.Utilities;
-using Microsoft.TemplateEngine.Cli;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 using Xunit;
@@ -30,7 +28,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private readonly IFileSystem _fileSystem;
         private readonly IToolPackageStore _toolPackageStore;
         private readonly ToolPackageInstallerMock _toolPackageInstallerMock;
-        private readonly AppliedOption _appliedCommand;
         private readonly ParseResult _parseResult;
         private readonly BufferedReporter _reporter;
         private readonly string _temporaryDirectory;
@@ -102,10 +99,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                     }),
                 installCallback: () => _installCalledCount++);
 
-            ParseResult result = Parser.Instance.Parse("dotnet tool restore");
-            _appliedCommand = result["dotnet"]["tool"]["restore"];
-            Cli.CommandLine.Parser parser = Parser.Instance;
-            _parseResult = parser.ParseFrom("dotnet tool", new[] {"restore"});
+            _parseResult = Parser.Instance.Parse("dotnet tool restore");
 
             _localToolsResolverCache
                 = new LocalToolsResolverCache(
@@ -128,8 +122,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         new DirectoryPath(_temporaryDirectory))
                 });
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
-                _parseResult,
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
                 _toolPackageInstallerMock,
                 manifestFinder,
                 _localToolsResolverCache,
@@ -166,8 +159,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         new DirectoryPath(_temporaryDirectory))
                 });
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
-                _parseResult,
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
                 _toolPackageInstallerMock,
                 manifestFinder,
                 _localToolsResolverCache,
@@ -202,8 +194,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         new DirectoryPath(_temporaryDirectory))
                 });
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
-                _parseResult,
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
                 _toolPackageInstallerMock,
                 manifestFinder,
                 _localToolsResolverCache,
@@ -258,8 +249,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         new DirectoryPath(_temporaryDirectory))
                 });
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
-                _parseResult,
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
                 _toolPackageInstallerMock,
                 manifestFinder,
                 _localToolsResolverCache,
@@ -299,8 +289,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         new DirectoryPath(_temporaryDirectory)),
                 });
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
-                _parseResult,
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
                 _toolPackageInstallerMock,
                 manifestFinder,
                 _localToolsResolverCache,
@@ -322,8 +311,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             IToolManifestFinder realManifestFinderImplementationWithMockFinderSystem =
                 new ToolManifestFinder(new DirectoryPath(Path.GetTempPath()), _fileSystem, new FakeDangerousFileDetector());
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
-                _parseResult,
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
                 _toolPackageInstallerMock,
                 realManifestFinderImplementationWithMockFinderSystem,
                 _localToolsResolverCache,
@@ -349,8 +337,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         new DirectoryPath(_temporaryDirectory))
                 });
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
-                _parseResult,
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
                 _toolPackageInstallerMock,
                 manifestFinder,
                 _localToolsResolverCache,
@@ -377,8 +364,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         new DirectoryPath(_temporaryDirectory))
                 });
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
-                _parseResult,
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
                 _toolPackageInstallerMock,
                 manifestFinder,
                 _localToolsResolverCache,
@@ -401,8 +387,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             IToolManifestFinder manifestFinder =
                 new CannotFindManifestFinder();
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
-                _parseResult,
+            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
                 _toolPackageInstallerMock,
                 manifestFinder,
                 _localToolsResolverCache,

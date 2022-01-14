@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.NuGet;
@@ -17,26 +17,29 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
     {
         //The file or directory passed down by the command
         private readonly string _fileOrDirectory;
-        private AppliedOption _appliedCommand;
 
         public ListPackageReferencesCommand(
-            AppliedOption appliedCommand,
             ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-
             _fileOrDirectory = PathUtility.GetAbsolutePath(PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()),
-                                                           appliedCommand.Arguments.Single());
-
-            _appliedCommand = appliedCommand["package"];
+                parseResult.GetValueForArgument(ListCommandParser.SlnOrProjectArgument));
         }
 
         public override int Execute()
         {
             return NuGetCommand.Run(TransformArgs());
+        }
+
+        internal static void EnforceOptionRules(ParseResult parseResult)
+        {
+            var mutexOptionCount = 0;
+            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.DepreciatedOption) ? 1 : 0;
+            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.OutdatedOption) ? 1 : 0;
+            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.VulnerableOption) ? 1 : 0;
+            if (mutexOptionCount > 1)
+            {
+                throw new GracefulException(LocalizableStrings.OptionsCannotBeCombined);
+            }
         }
 
         private string[] TransformArgs()
@@ -49,52 +52,11 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
 
             args.Add(GetProjectOrSolution());
 
-            args.AddRange(_appliedCommand.OptionValuesToBeForwarded());
+            args.AddRange(_parseResult.OptionValuesToBeForwarded(ListPackageReferencesCommandParser.GetCommand()));
 
-            if (_appliedCommand.HasOption("include-prerelease"))
-            {
-                CheckForOutdatedOrDeprecated("--include-prerelease");
-            }
-
-            if (_appliedCommand.HasOption("highest-patch"))
-            {
-                CheckForOutdatedOrDeprecated("--highest-patch");
-            }
-
-            if (_appliedCommand.HasOption("highest-minor"))
-            {
-                CheckForOutdatedOrDeprecated("--highest-minor");
-            }
-
-            if (_appliedCommand.HasOption("config"))
-            {
-                CheckForOutdatedOrDeprecated("--config");
-            }
-
-            if (_appliedCommand.HasOption("source"))
-            {
-                CheckForOutdatedOrDeprecated("--source");
-            }
-
-            if (_appliedCommand.HasOption("deprecated") && _appliedCommand.HasOption("outdated"))
-            {
-                throw new GracefulException(LocalizableStrings.OutdatedAndDeprecatedOptionsCannotBeCombined);
-            }
+            EnforceOptionRules(_parseResult);
 
             return args.ToArray();
-        }
-
-        /// <summary>
-        /// A check for the outdated and deprecated specific options. If --outdated or --deprecated not present,
-        /// these options must not be used, so error is thrown.
-        /// </summary>
-        /// <param name="option"></param>
-        private void CheckForOutdatedOrDeprecated(string option)
-        {
-            if (!_appliedCommand.HasOption("deprecated") && !_appliedCommand.HasOption("outdated"))
-            {
-                throw new GracefulException(LocalizableStrings.OutdatedOrDeprecatedOptionOnly, option);
-            }
         }
 
         /// <summary>

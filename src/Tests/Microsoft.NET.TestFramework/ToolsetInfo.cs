@@ -17,6 +17,9 @@ namespace Microsoft.NET.TestFramework
 {
     public class ToolsetInfo
     {
+        public const string CurrentTargetFramework = "net6.0";
+        public const string CurrentTargetFrameworkVersion = "6.0";
+
         public string DotNetRoot { get; }
         public string DotNetHostPath { get; }
 
@@ -64,6 +67,8 @@ namespace Microsoft.NET.TestFramework
         public bool ShouldUseFullFrameworkMSBuild => !string.IsNullOrEmpty(FullFrameworkMSBuildPath);
 
         public string FullFrameworkMSBuildPath { get; set; }
+
+        public string SdkResolverPath { get; set; }
 
         public ToolsetInfo(string dotNetRoot)
         {
@@ -147,7 +152,15 @@ namespace Microsoft.NET.TestFramework
             if (ShouldUseFullFrameworkMSBuild)
             {
                 string sdksPath = Path.Combine(DotNetRoot, "sdk", SdkVersion, "Sdks");
-                command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR"] = sdksPath;
+
+                //  Use stage 2 MSBuild SDK resolver
+                command.Environment["MSBUILDADDITIONALSDKRESOLVERSFOLDER"] = SdkResolverPath;
+
+                //  Avoid using stage 0 dotnet install dir
+                command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR"] = "";
+
+                //  Put stage 2 on the Path (this is how the MSBuild SDK resolver finds dotnet)
+                command.Environment["Path"] = DotNetRoot + ";" + Environment.GetEnvironmentVariable("Path");
 
                 if (!string.IsNullOrEmpty(MicrosoftNETBuildExtensionsPathOverride))
                 {
@@ -247,15 +260,6 @@ namespace Microsoft.NET.TestFramework
             }
 
             var ret = new ToolsetInfo(dotnetRoot);
-            
-            // if (!string.IsNullOrWhiteSpace(commandLine.MSBuildSDKsPath))
-            // {
-            //     ret.SdksPath = commandLine.MSBuildSDKsPath;
-            // }
-            // else if (repoRoot != null)
-            // {
-            //     ret.SdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
-            // }
 
             if (!string.IsNullOrEmpty(commandLine.FullFrameworkMSBuildPath))
             {
@@ -266,12 +270,34 @@ namespace Microsoft.NET.TestFramework
                 ret.FullFrameworkMSBuildPath = ResolveCommand("MSBuild");
             }
 
-            if (repoRoot != null && ret.ShouldUseFullFrameworkMSBuild)
+            var microsoftNETBuildExtensionsTargetsFromEnvironment = Environment.GetEnvironmentVariable("MicrosoftNETBuildExtensionsTargets");
+            if (!string.IsNullOrWhiteSpace(microsoftNETBuildExtensionsTargetsFromEnvironment))
+            {
+                ret.MicrosoftNETBuildExtensionsPathOverride = Path.GetDirectoryName(microsoftNETBuildExtensionsTargetsFromEnvironment);
+            }
+            else if (repoRoot != null && ret.ShouldUseFullFrameworkMSBuild)
             {
                 //  Find path to Microsoft.NET.Build.Extensions for full framework
                 string sdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
                 var buildExtensionsSdkPath = Path.Combine(sdksPath, "Microsoft.NET.Build.Extensions");
                 ret.MicrosoftNETBuildExtensionsPathOverride = Path.Combine(buildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions");
+            }
+
+            if (ret.ShouldUseFullFrameworkMSBuild)
+            {
+                if (repoRoot != null)
+                {
+                    // Find path to MSBuildSdkResolver for full framework
+                    ret.SdkResolverPath = Path.Combine(repoArtifactsDir, "bin", "Microsoft.DotNet.MSBuildSdkResolver", configuration, "net472", "SdkResolvers");
+                }
+                else if (!string.IsNullOrWhiteSpace(commandLine.MsbuildAdditionalSdkResolverFolder))
+                {
+                    ret.SdkResolverPath = Path.Combine(commandLine.MsbuildAdditionalSdkResolverFolder, configuration, "net472", "SdkResolvers");
+                }
+                else
+                {
+                    throw new InvalidOperationException("Microsoft.DotNet.MSBuildSdkResolver path is not provided, set msbuildAdditionalSdkResolverFolder on test commandline or set repoRoot");
+                }
             }
 
             if (repoRoot != null)

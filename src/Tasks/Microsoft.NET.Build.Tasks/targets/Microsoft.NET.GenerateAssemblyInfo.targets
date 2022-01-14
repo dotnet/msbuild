@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -37,13 +37,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateAssemblyMetadataAttributes Condition="'$(GenerateAssemblyMetadataAttributes)' == ''">true</GenerateAssemblyMetadataAttributes>
     <IncludeSourceRevisionInInformationalVersion Condition="'$(IncludeSourceRevisionInInformationalVersion)' == ''">true</IncludeSourceRevisionInInformationalVersion>
     <GenerateInternalsVisibleToAttributes Condition="'$(GenerateInternalsVisibleToAttributes)' == ''">true</GenerateInternalsVisibleToAttributes>
+    <GenerateRequiresPreviewFeaturesAttribute Condition="'$(GenerateRequiresPreviewFeaturesAttribute)' == '' and '$(IsNetCoreAppTargetingLatestTFM)' == 'true'">true</GenerateRequiresPreviewFeaturesAttribute>
   </PropertyGroup>
 
-  <!-- 
+  <!--
     Note that this must run before every invocation of CoreCompile to ensure that all compiler
-    runs see the generated assembly info. There is at least one scenario involving Xaml 
+    runs see the generated assembly info. There is at least one scenario involving Xaml
     where CoreCompile is invoked without other potential hooks such as Compile or CoreBuild,
-    etc., so we hook directly on to CoreCompile. Furthermore, we  must run *after* 
+    etc., so we hook directly on to CoreCompile. Furthermore, we  must run *after*
     PrepareForBuild to ensure that the intermediate directory has been created.
 
     Targets that generate Compile items are also expected to run before
@@ -114,19 +115,35 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_Parameter1>%(AssemblyMetadata.Identity)</_Parameter1>
         <_Parameter2>%(AssemblyMetadata.Value)</_Parameter2>
       </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Runtime.Versioning.RequiresPreviewFeaturesAttribute" Condition="'$(EnablePreviewFeatures)' == 'true' and '$(GenerateRequiresPreviewFeaturesAttribute)' == 'true'">
+      </AssemblyAttribute>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
-                         and '$(MinimumOSPlatform)' != ''
+                         and '$(TargetPlatformVersion)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                          and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
-      <AssemblyAttribute Include="System.Runtime.Versioning.MinimumOSPlatformAttribute">
-        <_Parameter1>$(TargetPlatformIdentifier)$(MinimumOSPlatform)</_Parameter1>
+      <AssemblyAttribute Include="System.Runtime.Versioning.TargetPlatformAttribute">
+        <_Parameter1>$(TargetPlatformIdentifier)$(TargetPlatformVersion)</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
+                         and '$(SupportedOSPlatformVersion)' != ''
+                         and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                         and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
+      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute"
+                         Condition="!$([MSBuild]::VersionEquals($(SupportedOSPlatformVersion), '0.0'))" >
+        <_Parameter1>$(TargetPlatformIdentifier)$(SupportedOSPlatformVersion)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute"
+                         Condition="$([MSBuild]::VersionEquals($(SupportedOSPlatformVersion), '0.0'))" >
+        <_Parameter1>$(TargetPlatformIdentifier)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>
   </Target>
 
-  <!-- 
+  <!--
     To allow version changes to be respected on incremental builds (e.g. through CLI parameters),
     create a hash of all assembly attributes so that the cache file will change with the calculated
     assembly attribute values and msbuild will then execute CoreGenerateAssembly to generate a new file.
@@ -143,7 +160,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Hash>
 
     <WriteLinesToFile Lines="$(_AssemblyAttributesHash)" File="$(GeneratedAssemblyInfoInputsCacheFile)" Overwrite="True" WriteOnlyWhenDifferent="True" />
-    
+
     <ItemGroup>
       <FileWrites Include="$(GeneratedAssemblyInfoInputsCacheFile)" />
     </ItemGroup>
@@ -189,7 +206,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GetAssemblyVersion Condition="'$(AssemblyVersion)' == ''" NuGetVersion="$(Version)">
       <Output TaskParameter="AssemblyVersion" PropertyName="AssemblyVersion" />
     </GetAssemblyVersion>
-    
+
     <PropertyGroup>
       <FileVersion Condition="'$(FileVersion)' == ''">$(AssemblyVersion)</FileVersion>
       <InformationalVersion Condition="'$(InformationalVersion)' == ''">$(Version)</InformationalVersion>

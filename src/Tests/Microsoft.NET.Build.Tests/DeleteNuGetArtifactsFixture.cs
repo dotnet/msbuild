@@ -5,6 +5,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Microsoft.NET.Build.Tests
@@ -17,9 +18,9 @@ namespace Microsoft.NET.Build.Tests
         public static string NetstandardTargetFrameworkIdentifier = ".NETStandard";
         public static string DependencyDirectoryNamePrefix = "D_";
 
-        public static string ConstructNuGetPackageReferencePath(TestProject dependencyProject)
+        public static string ConstructNuGetPackageReferencePath(TestProject dependencyProject, string identifier, [CallerMemberName] string callingMethod = null)
         {
-            return TestAssetsManager.GetTestDestinationDirectoryPath(dependencyProject.Name, TestDirectoriesNamePrefix, NuGetSharedDirectoryNamePostfix);
+            return TestAssetsManager.GetTestDestinationDirectoryPath(dependencyProject.Name, callingMethod, identifier);
         }
     }
 

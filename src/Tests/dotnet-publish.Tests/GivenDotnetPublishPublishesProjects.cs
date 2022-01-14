@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -36,11 +37,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework", "netcoreapp3.1")
+                .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.1", "publish", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"{testAppName}.dll");
 
             new DotnetCommand(Log)
                 .Execute(outputDll)
@@ -59,11 +60,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework", "netcoreapp3.1")
+                .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass();
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19487")]
         public void ItCanPublishAMultiTFMProjectWithImplicitRestore()
         {
             var testInstance = _testAssetsManager.CopyTestAsset(
@@ -75,7 +76,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework", "netcoreapp3.1")
+                .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass();
         }
 
@@ -97,7 +98,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
         [Theory]
         [InlineData(null)]
+        [InlineData("--sc")]
         [InlineData("--self-contained")]
+        [InlineData("--sc=true")]
         [InlineData("--self-contained=true")]
         public void ItPublishesSelfContainedWithRid(string args)
         {
@@ -114,6 +117,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
+        [InlineData("--sc=false")]
         [InlineData("--self-contained=false")]
         [InlineData("--no-self-contained")]
         public void ItPublishesFrameworkDependentWithRid(string args)
@@ -141,6 +145,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
+        [InlineData("--sc=false")]
         [InlineData("--self-contained=false")]
         [InlineData(null)]
         [InlineData("--no-self-contained")]
@@ -149,12 +154,13 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var testAppName = "MSBuildTestApp";
             var outputDirectory = PublishApp(testAppName, rid: null, args: args);
 
-            outputDirectory.Should().OnlyHaveFiles(AssertionHelper.AppendApphostOnNonMacOS(testAppName, new[] {
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{testAppName}{Constants.ExeSuffix}",
                 $"{testAppName}.dll",
                 $"{testAppName}.pdb",
                 $"{testAppName}.deps.json",
                 $"{testAppName}.runtimeconfig.json",
-            }));
+            });
 
             new DotnetCommand(Log)
                 .Execute(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
@@ -163,7 +169,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
+        [InlineData("--sc --no-self-contained")]
         [InlineData("--self-contained --no-self-contained")]
+        [InlineData("--sc=true --no-self-contained")]
         [InlineData("--self-contained=true --no-self-contained")]
         public void ItFailsToPublishWithConflictingArgument(string args)
         {
@@ -180,7 +188,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute(args.Split())
                 .Should().Fail()
-                    .And.HaveStdErrContaining(LocalizableStrings.SelfContainAndNoSelfContainedConflict);
+                    .And.HaveStdErrContaining(CommonLocalizableStrings.SelfContainAndNoSelfContainedConflict);
         }
 
         private DirectoryInfo PublishApp(string testAppName, string rid, string args = null, [CallerMemberName] string callingMethod = "")
@@ -197,7 +205,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            return new DirectoryInfo(Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.1", rid ?? "", "publish"));
+            return new DirectoryInfo(Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid ?? "", "publish"));
         }
 
         [Fact]
@@ -219,7 +227,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputProgram = Path.Combine(rootDir, "bin", configuration, "netcoreapp3.1", "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(rootDir, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()
@@ -270,7 +278,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputProgram = Path.Combine(rootPath, "bin", configuration, "netcoreapp3.1", rid, "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(rootPath, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid, "publish", $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()
@@ -315,6 +323,22 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             {
                 cmd.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
             }
+        }
+
+        [Fact]
+        public void DotnetPublishAllowsPublishOutputDir()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("TestAppSimple")
+                .WithSource()
+                .Restore(Log);
+
+            var rootDir = testInstance.Path;
+
+            new DotnetPublishCommand(Log)
+                .WithWorkingDirectory(rootDir)
+                .Execute("--no-restore", "-o", "publish")
+                .Should()
+                .Pass();
         }
     }
 }

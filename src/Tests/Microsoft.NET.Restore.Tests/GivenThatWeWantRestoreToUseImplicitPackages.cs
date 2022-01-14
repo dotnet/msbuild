@@ -26,7 +26,6 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = testProjectName,
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager
@@ -61,7 +60,6 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = testProjectName,
                 TargetFrameworks = "netcoreapp2.0",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager

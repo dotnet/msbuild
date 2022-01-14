@@ -13,6 +13,7 @@ using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -29,7 +30,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopSdkTest";
 
-            var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty);
+            var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty, uiFrameworkProperty);
 
             var command = new BuildCommand(asset);
 
@@ -46,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopSdkErrorTest";
 
-            var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty);
+            var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty, uiFrameworkProperty);
 
             var command = new BuildCommand(asset);
 
@@ -66,7 +67,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopReferenceTest";
 
-            var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework);
+            var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework, desktopFramework);
 
             var command = new BuildCommand(asset);
 
@@ -84,7 +85,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopReferenceErrorTest";
 
-            var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework);
+            var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework, desktopFramework);
 
             var command = new BuildCommand(asset);
 
@@ -96,105 +97,17 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
-        [RequiresMSBuildVersionFact("16.8.0")]
-        public void It_does_not_download_desktop_targeting_packs_on_unix()
-        {
-            const string ProjectName = "NoDownloadTargetingPackTest";
-
-            var testProject = new TestProject()
-            {
-                Name = ProjectName,
-                TargetFrameworks = "net5.0",
-                IsSdkProject = true,
-                IsExe = true,
-            };
-
-            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
-
-            var asset = _testAssetsManager.CreateTestProject(testProject);
-
-            var command = new BuildCommand(asset);
-
-            command
-                .Execute()
-                .Should()
-                .Pass();
-
-            Directory.Exists(Path.Combine(asset.Path, ProjectName, "packages")).Should().BeFalse();
-        }
-
-        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
-        public void It_does_not_download_desktop_runtime_packs_on_unix()
-        {
-            const string ProjectName = "NoDownloadRuntimePackTest";
-            const string Rid = "win-x64";
-
-            var testProject = new TestProject()
-            {
-                Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
-                IsExe = true,
-                RuntimeIdentifier = Rid
-            };
-
-            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
-
-            var asset = _testAssetsManager.CreateTestProject(testProject);
-
-            var command = new PublishCommand(Log, Path.Combine(asset.Path, ProjectName));
-
-            command
-                .Execute()
-                .Should()
-                .Pass();
-
-            new DirectoryInfo(Path.Combine(asset.Path, ProjectName, "packages"))
-                .Should()
-                .NotHaveSubDirectories($"runtime.{Rid}.microsoft.windowsdesktop.app");
-        }
-
-        [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0", "TargetPlatformIdentifier", "Windows", "Exe")]
-        [InlineData("netcoreapp3.1", "UseWindowsForms", "true", "WinExe")]
-        [InlineData("netcoreapp3.1", "UseWPF", "true", "WinExe")]
-        [InlineData("netcoreapp3.1", "UseWPF", "false", "Exe")]
-        public void It_infers_WinExe_output_type(string targetFramework, string propName, string propValue, string expectedOutputType)
-        {
-            var testProject = new TestProject()
-            {
-                Name = "WinExeOutput",
-                TargetFrameworks = targetFramework,
-                IsSdkProject = true,
-                IsExe = true,
-            };
-            testProject.AdditionalProperties[propName] = propValue;
-
-            var asset = _testAssetsManager.CreateTestProject(testProject);
-
-            var getValuesCommand = new GetValuesCommand(asset, "OutputType");
-            getValuesCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var values = getValuesCommand.GetValues();
-            values.Count.Should().Be(1);
-            values.First().Should().Be(expectedOutputType);
-        }
-
         [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_builds_on_windows_with_the_windows_desktop_sdk_5_0_with_ProjectSdk_set()
         {
             const string ProjectName = "WindowsDesktopSdkTest_50";
 
-            const string tfm = "net5.0";
+            const string tfm = "net5.0-windows";
 
             var testProject = new TestProject()
             {
                 Name = ProjectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
@@ -223,7 +136,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = ProjectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsWinExe = true,
             };
 
@@ -252,7 +164,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = ProjectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsWinExe = true,
             };
 
@@ -279,16 +190,131 @@ namespace Microsoft.NET.Build.Tests
 
             Assert(buildCommand.GetOutputDirectory(tfm));
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(asset.Path, ProjectName));
+            var publishCommand = new PublishCommand(asset);
             var runtimeIdentifier = "win-x64";
             publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();
 
             Assert(publishCommand.GetOutputDirectory(tfm, runtimeIdentifier: runtimeIdentifier));
+
+            var filesCopiedToPublishDirCommand = new GetValuesCommand(
+                Log,
+                Path.Combine(asset.Path, testProject.Name),
+                testProject.TargetFrameworks,
+                "FilesCopiedToPublishDir",
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "ComputeFilesCopiedToPublishDir",
+                MetadataNames = { "RelativePath" },
+            };
+
+            filesCopiedToPublishDirCommand.Execute().Should().Pass();
+            var filesCopiedToPublishDircommandItems
+                = from item in filesCopiedToPublishDirCommand.GetValuesWithMetadata()
+                  select new
+                  {
+                      Identity = item.value,
+                      RelativePath = item.metadata["RelativePath"]
+                  };
+
+            filesCopiedToPublishDircommandItems
+                .Should().Contain(i => i.RelativePath == "Microsoft.Windows.SDK.NET.dll" && Path.GetFileName(i.Identity) == "Microsoft.Windows.SDK.NET.dll",
+                                  because: "wapproj should copy cswinrt dlls");
+            filesCopiedToPublishDircommandItems
+                .Should()
+                .Contain(i => i.RelativePath == "WinRT.Runtime.dll" && Path.GetFileName(i.Identity) == "WinRT.Runtime.dll",
+                         because: "wapproj should copy cswinrt dlls");
+
+            var publishItemsOutputGroupOutputsCommand = new GetValuesCommand(
+                Log,
+                Path.Combine(asset.Path, testProject.Name),
+                testProject.TargetFrameworks,
+                "PublishItemsOutputGroupOutputs",
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "Publish",
+                MetadataNames = { "OutputPath" },
+            };
+
+            publishItemsOutputGroupOutputsCommand.Execute().Should().Pass();
+            var publishItemsOutputGroupOutputsItems =
+                from item in publishItemsOutputGroupOutputsCommand.GetValuesWithMetadata()
+                select new
+                {
+                    FullAssetPath = Path.GetFullPath(Path.Combine(asset.Path, testProject.Name, item.metadata["OutputPath"]))
+                };
+
+            publishItemsOutputGroupOutputsItems
+                .Should().Contain(i => Path.GetFileName(Path.GetFullPath(i.FullAssetPath)) == "WinRT.Runtime.dll" && File.Exists(i.FullAssetPath),
+                      because: (string)"as the replacement for FilesCopiedToPublishDir, wapproj should copy cswinrt dlls");
+            publishItemsOutputGroupOutputsItems
+                .Should()
+                .Contain(i => Path.GetFileName(Path.GetFullPath(i.FullAssetPath)) == "WinRT.Runtime.dll" && File.Exists(i.FullAssetPath),
+                         because: "as the replacement for FilesCopiedToPublishDir, wapproj should copy cswinrt dlls");
+
+            // ready to run is supported
+            publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}", $"-p:PublishReadyToRun=true")
+                .Should()
+                .Pass();
+
+            // PublishSingleFile is supported
+            publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}", $"-p:PublishSingleFile=true")
+                .Should()
+                .Pass();
         }
 
-        private TestAsset CreateWindowsDesktopSdkTestAsset(string projectName, string uiFrameworkProperty)
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
+        public void Given_duplicated_ResolvedFileToPublish_It_Can_Publish()
+        {
+            const string ProjectName = "WindowsDesktopSdkTest_without_ProjectSdk_set";
+
+            const string tfm = "net5.0";
+
+            var testProject = new TestProject()
+            {
+                Name = ProjectName,
+                TargetFrameworks = tfm,
+                IsWinExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject).WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var duplicatedResolvedFileToPublish = XElement.Parse(@"
+<ItemGroup>
+    <ResolvedFileToPublish Include=""obj\Debug\net5.0\WindowsDesktopSdkTest_without_ProjectSdk_set.dll"">
+      <RelativePath>WindowsDesktopSdkTest_without_ProjectSdk_set.dll</RelativePath>
+    </ResolvedFileToPublish>
+    <ResolvedFileToPublish Include=""obj\Debug\net5.0\WindowsDesktopSdkTest_without_ProjectSdk_set.dll"">
+      <RelativePath>WindowsDesktopSdkTest_without_ProjectSdk_set.dll</RelativePath>
+    </ResolvedFileToPublish>
+  </ItemGroup>
+");
+                project.Root.Add(duplicatedResolvedFileToPublish);
+            });
+
+            var publishItemsOutputGroupOutputsCommand = new GetValuesCommand(
+                Log,
+                Path.Combine(testAsset.Path, testProject.Name),
+                testProject.TargetFrameworks,
+                "PublishItemsOutputGroupOutputs",
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "Publish",
+                MetadataNames = { "OutputPath" },
+            };
+
+            publishItemsOutputGroupOutputsCommand.Execute().Should().Pass();
+            var publishItemsOutputGroupOutputsItems =
+                from item in publishItemsOutputGroupOutputsCommand.GetValuesWithMetadata()
+                select new
+                {
+                    OutputPath = item.metadata["OutputPath"]
+                };
+        }
+
+        private TestAsset CreateWindowsDesktopSdkTestAsset(string projectName, string uiFrameworkProperty, string identifier, [CallerMemberName] string callingMethod = "")
         {
             const string tfm = "netcoreapp3.0";
 
@@ -296,17 +322,16 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = projectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
 
             testProject.AdditionalProperties.Add(uiFrameworkProperty, "true");
 
-            return _testAssetsManager.CreateTestProject(testProject);
+            return _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier);
         }
 
-        private TestAsset CreateWindowsDesktopReferenceTestAsset(string projectName, string desktopFramework)
+        private TestAsset CreateWindowsDesktopReferenceTestAsset(string projectName, string desktopFramework, string identifier, [CallerMemberName] string callingMethod = "")
         {
             const string tfm = "netcoreapp3.0";
 
@@ -314,13 +339,12 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = projectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsWinExe = true,
             };
 
             testProject.FrameworkReferences.Add(desktopFramework);
 
-            return _testAssetsManager.CreateTestProject(testProject);
+            return _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier);
         }
 
         private readonly string _fileUseWindowsType = @"

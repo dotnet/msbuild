@@ -11,12 +11,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup Condition=" '$(_IncludeWindowsSDKRefFrameworkReferences)' == 'true' ">
+  <ItemGroup Condition=" '$(IncludeWindowsSDKRefFrameworkReferences)' == 'true' ">
     <FrameworkReference Include="Microsoft.Windows.SDK.NET.Ref" IsImplicitlyDefined="true" Pack="false" PrivateAssets="All" />
   </ItemGroup>
 
-  <!--https://github.com/dotnet/sdk/issues/12403-->
   <PropertyGroup>
+    <MicrosoftNETWindowsWorkloadInstalled>true</MicrosoftNETWindowsWorkloadInstalled>
+    
+    <!--https://github.com/dotnet/sdk/issues/12403-->
     <_TargetFrameworkVersionValue>0.0</_TargetFrameworkVersionValue>
     <_WindowsDesktopSdkTargetFrameworkVersionFloor>3.0</_WindowsDesktopSdkTargetFrameworkVersionFloor>
   </PropertyGroup>

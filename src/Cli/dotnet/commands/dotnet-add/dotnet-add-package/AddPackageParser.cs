@@ -3,59 +3,77 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Add.PackageReference;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class AddPackageParser
     {
-        public static Command AddPackage()
+        public static readonly Argument<string> CmdPackageArgument = new Argument<string>(LocalizableStrings.CmdPackage)
         {
-            return Create.Command(
-                "package",
-                LocalizableStrings.AppFullName,
-                Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageReference)
-                      .WithSuggestionsFrom(QueryNuGet)
-                      .With(name: LocalizableStrings.CmdPackage,
-                            description: LocalizableStrings.CmdPackageDescription),
-                CommonOptions.HelpOption(),
-                Create.Option("-v|--version",
-                              LocalizableStrings.CmdVersionDescription,
-                              Accept.ExactlyOneArgument()
-                                    .With(name: LocalizableStrings.CmdVersion)
-                                    .ForwardAsSingle(o => $"--version {o.Arguments.Single()}")),
-                Create.Option("-f|--framework",
-                              LocalizableStrings.CmdFrameworkDescription,
-                              Accept.ExactlyOneArgument()
-                                    .With(name: LocalizableStrings.CmdFramework)
-                                    .ForwardAsSingle(o => $"--framework {o.Arguments.Single()}")),
-                Create.Option("-n|--no-restore",
-                              LocalizableStrings.CmdNoRestoreDescription),
-                Create.Option("-s|--source",
-                              LocalizableStrings.CmdSourceDescription,
-                              Accept.ExactlyOneArgument()
-                                    .With(name: LocalizableStrings.CmdSource)
-                                    .ForwardAsSingle(o => $"--source {o.Arguments.Single()}")),
-                Create.Option("--package-directory",
-                              LocalizableStrings.CmdPackageDirectoryDescription,
-                              Accept.ExactlyOneArgument()
-                                    .With(name: LocalizableStrings.CmdPackageDirectory)
-                                    .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}")),
-                Create.Option("--interactive",
-                              CommonLocalizableStrings.CommandInteractiveOptionDescription,
-                              Accept.NoArguments()
-                                    .ForwardAs("--interactive")),
-                Create.Option("--prerelease",
-                              CommonLocalizableStrings.CommandPrereleaseOptionDescription,
-                              Accept.NoArguments()
-                                    .ForwardAs("--prerelease")));
+            Description = LocalizableStrings.CmdPackageDescription
+        }.AddSuggestions((parseResult, match) => QueryNuGet(match));
+
+        public static readonly Option<string> VersionOption = new ForwardedOption<string>(new string[] { "-v", "--version" }, LocalizableStrings.CmdVersionDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.CmdVersion
+        }.ForwardAsSingle(o => $"--version {o}");
+
+        public static readonly Option<string> FrameworkOption = new ForwardedOption<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.CmdFramework
+        }.ForwardAsSingle(o => $"--framework {o}");
+
+        public static readonly Option<bool> NoRestoreOption = new Option<bool>(new string[] { "-n", "--no-restore" }, LocalizableStrings.CmdNoRestoreDescription);
+
+        public static readonly Option<string> SourceOption = new ForwardedOption<string>(new string[] { "-s", "--source" }, LocalizableStrings.CmdSourceDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.CmdSource
+        }.ForwardAsSingle(o => $"--source {o}");
+
+        public static readonly Option<string> PackageDirOption = new ForwardedOption<string>("--package-directory", LocalizableStrings.CmdPackageDirectoryDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.CmdPackageDirectory
+        }.ForwardAsSingle(o => $"--package-directory {o}");
+
+        public static readonly Option<bool> InteractiveOption = new ForwardedOption<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
+            .ForwardAs("--interactive");
+
+        public static readonly Option<bool> PrereleaseOption = new ForwardedOption<bool>("--prerelease", CommonLocalizableStrings.CommandPrereleaseOptionDescription)
+            .ForwardAs("--prerelease");
+
+        private static readonly Command Command = ConstructCommand();
+
+        public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
+            var command = new Command("package", LocalizableStrings.AppFullName);
+
+            command.AddArgument(CmdPackageArgument);
+            command.AddOption(VersionOption);
+            command.AddOption(FrameworkOption);
+            command.AddOption(NoRestoreOption);
+            command.AddOption(SourceOption);
+            command.AddOption(PackageDirOption);
+            command.AddOption(InteractiveOption);
+            command.AddOption(PrereleaseOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new AddPackageReferenceCommand(parseResult).Execute());
+
+            return command;
         }
 
         public static IEnumerable<string> QueryNuGet(string match)

@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -51,6 +52,29 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Pass();
+        }
+
+        [Fact]
+        public void It_fails_with_unsupported_RID()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesignTimePackageDependencies",
+                //  Note: The logic is different for .NET Core 3+, there is a different test that covers that (and the error is different too, it's NETSDK1083)
+                TargetFrameworks = "netcoreapp2.1",
+                IsSdkProject = true,
+                //  Note the typo in the RID
+                RuntimeIdentifier = "won-x64"
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1056");
         }
     }
 }

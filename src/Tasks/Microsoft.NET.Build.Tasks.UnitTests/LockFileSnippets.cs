@@ -23,10 +23,106 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
               ""targets"": {{{string.Join(",", targets)}}},
               ""libraries"": {{{string.Join(",", libraries)}}},
               {GetLogsPart(logs)}
-              ""projectFileDependencyGroups"": {{{string.Join(",", projectFileDependencyGroups)}}}
-
+              ""projectFileDependencyGroups"": {{{string.Join(",", projectFileDependencyGroups)}}},
+              {LockFileProjectSection}
             }}";
         }
+
+        public static string CreateCrossTargetingLockFileSnippet(
+            string[] targets,
+            string[] originalTargetFrameworks,
+            string[] targetFrameworks,
+            string[] libraries = null,
+            string[] projectFileDependencyGroups = null,
+            string[] logs = null)
+        {
+            return $@"{{
+  ""version"": 3,
+  ""targets"": {{{string.Join(",", targets)}}},
+  ""libraries"": {{{(libraries == null ? string.Empty : string.Join(",", libraries))}}},
+  {GetLogsPart(logs)}
+  ""projectFileDependencyGroups"": {{{(projectFileDependencyGroups == null ? string.Empty : string.Join(",", projectFileDependencyGroups))}}},
+  ""project"": {{
+    ""version"": ""1.0.0"",
+    ""restore"": {{
+      'projectUniqueName': 'C:\\git\\repro\\consoletest\\consoletest.csproj',
+      'projectName': 'consoletest',
+      'projectPath': 'C:\\git\\repro\\consoletest\\consoletest.csproj',
+      ""packagesPath"": ""C:\\Users\\username\\.nuget\\packages\\"",
+      ""outputPath"": ""C:\\code\\tmp\\obj\\"",
+      ""projectStyle"": ""PackageReference"",
+      ""crossTargeting"": true,
+      ""fallbackFolders"": [],
+      ""configFilePaths"": [
+        ""C:\\Users\\username\\AppData\\Roaming\\NuGet\\NuGet.Config""
+      ],
+      ""originalTargetFrameworks"": [
+        {string.Join(",", originalTargetFrameworks)}
+      ],
+      ""sources"": {{
+        ""https://api.nuget.org/v3/index.json"": {{}},
+      }},
+      ""frameworks"": {{
+        {string.Join(",", targetFrameworks)}
+      }},
+      ""warningProperties"": {{
+        ""warnAsError"": [
+          ""NU1605""
+        ]
+      }}
+    }},
+    ""frameworks"": {{
+      {string.Join(",", targetFrameworks)}
+    }}
+  }}
+}}";
+        }
+
+        private static string LockFileProjectSection = @"  'project': {
+    'version': '1.0.0',
+    'restore': {
+      'projectUniqueName': 'C:\\git\\repro\\consoletest\\consoletest.csproj',
+      'projectName': 'consoletest',
+      'projectPath': 'C:\\git\\repro\\consoletest\\consoletest.csproj',
+      'packagesPath': 'C:\\Users\\username\\.nuget\\packages\\',
+      'outputPath': 'C:\\git\\repro\\consoletest\\obj\\',
+      'projectStyle': 'PackageReference',
+      'fallbackFolders': [],
+      'configFilePaths': [
+        'C:\\Users\\username\\AppData\\Roaming\\NuGet\\NuGet.Config'
+      ],
+      'originalTargetFrameworks': [
+        'netcoreapp1.0'
+      ],
+      'sources': {
+        'https://api.nuget.org/v3/index.json': {}
+      },
+      'frameworks': {
+        'netcoreapp1.0': {
+          'targetAlias': 'netcoreapp1.0',
+          'projectReferences': {}
+        }
+      },
+      'warningProperties': {
+        'warnAsError': [
+          'NU1605'
+        ]
+      }
+    },
+    'frameworks': {
+      'netcoreapp1.0': {
+        'targetAlias': 'netcoreapp1.0',
+        'dependencies': {
+          'Microsoft.NETCore.App': {
+            'target': 'Package',
+            'version': '[1.0.5, )',
+            'autoReferenced': true
+          }
+        },
+        'runtimeIdentifierGraphPath': 'C:\\git\\dotnet-sdk\\artifacts\\bin\\redist\\Debug\\dotnet\\sdk\\5.0.100-dev\\RuntimeIdentifierGraph.json'
+      }
+    }
+  }".Replace('\'', '"');
 
         private static string GetLogsPart(string[] logs)
             => logs == null ? string.Empty : $@" ""logs"": [{string.Join(",", logs)}], ";
@@ -53,6 +149,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         public static string CreateTarget(string tfm, params string[] targetLibs)
         {
             return $"\"{tfm}\": {{{string.Join(",", targetLibs)}}}";
+        }
+
+        public static string CreateTargetFramework(string tfm, string targetAlias = null)
+        {
+            return @$"""{tfm}"": {{
+    ""targetAlias"": ""{(targetAlias == null ? tfm : targetAlias)}""
+}}";
         }
 
         public static string CreateTargetLibrary(

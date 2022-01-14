@@ -30,7 +30,7 @@ namespace Microsoft.NET.ToolPack.Tests
         public void It_has_native_and_transitive_dependencies_dll(bool multiTarget)
         {
             TestAsset helloWorldAsset = _testAssetsManager
-                                        .CopyTestAsset("PortableTool")
+                                        .CopyTestAsset("PortableTool", identifier: multiTarget.ToString())
                                         .WithSource()
                                         .WithProjectChanges(project =>
                                         {

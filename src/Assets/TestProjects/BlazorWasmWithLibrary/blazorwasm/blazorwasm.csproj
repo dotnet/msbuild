@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>$(AspNetTestTfm)</TargetFramework>
+    <ServiceWorkerAssetsManifest>custom-service-worker-assets.js</ServiceWorkerAssetsManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\razorclasslibrary\RazorClassLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- These assets should be treated as static web assets for publish purposes -->
+    <Content Include="..\LinkBaseToWebRoot\**\*.js">
+      <LinkBase>wwwroot\</LinkBase>
+    </Content>
+
+    <!-- This asset should be ignored as a static web assets as it defines CopyToPublishDirectory="Never" -->
+    <Content Update="wwwroot\css\app.css" CopyToPublishDirectory="Never" />
+
+    <!-- This asset should be treated as a static web asset and copied into the right location defined by its link attribute. -->
+    <Content Include="LinkToWebRoot\css\app.css" Link="wwwroot\css\app.css" />
+
+    <!-- The content from my-prod-service-worker.js should be published under the name my-service-worker.js -->
+    <ServiceWorker Include="wwwroot\serviceworkers\my-service-worker.js" PublishedContent="wwwroot\serviceworkers\my-prod-service-worker.js" />
+  </ItemGroup>
+
+  <!-- Enabling compression increases build time. We want to avoid this for tests so we
+  disable it here. This doesn't affect any test assertions. -->
+  <PropertyGroup>
+    <_BlazorBrotliCompressionLevel>NoCompression</_BlazorBrotliCompressionLevel>
+  </PropertyGroup>
+
+</Project>

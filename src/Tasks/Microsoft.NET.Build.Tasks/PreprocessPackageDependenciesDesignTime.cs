@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tasks
     /// Only top-level package references are retained (i.e. those referenced directly by the project, not
     /// those only brought in transitively).
     ///
-    /// Only package references applicable to <see cref="TargetFrameworkMoniker"/> are retained.
+    /// Only package references applicable to <see cref="TargetFramework"/> are retained.
     /// 
     /// Changes to the implementation of this class must be coordinated with <c>PackageRuleHandler</c>
     /// in the dotnet/project-system repo.
@@ -50,11 +50,12 @@ namespace Microsoft.NET.Build.Tasks
         public string DefaultImplicitPackages { get; set; }
 
         /// <summary>
-        /// Eg: ".NETCoreApp,Version=v5.0".
+        /// The TargetFramework, which may be an alias
+        /// Eg: "netcoreapp3.1", "net5.0-windows", etc.
         /// Only packages targeting this framework will be returned.
         /// </summary>
         [Required]
-        public string TargetFrameworkMoniker { get; set; }
+        public string TargetFramework { get; set; }
 
         [Output]
         public ITaskItem[] PackageDependenciesDesignTime { get; private set; }
@@ -82,7 +83,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 var target = dependency.GetMetadata(MetadataKeys.ParentTarget);
 
-                if (!StringComparer.OrdinalIgnoreCase.Equals(target, TargetFrameworkMoniker))
+                if (!StringComparer.OrdinalIgnoreCase.Equals(target, TargetFramework))
                 {
                     // skip dependencies for other targets
                     continue;

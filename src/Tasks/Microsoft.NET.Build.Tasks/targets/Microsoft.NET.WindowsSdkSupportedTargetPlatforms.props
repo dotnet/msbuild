@@ -1,0 +1,28 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.WindowsSdkSupportedTargetPlatforms.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<!-- This file contains a list of the windows target platform versions that are supported by this SDK for .NET. Supported versions are processed in _NormalizeTargetPlatformVersion -->
+<Project>
+  
+    <!-- These will be added to the BundledVersions.props that's generated in dotnet/installer.  So only add them here if we don't have that change yet -->
+    <ItemGroup Condition="'@(WindowsSdkSupportedTargetPlatformVersion)' == ''">
+        <WindowsSdkSupportedTargetPlatformVersion Include="10.0.19041.0" WindowsSdkPackageVersion="10.0.19041.16" MinimumNETVersion="5.0" />
+        <WindowsSdkSupportedTargetPlatformVersion Include="10.0.18362.0" WindowsSdkPackageVersion="10.0.18362.16" MinimumNETVersion="5.0" />
+        <WindowsSdkSupportedTargetPlatformVersion Include="10.0.17763.0" WindowsSdkPackageVersion="10.0.17763.16" MinimumNETVersion="5.0" />
+        <WindowsSdkSupportedTargetPlatformVersion Include="8.0" />
+        <WindowsSdkSupportedTargetPlatformVersion Include="7.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <SdkSupportedTargetPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'Windows'" Include="@(WindowsSdkSupportedTargetPlatformVersion)" />
+    </ItemGroup>
+</Project>

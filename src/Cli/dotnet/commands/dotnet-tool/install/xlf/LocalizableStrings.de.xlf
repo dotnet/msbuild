@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 Das Tool "{1}" (Version {2}) wurde erfolgreich installiert.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">Der Runtimebezeichner {0} ist ungültig. Gültige Runtimebezeichner sind: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">Hiermit installieren Sie das Tool und fügen es dem lokalen Toolmanifest (Standard) hinzu.</target>
@@ -66,6 +71,11 @@ Wenn Sie ein Manifest erstellen möchten, verwenden Sie "dotnet new tool-manifes
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">Das Zielframework, für das das Tool installiert wird.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">Die Optionen „--prerelease“ und „--version“ werden im gleichen Befehl nicht unterstützt.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -142,10 +152,10 @@ Wenn Sie ein Manifest erstellen möchten, verwenden Sie "dotnet new tool-manifes
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">Fehler bei der Installation des Tools "{0}". Dieser Fehler kann folgende Ursachen haben:
+        <target state="translated">Fehler bei der Installation des Tools "{0}". Dieser Fehler kann folgende Ursachen haben:
 
 * Sie versuchen, eine Vorschauversion zu installieren und haben nicht die Option "--version" verwendet, um die Version anzugeben.
-* Ein Paket mit diesem Namen wurde gefunden, aber es handelte sich nicht um ein .NET Core-Tool.
+* Ein Paket mit diesem Namen wurde gefunden, aber es handelte sich nicht um ein .NET-Tool.
 * Auf den erforderlichen NuGet-Feed kann nicht zugegriffen werden, möglicherweise aufgrund eines Problems mit der Internetverbindung.
 * Sie haben den Namen des Tools falsch eingegeben.
 

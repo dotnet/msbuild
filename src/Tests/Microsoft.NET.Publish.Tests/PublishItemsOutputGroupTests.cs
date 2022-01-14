@@ -37,7 +37,7 @@ namespace Microsoft.NET.Publish.Tests
         public void RunPublishItemsOutputGroupTest(bool specifyRid, bool singleFile)
         {
             var testProject = this.SetupProject(specifyRid, singleFile);
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: specifyRid.ToString() + singleFile.ToString());
 
             var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand
@@ -129,7 +129,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "TestPublishOutputGroup",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 

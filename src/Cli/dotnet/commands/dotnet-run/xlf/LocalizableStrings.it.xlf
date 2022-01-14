@@ -32,9 +32,19 @@
         <target state="translated">Non è stato possibile convertire il valore della proprietà '{0}' in una stringa.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneProjectAllowed">
+        <source>Only one project can be specified at a time using the `-p` option.</source>
+        <target state="translated">È possibile specificare un solo progetto alla volta utilizzando l'opzione '-p'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyOptionDescription">
+        <source>Properties to be passed to MSBuild.</source>
+        <target state="translated">Proprietà da passare a MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
-        <target state="new">Building...</target>
+        <target state="translated">Compilazione...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
@@ -64,9 +74,9 @@ Il progetto è destinato a più framework. Specificare il framework da eseguire 
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">Non è possibile eseguire il progetto.
+        <target state="translated">Non è possibile eseguire il progetto.
 Assicurarsi che sia presente un tipo di progetto eseguibile e che '{0}' supporti tale progetto.
-Un progetto eseguibile deve essere destinato a un TFM eseguibile, ad esempio netcoreapp2.0, inoltre OutputType deve essere impostato su 'Exe'.
+Un progetto eseguibile deve essere destinato a un TFM eseguibile, ad esempio net5.0, inoltre OutputType deve essere impostato su 'Exe'.
 Il valore corrente di {1} è '{2}'.</target>
         <note />
       </trans-unit>
@@ -105,6 +115,11 @@ Il valore corrente di {1} è '{2}'.</target>
       <trans-unit id="DefaultLaunchProfileDisplayName">
         <source>(Default)</source>
         <target state="translated">(Predefinita)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="translated">Avviso NETSDK1174: l'abbreviazione di -p per --project è deprecata. Usare --project.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">

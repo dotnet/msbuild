@@ -674,4 +674,29 @@ setx PATH "%PATH%;{0}"
   <data name="CommandPrereleaseOptionDescription" xml:space="preserve">
     <value>Allows prerelease packages to be installed.</value>
   </data>
+  <data name="ArchitectureOptionDescription" xml:space="preserve">
+    <value>The target architecture.</value>
+  </data>
+  <data name="OperatingSystemOptionDescription" xml:space="preserve">
+    <value>The target operating system.</value>
+  </data>
+  <data name="CannotResolveRuntimeIdentifier" xml:space="preserve">
+    <value>Resolving the current runtime identifier failed.</value>
+  </data>
+  <data name="CannotSpecifyBothRuntimeAndArchOptions" xml:space="preserve">
+    <value>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</value>
+  </data>
+  <data name="CannotSpecifyBothRuntimeAndOsOptions" xml:space="preserve">
+    <value>Specifying both the `-r|--runtime` and `-os` options is not supported.</value>
+  </data>
+  <data name="SelfContainedOptionDescription" xml:space="preserve">
+    <value>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</value>
+  </data>
+  <data name="FrameworkDependentOptionDescription" xml:space="preserve">
+    <value>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</value>
+  </data>
+  <data name="SelfContainAndNoSelfContainedConflict" xml:space="preserve">
+    <value>The '--self-contained' and '--no-self-contained' options cannot be used together.</value>
+  </data>
 </root>

@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
@@ -19,7 +19,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Update
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
 
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller) CreateToolPackageStoresAndInstallerAndUninstaller(
         DirectoryPath? nonGlobalLocation = null,
@@ -42,27 +42,21 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         private readonly IEnumerable<string> _forwardRestoreArguments;
         private readonly string _packageVersion;
 
-        public ToolUpdateGlobalOrToolPathCommand(AppliedOption appliedCommand,
-            ParseResult parseResult,
+        public ToolUpdateGlobalOrToolPathCommand(ParseResult parseResult,
             CreateToolPackageStoresAndInstallerAndUninstaller createToolPackageStoreInstallerUninstaller = null,
             CreateShellShimRepository createShellShimRepository = null,
             IReporter reporter = null)
             : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-
-            _packageId = new PackageId(appliedCommand.Arguments.Single());
-            _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
-            _framework = appliedCommand.ValueOrDefault<string>("framework");
-            _additionalFeeds = appliedCommand.ValueOrDefault<string[]>("add-source");
-            _packageVersion = appliedCommand.SingleArgumentOrDefault("version");
-            _global = appliedCommand.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
-            _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
-            _toolPath = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
-            _forwardRestoreArguments = appliedCommand.OptionValuesToBeForwarded();
+            _packageId = new PackageId(parseResult.GetValueForArgument(ToolUninstallCommandParser.PackageIdArgument));
+            _configFilePath = parseResult.GetValueForOption(ToolUpdateCommandParser.ConfigOption);
+            _framework = parseResult.GetValueForOption(ToolUpdateCommandParser.FrameworkOption);
+            _additionalFeeds = parseResult.GetValueForOption(ToolUpdateCommandParser.AddSourceOption);
+            _packageVersion = parseResult.GetValueForOption(ToolUpdateCommandParser.VersionOption);
+            _global = parseResult.GetValueForOption(ToolUpdateCommandParser.GlobalOption);
+            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolUpdateCommandParser.VerbosityOption));
+            _toolPath = parseResult.GetValueForOption(ToolUpdateCommandParser.ToolPathOption);
+            _forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand());
 
             _createToolPackageStoreInstallerUninstaller = createToolPackageStoreInstallerUninstaller ??
                                                   ToolPackageFactory.CreateToolPackageStoresAndInstallerAndUninstaller;
@@ -79,26 +73,20 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             ValidateArguments();
 
             DirectoryPath? toolPath = null;
-            if (_toolPath != null)
+            if (!string.IsNullOrEmpty(_toolPath))
             {
                 toolPath = new DirectoryPath(_toolPath);
             }
 
-            VersionRange versionRange = null;
-            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
-            {
-                throw new GracefulException(
-                    string.Format(
-                        LocalizableStrings.InvalidNuGetVersionRange,
-                        _packageVersion));
-            }
+            VersionRange versionRange = _parseResult.GetVersionRange();
 
             (IToolPackageStore toolPackageStore,
              IToolPackageStoreQuery toolPackageStoreQuery,
              IToolPackageInstaller toolPackageInstaller,
              IToolPackageUninstaller toolPackageUninstaller) = _createToolPackageStoreInstallerUninstaller(toolPath, _forwardRestoreArguments);
 
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
+            var appHostSourceDirectory = ShellShimTemplateFinder.GetDefaultAppHostSourceDirectory();
+            IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolPath);
 
             IToolPackage oldPackageNullable = GetOldPackage(toolPackageStoreQuery);
 
@@ -132,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
                     foreach (RestoredCommand command in newInstalledPackage.Commands)
                     {
-                        shellShimRepository.CreateShim(command.Executable, command.Name);
+                        shellShimRepository.CreateShim(command.Executable, command.Name, newInstalledPackage.PackagedShims);
                     }
 
                     PrintSuccessMessage(oldPackageNullable, newInstalledPackage);
@@ -161,7 +149,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
         private void ValidateArguments()
         {
-            if (_configFilePath != null && !File.Exists(_configFilePath))
+            if (!string.IsNullOrEmpty(_configFilePath) && !File.Exists(_configFilePath))
             {
                 throw new GracefulException(
                     string.Format(
@@ -220,7 +208,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         private FilePath? GetConfigFile()
         {
             FilePath? configFile = null;
-            if (_configFilePath != null)
+            if (!string.IsNullOrEmpty(_configFilePath))
             {
                 configFile = new FilePath(_configFilePath);
             }

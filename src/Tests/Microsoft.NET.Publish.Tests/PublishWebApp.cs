@@ -26,7 +26,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "SelfContainedWebApp",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -45,7 +44,7 @@ namespace Microsoft.NET.Publish.Tests
 
                             });
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute()
                 .Should()

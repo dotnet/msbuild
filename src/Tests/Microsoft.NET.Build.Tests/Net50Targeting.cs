@@ -27,7 +27,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net5Test",
                 TargetFrameworks = "net5.0",
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);

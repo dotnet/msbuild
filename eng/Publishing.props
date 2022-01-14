@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
+  <PropertyGroup>
+    <PublishingVersion>3</PublishingVersion>
+    <!-- This repo does its own symbol package generation to avoid generating symbols for a bunch of unrelated test packages. -->
+    <AutoGenerateSymbolPackages>false</AutoGenerateSymbolPackages>
+  </PropertyGroup>
 
   <PropertyGroup>
     <Product>Sdk</Product>
@@ -55,26 +60,40 @@
 
   <!-- We use a separate target to publish this to blob storage so that we can push this to
        a relative path inside the blob storage. -->
-  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish" Condition="'$(PublishToAzure)' == 'true'">
+  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish">
     <ItemGroup>
       <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)">
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(ToolsetVersionValue)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
         <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
       </ToolsetAssetsToPushToBlobFeed>
     </ItemGroup>
+    
+    <ItemGroup Condition="'$(PostBuildSign)' == 'true'">
+      <ItemsToSignPostBuild Remove="@(ItemsToSignPostBuild)" />
+      <ItemsToSignPostBuild Include="@(ToolsetAssetsToPublish->'%(Filename)%(Extension)')" />
+    </ItemGroup>
 
     <MakeDir Directories="$(TempWorkingDirectory)"/>
 
     <PushToAzureDevOpsArtifacts
+      AzureDevOpsCollectionUri="$(SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)"
+      AzureDevOpsProject="$(SYSTEM_TEAMPROJECT)"
+      AzureDevOpsBuildId="$(BUILD_BUILDID)"
       ItemsToPush="@(ToolsetAssetsToPushToBlobFeed)"
+      ItemsToSign="@(ItemsToSignPostBuild)"
+      CertificatesSignInfo="@(CertificatesSignInfo)"
+      StrongNameSignInfo="@(StrongNameSignInfo)"
+      FileSignInfo="@(FileSignInfo)"
+      FileExtensionSignInfo="@(FileExtensionSignInfo)"
       ManifestBuildData="@(ManifestBuildData)"
-      ManifestRepoUri="$(BUILD_REPOSITORY_URI)"
+      ManifestRepoUri="$(BUILD_REPOSITORY_NAME)"
       ManifestBranch="$(BUILD_SOURCEBRANCH)"
       ManifestBuildId="$(BUILD_BUILDNUMBER)"
       ManifestCommit="$(BUILD_SOURCEVERSION)"
       PublishFlatContainer="true"
       AssetManifestPath="$(SdkAssetsManifestFilePath)"
-      AssetsTemporaryDirectory="$(TempWorkingDirectory)" />
+      AssetsTemporaryDirectory="$(TempWorkingDirectory)" 
+      PublishingVersion="3"/>
 
     <Copy
       SourceFiles="$(SdkAssetsManifestFilePath)"

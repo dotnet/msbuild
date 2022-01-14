@@ -14,12 +14,17 @@
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>PROJECT</source>
-        <target state="translated">PROJE</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
         <source>Optional path to a project file or MSBuild arguments.</source>
         <target state="translated">Proje dosyasının veya MSBuild bağımsız değişkenlerinin isteğe bağlı yolu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdCurrentRuntimeOptionDescription">
+        <source>Use current runtime as the target runtime.</source>
+        <target state="translated">Hedef çalışma zamanı olarak geçerli çalışma zamanını kullanın.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">
@@ -74,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="translated">ÇALIŞMA_ZAMANI_TANIMLAYICISI</target>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">

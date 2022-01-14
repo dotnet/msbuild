@@ -13,7 +13,7 @@ possible and can triage effectively.
 The below steps are something that we believe is not a huge increase in process, 
 but would help us react much faster to any issues that are filed. 
 
-1. Check if the [known issues](https://github.com/dotnet/core/blob/master/release-notes/2.0/2.0.0-known-issues.md) cover the issue you are running 
+1. Check if the [known issues](https://github.com/dotnet/core/blob/main/release-notes/2.0/2.0.0-known-issues.md) cover the issue you are running 
 into. We are collecting issues that are known and that have workarounds, so it 
 could be that you can get unblocked pretty easily. 
 

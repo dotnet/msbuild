@@ -4,24 +4,21 @@
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.List;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 using Xunit;
-using Parser = Microsoft.DotNet.Cli.Parser;
-using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine.Parsing;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolListLocalCommandTests
     {
-        private readonly AppliedOption _appliedCommand;
         private readonly ParseResult _parseResult;
         private readonly BufferedReporter _reporter;
         private readonly string _temporaryDirectory;
@@ -46,9 +43,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 }
             );
             _parseResult = Parser.Instance.Parse("dotnet tool list");
-            _appliedCommand = _parseResult["dotnet"]["tool"]["list"];
             _defaultToolListLocalCommand = new ToolListLocalCommand(
-                _appliedCommand,
                 _parseResult,
                 _toolManifestInspector,
                 _reporter);
@@ -67,8 +62,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         [Fact]
         public void GivenManifestInspectorWhenCalledFromRedirectCommandItPrintsTheTable()
         {
-            var command = new ToolListCommand(_appliedCommand,
-                result: _parseResult,
+            var command = new ToolListCommand(result: _parseResult,
                 toolListLocalCommand: _defaultToolListLocalCommand);
             _defaultToolListLocalCommand.Execute();
             _reporter.Lines.Should().Contain(l => l.Contains("package.id"));

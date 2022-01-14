@@ -43,7 +43,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ValidateParameter
     ParameterName="UserName"
     ParameterValue="$(UserName)"/>
-    
+
     <PropertyGroup>
       <PublishUrl Condition=" '$(PublishUrl)'=='' ">https://{0}.scm.azurewebsites.net/api/{1}</PublishUrl>
       <DeployIndividualFiles Condition=" '$(DeployIndividualFiles)' != 'true'">false</DeployIndividualFiles>

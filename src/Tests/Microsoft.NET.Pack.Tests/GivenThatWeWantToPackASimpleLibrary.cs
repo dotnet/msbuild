@@ -16,7 +16,7 @@ namespace Microsoft.NET.Pack.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_packs_successfully()
         {
             var testAsset = _testAssetsManager
@@ -28,14 +28,16 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
+            
+
             var outputDirectory = new DirectoryInfo(Path.Combine(testAsset.TestRoot, "bin", "Debug"));
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "HelloWorld.1.0.0.nupkg",
-                "netcoreapp2.1/HelloWorld.dll",
-                "netcoreapp2.1/HelloWorld.pdb",
-                "netcoreapp2.1/HelloWorld.deps.json",
-                "netcoreapp2.1/HelloWorld.runtimeconfig.json",
-                "netcoreapp2.1/HelloWorld.runtimeconfig.dev.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.dll",
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.pdb",
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.deps.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.runtimeconfig.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld{EnvironmentInfo.ExecutableExtension}",
             });
         }
     }

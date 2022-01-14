@@ -29,7 +29,6 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetStandard1x",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard1.4",
                 IsExe = false
             };
@@ -49,7 +48,6 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetStandard20",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0",
                 IsExe = false
             };
@@ -65,7 +63,6 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetCoreApp11Library",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp1.1",
                 IsExe = false
             };
@@ -87,7 +84,6 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetCoreApp20Library",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.0",
                 IsExe = false
             };
@@ -103,7 +99,6 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetCoreApp11App",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp1.1",
                 IsExe = true
             };
@@ -125,7 +120,6 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackNet461App",
-                IsSdkProject = true,
                 TargetFrameworks = "net461",
             };
 
@@ -150,7 +144,6 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackApp_" + targetFramework,
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = true
             };
@@ -168,14 +161,13 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackAspNetCoreApp21App",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.1",
                 IsExe = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference(packageId, ""));
 
-            var dependencies = PackAndGetDependencies(testProject);
+            var dependencies = PackAndGetDependencies(testProject, packageId);
 
             dependencies.Should().BeEmpty();
 
@@ -187,7 +179,6 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackNetCoreApp20App",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.0",
                 IsExe = true
             };
@@ -211,7 +202,6 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackMultiTargetedLibrary",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard1.1;netstandard2.0;netcoreapp1.1;netcoreapp2.0",
                 IsExe = false
             };
@@ -275,9 +265,9 @@ namespace Microsoft.NET.Pack.Tests
                 .ToList();
         }
 
-        private XDocument PackAndGetNuspec(TestProject testProject)
+        private XDocument PackAndGetNuspec(TestProject testProject, string identifier = null)
         {
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier);
 
             var packCommand = new PackCommand(Log, testProjectInstance.TestRoot, testProject.Name);
 
@@ -290,9 +280,9 @@ namespace Microsoft.NET.Pack.Tests
             return nuspec;
         }
 
-        private List<XElement> PackAndGetDependencies(TestProject testProject)
+        private List<XElement> PackAndGetDependencies(TestProject testProject, string identifier = null)
         {
-            var dependencyGroups = GetDependencyGroups(PackAndGetNuspec(testProject), out var ns);
+            var dependencyGroups = GetDependencyGroups(PackAndGetNuspec(testProject, identifier), out var ns);
 
             //  There should be only one dependency group for these tests
             dependencyGroups.Count().Should().Be(1);

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -79,6 +81,106 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        //  Regression test for https://github.com/dotnet/sdk/issues/13513
+        [Fact]
+        public void DesignTimeBuildSucceedsWhenTargetingNetCore21WithRuntimeIdentifier()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesignTimePackageDependencies",
+                TargetFrameworks = "netcoreapp2.1",
+                IsSdkProject = true,
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new MSBuildCommand(testAsset, "ResolvePackageDependenciesDesignTime")
+                .Execute()
+                .Should()
+                .Pass();
+       }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net5.0-windows")]
+        [InlineData("net5.0-windows7.0")]
+        public void DesignTimePackageDependenciesAreResolved(string targetFramework)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesignTimePackageDependencies",
+                TargetFrameworks = targetFramework,
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1", privateAssets: "All"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.8.26"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "_PackageDependenciesDesignTime", GetValuesCommand.ValueType.Item);
+            getValuesCommand.DependsOnTargets = "ResolvePackageDependenciesDesignTime";
+
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+
+            getValuesCommand.GetValues()
+                .Should()
+                .BeEquivalentTo("Newtonsoft.Json/13.0.1", "Humanizer/2.8.26");
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net5.0-windows")]
+        [InlineData("net5.0-windows7.0")]
+        public void PackageErrorsAreSet(string targetFramework)
+        {
+            var designTimeArgs = GetDesignTimeMSBuildArgs();
+            if (designTimeArgs == null)
+            {
+                //  Design-time targets couldn't be found
+                return;
+            }
+
+            var testProject = new TestProject()
+            {
+                Name = "DesignTimePackageDependencies",
+                TargetFrameworks = targetFramework,
+            };
+
+            //  Downgrade will cause an error
+            testProject.AdditionalProperties["ContinueOnError"] = "ErrorAndContinue";
+
+            testProject.PackageReferences.Add(new TestPackageReference("NuGet.Commands", "4.0.0"));
+            testProject.PackageReferences.Add(new TestPackageReference("NuGet.Packaging", "3.5.0"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            new RestoreCommand(testAsset)
+                .Execute()
+                .Should()
+                .Fail();
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "_PackageDependenciesDesignTime", GetValuesCommand.ValueType.Item);
+            getValuesCommand.ShouldRestore = false;
+            getValuesCommand.DependsOnTargets = "ResolvePackageDependenciesDesignTime";
+            getValuesCommand.MetadataNames = new List<string>() { "DiagnosticLevel" };
+
+            getValuesCommand
+                .WithWorkingDirectory(testAsset.TestRoot)
+                .Execute(designTimeArgs)
+                .Should()
+                .Fail();
+
+            var valuesWithMetadata = getValuesCommand.GetValuesWithMetadata();
+            var nugetPackagingMetadata = valuesWithMetadata.Single(kvp => kvp.value.Equals("NuGet.Packaging/3.5.0")).metadata;
+            nugetPackagingMetadata["DiagnosticLevel"].Should().Be("Error");
+
+        }
+
         private void TestDesignTimeBuildAfterChange(Action<XDocument> projectChange, [CallerMemberName] string callingMethod = "")
         {
             var designTimeArgs = GetDesignTimeMSBuildArgs();
@@ -92,18 +194,17 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "App",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
             //  Add some package references to test more code paths (such as in ResolvePackageAssets)
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
-            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.6.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1", privateAssets: "All"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.8.26"));
 
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod: callingMethod)
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;
@@ -177,7 +278,7 @@ namespace Microsoft.NET.Build.Tests
                 "/t:CollectUpToDateCheckOutputDesignTime;ResolvePackageDependenciesDesignTime;CompileDesignTime",
                 "/t:CollectResolvedCompilationReferencesDesignTime;ResolveFrameworkReferences",
                 //  Set targeting pack folder to nonexistant folder so the project won't use installed targeting packs
-                "/p:NetCoreTargetingPackRoot=" + Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()),
+                "/p:NetCoreTargetingPackRoot=" + Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString())
             };
 
             return args;

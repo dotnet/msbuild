@@ -49,7 +49,7 @@ namespace Microsoft.NET.TestFramework
             return rid;
         }
 
-        //  Encode relevant information from https://github.com/dotnet/core/blob/master/os-lifecycle-policy.md
+        //  Encode relevant information from https://github.com/dotnet/core/blob/main/os-lifecycle-policy.md
         //  so that we can check if a test targeting a particular version of .NET Core should be
         //  able to run on the current OS
         public static bool SupportsTargetFramework(string targetFramework)
@@ -119,6 +119,25 @@ namespace Microsoft.NET.TestFramework
                             return false;
                         }
                     }
+                }
+            }
+            else if (ridOS.Equals("ubuntu", StringComparison.OrdinalIgnoreCase))
+            {
+                string restOfRid = currentRid.Substring(ridOS.Length + 1);
+                string ubuntuVersionString = restOfRid.Split('-')[0];
+                if (float.TryParse(ubuntuVersionString, out float ubuntuVersion))
+                {
+                    if (ubuntuVersion > 16.04)
+                    {
+                        if (nugetFramework.Version < new Version(2, 0, 0, 0))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    return true;
                 }
             }
             else if (ridOS.Equals("osx", StringComparison.OrdinalIgnoreCase))

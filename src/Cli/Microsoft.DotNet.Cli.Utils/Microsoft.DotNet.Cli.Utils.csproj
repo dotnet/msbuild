@@ -2,10 +2,11 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">$(SdkTargetFramework)</TargetFrameworks>
     <WarningsAsErrors>true</WarningsAsErrors>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PublicSign Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">true</PublicSign>
     <IsPackable>true</IsPackable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -14,7 +15,22 @@
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
   </ItemGroup>
 
+  <Target Name="VerifyMSBuildDependency" BeforeTargets="ResolveAssemblyReferences" Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'">
+    <PropertyGroup>
+      <MSBuildPathInPackage>$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net6.0\MSBuild.dll</MSBuildPathInPackage>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(MSBuildPathInPackage)')" Text="Something moved around in Microsoft.Build.Runtime, adjust code here accordingly." />
+    <ItemGroup>
+      <Reference Include="$(MSBuildPathInPackage)" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Runtime"
+        ExcludeAssets="all"
+        Version="$(MicrosoftBuildRuntimePackageVersion)"
+        Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'"
+        GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingPackageVersion)" />
@@ -26,6 +42,6 @@
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
   </ItemGroup>
-
 </Project>
