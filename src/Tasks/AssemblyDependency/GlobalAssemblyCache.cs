@@ -12,6 +12,8 @@ using System.Reflection;
 using Microsoft.Build.Framework;
 using System.Collections.Concurrent;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

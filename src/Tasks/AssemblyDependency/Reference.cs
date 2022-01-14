@@ -10,6 +10,8 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -1121,7 +1123,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            //  It was resolved locally, so copy it.
+            // It was resolved locally, so copy it.
             CopyLocal = CopyLocalState.YesBecauseOfHeuristic;
         }
 

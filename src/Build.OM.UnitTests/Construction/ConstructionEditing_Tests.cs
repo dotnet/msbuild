@@ -15,6 +15,8 @@ using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -935,7 +937,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [MemberData(nameof(InsertMetadataElemenetBeforeSiblingsTestData))]
         public void InsertMetadataElementBeforeSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
-            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertBeforeChild(c, r);};
+            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertBeforeChild(c, r); };
 
             AssertMetadataConstruction(addMetadata, position, expectedItem, act);
         }

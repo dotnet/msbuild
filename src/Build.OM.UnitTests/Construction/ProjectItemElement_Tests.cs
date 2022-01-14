@@ -12,6 +12,8 @@ using Microsoft.Build.Construction;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -94,7 +96,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         // https://github.com/dotnet/msbuild/issues/900
-        //[InlineData(@"
+        // [InlineData(@"
         //            <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
         //                <Target Name='t'>
         //                    <ItemGroup>

@@ -11,6 +11,8 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     internal class BuildEnvironmentHelper
@@ -235,7 +237,7 @@ namespace Microsoft.Build.Shared
         {
             if (s_runningTests())
             {
-                //  If running unit tests, then don't try to get the build environment from MSBuild installed on the machine
+                // If running unit tests, then don't try to get the build environment from MSBuild installed on the machine
                 //  (we should be using the locally built MSBuild instead)
                 return null;
             }
@@ -259,7 +261,7 @@ namespace Microsoft.Build.Shared
         {
             if (s_runningTests())
             {
-                //  If running unit tests, then don't try to get the build environment from MSBuild installed on the machine
+                // If running unit tests, then don't try to get the build environment from MSBuild installed on the machine
                 //  (we should be using the locally built MSBuild instead)
                 return null;
             }
@@ -353,7 +355,7 @@ namespace Microsoft.Build.Shared
                     return _runningTests.Value;
                 }
 
-                //  Check if running tests via the TestInfo class in Microsoft.Build.Framework.
+                // Check if running tests via the TestInfo class in Microsoft.Build.Framework.
                 //  See the comments on the TestInfo class for an explanation of why it works this way.
                 var frameworkAssembly = typeof(Framework.ITask).Assembly;
                 var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
@@ -434,7 +436,7 @@ namespace Microsoft.Build.Shared
             s_getVisualStudioInstances = getVisualStudioInstances ?? VisualStudioLocationHelper.GetInstances;
             s_getEnvironmentVariable = getEnvironmentVariable ?? GetEnvironmentVariable;
 
-            //  Tests which specifically test the BuildEnvironmentHelper need it to be able to act as if it is not running tests
+            // Tests which specifically test the BuildEnvironmentHelper need it to be able to act as if it is not running tests
             s_runningTests = runningTests ?? CheckIfRunningTests;
 
             BuildEnvironmentHelperSingleton.s_instance = Initialize();
@@ -457,8 +459,8 @@ namespace Microsoft.Build.Shared
 
         private static class BuildEnvironmentHelperSingleton
         {
-            // Explicit static constructor to tell C# compiler
-            // not to mark type as beforefieldinit
+            // Explicit static constructor to tell C# compiler
+            // not to mark type as beforefieldinit
             static BuildEnvironmentHelperSingleton()
             { }
 

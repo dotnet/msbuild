@@ -19,6 +19,8 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     public class ToolsetState_Tests
@@ -26,7 +28,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void OverrideTasksAreFoundInOverridePath()
         {
-            //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
+            // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             ProjectCollection e = new ProjectCollection();
             string dir = NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2";
             string overrideDir = NativeMethodsShared.IsWindows ? "c:\\msbuildoverridetasks" : "/msbuildoverridetasks";
@@ -70,7 +72,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void OverrideTaskPathIsRelative()
         {
-            //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
+            // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             ProjectCollection e = new ProjectCollection();
             Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "msbuildoverridetasks", new DirectoryExists(this.directoryExists));
 
@@ -123,7 +125,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void OverrideTaskPathIsNotFound()
         {
-            //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
+            // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             ProjectCollection e = new ProjectCollection();
             Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "k:\\Thecatinthehat", new DirectoryExists(this.directoryExists));
 
@@ -141,7 +143,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void DefaultTasksAreFoundInToolsPath()
         {
-            //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
+            // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             Toolset t = new Toolset(
                 "toolsversionname",
                 NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2",
@@ -172,7 +174,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void WarningLoggedIfNoDefaultTasksFound()
         {
-            //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
+            // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             ProjectCollection p = new ProjectCollection();
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -195,7 +197,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void InvalidToolPath()
         {
-            //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
+            // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             ProjectCollection p = new ProjectCollection();
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -215,7 +217,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void VerifyTasksFilesAreInSortedOrder()
         {
-            //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
+            // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             ProjectCollection p = new ProjectCollection();
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -923,8 +925,8 @@ namespace Microsoft.Build.UnitTests.Definition
             string pathWithoutTrailingSlash = path.EndsWith(Path.DirectorySeparatorChar.ToString())
                                                   ? path.Substring(0, path.Length - 1)
                                                   : path;
-            //NOTE: the Replace calls below are a very minimal attempt to convert a basic, cmd.exe-style wildcard
-            //into something Regex.IsMatch will know how to use.
+            // NOTE: the Replace calls below are a very minimal attempt to convert a basic, cmd.exe-style wildcard
+            // into something Regex.IsMatch will know how to use.
             string finalPattern = "^" + pattern.Replace(".", "\\.").Replace("*", "[\\w\\W]*") + "$";
 
             List<string> matches = new List<string>(_defaultTasksFileMap.Keys);

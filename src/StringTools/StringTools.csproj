@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'">$(LibraryTargetFrameworks);net35</TargetFrameworks>
@@ -9,7 +9,6 @@
     <LangVersion>8.0</LangVersion>
     <PackageId>Microsoft.NET.StringTools</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Nullable>enable</Nullable>
 
     <VersionPrefix>1.0.0</VersionPrefix>
     <AssemblyVersion></AssemblyVersion>

@@ -12,6 +12,8 @@ using System.Linq;
 using Microsoft.Build.Evaluation;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -639,7 +641,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        //  NOTE: When https://github.com/dotnet/msbuild/issues/362 is fixed, then the expected value in XML may be:
+        // NOTE: When https://github.com/dotnet/msbuild/issues/362 is fixed, then the expected value in XML may be:
         //      &lt;&amp;>"
         //  instead of:
         //      &lt;&amp;&gt;&quot;

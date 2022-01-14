@@ -13,6 +13,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -132,7 +134,7 @@ namespace Microsoft.Build.Logging
             // So keeping that map here
             var originalLocations = new Dictionary<EvaluationLocation, EvaluationLocation>(EvaluationLocationIdAgnosticComparer.Singleton);
 
-            while (!_profiledResults.IsEmpty)
+            while (_profiledResults.Any())
             {
                 ProfilerResult profiledResult;
                 var result = _profiledResults.TryDequeue(out profiledResult);

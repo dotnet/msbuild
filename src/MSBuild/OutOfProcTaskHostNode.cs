@@ -19,6 +19,8 @@ using Microsoft.Build.Shared;
 using System.Runtime.Remoting;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
@@ -905,22 +907,14 @@ namespace Microsoft.Build.CommandLine
                     taskParams
                 );
             }
-            catch (Exception e)
+            catch (ThreadAbortException)
             {
-                if (e is ThreadAbortException)
-                {
-                    // This thread was aborted as part of Cancellation, we will return a failure task result
-                    taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-                }
-                else
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-                else
-                {
-                    taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
-                }
+                // This thread was aborted as part of Cancellation, we will return a failure task result
+                taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
             }
             finally
             {
@@ -931,10 +925,7 @@ namespace Microsoft.Build.CommandLine
                     IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
-                    if (taskResult == null)
-                    {
-                        taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-                    }
+                    taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
 
                     lock (_taskCompleteLock)
                     {

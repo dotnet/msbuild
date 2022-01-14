@@ -9,6 +9,8 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

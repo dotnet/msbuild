@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -181,7 +183,7 @@ namespace Microsoft.Build.Tasks
         /// if they aren't used.  ConsoleOutput is a combination of stdout and stderr.
         /// </summary>
         [Output]
-        public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray();
+        public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>() : _nonEmptyOutput.ToArray();
 
         #endregion
 
@@ -370,7 +372,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="message"></param>
         protected override void LogToolCommand(string message)
         {
-            //Dont print the command line if Echo is Off.
+            // Dont print the command line if Echo is Off.
             if (!EchoOff)
             {
                 base.LogToolCommand(Command);

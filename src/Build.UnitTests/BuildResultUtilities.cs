@@ -6,18 +6,20 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.Unittest
 {
     internal class BuildResultUtilities
     {
         public static TargetResult GetEmptyFailingTargetResult()
         {
-            return new TargetResult(new TaskItem[0] { }, BuildResultUtilities.GetStopWithErrorResult());
+            return new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetStopWithErrorResult());
         }
 
         public static TargetResult GetEmptySucceedingTargetResult()
         {
-            return new TargetResult(new TaskItem[0] { }, BuildResultUtilities.GetSuccessResult());
+            return new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetSuccessResult());
         }
 
         public static TargetResult GetNonEmptySucceedingTargetResult()

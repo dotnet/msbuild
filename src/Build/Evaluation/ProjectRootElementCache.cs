@@ -15,6 +15,8 @@ using System.Globalization;
 using Microsoft.Build.Internal;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -69,7 +71,9 @@ namespace Microsoft.Build.Evaluation
         /// If this number is increased much higher, the datastructure may
         /// need to be changed from a linked list, since it's currently O(n).
         /// </remarks>
+#pragma warning disable CA1802 // Use literals where appropriate
         private static readonly int s_maximumStrongCacheSize = 200;
+#pragma warning restore CA1802 // Use literals where appropriate
 
         /// <summary>
         /// Whether the cache should log activity to the Debug.Out stream
@@ -260,7 +264,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
                     {
-                        //  Cached project doesn't match preserveFormatting setting, so reload it
+                        // Cached project doesn't match preserveFormatting setting, so reload it
                         projectRootElement.Reload(true, preserveFormatting);
                     }
                 }

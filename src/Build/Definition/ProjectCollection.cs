@@ -27,9 +27,11 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
-    using Utilities = Internal.Utilities;
+    using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
     /// Flags for controlling the toolset initialization.
@@ -1733,7 +1735,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void ResetToolsetsForTests(ToolsetConfigurationReader configurationReaderForTestsOnly)
         {
-            InitializeToolsetCollection(configReader:configurationReaderForTestsOnly);
+            InitializeToolsetCollection(configReader: configurationReaderForTestsOnly);
         }
 
 #if FEATURE_WIN32_REGISTRY
@@ -1742,7 +1744,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void ResetToolsetsForTests(ToolsetRegistryReader registryReaderForTestsOnly)
         {
-            InitializeToolsetCollection(registryReader:registryReaderForTestsOnly);
+            InitializeToolsetCollection(registryReader: registryReaderForTestsOnly);
         }
 #endif
 

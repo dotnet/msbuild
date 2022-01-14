@@ -12,10 +12,10 @@ class Program
 
         int returnCode = Xunit.ConsoleClient.Program.Main(newArgs.ToArray());
 
-        //if (showHelp)
-        //{
+        // if (showHelp)
+        // {
         //    TestCommandLine.ShowHelp();
-        //}
+        // }
 
         return returnCode;
 #else

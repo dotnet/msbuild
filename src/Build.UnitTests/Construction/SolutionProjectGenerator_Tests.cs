@@ -30,6 +30,8 @@ using Xunit.Abstractions;
 using Shouldly;
 using Microsoft.Build.UnitTests.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     public class SolutionProjectGenerator_Tests : IDisposable
@@ -1719,7 +1721,7 @@ EndGlobal
         {
             string oldValueForMSBuildEmitSolution = Environment.GetEnvironmentVariable("MSBuildEmitSolution");
 
-            //  Clean up projects loaded by other tests
+            // Clean up projects loaded by other tests
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
 
             string solutionFileContents =
@@ -1930,7 +1932,7 @@ EndGlobal
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
 
-                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
                 BuildResult result = buildManager.Build(parameters, request);
                 Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
@@ -2018,7 +2020,7 @@ EndGlobal
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
 
-                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
                 BuildResult result = buildManager.Build(parameters, request);
                 Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
@@ -2349,7 +2351,7 @@ EndGlobal
                 projectInstance.Targets["MyTarget"].BeforeTargets.ShouldBe("DynamicTraversalTarget");
 
                 MockLogger mockLogger = new MockLogger(output);
-                projectInstance.Build(targetsToBuild, new List <ILogger> { mockLogger })
+                projectInstance.Build(targetsToBuild, new List<ILogger> { mockLogger })
                     .ShouldBeFalse("The solution build should have failed due to a missing project");
                 mockLogger.AssertLogContains("Message from MyTarget");
             }

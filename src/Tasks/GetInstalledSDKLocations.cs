@@ -9,6 +9,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -137,13 +139,8 @@ namespace Microsoft.Build.Tasks
                 Version platformVersion = Version.Parse(TargetPlatformVersion);
                 installedSDKs = ToolLocationHelper.GetPlatformExtensionSDKLocationsAndVersions(SDKDirectoryRoots, SDKExtensionDirectoryRoots, SDKRegistryRoot, TargetPlatformIdentifier, platformVersion);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("GetInstalledSDKs.CouldNotGetSDKList", e.Message);
             }
 

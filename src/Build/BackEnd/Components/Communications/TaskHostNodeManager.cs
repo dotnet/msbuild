@@ -5,6 +5,8 @@ using System;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

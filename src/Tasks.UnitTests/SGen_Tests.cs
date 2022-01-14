@@ -9,6 +9,8 @@ using System.Linq;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class SGen_Tests
@@ -250,7 +252,7 @@ namespace Microsoft.Build.UnitTests
             sgen.ShouldGenerateSerializer = true;
             sgen.UseProxyTypes = false;
             sgen.UseKeep = false;
-            sgen.References = new string[]{ };
+            sgen.References = Array.Empty<string>();
 
             string commandLine = sgen.CommandLine();
 

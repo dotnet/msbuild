@@ -22,6 +22,8 @@ using Microsoft.Build.Shared.Debugging;
 using System.Threading.Tasks;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>
@@ -463,7 +465,7 @@ namespace Microsoft.Build.Internal
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)
             {
-                int bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bytesToRead - totalBytesRead);
+                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead), CancellationToken.None);
                 if (bytesRead == 0)
                 {
                     return totalBytesRead;

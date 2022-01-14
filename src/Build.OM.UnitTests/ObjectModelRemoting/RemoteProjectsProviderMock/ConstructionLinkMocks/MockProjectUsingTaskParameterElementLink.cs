@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System.Collections.Generic;
@@ -38,7 +40,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         object ILinkMock.Remoter => this.Proxy;
         MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
 
-        public override string Name { get => Proxy.Name ; set =>Proxy.Name = value; }
+        public override string Name { get => Proxy.Name; set =>Proxy.Name = value; }
         #region ProjectElementLink redirectors
         private IProjectElementLinkHelper EImpl => (IProjectElementLinkHelper)this;
         public override ProjectElementContainer Parent => EImpl.GetParent();

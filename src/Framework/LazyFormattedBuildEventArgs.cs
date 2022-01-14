@@ -5,6 +5,8 @@ using System;
 using System.Globalization;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -33,17 +35,6 @@ namespace Microsoft.Build.Framework
         {
             get => (argumentsOrFormattedMessage is string formattedMessage) ? formattedMessage : base.FormattedMessage;
         }
-
-        /// <summary>
-        /// Stores the original culture for String.Format.
-        /// </summary>
-        private string originalCultureName;
-
-        /// <summary>
-        /// Non-serializable CultureInfo object
-        /// </summary>
-        [NonSerialized]
-        private volatile CultureInfo originalCultureInfo;
 
         /// <summary>
         /// This constructor allows all event data to be initialized.
@@ -80,8 +71,6 @@ namespace Microsoft.Build.Framework
             : base(message, helpKeyword, senderName, eventTimestamp)
         {
             argumentsOrFormattedMessage = messageArgs;
-            originalCultureName = CultureInfo.CurrentCulture.Name;
-            originalCultureInfo = CultureInfo.CurrentCulture;
         }
 
         /// <summary>
@@ -107,12 +96,7 @@ namespace Microsoft.Build.Framework
 
                 if (argsOrMessage is object[] arguments && arguments.Length > 0)
                 {
-                    if (originalCultureInfo == null)
-                    {
-                        originalCultureInfo = new CultureInfo(originalCultureName);
-                    }
-
-                    formattedMessage = FormatString(originalCultureInfo, base.Message, arguments);
+                    formattedMessage = FormatString(base.Message, arguments);
                     argumentsOrFormattedMessage = formattedMessage;
                     return formattedMessage;
                 }
@@ -145,8 +129,6 @@ namespace Microsoft.Build.Framework
                 base.WriteToStreamWithExplicitMessage(writer, (argsOrMessage is string formattedMessage) ? formattedMessage : base.Message);
                 writer.Write(-1);
             }
-
-            writer.Write(originalCultureName);
         }
 
         /// <summary>
@@ -174,8 +156,6 @@ namespace Microsoft.Build.Framework
                 }
 
                 argumentsOrFormattedMessage = messageArgs;
-
-                originalCultureName = reader.ReadString();
             }
         }
 
@@ -186,11 +166,10 @@ namespace Microsoft.Build.Framework
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        /// <param name="culture">The culture info for formatting the message.</param>
         /// <param name="unformatted">The string to format.</param>
         /// <param name="args">Optional arguments for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
-        private static string FormatString(CultureInfo culture, string unformatted, params object[] args)
+        private static string FormatString(string unformatted, params object[] args)
         {
             // Based on the one in Shared/ResourceUtilities.
             string formatted = unformatted;
@@ -208,7 +187,7 @@ namespace Microsoft.Build.Framework
                     // another one, add it here.
                     if (param != null && param.ToString() == param.GetType().FullName)
                     {
-                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, "Invalid type for message formatting argument, was {0}", param.GetType().FullName));
+                        throw new InvalidOperationException(string.Format("Invalid type for message formatting argument, was {0}", param.GetType().FullName));
                     }
                 }
 #endif
@@ -216,7 +195,7 @@ namespace Microsoft.Build.Framework
                 // NOTE: all String methods are thread-safe
                 try
                 {
-                    formatted = String.Format(culture, unformatted, args);
+                    formatted = string.Format(unformatted, args);
                 }
                 catch (FormatException ex)
                 {
@@ -228,12 +207,12 @@ namespace Microsoft.Build.Framework
                     //       Task "Crash"
                     //          (16,14):  error : "This message logged from a task {1} has too few formatting parameters."
                     //             at System.Text.StringBuilder.AppendFormat(IFormatProvider provider, String format, Object[] args)
-                    //             at System.String.Format(IFormatProvider provider, String format, Object[] args)
-                    //             at Microsoft.Build.Framework.LazyFormattedBuildEventArgs.FormatString(CultureInfo culture, String unformatted, Object[] args) in d:\W8T_Refactor\src\vsproject\xmake\Framework\LazyFormattedBuildEventArgs.cs:line 263
+                    //             at System.String.Format(String format, Object[] args)
+                    //             at Microsoft.Build.Framework.LazyFormattedBuildEventArgs.FormatString(String unformatted, Object[] args) in d:\W8T_Refactor\src\vsproject\xmake\Framework\LazyFormattedBuildEventArgs.cs:line 263
                     //          Done executing task "Crash".
                     //
                     // T
-                    formatted = String.Format(CultureInfo.CurrentCulture, "\"{0}\"\n{1}", unformatted, ex.ToString());
+                    formatted = string.Format("\"{0}\"\n{1}", unformatted, ex.ToString());
                 }
             }
 
