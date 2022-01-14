@@ -239,7 +239,6 @@ namespace Microsoft.Build.Shared
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
                 // Only one thread should be doing operations on this instance of the object at a time.
-
                 Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
                 {
                     if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
@@ -285,7 +284,7 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new TypeInformation() { LoadedType = new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) } : null;
+                return type != null ? new TypeInformation(new LoadedType(type, _assemblyLoadInfo, _loadedAssembly)) : null;
             }
 
             /// <summary>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -137,7 +137,7 @@
     <Compile Include="..\Shared\TypeLoader.cs" />
 	<Compile Include="..\Shared\TypeInformation.cs" />
     <Compile Include="..\Shared\LoadedType.cs">
-	   <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+	  <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\AssemblyLoadInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

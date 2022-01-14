@@ -325,6 +325,11 @@ namespace Microsoft.Build.Shared
                 return typeInfo;
             }
 
+            /// <summary>
+            /// The user has not explicitly requested a TaskHost; load the type and use it to find relevant information.
+            /// </summary>
+            /// <param name="typeName">The type to find.</param>
+            /// <returns>A <c ref="TypeInformation"/> with a LoadedType indicating relevant information.</returns>
             private TypeInformation FindTypeInformationUsingLoadedType(string typeName)
             {
                 if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
@@ -370,13 +375,20 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
+            /// <summary>
+            /// Find type information using System.Reflection.Metadata to avoid loading (and locking) its containing assembly.
+            /// </summary>
+            /// <param name="typeName">The type to find.</param>
+            /// <returns>A <c ref="TypeInformation"/> indicating relevant information about typeName.</returns>
             private TypeInformation FindTypeInformationUsingSystemReflectionMetadata(string typeName)
             {
                 string path = _assemblyLoadInfo.AssemblyFile;
                 if (path is null)
                 {
 #if NETFRAMEWORK
-                    AppDomain appDomain = AppDomain.CreateDomain("appDomainToFindPath", null, AppDomain.CurrentDomain.SetupInformation);
+                    AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
+                    setup.LoaderOptimization = LoaderOptimization.SingleDomain;
+                    AppDomain appDomain = AppDomain.CreateDomain("appDomainToFindPath", null, setup);
                     path = appDomain.Load(new AssemblyName(_assemblyLoadInfo.AssemblyName)).Location;
                     AppDomain.Unload(appDomain);
 #else
@@ -405,6 +417,14 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
+            /// <summary>
+            /// Tries to find information about the type.
+            /// </summary>
+            /// <param name="metadataReader"><c ref="MetadataReader"/> for the assembly containing the type.</param>
+            /// <param name="typeDef"><c ref="TypeDefinition"/> indicating the type currently under consideration.</param>
+            /// <param name="typeName">The name of the task type to find.</param>
+            /// <param name="typeInformation">The information, if we find it.</param>
+            /// <returns>True if this type or one of its children matches typeName. False otherwise.</returns>
             private bool TryGetTypeInformationFromDefinition(MetadataReader metadataReader, TypeDefinition typeDef, string typeName, out TypeInformation typeInformation)
             {
                 typeInformation = null;
@@ -553,6 +573,9 @@ namespace Microsoft.Build.Shared
             private Type StringToType(string s)
             {
                 // return Type.GetType(s, false, true) ?? typeof(object);
+                // would be a much cleaner implementation of StringToType, but it unfortunately
+                // expects not just the type name but also its namespace like "System,Int32"
+                // rather than just "Int32" as we get from decoding the TypeDefinition's signature.
                 return s switch
                 {
                     "String" => typeof(String),

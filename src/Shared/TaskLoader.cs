@@ -143,24 +143,23 @@ namespace Microsoft.Build.Shared
                     // a task assembly using Load, and loaded a different one. I don't see any other choice than
                     // to fail here.
                     if (((typeInformation.LoadedType is not null) && taskType != typeInformation.LoadedType.Type) ||
-                            ((typeInformation.LoadedType is null) && (!taskType.Assembly.Location.Equals(typeInformation.LoadInfo.AssemblyLocation) || !taskType.Name.Equals(typeInformation.TypeName))))
+                        ((typeInformation.LoadedType is null) &&
+                        (!taskType.Assembly.Location.Equals(typeInformation.LoadInfo.AssemblyLocation) || !taskType.Name.Equals(typeInformation.TypeName))))
                     {
-                        logError
-                        (
-                        taskLocation,
-                        taskLine,
-                        taskColumn,
-                        "ConflictingTaskAssembly",
-                        typeInformation.LoadInfo.AssemblyFile ?? typeInformation.LoadedType.Assembly.AssemblyFile,
-                        typeInformation.LoadInfo.AssemblyLocation ?? typeInformation.LoadedType.Type.GetTypeInfo().Assembly.Location
-                        );
+                        logError(
+                            taskLocation,
+                            taskLine,
+                            taskColumn,
+                            "ConflictingTaskAssembly",
+                            typeInformation.LoadInfo.AssemblyFile ?? typeInformation.LoadedType.Assembly.AssemblyFile,
+                            typeInformation.LoadInfo.AssemblyLocation ?? typeInformation.LoadedType.Type.GetTypeInfo().Assembly.Location);
 
                         taskInstanceInOtherAppDomain = null;
                     }
                 }
                 else
                 {
-                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.Type.GetTypeInfo().Assembly.FullName, typeInformation.TypeName);
+                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(typeInformation.LoadedType.Type.GetTypeInfo().Assembly.FullName, typeInformation.TypeName);
                 }
 
                 return taskInstanceInOtherAppDomain;

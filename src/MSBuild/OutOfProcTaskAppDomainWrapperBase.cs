@@ -114,11 +114,11 @@ namespace Microsoft.Build.CommandLine
 #endif
             wrappedTask = null;
 
-            LoadedType taskType = null;
+            TypeInformation taskType = null;
             try
             {
                 TypeLoader typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
-                taskType = typeLoader.Load(taskName, Path.IsPathRooted(taskLocation) ? AssemblyLoadInfo.Create(null, taskLocation) : AssemblyLoadInfo.Create(taskLocation, null), false).LoadedType;
+                taskType = typeLoader.Load(taskName, AssemblyLoadInfo.Create(null, taskLocation), false);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -136,10 +136,10 @@ namespace Microsoft.Build.CommandLine
             }
 
             OutOfProcTaskHostTaskResult taskResult;
-            if (taskType.HasSTAThreadAttribute())
+            if (taskType.HasSTAThreadAttribute)
             {
 #if FEATURE_APARTMENT_STATE
-                taskResult = InstantiateAndExecuteTaskInSTAThread(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn,
+                taskResult = InstantiateAndExecuteTaskInSTAThread(oopTaskHostNode, taskType.LoadedType, taskName, taskLocation, taskFile, taskLine, taskColumn,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
@@ -156,7 +156,7 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
-                taskResult = InstantiateAndExecuteTask(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn,
+                taskResult = InstantiateAndExecuteTask(oopTaskHostNode, taskType.LoadedType, taskName, taskLocation, taskFile, taskLine, taskColumn,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif

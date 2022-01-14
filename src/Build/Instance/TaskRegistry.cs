@@ -1369,7 +1369,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
                                 factory = (ITaskFactory)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.Type.GetTypeInfo().Assembly.FullName, typeInformation.TypeName);
 #else
-                                factory = (ITaskFactory) Activator.CreateInstance(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.LoadedAssembly.FullName, typeInformation.TypeName)?.Unwrap();
+                                factory = (ITaskFactory)Activator.CreateInstance(typeInformation.LoadInfo.AssemblyName ?? typeInformation.LoadedType.LoadedAssembly.FullName, typeInformation.TypeName)?.Unwrap();
 #endif
                                 TaskFactoryLoggingHost taskFactoryLoggingHost = new TaskFactoryLoggingHost(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext);
 
@@ -1388,15 +1388,14 @@ namespace Microsoft.Build.Execution
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
                                         if (TaskFactoryParameters != null)
                                         {
-                                            targetLoggingContext.LogWarning
-                                                (
+                                            targetLoggingContext.LogWarning(
                                                 null,
-                                                    new BuildEventFileInfo(elementLocation),
-                                                    "TaskFactoryWillIgnoreTaskFactoryParameters",
-                                                    factory.FactoryName,
-                                                    XMakeAttributes.runtime,
-                                                    XMakeAttributes.architecture,
-                                                RegisteredName);
+                                                new BuildEventFileInfo(elementLocation),
+                                                "TaskFactoryWillIgnoreTaskFactoryParameters",
+                                                factory.FactoryName,
+                                                XMakeAttributes.runtime,
+                                                XMakeAttributes.architecture,
+                                            RegisteredName);
                                         }
                                     }
 
@@ -1460,7 +1459,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, typeInformation, TaskFactoryAssemblyLoadInfo, RegisteredName, TaskFactoryParameters);
+                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, typeInformation, RegisteredName, TaskFactoryParameters);
                 }
 
                 return true;

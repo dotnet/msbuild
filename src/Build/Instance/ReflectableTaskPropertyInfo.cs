@@ -17,15 +17,19 @@ namespace Microsoft.Build.Execution
     internal class ReflectableTaskPropertyInfo : TaskPropertyInfo
     {
         /// <summary>
+        /// The name of the generated tasks.
+        /// </summary>
+        private readonly string taskName;
+
+        /// <summary>
+        /// Function for accessing information about a property on a task via its name.
+        /// </summary>
+        private readonly Func<string, BindingFlags, PropertyInfo> getProperty;
+
+        /// <summary>
         /// The reflection-produced PropertyInfo.
         /// </summary>
         private PropertyInfo _propertyInfo;
-
-        /// <summary>
-        /// The type of the generated tasks.
-        /// </summary>
-        private readonly Func<string, BindingFlags, PropertyInfo> getProperty;
-        private readonly string taskName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReflectableTaskPropertyInfo"/> class.

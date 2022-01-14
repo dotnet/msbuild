@@ -84,25 +84,37 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                return _typeInformation.LoadInfo.AssemblyLocation ?? _typeInformation.LoadedType.LoadedAssembly.Location;
+                return _typeInformation.LoadInfo.AssemblyLocation;
             }
         }
 
         /// <summary>
         /// Gets the type of task this factory creates.
+        /// This is only actually used in finding the TaskName immediately below this if LoadedType is not null.
+        /// The extra null checks are to avoid throwing, though it will if it cannot find the type.
         /// </summary>
         public Type TaskType
         {
             get { return _typeInformation.LoadedType?.Type ?? Type.GetType(_typeInformation.TypeName, true, true); }
         }
 
+        /// <summary>
+        /// The name of the task.
+        /// </summary>
         public string TaskName
         {
             get { return _typeInformation.LoadedType is null ? $"{_typeInformation.Namespace}.{_typeInformation.TypeName}" : TaskType.FullName; }
         }
 
+        /// <summary>
+        /// All information known about a type. If it's loaded, that information mostly comes from the LoadedType object contained within.
+        /// If not, the information was collected in TypeLoader via System.Reflection.Metadata.
+        /// </summary>
         public TypeInformation TypeInformation { get { return _typeInformation; } }
 
+        /// <summary>
+        /// Indicates whether this task implements IGeneratedTask. IGeneratedTask has useful methods for getting and setting properties.
+        /// </summary>
         public bool ImplementsIGeneratedTask { get { return _typeInformation?.ImplementsIGeneratedTask ?? false; } }
 
         /// <summary>

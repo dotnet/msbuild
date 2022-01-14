@@ -299,7 +299,7 @@ namespace Microsoft.Build.BackEnd
             if (_resolver == null)
             {
                 _resolver = new TaskEngineAssemblyResolver();
-                _resolver.Initialize(_taskFactoryWrapper.TaskFactoryAssemblyLoadInfo.AssemblyFile);
+                _resolver.Initialize(_taskFactoryWrapper.TaskFactoryTypeInformation.LoadInfo.AssemblyFile);
                 _resolver.InstallHandler();
             }
 #endif
@@ -903,12 +903,14 @@ namespace Microsoft.Build.BackEnd
                 // Map to an intrinsic task, if necessary.
                 if (String.Equals(taskFactoryFullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new TypeInformation(new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null))), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null), _taskName, null);
+                    AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null);
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new TypeInformation(new LoadedType(typeof(MSBuild), loadInfo)), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(taskFactoryFullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new TypeInformation(new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null))), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null), _taskName, null);
+                    AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null);
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new TypeInformation(new LoadedType(typeof(CallTarget), loadInfo)), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
             }
@@ -1080,8 +1082,8 @@ namespace Microsoft.Build.BackEnd
                         "UnexpectedTaskAttribute",
                         parameterName,
                         _taskName,
-                        _taskFactoryWrapper.TaskFactoryAssemblyLoadInfo.AssemblyName,
-                        _taskFactoryWrapper.TaskFactoryAssemblyLoadInfo.AssemblyLocation
+                        _taskFactoryWrapper.TaskFactoryTypeInformation.LoadInfo.AssemblyName,
+                        _taskFactoryWrapper.TaskFactoryTypeInformation.LoadInfo.AssemblyLocation
                         );
                 }
             }

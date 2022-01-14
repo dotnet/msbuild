@@ -33,11 +33,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private AssemblyLoadInfo _loadInfo;
 
         /// <summary>
-        /// The loaded type from the initialized task factory.
-        /// </summary>
-        private LoadedType _loadedType;
-
-        /// <summary>
         /// Initialize a task factory
         /// </summary>
         public AssemblyTaskFactory_Tests()
@@ -703,8 +698,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _loadInfo = AssemblyLoadInfo.Create(typeof(TaskToTestFactories).GetTypeInfo().Assembly.FullName, null);
 #endif
             TypeInformation typeInfo = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
-            Assert.True(typeInfo.LoadInfo.Equals(_loadInfo)); // "Expected the AssemblyLoadInfo to be equal"
-            _loadedType = typeInfo.LoadedType;
+            typeInfo.LoadInfo.ShouldBe(_loadInfo, "Expected the AssemblyLoadInfo to be equal");
         }
 
         #endregion
