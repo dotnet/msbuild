@@ -9,6 +9,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {
     /// <summary>
@@ -284,7 +286,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("1");
+            builder.Append('1');
 
             string return2 = cache.Add(builder.ToString(), document);
 
@@ -318,7 +320,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("1");
+            builder.Append('1');
             XmlDocument document2 = new XmlDocument();
 
             string return2 = cache.Add(builder.ToString(), document2);
@@ -360,7 +362,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("1");
+            builder.Append('1');
             XmlDocument document2 = new XmlDocument();
 
             string return2 = cache.Add(builder.ToString(), document2);
@@ -397,7 +399,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("1");
+            builder.Append('1');
             XmlDocument document3 = new XmlDocument();
 
             string return3 = cache.Add(builder.ToString(), document3);
@@ -432,7 +434,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("2");
+            builder.Append('2');
             string return3 = cache.Add(builder.ToString(), document);
 
             // The new string should be the same as the other one already in the collection.
@@ -466,7 +468,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("2");
+            builder.Append('2');
             XmlDocument document3 = new XmlDocument();
             string return3 = cache.Add(builder.ToString(), document3);
 

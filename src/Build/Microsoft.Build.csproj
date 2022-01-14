@@ -98,9 +98,6 @@
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\StringBuilderCache.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
@@ -139,7 +136,6 @@
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\ReuseableStringBuilder.cs" />
     <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
@@ -359,7 +355,6 @@
       <Link>Collections\CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
-    <Compile Include="Collections\IDeepCloneable.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

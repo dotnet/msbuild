@@ -12,9 +12,11 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    //  Although this tests the ProfilerResult API from Microsoft.Build.Framework, it uses the
+    // Although this tests the ProfilerResult API from Microsoft.Build.Framework, it uses the
     //  construction APIs in Microsoft.Build in the test, so this test is in the Microsoft.Build tests
     public class ProjectEvaluationFinishedEventArgs_Tests 
     {

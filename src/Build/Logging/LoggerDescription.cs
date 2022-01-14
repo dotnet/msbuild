@@ -12,6 +12,8 @@ using Microsoft.Build.BackEnd;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -226,25 +228,15 @@ namespace Microsoft.Build.Logging
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerInstantiationFailureErrorInvalidCast", _loggerClassName, _loggerAssembly.AssemblyLocation, e.Message);
                 throw new LoggerException(message, e.InnerException);
             }
-            catch (TargetInvocationException e)
+            catch (TargetInvocationException e) when (e.InnerException is LoggerException le)
             {
                 // At this point, the interesting stack is the internal exception;
                 // the outer exception is System.Reflection stuff that says nothing
                 // about the nature of the logger failure.
-                Exception innerException = e.InnerException;
-
-                if (innerException is LoggerException)
-                {
-                    // Logger failed politely during construction. In order to preserve
-                    // the stack trace at which the error occurred we wrap the original
-                    // exception instead of throwing.
-                    LoggerException l = ((LoggerException)innerException);
-                    throw new LoggerException(l.Message, innerException, l.ErrorCode, l.HelpKeyword);
-                }
-                else
-                {
-                    throw;
-                }
+                // Logger failed politely during construction. In order to preserve
+                // the stack trace at which the error occurred we wrap the original
+                // exception instead of throwing.
+                throw new LoggerException(le.Message, le, le.ErrorCode, le.HelpKeyword);
             }
 
             return logger;

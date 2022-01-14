@@ -7,6 +7,8 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public sealed class TaskHostFactory_Tests

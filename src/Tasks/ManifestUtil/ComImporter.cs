@@ -11,6 +11,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal class ComImporter
@@ -22,8 +24,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         // These must be defined in sorted order!
         private static readonly string[] s_knownImplementedCategories =
         {
-            "{02496840-3AC4-11cf-87B9-00AA006C8166}", //CATID_VBFormat
-            "{02496841-3AC4-11cf-87B9-00AA006C8166}", //CATID_VBGetControl
+            "{02496840-3AC4-11cf-87B9-00AA006C8166}", // CATID_VBFormat
+            "{02496841-3AC4-11cf-87B9-00AA006C8166}", // CATID_VBGetControl
             "{40FC6ED5-2438-11CF-A3DB-080036F12502}",
         };
         private static readonly string[] s_knownSubKeys =
@@ -63,7 +65,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 Guid tlbid = typeLibAttr.guid;
 
                 tlib.GetDocumentation(-1, out _, out string docString, out _, out string helpFile);
-                string helpdir = Util.FilterNonprintableChars(helpFile); //Path.GetDirectoryName(helpFile);
+                string helpdir = Util.FilterNonprintableChars(helpFile); // Path.GetDirectoryName(helpFile);
 
                 TypeLib = new TypeLib(tlbid, new Version(typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum), helpdir, typeLibAttr.lcid, Convert.ToInt32(typeLibAttr.wLibFlags, CultureInfo.InvariantCulture));
 

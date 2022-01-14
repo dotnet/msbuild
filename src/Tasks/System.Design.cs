@@ -9,6 +9,8 @@ using System.Threading;
 
 using System.ComponentModel;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     [AttributeUsage(AttributeTargets.All)]

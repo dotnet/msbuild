@@ -12,6 +12,8 @@ using System.IO;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -59,7 +61,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestValidConfiguration()
         {
-            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, "2.0");
             ConfigurationMetadata metadata = new ConfigurationMetadata(config);
             Assert.Equal(data.ProjectFullPath, metadata.ProjectFullPath);
@@ -85,7 +87,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestGetHashCode()
         {
-            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             Project project = CreateProject();
@@ -101,7 +103,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestEquals()
         {
-            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             Project project = CreateProject();
@@ -110,12 +112,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ConfigurationMetadata metadata2 = new ConfigurationMetadata(project);
             Assert.True(metadata1.Equals(metadata2));
 
-            data = new BuildRequestData("file2", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+            data = new BuildRequestData("file2", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             BuildRequestConfiguration config2 = new BuildRequestConfiguration(1, data, ObjectModelHelpers.MSBuildDefaultToolsVersion);
             ConfigurationMetadata metadata3 = new ConfigurationMetadata(config2);
             Assert.False(metadata1.Equals(metadata3));
 
-            data = new BuildRequestData("file", new Dictionary<string, string>(), "3.0", new string[0], null);
+            data = new BuildRequestData("file", new Dictionary<string, string>(), "3.0", Array.Empty<string>(), null);
             BuildRequestConfiguration config3 = new BuildRequestConfiguration(1, data, "3.0");
             ConfigurationMetadata metadata4 = new ConfigurationMetadata(config3);
             Assert.False(metadata1.Equals(metadata4));
@@ -135,7 +137,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             copy.ProjectFullPath.ShouldBe(initial.ProjectFullPath);
             copy.ToolsVersion.ShouldBe(initial.ToolsVersion);
 
-            Assert.Equal(copy.GlobalProperties.GetCopyOnReadEnumerable(), initial.GlobalProperties.GetCopyOnReadEnumerable(), EqualityComparer<ProjectPropertyInstance>.Default);
+            Assert.Equal(copy.GlobalProperties, initial.GlobalProperties, EqualityComparer<ProjectPropertyInstance>.Default);
         }
 
         /// <summary>

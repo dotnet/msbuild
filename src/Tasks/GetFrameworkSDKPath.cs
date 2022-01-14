@@ -6,6 +6,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -310,7 +312,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>true</returns>
         public override bool Execute()
         {
-            //Does Nothing: getters do all the work
+            // Does Nothing: getters do all the work
 
             return true;
         }

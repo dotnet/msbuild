@@ -10,6 +10,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

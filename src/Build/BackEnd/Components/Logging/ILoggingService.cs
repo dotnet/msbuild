@@ -12,6 +12,8 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     #region Delegates
@@ -267,7 +269,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Register an logger which expects all logging events from the system
         /// </summary>
         /// <param name="logger">The logger to register.</param>
-        ///<returns value="bool">True if the central was registered. False if the central logger was already registered</returns>
+        /// <returns value="bool">True if the central was registered. False if the central logger was already registered</returns>
         bool RegisterLogger(ILogger logger);
 
         /// <summary>
@@ -447,6 +449,16 @@ namespace Microsoft.Build.BackEnd.Logging
         BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId);
 
         /// <summary>
+        /// Create a project cache context, by generating a new project context id.
+        /// </summary>
+        /// <param name="submissionId">The submission id</param>
+        /// <param name="evaluationId">The evaluation id</param>
+        /// <param name="projectInstanceId">The project instance id</param>
+        /// <param name="projectFile">Project file being built</param>
+        /// <returns></returns>
+        BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId, string projectFile);
+
+        /// <summary>
         /// Logs that a project evaluation has started
         /// </summary>
         /// <param name="eventContext">The event context to use for logging</param>
@@ -477,15 +489,26 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="nodeBuildEventContext">The logging context of the node which is building this project.</param>
         /// <param name="submissionId">The id of the build submission.</param>
-        /// <param name="projectId">The id of the project instance which is about to start</param>
+        /// <param name="configurationId">The id of the project configuration which is about to start</param>
         /// <param name="parentBuildEventContext">The build context of the parent project which asked this project to build</param>
         /// <param name="projectFile">The project file path of the project about to be built</param>
         /// <param name="targetNames">The entrypoint target names for this project</param>
         /// <param name="properties">The initial properties of the project</param>
         /// <param name="items">The initial items of the project</param>
         /// <param name="evaluationId">EvaluationId of the project instance</param>
+        /// <param name="projectContextId">The project context id</param>
         /// <returns>The BuildEventContext to use for this project.</returns>
-        BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items, int evaluationId = BuildEventContext.InvalidEvaluationId);
+        BuildEventContext LogProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId);
 
         /// <summary>
         /// Log that the project has finished

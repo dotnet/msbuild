@@ -17,6 +17,8 @@ using System.Threading.Tasks;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -71,7 +73,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _elementLocation = ElementLocation.Create("MockFile", 5, 5);
 
             BuildRequest buildRequest = new BuildRequest(1 /* submissionId */, 1, 1, new List<string>(), null, BuildEventContext.Invalid, null);
-            BuildRequestConfiguration configuration = new BuildRequestConfiguration(1, new BuildRequestData("Nothing", new Dictionary<string, string>(), "4.0", new string[0], null), "2.0");
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(1, new BuildRequestData("Nothing", new Dictionary<string, string>(), "4.0", Array.Empty<string>(), null), "2.0");
 
             configuration.Project = new ProjectInstance(ProjectRootElement.Create());
 
@@ -973,7 +975,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         internal class MyCustomBuildEventArgsNotSerializable : CustomBuildEventArgs
         {
-            //  If binary serialization is not available, then we use a simple serializer which relies on a default constructor.  So to test
+            // If binary serialization is not available, then we use a simple serializer which relies on a default constructor.  So to test
             //  what happens for an event that's not serializable, don't include a default constructor.
             /// <summary>
             /// Default constructor

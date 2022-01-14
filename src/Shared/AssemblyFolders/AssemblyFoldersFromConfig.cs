@@ -10,6 +10,8 @@ using Microsoft.Build.Shared.AssemblyFoldersFromConfig;
 using Microsoft.Build.Utilities;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 {
     internal class AssemblyFoldersFromConfig : IEnumerable<AssemblyFoldersFromConfigInfo>

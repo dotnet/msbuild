@@ -11,6 +11,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class PortableTasks_Tests
@@ -51,7 +53,7 @@ namespace Microsoft.Build.UnitTests
                 var folder = env.CreateFolder().Path;
                 var projFile = Path.Combine(folder, ProjectFileName);
 
-                //"Debug", "netstandard1.3"
+                // "Debug", "netstandard1.3"
                 DirectoryInfo ProjectFileFolder =
                     new DirectoryInfo(PortableTaskFolderPath).EnumerateDirectories().First().EnumerateDirectories().First(n => n.Name.Equals("netstandard2.0", StringComparison.OrdinalIgnoreCase));
 

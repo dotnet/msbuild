@@ -23,6 +23,8 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -1599,24 +1601,15 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
                     File.Create("testProject.proj").Dispose();
                     break;
                 }
-                catch (Exception ex)
+                // If all the retries failed, fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
 
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testFile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0");
             Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
 
             config.Project = project.CreateProjectInstance();
@@ -1632,7 +1625,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <returns>The context</returns>
         private ProjectLoggingContext GetProjectLoggingContext(BuildRequestEntry entry)
         {
-            return new ProjectLoggingContext(new NodeLoggingContext(_host, 1, false), entry, null);
+            return new ProjectLoggingContext(new NodeLoggingContext(_host, 1, false), entry);
         }
 
         /// <summary>

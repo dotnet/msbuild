@@ -9,6 +9,8 @@ using System.Reflection;
 
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

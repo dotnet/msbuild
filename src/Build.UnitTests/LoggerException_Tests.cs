@@ -8,6 +8,8 @@ using Microsoft.Build.Exceptions;
 using Xunit;
 using System.Runtime.Serialization.Formatters.Binary;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class InternalLoggerExceptionTests

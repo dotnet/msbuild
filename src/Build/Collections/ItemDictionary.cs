@@ -8,6 +8,8 @@ using System.Diagnostics;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>
@@ -146,9 +148,9 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns an enumerable which copies the underlying data on read.
         /// </summary>
-        public IEnumerable<T> GetCopyOnReadEnumerable()
+        public IEnumerable<TResult> GetCopyOnReadEnumerable<TResult>(Func<T, TResult> selector)
         {
-            return new CopyOnReadEnumerable<T>(this, _itemLists);
+            return new CopyOnReadEnumerable<T, TResult>(this, _itemLists, selector);
         }
 
         /// <summary>
@@ -406,7 +408,7 @@ namespace Microsoft.Build.Collections
             }
 
             /// <summary>
-            /// Finalizer
+            /// Finalizes an instance of the <see cref="Enumerator"/> class.
             /// </summary>
             ~Enumerator()
             {

@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -43,7 +41,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     internal class ProjectCacheService
     {
         private readonly BuildManager _buildManager;
-        private readonly Func<PluginLoggerBase> _loggerFactory;
+        private readonly ILoggingService _loggingService;
         private readonly ProjectCacheDescriptor _projectCacheDescriptor;
         private readonly CancellationToken _cancellationToken;
         private readonly ProjectCachePluginBase _projectCachePlugin;
@@ -65,14 +63,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private ProjectCacheService(
             ProjectCachePluginBase projectCachePlugin,
             BuildManager buildManager,
-            Func<PluginLoggerBase> loggerFactory,
+            ILoggingService loggingService,
             ProjectCacheDescriptor projectCacheDescriptor,
             CancellationToken cancellationToken
         )
         {
             _projectCachePlugin = projectCachePlugin;
             _buildManager = buildManager;
-            _loggerFactory = loggerFactory;
+            _loggingService = loggingService;
             _projectCacheDescriptor = projectCacheDescriptor;
             _cancellationToken = cancellationToken;
         }
@@ -86,11 +84,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             var plugin = await Task.Run(() => GetPluginInstance(pluginDescriptor), cancellationToken)
                 .ConfigureAwait(false);
 
-            // TODO: Detect and use the highest verbosity from all the user defined loggers. That's tricky because right now we can't query loggers about
-            // their verbosity levels.
-            var loggerFactory = new Func<PluginLoggerBase>(() => new LoggingServiceToPluginLoggerAdapter(LoggerVerbosity.Normal, loggingService));
-
-            var service = new ProjectCacheService(plugin, buildManager, loggerFactory, pluginDescriptor, cancellationToken);
+            var service = new ProjectCacheService(plugin, buildManager, loggingService, pluginDescriptor, cancellationToken);
 
             // TODO: remove the if after we change VS to set the cache descriptor via build parameters and always call BeginBuildAsync in FromDescriptorAsync.
             // When running under VS we can't initialize the plugin until we evaluate a project (any project) and extract
@@ -106,7 +100,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
         // TODO: remove vsWorkaroundOverrideDescriptor after we change VS to set the cache descriptor via build parameters.
         private async Task BeginBuildAsync(ProjectCacheDescriptor? vsWorkaroundOverrideDescriptor = null)
         {
-            var logger = _loggerFactory();
+            var logger = new LoggingServiceToPluginLoggerAdapter(
+                _loggingService,
+                BuildEventContext.Invalid,
+                BuildEventFileInfo.Empty);
 
             try
             {
@@ -127,7 +124,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         new DefaultMSBuildFileSystem(),
                         projectDescriptor.ProjectGraph,
                         projectDescriptor.EntryPoints),
-                    // TODO: Detect verbosity from logging service.
                     logger,
                     _cancellationToken);
 
@@ -222,22 +218,22 @@ namespace Microsoft.Build.Experimental.ProjectCache
             {
                 try
                 {
-                    var cacheResult = await ProcessCacheRequest(cacheRequest);
-                    _buildManager.PostCacheResult(cacheRequest, cacheResult);
+                    (CacheResult cacheResult, int projectContextId) = await ProcessCacheRequest(cacheRequest);
+                    _buildManager.PostCacheResult(cacheRequest, cacheResult, projectContextId);
                 }
                 catch (Exception e)
                 {
-                    _buildManager.PostCacheResult(cacheRequest, CacheResult.IndicateException(e));
+                    _buildManager.PostCacheResult(cacheRequest, CacheResult.IndicateException(e), BuildEventContext.InvalidProjectContextId);
                 }
             }, _cancellationToken);
 
-            async Task<CacheResult> ProcessCacheRequest(CacheRequest request)
+            async Task<(CacheResult Result, int ProjectContextId)> ProcessCacheRequest(CacheRequest request)
             {
                 // Prevent needless evaluation if design time builds detected.
                 if (_projectCacheDescriptor.VsWorkaround && DesignTimeBuildsDetected)
                 {
                     // The BuildManager should disable the cache when it finds its servicing design time builds.
-                    return CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss);
+                    return (CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss), BuildEventContext.InvalidProjectContextId);
                 }
 
                 EvaluateProjectIfNecessary(request);
@@ -260,7 +256,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     if (DesignTimeBuildsDetected)
                     {
                         // The BuildManager should disable the cache when it finds its servicing design time builds.
-                        return CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss);
+                        return (CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss), BuildEventContext.InvalidProjectContextId);
                     }
                 }
 
@@ -286,13 +282,30 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 ErrorUtilities.VerifyThrowInternalError(
                     LateInitializationForVSWorkaroundCompleted is null ||
-                    _projectCacheDescriptor.VsWorkaround && LateInitializationForVSWorkaroundCompleted.Task.IsCompleted,
+                    (_projectCacheDescriptor.VsWorkaround && LateInitializationForVSWorkaroundCompleted.Task.IsCompleted),
                     "Completion source should be null when this is not the VS workaround");
 
-                return await GetCacheResultAsync(
-                    new BuildRequestData(
-                        request.Configuration.Project,
-                        request.Submission.BuildRequestData.TargetNames.ToArray()));
+                BuildRequestData buildRequest = new BuildRequestData(
+                    cacheRequest.Configuration.Project,
+                    cacheRequest.Submission.BuildRequestData.TargetNames.ToArray());
+                BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
+                    cacheRequest.Submission.SubmissionId,
+                    evaluationId: cacheRequest.Configuration.Project.EvaluationId,
+                    projectInstanceId: cacheRequest.Configuration.ConfigurationId,
+                    projectFile: cacheRequest.Configuration.Project.FullPath);
+
+                CacheResult cacheResult;
+                try
+                {
+                    cacheResult = await GetCacheResultAsync(buildRequest, buildEventContext);
+                }
+                catch (Exception ex)
+                {
+                    // Wrap the exception here so we can preserve the ProjectContextId
+                    cacheResult = CacheResult.IndicateException(ex);
+                }
+
+                return (cacheResult, buildEventContext.ProjectContextId);
             }
 
             static bool IsDesignTimeBuild(ProjectInstance project)
@@ -301,7 +314,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 var buildingProject = project.GlobalPropertiesDictionary[DesignTimeProperties.BuildingProject]?.EvaluatedValue;
 
                 return MSBuildStringIsTrue(designTimeBuild) ||
-                       buildingProject != null && !MSBuildStringIsTrue(buildingProject);
+                       (buildingProject != null && !MSBuildStringIsTrue(buildingProject));
             }
 
             void EvaluateProjectIfNecessary(CacheRequest request)
@@ -451,7 +464,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 ConversionUtilities.ConvertStringToBool(msbuildString, nullOrWhitespaceIsFalse: true);
         }
 
-        private async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest)
+        private async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildEventContext buildEventContext)
         {
             lock (this)
             {
@@ -470,7 +483,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
                                    $"\n\tTargets:[{string.Join(", ", buildRequest.TargetNames)}]" +
                                    $"\n\tGlobal Properties: {{{string.Join(",", buildRequest.GlobalProperties.Select(kvp => $"{kvp.Name}={kvp.EvaluatedValue}"))}}}";
 
-            var logger = _loggerFactory();
+            var buildEventFileInfo = new BuildEventFileInfo(buildRequest.ProjectFullPath);
+            var logger = new LoggingServiceToPluginLoggerAdapter(
+                _loggingService,
+                buildEventContext,
+                buildEventFileInfo);
 
             logger.LogMessage(
                 "\n====== Querying project cache for project " + queryDescription,
@@ -517,7 +534,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public async Task ShutDown()
         {
-            var logger = _loggerFactory();
+            var logger = new LoggingServiceToPluginLoggerAdapter(
+                _loggingService,
+                BuildEventContext.Invalid,
+                BuildEventFileInfo.Empty);
 
             try
             {
@@ -609,19 +629,26 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             private readonly ILoggingService _loggingService;
 
+            private readonly BuildEventContext _buildEventContext;
+
+            private readonly BuildEventFileInfo _buildEventFileInfo;
+
             public override bool HasLoggedErrors { get; protected set; }
 
             public LoggingServiceToPluginLoggerAdapter(
-                LoggerVerbosity verbosity,
-                ILoggingService loggingService) : base(verbosity)
+                ILoggingService loggingService,
+                BuildEventContext buildEventContext,
+                BuildEventFileInfo buildEventFileInfo)
             {
                 _loggingService = loggingService;
+                _buildEventContext = buildEventContext;
+                _buildEventFileInfo = buildEventFileInfo;
             }
 
             public override void LogMessage(string message, MessageImportance? messageImportance = null)
             {
                 _loggingService.LogCommentFromText(
-                    BuildEventContext.Invalid,
+                    _buildEventContext,
                     messageImportance ?? MessageImportance.Normal,
                     message);
             }
@@ -629,11 +656,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
             public override void LogWarning(string warning)
             {
                 _loggingService.LogWarningFromText(
-                    BuildEventContext.Invalid,
+                    _buildEventContext,
                     null,
                     null,
                     null,
-                    BuildEventFileInfo.Empty,
+                    _buildEventFileInfo,
                     warning);
             }
 
@@ -642,7 +669,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 HasLoggedErrors = true;
 
                 _loggingService.LogErrorFromText(
-                    BuildEventContext.Invalid,
+                    _buildEventContext,
                     null,
                     null,
                     null,

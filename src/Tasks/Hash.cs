@@ -7,14 +7,19 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Generates a hash of a given ItemGroup items. Metadata is not considered in the hash.
     /// </summary>
     /// <remarks>
-    /// Currently uses SHA1. Implementation subject to change between MSBuild versions. Not
-    /// intended as a cryptographic security measure, only uniqueness between build executions.
+    ///    <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// Currently uses SHA1. The implementation is subject to change between MSBuild versions.
+    /// This class is not intended as a cryptographic security measure, only for uniqueness between build executions.
+    /// ]]></format>
     /// </remarks>
     public class Hash : TaskExtension
     {
@@ -40,6 +45,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Execute the task.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "This is not intended as a cryptographic security measure, only for uniqueness between build executions.")]
         public override bool Execute()
         {
             if (ItemsToHash?.Length > 0)

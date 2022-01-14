@@ -30,6 +30,8 @@ using Xunit.Abstractions;
 using Shouldly;
 using Microsoft.Build.UnitTests.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     public class SolutionProjectGenerator_Tests : IDisposable
@@ -78,100 +80,6 @@ namespace Microsoft.Build.UnitTests.Construction
                 instances[0].Targets["Build"].AfterTargets.ShouldBe(string.Empty);
                 MockLogger logger = new MockLogger(output);
                 instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
-            }
-        }
-
-        /// <summary>
-        /// Test that a solution filter file excludes projects not covered by its list of projects or their dependencies.
-        /// </summary>
-        [Fact]
-        public void SolutionFilterFiltersProjects()
-        {
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
-            {
-                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);              
-                TransientTestFolder classLibFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "ClassLibrary"), createFolder: true);
-                TransientTestFolder classLibSubFolder = testEnvironment.CreateFolder(Path.Combine(classLibFolder.Path, "ClassLibrary"), createFolder: true);
-                TransientTestFile classLibrary = testEnvironment.CreateFile(classLibSubFolder, "ClassLibrary.csproj",
-                    @"<Project>
-                  <Target Name=""ClassLibraryTarget"">
-                      <Message Text=""ClassLibraryBuilt""/>
-                  </Target>
-                  </Project>
-                    ");
-
-                TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "SimpleProject"), createFolder: true);
-                TransientTestFolder simpleProjectSubFolder = testEnvironment.CreateFolder(Path.Combine(simpleProjectFolder.Path, "SimpleProject"), createFolder: true);
-                TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectSubFolder, "SimpleProject.csproj",
-                    @"<Project DefaultTargets=""SimpleProjectTarget"">
-                  <Target Name=""SimpleProjectTarget"">
-                      <Message Text=""SimpleProjectBuilt""/>
-                  </Target>
-                  </Project>
-                    ");
-
-                // Slashes here (and in the .slnf) are hardcoded as backslashes intentionally to support the common case.
-                TransientTestFile solutionFile = testEnvironment.CreateFile(simpleProjectFolder, "SimpleProject.sln",
-                    @"
-                    Microsoft Visual Studio Solution File, Format Version 12.00
-                    # Visual Studio Version 16
-                    VisualStudioVersion = 16.0.29326.124
-                    MinimumVisualStudioVersion = 10.0.40219.1
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", ""SimpleProject\SimpleProject.csproj"", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
-                    EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary"", ""..\ClassLibrary\ClassLibrary\ClassLibrary.csproj"", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
-                    EndProject
-                    Global
-                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                            Debug|Any CPU = Debug|Any CPU
-                            Release|Any CPU = Release|Any CPU
-                            EndGlobalSection
-                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Release|Any CPU.Build.0 = Release|Any CPU
-                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Release|Any CPU.Build.0 = Release|Any CPU
-                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Release|Any CPU.Build.0 = Release|Any CPU
-                        EndGlobalSection
-                        GlobalSection(SolutionProperties) = preSolution
-                            HideSolutionNode = FALSE
-                        EndGlobalSection
-                        GlobalSection(ExtensibilityGlobals) = postSolution
-                            SolutionGuid = {DE7234EC-0C4D-4070-B66A-DCF1B4F0CFEF}
-                        EndGlobalSection
-                    EndGlobal
-                ");
-                TransientTestFile filterFile = testEnvironment.CreateFile(folder, "solutionFilter.slnf",
-                    @"
-                {
-                  ""solution"": {
-                    // I'm a comment
-                    ""path"": "".\\SimpleProject\\SimpleProject.sln"",
-                    ""projects"": [
-                    /* ""..\\ClassLibrary\\ClassLibrary\\ClassLibrary.csproj"", */
-                      ""SimpleProject\\SimpleProject.csproj"",
-                    ]
-                    }
-                }
-                ");
-                Directory.GetCurrentDirectory().ShouldNotBe(Path.GetDirectoryName(filterFile.Path));
-                SolutionFile solution = SolutionFile.Parse(filterFile.Path);
-                ILoggingService mockLogger = CreateMockLoggingService();
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, mockLogger);
-                instances.ShouldHaveSingleItem();
-
-                // Check that dependencies are built, and non-dependencies in the .sln are not.
-                MockLogger logger = new MockLogger(output);
-                instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
-                logger.AssertLogContains(new string[] { "SimpleProjectBuilt" });
-                logger.AssertLogDoesntContain("ClassLibraryBuilt");
             }
         }
 
@@ -1813,7 +1721,7 @@ EndGlobal
         {
             string oldValueForMSBuildEmitSolution = Environment.GetEnvironmentVariable("MSBuildEmitSolution");
 
-            //  Clean up projects loaded by other tests
+            // Clean up projects loaded by other tests
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
 
             string solutionFileContents =
@@ -2024,7 +1932,7 @@ EndGlobal
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
 
-                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
                 BuildResult result = buildManager.Build(parameters, request);
                 Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
@@ -2112,7 +2020,7 @@ EndGlobal
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
 
-                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
+                BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
                 BuildResult result = buildManager.Build(parameters, request);
                 Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
@@ -2443,7 +2351,7 @@ EndGlobal
                 projectInstance.Targets["MyTarget"].BeforeTargets.ShouldBe("DynamicTraversalTarget");
 
                 MockLogger mockLogger = new MockLogger(output);
-                projectInstance.Build(targetsToBuild, new List <ILogger> { mockLogger })
+                projectInstance.Build(targetsToBuild, new List<ILogger> { mockLogger })
                     .ShouldBeFalse("The solution build should have failed due to a missing project");
                 mockLogger.AssertLogContains("Message from MyTarget");
             }

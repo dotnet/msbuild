@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -126,8 +128,7 @@ namespace Microsoft.Build.BackEnd
         public void SendData(int node, INodePacket packet)
         {
             // Look up the node provider for this node in the mapping.
-            INodeProvider provider;
-            if (!_nodeIdToProvider.TryGetValue(node, out provider))
+            if (!_nodeIdToProvider.TryGetValue(node, out INodeProvider provider))
             {
                 ErrorUtilities.ThrowInternalError("Node {0} does not have a provider.", node);
             }

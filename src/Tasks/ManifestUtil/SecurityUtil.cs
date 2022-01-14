@@ -24,6 +24,8 @@ using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>
@@ -220,13 +222,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     }
                                     catch (Exception)
                                     {
-                                        //continue.
+                                        // continue.
                                     }
                                 }
                             }
                             catch (ArgumentException)
                             {
-                                //continue.
+                                // continue.
                             }
                         }
                     }
@@ -411,8 +413,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             foreach (XmlAttribute xa in xe.Attributes)
                 se.AddAttribute(xa.Name, xa.Value);
             foreach (XmlNode xn in xe.ChildNodes)
+            {
                 if (xn.NodeType == XmlNodeType.Element)
                     se.AddChild(XmlElementToSecurityElement((XmlElement)xn));
+            }
+
             return se;
         }
 
@@ -464,7 +469,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             catch (ArgumentException ex)
             {
-                //UNDONE: Need to log exception thrown from PermissionSet.FromXml
+                // UNDONE: Need to log exception thrown from PermissionSet.FromXml
                 Debug.Fail(String.Format(CultureInfo.CurrentCulture, "PermissionSet.FromXml failed: {0}\r\n\r\n{1}", ex.Message, element.OuterXml));
                 return null;
             }
@@ -702,15 +707,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, true);
             }
-            catch(ApplicationException)
+            catch(ApplicationException) when (timestampUrl != null)
             {
                 // error, retry with signtool /t if timestamp url was given
-                if (timestampUrl != null)
-                {
-                    SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false);
-                    return;
-                }
-                throw;
+                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false);
+                return;
             }
         }
 

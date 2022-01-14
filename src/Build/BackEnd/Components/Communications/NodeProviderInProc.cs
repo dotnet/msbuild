@@ -10,6 +10,8 @@ using Microsoft.Build.Shared;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -88,7 +90,7 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         /// <summary>
-        /// Finalizer
+        /// Finalizes an instance of the <see cref="NodeProviderInProc"/> class.
         /// </summary>
         ~NodeProviderInProc()
         {

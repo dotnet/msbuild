@@ -15,6 +15,8 @@ using Microsoft.Build.Unittest;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -331,7 +333,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestEngineShutdownWhileActive()
         {
-            BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, "2.0");
             _cache.AddConfiguration(config);
 
@@ -359,7 +361,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSimpleBuildScenario()
         {
-            BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, "2.0");
             _cache.AddConfiguration(config);
 
@@ -386,7 +388,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestBuildWithChildren()
         {
-            BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, "2.0");
             _cache.AddConfiguration(config);
 
@@ -439,13 +441,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestBuildWithNewConfiguration()
         {
-            BuildRequestData data = new BuildRequestData(Path.GetFullPath("TestFile"), new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData(Path.GetFullPath("TestFile"), new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, "2.0");
             _cache.AddConfiguration(config);
 
             // Configure the builder to spawn build requests
             MockRequestBuilder builder = (MockRequestBuilder)_host.GetComponent(BuildComponentType.RequestBuilder);
-            BuildRequestData data2 = new BuildRequestData(Path.GetFullPath("OtherFile"), new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
+            BuildRequestData data2 = new BuildRequestData(Path.GetFullPath("OtherFile"), new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration unresolvedConfig = new BuildRequestConfiguration(data2, "2.0");
             builder.NewRequests.Add(new FullyQualifiedBuildRequest[1] { new FullyQualifiedBuildRequest(unresolvedConfig, new string[1] { "requiredTarget1" }, true) });
 

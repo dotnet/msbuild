@@ -14,6 +14,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Eventing;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -101,26 +103,26 @@ namespace Microsoft.Build.Tasks
         public ITaskItem DestinationFolder { get; set; }
 
         /// <summary>
-        /// How many times to attempt to copy, if all previous
-        /// attempts failed. Defaults to zero.
-        /// Warning: using retries may mask a synchronization problem in your
-        /// build process.
+        /// Gets or sets the number of times to attempt to copy, if all previous attempts failed.
+        /// Warning: using retries may mask a synchronization problem in your build process.
         /// </summary>
         public int Retries { get; set; } = 10;
 
         /// <summary>
-        /// Delay between any necessary retries.
+        /// Gets or sets the delay, in milliseconds, between any necessary retries.
         /// Defaults to <see cref="RetryDelayMillisecondsDefault">RetryDelayMillisecondsDefault</see>
         /// </summary>
         public int RetryDelayMilliseconds { get; set; }
 
         /// <summary>
-        /// Create Hard Links for the copied files rather than copy the files if possible to do so
+        /// Gets or sets a value that indicates whether to use hard links for the copied files
+        /// rather than copy the files, if it's possible to do so.
         /// </summary>
         public bool UseHardlinksIfPossible { get; set; }
 
         /// <summary>
-        /// Create Symbolic Links for the copied files rather than copy the files if possible to do so
+        /// Gets or sets a value that indicates whether to create symbolic links for the copied files
+        /// rather than copy the files, if it's possible to do so.
         /// </summary>
         public bool UseSymboliclinksIfPossible { get; set; } = s_forceSymlinks;
 
@@ -144,7 +146,7 @@ namespace Microsoft.Build.Tasks
         public bool WroteAtLeastOneFile { get; private set; }
 
         /// <summary>
-        /// Whether to overwrite files in the destination
+        /// Gets or sets a value that indicates whether to overwrite files in the destination
         /// that have the read-only attribute set.
         /// </summary>
         public bool OverwriteReadOnlyFiles { get; set; }
@@ -785,55 +787,56 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    if (e is ArgumentException ||  // Invalid chars
-                        e is NotSupportedException || // Colon in the middle of the path
-                        e is PathTooLongException)
+                    switch (e)
                     {
-                        // No use retrying these cases
-                        throw;
-                    }
+                        case ArgumentException: // Invalid chars
+                        case NotSupportedException: // Colon in the middle of the path
+                        case PathTooLongException:
+                            throw;
+                        case UnauthorizedAccessException:
+                        case IOException: // Not clear why we can get one and not the other
+                            int code = Marshal.GetHRForException(e);
 
-                    if (e is UnauthorizedAccessException || e is IOException) // Not clear why we can get one and not the other
-                    {
-                        int code = Marshal.GetHRForException(e);
-
-                        LogDiagnostic("Got {0} copying {1} to {2} and HR is {3}", e.ToString(), sourceFileState.Name, destinationFileState.Name, code);
-                        if (code == NativeMethods.ERROR_ACCESS_DENIED)
-                        {
-                            // ERROR_ACCESS_DENIED can either mean there's an ACL preventing us, or the file has the readonly bit set.
-                            // In either case, that's likely not a race, and retrying won't help.
-                            // Retrying is mainly for ERROR_SHARING_VIOLATION, where someone else is using the file right now.
-                            // However, there is a limited set of circumstances where a copy failure will show up as access denied due 
-                            // to a failure to reset the readonly bit properly, in which case retrying will succeed.  This seems to be 
-                            // a pretty edge scenario, but since some of our internal builds appear to be hitting it, provide a secret
-                            // environment variable to allow overriding the default behavior and forcing retries in this circumstance as well. 
-                            if (!s_alwaysRetryCopy)
+                            LogDiagnostic("Got {0} copying {1} to {2} and HR is {3}", e.ToString(), sourceFileState.Name, destinationFileState.Name, code);
+                            if (code == NativeMethods.ERROR_ACCESS_DENIED)
                             {
+                                // ERROR_ACCESS_DENIED can either mean there's an ACL preventing us, or the file has the readonly bit set.
+                                // In either case, that's likely not a race, and retrying won't help.
+                                // Retrying is mainly for ERROR_SHARING_VIOLATION, where someone else is using the file right now.
+                                // However, there is a limited set of circumstances where a copy failure will show up as access denied due 
+                                // to a failure to reset the readonly bit properly, in which case retrying will succeed.  This seems to be 
+                                // a pretty edge scenario, but since some of our internal builds appear to be hitting it, provide a secret
+                                // environment variable to allow overriding the default behavior and forcing retries in this circumstance as well. 
+                                if (!s_alwaysRetryCopy)
+                                {
+                                    throw;
+                                }
+                                else
+                                {
+                                    LogDiagnostic("Retrying on ERROR_ACCESS_DENIED because MSBUILDALWAYSRETRY = 1");
+                                }
+                            }
+
+                            if (e is UnauthorizedAccessException)
+                            {
+                                break;
+                            }
+
+                            if (DestinationFolder != null && FileSystems.Default.FileExists(DestinationFolder.ItemSpec))
+                            {
+                                // We failed to create the DestinationFolder because it's an existing file. No sense retrying.
+                                // We don't check for this case upstream because it'd be another hit to the filesystem.
                                 throw;
                             }
-                            else
+
+                            // if this was just because the source and destination files are the
+                            // same file, that's not a failure.
+                            // Note -- we check this exceptional case here, not before the copy, for perf.
+                            if (PathsAreIdentical(sourceFileState.Name, destinationFileState.Name))
                             {
-                                LogDiagnostic("Retrying on ERROR_ACCESS_DENIED because MSBUILDALWAYSRETRY = 1");
+                                return true;
                             }
-                        }
-                    }
-
-                    if (e is IOException && DestinationFolder != null && FileSystems.Default.FileExists(DestinationFolder.ItemSpec))
-                    {
-                        // We failed to create the DestinationFolder because it's an existing file. No sense retrying.
-                        // We don't check for this case upstream because it'd be another hit to the filesystem.
-                        throw;
-                    }
-
-                    if (e is IOException)
-                    {
-                        // if this was just because the source and destination files are the
-                        // same file, that's not a failure.
-                        // Note -- we check this exceptional case here, not before the copy, for perf.
-                        if (PathsAreIdentical(sourceFileState.Name, destinationFileState.Name))
-                        {
-                            return true;
-                        }
+                            break;
                     }
 
                     if (retries < Retries)

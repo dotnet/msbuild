@@ -34,6 +34,8 @@ using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -1227,7 +1229,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -1878,7 +1879,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     projectList ??= new List<ProjectRootElement>();
 
-                    //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
+                    // Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
                     //  any projects from paths returned by the SDK Resolver.
                     projectList.Insert(0, CreateProjectForSdkResult(sdkResult));
                 }
@@ -1892,7 +1893,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        //  Creates a project to set the properties and include the items from an SdkResult
+        // Creates a project to set the properties and include the items from an SdkResult
         private ProjectRootElement CreateProjectForSdkResult(SdkResult sdkResult)
         {
             int propertiesAndItemsHash;
@@ -1935,7 +1936,7 @@ namespace Microsoft.Build.Evaluation
             propertiesAndItemsHash = hash.ToHashCode();
 #endif
 
-            //  Generate a unique filename for the generated project for each unique set of properties and items.
+            // Generate a unique filename for the generated project for each unique set of properties and items.
             string projectPath = _projectRootElement.FullPath + ".SdkResolver." + propertiesAndItemsHash + ".proj";
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
@@ -2157,11 +2158,7 @@ namespace Microsoft.Build.Evaluation
                         // clearing the weak cache (and therefore setting explicitload=false) for projects the project system never
                         // was directly interested in (i.e. the ones that were reached for purposes of building a P2P.)
                         bool explicitlyLoaded = importElement.ContainingProject.IsExplicitlyLoaded;
-                        importedProjectElement = _projectRootElementCache.Get(
-                            importFileUnescaped,
-                            (p, c) =>
-                            {
-                                return ProjectRootElement.OpenProjectOrSolution(
+                        importedProjectElement = ProjectRootElement.OpenProjectOrSolution(
                                     importFileUnescaped,
                                     new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(
                                         _data.GlobalPropertiesDictionary,
@@ -2169,10 +2166,6 @@ namespace Microsoft.Build.Evaluation
                                     _data.ExplicitToolsVersion,
                                     _projectRootElementCache,
                                     explicitlyLoaded);
-                            },
-                            explicitlyLoaded,
-                            // don't care about formatting, reuse whatever is there
-                            preserveFormatting: null);
 
                         if (duplicateImport)
                         {

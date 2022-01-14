@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -35,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             _env = TestEnvironment.Create(output);
 
             BuildManager.ProjectCacheItems.ShouldBeEmpty();
-            _env.WithInvariant(new CustomConditionInvariant(() => BuildManager.ProjectCacheItems.Count == 0));
+            _env.WithInvariant(new CustomConditionInvariant(() => BuildManager.ProjectCacheItems.IsEmpty));
         }
 
         public void Dispose()
@@ -43,7 +42,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             _env.Dispose();
         }
 
-        private static readonly string AssemblyMockCache = nameof(AssemblyMockCache);
+        private const string AssemblyMockCache = nameof(AssemblyMockCache);
 
         private static readonly Lazy<string> SamplePluginAssemblyPath =
             new Lazy<string>(
@@ -160,7 +159,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             public override string ToString()
             {
-                //return base.ToString();
+                // return base.ToString();
                 return string.Join(
                     ", ",
                     GraphEdges.Select(e => $"{Node(e.Key)}->{FormatChildren(e.Value)}"));
@@ -306,7 +305,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 if (_projectQuerySleepTime is not null)
                 {
-                    await Task.Delay(_projectQuerySleepTime.Value);
+                    await Task.Delay(_projectQuerySleepTime.Value, cancellationToken);
                 }
 
                 QueryStartStops.Enqueue(queryId);
@@ -837,7 +836,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
             buildSession.Logger.AssertMessageCount("MSB4274", 1);
-
         }
 
         private void AssertCacheBuild(
@@ -1296,8 +1294,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 {
                     {1, new []{2}}
                 },
-                extraContentPerProjectNumber:null,
-                extraContentForAllNodes:@$"
+                extraContentPerProjectNumber: null,
+                extraContentForAllNodes: @$"
 <ItemGroup>
     <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
     <{ItemTypeNames.ProjectReferenceTargets} Include=`Build` Targets=`Build` />
@@ -1497,7 +1495,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Theory]
         [InlineData(false, false)]
         // TODO: Reenable when this gets into the main branch.
-        //[InlineData(true, true)]
+        // [InlineData(true, true)]
         public void ParallelStressTestForVsWorkaround(bool useSynchronousLogging, bool disableInprocNode)
         {
             var currentBuildEnvironment = BuildEnvironmentHelper.Instance;

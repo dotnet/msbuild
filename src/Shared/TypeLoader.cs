@@ -19,6 +19,8 @@ using System.Runtime.Loader;
 using System.Threading;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

@@ -8,6 +8,8 @@ using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd.Logging;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

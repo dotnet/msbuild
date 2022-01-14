@@ -6,6 +6,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

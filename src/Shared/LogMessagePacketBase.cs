@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 using Microsoft.Build.BackEnd;
@@ -20,6 +21,8 @@ using Microsoft.Build.Execution;
 #if FEATURE_APPDOMAIN
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 #endif
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -487,17 +490,13 @@ namespace Microsoft.Build.Shared
                     delegateMethod = methodInfo.CreateDelegate(type, firstArgument);
 #endif
                 }
-                catch (FileLoadException)
+                catch (FileLoadException) when (i < 5)
                 {
                     // Sometimes, in 64-bit processes, the fusion load of Microsoft.Build.Framework.dll
-                    // spontaneously fails when trying to bind to the delegate.  However, it seems to 
-                    // not repeat on additional tries -- so we'll try again a few times.  However, if 
-                    // it keeps happening, it's probably a real problem, so we want to go ahead and 
-                    // throw to let the user know what's up.  
-                    if (i == 5)
-                    {
-                        throw;
-                    }
+                    // spontaneously fails when trying to bind to the delegate.  However, it seems to
+                    // not repeat on additional tries -- so we'll try again a few times.  However, if
+                    // it keeps happening, it's probably a real problem, so we want to go ahead and
+                    // throw to let the user know what's up.
                 }
             }
 
@@ -1258,7 +1257,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return Array.Empty<DictionaryEntry>();
+                return Enumerable.Empty<DictionaryEntry>();
             }
 
             var list = new ArrayList(count);
@@ -1280,7 +1279,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return Array.Empty<DictionaryEntry>();
+                return Enumerable.Empty<DictionaryEntry>();
             }
 
             var list = new ArrayList(count);
