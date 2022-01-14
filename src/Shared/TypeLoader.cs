@@ -396,6 +396,7 @@ namespace Microsoft.Build.Shared
                         TypeDefinition typeDef = metadataReader.GetTypeDefinition(typeDefHandle);
                         if (TryGetTypeInformationFromDefinition(metadataReader, typeDef, typeName, out TypeInformation typeInformation))
                         {
+                            typeInformation.Path = path;
                             return typeInformation;
                         }
                     }
@@ -451,10 +452,10 @@ namespace Microsoft.Build.Shared
                 }
 
                 IEnumerable<PropertyDefinition> propertyDefinitions = typeDef.GetProperties().Select(prop => metadataReader.GetPropertyDefinition(prop));
-                List<TypeInformationPropertyInfo> typePropertyInfos = new();
+                List<TypeInformation.PropertyInfo> typePropertyInfos = new();
                 foreach (PropertyDefinition propertyDefinition in propertyDefinitions)
                 {
-                    TypeInformationPropertyInfo toAdd = new();
+                    TypeInformation.PropertyInfo toAdd = new();
                     toAdd.Name = metadataReader.GetString(propertyDefinition.Name);
                     SignatureDecoder<string, object> decoder = new(ConstantSignatureVisualizer.Instance, metadataReader, genericContext: null);
                     BlobReader blob = metadataReader.GetBlobReader(propertyDefinition.Signature);
@@ -551,7 +552,7 @@ namespace Microsoft.Build.Shared
 
             private Type StringToType(string s)
             {
-                //return Type.GetType(s, false, true) ?? typeof(object);
+                // return Type.GetType(s, false, true) ?? typeof(object);
                 return s switch
                 {
                     "String" => typeof(String),

@@ -204,7 +204,6 @@ namespace Microsoft.Build.Execution
             {
                 PropertyInfo prop = task.GetType().GetProperty(property.Name);
                 prop.SetValue(task, value);
-                //task.GetType().GetTypeInfo().DeclaredProperties.FirstOrDefault(prop => prop.Name.Equals(property.Name)).SetValue(property, value);
             }
         }
 

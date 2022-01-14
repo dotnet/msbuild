@@ -62,14 +62,13 @@ namespace Microsoft.Build.Execution
             _propertyInfo = propertyInfo;
         }
 
-        internal ReflectableTaskPropertyInfo(TypeInformationPropertyInfo propertyInfo) :
+        internal ReflectableTaskPropertyInfo(TypeInformation.PropertyInfo propertyInfo) :
             base(
                 propertyInfo.Name,
                 propertyInfo.PropertyType,
                 propertyInfo.OutputAttribute,
                 propertyInfo.RequiredAttribute)
         {
-
         }
 
         /// <summary>

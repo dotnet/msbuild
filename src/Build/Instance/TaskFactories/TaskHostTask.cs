@@ -281,7 +281,7 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ProjectFileOfTaskNode,
                         BuildEngine.ContinueOnError,
                         _taskType.TypeName,
-                        _taskType.LoadInfo.AssemblyLocation ?? _taskType.LoadedType.LoadedAssembly.Location,
+                        _taskType.Path,
                         _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),

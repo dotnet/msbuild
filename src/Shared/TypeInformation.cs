@@ -8,10 +8,13 @@ using System.Reflection.Metadata;
 #endif
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     internal sealed class TypeInformation
     {
+        internal string Path { get; set; }
         internal AssemblyLoadInfo LoadInfo { get; set; }
         internal string TypeName { get; set; }
 
@@ -24,7 +27,7 @@ namespace Microsoft.Build.Shared
         internal AssemblyName AssemblyName { get; set; }
         internal string Namespace { get; set; }
 #if !TASKHOST
-        internal TypeInformationPropertyInfo[] Properties { get; set; }
+        internal TypeInformation.PropertyInfo[] Properties { get; set; }
 #endif
 
         internal TypeInformation()
@@ -42,18 +45,18 @@ namespace Microsoft.Build.Shared
 #else
             ImplementsIGeneratedTask = LoadedType.Type is IGeneratedTask;
 #endif
-            AssemblyName = LoadedType.LoadedAssembly?.GetName();
+            AssemblyName = baseType.LoadedAssembly?.GetName();
             Namespace = LoadedType.Type.Namespace;
             LoadInfo = LoadedType.Assembly;
             TypeName = LoadedType.Type.FullName;
+            Path = baseType.Assembly.AssemblyFile;
         }
 
-        public PropertyInfo[] GetProperties(BindingFlags flags)
+        public System.Reflection.PropertyInfo[] GetProperties(BindingFlags flags)
         {
             if (LoadedType is null)
             {
                 throw new NotImplementedException();
-                
             }
             else
             {
@@ -61,7 +64,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        public PropertyInfo GetProperty(string name, BindingFlags flags)
+        public System.Reflection.PropertyInfo GetProperty(string name, BindingFlags flags)
         {
             if (LoadedType is null)
             {
@@ -72,13 +75,21 @@ namespace Microsoft.Build.Shared
                 return LoadedType.Type.GetProperty(name, flags);
             }
         }
-    }
 
-    internal struct TypeInformationPropertyInfo
-    {
-        public string Name { get; set; }
-        public Type PropertyType { get; set; } = null;
-        public bool OutputAttribute { get; set; }
-        public bool RequiredAttribute { get; set; }
+        internal struct PropertyInfo
+        {
+            public PropertyInfo(string name, Type propertyType, bool outputAttribute, bool requiredAttribute)
+            {
+                Name = name;
+                PropertyType = propertyType;
+                OutputAttribute = outputAttribute;
+                RequiredAttribute = requiredAttribute;
+            }
+
+            public string Name { get; set; }
+            public Type PropertyType { get; set; }
+            public bool OutputAttribute { get; set; }
+            public bool RequiredAttribute { get; set; }
+        }
     }
 }
