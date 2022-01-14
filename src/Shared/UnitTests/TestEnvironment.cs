@@ -471,7 +471,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             // Assert file count is equal minus any files that were OK
-            Assert.Equal(_originalFiles.Length, newFilesCount);
+            newFilesCount.ShouldBe(_originalFiles.Length, "Files to check: " + string.Join(" ", newFiles.Except(_originalFiles)));
         }
     }
 

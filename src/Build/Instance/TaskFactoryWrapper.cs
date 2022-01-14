@@ -214,8 +214,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
             ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
 
-            IGeneratedTask generatedTask = task as IGeneratedTask;
-            if (generatedTask != null)
+            if (task is IGeneratedTask generatedTask)
             {
                 return generatedTask.GetPropertyValue(property);
             }
