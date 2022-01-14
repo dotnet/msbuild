@@ -2006,8 +2006,8 @@ namespace Microsoft.Build.UnitTests
                 "Expected parameter in logger to match parameters passed in",
                 StringCompareShould.IgnoreCase);
             distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe(
-                "SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter",
-                "Expected parameter in logger to match parameter passed in",
+                "SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter;FORWARDPROJECTCONTEXTEVENTS",
+                "Expected parameter in logger to match parameter passed in + FORWARDPROJECTCONTEXTEVENTS",
                 StringCompareShould.IgnoreCase);
         }
         #endregion
