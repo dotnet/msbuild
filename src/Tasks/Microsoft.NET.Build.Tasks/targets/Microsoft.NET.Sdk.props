@@ -72,6 +72,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- Default settings for all projects built with this Sdk package -->
+
+  <PropertyGroup Condition=" '$(AssemblySearchPaths)' == '' ">
+    <!-- By default exclude GAC, registry, output directory from search paths. -->
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseCandidateAssemblyFiles)' != 'false'">{CandidateAssemblyFiles}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseHintPathFromItem)' != 'false'">$(AssemblySearchPaths);{HintPathFromItem}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseTargetFrameworkDirectory)' != 'false'">$(AssemblySearchPaths);{TargetFrameworkDirectory}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseRawFileName)' != 'false'">$(AssemblySearchPaths);{RawFileName}</AssemblySearchPaths>
+  </PropertyGroup>
+
   <PropertyGroup>
     <DebugType Condition=" '$(DebugType)' == '' ">portable</DebugType>
 
@@ -87,8 +96,6 @@ Copyright (c) .NET Foundation. All rights reserved.
          a project targets .NET Framework and doesn't have any direct package dependencies. -->
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
 
-    <!-- Exclude GAC, registry, output directory from search paths. -->
-    <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == '' ">{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
     <DesignTimeAssemblySearchPaths Condition=" '$(DesignTimeAssemblySearchPaths)' == '' ">$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
 
     <AllowUnsafeBlocks Condition="'$(AllowUnsafeBlocks)'==''">false</AllowUnsafeBlocks>
