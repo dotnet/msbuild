@@ -133,12 +133,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.0-alpha.1.22063.18</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>7.0.0-alpha.1.22063.18</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.0-alpha.1.22063.18</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.0-alpha.1.22063.18</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.0-alpha.1.22063.18</MicrosoftAspNetCoreAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreTestHostPackageVersion>7.0.0-alpha.1.22063.18</MicrosoftAspNetCoreTestHostPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.0-alpha.1.22063.22</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>7.0.0-alpha.1.22063.22</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.0-alpha.1.22063.22</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.0-alpha.1.22063.22</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.0-alpha.1.22063.22</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreTestHostPackageVersion>7.0.0-alpha.1.22063.22</MicrosoftAspNetCoreTestHostPackageVersion>
     <MicrosoftAspNetCoreMvcRazorExtensionsToolingInternalPackageVersion>7.0.0-alpha.1.22062.1</MicrosoftAspNetCoreMvcRazorExtensionsToolingInternalPackageVersion>
     <MicrosoftCodeAnalysisRazorToolingInternalVersion>7.0.0-alpha.1.22062.1</MicrosoftCodeAnalysisRazorToolingInternalVersion>
     <MicrosoftAspNetCoreRazorSourceGeneratorToolingInternalPackageVersion>7.0.0-alpha.1.22062.1</MicrosoftAspNetCoreRazorSourceGeneratorToolingInternalPackageVersion>
