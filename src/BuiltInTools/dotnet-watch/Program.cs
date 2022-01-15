@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -38,6 +38,10 @@ Environment variables:
   DOTNET_WATCH_ITERATION
   dotnet-watch sets this variable to '1' and increments by one each time
   a file is changed and the command is restarted.
+
+  DOTNET_WATCH_SUPPRESS_EMOJIS
+  When set to '1' or 'true', dotnet-watch will not show emojis in the 
+  console output.
 
 Remarks:
   The special option '--' is used to delimit the end of the options and
@@ -84,8 +88,10 @@ Examples:
             _workingDirectory = workingDirectory;
             _cts = new CancellationTokenSource();
             console.CancelKeyPress += OnCancelKeyPress;
-            _reporter = CreateReporter(verbose: true, quiet: false, console: _console);
-            _requester = new ConsoleRequester(_console, quiet: false);
+
+            var suppressEmojis = ShouldSuppressEmojis();
+            _reporter = CreateReporter(verbose: true, quiet: false, console: _console, suppressEmojis);
+            _requester = new ConsoleRequester(_console, quiet: false, suppressEmojis);
 
             // Register listeners that load Roslyn-related assemblies from the `Rosyln/bincore` directory.
             RegisterAssemblyResolutionEvents(sdkRootDirectory);
@@ -163,8 +169,9 @@ Examples:
         private async Task<int> HandleWatch(CommandLineOptions options)
         {
             // update reporter as configured by options
-            _reporter = CreateReporter(options.Verbose, options.Quiet, _console);
-            _requester = new ConsoleRequester(_console, quiet: options.Quiet);
+            var suppressEmojis = ShouldSuppressEmojis();
+            _reporter = CreateReporter(options.Verbose, options.Quiet, _console, suppressEmojis);
+            _requester = new ConsoleRequester(_console, quiet: options.Quiet, suppressEmojis);
 
             try
             {
@@ -370,8 +377,8 @@ Examples:
             return 0;
         }
 
-        private static IReporter CreateReporter(bool verbose, bool quiet, IConsole console)
-            => new ConsoleReporter(console, verbose || IsGlobalVerbose(), quiet);
+        private static IReporter CreateReporter(bool verbose, bool quiet, IConsole console, bool suppressEmojis)
+            => new ConsoleReporter(console, verbose || IsGlobalVerbose(), quiet, suppressEmojis);
 
         private static bool IsGlobalVerbose()
         {
@@ -383,6 +390,13 @@ Examples:
         {
             _console.CancelKeyPress -= OnCancelKeyPress;
             _cts.Dispose();
+        }
+
+        private static bool ShouldSuppressEmojis()
+        {
+            var suppressEmojisEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNET_WATCH_SUPPRESS_EMOJIS");
+            var suppressEmojis = suppressEmojisEnvironmentVariable == "1" || string.Equals(suppressEmojisEnvironmentVariable, "true", StringComparison.OrdinalIgnoreCase);
+            return suppressEmojis;
         }
 
         private static void RegisterAssemblyResolutionEvents(string sdkRootDirectory)

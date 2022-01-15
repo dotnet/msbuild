@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 #nullable enable
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Watcher
 
             if (!_dotNetWatchOptions.NonInteractive)
             {
-                _reporter.Output($"{hotReloadEnabledMessage}{Environment.NewLine}  💡 Press \"Ctrl + R\" to restart.", emoji: "🔥");
+                _reporter.Output($"{hotReloadEnabledMessage}{Environment.NewLine}  {(_dotNetWatchOptions.SuppressEmojis ? string.Empty : "💡")} Press \"Ctrl + R\" to restart.", emoji: "🔥");
 
                 _console.KeyPressed += (key) =>
                 {

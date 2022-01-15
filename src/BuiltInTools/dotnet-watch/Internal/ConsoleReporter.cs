@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -18,28 +18,30 @@ namespace Microsoft.Extensions.Tools.Internal
         private readonly object _writeLock = new object();
 
         public ConsoleReporter(IConsole console)
-            : this(console, verbose: false, quiet: false)
+            : this(console, verbose: false, quiet: false, suppressEmojis: false)
         { }
 
-        public ConsoleReporter(IConsole console, bool verbose, bool quiet)
+        public ConsoleReporter(IConsole console, bool verbose, bool quiet, bool suppressEmojis)
         {
             Ensure.NotNull(console, nameof(console));
 
             Console = console;
             IsVerbose = verbose;
             IsQuiet = quiet;
+            SuppressEmojis = suppressEmojis;
         }
 
         protected IConsole Console { get; }
         public bool IsVerbose { get; set; }
         public bool IsQuiet { get; set; }
+        public bool SuppressEmojis { get; set; }
 
         private void WriteLine(TextWriter writer, string message, ConsoleColor? color, string emoji)
         {
             lock (_writeLock)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                writer.Write($"dotnet watch {emoji} ");
+                writer.Write($"dotnet watch {(SuppressEmojis ? ":" : emoji)} ");
                 Console.ResetColor();
 
                 if (color.HasValue)

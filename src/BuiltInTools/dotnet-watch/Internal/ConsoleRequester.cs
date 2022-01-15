@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -17,16 +17,18 @@ namespace Microsoft.Extensions.Tools.Internal
     {
         private readonly object _writeLock = new object();
 
-        public ConsoleRequester(IConsole console, bool quiet)
+        public ConsoleRequester(IConsole console, bool quiet, bool suppressEmojis)
         {
             Ensure.NotNull(console, nameof(console));
 
             Console = console;
             IsQuiet = quiet;
+            SuppressEmojis = suppressEmojis;
         }
 
         private IConsole Console { get; }
         private bool IsQuiet { get; set; }
+        private bool SuppressEmojis { get; set; }
 
         public async Task<ConsoleKey> GetKeyAsync(string prompt, Func<ConsoleKey, bool> validateInput, CancellationToken cancellationToken)
         {
@@ -35,14 +37,15 @@ namespace Microsoft.Extensions.Tools.Internal
                 return ConsoleKey.Escape;
             }
 
+            var questionMark = SuppressEmojis ? "?" : "❔";
             while (true)
             {
-                WriteLine($"  ❔ {prompt}");
+                WriteLine($"  {questionMark} {prompt}");
 
                 lock (_writeLock)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Out.Write("  ❔ ");
+                    Console.Out.Write($"  {questionMark} ");
                     Console.ResetColor();
                 }
                 
