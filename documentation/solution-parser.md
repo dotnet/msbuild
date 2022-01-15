@@ -8,7 +8,7 @@ The `Expander` class is used to expand a value from an expression, which can be 
 
 MSBuild defines an initial set of properties like `MSBuildFrameworkToolsPath32`, `MSBuildFrameworkToolsPath`, etc.
 
-Tools configuration can come from configuration file, registry and local.
+Tools configuration can come from configuration file, registry and current exe path.
 
 ## Building
 
