@@ -817,7 +817,7 @@ namespace Microsoft.Build.CommandLine
                     {
                         sb.Append($"\n{ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResponseFileSwitchFromLocation", kvp.Value, kvp.Key)}");
                     }
-                    CommandLineSwitchException.Throw("SwitchErrorWithArguments", _badCommandLineArg, ResourceUtilities.GetResourceString(_errorMessage), _commandLine, sb.ToString());
+                    CommandLineSwitchException.Throw("SwitchErrorWithArguments", _badCommandLineArg, ResourceUtilities.GetResourceString(_errorMessage), _commandLine, StringBuilderCache.GetStringAndRelease(sb));
                 }
             }
         }
