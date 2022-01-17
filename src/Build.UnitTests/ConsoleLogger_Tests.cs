@@ -1433,10 +1433,10 @@ namespace Microsoft.Build.UnitTests
             string prop1;
             string prop2;
             string prop3;
-            if (cl is SerialConsoleLogger)
+            if (cl is SerialConsoleLogger scl)
             {
-                var propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
-                ((SerialConsoleLogger)cl).WriteProperties(propertyList);
+                var propertyList = scl.ExtractPropertyList(properties);
+                scl.WriteProperties(propertyList);
                 prop1 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop1", "val1");
                 prop2 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop2", "val2");
                 prop3 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "pro(p3)", "va;%3b;l3");
@@ -1688,10 +1688,10 @@ namespace Microsoft.Build.UnitTests
             string item3spec;
             string item3metadatum = string.Empty;
 
-            if (cl is SerialConsoleLogger)
+            if (cl is SerialConsoleLogger scl)
             {
-                SortedList itemList = ((SerialConsoleLogger)cl).ExtractItemList(items);
-                ((SerialConsoleLogger)cl).WriteItems(itemList);
+                SortedList itemList = scl.ExtractItemList(items);
+                scl.WriteItems(itemList);
                 item1spec = "spec" + Environment.NewLine;
                 item2spec = "spec2" + Environment.NewLine;
                 item3spec = "(spec;3" + Environment.NewLine;
@@ -1770,10 +1770,10 @@ namespace Microsoft.Build.UnitTests
                     cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
                 }
 
-                if (cl is SerialConsoleLogger)
+                if (cl is SerialConsoleLogger scl)
                 {
-                    SortedList itemList = ((SerialConsoleLogger)cl).ExtractItemList(items);
-                    ((SerialConsoleLogger)cl).WriteItems(itemList);
+                    SortedList itemList = scl.ExtractItemList(items);
+                    scl.WriteItems(itemList);
                 }
                 else
                 {
