@@ -864,24 +864,25 @@ namespace Microsoft.Build.UnitTests
             string doubleTypePath = Path.Combine(dir, "double.dll");
 
             CompileDoubleType(doubleTypePath);
-            {
-                XslTransformation t = new XslTransformation();
-                t.BuildEngine = engine;
-                t.OutputPaths = outputPaths;
-                t.XmlContent = _xmlDocument;
-                t.XslCompiledDllPath = new TaskItem(doubleTypePath);
-                try
-                {
-                    t.Execute();
-                    Console.WriteLine(engine.Log);
-                }
-                catch (Exception e)
-                {
-                    Assert.Contains("error?", e.Message);
-                }
 
-                System.Diagnostics.Debug.WriteLine(engine.Log);
+            XslTransformation t = new()
+            {
+                BuildEngine = engine,
+                OutputPaths = outputPaths,
+                XmlContent = _xmlDocument,
+                XslCompiledDllPath = new TaskItem(doubleTypePath),
+            };
+            try
+            {
+                t.Execute();
+                Console.WriteLine(engine.Log);
             }
+            catch (Exception e)
+            {
+                Assert.Contains("error?", e.Message);
+            }
+
+            System.Diagnostics.Debug.WriteLine(engine.Log);
 
             CleanUp(dir);
         }
