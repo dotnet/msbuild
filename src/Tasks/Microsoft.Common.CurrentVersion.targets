@@ -4187,7 +4187,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       use the built DLL as the entry point
     -->
     <ItemGroup Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true' and exists('$(AppHostIntermediatePath)')">
-      <EntryPointForLauncher Include="$(AppHostIntermediatePath)"/>
+      <EntryPointForLauncher Include="$(AppHostIntermediatePath)" TargetPath="$(AssemblyName).exe"/>
       <ContentWithTargetPath Include="@(EntryPointForLauncher)"/>
     </ItemGroup>
     <ItemGroup Condition="'$(EntryPointForLauncher)'==''">
