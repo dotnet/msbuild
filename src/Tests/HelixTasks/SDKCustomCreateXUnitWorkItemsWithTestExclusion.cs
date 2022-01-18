@@ -120,13 +120,13 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
             string assemblyName = Path.GetFileName(targetPath);
 
+            string driver = $"{PathToDotnet} exec ";
+
             var runtimeTargetFrameworkParsed = NuGetFramework.Parse(runtimeTargetFramework);
             if (runtimeTargetFrameworkParsed.Framework != ".NETCoreApp")
             {
-                throw new NotImplementedException("does not support non core runtime target");
+                driver = $"{PathToDotnet} test ";
             }
-
-            string driver = $"{PathToDotnet} exec ";
 
             // On mac due to https://github.com/dotnet/sdk/issues/3923, we run against workitem directory
             // but on Windows, if we running against working item diretory, we would hit long path.

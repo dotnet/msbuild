@@ -50,7 +50,7 @@
       <_CurrentSDKCustomXUnitProject>%(SDKCustomXUnitProject.Identity)</_CurrentSDKCustomXUnitProject>
       <_CurrentPublishTargetFramework>%(SDKCustomXUnitProject.TargetFramework)</_CurrentPublishTargetFramework>
       <_CurrentPublishTargetFramework Condition="'$(_CurrentPublishTargetFramework)' == ''">$(SDKCustomXUnitPublishTargetFramework)</_CurrentPublishTargetFramework>
-      <_CurrentRuntimeTargetFramework>%(SDKCustomXUnitProject.RuntimeTargetFramework)</_CurrentRuntimeTargetFramework>
+      <_CurrentRuntimeTargetFramework>%(SDKCustomXUnitProject.TargetFramework)</_CurrentRuntimeTargetFramework>
       <_CurrentRuntimeTargetFramework Condition="'$(_CurrentRuntimeTargetFramework)' == ''">$(SDKCustomXUnitRuntimeTargetFramework)</_CurrentRuntimeTargetFramework>
       <_CurrentAdditionalProperties>%(SDKCustomXUnitProject.AdditionalProperties)</_CurrentAdditionalProperties>
     </PropertyGroup>
