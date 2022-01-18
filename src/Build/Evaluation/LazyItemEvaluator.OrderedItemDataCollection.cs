@@ -59,6 +59,7 @@ namespace Microsoft.Build.Evaluation
 
                     set
                     {
+                        // Update the dictionary if it exists.
                         if (_dictionaryBuilder is not null)
                         {
                             ItemData oldItemData = _listBuilder[index];
