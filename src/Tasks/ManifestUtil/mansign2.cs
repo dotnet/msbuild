@@ -277,7 +277,7 @@ namespace System.Deployment.Internal.CodeSigning
                                Sha256SignatureMethodUri);
 
 #if RUNTIME_TYPE_NETCORE
-            CryptoConfig.AddAlgorithm(typeof(SHA256Managed),
+            CryptoConfig.AddAlgorithm(typeof(SHA256),
                                Sha256DigestMethod);
 #else
             CryptoConfig.AddAlgorithm(typeof(System.Security.Cryptography.SHA256Cng),
@@ -584,7 +584,7 @@ namespace System.Deployment.Internal.CodeSigning
 
                 if (useSha256)
                 {
-                    using (SHA256CryptoServiceProvider sha2 = new SHA256CryptoServiceProvider())
+                    using (SHA256 sha2 = SHA256.Create("System.Security.Cryptography.SHA256CryptoServiceProvider"))
                     {
                         byte[] hash = sha2.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -597,7 +597,7 @@ namespace System.Deployment.Internal.CodeSigning
                 }
                 else
                 {
-                    using (SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider())
+                    using (SHA1 sha1 = SHA1.Create("System.Security.Cryptography.SHA1CryptoServiceProvider"))
                     {
                         byte[] hash = sha1.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -632,7 +632,7 @@ namespace System.Deployment.Internal.CodeSigning
 
                 if (useSha256)
                 {
-                    using (SHA256CryptoServiceProvider sha2 = new SHA256CryptoServiceProvider())
+                    using (SHA256 sha2 = SHA256.Create("System.Security.Cryptography.SHA256CryptoServiceProvider"))
                     {
                         byte[] hash = sha2.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -645,7 +645,7 @@ namespace System.Deployment.Internal.CodeSigning
                 }
                 else
                 {
-                    using (SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider())
+                    using (SHA1 sha1 = SHA1.Create("System.Security.Cryptography.SHA1CryptoServiceProvider"))
                     {
                         byte[] hash = sha1.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
