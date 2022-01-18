@@ -23,15 +23,13 @@ namespace Microsoft.Build.Tasks
 
         static HashSet<string> InitializeValidCultureNames()
         {
-            HashSet<string> validCultureNames = new(StringComparer.OrdinalIgnoreCase);
 #if !FEATURE_CULTUREINFO_GETCULTURES
             if (!AssemblyUtilities.CultureInfoHasGetCultures())
             {
-                validCultureNames = HardcodedCultureNames;
-                return validCultureNames;
+                return HardcodedCultureNames;
             }
 #endif
-
+            HashSet<string> validCultureNames = new(StringComparer.OrdinalIgnoreCase);
             foreach (CultureInfo cultureName in AssemblyUtilities.GetAllCultures())
             {
                 validCultureNames.Add(cultureName.Name);
