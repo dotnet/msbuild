@@ -293,7 +293,11 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
-                _typeInformation = _typeLoader.Load(taskName, loadInfo, taskHostFactoryExplicitlyRequested);
+
+                // If the user requested a task host but provided us with an assembly name rather than an assembly file, pretend they didn't.
+                // Finding the path to the assembly file the runtime would load without actually loading the assembly would likely be a bug farm.
+                // Also, this should be a very unusual case.
+                _typeInformation = _typeLoader.Load(taskName, loadInfo, taskHostFactoryExplicitlyRequested && loadInfo.AssemblyFile is not null);
 
                 // If the user specifically requests a code task factory, and the type wasn't already loaded, we need a way to verify that it really found a matching type. Properties is an array, so it should never be null,
                 // though it could be an empty array.
