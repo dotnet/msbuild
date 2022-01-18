@@ -826,9 +826,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     toolPath = Path.Combine(pathToDotNetFrameworkSdk, "bin", ToolName);
                 }
             }
-            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
+            if (NativeMethodsShared.IsWindows && (toolPath == null || !FileSystems.Default.FileExists(toolPath)))
             {
+#pragma warning disable CA1416 // Validate platform compatibility
                 toolPath = GetVersionIndependentToolPath(ToolName);
+#pragma warning restore CA1416
             }
             if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
             {
@@ -880,6 +882,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return false;
         }
 
+#if NET5_0_OR_GREATER
+        [SupportedOSPlatformAttribute("windows")]
+#endif
         private static string GetVersionIndependentToolPath(string toolName)
         {
             const string versionIndependentToolKeyName = @"Software\Microsoft\ClickOnce\SignTool";
