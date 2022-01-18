@@ -101,6 +101,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="ILLink"
           Condition=" '$(PublishTrimmed)' == 'true' And
+                      '$(RunILLink)' != 'false' And
                       '$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' "
           DependsOnTargets="_RunILLink">
 
@@ -211,8 +212,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- The defaults currently root non-framework assemblies, which
          is a no-op for portable apps. If we later support more ways
          to customize the behavior we can allow linking portable apps
-         in some cases. -->
-    <NETSdkError Condition="'$(SelfContained)' != 'true'" ResourceName="ILLinkNotSupportedError" />
+         in some cases. If we're not running ILLink because e.g. this
+         is a NativeAOT app, value of SelfContained doesn't matter. -->
+    <NETSdkError Condition="'$(RunILLink)' != 'false' And '$(SelfContained)' != 'true'" ResourceName="ILLinkNotSupportedError" />
 
     <PropertyGroup Condition=" '$(ILLinkWarningLevel)' == '' ">
       <ILLinkWarningLevel Condition=" '$(EffectiveAnalysisLevel)' != '' And
