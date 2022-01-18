@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Eventing;
@@ -110,6 +111,28 @@ namespace Microsoft.Build.Framework
         {
             LazyPrepare();
             _borrowedBuilder.Append(value, startIndex, count);
+            return this;
+        }
+
+        /// <inheritdoc cref="StringBuilder.AppendFormat(IFormatProvider, string, object[])"/>
+        internal ReuseableStringBuilder AppendFormat(
+            CultureInfo currentCulture,
+            string format,
+            params object[] args)
+        {
+            LazyPrepare();
+            _borrowedBuilder.AppendFormat(
+                currentCulture,
+                format,
+                args);
+            return this;
+        }
+
+        /// <inheritdoc cref="StringBuilder.AppendLine()"/>
+        internal ReuseableStringBuilder AppendLine()
+        {
+            LazyPrepare();
+            _borrowedBuilder.AppendLine();
             return this;
         }
 
