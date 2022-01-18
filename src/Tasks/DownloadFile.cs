@@ -185,7 +185,11 @@ namespace Microsoft.Build.Tasks
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 
+#if NET5_0_OR_GREATER
+                            using (Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false))
+#else
                             using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+#endif
                             {
                                 await responseStream.CopyToAsync(target, 1024, cancellationToken).ConfigureAwait(false);
                             }
