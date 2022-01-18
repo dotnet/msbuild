@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 
@@ -722,6 +723,9 @@ internal static class NativeMethods
     /// <summary>
     /// Gets a flag indicating if we are running under some version of Windows
     /// </summary>
+#if NET5_0_OR_GREATER
+    [SupportedOSPlatformGuard("windows")]
+#endif
     internal static bool IsWindows
     {
 #if CLR2COMPATIBILITY
@@ -876,9 +880,9 @@ internal static class NativeMethods
     /// </summary>
     internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.ProcessorArchitectureTypeNative;
 
-    #endregion
+#endregion
 
-    #region Wrapper methods
+#region Wrapper methods
 
     /// <summary>
     /// Really truly non pumping wait.
@@ -1460,9 +1464,9 @@ internal static class NativeMethods
         }
     }
 
-    #endregion
+#endregion
 
-    #region PInvoke
+#region PInvoke
 
     /// <summary>
     /// Gets the current OEM code page which is used by console apps
@@ -1622,9 +1626,9 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", SetLastError = true)]
     internal static extern bool SetThreadErrorMode(int newMode, out int oldMode);
 
-    #endregion
+#endregion
 
-    #region Extensions
+#region Extensions
 
     /// <summary>
     /// Waits while pumping APC messages.  This is important if the waiting thread is an STA thread which is potentially
@@ -1671,9 +1675,9 @@ internal static class NativeMethods
         return returnValue == 0;
     }
 
-    #endregion
+#endregion
 
-    #region helper methods
+#region helper methods
 
     internal static bool DirectoryExists(string fullPath)
     {
@@ -1716,6 +1720,6 @@ internal static class NativeMethods
         return GetFileAttributesEx(path, 0, ref data);
     }
 
-    #endregion
+#endregion
 
 }
