@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">net6.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
     <StrongNameKeyId>Open</StrongNameKeyId>
