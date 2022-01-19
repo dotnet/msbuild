@@ -223,9 +223,9 @@
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
-        <source>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="translated">NETSDK1174: 単一ファイル バンドルの圧縮は、内臓アプリケーションの発行時にのみサポートされます。</target>
-        <note>{StrBegin="NETSDK1174: "}</note>
+        <source>NETSDK1176: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="translated">NETSDK1176: 単一ファイル バンドルの圧縮は、内臓アプリケーションの発行時にのみサポートされます。</target>
+        <note>{StrBegin="NETSDK1176: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
@@ -656,9 +656,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
-        <source>NETSDK1176: Placeholder</source>
-        <target state="translated">NETSDK1176: プレースホルダー</target>
-        <note>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+        <source>NETSDK1174: Placeholder</source>
+        <target state="translated">NETSDK1174: プレースホルダー</target>
+        <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
