@@ -303,14 +303,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("RP")]
         public void RestorePropertySwitchIdentificationTests(string property)
         {
-            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
-            string duplicateSwitchErrorMessage;
-            bool multipleParametersAllowed;
-            string missingParametersErrorMessage;
-            bool unquoteParameters;
-            bool emptyParametersAllowed;
-
-            CommandLineSwitches.IsParameterizedSwitch(property, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+                CommandLineSwitches.IsParameterizedSwitch(property, out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch, out string duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
             parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.RestoreProperty);
             duplicateSwitchErrorMessage.ShouldBeNull();
             multipleParametersAllowed.ShouldBeTrue();
