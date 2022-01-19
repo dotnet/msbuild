@@ -3,10 +3,7 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.List.PackageReferences;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.PackageReferences.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -54,25 +51,11 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option InteractiveOption = new ForwardedOption<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs("--interactive");
 
-        public static readonly Option VerbosityOption = new ForwardedOption<VerbosityOptions>(
-                new string[] { "-v", "--verbosity" },
-                description: CommonLocalizableStrings.VerbosityOptionDescription)
-            {
-                ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
-            }.ForwardAsSingle(o => $"--verbosity:{o}");
-
-        private static readonly Command Command = ConstructCommand();
-
         public static Command GetCommand()
-        {
-            return Command;
-        }
-
-        private static Command ConstructCommand()
         {
             var command = new Command("package", LocalizableStrings.AppFullName);
 
-            command.AddOption(VerbosityOption);
+            command.AddOption(CommonOptions.VerbosityOption(o => $"--verbosity:{o}"));
             command.AddOption(OutdatedOption);
             command.AddOption(DepreciatedOption);
             command.AddOption(VulnerableOption);
@@ -84,8 +67,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ConfigOption);
             command.AddOption(SourceOption);
             command.AddOption(InteractiveOption);
-
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
 
             return command;
         }

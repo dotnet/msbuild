@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
   List all project-to-project references of the project.
 
 Usage:
-  dotnet list [<PROJECT>] reference [options]
+  dotnet [options] list [<PROJECT>] reference
 
 Arguments:
   <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
@@ -34,7 +34,7 @@ Options:
   List references or packages of a .NET project.
 
 Usage:
-  dotnet list [<PROJECT | SOLUTION>] [command] [options]
+  dotnet [options] list [<PROJECT | SOLUTION>] [command]
 
 Arguments:
   <PROJECT | SOLUTION>    The project or solution file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]

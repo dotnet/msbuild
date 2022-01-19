@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
@@ -22,16 +23,13 @@ namespace Microsoft.DotNet.Tools.Publish
 
         public static PublishCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var parser = Parser.Instance;
-            var parseResult = parser.ParseFrom("dotnet publish", args);
-            return FromParseResult(parseResult);
-        }
-
-        public static PublishCommand FromParseResult(ParseResult parseResult, string msbuildPath = null)
-        {
-            parseResult.HandleDebugSwitch();
+            DebugHelper.HandleDebugSwitch(ref args);
 
             var msbuildArgs = new List<string>();
+
+            var parser = Parser.Instance;
+
+            var parseResult = parser.ParseFrom("dotnet publish", args);
 
             parseResult.ShowHelpOrErrorIfAppropriate();
 
@@ -42,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PublishCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(parseResult.ValueForArgument<IEnumerable<string>>(PublishCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PublishCommandParser.NoRestoreOption)
                           || parseResult.HasOption(PublishCommandParser.NoBuildOption);
@@ -53,11 +51,11 @@ namespace Microsoft.DotNet.Tools.Publish
                 msbuildPath);
         }
 
-        public static int Run(ParseResult parseResult)
+        public static int Run(string[] args)
         {
-            parseResult.HandleDebugSwitch();
+            DebugHelper.HandleDebugSwitch(ref args);
 
-            return FromParseResult(parseResult).Execute();
+            return FromArgs(args).Execute();
         }
     }
 }

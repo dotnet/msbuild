@@ -20,14 +20,11 @@ namespace Microsoft.DotNet.Tools.Store
 
         public static StoreCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var parser = Parser.Instance;
-            var result = parser.ParseFrom("dotnet store", args);
-            return FromParseResult(result, msbuildPath);
-        }
-
-        public static StoreCommand FromParseResult(ParseResult result, string msbuildPath = null)
-        {
             var msbuildArgs = new List<string>();
+
+            var parser = Parser.Instance;
+
+            var result = parser.ParseFrom("dotnet store", args);
 
             result.ShowHelpOrErrorIfAppropriate();
 
@@ -40,16 +37,16 @@ namespace Microsoft.DotNet.Tools.Store
 
             msbuildArgs.AddRange(result.OptionValuesToBeForwarded(StoreCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(result.GetValueForArgument(StoreCommandParser.Argument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.ValueForArgument<IEnumerable<string>>(StoreCommandParser.Argument) ?? Array.Empty<string>());
 
             return new StoreCommand(msbuildArgs, msbuildPath);
         }
 
-        public static int Run(ParseResult parseResult)
+        public static int Run(string[] args)
         {
-            parseResult.HandleDebugSwitch();
+            DebugHelper.HandleDebugSwitch(ref args);
 
-            return FromParseResult(parseResult).Execute();
+            return FromArgs(args).Execute();
         }
     }
 }

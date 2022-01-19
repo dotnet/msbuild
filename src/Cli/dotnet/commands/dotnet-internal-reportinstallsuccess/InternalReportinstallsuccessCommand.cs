@@ -5,9 +5,9 @@ using System;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Cli.Telemetry;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -15,10 +15,10 @@ namespace Microsoft.DotNet.Cli
     {
         internal const string TelemetrySessionIdEnvironmentVariableName = "DOTNET_CLI_TELEMETRY_SESSIONID";
 
-        public static int Run(ParseResult parseResult)
+        public static int Run(string[] args)
         {
             var telemetry = new ThreadBlockingTelemetry();
-            ProcessInputAndSendTelemetry(parseResult, telemetry);
+            ProcessInputAndSendTelemetry(args, telemetry);
 
             return 0;
         }
@@ -27,12 +27,8 @@ namespace Microsoft.DotNet.Cli
         {
             var parser = Parser.Instance;
             var result = parser.ParseFrom("dotnet internal-reportinstallsuccess", args);
-            ProcessInputAndSendTelemetry(result, telemetry);
-        }
 
-        public static void ProcessInputAndSendTelemetry(ParseResult result, ITelemetry telemetry)
-        {
-            var exeName = Path.GetFileName(result.GetValueForArgument(InternalReportinstallsuccessCommandParser.Argument));
+            var exeName = Path.GetFileName(result.ValueForArgument<string>(InternalReportinstallsuccessCommandParser.Argument));
 
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             foreach (var e in filter.Filter(new InstallerSuccessReport(exeName)))

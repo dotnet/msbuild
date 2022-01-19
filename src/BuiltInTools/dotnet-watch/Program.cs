@@ -129,7 +129,6 @@ Examples:
                 return null;
             });
 
-            var projectOption = new Option<string>("-p", "The project to watch") { IsHidden = true };
             var root = new RootCommand(Description)
             {
                  quiet,
@@ -140,7 +139,9 @@ Examples:
                  new Option<string>(
                      "--project",
                     "The project to watch"),
-                 projectOption,
+                 new Option<string>(
+                     "-p",
+                     "The project to watch") { IsHidden = true },
                  new Option<bool>(
                     "--list",
                     "Lists all discovered files without starting the watcher"),
@@ -152,7 +153,7 @@ Examples:
                 if (string.IsNullOrEmpty(options.Project))
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    var projectOptionShort = parseResults.GetValueForOption(projectOption);
+                    var projectOptionShort = parseResults.ValueForOption<string>("-p");
 #pragma warning restore CS0618 // Type or member is obsolete
                     if (!string.IsNullOrEmpty(projectOptionShort))
                     {

@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
         public static ParseResult ParseFrom(
             this System.CommandLine.Parsing.Parser parser,
             string context,
-            string[] args = null) =>
+            string[] args) =>
             parser.Parse(context.Split(' ').Concat(args).ToArray());
     }
 }

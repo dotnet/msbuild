@@ -10,7 +10,7 @@ using Microsoft.DotNet.Cli.CommandLineValidation;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal sealed class CommandLineValidationMessages : LocalizationResources
+    internal sealed class CommandLineValidationMessages : Resources
     {
         public override string ExpectsOneArgument(SymbolResult symbolResult) =>
             symbolResult is CommandResult

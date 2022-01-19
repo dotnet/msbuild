@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Telemetry;
@@ -136,7 +137,7 @@ namespace Microsoft.DotNet.Cli
                         Path.Combine(
                             CliFolderPathCalculator.DotnetUserProfileFolderPath,
                             ToolPathSentinelFileName)));
-                if (parseResult.GetValueForOption(Parser.DiagOption) && parseResult.IsDotnetBuiltInCommand())
+                if (parseResult.ValueForOption<bool>(Parser.DiagOption) && parseResult.IsDotnetBuiltInCommand())
                 {
                     Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
                     CommandContext.SetVerbose(true);
@@ -151,6 +152,15 @@ namespace Microsoft.DotNet.Cli
                 {
                     CommandLineInfo.PrintInfo();
                     return 0;
+                }
+                else if (parseResult.HasOption("-h") && parseResult.IsTopLevelDotnetCommand())
+                {
+                    HelpCommand.PrintHelp();
+                    return 0;
+                }
+                else if (parseResult.Directives.Count() > 0)
+                {
+                    return parseResult.Invoke();
                 }
                 else
                 {
@@ -217,17 +227,21 @@ namespace Microsoft.DotNet.Cli
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
             int exitCode;
-            if (parseResult.CanBeInvoked())
+            if (parseResult.CommandResult.Command.Name.Equals("dotnet") && string.IsNullOrEmpty(parseResult.ValueForArgument<string>(Parser.DotnetSubCommand)))
+            {
+                exitCode = 0;
+            }
+            else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootSubCommandResult(), out var builtIn))
             {
                 PerformanceLogEventSource.Log.BuiltInCommandStart();
-                exitCode = parseResult.Invoke();
+                exitCode = builtIn.Command(args.GetSubArguments());
                 PerformanceLogEventSource.Log.BuiltInCommandStop();
             }
             else
             {
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStart();
                 var resolvedCommand = CommandFactoryUsingResolver.Create(
-                        "dotnet-" + parseResult.GetValueForArgument(Parser.DotnetSubCommand),
+                        "dotnet-" + parseResult.ValueForArgument<string>(Parser.DotnetSubCommand),
                         args.GetSubArguments(),
                         FrameworkConstants.CommonFrameworks.NetStandardApp15);
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStop();
@@ -299,6 +313,11 @@ namespace Microsoft.DotNet.Cli
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             UILanguageOverride.Setup();
+        }
+
+        internal static bool TryGetBuiltInCommand(string commandName, out BuiltInCommandMetadata builtInCommand)
+        {
+            return BuiltInCommandsCatalog.Commands.TryGetValue(commandName, out builtInCommand);
         }
     }
 }

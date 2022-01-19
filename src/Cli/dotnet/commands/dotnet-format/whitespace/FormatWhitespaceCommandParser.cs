@@ -3,27 +3,20 @@
 //
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
-using Microsoft.DotNet.Cli;
+
 using static Microsoft.DotNet.Tools.Format.FormatCommandCommon;
 
 namespace Microsoft.DotNet.Tools.Format
 {
     internal static class FormatWhitespaceCommandParser
     {
-        private static readonly Command Command = ConstructCommand();
-
         public static Command GetCommand()
         {
-            return Command;
-        }
-
-        private static Command ConstructCommand()
-        {
-            var command = new Command("whitespace", LocalizableStrings.Run_whitespace_formatting);
+            var command = new Command("whitespace", LocalizableStrings.Run_whitespace_formatting)
+            {
+                FolderOption,
+            };
             command.AddCommonOptions();
-            command.Handler = CommandHandler.Create<ParseResult>((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
             return command;
         }
     }

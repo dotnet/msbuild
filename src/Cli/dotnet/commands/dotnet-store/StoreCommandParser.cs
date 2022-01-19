@@ -3,18 +3,13 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using System.Linq;
-using Microsoft.DotNet.Tools.Store;
 using LocalizableStrings = Microsoft.DotNet.Tools.Store.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class StoreCommandParser
     {
-        public static readonly string DocsLink = "https://aka.ms/dotnet-store";
-
         public static readonly Argument<IEnumerable<string>> Argument = new Argument<IEnumerable<string>>()
         {
             Arity = ArgumentArity.ZeroOrMore,
@@ -67,16 +62,9 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> SkipSymbolsOption = new ForwardedOption<bool>("--skip-symbols", LocalizableStrings.SkipSymbolsOptionDescription)
             .ForwardAs("-property:CreateProfilingSymbols=false");
 
-        private static readonly Command Command = ConstructCommand();
-
         public static Command GetCommand()
         {
-            return Command;
-        }
-
-        private static Command ConstructCommand()
-        {
-            var command = new DocumentedCommand("store", DocsLink, LocalizableStrings.AppDescription);
+            var command = new Command("store", LocalizableStrings.AppDescription);
 
             command.AddArgument(Argument);
             command.AddOption(ManifestOption);
@@ -86,11 +74,9 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SkipOptimizationOption);
             command.AddOption(SkipSymbolsOption);
             command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
-            command.AddOption(CommonOptions.RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
-            command.AddOption(CommonOptions.VerbosityOption);
+            command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
+            command.AddOption(CommonOptions.VerbosityOption());
 			command.AddOption(CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription));
-
-            command.Handler = CommandHandler.Create<ParseResult>(StoreCommand.Run);
 
             return command;
         }

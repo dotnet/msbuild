@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
   Remove one or more projects from a solution file.
 
 Usage:
-  dotnet sln <SLN_FILE> remove [<PROJECT_PATH>...] [options]
+  dotnet [options] sln <SLN_FILE> remove [<PROJECT_PATH>...]
 
 Arguments:
   <SLN_FILE>        The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]

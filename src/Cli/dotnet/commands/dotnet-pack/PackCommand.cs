@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -23,12 +24,9 @@ namespace Microsoft.DotNet.Tools.Pack
         public static PackCommand FromArgs(string[] args, string msbuildPath = null)
         {
             var parser = Parser.Instance;
-            var parseResult = parser.ParseFrom("dotnet pack", args);
-            return FromParseResult(parseResult, msbuildPath);
-        }
 
-        public static PackCommand FromParseResult(ParseResult parseResult, string msbuildPath = null)
-        {
+            var parseResult = parser.ParseFrom("dotnet pack", args);
+
             parseResult.ShowHelpOrErrorIfAppropriate();
 
             var msbuildArgs = new List<string>()
@@ -38,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Pack
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(parseResult.GetValueForArgument(PackCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(parseResult.ValueForArgument<IEnumerable<string>>(PackCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PackCommandParser.NoRestoreOption) || parseResult.HasOption(PackCommandParser.NoBuildOption);
 
@@ -48,11 +46,11 @@ namespace Microsoft.DotNet.Tools.Pack
                 msbuildPath);
         }
 
-        public static int Run(ParseResult parseResult)
+        public static int Run(string[] args)
         {
-            parseResult.HandleDebugSwitch();
+            DebugHelper.HandleDebugSwitch(ref args);
 
-            return FromParseResult(parseResult).Execute();
+            return FromArgs(args).Execute();
         }
     }
 }

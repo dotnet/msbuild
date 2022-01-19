@@ -7,9 +7,20 @@ namespace Microsoft.DotNet.Cli
 {
     public class ParseCommand
     {
-        public static int Run(ParseResult result)
+        public static int Run(string[] args)
         {
-            result.HandleDebugSwitch();
+            DebugHelper.HandleDebugSwitch(ref args);
+
+            ParseResult result;
+            try
+            {
+                result = Parser.Instance.Parse(
+                    args.Single());
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("The parser threw an exception.", e);
+            }
 
             Console.WriteLine(result.Diagram());
 

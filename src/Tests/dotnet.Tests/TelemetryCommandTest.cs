@@ -377,6 +377,12 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
+        public void InternalreportinstallsuccessCommandIsRegisteredInBuiltIn()
+        {
+            BuiltInCommandsCatalog.Commands.Should().ContainKey("internal-reportinstallsuccess");
+        }
+
+        [Fact]
         public void ExceptionShouldBeSentToTelemetry()
         {
             Exception caughtException = null;

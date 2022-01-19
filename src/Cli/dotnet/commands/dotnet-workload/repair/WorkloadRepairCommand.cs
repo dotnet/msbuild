@@ -42,22 +42,22 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;
-            _verbosity = parseResult.GetValueForOption(WorkloadRepairCommandParser.VerbosityOption);
+            _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadRepairCommandParser.VerbosityOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption), version, _dotnetPath, userProfileDir);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadRepairCommandParser.VersionOption), version, _dotnetPath, userProfileDir);
 
-            var configOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.ConfigOption);
-            var sourceOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.SourceOption);
+            var configOption = parseResult.ValueForOption<string>(WorkloadRepairCommandParser.ConfigOption);
+            var sourceOption = parseResult.ValueForOption<string[]>(WorkloadRepairCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), userProfileDir);
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), userProfileDir);
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption)) ?
+            tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
-                parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption));
+                parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption));
             var tempPackagesDir = new DirectoryPath(Path.Combine(tempDirPath, "dotnet-sdk-advertising-temp"));
             NullLogger nullLogger = new NullLogger();
             nugetPackageDownloader ??= new NuGetPackageDownloader(
