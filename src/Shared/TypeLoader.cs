@@ -382,8 +382,25 @@ namespace Microsoft.Build.Shared
             /// <returns>A <c ref="TypeInformation"/> indicating relevant information about typeName.</returns>
             private TypeInformation FindTypeInformationUsingSystemReflectionMetadata(string typeName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_assemblyLoadInfo.AssemblyFile, "AssemblyFile");
-                using (FileStream stream = File.OpenRead(_assemblyLoadInfo.AssemblyFile))
+                string path = _assemblyLoadInfo.AssemblyFile;
+
+                // This should only be true for Microsoft.Build assemblies. We use this for testing.
+                if (path is null)
+                {
+#if NETFRAMEWORK
+                    AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
+                    setup.LoaderOptimization = LoaderOptimization.SingleDomain;
+                    AppDomain appDomain = AppDomain.CreateDomain("appDomainToFindPath", null, setup);
+                    path = appDomain.Load(new AssemblyName(_assemblyLoadInfo.AssemblyName)).Location;
+                    AppDomain.Unload(appDomain);
+#else
+                    AssemblyLoadContext alc = new("loadContextToFindPath", true);
+                    path = alc.LoadFromAssemblyName(new AssemblyName(_assemblyLoadInfo.AssemblyName)).Location;
+                    alc.Unload();
+#endif
+                }
+
+                using (FileStream stream = File.OpenRead(path))
                 using (PEReader peFile = new(stream))
                 {
                     MetadataReader metadataReader = peFile.GetMetadataReader();
@@ -393,7 +410,7 @@ namespace Microsoft.Build.Shared
                         TypeDefinition typeDef = metadataReader.GetTypeDefinition(typeDefHandle);
                         if (TryGetTypeInformationFromDefinition(metadataReader, typeDef, typeName, out TypeInformation typeInformation))
                         {
-                            typeInformation.Path = _assemblyLoadInfo.AssemblyFile;
+                            typeInformation.Path = path;
                             return typeInformation;
                         }
                     }
