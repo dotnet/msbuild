@@ -1899,4 +1899,37 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ProxyRequestNotScheduledOnInprocNode" xml:space="preserve">
     <value>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</value>
   </data>
+  <data name="ProjectCacheBeginBuild" xml:space="preserve">
+    <value>Initializing project cache plugin.</value>
+  </data>
+  <data name="ProjectCacheEndBuild" xml:space="preserve">
+    <value>Shutting down project cache plugin.</value>
+  </data>
+  <data name="ProjectCacheQueryStartedWithTargetNames" xml:space="preserve">
+    <value>Project cache query "{0}" ({1} target(s)):</value>
+  </data>
+  <data name="ProjectCacheQueryStartedWithDefaultTargets" xml:space="preserve">
+    <value>Project cache query "{0}" (default targets):</value>
+  </data>
+  <data name="ProjectCacheHitWithDefaultTargets" xml:space="preserve">
+    <value>Project cache hit for "{0}" (default targets).</value>
+  </data>
+  <data name="ProjectCacheHitWithTargetNames" xml:space="preserve">
+    <value>Project cache hit for "{0}" ({1} target(s)).</value>
+  </data>
+  <data name="ProjectCacheHitWithOutputs" xml:space="preserve">
+    <value>{0} -> Cache Hit</value>
+  </data>
+  <data name="ProjectCacheMissWithDefaultTargets" xml:space="preserve">
+    <value>Project cache miss for "{0}" (default targets).</value>
+  </data>
+  <data name="ProjectCacheMissWithTargetNames" xml:space="preserve">
+    <value>Project cache miss for "{0}" ({1} target(s)).</value>
+  </data>
+  <data name="ProjectCacheNotApplicableWithDefaultTargets" xml:space="preserve">
+    <value>Project cache not applicable for "{0}" (default targets).</value>
+  </data>
+  <data name="ProjectCacheNotApplicableWithTargetNames" xml:space="preserve">
+    <value>Project cache not applicable for "{0}" ({1} target(s)).</value>
+  </data>
 </root>

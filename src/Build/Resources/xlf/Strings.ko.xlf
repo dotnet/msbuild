@@ -219,9 +219,34 @@
         <target state="translated">MSB4265: 단일 프로젝트 캐시 플러그 인이 지정되어야 하지만, {0}에서 여러 개를 찾았습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheBeginBuild">
+        <source>Initializing project cache plugin.</source>
+        <target state="new">Initializing project cache plugin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheEndBuild">
+        <source>Shutting down project cache plugin.</source>
+        <target state="new">Shutting down project cache plugin.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
         <target state="translated">MSB4273: 프로젝트 캐시는 {0} 메서드에서 처리되지 않은 예외를 발생시켰습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithDefaultTargets">
+        <source>Project cache hit for "{0}" (default targets).</source>
+        <target state="new">Project cache hit for "{0}" (default targets).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithOutputs">
+        <source>{0} -&gt; Cache Hit</source>
+        <target state="new">{0} -&gt; Cache Hit</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithTargetNames">
+        <source>Project cache hit for "{0}" ({1} target(s)).</source>
+        <target state="new">Project cache hit for "{0}" ({1} target(s)).</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
@@ -229,9 +254,39 @@
         <target state="translated">MSB4266: 프로젝트 캐시를 초기화하지 못했습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheMissWithDefaultTargets">
+        <source>Project cache miss for "{0}" (default targets).</source>
+        <target state="new">Project cache miss for "{0}" (default targets).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheMissWithTargetNames">
+        <source>Project cache miss for "{0}" ({1} target(s)).</source>
+        <target state="new">Project cache miss for "{0}" ({1} target(s)).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
+        <source>Project cache not applicable for "{0}" (default targets).</source>
+        <target state="new">Project cache not applicable for "{0}" (default targets).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
+        <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
+        <target state="new">Project cache not applicable for "{0}" ({1} target(s)).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
         <target state="translated">MSB4267: {0} 프로젝트에 대해 쿼리되는 동안 프로젝트 캐시가 실패했습니다. 캐시는 여러 프로젝트에 대해 병렬로 쿼리되므로 이 특정 프로젝트가 원인이 아닐 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
+        <source>Project cache query "{0}" (default targets):</source>
+        <target state="new">Project cache query "{0}" (default targets):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
+        <source>Project cache query "{0}" ({1} target(s)):</source>
+        <target state="new">Project cache query "{0}" ({1} target(s)):</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
