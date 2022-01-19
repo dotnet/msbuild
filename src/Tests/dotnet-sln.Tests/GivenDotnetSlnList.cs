@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli.Sln.List.Tests
   List all projects in a solution file.
 
 Usage:
-  dotnet [options] sln <SLN_FILE> list
+  dotnet sln <SLN_FILE> list [options]
 
 Arguments:
   <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]

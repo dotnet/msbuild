@@ -3,7 +3,10 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Remove.ProjectToProjectReference;
 using LocalizableStrings = Microsoft.DotNet.Tools.Remove.ProjectToProjectReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -21,12 +24,21 @@ namespace Microsoft.DotNet.Cli
             ArgumentHelpName = CommonLocalizableStrings.CmdFramework
         };
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("reference", LocalizableStrings.AppFullName);
 
             command.AddArgument(ProjectPathArgument);
             command.AddOption(FrameworkOption);
+
+            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new RemoveProjectToProjectReferenceCommand(parseResult).Execute());
 
             return command;
         }
