@@ -34,6 +34,11 @@
     <PackageReference Include="Wcwidth.Sources" ExcludeAssets="all" GeneratePathProperty="true" />
   </ItemGroup>
 
+  <!-- forces the version in sub dependencies -->
+  <ItemGroup>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Compile Update="LocalizableStrings.Designer.cs">
       <DesignTime>True</DesignTime>
