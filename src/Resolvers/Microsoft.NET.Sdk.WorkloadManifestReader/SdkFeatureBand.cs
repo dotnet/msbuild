@@ -56,7 +56,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return _featureBand.ToString();
         }
 
-        internal string ToStringWithoutPrerelease()
+        public string ToStringWithoutPrerelease()
         {
             return new ReleaseVersion(_featureBand.Major, _featureBand.Minor, _featureBand.SdkFeatureBand).ToString();
         }
