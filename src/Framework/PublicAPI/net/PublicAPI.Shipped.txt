@@ -885,6 +885,9 @@ virtual Microsoft.Build.Framework.BuildEventArgs.Message.set -> void
 virtual Microsoft.Build.Framework.EngineServices.IsTaskInputLoggingEnabled.get -> bool
 virtual Microsoft.Build.Framework.EngineServices.LogsMessagesOfImportance(Microsoft.Build.Framework.MessageImportance importance) -> bool
 virtual Microsoft.Build.Framework.EngineServices.Version.get -> int
+virtual Microsoft.Build.Framework.SdkLogger.LogEvent(params object[] args) -> void
+virtual Microsoft.Build.Framework.SdkLogger.LogEventStart(params object[] args) -> void
+virtual Microsoft.Build.Framework.SdkLogger.LogEventStop(params object[] args) -> void
 virtual Microsoft.Build.Framework.SdkResolverContext.Interactive.get -> bool
 virtual Microsoft.Build.Framework.SdkResolverContext.Interactive.set -> void
 virtual Microsoft.Build.Framework.SdkResolverContext.IsRunningInVisualStudio.get -> bool
