@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
+using System.Runtime.InteropServices;
 #if !NETFRAMEWORK
 using System.Runtime.Loader;
 #endif
@@ -198,10 +199,11 @@ namespace Microsoft.Build.Shared
         (
             string typeName,
             AssemblyLoadInfo assembly,
-            bool taskHostFactoryExplicitlyRequested
+            bool taskHostFactoryExplicitlyRequested,
+            out bool taskHostFactoryNeeded
         )
         {
-            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, taskHostFactoryExplicitlyRequested);
+            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, taskHostFactoryExplicitlyRequested, out taskHostFactoryNeeded);
         }
 
         /// <summary>
@@ -216,7 +218,7 @@ namespace Microsoft.Build.Shared
             AssemblyLoadInfo assembly
         )
         {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, false)?.LoadedType;
+            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, false, out _)?.LoadedType;
         }
 
         /// <summary>
@@ -228,7 +230,8 @@ namespace Microsoft.Build.Shared
             ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache,
             string typeName,
             AssemblyLoadInfo assembly,
-            bool taskHostFactoryExplicitlyRequested)
+            bool taskHostFactoryExplicitlyRequested,
+            out bool taskHostFactoryNeeded)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which 
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
@@ -239,7 +242,7 @@ namespace Microsoft.Build.Shared
             AssemblyInfoToLoadedTypes typeNameToType =
                 loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
 
-            return typeNameToType.GetLoadedTypeByTypeName(typeName, taskHostFactoryExplicitlyRequested);
+            return typeNameToType.GetLoadedTypeByTypeName(typeName, taskHostFactoryExplicitlyRequested, out taskHostFactoryNeeded);
         }
 
         /// <summary>
@@ -312,17 +315,35 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly
             /// </summary>
-            internal TypeInformation GetLoadedTypeByTypeName(string typeName, bool taskHostFactoryExplicitlyRequested)
+            internal TypeInformation GetLoadedTypeByTypeName(string typeName, bool taskHostFactoryExplicitlyRequested, out bool taskHostFactoryNeeded)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
+                taskHostFactoryNeeded = taskHostFactoryExplicitlyRequested;
+                if (!taskHostFactoryNeeded && _assemblyLoadInfo.AssemblyFile is not null)
+                {
+                    ProcessorArchitecture taskArch = AssemblyName.GetAssemblyName(_assemblyLoadInfo.AssemblyFile).ProcessorArchitecture;
+                    bool msbuildIs64Bit = RuntimeInformation.ProcessArchitecture == Architecture.X64;
+                    taskHostFactoryNeeded = msbuildIs64Bit ? Required32Bit(taskArch) : Required64Bit(taskArch);
+                }
+
                 // Only one thread should be doing operations on this instance of the object at a time.
-                TypeInformation typeInfo = taskHostFactoryExplicitlyRequested ?
+                TypeInformation typeInfo = taskHostFactoryNeeded ?
                     _typeNameToTypeInformationTaskHost.GetOrAdd(typeName, key => FindTypeInformationUsingSystemReflectionMetadata(typeName)) :
                     _typeNameToTypeInformation.GetOrAdd(typeName, key => FindTypeInformationUsingLoadedType(typeName)
                     );
 
                 return typeInfo;
+            }
+
+            private bool Required32Bit(ProcessorArchitecture arch)
+            {
+                return arch == ProcessorArchitecture.X86 || arch == ProcessorArchitecture.Arm;
+            }
+
+            private bool Required64Bit(ProcessorArchitecture arch)
+            {
+                return arch == ProcessorArchitecture.IA64 || arch == ProcessorArchitecture.Amd64;
             }
 
             /// <summary>

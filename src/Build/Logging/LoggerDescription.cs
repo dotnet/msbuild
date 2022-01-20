@@ -202,7 +202,7 @@ namespace Microsoft.Build.Logging
                 if (forwardingLogger)
                 {
                     // load the logger from its assembly
-                    LoadedType loggerClass = (new TypeLoader(s_forwardingLoggerClassFilter)).Load(_loggerClassName, _loggerAssembly, false).LoadedType;
+                    LoadedType loggerClass = (new TypeLoader(s_forwardingLoggerClassFilter)).Load(_loggerClassName, _loggerAssembly, false, out _).LoadedType;
 
                     if (loggerClass != null)
                     {
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Logging
                 else
                 {
                     // load the logger from its assembly
-                    LoadedType loggerClass = (new TypeLoader(s_loggerClassFilter)).Load(_loggerClassName, _loggerAssembly, false).LoadedType;
+                    LoadedType loggerClass = (new TypeLoader(s_loggerClassFilter)).Load(_loggerClassName, _loggerAssembly, false, out _).LoadedType;
 
                     if (loggerClass != null)
                     {

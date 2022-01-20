@@ -131,9 +131,11 @@ namespace Microsoft.Build.Shared
         (
             string typeName,
             AssemblyLoadInfo assembly,
-            bool taskHostFactoryExplicitlyRequested
+            bool taskHostFactoryExplicitlyRequested,
+            out bool taskHostFactoryNeeded
         )
         {
+            taskHostFactoryNeeded = false;
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
         }
 
