@@ -159,7 +159,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             }
 
             ErrorUtilities.ThrowInternalErrorUnreachable();
-            return (null!, null!);
+            return (null!, null!); // Unreachable
         }
 
         private static ProjectCachePluginBase GetPluginInstanceFromType(Type pluginType)
@@ -171,9 +171,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
                 HandlePluginException(e.InnerException, "Constructor");
+                return null!; // Unreachable
             }
-
-            return null!;
         }
 
         private static Type GetTypeFromAssemblyPath(string pluginAssemblyPath)
@@ -500,7 +499,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "ProjectCacheQueryStartedWithTargetNames", buildRequest.ProjectFullPath, targetNames);
             }
 
-            CacheResult cacheResult = null!;
+            CacheResult? cacheResult = null;
             try
             {
                 MSBuildEventSource.Log.ProjectCacheGetCacheResultStart(_projectCachePluginTypeName, buildRequest.ProjectFullPath, targetNames);
@@ -509,11 +508,15 @@ namespace Microsoft.Build.Experimental.ProjectCache
             catch (Exception e)
             {
                 HandlePluginException(e, nameof(ProjectCachePluginBase.GetCacheResultAsync));
+                return null!; // Unreachable
             }
             finally
             {
-                string cacheResultType = cacheResult?.ResultType.ToString() ?? nameof(CacheResultType.None);
-                MSBuildEventSource.Log.ProjectCacheGetCacheResultStop(_projectCachePluginTypeName, buildRequest.ProjectFullPath, targetNames, cacheResultType);
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    string cacheResultType = cacheResult?.ResultType.ToString() ?? nameof(CacheResultType.None);
+                    MSBuildEventSource.Log.ProjectCacheGetCacheResultStop(_projectCachePluginTypeName, buildRequest.ProjectFullPath, targetNames, cacheResultType);
+                }
             }
 
             if (pluginLogger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
