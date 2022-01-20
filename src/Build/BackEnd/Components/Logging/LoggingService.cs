@@ -481,6 +481,15 @@ namespace Microsoft.Build.BackEnd.Logging
         } = null;
 
         /// <summary>
+        /// Get of warnings to not treat as errors. Only has any effect if WarningsAsErrors is empty but not null.
+        /// </summary>
+        public ISet<string> WarningsNotAsErrors
+        {
+            get;
+            set;
+        } = null;
+
+        /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
         public ISet<string> WarningsAsMessages
@@ -1744,7 +1753,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 // Global warnings as errors apply to all projects.  If the list is empty or contains the code, the warning should be treated as an error
                 //
-                if (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningEvent.Code))
+                if ((WarningsAsErrors.Count == 0 && (WarningsNotAsErrors is null || !WarningsNotAsErrors.Contains(warningEvent.Code))) || WarningsAsErrors.Contains(warningEvent.Code))
                 {
                     return true;
                 }

@@ -162,6 +162,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// List of warnings to not treat as errors.
+        /// </summary>
+        public ISet<string> WarningsNotAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// List of warnings to treat as low importance messages.
         /// </summary>
         public ISet<string> WarningsAsMessages

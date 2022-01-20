@@ -1258,6 +1258,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="MissingWarnNotAsErrorParameterError" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1060: Specify one or more warning codes to keep as warnings despite a global -warnaserror when using the -warnNotAsError switch.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="InvalidProfilerValue" xml:space="preserve">
     <value>MSBUILD : error MSB1053: Provided filename is not valid. {0}</value>
   </data>
@@ -1294,7 +1302,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1060.
+        Next error code should be MSB1061.
 
         Don't forget to update this comment after using the new code.
   -->

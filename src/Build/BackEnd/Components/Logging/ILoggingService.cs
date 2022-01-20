@@ -164,6 +164,15 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Set of warnings to not treat as errors. Only has any effect if WarningsAsErrors is non-null but empty.
+        /// </summary>
+        ISet<string> WarningsNotAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
         ISet<string> WarningsAsMessages

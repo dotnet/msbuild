@@ -1205,6 +1205,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="MissingWarnNotAsErrorParameterError">
+        <source>MSBUILD : error MSB1060: Specify one or more warning codes to keep as warnings despite a global -warnaserror when using the -warnNotAsError switch.</source>
+        <target state="new">MSBUILD : error MSB1060: Specify one or more warning codes to keep as warnings despite a global -warnaserror when using the -warnNotAsError switch.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MultipleSchemasError">
         <source>MSBUILD : error MSB1024: Only one schema can be specified for validation of the project.</source>
         <target state="translated">MSBUILD : error MSB1024: 프로젝트의 유효성을 검사하는 데 사용할 스키마를 하나만 지정할 수 있습니다.</target>

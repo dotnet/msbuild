@@ -11,3 +11,5 @@ Microsoft.Build.FileSystem.IDirectoryCache.FileExists(string path) -> bool
 Microsoft.Build.FileSystem.IDirectoryCacheFactory
 Microsoft.Build.FileSystem.IDirectoryCacheFactory.GetDirectoryCacheForEvaluation(int evaluationId) -> Microsoft.Build.FileSystem.IDirectoryCache
 static Microsoft.Build.Globbing.CompositeGlob.Create(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) -> Microsoft.Build.Globbing.IMSBuildGlob
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Collections.Generic.ISet<string>
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void
