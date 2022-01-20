@@ -292,11 +292,23 @@ namespace Microsoft.Build.BackEnd
 
                 if (msbuildProcess.HasExited)
                 {
-                    CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it has exited. This can indicate a crash at startup");
+                    if (Traits.Instance.DebugNodeCommunication)
+                    {
+                        try
+                        {
+                            CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with exit code {1}. This can indicate a crash at startup", msbuildProcess.Id, msbuildProcess.ExitCode);
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // This case is common on Windows where we called CreateProcess and the Process object
+                            // can't get the exit code.
+                            CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with unknown exit code. This can indicate a crash at startup", msbuildProcess.Id);
+                        }
+                    }
                 }
                 else
                 {
-                    CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node");
+                    CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node", msbuildProcess.Id);
                 }
             }
 
