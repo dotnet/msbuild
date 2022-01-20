@@ -11,6 +11,7 @@ using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
@@ -44,6 +45,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private readonly ProjectCacheDescriptor _projectCacheDescriptor;
         private readonly CancellationToken _cancellationToken;
         private readonly ProjectCachePluginBase _projectCachePlugin;
+        private readonly string _projectCachePluginTypeName;
         private ProjectCacheServiceState _serviceState = ProjectCacheServiceState.NotInitialized;
 
         /// <summary>
@@ -61,6 +63,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         private ProjectCacheService(
             ProjectCachePluginBase projectCachePlugin,
+            string pluginTypeName,
             BuildManager buildManager,
             ILoggingService loggingService,
             ProjectCacheDescriptor projectCacheDescriptor,
@@ -68,6 +71,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         )
         {
             _projectCachePlugin = projectCachePlugin;
+            _projectCachePluginTypeName = pluginTypeName;
             _buildManager = buildManager;
             _loggingService = loggingService;
             _projectCacheDescriptor = projectCacheDescriptor;
@@ -80,10 +84,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ILoggingService loggingService,
             CancellationToken cancellationToken)
         {
-            var plugin = await Task.Run(() => GetPluginInstance(pluginDescriptor), cancellationToken)
+            (ProjectCachePluginBase plugin, string pluginTypeName) = await Task.Run(() => GetPluginInstance(pluginDescriptor), cancellationToken)
                 .ConfigureAwait(false);
 
-            var service = new ProjectCacheService(plugin, buildManager, loggingService, pluginDescriptor, cancellationToken);
+            var service = new ProjectCacheService(plugin, pluginTypeName, buildManager, loggingService, pluginDescriptor, cancellationToken);
 
             // TODO: remove the if after we change VS to set the cache descriptor via build parameters and always call BeginBuildAsync in FromDescriptorAsync.
             // When running under VS we can't initialize the plugin until we evaluate a project (any project) and extract
@@ -105,13 +109,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 _loggingService,
                 buildEventContext,
                 buildEventFileInfo);
+            ProjectCacheDescriptor projectDescriptor = vsWorkaroundOverrideDescriptor ?? _projectCacheDescriptor;
 
             try
             {
                 SetState(ProjectCacheServiceState.BeginBuildStarted);
                 _loggingService.LogComment(buildEventContext, MessageImportance.Low, "ProjectCacheBeginBuild");
+                MSBuildEventSource.Log.ProjectCacheBeginBuildStart(_projectCachePluginTypeName);
 
-                var projectDescriptor = vsWorkaroundOverrideDescriptor ?? _projectCacheDescriptor;
                 await _projectCachePlugin.BeginBuildAsync(
                     new CacheContext(
                         projectDescriptor.PluginSettings,
@@ -120,12 +125,15 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         projectDescriptor.EntryPoints),
                     pluginLogger,
                     _cancellationToken);
-
-                SetState(ProjectCacheServiceState.BeginBuildFinished);
             }
             catch (Exception e)
             {
                 HandlePluginException(e, nameof(ProjectCachePluginBase.BeginBuildAsync));
+            }
+            finally
+            {
+                MSBuildEventSource.Log.ProjectCacheBeginBuildStop(_projectCachePluginTypeName);
+                SetState(ProjectCacheServiceState.BeginBuildFinished);
             }
 
             if (pluginLogger.HasLoggedErrors)
@@ -134,20 +142,24 @@ namespace Microsoft.Build.Experimental.ProjectCache
             }
         }
 
-        private static ProjectCachePluginBase GetPluginInstance(ProjectCacheDescriptor pluginDescriptor)
+        private static (ProjectCachePluginBase PluginInstance, string PluginTypeName) GetPluginInstance(ProjectCacheDescriptor pluginDescriptor)
         {
             if (pluginDescriptor.PluginInstance != null)
             {
-                return pluginDescriptor.PluginInstance;
+                return (pluginDescriptor.PluginInstance, pluginDescriptor.PluginInstance.GetType().Name);
             }
+
             if (pluginDescriptor.PluginAssemblyPath != null)
             {
-                return GetPluginInstanceFromType(GetTypeFromAssemblyPath(pluginDescriptor.PluginAssemblyPath));
+                MSBuildEventSource.Log.ProjectCacheCreatePluginInstanceStart(pluginDescriptor.PluginAssemblyPath);
+                Type pluginType = GetTypeFromAssemblyPath(pluginDescriptor.PluginAssemblyPath);
+                ProjectCachePluginBase pluginInstance = GetPluginInstanceFromType(pluginType);
+                MSBuildEventSource.Log.ProjectCacheCreatePluginInstanceStop(pluginDescriptor.PluginAssemblyPath, pluginType.Name);
+                return (pluginInstance, pluginType.Name);
             }
 
             ErrorUtilities.ThrowInternalErrorUnreachable();
-
-            return null!;
+            return (null!, null!);
         }
 
         private static ProjectCachePluginBase GetPluginInstanceFromType(Type pluginType)
@@ -491,11 +503,17 @@ namespace Microsoft.Build.Experimental.ProjectCache
             CacheResult cacheResult = null!;
             try
             {
+                MSBuildEventSource.Log.ProjectCacheGetCacheResultStart(_projectCachePluginTypeName, buildRequest.ProjectFullPath, targetNames);
                 cacheResult = await _projectCachePlugin.GetCacheResultAsync(buildRequest, pluginLogger, _cancellationToken);
             }
             catch (Exception e)
             {
                 HandlePluginException(e, nameof(ProjectCachePluginBase.GetCacheResultAsync));
+            }
+            finally
+            {
+                string cacheResultType = cacheResult?.ResultType.ToString() ?? nameof(CacheResultType.None);
+                MSBuildEventSource.Log.ProjectCacheGetCacheResultStop(_projectCachePluginTypeName, buildRequest.ProjectFullPath, targetNames, cacheResultType);
             }
 
             if (pluginLogger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
@@ -566,6 +584,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             {
                 SetState(ProjectCacheServiceState.ShutdownStarted);
                 _loggingService.LogComment(buildEventContext, MessageImportance.Low, "ProjectCacheEndBuild");
+                MSBuildEventSource.Log.ProjectCacheEndBuildStart(_projectCachePluginTypeName);
 
                 await _projectCachePlugin.EndBuildAsync(pluginLogger, _cancellationToken);
 
@@ -580,6 +599,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             }
             finally
             {
+                MSBuildEventSource.Log.ProjectCacheEndBuildStop(_projectCachePluginTypeName);
                 SetState(ProjectCacheServiceState.ShutdownFinished);
             }
         }

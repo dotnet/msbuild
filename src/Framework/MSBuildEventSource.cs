@@ -551,6 +551,54 @@ namespace Microsoft.Build.Eventing
             WriteEvent(75, submissionId, sdkName, solutionPath, projectPath, success, wasResultCached);
         }
 
+        [Event(76, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void ProjectCacheCreatePluginInstanceStart(string pluginAssemblyPath)
+        {
+            WriteEvent(76, pluginAssemblyPath);
+        }
+
+        [Event(77, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void ProjectCacheCreatePluginInstanceStop(string pluginAssemblyPath, string pluginTypeName)
+        {
+            WriteEvent(77, pluginAssemblyPath, pluginTypeName);
+        }
+
+        [Event(78, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void ProjectCacheBeginBuildStart(string pluginTypeName)
+        {
+            WriteEvent(78, pluginTypeName);
+        }
+
+        [Event(79, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void ProjectCacheBeginBuildStop(string pluginTypeName)
+        {
+            WriteEvent(79, pluginTypeName);
+        }
+
+        [Event(80, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void ProjectCacheGetCacheResultStart(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(80, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(81, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void ProjectCacheGetCacheResultStop(string pluginTypeName, string projectPath, string targets, string cacheResultType)
+        {
+            WriteEvent(81, pluginTypeName, projectPath, targets, cacheResultType);
+        }
+
+        [Event(82, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void ProjectCacheEndBuildStart(string pluginTypeName)
+        {
+            WriteEvent(82, pluginTypeName);
+        }
+
+        [Event(83, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void ProjectCacheEndBuildStop(string pluginTypeName)
+        {
+            WriteEvent(83, pluginTypeName);
+        }
+
         #endregion
     }
 }

@@ -1906,10 +1906,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Shutting down project cache plugin.</value>
   </data>
   <data name="ProjectCacheQueryStartedWithTargetNames" xml:space="preserve">
-    <value>Project cache query "{0}" ({1} target(s)):</value>
+    <value>Querying project cache for "{0}" (targets: {1}):</value>
   </data>
   <data name="ProjectCacheQueryStartedWithDefaultTargets" xml:space="preserve">
-    <value>Project cache query "{0}" (default targets):</value>
+    <value>Querying project cache for "{0}" (default targets):</value>
   </data>
   <data name="ProjectCacheHitWithDefaultTargets" xml:space="preserve">
     <value>Project cache hit for "{0}" (default targets).</value>

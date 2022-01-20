@@ -280,13 +280,13 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
-        <source>Project cache query "{0}" (default targets):</source>
-        <target state="new">Project cache query "{0}" (default targets):</target>
+        <source>Querying project cache for "{0}" (default targets):</source>
+        <target state="new">Querying project cache for "{0}" (default targets):</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
-        <source>Project cache query "{0}" ({1} target(s)):</source>
-        <target state="new">Project cache query "{0}" ({1} target(s)):</target>
+        <source>Querying project cache for "{0}" (targets: {1}):</source>
+        <target state="new">Querying project cache for "{0}" (targets: {1}):</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">

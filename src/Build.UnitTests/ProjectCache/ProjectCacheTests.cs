@@ -843,7 +843,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             InstanceMockCache? instanceMockCache,
             MockLogger mockLogger,
             IReadOnlyDictionary<ProjectGraphNode, BuildResult> projectPathToBuildResults,
-            string targets)
+            string? targets)
         {
             if (instanceMockCache != null)
             {
