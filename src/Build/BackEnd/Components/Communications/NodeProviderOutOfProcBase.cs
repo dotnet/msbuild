@@ -289,6 +289,15 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
                     return new NodeContext(nodeId, msbuildProcess, nodeStream, factory, terminateNode);
                 }
+
+                if (msbuildProcess.HasExited)
+                {
+                    CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it has exited. This can indicate a crash at startup");
+                }
+                else
+                {
+                    CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node");
+                }
             }
 
             // We were unable to launch a node.
