@@ -609,7 +609,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
                         commandLine
 #else
-                        string.Join(" ", commandLine)
+                        string.Join(' ', commandLine)
 #endif
                         ))
                 {
@@ -1911,7 +1911,7 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
 
-                        CommandLineSwitches.SwitchesFromResponseFiles.Add(responseFile, string.Join(" ", argsFromResponseFile));
+                        CommandLineSwitches.SwitchesFromResponseFiles[responseFile] = string.Join(" ", argsFromResponseFile);
 
                         GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, commandLine);
                     }

@@ -531,6 +531,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ErrorCommandLine()
         {
+            string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
 #if FEATURE_GET_COMMANDLINE
             MSBuildApp.Execute(@"c:\bin\msbuild.exe -junk").ShouldBe(MSBuildApp.ExitType.SwitchError);
 
@@ -544,6 +545,7 @@ namespace Microsoft.Build.UnitTests
 
             MSBuildApp.Execute(new[] { @"msbuild.exe", "@bogus.rsp" }).ShouldBe(MSBuildApp.ExitType.InitializationError);
 #endif
+            Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
         }
 
         [Fact]
@@ -810,6 +812,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MSBuildEngineLogger()
         {
+            string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             string projectString =
                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
                     "<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">" +
@@ -856,6 +859,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectFileName);
                 File.Delete(logFile);
+                Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }
         }
 
