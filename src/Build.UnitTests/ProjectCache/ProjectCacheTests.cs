@@ -480,7 +480,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
-            AssertCacheBuild(graph, testData, mockCache, buildSession.Logger, graphResult.ResultsByNode);
+            AssertCacheBuild(graph, testData, mockCache, buildSession.Logger, graphResult.ResultsByNode, targets: "Build");
         }
 
         [Theory]
@@ -518,7 +518,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
-            AssertCacheBuild(graph, testData, mockCache, buildSession.Logger, nodesToBuildResults);
+            AssertCacheBuild(graph, testData, mockCache, buildSession.Logger, nodesToBuildResults, targets: null);
         }
 
         [Theory]
@@ -537,7 +537,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             graph.ShouldNotBeNull();
 
-            AssertCacheBuild(graph!, testData, null, logger, nodesToBuildResults);
+            AssertCacheBuild(graph!, testData, null, logger, nodesToBuildResults, targets: null);
         }
 
         [Fact]
@@ -659,7 +659,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 if (assertBuildResults)
                 {
                     logger.FullLog.ShouldContain("Visual Studio Workaround based");
-                    logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
 
                     foreach (var node in graph.ProjectNodes)
                     {
@@ -843,7 +842,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             GraphCacheResponse testData,
             InstanceMockCache? instanceMockCache,
             MockLogger mockLogger,
-            IReadOnlyDictionary<ProjectGraphNode, BuildResult> projectPathToBuildResults)
+            IReadOnlyDictionary<ProjectGraphNode, BuildResult> projectPathToBuildResults,
+            string targets)
         {
             if (instanceMockCache != null)
             {
@@ -866,7 +866,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             {
                 var expectedCacheResponse = testData.GetExpectedCacheResultForNode(node);
 
-                mockLogger.FullLog.ShouldContain($"====== Querying project cache for project {node.ProjectInstance.FullPath}");
+                if (string.IsNullOrEmpty(targets))
+                {
+                    mockLogger.FullLog.ShouldContain(string.Format(ResourceUtilities.GetResourceString("ProjectCacheQueryStartedWithDefaultTargets"), node.ProjectInstance.FullPath));
+                }
+                else
+                {
+                    mockLogger.FullLog.ShouldContain(string.Format(ResourceUtilities.GetResourceString("ProjectCacheQueryStartedWithTargetNames"), node.ProjectInstance.FullPath, targets));
+                }
 
                 if (instanceMockCache != null)
                 {
@@ -1009,7 +1016,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             buildSession.Logger.FullLog.ShouldContain("Explicit entry-point based");
 
-            AssertCacheBuild(graph, testData, null, buildSession.Logger, graphResult.ResultsByNode);
+            AssertCacheBuild(graph, testData, null, buildSession.Logger, graphResult.ResultsByNode, targets: "Build");
         }
 
         [Fact]
@@ -1032,7 +1039,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
-            AssertCacheBuild(graph, testData, null, buildSession.Logger, graphResult.ResultsByNode);
+            AssertCacheBuild(graph, testData, null, buildSession.Logger, graphResult.ResultsByNode, targets: "Build");
         }
 
         [Fact]
@@ -1567,7 +1574,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 StringShouldContainSubstring(buildSession.Logger.FullLog, $"{AssemblyMockCache}: GetCacheResultAsync for", graph.ProjectNodes.Count);
 
                 buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
-                buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
             }
             finally
             {
