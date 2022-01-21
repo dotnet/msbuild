@@ -37,7 +37,7 @@ variables:
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
   - name: NUGET_PACKAGES
-    value: ${{Build.SourcesDirectory}}/.nuget/packages
+    value: $(Build.SourcesDirectory)/.nuget/packages
 
 stages:
 - stage: build
