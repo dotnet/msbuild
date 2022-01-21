@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             // These tests have to be executed slightly differently and we give them a different Identity so ADO can tell them apart
             var runtimeTargetFrameworkParsed = NuGetFramework.Parse(runtimeTargetFramework);
             var testParameters = "";
-            var testDifferentiator = "";
+            var testIdentityDifferentiator = "";
             if (runtimeTargetFrameworkParsed.Framework != ".NETCoreApp")
             {
                 driver = $"{PathToDotnet} test ";
