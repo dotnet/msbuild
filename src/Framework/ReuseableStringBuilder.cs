@@ -49,7 +49,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public int Length
         {
-            get { return _borrowedBuilder?.Length ?? 0; }
+            get
+            {
+                return _borrowedBuilder?.Length ?? 0;
+            }
+
             set
             {
                 LazyPrepare();
