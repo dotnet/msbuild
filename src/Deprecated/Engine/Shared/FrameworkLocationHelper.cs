@@ -401,7 +401,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string programFilesReferenceAssemblyDirectory = Path.Combine(programFilesReferenceAssemblyLocation, versionPrefix);
             string referenceAssemblyDirectory = null;
 
-            if(Directory.Exists(programFilesReferenceAssemblyDirectory))
+            if (Directory.Exists(programFilesReferenceAssemblyDirectory))
             {
                 referenceAssemblyDirectory = programFilesReferenceAssemblyDirectory;
             }

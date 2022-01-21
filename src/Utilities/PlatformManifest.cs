@@ -135,7 +135,7 @@ namespace Microsoft.Build.Utilities
                             {
                                 ApiContract.ReadContractsElement(childElement, ApiContracts);
                             }
-                            else if(ApiContract.IsVersionedContentElement(childElement.Name))
+                            else if (ApiContract.IsVersionedContentElement(childElement.Name))
                             {
                                 bool.TryParse(childElement.InnerText, out bool versionedContent);
                                 VersionedContent = versionedContent;

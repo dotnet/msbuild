@@ -1513,7 +1513,7 @@ namespace Microsoft.Build.Utilities
                         }
                     }
 
-                    if(allFilesFound)
+                    if (allFilesFound)
                     {
                         return root;
                     }

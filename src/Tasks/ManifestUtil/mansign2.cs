@@ -514,7 +514,8 @@ namespace System.Deployment.Internal.CodeSigning
 
             byte[] cspPublicKeyBlob;
 
-            if(snKey is RSACryptoServiceProvider rsacsp){
+            if (snKey is RSACryptoServiceProvider rsacsp)
+            {
                 cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider(rsacsp, useSha256)).ExportCspBlob(false);
                 if (cspPublicKeyBlob == null || cspPublicKeyBlob.Length == 0)
                 {

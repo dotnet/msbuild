@@ -124,7 +124,7 @@ namespace Microsoft.Build.Shared
                         //We get here in the case of an extra slash.
                         return -1;
                     }
-                    else if(hasShare)
+                    else if (hasShare)
                     {
                         return i;
                     }
@@ -138,7 +138,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            if(!hasShare)
+            if (!hasShare)
             {
                 //no subfolder means no unc pattern. string is something like "\\abc" in this case
                 return -1;
