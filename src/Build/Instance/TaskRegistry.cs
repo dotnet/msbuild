@@ -754,6 +754,7 @@ namespace Microsoft.Build.Execution
             public IDictionary<string, string> TaskIdentityParameters
             {
                 get { return _taskIdentityParameters; }
+                internal set { _taskIdentityParameters = value; }
             }
 
             /// <summary>
@@ -1301,7 +1302,8 @@ namespace Microsoft.Build.Execution
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
                         AssemblyTaskFactory taskFactory = new();
-                        typeInformation = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
+                        typeInformation = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, ref _taskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
+                        _taskIdentity.TaskIdentityParameters = _taskFactoryParameters;
                         factory = taskFactory;
                     }
                     else

@@ -265,9 +265,7 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrowInternalNull(_taskHostProvider, "taskHostProvider");
             }
 
-            TaskHostConfiguration hostConfiguration =
-                new TaskHostConfiguration
-                    (
+            TaskHostConfiguration hostConfiguration = new(
                         _buildComponentHost.BuildParameters.NodeId,
                         NativeMethodsShared.GetCurrentDirectory(),
                         CommunicationsUtilities.GetEnvironmentVariables(),

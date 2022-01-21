@@ -32,6 +32,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private AssemblyLoadInfo _loadInfo;
 
+        private Dictionary<string, string> _taskFactoryIdentityParameters = null;
+
         /// <summary>
         /// Initialize a task factory
         /// </summary>
@@ -51,7 +53,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 AssemblyTaskFactory taskFactory = new();
-                taskFactory.InitializeFactory(null, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, null, ElementLocation.Create("NONE"), String.Empty);
+                taskFactory.InitializeFactory(null, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, ref _taskFactoryIdentityParameters, false, null, ElementLocation.Create("NONE"), String.Empty);
             }
            );
         }
@@ -64,7 +66,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                taskFactory.InitializeFactory(_loadInfo, null, new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, null, ElementLocation.Create("NONE"), String.Empty);
+                taskFactory.InitializeFactory(_loadInfo, null, new Dictionary<string, TaskPropertyInfo>(), string.Empty, ref _taskFactoryIdentityParameters, false, null, ElementLocation.Create("NONE"), String.Empty);
             }
            );
         }
@@ -77,7 +79,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                taskFactory.InitializeFactory(_loadInfo, String.Empty, new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, null, ElementLocation.Create("NONE"), String.Empty);
+                taskFactory.InitializeFactory(_loadInfo, String.Empty, new Dictionary<string, TaskPropertyInfo>(), string.Empty, ref _taskFactoryIdentityParameters, false, null, ElementLocation.Create("NONE"), String.Empty);
             }
            );
         }
@@ -90,7 +92,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                taskFactory.InitializeFactory(_loadInfo, "RandomTask", new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, null, ElementLocation.Create("NONE"), String.Empty);
+                taskFactory.InitializeFactory(_loadInfo, "RandomTask", new Dictionary<string, TaskPropertyInfo>(), string.Empty, ref _taskFactoryIdentityParameters, false, null, ElementLocation.Create("NONE"), String.Empty);
             }
            );
         }
@@ -175,7 +177,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CreatableByTaskFactoryMatchingIdentity()
         {
-            IDictionary<string, string> factoryIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> factoryIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             factoryIdentityParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.currentRuntime);
             factoryIdentityParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
@@ -195,7 +197,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CreatableByTaskFactoryMismatchedIdentity()
         {
-            IDictionary<string, string> factoryIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> factoryIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             factoryIdentityParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr2);
             factoryIdentityParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
@@ -337,7 +339,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
@@ -370,7 +372,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.GetCurrentMSBuildArchitecture());
 
@@ -403,7 +405,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                IDictionary<string, string> factoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, string> factoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 factoryParameters.Add(XMakeAttributes.runtime, XMakeAttributes.GetCurrentMSBuildRuntime());
 
                 SetupTaskFactory(factoryParameters, false /* don't want task host */);
@@ -439,7 +441,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr2);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
@@ -505,7 +507,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                IDictionary<string, string> factoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, string> factoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 factoryParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr2);
 
                 SetupTaskFactory(factoryParameters, false /* don't want task host */);
@@ -570,7 +572,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
@@ -636,7 +638,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void VerifySameFactoryCanGenerateDifferentTaskInstances()
         {
             ITask createdTask = null;
-            IDictionary<string, string> factoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> factoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             factoryParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
             factoryParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
@@ -689,7 +691,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Abstract out the creation of the new AssemblyTaskFactory with default task, and 
         /// with some basic validation.
         /// </summary>
-        private void SetupTaskFactory(IDictionary<string, string> factoryParameters, bool explicitlyLaunchTaskHost)
+        private void SetupTaskFactory(Dictionary<string, string> factoryParameters, bool explicitlyLaunchTaskHost)
         {
             _taskFactory = new AssemblyTaskFactory();
 #if FEATURE_ASSEMBLY_LOCATION
@@ -697,7 +699,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #else
             _loadInfo = AssemblyLoadInfo.Create(typeof(TaskToTestFactories).GetTypeInfo().Assembly.FullName, null);
 #endif
-            TypeInformation typeInfo = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
+            TypeInformation typeInfo = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, ref factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
             typeInfo.LoadInfo.ShouldBe(_loadInfo, "Expected the AssemblyLoadInfo to be equal");
         }
 

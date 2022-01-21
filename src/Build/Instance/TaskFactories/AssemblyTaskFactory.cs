@@ -272,7 +272,7 @@ namespace Microsoft.Build.BackEnd
                 string taskName,
                 IDictionary<string, TaskPropertyInfo> taskParameters,
                 string taskElementContents,
-                IDictionary<string, string> taskFactoryIdentityParameters,
+                ref Dictionary<string, string> taskFactoryIdentityParameters,
                 bool taskHostFactoryExplicitlyRequested,
                 TargetLoggingContext targetLoggingContext,
                 ElementLocation elementLocation,
@@ -297,7 +297,14 @@ namespace Microsoft.Build.BackEnd
                 // If the user requested a task host but provided us with an assembly name rather than an assembly file, pretend they didn't.
                 // Finding the path to the assembly file the runtime would load without actually loading the assembly would likely be a bug farm.
                 // Also, this should be a very unusual case.
-                _typeInformation = _typeLoader.Load(taskName, loadInfo, taskHostFactoryExplicitlyRequested && (loadInfo.AssemblyFile is not null || loadInfo.AssemblyName.StartsWith("Microsoft.Build")), out _taskHostFactoryExplicitlyRequested);
+                _typeInformation = _typeLoader.Load(taskName, loadInfo, taskHostFactoryExplicitlyRequested && (loadInfo.AssemblyFile is not null || loadInfo.AssemblyName.StartsWith("Microsoft.Build")), out TypeLoader.TaskRuntimeInformation runtimeInformation);
+                _taskHostFactoryExplicitlyRequested = runtimeInformation.TaskHostNeeded;
+                if (runtimeInformation.Architecture is not null)
+                {
+                    taskFactoryIdentityParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    taskFactoryIdentityParameters[XMakeAttributes.architecture] = runtimeInformation.Architecture;
+                    _factoryIdentityParameters = taskFactoryIdentityParameters;
+                }
 
                 // If the user specifically requests a code task factory, and the type wasn't already loaded, we need a way to verify that it really found a matching type. Properties is an array, so it should never be null,
                 // though it could be an empty array.
@@ -603,7 +610,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (!XMakeAttributes.TryMergeArchitectureValues(taskArchitecture, usingTaskArchitecture, out mergedArchitecture))
                 {
-                    ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable?");
+                    ErrorUtilities.ThrowInternalError("How did we get two architecture values that were unmergeable?");
                 }
                 else
                 {

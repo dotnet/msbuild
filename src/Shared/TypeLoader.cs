@@ -18,6 +18,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 #endif
 using System.Threading;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -200,10 +201,10 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly,
             bool taskHostFactoryExplicitlyRequested,
-            out bool taskHostFactoryNeeded
+            out TaskRuntimeInformation runtimeInformation
         )
         {
-            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, taskHostFactoryExplicitlyRequested, out taskHostFactoryNeeded);
+            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, taskHostFactoryExplicitlyRequested, out runtimeInformation);
         }
 
         /// <summary>
@@ -231,7 +232,7 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly,
             bool taskHostFactoryExplicitlyRequested,
-            out bool taskHostFactoryNeeded)
+            out TaskRuntimeInformation runtimeInformation)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which 
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
@@ -242,7 +243,7 @@ namespace Microsoft.Build.Shared
             AssemblyInfoToLoadedTypes typeNameToType =
                 loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
 
-            return typeNameToType.GetLoadedTypeByTypeName(typeName, taskHostFactoryExplicitlyRequested, out taskHostFactoryNeeded);
+            return typeNameToType.GetLoadedTypeByTypeName(typeName, taskHostFactoryExplicitlyRequested, out runtimeInformation);
         }
 
         /// <summary>
@@ -315,20 +316,24 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly
             /// </summary>
-            internal TypeInformation GetLoadedTypeByTypeName(string typeName, bool taskHostFactoryExplicitlyRequested, out bool taskHostFactoryNeeded)
+            internal TypeInformation GetLoadedTypeByTypeName(string typeName, bool taskHostFactoryExplicitlyRequested, out TaskRuntimeInformation runtimeInformation)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
-                taskHostFactoryNeeded = taskHostFactoryExplicitlyRequested;
-                if (!taskHostFactoryNeeded && _assemblyLoadInfo.AssemblyFile is not null)
+                runtimeInformation = new() { TaskHostNeeded = taskHostFactoryExplicitlyRequested };
+                if (!taskHostFactoryExplicitlyRequested && _assemblyLoadInfo.AssemblyFile is not null)
                 {
                     ProcessorArchitecture taskArch = AssemblyName.GetAssemblyName(_assemblyLoadInfo.AssemblyFile).ProcessorArchitecture;
                     bool msbuildIs64Bit = RuntimeInformation.ProcessArchitecture == Architecture.X64;
-                    taskHostFactoryNeeded = msbuildIs64Bit ? Required32Bit(taskArch) : Required64Bit(taskArch);
+                    runtimeInformation.TaskHostNeeded = msbuildIs64Bit ? Required32Bit(taskArch) : Required64Bit(taskArch);
+                    if (runtimeInformation.TaskHostNeeded)
+                    {
+                        runtimeInformation.Architecture = msbuildIs64Bit ? "x86" : "x64";
+                    }
                 }
 
                 // Only one thread should be doing operations on this instance of the object at a time.
-                TypeInformation typeInfo = taskHostFactoryNeeded ?
+                TypeInformation typeInfo = runtimeInformation.TaskHostNeeded ?
                     _typeNameToTypeInformationTaskHost.GetOrAdd(typeName, key => FindTypeInformationUsingSystemReflectionMetadata(typeName)) :
                     _typeNameToTypeInformation.GetOrAdd(typeName, key => FindTypeInformationUsingLoadedType(typeName)
                     );
@@ -752,6 +757,12 @@ namespace Microsoft.Build.Shared
                 var sigReader = reader.GetBlobReader(reader.GetTypeSpecification(handle).Signature);
                 return new SignatureDecoder<string, object>(Instance, reader, genericContext).DecodeType(ref sigReader);
             }
+        }
+
+        internal struct TaskRuntimeInformation
+        {
+            public string Architecture;
+            public bool TaskHostNeeded;
         }
     }
 }
