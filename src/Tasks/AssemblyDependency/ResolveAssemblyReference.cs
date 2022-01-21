@@ -322,7 +322,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetFrameworkSubsets
         {
-            get { return _targetFrameworkSubsets; }
+            get
+            {
+                return _targetFrameworkSubsets;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "TargetFrameworkSubsets");
@@ -450,7 +454,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] InstalledAssemblySubsetTables
         {
-            get { return _installedAssemblySubsetTables; }
+            get
+            {
+                return _installedAssemblySubsetTables;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "InstalledAssemblySubsetTables");
@@ -477,7 +485,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] FullFrameworkAssemblyTables
         {
-            get { return _fullFrameworkAssemblyTables; }
+            get
+            {
+                return _fullFrameworkAssemblyTables;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkAssemblyTables");

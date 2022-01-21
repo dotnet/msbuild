@@ -56,9 +56,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                  OUTPUT PARAMS
-         * 
+         *
          *********************************************************************************/
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
                          <NonExistantTask Condition=""'1'=='1'""/>
-                         <Message Text='Made it'/>                    
+                         <Message Text='Made it'/>
                       </Target>
                       </Project>");
 
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
                          <NonExistantTask Condition=""'1'=='2'""/>
-                         <Message Text='Made it'/>                    
+                         <Message Text='Made it'/>
                       </Target>
                       </Project>");
 
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ProjectCollection collection = new ProjectCollection();
 
                 string contents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion ='Current'>
+                    <Project ToolsVersion ='Current'>
                      <Target Name='test'>
                         <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
                      </Target>
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                          Condition=""'%(LogicalName)' != '' "">
                              <Output TaskParameter=""Value"" PropertyName=""LinkSwitches""/>
                          </CreateProperty>
-                         <Message Text='final:[$(LinkSwitches)]'/>                    
+                         <Message Text='final:[$(LinkSwitches)]'/>
                       </Target>
                       </Project>");
 
@@ -223,7 +223,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <ItemGroup>
                         <i Include='" + files[0] + "'><output>" + files[1] + @"</output></i>
-                      </ItemGroup> 
+                      </ItemGroup>
                       <ItemGroup>
                          <EmbeddedResource Include='a.resx'>
                         <LogicalName>foo</LogicalName>
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         </EmbeddedResource>
                         </ItemGroup>
                       <Target Name='t2' DependsOnTargets='t'>
-                        <Message Text='final:[$(LinkSwitches)]'/>   
+                        <Message Text='final:[$(LinkSwitches)]'/>
                       </Target>
                       <Target Name='t' Inputs='%(i.Identity)' Outputs='%(i.Output)'>
                         <Message Text='start:[Hello]'/>
@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                          Condition=""'%(LogicalName)' != '' "">
                              <Output TaskParameter=""Value"" PropertyName=""LinkSwitches""/>
                         </CreateProperty>
-                        <Message Text='end:[hello]'/>                    
+                        <Message Text='end:[hello]'/>
                     </Target>
                     </Project>");
 
@@ -288,17 +288,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Target Name='Build'>
                         <CreateProperty Value=""@(TaskParameterItem)"">
                             <Output TaskParameter=""Value"" PropertyName=""Property1""/>
-                        </CreateProperty> 
+                        </CreateProperty>
                         <Message Text='Property1=[$(Property1)]' />
 
                         <CreateProperty Value=""@(TaskParameterItem)"">
                             <Output TaskParameter=""%(TaskParameterItem.ParameterName)"" PropertyName=""Property2""/>
-                        </CreateProperty> 
+                        </CreateProperty>
                         <Message Text='Property2=[$(Property2)]' />
 
                         <CreateProperty Value=""@(TaskParameterItem)"">
                             <Output TaskParameter=""Value"" PropertyName=""%(TaskParameterItem.PropertyName)""/>
-                        </CreateProperty> 
+                        </CreateProperty>
                         <Message Text='MetadataProperty=[$(MetadataProperty)]' />
 
                         <CreateItem Include=""@(TaskParameterItem)"">
@@ -348,9 +348,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Copy SourceFiles='|' DestinationFolder='c:\' ContinueOnError='true' />
         <PropertyGroup>
            <p>$(MSBuildLastTaskResult)</p>
-        </PropertyGroup>                 
-        <Message Text='[1:$(MSBuildLastTaskResult)]'/> <!-- Should be false: propertygroup did not reset it -->   
-        <Message Text='[p:$(p)]'/> <!-- Should be false as stored earlier -->   
+        </PropertyGroup>
+        <Message Text='[1:$(MSBuildLastTaskResult)]'/> <!-- Should be false: propertygroup did not reset it -->
+        <Message Text='[p:$(p)]'/> <!-- Should be false as stored earlier -->
         <Message Text='[2:$(MSBuildLastTaskResult)]'/> <!-- Message succeeded, should now be true -->
     </Target>
     <Target Name='t2' DependsOnTargets='t'>
@@ -850,11 +850,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
-/*********************************************************************************
- * 
- *                                     Helpers
- * 
- *********************************************************************************/
+        /*********************************************************************************
+         *
+         *                                     Helpers
+         *
+         *********************************************************************************/
 
         /// <summary>
         /// Helper method for validating the setting of defining project metadata on items
@@ -871,7 +871,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Import Project=`b.proj` />
 
                     <Target Name=`Run`>
-                      <ItemCreationTask 
+                      <ItemCreationTask
                         InputItemsToPassThrough=`@(PassThrough)`
                         InputItemsToCopy=`@(Copy)`>
                           <Output TaskParameter=`OutputString` ItemName=`A` />
@@ -880,10 +880,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                           <Output TaskParameter=`CopiedOutputItems` ItemName=`D` />
                       </ItemCreationTask>
 
-                      <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />    
-                      <Warning Text=`B is wrong: EXPECTED: [a] ACTUAL: [%(B.DefiningProjectName)]` Condition=`'%(B.DefiningProjectName)' != 'a'` />    
-                      <Warning Text=`C is wrong: EXPECTED: [a] ACTUAL: [%(C.DefiningProjectName)]` Condition=`'%(C.DefiningProjectName)' != 'a'` />    
-                      <Warning Text=`D is wrong: EXPECTED: [a] ACTUAL: [%(D.DefiningProjectName)]` Condition=`'%(D.DefiningProjectName)' != 'a'` />    
+                      <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />
+                      <Warning Text=`B is wrong: EXPECTED: [a] ACTUAL: [%(B.DefiningProjectName)]` Condition=`'%(B.DefiningProjectName)' != 'a'` />
+                      <Warning Text=`C is wrong: EXPECTED: [a] ACTUAL: [%(C.DefiningProjectName)]` Condition=`'%(C.DefiningProjectName)' != 'a'` />
+                      <Warning Text=`D is wrong: EXPECTED: [a] ACTUAL: [%(D.DefiningProjectName)]` Condition=`'%(D.DefiningProjectName)' != 'a'` />
                     </Target>
                 </Project>
 ";
@@ -1092,11 +1092,11 @@ namespace ClassLibrary2
                     <Target Name='Skip' Inputs='testProject.proj' Outputs='testProject.proj' />
 
                     <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>                    
-                        <ErrorTask2 ContinueOnError='False'/>  
-                        <ErrorTask3 /> 
-                        <OnError ExecuteTargets='Foo'/>                  
-                        <OnError ExecuteTargets='Bar'/>                  
+                        <ErrorTask1 ContinueOnError='True'/>
+                        <ErrorTask2 ContinueOnError='False'/>
+                        <ErrorTask3 />
+                        <OnError ExecuteTargets='Foo'/>
+                        <OnError ExecuteTargets='Bar'/>
                     </Target>
 
                     <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>
@@ -1147,7 +1147,7 @@ namespace ClassLibrary2
         /// </summary>
         private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
-#region IBuildComponentHost Members
+            #region IBuildComponentHost Members
 
             /// <summary>
             /// The config cache
@@ -1285,9 +1285,9 @@ namespace ClassLibrary2
             {
             }
 
-#endregion
+            #endregion
 
-#region IBuildComponent Members
+            #region IBuildComponent Members
 
             /// <summary>
             /// Sets the component host
@@ -1306,7 +1306,7 @@ namespace ClassLibrary2
                 throw new NotImplementedException();
             }
 
-#endregion
+            #endregion
         }
     }
 }

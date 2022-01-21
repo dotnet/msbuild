@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     public class ProjectItemElement_Tests
     {
         private const string RemoveInTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Remove='i'/>
@@ -32,21 +32,21 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
         private const string RemoveOutsideTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                             <ItemGroup>
                                 <i Remove='i'/>
                             </ItemGroup>
                     </Project>
                 ";
         private const string IncludeOutsideTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i'/>
                         </ItemGroup>
                     </Project>
                 ";
         private const string IncludeInsideTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i'/>
@@ -55,14 +55,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
         private const string UpdateOutsideTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                             <ItemGroup>
                                 <i Update='i'/>
                             </ItemGroup>
                     </Project>
                 ";
         private const string UpdateInTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Update='i'/>
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i/>
                         </ItemGroup>
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         // https://github.com/dotnet/msbuild/issues/900
         // [InlineData(@"
-        //            <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+        //            <Project>
         //                <Target Name='t'>
         //                    <ItemGroup>
         //                        <i/>
@@ -119,14 +119,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='a'>error text</i>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='a'>error text</i>
@@ -148,14 +148,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include=''/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include=''/>
@@ -177,14 +177,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <PropertyGroup Include='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <PropertyGroup Include='i1'/>
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadInvalidExcludeWithoutInclude()
         {
             var project = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Exclude='i1'/>
                         </ItemGroup>
@@ -219,10 +219,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 Assert.Throws<InvalidProjectFileException>(
                     () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); }
                     );
-            
+
             Assert.Contains("Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.", exception.Message);
         }
-        
+
         /// <summary>
         /// Read item with Exclude without Include under a target
         /// </summary>
@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadInvalidExcludeWithoutIncludeUnderTarget()
         {
             var project = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Exclude='i1'/>
@@ -243,20 +243,20 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 Assert.Throws<InvalidProjectFileException>(
                     () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); }
                     );
-            
+
             Assert.Contains("The attribute \"Exclude\" in element <i> is unrecognized.", exception.Message);
         }
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i include='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i include='i1'/>
@@ -265,14 +265,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' exclude='i2' />
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' exclude='i2' />
@@ -294,7 +294,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i'>
                                 <m1>v1</m1>
@@ -306,7 +306,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i'>
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i' m1='v1' />
                             <i2 Include='i' Exclude='j' m2='v2' />
@@ -328,7 +328,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i' m1='v1' />
@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadBasic(string project)
         {
             ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement) projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
+            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var items = Helpers.MakeList(itemGroup.Items);
 
@@ -366,7 +366,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i'>
                                 <m1>v1</m1>
@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i'>
@@ -408,14 +408,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Update='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' Update='i2'/>
@@ -434,14 +434,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Exclude='i1' Update='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' Exclude='i1' Update='i2'/>
@@ -460,14 +460,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Exclude='i1' Update='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Exclude='i1' Update='i2'/>
@@ -489,7 +489,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Remove='i1'>
                                     <m> </m>
@@ -498,7 +498,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Remove='i1'>
@@ -522,14 +522,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Exclude='i1' Remove='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Exclude='i1' Remove='i1'/>
@@ -551,14 +551,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Remove='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' Remove='i1'/>
@@ -606,14 +606,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Exclude='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' Exclude='i2'/>
@@ -831,7 +831,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
            );
         }
-        
+
         /// <summary>
         /// Set Update when Remove is present
         /// </summary>
@@ -849,7 +849,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
            );
         }
 
-        /// 
+        ///
         /// <summary>
         /// Set the Update on an item
         /// </summary>

@@ -771,7 +771,7 @@ dotnet_diagnostic.SA1100.severity = suggestion
 
 dotnet_diagnostic.SA1101.severity = none
 
-dotnet_diagnostic.SA1102.severity = suggestion
+dotnet_diagnostic.SA1102.severity = warning
 
 # Code should not contain empty statements
 dotnet_diagnostic.SA1106.severity = suggestion
@@ -981,7 +981,7 @@ dotnet_diagnostic.SA1502.severity = suggestion
 dotnet_diagnostic.SA1503.severity = suggestion
 
 # All accessors should be single-line or multi-line
-dotnet_diagnostic.SA1504.severity = suggestion
+dotnet_diagnostic.SA1504.severity = warning
 
 # An opening brace should not be followed by a blank line
 dotnet_diagnostic.SA1505.severity = suggestion
