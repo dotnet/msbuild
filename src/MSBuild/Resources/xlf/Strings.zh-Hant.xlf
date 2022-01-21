@@ -250,6 +250,32 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_40_WarnNotAsErrorSwitch">
+        <source>
+      -warnNotAsError[:code[;code2]]
+      List of warning codes to treats not treat as errors.
+      Use a semicolon or a comma to separate
+      multiple warning codes. Has no effect if the -warnaserror
+      switch is not set.
+
+      Example:
+      -warnNotAsError:MSB3026
+    </source>
+        <target state="new">
+      -warnNotAsError[:code[;code2]]
+      List of warning codes to treats not treat as errors.
+      Use a semicolon or a comma to separate
+      multiple warning codes. Has no effect if the -warnaserror
+      switch is not set.
+
+      Example:
+      -warnNotAsError:MSB3026
+    </target>
+        <note>
+      LOCALIZATION: "-warnNotAsError" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="HelpMessage_4_HelpSwitch">
         <source>  -help              Display this usage message. (Short form: -? or -h)
 </source>

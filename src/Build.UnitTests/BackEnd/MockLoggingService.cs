@@ -249,6 +249,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             throw new NotImplementedException();
         }
 
+        public void AddWarningsNotAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Registers a distributed logger.
         /// </summary>
@@ -614,6 +619,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> GetWarningsNotAsErrors(BuildEventContext context)
         {
             throw new NotImplementedException();
         }
