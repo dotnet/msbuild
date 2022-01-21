@@ -73,14 +73,10 @@ namespace Microsoft.Build.Framework.Profiler
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (obj is ProfiledLocation location)
-            {
-                return InclusiveTime.Equals(location.InclusiveTime) &&
-                       ExclusiveTime.Equals(location.ExclusiveTime) &&
-                       NumberOfHits == location.NumberOfHits;
-            }
-
-            return false;
+            return obj is ProfiledLocation location &&
+                   InclusiveTime.Equals(location.InclusiveTime) &&
+                   ExclusiveTime.Equals(location.ExclusiveTime) &&
+                   NumberOfHits == location.NumberOfHits;
         }
 
         /// <inheritdoc />

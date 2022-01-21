@@ -552,9 +552,9 @@ namespace Microsoft.Build.Tasks
             try
             {
                 object allowUntrustedFiles = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null);
-                if (allowUntrustedFiles is String allowUntrustedFilesString)
+                if (allowUntrustedFiles is string allowUntrustedFilesString)
                 {
-                    allowMOTW = (allowUntrustedFilesString).Equals("true", StringComparison.OrdinalIgnoreCase);
+                    allowMOTW = allowUntrustedFilesString.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
             }
             catch { }
