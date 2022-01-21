@@ -2080,7 +2080,7 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
         <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
-        <target state="new">Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</target>
+        <target state="translated">Progetto non caricato con il flag ProjectLoadSettings.RecordDuplicateButNotCircularImports.flag.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
