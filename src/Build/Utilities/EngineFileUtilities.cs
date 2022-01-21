@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     internal static class EngineFileUtilities

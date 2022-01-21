@@ -16,6 +16,8 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class BatchingEngine_Tests
@@ -223,7 +225,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void Simple()
         {
             string content = @"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
 
                     <ItemGroup>
                         <AToB Include=""a;b""/>
@@ -254,7 +256,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void Regress72803()
         {
             string content = @"
-                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"" DefaultTargets=""ReleaseBuild"">
+                <Project DefaultTargets=""ReleaseBuild"">
                     <ItemGroup>
                         <Environments Include=""dev"" />
                         <Environments Include=""prod"" />
@@ -295,7 +297,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void BucketsWithEmptyListForBatchedItemList()
         {
             string content = @"
- <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+ <Project ToolsVersion=""msbuilddefaulttoolsversion"">
   <ItemGroup>
     <i Include=""b""/>
     <j Include=""a"">
@@ -324,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void BucketsWithEmptyListForTargetBatchedItemList()
         {
             string content = @"
-<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project ToolsVersion=""msbuilddefaulttoolsversion"">
     <ItemGroup>
         <a Include=""a1""/>
         <b Include=""b1""/>
@@ -349,7 +351,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void BatchOnEmptyOutput()
         {
             string content = @"
-         <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+         <Project ToolsVersion=""msbuilddefaulttoolsversion"">
             <ItemGroup>
               <File Include=""$(foo)"" />
             </ItemGroup>
@@ -375,7 +377,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void EachBatchGetsASeparateTaskObject()
         {
             string content = @"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include=""i1"">
                       <Code>high</Code>
@@ -404,7 +406,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void BatcherPreservesItemOrderWithinASingleItemList()
         {
             string content = @"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
 
                     <ItemGroup>
                         <AToZ Include=""a;b;c;d;e;f;g;h;i;j;k;l;m;n;o;p;q;r;s;t;u;v;w;x;y;z""/>
@@ -439,7 +441,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void UndefinedAndEmptyMetadataValues()
         {
             string content = @"
-                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemGroup>
                         <i Include='i1'/>
                         <i Include='i2'>

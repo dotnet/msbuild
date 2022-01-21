@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using System.Globalization;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -197,7 +199,9 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
+#pragma warning disable CA1825 // Avoid zero-length array allocations
                     byteArray = new byte[0];
+#pragma warning restore CA1825 // Avoid zero-length array allocations
                 }
             }
 

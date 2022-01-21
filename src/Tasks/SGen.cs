@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -364,7 +366,7 @@ namespace Microsoft.Build.Tasks
 
                 commandLineBuilder.AppendWhenTrue("/proxytypes", Bag, "UseProxyTypes");
 
-                //add the keep switch
+                // add the keep switch
                 commandLineBuilder.AppendWhenTrue("/keep", Bag, "UseKeep");
 
                 // Append the references, if any.
@@ -380,7 +382,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                //Append the Types to the command line, if any.
+                // Append the Types to the command line, if any.
                 if (Types != null)
                 {
                     foreach (string type in Types)

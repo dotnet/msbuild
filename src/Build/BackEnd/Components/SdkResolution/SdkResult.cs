@@ -8,6 +8,8 @@ using System.Linq;
 using SdkReference = Microsoft.Build.Framework.SdkReference;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
@@ -64,7 +66,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             Version = version;
 
-            //  Note: these dictionaries should use StringComparison.OrdinalIgnoreCase
+            // Note: these dictionaries should use StringComparison.OrdinalIgnoreCase
             PropertiesToAdd = propertiesToAdd;
             ItemsToAdd = itemsToAdd;
 

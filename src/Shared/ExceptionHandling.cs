@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
 #else
@@ -317,7 +319,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void DumpExceptionToFile(Exception ex)
         {
-            //  Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
+            // Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
             //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
             //  applied to a static method.
             lock (typeof(ExceptionHandling))
@@ -371,7 +373,7 @@ namespace Microsoft.Build.Shared
                 {
                     builder.Append(Environment.NewLine);
                     builder.Append(file);
-                    builder.Append(":");
+                    builder.Append(':');
                     builder.Append(Environment.NewLine);
                     builder.Append(File.ReadAllText(file));
                     builder.Append(Environment.NewLine);

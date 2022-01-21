@@ -1,4 +1,4 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project>
 
     <!-- This file lists UsingTask elements that we wish to override
          any other UsingTask elements -->

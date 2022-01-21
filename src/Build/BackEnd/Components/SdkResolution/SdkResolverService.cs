@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Eventing;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
@@ -239,7 +241,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 _resolvers = _sdkResolverLoader.LoadResolvers(loggingContext, location);
                 MSBuildEventSource.Log.SdkResolverServiceInitializeStop(_resolvers.Count);
             }
-
         }
 
         private void SetResolverState(int submissionId, SdkResolver resolver, object state)

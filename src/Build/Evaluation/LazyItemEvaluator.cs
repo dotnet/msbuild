@@ -18,6 +18,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
@@ -341,7 +343,7 @@ namespace Microsoft.Build.Evaluation
                         break;
                     }
 
-                    //  If this is a remove operation, then add any globs that will be removed
+                    // If this is a remove operation, then add any globs that will be removed
                     //  to a list of globs to ignore in previous operations
                     if (currentList._memoizedOperation.Operation is RemoveOperation removeOperation)
                     {
@@ -369,7 +371,7 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
                 bool addedToBatch = false;
 
-                //  Walk back down the stack of item lists applying operations
+                // Walk back down the stack of item lists applying operations
                 while (itemListStack.Count > 0)
                 {
                     var currentList = itemListStack.Pop();
@@ -422,7 +424,7 @@ namespace Microsoft.Build.Evaluation
                         ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
                     }
 
-                    //  If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
+                    // If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
                     //  modified entry off the stack of globs to ignore
                     if (currentList._memoizedOperation.Operation is RemoveOperation)
                     {
@@ -558,12 +560,12 @@ namespace Microsoft.Build.Evaluation
             // Process include
             ProcessItemSpec(rootDirectory, itemElement.Include, itemElement.IncludeLocation, operationBuilder);
 
-            //  Code corresponds to Evaluator.EvaluateItemElement
+            // Code corresponds to Evaluator.EvaluateItemElement
 
             // Process exclude (STEP 4: Evaluate, split, expand and subtract any Exclude)
             if (itemElement.Exclude.Length > 0)
             {
-                //  Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
+                // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
                 //  if so we need to add the right item reference
                 string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandProperties, itemElement.ExcludeLocation);
 

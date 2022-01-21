@@ -4,6 +4,8 @@
 using System;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -439,7 +441,6 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// Clone from ErrorUtilities which isn't (yet?) available in Framework.
         /// </remarks>
-
         private static readonly bool s_throwExceptions = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDONOTTHROWINTERNAL"));
 
         /// <summary>

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
@@ -21,7 +23,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var link = new MockProjectLink(this, holder);
             return holder.Linker.LinkFactory.Create(link);
         }
-
 
         // ProjectLink remoting
         public MockProjectElementLinkRemoter Xml => this.OwningCollection.ExportElement(this.Source.Xml);

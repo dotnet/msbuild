@@ -16,6 +16,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -609,7 +611,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
             Assert.NotNull(deserializedConfig.WarningsAsErrors);
             config.WarningsAsErrors.SequenceEqual(deserializedConfig.WarningsAsErrors, StringComparer.Ordinal).ShouldBeTrue();
-
         }
 
         /// <summary>

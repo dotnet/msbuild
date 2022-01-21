@@ -11,6 +11,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     public class ResolveAssemblyReferenceCacheSerialization : IDisposable

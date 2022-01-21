@@ -20,6 +20,8 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -285,7 +287,7 @@ namespace Microsoft.Build.Shared
             if (fullPath != null)
             {
                 int i = fullPath.Length;
-                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar) ;
+                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar);
                 return FixFilePath(fullPath.Substring(0, i));
             }
             return null;
@@ -447,7 +449,7 @@ namespace Microsoft.Build.Shared
 
         internal static string FixFilePath(string path)
         {
-            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
+            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/'); // .Replace("//", "/");
         }
 
 #if !CLR2COMPATIBILITY
@@ -822,7 +824,7 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static void DeleteWithoutTrailingBackslash(string path, bool recursive = false)
         {
-            //  Some tests (such as FileMatcher and Evaluation tests) were failing with an UnauthorizedAccessException or directory not empty.
+            // Some tests (such as FileMatcher and Evaluation tests) were failing with an UnauthorizedAccessException or directory not empty.
             //  This retry logic works around that issue.
             const int NUM_TRIES = 3;
             for (int i = 0; i < NUM_TRIES; i++)
@@ -831,17 +833,17 @@ namespace Microsoft.Build.Shared
                 {
                     Directory.Delete(EnsureNoTrailingSlash(path), recursive);
 
-                    //  If we got here, the directory was successfully deleted
+                    // If we got here, the directory was successfully deleted
                     return;
                 }
                 catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
                 {
                     if (i == NUM_TRIES - 1)
                     {
-                        //var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-                        //string fileString = string.Join(Environment.NewLine, files);
-                        //string message = $"Unable to delete directory '{path}'.  Contents:" + Environment.NewLine + fileString;
-                        //throw new IOException(message, ex);
+                        // var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+                        // string fileString = string.Join(Environment.NewLine, files);
+                        // string message = $"Unable to delete directory '{path}'.  Contents:" + Environment.NewLine + fileString;
+                        // throw new IOException(message, ex);
                         throw;
                     }
                 }

@@ -21,6 +21,8 @@ using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Logging
 {
     /// <summary>
@@ -457,14 +459,14 @@ namespace Microsoft.Build.UnitTests.Logging
             string targetsFile = Path.Combine(testTempPath, "x.targets");
             string projectfileContent =
                 @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='x.targets'/>
                     </Project>
                 ";
 
             string targetsfileContent = @"
-                 <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                   <UsingTask TaskName='RandomTask' AssemblyName='NotARealTaskLocaiton'/>    
+                 <Project DefaultTargets='Build'>
+                   <UsingTask TaskName='RandomTask' AssemblyName='NotARealTaskLocaiton'/>
                    <Target Name='Build'>
                        <RandomTask/>
                    </Target>
@@ -860,7 +862,7 @@ namespace Microsoft.Build.UnitTests.Logging
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1, componentHost);
             ConfigCache cache = (ConfigCache)componentHost.GetComponent(BuildComponentType.ConfigCache);
 
-            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(2, data, "4.0");
             cache.AddConfiguration(config);
 
@@ -1442,7 +1444,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             ConfigCache cache = (ConfigCache)componentHost.GetComponent(BuildComponentType.ConfigCache);
 
-            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(2, data, "4.0");
             cache.AddConfiguration(config);
 

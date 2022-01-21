@@ -4,6 +4,8 @@
 using System;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     internal static class StringExtensions

@@ -2,6 +2,8 @@
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
+#nullable disable
+
 namespace Xunit.NetCore.Extensions
 {
     public class XunitTestFrameworkWithAssemblyFixture : XunitTestFramework

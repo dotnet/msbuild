@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

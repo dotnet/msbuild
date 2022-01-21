@@ -1,9 +1,10 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build">
   <!-- Import the repo root props -->
   <Import Project="..\Directory.Build.props"/>
 
   <PropertyGroup>
       <LangVersion>latest</LangVersion>
+      <Nullable>enable</Nullable>
       <DiscoverEditorConfigFiles>true</DiscoverEditorConfigFiles>
   </PropertyGroup>
 

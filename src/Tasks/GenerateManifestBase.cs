@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -16,8 +18,19 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public abstract class GenerateManifestBase : Task
     {
-        private enum AssemblyType { Unspecified, Managed, Native, Satellite };
-        private enum DependencyType { Install, Prerequisite };
+        private enum AssemblyType
+        {
+            Unspecified,
+            Managed,
+            Native,
+            Satellite,
+        }
+
+        private enum DependencyType
+        {
+            Install,
+            Prerequisite,
+        }
 
         private string _processorArchitecture;
         private int _startTime;

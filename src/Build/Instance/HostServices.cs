@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
