@@ -122,10 +122,16 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
             string driver = $"{PathToDotnet} exec ";
 
+            // netfx tests should only run on Windows full framework for testing VS scenarios
+            // These tests have to be executed slightly differently and we give them a different Identity so ADO can tell them apart
             var runtimeTargetFrameworkParsed = NuGetFramework.Parse(runtimeTargetFramework);
+            var testParameters = "";
+            var testDifferentiator = "";
             if (runtimeTargetFrameworkParsed.Framework != ".NETCoreApp")
             {
                 driver = $"{PathToDotnet} test ";
+                testParameters = "-- ";
+                testIdentityDifferentiator = ".netfx";
             }
 
             // On mac due to https://github.com/dotnet/sdk/issues/3923, we run against workitem directory
@@ -140,7 +146,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             var partitionedWorkItem = new List<ITaskItem>();
             foreach (var assemblyPartitionInfo in assemblyPartitionInfos)
             {
-                string command = $"{driver}{assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
+                string command = $"{driver}{assemblyName} {testParameters}{testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
 
                 Log.LogMessage($"Creating work item with properties Identity: {assemblyName}, PayloadDirectory: {publishDirectory}, Command: {command}");
 
@@ -155,7 +161,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
                 partitionedWorkItem.Add(new Microsoft.Build.Utilities.TaskItem(assemblyPartitionInfo.DisplayName, new Dictionary<string, string>()
                     {
-                        { "Identity", assemblyPartitionInfo.DisplayName},
+                        { "Identity", assemblyPartitionInfo.DisplayName + testIdentityDifferentiator},
                         { "PayloadDirectory", publishDirectory },
                         { "Command", command },
                         { "Timeout", timeout.ToString() },
