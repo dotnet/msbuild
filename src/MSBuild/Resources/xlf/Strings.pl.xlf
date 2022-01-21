@@ -260,23 +260,23 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       <trans-unit id="HelpMessage_40_WarnNotAsErrorSwitch">
         <source>
       -warnNotAsError[:code[;code2]]
-      List of warning codes to treats not treat as errors.
-      Use a semicolon or a comma to separate
-      multiple warning codes. Has no effect if the -warnaserror
-      switch is not set.
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-      Example:
-      -warnNotAsError:MSB3026
+                     Example:
+                       -warnNotAsError:MSB3026
     </source>
         <target state="new">
       -warnNotAsError[:code[;code2]]
-      List of warning codes to treats not treat as errors.
-      Use a semicolon or a comma to separate
-      multiple warning codes. Has no effect if the -warnaserror
-      switch is not set.
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-      Example:
-      -warnNotAsError:MSB3026
+                     Example:
+                       -warnNotAsError:MSB3026
     </target>
         <note>
       LOCALIZATION: "-warnNotAsError" should not be localized.
