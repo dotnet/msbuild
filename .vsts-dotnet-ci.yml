@@ -3,6 +3,10 @@ trigger:
 - exp/*
 - vs*
 
+variables:
+  - name: NUGET_PACKAGES
+    value: ${Build.SourcesDirectory}/.nuget/packages
+
 jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
   displayName: "Windows Full"
