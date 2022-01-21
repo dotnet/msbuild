@@ -222,13 +222,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     }
                                     catch (Exception)
                                     {
-                                        //continue.
+                                        // continue.
                                     }
                                 }
                             }
                             catch (ArgumentException)
                             {
-                                //continue.
+                                // continue.
                             }
                         }
                     }
@@ -413,8 +413,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             foreach (XmlAttribute xa in xe.Attributes)
                 se.AddAttribute(xa.Name, xa.Value);
             foreach (XmlNode xn in xe.ChildNodes)
+            {
                 if (xn.NodeType == XmlNodeType.Element)
                     se.AddChild(XmlElementToSecurityElement((XmlElement)xn));
+            }
+
             return se;
         }
 
@@ -466,7 +469,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             catch (ArgumentException ex)
             {
-                //UNDONE: Need to log exception thrown from PermissionSet.FromXml
+                // UNDONE: Need to log exception thrown from PermissionSet.FromXml
                 Debug.Fail(String.Format(CultureInfo.CurrentCulture, "PermissionSet.FromXml failed: {0}\r\n\r\n{1}", ex.Message, element.OuterXml));
                 return null;
             }

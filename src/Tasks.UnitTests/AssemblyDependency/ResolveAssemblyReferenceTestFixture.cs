@@ -503,11 +503,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // ==[Related File Extensions Testing]================================================================================================
 
             // ==[Unification Testing]============================================================================================================
-            //@"C:\MyComponents\v0.5\UnifyMe.dll",                                 // For unification testing, a version that doesn't exist.
+            // @"C:\MyComponents\v0.5\UnifyMe.dll",                                 // For unification testing, a version that doesn't exist.
             s_unifyMeDll_V10Path,
             s_unifyMeDll_V20Path,
             s_unifyMeDll_V30Path,
-            //@"C:\MyComponents\v4.0\UnifyMe.dll",
+            // @"C:\MyComponents\v4.0\UnifyMe.dll",
             Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"),
             Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"),
             Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"),
@@ -520,8 +520,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // ==[Test assemblies reference higher versions than the current target framework=====================================================
             Path.Combine(s_myComponentsMiscPath, "DependsOnOnlyv4Assemblies.dll"),  // Only depends on 4.0.0 assemblies
-            Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), //Is in redist list and is a 9.0 assembly
-            Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), //Depends on 9.0 assemblies
+            Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), // Is in redist list and is a 9.0 assembly
+            Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), // Depends on 9.0 assemblies
             Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), // Depends on 9.0 assemblies
             Path.Combine(s_myComponents10Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
             Path.Combine(s_myComponents20Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
@@ -1388,7 +1388,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("DependsOn9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
-            //A second assembly which depends on version 9 framework assemblies.
+            // A second assembly which depends on version 9 framework assemblies.
             if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOn9Also, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
@@ -2290,7 +2290,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            //A second assembly which depends on version 9 framework assemblies.
+            // A second assembly which depends on version 9 framework assemblies.
             if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
@@ -3097,7 +3097,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         // OriginalItemSpec attribute on resolved items is to support VS in figuring out which
                         // project file reference caused a particular resolved file.
                         string originalItemSpec = t.ResolvedFiles[i].GetMetadata("OriginalItemSpec");
-                        Assert.True(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); //                         "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
+                        Assert.True(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); // "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
                     }
                 }
             }

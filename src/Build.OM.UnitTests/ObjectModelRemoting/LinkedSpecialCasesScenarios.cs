@@ -171,8 +171,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             // children are not copied.
             Assert.Empty(newCopyFrom.View.Items);
             // but attributes are (even non standard)
-            //Assert.Equal("2", ProjectElementLink.GetAttributeValue(existingItemGroup, "FunnyAttribute", true));
-            //Assert.Equal("2", ProjectElementLink.GetAttributeValue(newCopyFrom.View, "FunnyAttribute", true));
+            // Assert.Equal("2", ProjectElementLink.GetAttributeValue(existingItemGroup, "FunnyAttribute", true));
+            // Assert.Equal("2", ProjectElementLink.GetAttributeValue(newCopyFrom.View, "FunnyAttribute", true));
             newCopyFrom.VerifyNotSame(ourGroup1);
 
 

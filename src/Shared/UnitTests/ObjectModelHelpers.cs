@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     return new Project(p, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, c)
                         .Items
-                        .Select(i => (ITestItem) new ProjectItemTestItemAdapter(i))
+                        .Select(i => (ITestItem)new ProjectItemTestItemAdapter(i))
                         .ToList();
                 },
             projectContents,
@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItems(string[] expectedItems, ICollection<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
         {
-            var converteditems = items.Select(i => (ITestItem) new ProjectItemTestItemAdapter(i)).ToList();
+            var converteditems = items.Select(i => (ITestItem)new ProjectItemTestItemAdapter(i)).ToList();
             AssertItems(expectedItems, converteditems, expectedDirectMetadata, normalizeSlashes);
         }
 
@@ -271,7 +271,7 @@ namespace Microsoft.Build.UnitTests
 
         public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
         {
-            var convertedItems = items.Select(i => (ITestItem) new ProjectItemTestItemAdapter(i)).ToList();
+            var convertedItems = items.Select(i => (ITestItem)new ProjectItemTestItemAdapter(i)).ToList();
             AssertItems(expectedItems, convertedItems, expectedDirectMetadataPerItem, normalizeSlashes);
         }
 
@@ -427,7 +427,7 @@ namespace Microsoft.Build.UnitTests
                         Assert.Equal(
                                 expectedMetadataValue,
                                 actualMetadataValue
-                            //string.Format
+                            // string.Format
                             //    (
                             //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
                             //        actualItem.ItemSpec,
@@ -716,7 +716,7 @@ namespace Microsoft.Build.UnitTests
             string toolsVersion /* may be null */
             )
         {
-            XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
+            XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
 
             Project project = new Project
                 (
@@ -1102,7 +1102,7 @@ namespace Microsoft.Build.UnitTests
         {
             return
                 $@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             {fragment}
                         </ItemGroup>
@@ -1384,8 +1384,8 @@ namespace Microsoft.Build.UnitTests
                 if (logger != null)
                 {
                     parameters.Loggers = parameters.Loggers == null
-                        ? new[] {logger}
-                        : parameters.Loggers.Concat(new[] {logger});
+                        ? new[] { logger }
+                        : parameters.Loggers.Concat(new[] { logger });
                 }
 
                 var request = new BuildRequestData(
@@ -1585,7 +1585,7 @@ namespace Microsoft.Build.UnitTests
 
             sb.Append("</ItemGroup>");
 
-            
+
             foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
                 sb.Append("<Target Name='").Append(defaultTarget).Append("'/>");
@@ -1783,7 +1783,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual, ITestOutputHelper testOutput = null)
         {
-            Action<string> LogLine = testOutput == null ? (Action<string>) Console.WriteLine : testOutput.WriteLine;
+            Action<string> LogLine = testOutput == null ? (Action<string>)Console.WriteLine : testOutput.WriteLine;
 
             string[] actualLines = SplitIntoLines(actual);
 
@@ -1934,7 +1934,7 @@ namespace Microsoft.Build.UnitTests
                 _env = env;
 
                 Logger = new MockLogger(_env.Output);
-                var loggers = new[] {Logger};
+                var loggers = new[] { Logger };
 
                 var actualBuildParameters = buildParameters ?? new BuildParameters();
 

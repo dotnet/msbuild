@@ -66,7 +66,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             Version = version;
 
-            //  Note: these dictionaries should use StringComparison.OrdinalIgnoreCase
+            // Note: these dictionaries should use StringComparison.OrdinalIgnoreCase
             PropertiesToAdd = propertiesToAdd;
             ItemsToAdd = itemsToAdd;
 

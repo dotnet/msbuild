@@ -370,7 +370,6 @@ namespace Microsoft.Build.Utilities
         /// path that matches. 
         /// </summary>
         /// <returns>The full path to Tracker.exe, or <see langword="null" /> if a matching path is not found.</returns>
-        
         public static string FindTrackerOnPath()
         {
             string[] paths = Environment.GetEnvironmentVariable(pathEnvironmentVariableName).Split(pathSeparatorArray, StringSplitOptions.RemoveEmptyEntries);

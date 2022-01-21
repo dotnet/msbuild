@@ -252,7 +252,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The language to use when generating the class source for the strongly typed resource.
+        /// Gets or sets the language to use when generating the class source for the strongly typed resource.
         /// This parameter must match exactly one of the languages used by the CodeDomProvider.
         /// </summary>
         public string StronglyTypedLanguage
@@ -263,7 +263,11 @@ namespace Microsoft.Build.Tasks
                 // try to validate it -- that might prevent future expansion of supported languages.
                 _stronglyTypedLanguage = value;
             }
-            get { return _stronglyTypedLanguage; }
+
+            get
+            {
+                return _stronglyTypedLanguage;
+            }
         }
 
         /// <summary>
@@ -3291,8 +3295,11 @@ namespace Microsoft.Build.Tasks
         {
             String postfix = mainAssembly ? ".resources" : a.GetName().CultureInfo.Name + ".resources";
             foreach (String manifestResourceName in a.GetManifestResourceNames())
+            {
                 if (manifestResourceName.EndsWith(postfix, StringComparison.OrdinalIgnoreCase))
                     return true;
+            }
+
             return false;
         }
 #endif
@@ -3439,7 +3446,7 @@ namespace Microsoft.Build.Tasks
             // Generate the STR class
             String[] errors;
             bool generateInternalClass = !_stronglyTypedClassIsPublic;
-            //StronglyTypedResourcesNamespace can be null and this is ok.
+            // StronglyTypedResourcesNamespace can be null and this is ok.
             // If it is null then the default namespace (=stronglyTypedNamespace) is used.
             CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
                     reader.resourcesHashTable,

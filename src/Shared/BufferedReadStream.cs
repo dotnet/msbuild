@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd
         Stream _innerStream;
         byte[] _buffer;
 
-        //  The number of bytes in the buffer that have been read from the underlying stream but not read by consumers of this stream
+        // The number of bytes in the buffer that have been read from the underlying stream but not read by consumers of this stream
         int _currentlyBufferedByteCount;
 
         int _currentIndexInBuffer;
@@ -58,7 +58,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                //  Let the base class handle it, which will end up calling the Read() method
+                // Let the base class handle it, which will end up calling the Read() method
                 return base.ReadByte();
             }
         }
@@ -67,7 +67,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (count > BUFFER_SIZE)
             {
-                //  Trying to read more data than the buffer can hold
+                // Trying to read more data than the buffer can hold
                 int alreadyCopied = 0;
                 if (_currentlyBufferedByteCount > 0)
                 {
@@ -81,7 +81,7 @@ namespace Microsoft.Build.BackEnd
             }
             else if (count <= _currentlyBufferedByteCount)
             {
-                //  Enough data buffered to satisfy read request
+                // Enough data buffered to satisfy read request
                 Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, count);
                 _currentIndexInBuffer += count;
                 _currentlyBufferedByteCount -= count;
@@ -89,7 +89,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                //  Need to read more data
+                // Need to read more data
                 int alreadyCopied = 0;
                 if (_currentlyBufferedByteCount > 0)
                 {
@@ -146,6 +146,5 @@ namespace Microsoft.Build.BackEnd
 
             base.Dispose(disposing);
         }
-        
     }
 }

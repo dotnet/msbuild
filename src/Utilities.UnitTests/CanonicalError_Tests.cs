@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ValidateErrorMessageVariableNotUsed()
         {
-            //      (line)
+            // (line)
             ValidateFileNameMultiLineColumnError("Main.cs():Command line warning CS0168: The variable 'foo' is declared but never used",
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, 3, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
 
-            //      (line-line)
+            // (line-line)
             ValidateFileNameMultiLineColumnError("Main.cs(-):Command line warning CS0168: The variable 'foo' is declared but never used",
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
                 "Main.cs", 1, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
 
-            //      (line,col)
+            // (line,col)
             ValidateFileNameMultiLineColumnError("Main.cs(,):Command line warning CS0168: The variable 'foo' is declared but never used",
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
 
-            //      (line,col-col)
+            // (line,col-col)
             ValidateFileNameMultiLineColumnError("Main.cs(,-):Command line warning CS0168: The variable 'foo' is declared but never used",
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
 
-            //      (line,col,line,col)
+            // (line,col,line,col)
             ValidateFileNameMultiLineColumnError("Main.cs(,,,):Command line warning CS0168: The variable 'foo' is declared but never used",
                 "Main.cs", CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified,
                 CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");

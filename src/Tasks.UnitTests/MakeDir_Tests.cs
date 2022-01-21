@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 FileStream fs = File.Create(file);
-                fs.Dispose(); //we're gonna try to delete it
+                fs.Dispose(); // we're gonna try to delete it
 
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 FileStream fs = File.Create(file);
-                fs.Dispose(); //we're gonna try to delete it
+                fs.Dispose(); // we're gonna try to delete it
 
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();

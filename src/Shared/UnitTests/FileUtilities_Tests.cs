@@ -144,7 +144,6 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(@"../", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/"));
                 Assert.Equal(@"../ghi/", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/ghi/"));
                 Assert.Equal(@".", FileUtilities.MakeRelative(@"/abc/def", @"/abc/def/"));
-
             }
         }
 
@@ -334,10 +333,10 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar")); // "test 2"
 
             // Already has a trailing slash to start with.
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/")); //test 3"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\")); //test 4"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\")); //test 5"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); //"test 5"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/")); // test 3"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\")); // test 4"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\")); // test 5"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); // "test 5"
         }
 
         /// <summary>

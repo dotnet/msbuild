@@ -611,7 +611,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
             Assert.NotNull(deserializedConfig.WarningsAsErrors);
             config.WarningsAsErrors.SequenceEqual(deserializedConfig.WarningsAsErrors, StringComparer.Ordinal).ShouldBeTrue();
-
         }
 
         /// <summary>

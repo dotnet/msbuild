@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return r.LocalName;
         }
 
-        //NOTE: XmlDocument.ImportNode munges "xmlns:asmv2" to "xmlns:d1p1" for some reason, use XmlUtil.CloneElementToDocument instead
+        // NOTE: XmlDocument.ImportNode munges "xmlns:asmv2" to "xmlns:d1p1" for some reason, use XmlUtil.CloneElementToDocument instead
         public static XmlElement CloneElementToDocument(XmlElement element, XmlDocument document, string namespaceURI)
         {
             XmlElement newElement = document.CreateElement(element.Name, namespaceURI);
