@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// ParameterGroup with no parameters inside
         /// </summary>
         private static string s_contentEmptyParameterGroup = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup/>
                        </UsingTask>
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// ParameterGroup with duplicate child parameters
         /// </summary>
         private static string s_contentDuplicateParameters = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
                               <MyParameter/>
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// ParameterGroup with multiple parameters
         /// </summary>
         private static string s_contentMultipleParameters = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
                               <MyParameter1 ParameterType='System.String' Output='true' Required='false'/>
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup BadAttribute='Hello'/>
                        </UsingTask>

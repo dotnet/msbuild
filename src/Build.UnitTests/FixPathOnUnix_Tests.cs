@@ -9,20 +9,20 @@ using Xunit;
 namespace Microsoft.Build.UnitTests
 {
     [PlatformSpecific(TestPlatforms.AnyUnix)]
-    public  class FixPathOnUnixTests
+    public class FixPathOnUnixTests
     {
         [Fact]
         public void TestPathFixupInMetadata()
         {
             string buildProjectContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='Build'>
                         <MSBuild Projects='projectDirectory/main.proj' />
                     </Target>
                </Project>";
 
             string mainProjectContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <UsingTask TaskName='LogTaskPropertiesTask' AssemblyName='Microsoft.Build.Engine.UnitTests' />
                     <ItemGroup>
                         <Item0 Include='xyz'>
@@ -61,10 +61,10 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var item in Items)
                 {
-                    Log.LogMessage ($"Item: {item.ItemSpec}");
+                    Log.LogMessage($"Item: {item.ItemSpec}");
                     foreach (string name in item.MetadataNames)
                     {
-                        Log.LogMessage ($"ItemMetadata: {name} = {item.GetMetadata(name)}");
+                        Log.LogMessage($"ItemMetadata: {name} = {item.GetMetadata(name)}");
                     }
                 }
             }

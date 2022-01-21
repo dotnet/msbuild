@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask AssemblyFile='af'/>
                     </Project>
                 ";
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='' AssemblyFile='af'/>
                     </Project>
                 ";
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t' AssemblyFile='af' X='Y'/>
                     </Project>
                 ";
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t'/>
                     </Project>
                 ";
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t' AssemblyFile=''/>
                     </Project>
                 ";
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t' AssemblyFile='' AssemblyName='n'/>
                     </Project>
                 ";
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t' AssemblyName='' AssemblyFile='f'/>
                     </Project>
                 ";
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t' AssemblyName='an' AssemblyFile='af'/>
                     </Project>
                 ";
@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t' AssemblyName='' AssemblyFile=''/>
                     </Project>
                 ";
@@ -361,7 +361,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t2' AssemblyName='an' Condition='c' TaskFactory='AssemblyFactory'>
                             <ParameterGroup/>
                             <ParameterGroup/>
@@ -382,7 +382,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t2' AssemblyName='an' Condition='c' TaskFactory='AssemblyFactory'>
                             <Task/>
                             <Task/>
@@ -403,7 +403,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t2' AssemblyName='an' Condition='c' TaskFactory='AssemblyFactory'>
                             <IAMUNKNOWN/>
                         </UsingTask>
@@ -421,7 +421,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void WorksWithChildren()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t2' AssemblyName='an' Condition='c' TaskFactory='AssemblyFactory'>
                             <ParameterGroup>
                                <MyParameter/>
@@ -448,7 +448,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t2' AssemblyName='an' Condition='c'>
                             <ParameterGroup>
                                <MyParameter/>
@@ -472,7 +472,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t2' AssemblyName='an' Condition='c'>
                             <Task/>
                         </UsingTask>
@@ -491,7 +491,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectUsingTaskElement GetUsingTaskFactoryRuntimeAndPlatform()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t2' AssemblyName='an' Condition='c' TaskFactory='AssemblyFactory' />
                     </Project>
                 ";
@@ -507,7 +507,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectUsingTaskElement GetUsingTaskAssemblyFile()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t1' AssemblyFile='af' />
                         <UsingTask TaskName='t2' AssemblyName='an' Condition='c'/>
                     </Project>
@@ -524,7 +524,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectUsingTaskElement GetUsingTaskAssemblyName()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='t2' AssemblyName='an' Condition='c'/>
                     </Project>
                 ";

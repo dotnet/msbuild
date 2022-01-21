@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             XmlReader reader = XmlReader.Create(new StringReader
                 (
-                @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='4.0'>
+                @"<Project>
                       <Target Name='foo'/>
                   </Project>"
                 ));
