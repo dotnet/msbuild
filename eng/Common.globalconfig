@@ -373,7 +373,7 @@ dotnet_diagnostic.CA2153.severity = none
 dotnet_diagnostic.CA2201.severity = none
 
 # Instantiate argument exceptions correctly
-dotnet_diagnostic.CA2208.severity = suggestion
+dotnet_diagnostic.CA2208.severity = warning
 
 # Non-constant fields should not be visible
 dotnet_diagnostic.CA2211.severity = none
