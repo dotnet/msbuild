@@ -7,7 +7,7 @@ function InitializeCustomSDKToolset {
 
   # The following frameworks and tools are used only for testing.
   # Do not attempt to install them in source build.
-  if [[ "${ArcadeBuildFromSource:-}" == "true" ]]; then
+  if [[ "${DotNetBuildFromSource:-}" == "true" ]]; then
     return
   fi
 
