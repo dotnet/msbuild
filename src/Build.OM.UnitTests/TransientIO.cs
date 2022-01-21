@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
             var absolute = Path.GetFullPath(Path.IsPathRooted(relative) ? relative : Path.Combine(tempRoot, relative));
             if (!IsControled(absolute))
             {
-                throw new ArgumentException(nameof(relative));
+                throw new ArgumentException("Either the path is invalid or it is not rooted to RootFolder.", nameof(relative));
             }
 
             return absolute;
