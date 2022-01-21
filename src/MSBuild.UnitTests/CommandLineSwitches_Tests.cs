@@ -307,7 +307,7 @@ namespace Microsoft.Build.UnitTests
             parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.RestoreProperty);
             duplicateSwitchErrorMessage.ShouldBeNull();
             multipleParametersAllowed.ShouldBeTrue();
-            missingParametersErrorMessage.ShouldNotBeNull();
+            missingParametersErrorMessage.ShouldBe("MissingPropertyError");
             unquoteParameters.ShouldBeTrue();
         }
 
