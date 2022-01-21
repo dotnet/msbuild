@@ -2273,22 +2273,25 @@ $@"<Project>
             archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
         }
 
-        [Fact]
-        public void EndToEndWarnAsErrors()
+        [Theory]
+        [InlineData("-warnaserror", false)]
+        [InlineData("-warnaserror -warnnotaserror:FOR123", true)]
+        [InlineData("-warnaserror -warnnotaserror:FOR1234", false)]
+        public void EndToEndWarnAsErrors(string switches, bool expectedSuccess)
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
 
   <Target Name=""IssueWarning"">
-    <Warning Text=""Warning!"" />
+    <Warning Text=""Warning!"" Code=""FOR123"" />
   </Target>
 
 </Project>");
 
             TransientTestProjectWithFiles testProject = _env.CreateTestProjectWithFiles(projectContents);
 
-            RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" -warnaserror", out bool success, _output);
+            RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {switches} ", out bool success, _output);
 
-            success.ShouldBeFalse();
+            success.ShouldBe(expectedSuccess);
         }
 
         [Trait("Category", "netcore-osx-failing")]
