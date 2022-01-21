@@ -1,5 +1,3 @@
-Microsoft.DotNet.Cli.Sln.Internal.Tests
-dotnet-msbuild.Tests
 Microsoft.DotNet.Cli.Utils.Tests
 EndToEnd.Tests
 Microsoft.DotNet.Tools.Tests.Utilities.Tests
