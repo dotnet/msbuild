@@ -163,16 +163,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private ClassInfo GetRegisteredClassInfo(Guid clsid)
         {
             ClassInfo info = null;
-            RegistryKey userKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\CLASSES\\CLSID");
-            if (GetRegisteredClassInfo(userKey, clsid, ref info))
+
+            using (RegistryKey userKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\CLASSES\\CLSID"))
             {
-                return info;
+               if (GetRegisteredClassInfo(userKey, clsid, ref info))
+               {
+                   return info;
+               }
             }
-            RegistryKey machineKey = Registry.ClassesRoot.OpenSubKey("CLSID");
-            if (GetRegisteredClassInfo(machineKey, clsid, ref info))
+
+            using (RegistryKey machineKey = Registry.ClassesRoot.OpenSubKey("CLSID"))
             {
-                return info;
+               if (GetRegisteredClassInfo(machineKey, clsid, ref info))
+               {
+                  return info;
+               }
             }
+
+            // Check Wow6432Node of HKCR if the COM object is 32-bit.
+            if (Environment.Is64BitProcess)
+            {
+                using (RegistryKey classesRootKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32))
+                {
+                    using (RegistryKey clsidKey = classesRootKey.OpenSubKey("CLSID"))
+                    {
+                        if (GetRegisteredClassInfo(clsidKey, clsid, ref info))
+                        {
+                            return info;
+                        }
+                    }
+                }
+            }
+
             return null;
         }
 
