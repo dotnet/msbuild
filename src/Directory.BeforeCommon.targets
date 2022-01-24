@@ -96,7 +96,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_DEBUGGER</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_WORKINGSET</DefineConstants>
-    <DefineConstants Condition="'$(MonoBuild)' != 'true' and '$(MachineIndependentBuild)' != 'true' and '$(TargetFrameworkVersion)' != 'v3.5'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true' and '$(MachineIndependentBuild)' != 'true' and '$(TargetFrameworkVersion)' != 'v3.5' and '$(DotNetBuildFromSource)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
   </PropertyGroup>
 
