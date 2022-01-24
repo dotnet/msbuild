@@ -14,8 +14,7 @@ using Xunit;
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
-    // <summary>Tests for the ProjectExtensionsElement class.</summary>
-    /// Tests for the  class
+    /// Tests for the <see cref="ProjectExtensionsElement"/> class.
     /// </summary>
     public class ProjectExtensionsElement_Tests
     {

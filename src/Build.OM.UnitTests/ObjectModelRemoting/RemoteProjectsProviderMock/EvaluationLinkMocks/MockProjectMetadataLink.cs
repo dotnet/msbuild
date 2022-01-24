@@ -17,8 +17,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return holder.Linker.LinkFactory.Create(link);
         }
 
-
-        /// ProjectMetadataLink remoting
+        // ProjectMetadataLink remoting
         public object Parent
         {
             get
