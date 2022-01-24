@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
     [GuidAttribute("00020406-0000-0000-C000-000000000046")]
     [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
     [ComImport]
-    internal interface UCOMICreateITypeLib
+    internal interface ICreateTypeLib
     {
         void CreateTypeInfo();
         void SetName();

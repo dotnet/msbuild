@@ -901,7 +901,7 @@ dotnet_diagnostic.SA1217.severity = suggestion
 dotnet_diagnostic.SA1300.severity = suggestion
 
 # Interface names should begin with I
-dotnet_diagnostic.SA1302.severity = suggestion
+dotnet_diagnostic.SA1302.severity = warning
 
 # Const field names should begin with upper-case letter
 dotnet_diagnostic.SA1303.severity = suggestion
