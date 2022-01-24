@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
 
-        internal virtual Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
+        internal virtual Option<string[]> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
 
         protected NewCommand ParentCommand { get; }
 

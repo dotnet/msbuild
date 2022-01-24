@@ -23,7 +23,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddArgument(NameArgument);
         }
 
-        internal Argument<IReadOnlyList<string>> NameArgument { get; } = new("package")
+        internal Argument<string[]> NameArgument { get; } = new("package")
         {
             Description = SymbolStrings.Command_Uninstall_Argument_Package,
             Arity = new ArgumentArity(0, 99)

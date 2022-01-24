@@ -39,7 +39,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public virtual Option<bool> ColumnsAllOption { get; } = SharedOptionsFactory.CreateColumnsAllOption();
 
-        public virtual Option<IReadOnlyList<string>> ColumnsOption { get; } = SharedOptionsFactory.CreateColumnsOption();
+        public virtual Option<string[]> ColumnsOption { get; } = SharedOptionsFactory.CreateColumnsOption();
 
         public IReadOnlyDictionary<FilterOptionDefinition, Option> Filters { get; protected set; }
 

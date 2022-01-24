@@ -11,7 +11,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal Option<bool> ColumnsAllOption { get; }
 
-        internal Option<IReadOnlyList<string>> ColumnsOption { get; }
+        internal Option<string[]> ColumnsOption { get; }
     }
 
     internal interface ITabularOutputArgs

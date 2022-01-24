@@ -24,6 +24,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal override Option<bool> InteractiveOption => ParentCommand.InteractiveOption;
 
-        internal override Option<IReadOnlyList<string>> AddSourceOption => ParentCommand.AddSourceOption;
+        internal override Option<string[]> AddSourceOption => ParentCommand.AddSourceOption;
     }
 }

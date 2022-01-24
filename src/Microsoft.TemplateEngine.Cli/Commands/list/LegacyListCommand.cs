@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public override Option<bool> ColumnsAllOption => ParentCommand.ColumnsAllOption;
 
-        public override Option<IReadOnlyList<string>> ColumnsOption => ParentCommand.ColumnsOption;
+        public override Option<string[]> ColumnsOption => ParentCommand.ColumnsOption;
 
         protected override Option GetFilterOption(FilterOptionDefinition def)
         {

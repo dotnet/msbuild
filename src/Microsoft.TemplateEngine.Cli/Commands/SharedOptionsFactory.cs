@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             };
         }
 
-        internal static Option<IReadOnlyList<string>> CreateAddSourceOption()
+        internal static Option<string[]> CreateAddSourceOption()
         {
             return new(new[] { "--add-source", "--nuget-source" })
             {
@@ -92,9 +92,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             };
         }
 
-        internal static Option<IReadOnlyList<string>> CreateColumnsOption()
+        internal static Option<string[]> CreateColumnsOption()
         {
-            Option<IReadOnlyList<string>> option = new(new[] { "--columns" }, ParseCommaSeparatedValues)
+            Option<string[]> option = new(new[] { "--columns" }, ParseCommaSeparatedValues)
             {
                 Arity = new ArgumentArity(1, 4),
                 Description = SymbolStrings.Option_Columns,
@@ -118,14 +118,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             };
         }
 
-        internal static IReadOnlyList<string> ParseCommaSeparatedValues(ArgumentResult result)
+        internal static string[] ParseCommaSeparatedValues(ArgumentResult result)
         {
             List<string> values = new List<string>();
             foreach (var value in result.Tokens.Select(t => t.Value))
             {
                 values.AddRange(value.Split(",", StringSplitOptions.TrimEntries).Where(s => !string.IsNullOrWhiteSpace(s)));
             }
-            return values;
+            return values.ToArray();
         }
 
         internal static Option AsHidden(this Option o)

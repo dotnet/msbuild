@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(AddSourceOption);
         }
 
-        internal Argument<IReadOnlyList<string>> NameArgument { get; } = new("package")
+        internal Argument<string[]> NameArgument { get; } = new("package")
         {
             Description = SymbolStrings.Command_Install_Argument_Package,
             Arity = new ArgumentArity(1, 99)
@@ -35,7 +35,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
 
-        internal virtual Option<IReadOnlyList<string>> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
+        internal virtual Option<string[]> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
 
         protected NewCommand ParentCommand { get; }
 
