@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -620,7 +619,6 @@ namespace Microsoft.Build.UnitTests
            );
         }
 
-#if FEATURE_CULTUREINFO_CONSOLE_FALLBACK
         /// <summary>
         /// Regression test for bug where the MSBuild.exe command-line app
         /// would sometimes set the UI culture to just "en" which is considered a "neutral" UI
@@ -646,7 +644,6 @@ namespace Microsoft.Build.UnitTests
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
         }
-#endif
 
 #if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>

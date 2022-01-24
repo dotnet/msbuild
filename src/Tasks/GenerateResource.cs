@@ -9,7 +9,9 @@ using System.Collections.Generic;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.ComponentModel.Design;
 #endif
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -24,8 +26,10 @@ using System.Runtime.Remoting;
 #endif
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Versioning;
 using System.Security;
+#endif
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
