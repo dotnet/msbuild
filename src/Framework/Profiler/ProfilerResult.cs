@@ -28,12 +28,10 @@ namespace Microsoft.Build.Framework.Profiler
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is ProfilerResult))
+            if (!(obj is ProfilerResult result))
             {
                 return false;
             }
-
-            var result = (ProfilerResult)obj;
 
             return (ProfiledLocations == result.ProfiledLocations) ||
                    (ProfiledLocations.Count == result.ProfiledLocations.Count &&
