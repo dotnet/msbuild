@@ -678,7 +678,9 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     inputResultsCaches,
-                                    outputResultsCache))
+                                    outputResultsCache,
+                                    commandLine
+                                    ))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -1005,7 +1007,12 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             string[] inputResultsCaches,
-            string outputResultsCache
+            string outputResultsCache,
+#if FEATURE_GET_COMMANDLINE
+            string commandLine
+#else
+            string[] commandLine
+#endif
         )
         {
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
@@ -1206,9 +1213,17 @@ namespace Microsoft.Build.CommandLine
 #endif
                     BuildResultCode? result = null;
 
-                    var messagesToLogInBuildLoggers = Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager
-                        ? null
-                        : GetMessagesToLogInBuildLoggers();
+                    IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+                    if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
+                    {
+                        var commandLineString = 
+#if FEATURE_GET_COMMANDLINE
+                            commandLine;
+#else
+                            string.Join(" ", commandLine);
+#endif
+                        messagesToLogInBuildLoggers = GetMessagesToLogInBuildLoggers(commandLineString);
+                    }
 
                     buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
 
@@ -1354,7 +1369,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers()
+        private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
             return new[]
             {
@@ -1371,7 +1386,7 @@ namespace Microsoft.Build.CommandLine
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "CommandLine",
-                        Environment.CommandLine),
+                        commandLineString),
                     MessageImportance.Low),
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
