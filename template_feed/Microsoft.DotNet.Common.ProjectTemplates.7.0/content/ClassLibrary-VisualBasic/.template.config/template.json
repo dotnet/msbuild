@@ -9,7 +9,7 @@
   "generatorVersions": "[1.0.0.0-*)",
   "description": "A project for creating a class library that targets .NET or .NET Standard",
   "groupIdentity": "Microsoft.Common.Library",
-  "precedence": "8000",
+  "precedence": "9000",
   "identity": "Microsoft.Common.Library.VisualBasic.7.0",
   "shortName": "classlib",
   "tags": {

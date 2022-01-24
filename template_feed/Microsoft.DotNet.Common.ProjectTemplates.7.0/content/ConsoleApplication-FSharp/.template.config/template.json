@@ -9,7 +9,7 @@
   "generatorVersions": "[1.0.0.0-*)",
   "description": "A project for creating a command-line application that can run on .NET on Windows, Linux and macOS",
   "groupIdentity": "Microsoft.Common.Console",
-  "precedence": "8000",
+  "precedence": "9000",
   "identity": "Microsoft.Common.Console.FSharp.7.0",
   "shortName": "console",
   "tags": {
