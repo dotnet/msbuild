@@ -996,7 +996,7 @@ dotnet_diagnostic.SA1507.severity = suggestion
 dotnet_diagnostic.SA1508.severity = warning
 
 # Opening braces should not be preceded by blank line
-dotnet_diagnostic.SA1509.severity = suggestion
+dotnet_diagnostic.SA1509.severity = warning
 
 # 'else' statement should not be preceded by a blank line
 dotnet_diagnostic.SA1510.severity = warning

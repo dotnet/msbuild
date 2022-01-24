@@ -3338,7 +3338,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public static IEnumerable<Object[]> UpdateAndRemoveShouldWorkWithEscapedCharactersTestData
         {
             get
-
             {
                 var expectedMetadata = new[]
                 {
