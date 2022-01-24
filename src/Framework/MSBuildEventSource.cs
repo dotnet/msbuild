@@ -487,9 +487,9 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(67, Keywords = Keywords.All)]
-        public void CachedSdkResolverServiceResolveSdkStop(string sdkName, string solutionPath, string projectPath, bool success, bool wasResultCached)
+        public void CachedSdkResolverServiceResolveSdkStop(string sdkName, string solutionPath, string projectPath, bool success)
         {
-            WriteEvent(67, sdkName, solutionPath, projectPath, success, wasResultCached);
+            WriteEvent(67, sdkName, solutionPath, projectPath, success);
         }
 
         /// <remarks>
@@ -521,36 +521,6 @@ namespace Microsoft.Build.Eventing
             WriteEvent(70, oldHash, newHash);
         }
 
-        [Event(71, Keywords = Keywords.All)]
-        public void SdkResolverEvent(params object[] args)
-        {
-            WriteEvent(71, args);
-        }
-
-        [Event(72, Keywords = Keywords.All)]
-        public void SdkResolverEventStart(params object[] args)
-        {
-            WriteEvent(72, args);
-        }
-
-        [Event(73, Keywords = Keywords.All)]
-        public void SdkResolverEventStop(params object[] args)
-        {
-            WriteEvent(73, args);
-        }
-
-        [Event(74, Keywords = Keywords.All)]
-        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(int submissionId, string sdkName, string solutionPath, string projectPath)
-        {
-            WriteEvent(74, submissionId, sdkName, solutionPath, projectPath);
-        }
-
-        [Event(75, Keywords = Keywords.All)]
-        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(int submissionId, string sdkName, string solutionPath, string projectPath, bool success, bool wasResultCached)
-        {
-            WriteEvent(75, submissionId, sdkName, solutionPath, projectPath, success, wasResultCached);
-        }
-
-        #endregion
+#endregion
     }
 }
