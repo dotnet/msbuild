@@ -2274,13 +2274,21 @@ $@"<Project>
         }
 
         [Theory]
-        [InlineData("-warnaserror", false)]
-        [InlineData("-warnaserror -warnnotaserror:FOR123", true)]
-        [InlineData("-warnaserror -warnnotaserror:FOR1234", false)]
-        public void EndToEndWarnAsErrors(string switches, bool expectedSuccess)
+        [InlineData("-warnaserror", "", "", false)]
+        [InlineData("-warnaserror -warnnotaserror:FOR123", "", "", true)]
+        [InlineData("-err: -warnnotaserror:FOR1234", "", "", false)]
+        [InlineData("-warnaserror", "", "FOR123", true)]
+        [InlineData("-warnaserror:FOR123", "", "FOR123", false)]
+        [InlineData("", "FOR123", "FOR123", false)]
+        [InlineData("", "", "FOR123", true)]
+        [InlineData("-warnaserror:FOR1234 -warnnotaserror:FOR123", "", "", false)] // The task should fire as a warning, but this should fail for having warnnotaserror used incorrectly.
+        public void EndToEndWarnAsErrors(string switches, string errorCodes, string notErrorCodes, bool expectedSuccess)
         {
-            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
-
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@$"<Project>
+<PropertyGroup>
+<MSBuildWarningsAsErrors>{errorCodes}</MSBuildWarningsAsErrors>
+<MSBuildWarningsNotAsErrors>{notErrorCodes}</MSBuildWarningsNotAsErrors>
+</PropertyGroup>
   <Target Name=""IssueWarning"">
     <Warning Text=""Warning!"" Code=""FOR123"" />
   </Target>
