@@ -2,7 +2,7 @@
 Author: Test Asset
 
 Usage:
-  new3 TestAssets.PostActions.RunScript.Basic [options] [template options]
+  dotnet-new3 new3 TestAssets.PostActions.RunScript.Basic [options] [template options]
 
 Options:
   -n, --name <name>                The name for the output being created. If no name is specified, the name of the output directory is used.

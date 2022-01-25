@@ -22,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddAlias("-l");
             AddValidator(ValidateParentCommandArguments);
 
-            parentCommand.AddNoLegacyUsageValidators(this, except: Filters.Values.Concat(new Symbol[] { ColumnsAllOption, ColumnsOption, parentCommand.ShortNameArgument }).ToArray());
+            parentCommand.AddNoLegacyUsageValidators(this, except: Filters.Values.Concat(new Symbol[] { ColumnsAllOption, ColumnsOption, NewCommand.ShortNameArgument }).ToArray());
         }
 
         public override Option<bool> ColumnsAllOption => ParentCommand.ColumnsAllOption;

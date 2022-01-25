@@ -185,7 +185,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             writer.WriteLine();
         }
 
-        internal static void ShowHintForOtherTemplates(TemplateGroup templateGroup, CliTemplateInfo preferredtemplate, string commandName, TextWriter writer)
+        internal static void ShowHintForOtherTemplates(TemplateGroup templateGroup, CliTemplateInfo preferredtemplate, InstantiateCommandArgs args, TextWriter writer)
         {
             //other languages
             if (templateGroup.Languages.Count <= 1)
@@ -214,7 +214,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             supportedLanguages.Sort(StringComparer.OrdinalIgnoreCase);
             writer.WriteLine(HelpStrings.Hint_HelpForOtherLanguages, string.Join(", ", supportedLanguages));
-            writer.WriteLine(CommandExamples.HelpCommandExample(commandName, templateGroup.ShortNames[0], supportedLanguages.First()).Indent());
+            writer.WriteLine(
+                Example
+                    .For<NewCommand>(args.ParseResult)
+                    .WithArgument(NewCommand.ShortNameArgument, templateGroup.ShortNames[0])
+                    .WithHelpOption()
+                    .WithOption(SharedOptionsFactory.CreateLanguageOption(), supportedLanguages.First())
+                    .ToString().Indent());
             writer.WriteLine();
 
             //other types
@@ -244,7 +250,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             supportedTypes.Sort(StringComparer.OrdinalIgnoreCase);
             writer.WriteLine(HelpStrings.Hint_HelpForOtherTypes, string.Join(", ", supportedTypes));
-            writer.WriteLine(CommandExamples.HelpCommandExample(commandName, templateGroup.ShortNames[0], type: supportedTypes.First()).Indent());
+            writer.WriteLine(Example
+                .For<NewCommand>(args.ParseResult)
+                .WithArgument(NewCommand.ShortNameArgument, templateGroup.ShortNames[0])
+                .WithHelpOption()
+                .WithOption(SharedOptionsFactory.CreateTypeOption(), supportedTypes.First())
+                .ToString().Indent());
             writer.WriteLine();
         }
 
@@ -445,18 +456,51 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             HelpBuilder.Default.CommandArgumentsSection()(context);
             context.Output.WriteLine();
             HelpBuilder.Default.OptionsSection()(context);
-            context.Output.WriteLine();
             HelpBuilder.Default.SubcommandsSection()(context);
-            context.Output.WriteLine();
-            HelpBuilder.Default.AdditionalArgumentsSection()(context);
             context.Output.WriteLine();
         }
 
         private static void CustomUsageSection(HelpContext context, Command command)
         {
             context.Output.WriteLine(context.HelpBuilder.LocalizationResources.HelpUsageTitle());
-            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, command, showSubcommands: false, showParentArguments: false)));
-            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, command, showParentArguments: false, showArguments: false)));
+            context.Output.WriteLine(Indent + string.Join(" ", GetCustomUsageParts(context, command, showSubcommands: false)));
+            context.Output.WriteLine(Indent + string.Join(" ", GetCustomUsageParts(context, command, showArguments: false)));
+        }
+
+        private static IEnumerable<string> GetCustomUsageParts(
+            HelpContext context,
+            Command command,
+            bool showSubcommands = true,
+            bool showArguments = true,
+            bool showOptions = true)
+        {
+            List<Command> parentCommands = new List<Command>();
+            Command? nextCommand = command;
+            while (nextCommand is not null)
+            {
+                parentCommands.Add(nextCommand);
+                nextCommand = nextCommand.Parents.FirstOrDefault(c => c is Command) as Command;
+            }
+            parentCommands.Reverse();
+
+            foreach (Command parentCommand in parentCommands)
+            {
+                yield return parentCommand.Name;
+            }
+            if (showArguments)
+            {
+                yield return CommandLineUtils.FormatArgumentUsage(command.Arguments.ToArray());
+            }
+
+            if (showSubcommands)
+            {
+                yield return context.HelpBuilder.LocalizationResources.HelpUsageCommand();
+            }
+
+            if (showOptions)
+            {
+                yield return context.HelpBuilder.LocalizationResources.HelpUsageOptions();
+            }
         }
     }
 }

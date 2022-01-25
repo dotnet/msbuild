@@ -201,5 +201,19 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             }
         }
 
+        [Fact]
+        public void CommandExampleCanShowParentCommandsBeyondNew()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            Command rootCommand = new Command("dotnet")
+            {
+                myCommand
+            };
+
+            var parseResult = rootCommand.Parse("dotnet new install source");
+            Assert.Equal("dotnet new install my-source", Example.For<NewCommand>(parseResult).WithSubcommand<InstallCommand>().WithArgument(InstallCommand.NameArgument, "my-source"));
+        }
+
     }
 }

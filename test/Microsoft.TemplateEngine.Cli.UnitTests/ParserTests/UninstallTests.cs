@@ -86,5 +86,19 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}.") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}."));
             }
         }
+
+        [Fact]
+        public void CommandExampleCanShowParentCommandsBeyondNew()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            Command rootCommand = new Command("dotnet")
+            {
+                myCommand
+            };
+
+            var parseResult = rootCommand.Parse("dotnet new uninstall source");
+            Assert.Equal("dotnet new uninstall my-source", Example.For<NewCommand>(parseResult).WithSubcommand<UninstallCommand>().WithArgument(UninstallCommand.NameArgument, "my-source"));
+        }
     }
 }

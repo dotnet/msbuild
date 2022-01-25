@@ -142,9 +142,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse(command);
-            InstantiateCommandArgs args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse(command);
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             Assert.True(optionsMap[option](args));
             Assert.Equal("console", args.ShortName);
@@ -160,9 +159,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var customOption = new Option<string>("--newOption");
             myCommand.AddGlobalOption(customOption);
 
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse("new console --newOption val");
-            InstantiateCommandArgs args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse("new console --newOption val");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             Assert.NotNull(args.ParseResult);
             Assert.Equal("console", args.ShortName);

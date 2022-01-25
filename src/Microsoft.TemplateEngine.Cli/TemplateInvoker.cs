@@ -80,7 +80,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             finally
             {
-                _telemetryLogger.TrackEvent(templateArgs.NewCommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
+                _telemetryLogger.TrackEvent(templateArgs.RootCommand.Name + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
                     {
                         { TelemetryConstants.Language, templateLanguage },
                         { TelemetryConstants.ArgError, "False" },
@@ -225,7 +225,11 @@ namespace Microsoft.TemplateEngine.Cli
                 case CreationResultStatus.InvalidParamValues:
                     Reporter.Error.WriteLine($"{LocalizableStrings.InvalidCommandOptions}: {instantiateResult.ErrorMessage}".Bold().Red());
                     Reporter.Error.WriteLine(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters);
-                    Reporter.Error.WriteCommand(CommandExamples.HelpCommandExample(templateArgs.NewCommandName, templateArgs.Template.ShortNameList[0]));
+                    Reporter.Error.WriteCommand(
+                        Example
+                            .For<NewCommand>(templateArgs.ParseResult)
+                            .WithArgument(NewCommand.ShortNameArgument, templateArgs.Template.ShortNameList[0])
+                            .WithHelpOption());
                     return NewCommandStatus.InvalidParamValues;
                 case CreationResultStatus.DestructiveChangesDetected:
                     Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());

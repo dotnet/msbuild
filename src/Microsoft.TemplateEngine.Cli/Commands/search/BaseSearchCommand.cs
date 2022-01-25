@@ -46,7 +46,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public IReadOnlyDictionary<FilterOptionDefinition, Option> Filters { get; protected set; }
 
-        internal Argument<string> NameArgument { get; } = new("name")
+        internal static Argument<string> NameArgument { get; } = new("template-name")
         {
             Description = SymbolStrings.Command_Search_Argument_Name,
             Arity = new ArgumentArity(0, 1)

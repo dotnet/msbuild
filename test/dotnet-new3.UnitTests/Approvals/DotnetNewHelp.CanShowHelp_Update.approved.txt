@@ -2,7 +2,7 @@
   Checks the currently installed template packages for update, and install the updates.
 
 Usage:
-  new3 update [options]
+  dotnet-new3 new3 update [options]
 
 Options:
   --interactive                                Allows the command to stop and wait for user input or action (for example to complete authentication).

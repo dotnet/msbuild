@@ -4,8 +4,8 @@ Description: A project template for creating an ASP.NET Core application with ex
 This template contains technologies from parties other than Microsoft, see https://aka.ms/aspnetcore/5.0-third-party-notices for details.
 
 Usage:
-  new3 webapp [options] [template options]
-  new3 razor [options] [template options]
+  dotnet-new3 new3 webapp [options] [template options]
+  dotnet-new3 new3 razor [options] [template options]
 
 Options:
   -n, --name <name>       The name for the output being created. If no name is specified, the name of the output directory is used.

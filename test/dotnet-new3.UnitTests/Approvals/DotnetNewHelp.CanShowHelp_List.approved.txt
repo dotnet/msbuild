@@ -2,10 +2,10 @@
   Lists templates containing the specified template name. If no name is specified, lists all templates.
 
 Usage:
-  new3 list [<name>] [options]
+  dotnet-new3 new3 list [<template-name>] [options]
 
 Arguments:
-  <name>  If specified, only the templates matching the name will be shown.
+  <template-name>  If specified, only the templates matching the name will be shown.
 
 Options:
   --author <author>                      Filters the templates based on the template author.

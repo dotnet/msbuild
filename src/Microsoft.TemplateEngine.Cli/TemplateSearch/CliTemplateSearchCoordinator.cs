@@ -89,10 +89,18 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             if (searchResults.Where(r => r.Success).SelectMany(r => r.SearchHits).Any())
             {
                 string packageIdToShow = EvaluatePackageToShow(searchResults);
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_InstallHelp, commandArgs.CommandName));
-                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandArgs.CommandName));
+                Reporter.Output.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Info_InstallHelp);
+                Reporter.Output.WriteCommand(
+                 Example
+                     .For<NewCommand>(commandArgs.ParseResult)
+                     .WithSubcommand<InstallCommand>()
+                     .WithArgument(InstallCommand.NameArgument));
                 Reporter.Output.WriteLine(LocalizableStrings.Generic_ExampleHeader);
-                Reporter.Output.WriteCommand(CommandExamples.InstallCommandExample(commandArgs.CommandName, packageID: packageIdToShow));
+                Reporter.Output.WriteCommand(
+                   Example
+                       .For<NewCommand>(commandArgs.ParseResult)
+                       .WithSubcommand<InstallCommand>()
+                       .WithArgument(InstallCommand.NameArgument, packageIdToShow));
                 return NewCommandStatus.Success;
             }
             return NewCommandStatus.NotFound;
@@ -179,9 +187,25 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_NoTemplateName.Red().Bold());
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchHelp, string.Join(", ", SearchCommand.SupportedFilters.Select(f => $"'{f.OptionFactory().Aliases.First()}'"))));
                 Reporter.Error.WriteLine(LocalizableStrings.Generic_ExamplesHeader);
-                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandArgs.CommandName, usePlaceholder: true));
-                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandArgs.CommandName, additionalArgs: new[] { "--author", "Microsoft" }));
-                Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(commandArgs.CommandName, usePlaceholder: true, additionalArgs: new[] { "--author", "Microsoft" }));
+                Reporter.Error.WriteCommand(
+                    Example
+                        .For<NewCommand>(commandArgs.ParseResult)
+                        .WithSubcommand<SearchCommand>()
+                        .WithArgument(SearchCommand.NameArgument, "web"));
+
+                Reporter.Error.WriteCommand(
+                     Example
+                        .For<NewCommand>(commandArgs.ParseResult)
+                        .WithSubcommand<SearchCommand>()
+                        .WithOption(SharedOptionsFactory.CreateAuthorOption(), "Microsoft"));
+
+                Reporter.Error.WriteCommand(
+                 Example
+                    .For<NewCommand>(commandArgs.ParseResult)
+                    .WithSubcommand<SearchCommand>()
+                    .WithArgument(SearchCommand.NameArgument, "web")
+                    .WithOption(SharedOptionsFactory.CreateLanguageOption(), "C#"));
+
                 return false;
             }
 

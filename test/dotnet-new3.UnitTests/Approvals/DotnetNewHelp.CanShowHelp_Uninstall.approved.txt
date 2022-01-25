@@ -2,7 +2,7 @@
   Uninstalls a template package.
 
 Usage:
-  new3 uninstall [<package>...] [options]
+  dotnet-new3 new3 uninstall [<package>...] [options]
 
 Arguments:
   <package>  NuGet package ID (without version) or path to folder to uninstall. 

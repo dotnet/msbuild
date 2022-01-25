@@ -6,4 +6,4 @@
       netcoreapp3.1   - Target netcoreapp3.1
 
 For more information, run:
-   dotnet new3 console -h
+   dotnet-new3 new3 console -h

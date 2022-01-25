@@ -50,8 +50,8 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching("Package\\s+Current\\s+Latest")
                 .And.HaveStdOutMatching("Microsoft.DotNet.Common.ProjectTemplates.5.0\\s+5.0.0\\s+([\\d\\.a-z-])+")
                 .And.HaveStdOutContaining("To update the package use:")
-                .And.HaveStdOutContaining("   dotnet new3 --install <PACKAGE_ID>::<VERSION>")
-                .And.HaveStdOutMatching("   dotnet new3 --install Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+");
+                .And.HaveStdOutContaining("   dotnet-new3 new3 install <package>::<version>")
+                .And.HaveStdOutMatching("   dotnet-new3 new3 install Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+");
 
             new DotnetNewCommand(_log, testCase)
                 .WithCustomHive(home).WithoutBuiltInTemplates()

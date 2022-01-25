@@ -243,5 +243,47 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.NotEmpty(parseResult.Errors);
             Assert.Contains("Argument 'c1' not recognized. Must be one of:", parseResult.Errors.First().Message);
         }
+
+        [Fact]
+        public void CommandExampleCanShowParentCommandsBeyondNew()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            Command rootCommand = new Command("dotnet")
+            {
+                myCommand
+            };
+
+            var parseResult = rootCommand.Parse("dotnet new search template");
+            Assert.Equal("dotnet new search my-template", Example.For<NewCommand>(parseResult).WithSubcommand<SearchCommand>().WithArgument(SearchCommand.NameArgument, "my-template"));
+        }
+
+        [Fact]
+        public void CommandExampleShowsMandatoryArg()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            Command rootCommand = new Command("dotnet")
+            {
+                myCommand
+            };
+
+            var parseResult = rootCommand.Parse("dotnet new search template");
+            Assert.Equal("dotnet new search [<template-name>]", Example.For<NewCommand>(parseResult).WithSubcommand<SearchCommand>().WithArgument(SearchCommand.NameArgument));
+        }
+
+        [Fact]
+        public void CommandExampleShowsOptionalArgWhenOptionsAreGiven()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            Command rootCommand = new Command("dotnet")
+            {
+                myCommand
+            };
+
+            var parseResult = rootCommand.Parse("dotnet new search template");
+            Assert.Equal("dotnet new search [<template-name>] --author Microsoft", Example.For<NewCommand>(parseResult).WithSubcommand<SearchCommand>().WithArgument(SearchCommand.NameArgument).WithOption(SharedOptionsFactory.CreateAuthorOption(), "Microsoft"));
+        }
     }
 }

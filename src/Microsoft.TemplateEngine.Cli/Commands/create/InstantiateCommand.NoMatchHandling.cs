@@ -152,13 +152,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (templateGroup.ShortNames.Any())
             {
                 reporter.WriteLine(LocalizableStrings.InvalidParameterTemplateHint);
-                reporter.WriteCommand(CommandExamples.HelpCommandExample(args.CommandName, templateGroup.ShortNames[0]));
+                reporter.WriteCommand(
+                    Example
+                        .For<NewCommand>(args.ParseResult)
+                        .WithArgument(NewCommand.ShortNameArgument, templateGroup.ShortNames[0])
+                        .WithHelpOption());
             }
 
             return NewCommandStatus.InvalidParamValues;
         }
 
-        private void HandleNoMatchOnTemplateBaseOptions(IEnumerable<TemplateResult> matchInfos, InstantiateCommandArgs args, TemplateGroup templateGroup)
+        private static void HandleNoMatchOnTemplateBaseOptions(IEnumerable<TemplateResult> matchInfos, InstantiateCommandArgs args, TemplateGroup templateGroup)
         {
             Option<string> languageOption = SharedOptionsFactory.CreateLanguageOption();
             Option<string> typeOption = SharedOptionsFactory.CreateTypeOption();
@@ -203,10 +207,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Reporter.Error.WriteLine();
 
             Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
-            Reporter.Error.WriteCommand(CommandExamples.ListCommandExample(args.CommandName));
+
+            Reporter.Error.WriteCommand(
+                 Example
+                     .For<NewCommand>(args.ParseResult)
+                     .WithSubcommand<ListCommand>());
 
             Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
-            Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, args.ShortName));
+            Reporter.Error.WriteCommand(
+                  Example
+                      .For<NewCommand>(args.ParseResult)
+                      .WithSubcommand<SearchCommand>()
+                      .WithArgument(SearchCommand.NameArgument, args.ShortName ?? string.Empty));
             Reporter.Error.WriteLine();
         }
     }

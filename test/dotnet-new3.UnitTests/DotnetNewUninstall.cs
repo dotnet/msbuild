@@ -40,7 +40,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr()
                 .And.HaveStdOutContaining($"TemplateResolution{Path.DirectorySeparatorChar}DifferentLanguagesGroup{Path.DirectorySeparatorChar}BasicFSharp")
-                .And.HaveStdOutContaining($"         dotnet new3 --uninstall {testTemplate}");
+                .And.HaveStdOutContaining($"         dotnet-new3 new3 uninstall {testTemplate}");
         }
 
         [Theory]
@@ -74,7 +74,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Version: 5.0.0")
                 .And.HaveStdOutContaining("Author: Microsoft")
                 .And.HaveStdOutMatching("NuGetSource: [0-9.\\-A-Za-z]+")
-                .And.HaveStdOutContaining("         dotnet new3 --uninstall Microsoft.DotNet.Web.ProjectTemplates.5.0");
+                .And.HaveStdOutContaining("         dotnet-new3 new3 uninstall Microsoft.DotNet.Web.ProjectTemplates.5.0");
         }
 
         [Theory]
@@ -113,7 +113,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr()
                 .And.HaveStdOutContaining($"TemplateResolution{Path.DirectorySeparatorChar}DifferentLanguagesGroup{Path.DirectorySeparatorChar}BasicFSharp")
-                .And.HaveStdOutMatching($"^\\s*dotnet new3 --uninstall .*TemplateResolution{Regex.Escape(Path.DirectorySeparatorChar.ToString())}DifferentLanguagesGroup{Regex.Escape(Path.DirectorySeparatorChar.ToString())}BasicFSharp$", RegexOptions.Multiline);
+                .And.HaveStdOutMatching($"^\\s*dotnet-new3 new3 uninstall .*TemplateResolution{Regex.Escape(Path.DirectorySeparatorChar.ToString())}DifferentLanguagesGroup{Regex.Escape(Path.DirectorySeparatorChar.ToString())}BasicFSharp$", RegexOptions.Multiline);
 
             new DotnetNewCommand(_log, commandName, templateLocation)
                 .WithCustomHive(home)
@@ -168,7 +168,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Microsoft.DotNet.Web.ProjectTemplates.5.0")
                 .And.HaveStdOutContaining("Version: 5.0.0")
                 .And.HaveStdOutContaining("Author: Microsoft")
-                .And.HaveStdOutContaining("dotnet new3 --uninstall Microsoft.DotNet.Web.ProjectTemplates.5.0");
+                .And.HaveStdOutContaining("dotnet-new3 new3 uninstall Microsoft.DotNet.Web.ProjectTemplates.5.0");
 
             Assert.True(File.Exists(Path.Combine(home, "packages", "Microsoft.DotNet.Web.ProjectTemplates.5.0.5.0.0.nupkg")));
 
@@ -312,7 +312,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Should().Fail()
                 .And.HaveStdErrContaining("The template package 'Microsoft.DotNet.Common.ProjectTemplates.5.0' is not found.")
                 .And.HaveStdErrContaining("To list installed template packages use:")
-                .And.HaveStdErrContaining("   dotnet new3 --uninstall");
+                .And.HaveStdErrContaining("   dotnet-new3 new3 uninstall");
         }
 
         [Theory]
@@ -340,7 +340,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("   Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 (contains 2 templates)")
                 //                .And.HaveStdErrContaining("To list the templates installed in a package, use dotnet new3 <new option> <package name>")
                 .And.HaveStdErrContaining("To uninstall the template package use:")
-                .And.HaveStdErrContaining("   dotnet new3 --uninstall Microsoft.DotNet.Common.ProjectTemplates.5.0");
+                .And.HaveStdErrContaining("   dotnet-new3 new3 uninstall Microsoft.DotNet.Common.ProjectTemplates.5.0");
         }
 
         [Theory]
@@ -377,7 +377,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("   Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 (contains 2 templates)")
                 .And.HaveStdErrContaining("   Microsoft.DotNet.Common.ProjectTemplates.3.1::5.0.0 (contains 2 templates)")
                 .And.HaveStdErrContaining("To uninstall the template package use:")
-                .And.HaveStdErrContaining("   dotnet new3 --uninstall Microsoft.DotNet.Common.ProjectTemplates.");
+                .And.HaveStdErrContaining("   dotnet-new3 new3 uninstall Microsoft.DotNet.Common.ProjectTemplates.");
         }
 
         [Theory]
@@ -500,9 +500,9 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr()
                 .And.HaveStdOutContaining($"Basic FSharp (basic) F#")
-                .And.HaveStdOutContaining($"         dotnet new3 --uninstall '{testFolderWithSpace}'")
+                .And.HaveStdOutContaining($"         dotnet-new3 new3 uninstall '{testFolderWithSpace}'")
                 .And.HaveStdOutContaining($"Basic VB (basic) VB")
-                .And.HaveStdOutContaining($"         dotnet new3 --uninstall {testFolderWithoutSpace}");
+                .And.HaveStdOutContaining($"         dotnet-new3 new3 uninstall {testFolderWithoutSpace}");
         }
     }
 }

@@ -2,6 +2,6 @@
 Allowed values for '--language' option are: 'C#', 'F#', 'VB'.
 
 To list installed templates, run:
-   dotnet new3 --list
+   dotnet-new3 new3 list
 To search for the templates on NuGet.org, run:
-   dotnet new3 console --search
+   dotnet-new3 new3 search console

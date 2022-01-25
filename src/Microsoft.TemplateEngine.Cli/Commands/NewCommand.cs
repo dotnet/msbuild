@@ -8,6 +8,7 @@ using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -77,19 +78,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IsHidden = true
         };
 
-        internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
+        internal static Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
         {
             Description = SymbolStrings.Command_Instantiate_Argument_ShortName,
             Arity = new ArgumentArity(0, 1),
             IsHidden = true
         };
 
-        internal Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
+        internal static Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
         {
             Description = SymbolStrings.Command_Instantiate_Argument_TemplateOptions,
             Arity = new ArgumentArity(0, 999),
             IsHidden = true
         };
+
         protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {
             if (context is not TextCompletionContext textCompletionContext)

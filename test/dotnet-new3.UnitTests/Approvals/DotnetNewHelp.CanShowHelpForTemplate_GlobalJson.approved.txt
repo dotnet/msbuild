@@ -3,7 +3,7 @@ Author: Microsoft
 Description: A file for selecting the .NET SDK version.
 
 Usage:
-  new3 globaljson [options] [template options]
+  dotnet-new3 new3 globaljson [options] [template options]
 
 Options:
   -n, --name <name>      The name for the output being created. If no name is specified, the name of the output directory is used.

@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.IsHidden = true;
             AddValidator(ValidateParentCommandArguments);
 
-            parentCommand.AddNoLegacyUsageValidators(this, except: Filters.Values.Concat(new Symbol[] { ColumnsAllOption, ColumnsOption, parentCommand.ShortNameArgument }).ToArray());
+            parentCommand.AddNoLegacyUsageValidators(this, except: Filters.Values.Concat(new Symbol[] { ColumnsAllOption, ColumnsOption, NewCommand.ShortNameArgument }).ToArray());
         }
 
         public override Option<bool> ColumnsAllOption => ParentCommand.ColumnsAllOption;
@@ -31,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private void ValidateParentCommandArguments(CommandResult commandResult)
         {
-            var nameArgumentResult = commandResult.Children.FirstOrDefault(symbol => symbol.Symbol == this.NameArgument);
+            var nameArgumentResult = commandResult.Children.FirstOrDefault(symbol => symbol.Symbol == NameArgument);
             if (nameArgumentResult == null)
             {
                 return;

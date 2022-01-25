@@ -1,6 +1,6 @@
 ﻿To see help for other template languages (Lang2), use --language option:
-   dotnet new foo -h --language Lang2
+   new foo -h --language Lang2
 
 To see help for other template types (item), use --type option:
-   dotnet new foo -h --type item
+   new foo -h --type item
 

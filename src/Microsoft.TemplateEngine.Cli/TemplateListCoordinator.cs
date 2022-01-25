@@ -79,7 +79,11 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Output.WriteLine();
                     // To search for the templates on NuGet.org, run:
                     Reporter.Output.WriteLine(LocalizableStrings.SearchTemplatesCommand);
-                    Reporter.Output.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, usePlaceholder: true));
+                    Reporter.Output.WriteCommand(
+                       Example
+                           .For<NewCommand>(args.ParseResult)
+                           .WithSubcommand<SearchCommand>()
+                           .WithArgument(SearchCommand.NameArgument));
                     Reporter.Output.WriteLine();
                     return NewCommandStatus.Success;
                 }
@@ -108,11 +112,19 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
                 if (string.IsNullOrWhiteSpace(args.ListNameCriteria))
                 {
-                    Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, usePlaceholder: true));
+                    Reporter.Error.WriteCommand(
+                             Example
+                                 .For<NewCommand>(args.ParseResult)
+                                 .WithSubcommand<SearchCommand>()
+                                 .WithArgument(SearchCommand.NameArgument));
                 }
                 else
                 {
-                    Reporter.Error.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, args.ListNameCriteria));
+                    Reporter.Error.WriteCommand(
+                             Example
+                                 .For<NewCommand>(args.ParseResult)
+                                 .WithSubcommand<SearchCommand>()
+                                 .WithArgument(SearchCommand.NameArgument, args.ListNameCriteria));
                 }
                 Reporter.Error.WriteLine();
                 return NewCommandStatus.NotFound;
@@ -133,12 +145,13 @@ namespace Microsoft.TemplateEngine.Cli
 
             Reporter.Output.WriteLine(string.Format(
                 LocalizableStrings.TemplateInformationCoordinator_DotnetNew_Description,
-                CommandExamples.New3CommandExample(args.CommandName)));
+                Example.For<NewCommand>(args.ParseResult)));
+
             Reporter.Output.WriteLine();
 
             Reporter.Output.WriteLine(string.Format(
               LocalizableStrings.TemplateInformationCoordinator_DotnetNew_TemplatesHeader,
-              CommandExamples.New3CommandExample(args.CommandName)));
+              Example.For<NewCommand>(args.ParseResult)));
             TemplateGroupDisplay.DisplayTemplateList(
                 _engineEnvironmentSettings,
                 curatedTemplates,
@@ -146,17 +159,33 @@ namespace Microsoft.TemplateEngine.Cli
                 reporter: Reporter.Output);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
-            Reporter.Output.WriteCommand(CommandExamples.InstantiateTemplateExample(args.CommandName, "console"));
+            Reporter.Output.WriteCommand(
+               Example
+                   .For<NewCommand>(args.ParseResult)
+                   .WithArgument(NewCommand.ShortNameArgument, "console"));
+
             Reporter.Output.WriteLine();
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint);
-            Reporter.Output.WriteCommand(CommandExamples.HelpCommandExample(args.CommandName, "console"));
+            Reporter.Output.WriteCommand(
+              Example
+                  .For<NewCommand>(args.ParseResult)
+                  .WithArgument(NewCommand.ShortNameArgument, "console")
+                  .WithHelpOption());
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ListTemplatesHint);
-            Reporter.Output.WriteCommand(CommandExamples.ListCommandExample(args.CommandName));
+
+            Reporter.Output.WriteCommand(
+               Example
+                   .For<NewCommand>(args.ParseResult)
+                   .WithSubcommand<ListCommand>());
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint);
-            Reporter.Output.WriteCommand(CommandExamples.SearchCommandExample(args.CommandName, "web"));
+            Reporter.Output.WriteCommand(
+                     Example
+                         .For<NewCommand>(args.ParseResult)
+                         .WithSubcommand<SearchCommand>()
+                         .WithArgument(SearchCommand.NameArgument, "web"));
 
             Reporter.Output.WriteLine();
 

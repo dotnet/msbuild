@@ -105,10 +105,26 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             reporter.WriteLine();
 
             reporter.WriteLine(LocalizableStrings.ListTemplatesCommand);
-            reporter.WriteCommand(CommandExamples.ListCommandExample(instantiateArgs.CommandName));
+            reporter.WriteCommand(Example.For<NewCommand>(instantiateArgs.ParseResult).WithSubcommand<ListCommand>());
 
             reporter.WriteLine(LocalizableStrings.SearchTemplatesCommand);
-            reporter.WriteCommand(CommandExamples.SearchCommandExample(instantiateArgs.CommandName, instantiateArgs.ShortName));
+
+            if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
+            {
+                reporter.WriteCommand(
+                    Example
+                        .For<NewCommand>(instantiateArgs.ParseResult)
+                        .WithSubcommand<SearchCommand>()
+                        .WithArgument(SearchCommand.NameArgument));
+            }
+            else
+            {
+                reporter.WriteCommand(
+                  Example
+                      .For<NewCommand>(instantiateArgs.ParseResult)
+                      .WithSubcommand<SearchCommand>()
+                      .WithArgument(SearchCommand.NameArgument, instantiateArgs.ShortName));
+            }
 
             reporter.WriteLine();
         }

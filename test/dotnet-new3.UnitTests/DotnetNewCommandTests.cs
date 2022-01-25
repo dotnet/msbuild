@@ -26,30 +26,15 @@ namespace Dotnet_new3.IntegrationTests
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log)
+            var commandResult = new DotnetNewCommand(_log)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .Execute()
-                .Should()
-                .ExitWith(0).And.NotHaveStdErr()
-                .And.HaveStdOut(
-@"The 'dotnet new3' command creates a .NET project based on a template.
+                .Execute();
 
-Common templates are:
-Template Name  Short Name  Language    Tags          
--------------  ----------  ----------  --------------
-Class Library  classlib    [C#],F#,VB  Common/Library
-Console App    console     [C#],F#,VB  Common/Console
+            commandResult.Should()
+                .ExitWith(0).And.NotHaveStdErr();
 
-An example would be:
-   dotnet new3 console
-
-Display template options with:
-   dotnet new3 console -h
-Display all installed templates with:
-   dotnet new3 --list
-Display templates available on NuGet.org with:
-   dotnet new3 web --search");
+            ApprovalTests.Approvals.Verify(commandResult.StdOut);
         }
 
         [Fact]

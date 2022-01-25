@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             DebugShowConfig = parseResult.GetValueForOption(NewCommand.DebugShowConfigOption);
             ParseResult = parseResult;
             Command = command;
-            RootCommand = parseResult.GetNewCommandFromParseResult();
+            RootCommand = GetNewCommandFromParseResult(parseResult);
         }
 
         protected GlobalArgs(GlobalArgs args) : this(args.Command, args.ParseResult) { }
@@ -48,6 +48,24 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected static (bool, IReadOnlyList<string>?) ParseTabularOutputSettings(ITabularOutputCommand command, ParseResult parseResult)
         {
             return (parseResult.GetValueForOption(command.ColumnsAllOption), parseResult.GetValueForOption(command.ColumnsOption));
+        }
+
+        /// <summary>
+        /// Gets root <see cref="NewCommand"/> from <paramref name="parseResult"/>.
+        /// </summary>
+        private static NewCommand GetNewCommandFromParseResult(ParseResult parseResult)
+        {
+            var commandResult = parseResult.CommandResult;
+
+            while (commandResult?.Command != null && commandResult.Command is not NewCommand)
+            {
+                commandResult = (commandResult.Parent as CommandResult);
+            }
+            if (commandResult == null || commandResult.Command is not NewCommand newCommand)
+            {
+                throw new Exception($"Command structure is not correct: {nameof(NewCommand)} is not found as part of parse result.");
+            }
+            return newCommand;
         }
     }
 }

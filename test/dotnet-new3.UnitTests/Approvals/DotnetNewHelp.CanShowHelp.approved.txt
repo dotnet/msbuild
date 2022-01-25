@@ -2,16 +2,19 @@
   Template Instantiation Commands for .NET CLI.
 
 Usage:
-  new3 [<template-short-name> [<template-args>...]] [options]
-  new3 [command] [options]
+  dotnet-new3 new3 [<template-short-name> [<template-args>...]] [options]
+  dotnet-new3 new3 [command] [options]
+
+Arguments:
+  <template-short-name>  A short name of the template to create.
+  <template-args>        Template specific options to use.
 
 Options:
   -?, -h, --help  Show help and usage information
 
-
 Commands:
-  install <package>    Installs a template package.
-  uninstall <package>  Uninstalls a template package.
-  update               Checks the currently installed template packages for update, and install the updates.
-  search <name>        Searches for the templates on NuGet.org.
-  list <name>          Lists templates containing the specified template name. If no name is specified, lists all templates.
+  install <package>       Installs a template package.
+  uninstall <package>     Uninstalls a template package.
+  update                  Checks the currently installed template packages for update, and install the updates.
+  search <template-name>  Searches for the templates on NuGet.org.
+  list <template-name>    Lists templates containing the specified template name. If no name is specified, lists all templates.

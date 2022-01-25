@@ -4,7 +4,7 @@ Description: A project template for creating an ASP.NET Core application with ex
 This template contains technologies from parties other than Microsoft, see https://aka.ms/aspnetcore/5.0-third-party-notices for details.
 
 Usage:
-  new3 mvc [options] [template options]
+  dotnet-new3 new3 mvc [options] [template options]
 
 Options:
   -n, --name <name>       The name for the output being created. If no name is specified, the name of the output directory is used.
@@ -93,4 +93,4 @@ Template options:
                                                                           Default: false
 
 To see help for other template languages (F#), use --language option:
-   dotnet new3 mvc -h --language F#
+   dotnet-new3 new3 mvc -h --language F#

@@ -2,7 +2,7 @@
   Installs a template package.
 
 Usage:
-  new3 install <package>... [options]
+  dotnet-new3 new3 install [<package>...] [options]
 
 Arguments:
   <package>  NuGet package ID or path to folder or NuGet package to install. 

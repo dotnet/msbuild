@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(AddSourceOption);
         }
 
-        internal Argument<string[]> NameArgument { get; } = new("package")
+        internal static Argument<string[]> NameArgument { get; } = new("package")
         {
             Description = SymbolStrings.Command_Install_Argument_Package,
             Arity = new ArgumentArity(1, 99)

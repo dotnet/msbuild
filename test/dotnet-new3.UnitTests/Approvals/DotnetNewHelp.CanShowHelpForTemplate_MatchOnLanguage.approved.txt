@@ -3,7 +3,7 @@ Author: Microsoft
 Description: A project for creating a command-line application that can run on .NET on Windows, Linux and macOS
 
 Usage:
-  new3 console [options] [template options]
+  dotnet-new3 new3 console [options] [template options]
 
 Options:
   -n, --name <name>       The name for the output being created. If no name is specified, the name of the output directory is used.
@@ -26,4 +26,4 @@ Template options:
                                                  Default: false
 
 To see help for other template languages (C#, VB), use --language option:
-   dotnet new3 console -h --language C#
+   dotnet-new3 new3 console -h --language C#
