@@ -55,9 +55,7 @@ internal static class NativeMethods
 
     internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
 
-#if FEATURE_HANDLEREF
     internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
-#endif
 
     internal static IntPtr NullIntPtr = new IntPtr(0);
 
@@ -1515,11 +1513,7 @@ internal static class NativeMethods
     /// </summary>
     [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
     internal static extern int GetModuleFileName(
-#if FEATURE_HANDLEREF
             HandleRef hModule,
-#else
-            IntPtr hModule,
-#endif
             [Out] StringBuilder buffer, int length);
 
     [DllImport("kernel32.dll")]

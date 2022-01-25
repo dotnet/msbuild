@@ -39,7 +39,6 @@
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_GAC</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_GET_COMMANDLINE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_HANDLEREF</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HTTP_LISTENER</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_INSTALLED_MSBUILD</DefineConstants>
     <!-- Directory.GetCurrentDirectory The pre .Net 4.6.2 implementation of Directory.GetCurrentDirectory is slow and creates strings in its work. -->
