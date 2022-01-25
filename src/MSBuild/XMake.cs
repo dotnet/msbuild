@@ -28,9 +28,6 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
@@ -646,9 +643,6 @@ namespace Microsoft.Build.CommandLine
                     }
                     else // regular build
                     {
-#if !STANDALONEBUILD
-                    if (Environment.GetEnvironmentVariable("MSBUILDOLDOM") != "1")
-#endif
                         {
                             // if everything checks out, and sufficient information is available to start building
                             if (
@@ -686,12 +680,6 @@ namespace Microsoft.Build.CommandLine
                                 exitType = ExitType.BuildError;
                             }
                         }
-#if !STANDALONEBUILD
-                    else
-                    {
-                        exitType = OldOMBuildProject(exitType, projectFile, targets, toolsVersion, globalProperties, loggers, verbosity, needToValidateProject, schemaFile, cpuCount);
-                    }
-#endif
                     } // end of build
 
                     DateTime t2 = DateTime.Now;
@@ -854,35 +842,6 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
-#if (!STANDALONEBUILD)
-        /// <summary>
-        /// Use the Orcas Engine to build the project
-        /// #############################################################################################
-        /// #### Segregated into another method to avoid loading the old Engine in the regular case. ####
-        /// #### Do not move back in to the main code path! #############################################
-        /// #############################################################################################
-        ///  We have marked this method as NoInlining because we do not want Microsoft.Build.Engine.dll to be loaded unless we really execute this code path
-        /// </summary>
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static ExitType OldOMBuildProject(ExitType exitType, string projectFile, string[] targets, string toolsVersion, Dictionary<string, string> globalProperties, ILogger[] loggers, LoggerVerbosity verbosity, bool needToValidateProject, string schemaFile, int cpuCount)
-        {
-            // Log something to avoid confusion caused by errant environment variable sending us down here
-            Console.WriteLine(AssemblyResources.GetString("Using35Engine"));
-
-            Microsoft.Build.BuildEngine.BuildPropertyGroup oldGlobalProps = new Microsoft.Build.BuildEngine.BuildPropertyGroup();
-            // Copy over the global properties to the old OM
-            foreach (KeyValuePair<string, string> globalProp in globalProperties)
-            {
-                oldGlobalProps.SetProperty(globalProp.Key, globalProp.Value);
-            }
-
-            if (!BuildProjectWithOldOM(projectFile, targets, toolsVersion, oldGlobalProps, loggers, verbosity, null, needToValidateProject, schemaFile, cpuCount))
-            {
-                exitType = ExitType.BuildError;
-            }
-            return exitType;
-        }
-#endif
         /// <summary>
         /// Handler for when CTRL-C or CTRL-BREAK is called.
         /// CTRL-BREAK means "die immediately"
@@ -1470,88 +1429,7 @@ namespace Microsoft.Build.CommandLine
             return ExecuteBuild(buildManager, restoreRequest);
         }
 
-#if (!STANDALONEBUILD)
-        /// <summary>
-        /// Initializes the build engine, and starts the project build.
-        /// Uses the Whidbey/Orcas object model.
-        /// #############################################################################################
-        /// #### Segregated into another method to avoid loading the old Engine in the regular case. ####
-        /// #### Do not move back in to the main code path! #############################################
-        /// #############################################################################################
-        ///  We have marked this method as NoInlining because we do not want Microsoft.Build.Engine.dll to be loaded unless we really execute this code path
-        /// </summary>
-        /// <returns>true, if build succeeds</returns>
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool BuildProjectWithOldOM(string projectFile, string[] targets, string toolsVersion, Microsoft.Build.BuildEngine.BuildPropertyGroup propertyBag, ILogger[] loggers, LoggerVerbosity verbosity, DistributedLoggerRecord[] distributedLoggerRecords, bool needToValidateProject, string schemaFile, int cpuCount)
-        {
-            string msbuildLocation = Path.GetDirectoryName(Assembly.GetAssembly(typeof(MSBuildApp)).Location);
-            string localNodeProviderParameters = "msbuildlocation=" + msbuildLocation; /*This assembly is the exe*/ ;
 
-            localNodeProviderParameters += ";nodereuse=false";
-
-            Microsoft.Build.BuildEngine.Engine engine = new Microsoft.Build.BuildEngine.Engine(propertyBag, Microsoft.Build.BuildEngine.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.BuildEngine.ToolsetDefinitionLocations.Registry, cpuCount, localNodeProviderParameters);
-            bool success = false;
-
-            try
-            {
-                foreach (ILogger logger in loggers)
-                {
-                    engine.RegisterLogger(logger);
-                }
-
-                // Targeted perf optimization for the case where we only have our own parallel console logger, and verbosity is quiet. In such a case
-                // we know we won't emit any messages except for errors and warnings, so the engine should not bother even logging them.
-                // If we're using the original serial console logger we can't do this, as it shows project started/finished context
-                // around errors and warnings.
-                // Telling the engine to not bother logging non-critical messages means that typically it can avoid loading any resources in the successful
-                // build case.
-                if (loggers.Length == 1 &&
-                    verbosity == LoggerVerbosity.Quiet &&
-                    loggers[0].Parameters.IndexOf("ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase) != -1 &&
-                    loggers[0].Parameters.IndexOf("DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase) == -1 &&
-                    loggers[0].Parameters.IndexOf("V=", StringComparison.OrdinalIgnoreCase) == -1 &&                // Console logger could have had a verbosity
-                    loggers[0].Parameters.IndexOf("VERBOSITY=", StringComparison.OrdinalIgnoreCase) == -1)          // override with the /clp switch
-                {
-                    // Must be exactly the console logger, not a derived type like the file logger.
-                    Type t1 = loggers[0].GetType();
-                    Type t2 = typeof(ConsoleLogger);
-                    if (t1 == t2)
-                    {
-                        engine.OnlyLogCriticalEvents = true;
-                    }
-                }
-
-                Microsoft.Build.BuildEngine.Project project = null;
-
-                try
-                {
-                    project = new Microsoft.Build.BuildEngine.Project(engine, toolsVersion);
-                }
-                catch (InvalidOperationException e)
-                {
-                    InitializationException.Throw("InvalidToolsVersionError", toolsVersion, e, false /*no stack*/);
-                }
-
-                project.IsValidated = needToValidateProject;
-                project.SchemaFile = schemaFile;
-
-                project.Load(projectFile);
-
-                success = engine.BuildProject(project, targets);
-            }
-            // handle project file errors
-            catch (InvalidProjectFileException)
-            {
-                // just eat the exception because it has already been logged
-            }
-            finally
-            {
-                // Unregister loggers and finish with engine
-                engine.Shutdown();
-            }
-            return success;
-        }
-#endif
         /// <summary>
         /// Verifies that the code is running on a supported operating system.
         /// </summary>
@@ -2661,9 +2539,6 @@ namespace Microsoft.Build.CommandLine
                 CommandLineSwitchException.VerifyThrow(nodeModeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
             }
 
-#if !STANDALONEBUILD
-            if (!commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.OldOM])
-#endif
             {
                 bool restart = true;
                 while (restart)
@@ -2706,31 +2581,7 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
             }
-#if !STANDALONEBUILD
-            else
-            {
-                StartLocalNodeOldOM(nodeModeNumber);
-            }
-#endif
         }
-
-#if !STANDALONEBUILD
-        /// <summary>
-        /// Start an old-OM local node
-        /// </summary>
-        /// <remarks>
-        /// #############################################################################################
-        /// #### Segregated into another method to avoid loading the old Engine in the regular case. ####
-        /// #### Do not move back in to the main code path! #############################################
-        /// #############################################################################################
-        ///  We have marked this method as NoInlining because we do not want Microsoft.Build.Engine.dll to be loaded unless we really execute this code path
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void StartLocalNodeOldOM(int nodeNumber)
-        {
-            Microsoft.Build.BuildEngine.LocalNode.StartLocalNodeServer(nodeNumber);
-        }
-#endif
 
         /// <summary>
         /// Process the /m: switch giving the CPU count

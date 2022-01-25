@@ -5,10 +5,6 @@ using System;
 using System.Xml;
 using System.Collections;
 
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
-
 using Microsoft.Build.BuildEngine.Shared;
 
 using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
