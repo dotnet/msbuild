@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -45,7 +44,7 @@ namespace Microsoft.Build.Tasks
 
         public GetCompatiblePlatform()
         {
-            AnnotatedProjects = new ITaskItem[0];
+            AnnotatedProjects = Array.Empty<ITaskItem>();
             CurrentProjectPlatform = string.Empty;
             PlatformLookupTable = string.Empty;
         }

@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
@@ -56,7 +58,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new MainNodeSdkResolverService();
         }
 
-        //  Test hook
+        // Test hook
         internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IList<SdkResolver> resolvers = null)
         {
             ((CachingSdkResolverService)_cachedSdkResolver).InitializeForTests(resolverLoader, resolvers);

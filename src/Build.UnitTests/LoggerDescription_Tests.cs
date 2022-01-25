@@ -8,6 +8,8 @@ using Microsoft.Build.Framework;
 using Xunit;
 using Microsoft.Build.Logging;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class LoggerDescription_Tests

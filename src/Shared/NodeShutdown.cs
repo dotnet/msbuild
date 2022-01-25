@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

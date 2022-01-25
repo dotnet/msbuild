@@ -15,6 +15,8 @@ using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
 #if FEATURE_COM_INTEROP
@@ -55,7 +57,7 @@ namespace Microsoft.Build.Tasks
     [GuidAttribute("00020406-0000-0000-C000-000000000046")]
     [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
     [ComImport]
-    internal interface UCOMICreateITypeLib
+    internal interface ICreateTypeLib
     {
         void CreateTypeInfo();
         void SetName();
@@ -341,7 +343,9 @@ namespace Microsoft.Build.Tasks
         public uint cchBuf;
     }
 
-    [ComImport, Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport]
+    [Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAssemblyCache
     {
         /* Unused.
@@ -380,7 +384,9 @@ namespace Microsoft.Build.Tasks
         DOWNLOAD = 4
     }
 
-    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E")]
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E")]
     internal interface IAssemblyName
     {
         [PreserveSig]
@@ -432,7 +438,9 @@ namespace Microsoft.Build.Tasks
         int Clone(out IAssemblyName pAsmName);
     }// IAssemblyName
 
-    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
     internal interface IAssemblyEnum
     {
         [PreserveSig]
@@ -554,9 +562,9 @@ namespace Microsoft.Build.Tasks
         }
 
         // Set of IMAGE_FILE constants which represent the processor architectures for native assemblies.
-        internal const UInt16 IMAGE_FILE_MACHINE_UNKNOWN = 0x0; //	The contents of this field are assumed to be applicable to any machine type
+        internal const UInt16 IMAGE_FILE_MACHINE_UNKNOWN = 0x0; // The contents of this field are assumed to be applicable to any machine type
         internal const UInt16 IMAGE_FILE_MACHINE_INVALID = UInt16.MaxValue; // Invalid value for the machine type.
-        internal const UInt16 IMAGE_FILE_MACHINE_AMD64 = 0x8664; //	x64
+        internal const UInt16 IMAGE_FILE_MACHINE_AMD64 = 0x8664; // x64
         internal const UInt16 IMAGE_FILE_MACHINE_ARM = 0x1c0; // ARM little endian
         internal const UInt16 IMAGE_FILE_MACHINE_ARMV7 = 0x1c4; // ARMv7 (or higher) Thumb mode only
         internal const UInt16 IMAGE_FILE_MACHINE_I386 = 0x14c; // Intel 386 or later processors and compatible processors

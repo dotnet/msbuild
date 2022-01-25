@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework.Profiler
 {
     /// <summary>

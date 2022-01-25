@@ -10,6 +10,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

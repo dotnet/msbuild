@@ -14,6 +14,8 @@ using System.Xaml;
 using Microsoft.Build.Evaluation;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     internal static class XamlTestHelpers
@@ -230,7 +232,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 return (string)task.GetType().InvokeMember("GetCommandLine_ForUnitTestsOnly", BindingFlags.Public | BindingFlags.NonPublic |
-                                    BindingFlags.Instance | BindingFlags.InvokeMethod, null, task, new object[] { });
+                                    BindingFlags.Instance | BindingFlags.InvokeMethod, null, task, Array.Empty<object>());
             }
             catch (TargetInvocationException e)
             {

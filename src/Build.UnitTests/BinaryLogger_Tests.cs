@@ -11,12 +11,14 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class BinaryLoggerTests : IDisposable
     {
         private const string s_testProject = @"
-         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+         <Project>
             <PropertyGroup>
                <TestProperty>Test</TestProperty>
             </PropertyGroup>

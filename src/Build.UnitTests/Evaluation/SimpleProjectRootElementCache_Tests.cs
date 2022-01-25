@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {
     public class SimpleProjectRootElementCache_Tests : IDisposable

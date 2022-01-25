@@ -6,14 +6,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+#if MICROSOFT_BUILD_ENGINE_UNITTESTS
 using System.Text;
 using Microsoft.Build.BackEnd.Logging;
+#endif
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {

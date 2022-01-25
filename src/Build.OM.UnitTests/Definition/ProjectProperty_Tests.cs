@@ -11,6 +11,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
@@ -37,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void NoExpansion()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p>v1</p>
                         </PropertyGroup>
@@ -59,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ExpandProperty()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <o>v1</o>
                             <p>$(o)</p>
@@ -233,7 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Verify item expressions are not expanded in new property values.
         /// NOTE: They aren't expanded to "blank". It just seems like that, because
-        /// when you output them, item expansion happens after property expansion, and 
+        /// when you output them, item expansion happens after property expansion, and
         /// they may evaluate to blank then. (Unless items do exist at that point.)
         /// </summary>
         [Fact]

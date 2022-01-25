@@ -11,6 +11,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
@@ -135,7 +137,7 @@ namespace Microsoft.Build.UnitTests
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
             task.Language = "c#";
-            task.AssemblyAttributes = new TaskItem[] { }; // MSBuild sets an empty array
+            task.AssemblyAttributes = Array.Empty<TaskItem>(); // MSBuild sets an empty array
             task.OutputFile = new TaskItem(file);
             bool result = task.Execute();
 
@@ -482,8 +484,8 @@ namespace Microsoft.Build.UnitTests
             File.Delete(task.OutputFile.ItemSpec);
         }
 
-        private static readonly string VBCarriageReturn = "Global.Microsoft.VisualBasic.ChrW(13)";
-        private static readonly string VBLineFeed = "Global.Microsoft.VisualBasic.ChrW(10)";
+        private const string VBCarriageReturn = "Global.Microsoft.VisualBasic.ChrW(13)";
+        private const string VBLineFeed = "Global.Microsoft.VisualBasic.ChrW(10)";
 
         public static readonly string VBLineSeparator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"{VBCarriageReturn}&{VBLineFeed}" : VBLineFeed;
 
@@ -1062,7 +1064,6 @@ namespace Microsoft.Build.UnitTests
                 Assert.False(result, engine.Log);
 
                 engine.AssertLogContains(errorCode);
-
             }
             finally
             {

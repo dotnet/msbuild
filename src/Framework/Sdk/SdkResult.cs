@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -17,7 +19,7 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     public abstract class SdkResult
     {
-        //  Explicit backing fields so that implementation in Microsoft.Build.dll can use them for translation
+        // Explicit backing fields so that implementation in Microsoft.Build.dll can use them for translation
         private protected bool _success;
         private protected string _path;
         private protected string _version;

@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     internal static class EngineFileUtilities
@@ -51,7 +53,6 @@ namespace Microsoft.Build.Internal
             string directoryEscaped,
             string filespecEscaped
             )
-
         {
             return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: false, forceEvaluateWildCards: false, excludeSpecsEscaped: null, fileMatcher: FileMatcher.Default);
         }
@@ -225,9 +226,14 @@ namespace Microsoft.Build.Internal
             return _regexMatchCache.Value.GetOrAdd(fileSpec, file => s_lazyWildCardExpansionRegexes.Any(regex => regex.IsMatch(fileSpec)));
         }
 
-        /// Returns a Func that will return true IFF its argument matches any of the specified filespecs
-        /// Assumes filespec may be escaped, so it unescapes it
+        /// <summary>
+        /// Returns a Func that will return true IFF its argument matches any of the specified filespecs.
+        /// Assumes filespec may be escaped, so it unescapes it.
         /// The returned function makes no escaping assumptions or escaping operations. Its callers should control escaping.
+        /// </summary>
+        /// <param name="filespecsEscaped"></param>
+        /// <param name="currentDirectory"></param>
+        /// <returns>A Func that will return true IFF its argument matches any of the specified filespecs.</returns>
         internal static Func<string, bool> GetFileSpecMatchTester(IList<string> filespecsEscaped, string currentDirectory)
         {
             var matchers = filespecsEscaped

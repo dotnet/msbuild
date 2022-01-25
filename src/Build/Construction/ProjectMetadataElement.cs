@@ -5,6 +5,8 @@ using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -49,7 +51,7 @@ namespace Microsoft.Build.Construction
             set => ChangeName(value);
         }
 
-        //  Add a new property with the same name here because this attribute should be public for ProjectMetadataElement,
+        // Add a new property with the same name here because this attribute should be public for ProjectMetadataElement,
         //  but internal for ProjectElement, because we don't want it to be settable for arbitrary elements.
         /// <summary>
         /// Gets or sets whether this piece of metadata is expressed as an attribute.

@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.Tracing;
 
+#nullable disable
+
 namespace Microsoft.Build.Eventing
 {
     /// <summary>
@@ -10,7 +12,22 @@ namespace Microsoft.Build.Eventing
     {
         public static class Keywords
         {
+            /// <summary>
+            /// Keyword applied to all MSBuild events.
+            /// </summary>
+            /// <remarks>
+            /// Literally every event should define this.
+            /// </remarks>
             public const EventKeywords All = (EventKeywords)0x1;
+
+            /// <summary>
+            /// Keyword for events that should go in the text performance log when turned on.
+            /// </summary>
+            /// <remarks>
+            /// This keyword should be applied only to events that are low-volume
+            /// and likely to be useful to diagnose perf issues using the
+            /// <see href="https://github.com/dotnet/msbuild/pull/5861">text perf log</see>.
+            /// </remarks>
             public const EventKeywords PerformanceLog = (EventKeywords)0x2;
         }
 
@@ -519,6 +536,54 @@ namespace Microsoft.Build.Eventing
             WriteEvent(70, oldHash, newHash);
         }
 
-#endregion
+        [Event(71, Keywords = Keywords.All)]
+        public void ProjectCacheCreatePluginInstanceStart(string pluginAssemblyPath)
+        {
+            WriteEvent(71, pluginAssemblyPath);
+        }
+
+        [Event(72, Keywords = Keywords.All)]
+        public void ProjectCacheCreatePluginInstanceStop(string pluginAssemblyPath, string pluginTypeName)
+        {
+            WriteEvent(72, pluginAssemblyPath, pluginTypeName);
+        }
+
+        [Event(73, Keywords = Keywords.All)]
+        public void ProjectCacheBeginBuildStart(string pluginTypeName)
+        {
+            WriteEvent(73, pluginTypeName);
+        }
+
+        [Event(74, Keywords = Keywords.All)]
+        public void ProjectCacheBeginBuildStop(string pluginTypeName)
+        {
+            WriteEvent(74, pluginTypeName);
+        }
+
+        [Event(75, Keywords = Keywords.All)]
+        public void ProjectCacheGetCacheResultStart(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(75, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(76, Keywords = Keywords.All)]
+        public void ProjectCacheGetCacheResultStop(string pluginTypeName, string projectPath, string targets, string cacheResultType)
+        {
+            WriteEvent(76, pluginTypeName, projectPath, targets, cacheResultType);
+        }
+
+        [Event(77, Keywords = Keywords.All)]
+        public void ProjectCacheEndBuildStart(string pluginTypeName)
+        {
+            WriteEvent(77, pluginTypeName);
+        }
+
+        [Event(78, Keywords = Keywords.All)]
+        public void ProjectCacheEndBuildStop(string pluginTypeName)
+        {
+            WriteEvent(78, pluginTypeName);
+        }
+
+        #endregion
     }
 }
