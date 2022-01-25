@@ -75,6 +75,18 @@ namespace Microsoft.DotNet.Watcher.Tools
             WriteTestOutput($"{DateTime.Now}: process started: '{_process.StartInfo.FileName} {_process.StartInfo.Arguments}'");
         }
 
+        public Task<string> GetOutputLineAsyncWithConsoleHistoryAsync(string message, TimeSpan timeout)
+        {
+            if (_lines.Contains(message))
+            {
+                WriteTestOutput($"Found [msg == '{message}'] in console history.");
+                return Task.FromResult(message);
+            }
+            
+            WriteTestOutput($"Did not find [msg == '{message}'] in console history.");
+            return GetOutputLineAsync(message, timeout);
+        }
+
         public async Task<string> GetOutputLineAsync(string message, TimeSpan timeout)
         {
             WriteTestOutput($"Waiting for output line [msg == '{message}']. Will wait for {timeout.TotalSeconds} sec.");

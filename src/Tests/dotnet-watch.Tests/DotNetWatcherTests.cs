@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            await app.Process.GetOutputLineAsync("Environment: Development", TimeSpan.FromSeconds(10));
+            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development", TimeSpan.FromSeconds(10));
         }
 
         [CoreMSBuildOnlyFact]
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            await app.Process.GetOutputLineAsync("Environment: Development", TimeSpan.FromSeconds(10));
+            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development", TimeSpan.FromSeconds(10));
         }
 
         [CoreMSBuildOnlyFact]
