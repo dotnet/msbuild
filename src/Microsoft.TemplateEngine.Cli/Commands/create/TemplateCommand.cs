@@ -5,6 +5,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Cli.Extensions;
@@ -19,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static readonly string[] _helpAliases = new[] { "-h", "/h", "--help", "-?", "/?" };
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly IEngineEnvironmentSettings _environmentSettings;
-        private readonly InstantiateCommand _instantiateCommand;
+        private readonly BaseCommand _instantiateCommand;
         private readonly TemplateGroup _templateGroup;
         private readonly CliTemplateInfo _template;
         private Dictionary<string, TemplateOption> _templateSpecificOptions = new Dictionary<string, TemplateOption>();
@@ -29,7 +30,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         /// </summary>
         /// <exception cref="InvalidTemplateParametersException">when <paramref name="template"/> has invalid template parameters.</exception>
         public TemplateCommand(
-            InstantiateCommand instantiateCommand,
+            BaseCommand instantiateCommand,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             TemplateGroup templateGroup,
@@ -152,29 +153,29 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal CliTemplateInfo Template => _template;
 
-        public async Task<int> InvokeAsync(InvocationContext context, ITelemetryLogger telemetryLogger)
+        internal async Task<NewCommandStatus> InvokeAsync(ParseResult parseResult, ITelemetryLogger telemetryLogger, CancellationToken cancellationToken)
         {
-            TemplateCommandArgs args = new TemplateCommandArgs(this, context.ParseResult);
+            TemplateCommandArgs args = new TemplateCommandArgs(this, _instantiateCommand, parseResult);
 
             TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, telemetryLogger, () => Console.ReadLine() ?? string.Empty, _instantiateCommand.Callbacks);
             if (!args.NoUpdateCheck)
             {
                 TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(telemetryLogger, _environmentSettings, _templatePackageManager);
-                Task<CheckUpdateResult?> checkForUpdateTask = packageCoordinator.CheckUpdateForTemplate(args.Template, context.GetCancellationToken());
-                Task<NewCommandStatus> instantiateTask = invoker.InvokeTemplateAsync(args, context.GetCancellationToken());
+                Task<CheckUpdateResult?> checkForUpdateTask = packageCoordinator.CheckUpdateForTemplate(args.Template, cancellationToken);
+                Task<NewCommandStatus> instantiateTask = invoker.InvokeTemplateAsync(args, cancellationToken);
                 await Task.WhenAll(checkForUpdateTask, instantiateTask).ConfigureAwait(false);
 
                 if (checkForUpdateTask?.Result != null)
                 {
                     // print if there is update for this template
-                    packageCoordinator.DisplayUpdateCheckResult(checkForUpdateTask.Result, args.NewCommandName);
+                    packageCoordinator.DisplayUpdateCheckResult(checkForUpdateTask.Result, args);
                 }
                 // return creation result
-                return (int)instantiateTask.Result;
+                return instantiateTask.Result;
             }
             else
             {
-                return (int)await invoker.InvokeTemplateAsync(args, context.GetCancellationToken()).ConfigureAwait(false);
+                return await invoker.InvokeTemplateAsync(args, cancellationToken).ConfigureAwait(false);
             }
         }
 

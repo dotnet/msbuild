@@ -4,6 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyXunit;
 using Xunit;
@@ -26,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
             var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
 
-            var parseResult = myCommand.Parse("new ");
+            var parseResult = ParserFactory.CreateParser(myCommand).Parse("new ");
             var result = parseResult.GetCompletions().ToArray();
 
             return Verifier.Verify(result, _verifySettings.Settings);

@@ -3,8 +3,10 @@
 
 #nullable enable
 
+using System.CommandLine;
 using System.CommandLine.Help;
 using System.CommandLine.Parsing;
+using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -19,11 +21,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     throw new ArgumentException($"{nameof(context)} should be for {nameof(NewCommand)}");
                 }
                 NewCommandArgs args = new NewCommandArgs(newCommand, context.ParseResult);
-                InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(newCommand);
-
-                //tokens do not contain help option
-                ParseResult reparseResult = ParserFactory.CreateParser(instantiateCommand).Parse(args.Tokens);
-                instantiateCommand.WriteHelp(context, reparseResult);
+                IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
+                InstantiateCommandArgs instantiateCommandArgs = InstantiateCommandArgs.FromNewCommandArgs(args);
+                InstantiateCommand.WriteHelp(context, instantiateCommandArgs, environmentSettings);
             };
         }
     }

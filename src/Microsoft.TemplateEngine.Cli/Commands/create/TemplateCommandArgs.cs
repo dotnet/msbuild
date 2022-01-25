@@ -3,20 +3,22 @@
 
 #nullable enable
 
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class TemplateCommandArgs
+    internal class TemplateCommandArgs : ICommandArgs
     {
-        private readonly ParseResult _parseResult;
         private readonly TemplateCommand _command;
         private Dictionary<string, OptionResult> _templateOptions = new Dictionary<string, OptionResult>();
 
-        public TemplateCommandArgs(TemplateCommand command, ParseResult parseResult)
+        public TemplateCommandArgs(TemplateCommand command, BaseCommand parentCommand, ParseResult parseResult)
         {
-            _parseResult = parseResult ?? throw new ArgumentNullException(nameof(parseResult));
+            ParseResult = parseResult ?? throw new ArgumentNullException(nameof(parseResult));
             _command = command ?? throw new ArgumentNullException(nameof(command));
+            ParentCommand = parentCommand ?? throw new ArgumentNullException(nameof(parentCommand));
+            RootCommand = GetRootCommand(parentCommand);
 
             Name = parseResult.GetValueForOptionOrNull(command.NameOption);
             OutputPath = parseResult.GetValueForOptionOrNull(command.OutputOption);
@@ -49,7 +51,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
             }
             Template = command.Template;
-            NewCommandName = parseResult.GetNewCommandName();
         }
 
         public string? Name { get; }
@@ -83,7 +84,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         }
 
-        internal string NewCommandName { get; private set; }
+        public ParseResult ParseResult { get; }
+
+        public Command Command => _command;
+
+        public NewCommand RootCommand { get; }
+
+        public BaseCommand ParentCommand { get; }
 
         public bool TryGetAliasForCanonicalName(string canonicalName, out string? alias)
         {
@@ -120,6 +127,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return $"0x{intValue.ToString("X")}";
             }
             return optionValue.ToString();
+        }
+
+        private NewCommand GetRootCommand(BaseCommand command)
+        {
+            if (command is NewCommand newCommand)
+            {
+                return newCommand;
+            }
+            Command? currentCommand = command;
+            while (currentCommand != null && currentCommand is not NewCommand)
+            {
+                currentCommand = currentCommand.Parents.OfType<Command>().SingleOrDefault();
+            }
+            return currentCommand as NewCommand ?? throw new Exception($"Command structure is not correct: {nameof(NewCommand)} is not found.");
         }
     }
 }

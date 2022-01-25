@@ -119,14 +119,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo --testChoice ");
+            var parseResult = myCommand.Parse($" new foo --testChoice ");
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2", "val3" }, result);
         }
@@ -145,13 +144,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo --testChoice v");
+            var parseResult = myCommand.Parse($" new foo --testChoice v");
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2" }, result);
         }
@@ -170,14 +168,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo --testChoice v --name test");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo --testChoice v --name test");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
             completionContext = completionContext!.AtCursorPosition(23);
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2" }, result);
         }
@@ -199,13 +196,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo --testChoice ");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo --testChoice ");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2", "val3" }, result);
         }
@@ -227,13 +223,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo --testChoice v");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo --testChoice v");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2" }, result);
         }
@@ -257,13 +252,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo ");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo ");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Contains("--param", result);
             Assert.Contains("--testChoice", result);
@@ -299,13 +293,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo --t");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo --t");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Contains("--test", result);
             Assert.Contains("--testChoice", result);
@@ -343,13 +336,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo --foo val1 --bar val2 --t");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo --foo val1 --bar val2 --t");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.DoesNotContain("--test", result);
             Assert.Contains("--testChoice", result);
@@ -385,13 +377,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo {optionName} ");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo {optionName} ");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "C#", "F#" }, result);
         }
@@ -413,13 +404,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo --type ");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo --type ");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = instantiateCommand.GetCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "project", "solution" }, result);
         }

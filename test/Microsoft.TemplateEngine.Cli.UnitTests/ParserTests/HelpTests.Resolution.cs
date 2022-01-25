@@ -40,10 +40,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new console2");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($" new console2");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, matchingTemplates.Count());
             StringWriter output = new StringWriter();
             Reporter reporter = new Reporter(new AnsiConsole(output));
@@ -67,10 +66,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new console");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($" new console");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(3, matchingTemplates.Count());
             StringWriter output = new StringWriter();
             Reporter reporter = new Reporter(new AnsiConsole(output));
@@ -94,10 +92,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new console");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($" new console");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(2, matchingTemplates.Count());
             StringWriter output = new StringWriter();
             Reporter reporter = new Reporter(new AnsiConsole(output));
@@ -122,10 +119,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console --language L2");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console --language L2");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, matchingTemplates.Count());
             StringWriter output = new StringWriter();
             Reporter reporter = new Reporter(new AnsiConsole(output));
@@ -148,10 +144,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(3, matchingTemplates.Count());
             StringWriter output = new StringWriter();
             Reporter reporter = new Reporter(new AnsiConsole(output));
@@ -176,10 +171,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console --language L2");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console --language L2");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(0, matchingTemplates.Count());
         }
 
@@ -200,10 +194,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console --type item");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console --type item");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(0, matchingTemplates.Count());
         }
 
@@ -223,10 +216,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console --baseline core");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console --baseline core");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(0, matchingTemplates.Count());
         }
 
@@ -247,10 +239,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console --language L2 --type item --baseline core");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console --language L2 --type item --baseline core");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(0, matchingTemplates.Count());
         }
 
@@ -277,10 +268,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console --language L2 --type item");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console --language L2 --type item");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(0, matchingTemplates.Count());
         }
 
@@ -315,10 +305,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console --langVersion ver");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console --langVersion ver");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, matchingTemplates.Count());
         }
 
@@ -353,10 +342,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console --framework netcoreapp1.0");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console --framework netcoreapp1.0");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, matchingTemplates.Count());
 
         }
@@ -392,10 +380,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new console --do-not-exist");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var matchingTemplates = instantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new console --do-not-exist");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(0, matchingTemplates.Count());
         }
     }

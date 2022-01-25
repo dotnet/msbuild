@@ -21,34 +21,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         }
 
         /// <summary>
-        /// Gets name of <see cref="NewCommand"/> from <paramref name="parseResult"/>.
-        /// <paramref name="parseResult"/> might be result for subcommand, then method will traverse up until <see cref="NewCommand"/> is found.
-        /// </summary>
-        /// <param name="parseResult"></param>
-        /// <returns></returns>
-        internal static string GetNewCommandName(this ParseResult parseResult)
-        {
-            var commandResult = parseResult.CommandResult;
-
-            while (commandResult?.Command != null && commandResult.Command is not NewCommand)
-            {
-                commandResult = (commandResult.Parent as CommandResult);
-            }
-
-            //if new command is not found, search for instantiate command
-            //in instantiation workflow via new command (dotnet new template) NewCommand is replaced by InstantiateCommand
-            if (string.IsNullOrWhiteSpace(commandResult?.Command?.Name))
-            {
-                commandResult = parseResult.CommandResult;
-                while (commandResult?.Command != null && commandResult.Command is not InstantiateCommand)
-                {
-                    commandResult = (commandResult.Parent as CommandResult);
-                }
-            }
-            return commandResult?.Command?.Name ?? string.Empty;
-        }
-
-        /// <summary>
         /// Checks if <paramref name="parseResult"/> contains an error for <paramref name="option"/>.
         /// </summary>
         internal static bool HasErrorFor(this ParseResult parseResult, Option option)
@@ -69,6 +41,57 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
 
             return false;
+        }
+
+        internal static string GetDisplayArgumentName(this Argument argument)
+        {
+            return argument.Arity.MinimumNumberOfValues > 0
+                ? $"<{argument.Name}>"
+                : $"[{argument.Name}]";
+        }
+
+        /// <summary>
+        /// Gets root <see cref="NewCommand"/> from <paramref name="parseResult"/>.
+        /// </summary>
+        internal static NewCommand GetNewCommandFromParseResult(this ParseResult parseResult)
+        {
+            var commandResult = parseResult.CommandResult;
+
+            while (commandResult?.Command != null && commandResult.Command is not NewCommand)
+            {
+                commandResult = (commandResult.Parent as CommandResult);
+            }
+            if (commandResult == null || commandResult.Command is not NewCommand newCommand)
+            {
+                throw new Exception($"Command structure is not correct: {nameof(NewCommand)} is not found as part of parse result.");
+            }
+            return newCommand;
+        }
+
+        /// <summary>
+        /// Gets parent command list including topmost <see cref="NewCommand"/>.
+        /// </summary>
+        /// <returns> list of called commands before and including <see cref="NewCommand"/>.</returns>
+        internal static IReadOnlyList<Command> GetParentCommandListFromParseResult(this ParseResult parseResult)
+        {
+            var commandResult = parseResult.CommandResult;
+
+            while (commandResult?.Command != null && commandResult.Command is not NewCommand)
+            {
+                commandResult = (commandResult.Parent as CommandResult);
+            }
+            if (commandResult == null || commandResult.Command is not NewCommand newCommand)
+            {
+                throw new Exception($"Command structure is not correct: {nameof(NewCommand)} or {nameof(InstantiateCommand)} is not found.");
+            }
+            List<Command> parentCommands = new List<Command>();
+            while (commandResult?.Command != null)
+            {
+                parentCommands.Add(commandResult.Command);
+                commandResult = (commandResult.Parent as CommandResult);
+            }
+            parentCommands.Reverse();
+            return parentCommands;
         }
     }
 }

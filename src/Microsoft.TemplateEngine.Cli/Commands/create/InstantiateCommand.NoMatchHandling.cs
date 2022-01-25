@@ -59,7 +59,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return invalidOptionsList;
         }
 
-        internal List<TemplateResult> CollectTemplateMatchInfo(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, TemplateGroup templateGroup)
+        internal static List<TemplateResult> CollectTemplateMatchInfo(InstantiateCommandArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, TemplateGroup templateGroup)
         {
             List<TemplateResult> matchInfos = new List<TemplateResult>();
             foreach (CliTemplateInfo template in templateGroup.Templates)
@@ -121,7 +121,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return invalidParamsErrorText.ToString();
         }
 
-        private NewCommandStatus HandleNoTemplateFoundResult(
+        private static NewCommandStatus HandleNoTemplateFoundResult(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,

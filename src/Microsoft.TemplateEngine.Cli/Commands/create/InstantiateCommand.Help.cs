@@ -9,7 +9,6 @@ using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Extensions;
-using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 
@@ -19,21 +18,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         private const string Indent = "  ";
 
-        public IEnumerable<HelpSectionDelegate> CustomHelpLayout()
+        public static void WriteHelp(HelpContext context, InstantiateCommandArgs instantiateCommandArgs, IEngineEnvironmentSettings environmentSettings)
         {
-            yield return (context) => WriteHelp(context, context.ParseResult);
-        }
-
-        public void WriteHelp(HelpContext context, ParseResult parseResult)
-        {
-            InstantiateCommandArgs instantiateCommandArgs = new InstantiateCommandArgs(this, parseResult);
             if (string.IsNullOrWhiteSpace(instantiateCommandArgs.ShortName))
             {
-                WriteCustomInstantiateHelp(context);
+                WriteCustomInstantiateHelp(context, instantiateCommandArgs.Command);
                 return;
             }
-
-            IEngineEnvironmentSettings environmentSettings = GetEnvironmentSettingsFromArgs(instantiateCommandArgs);
 
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             HostSpecificDataLoader hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
@@ -90,10 +81,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             ShowTemplateDetailHeaders(preferredTemplate.Template, context.Output);
             //we need to show all possible short names (not just the one specified)
-            ShowUsage(templateGroup.ShortNames, context);
+            ShowUsage(instantiateCommandArgs.Command, templateGroup.ShortNames, context);
             ShowCommandOptions(templatesToShow, preferredTemplate, context);
             ShowTemplateSpecificOptions(templatesToShow, context);
-            ShowHintForOtherTemplates(templateGroup, preferredTemplate.Template, instantiateCommandArgs.CommandName, context.Output);
+            ShowHintForOtherTemplates(templateGroup, preferredTemplate.Template, instantiateCommandArgs, context.Output);
+        }
+
+        public IEnumerable<HelpSectionDelegate> CustomHelpLayout()
+        {
+            yield return (context) =>
+            {
+                InstantiateCommandArgs instantiateCommandArgs = new InstantiateCommandArgs(this, context.ParseResult);
+                IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(instantiateCommandArgs, context.ParseResult);
+                WriteHelp(context, instantiateCommandArgs, environmentSettings);
+            };
         }
 
         internal static bool VerifyMatchingTemplates(
@@ -310,7 +311,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             context.Output.WriteLine();
         }
 
-        internal IEnumerable<TemplateCommand> GetMatchingTemplates(
+        internal static IEnumerable<TemplateCommand> GetMatchingTemplates(
             InstantiateCommandArgs instantiateCommandArgs,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
@@ -344,11 +345,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return matchingTemplates;
         }
 
-        internal void ShowUsage(IReadOnlyList<string> shortNames, HelpContext context)
+        internal static void ShowUsage(Command? command, IReadOnlyList<string> shortNames, HelpContext context)
         {
             List<string> usageParts = new List<string>();
-
-            Command? command = this;
             while (command is not null)
             {
                 if (!string.IsNullOrWhiteSpace(command.Name))
@@ -431,11 +430,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return optionsToShow;
         }
 
-        private void WriteCustomInstantiateHelp(HelpContext context)
+        private static void WriteCustomInstantiateHelp(HelpContext context, Command command)
         {
+            //unhide arguments of NewCommand. They are hidden not to appear in subcommands help.
+            foreach (Argument arg in command.Arguments)
+            {
+                arg.IsHidden = false;
+            }
+
             HelpBuilder.Default.SynopsisSection()(context);
             context.Output.WriteLine();
-            CustomUsageSection(context);
+            CustomUsageSection(context, command);
+            context.Output.WriteLine();
             HelpBuilder.Default.CommandArgumentsSection()(context);
             context.Output.WriteLine();
             HelpBuilder.Default.OptionsSection()(context);
@@ -446,11 +452,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             context.Output.WriteLine();
         }
 
-        private void CustomUsageSection(HelpContext context)
+        private static void CustomUsageSection(HelpContext context, Command command)
         {
             context.Output.WriteLine(context.HelpBuilder.LocalizationResources.HelpUsageTitle());
-            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, this, showSubcommands: false)));
-            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, this, showParentArguments: false, showArguments: false)));
+            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, command, showSubcommands: false, showParentArguments: false)));
+            context.Output.WriteLine(Indent + string.Join(" ", GetUsageParts(context, command, showParentArguments: false, showArguments: false)));
         }
     }
 }

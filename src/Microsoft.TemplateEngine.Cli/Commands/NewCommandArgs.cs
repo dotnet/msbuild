@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.CommandLine.Parsing;
+using NuGet.Packaging;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -11,13 +12,30 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public NewCommandArgs(NewCommand command, ParseResult parseResult) : base(command, parseResult)
         {
-            var helpTokens = parseResult.CommandResult.Children
-                .OfType<OptionResult>()
-                .Where(result => IsHelpOption(result))
-                .Select(result => result.Token);
+            List<Token> tokensToEvaluate = new List<Token>();
+            foreach (var childrenResult in parseResult.CommandResult.Children)
+            {
+                if (childrenResult is OptionResult o)
+                {
+                    if (IsHelpOption(o))
+                    {
+                        continue;
+                    }
+                    if (!command.LegacyOptions.Contains(o.Option))
+                    {
+                        continue;
+                    }
 
-            Tokens = parseResult.Tokens
-                .Where(t => !helpTokens.Contains(t) && !string.IsNullOrWhiteSpace(t.Value))
+                    tokensToEvaluate.Add(o.Token);
+                    tokensToEvaluate.AddRange(o.Tokens);
+                }
+                else
+                {
+                    tokensToEvaluate.AddRange(childrenResult.Tokens);
+                }
+            }
+
+            Tokens = tokensToEvaluate
                 .Select(t => t.Value).ToArray();
         }
 
@@ -29,7 +47,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 return false;
             }
-            if (optionResult.Option.HasAlias("-h"))
+            if (optionResult.Option.HasAlias(Constants.KnownHelpAliases[0]))
             {
                 return true;
             }

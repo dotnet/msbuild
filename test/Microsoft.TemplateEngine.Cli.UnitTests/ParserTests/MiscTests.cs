@@ -25,13 +25,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var result = new CommandLineBuilder()
                 .UseDefaults()
                 .Build()
-                .Parse("-h");
+                .Parse(Constants.KnownHelpAliases[0]);
 
             var aliases = result.CommandResult
                 .Children
                 .OfType<OptionResult>()
                 .Select(r => r.Option)
-                .Where(o => o.HasAlias("-h"))
+                .Where(o => o.HasAlias(Constants.KnownHelpAliases[0]))
                 .Single()
                 .Aliases;
 

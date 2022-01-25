@@ -24,9 +24,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse("new console --framework net5.0");
-            InstantiateCommandArgs args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse("new console --framework net5.0");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             Assert.Equal("console", args.ShortName);
             Assert.Contains("--framework", args.RemainingArguments);
@@ -227,10 +226,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new {command}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var templateCommands = instantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($" new {command}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(expectedIdentities.Count(), templateCommands.Count);
             Assert.Equal(expectedIdentities.OrderBy(s => s), templateCommands.Select(templateCommand => templateCommand.Template.Identity).OrderBy(s => s));
         }
@@ -258,13 +256,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new {command}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            var parseResult = myCommand.Parse($"new {command}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-            var templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
+            var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
 
             Assert.Equal(expectedValue, templateArgs.Name);
         }
@@ -324,13 +321,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new {command}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            var parseResult = myCommand.Parse($" new {command}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-            var templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
+            var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
 
             if (string.IsNullOrWhiteSpace(expectedValue))
             {
@@ -368,13 +364,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new {command}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            var parseResult = myCommand.Parse($" new {command}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
-            var templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
+            var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
 
             if (string.IsNullOrWhiteSpace(expectedValue))
             {
@@ -439,11 +434,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new {command}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new {command}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
@@ -482,11 +476,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new {command}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new {command}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
@@ -507,15 +500,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
 
-            TemplateCommandArgs templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
+            TemplateCommandArgs templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
             Assert.Null(templateArgs.AllowScripts);
         }
 
@@ -541,15 +533,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse(command);
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse(command);
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
 
-            TemplateCommandArgs templateArgs = new TemplateCommandArgs(templateCommand, templateParseResult);
+            TemplateCommandArgs templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
             Assert.Equal(result, templateArgs.AllowScripts);
         }
 
@@ -575,10 +566,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($"new {shortName}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var templateCommands = instantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($"new {shortName}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, templateCommands.Count);
             Assert.Equal("MultiName.Test.High.CSharp", templateCommands.Single().Template.Identity);
         }
@@ -604,12 +594,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-
             string command = $"new {shortName} --language F#";
-            var parseResult = instantiateCommand.Parse(command);
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var templateCommands = instantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse(command);
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, templateCommands.Count);
             Assert.Equal("Multiname.Test.Only.FSharp", templateCommands.Single().Template.Identity);
 
@@ -636,12 +624,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             string command = $"new {name} --foo {fooChoice}";
-            var parseResult = instantiateCommand.Parse($" new {command}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var templateCommands = instantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($" new {command}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, templateCommands.Count);
             Assert.Equal(expectedIdentity, templateCommands.Single().Template.Identity);
         }
@@ -667,16 +654,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
             string command = $"new {name} --{paramName} {paramValue}";
-            var parseResult = instantiateCommand.Parse($" new {command}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var templateCommands = instantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($" new {command}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(1, templateCommands.Count);
             Assert.Equal(expectedIdentity, templateCommands.Single().Template.Identity);
         }
         #endregion
-
     }
 }

@@ -155,13 +155,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new {command}");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var templateCommands = instantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            var parseResult = myCommand.Parse($" new {command}");
+            var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Empty(templateCommands);
 
-            var templateMatchInfos = instantiateCommand.CollectTemplateMatchInfo(args, settings, templatePackageManager, templateGroup);
+            var templateMatchInfos = InstantiateCommand.CollectTemplateMatchInfo(args, settings, templatePackageManager, templateGroup);
             var invalidOptions = InstantiateCommand.GetInvalidOptions(templateMatchInfos);
             Assert.Equal(expectedInvalidParams.Length, invalidOptions.Count);
 

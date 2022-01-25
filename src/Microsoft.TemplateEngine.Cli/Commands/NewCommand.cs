@@ -77,6 +77,19 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IsHidden = true
         };
 
+        internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
+        {
+            Description = SymbolStrings.Command_Instantiate_Argument_ShortName,
+            Arity = new ArgumentArity(0, 1),
+            IsHidden = true
+        };
+
+        internal Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
+        {
+            Description = SymbolStrings.Command_Instantiate_Argument_TemplateOptions,
+            Arity = new ArgumentArity(0, 999),
+            IsHidden = true
+        };
         protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {
             if (context is not TextCompletionContext textCompletionContext)
@@ -88,13 +101,34 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 yield break;
             }
 
-            InstantiateCommand command = InstantiateCommand.FromNewCommand(this);
-            CompletionContext reparsedContext = ParserFactory.CreateParser(command).Parse(textCompletionContext.CommandLineText).GetCompletionContext();
-            foreach (CompletionItem completion in command.GetCompletions(reparsedContext, environmentSettings))
+            InstantiateCommandArgs instantiateCommandArgs = InstantiateCommandArgs.FromNewCommandArgs(ParseContext(context.ParseResult));
+
+            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
+            HostSpecificDataLoader? hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
+
+            //TODO: consider new API to get templates only from cache (non async)
+            IReadOnlyList<ITemplateInfo> templates =
+                Task.Run(async () => await templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false)).GetAwaiter().GetResult();
+
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
+
+            if (templateGroups.Any(template => template.ShortNames.Contains(instantiateCommandArgs.ShortName)))
+            {
+                foreach (CompletionItem completion in InstantiateCommand.GetTemplateCompletions(instantiateCommandArgs, templateGroups, environmentSettings, templatePackageManager, textCompletionContext))
+                {
+                    yield return completion;
+                }
+                yield break;
+            }
+
+            foreach (CompletionItem completion in InstantiateCommand.GetTemplateNameCompletions(instantiateCommandArgs.ShortName, templateGroups, environmentSettings))
             {
                 yield return completion;
             }
-
+            foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings))
+            {
+                yield return completion;
+            }
         }
 
         protected override Task<NewCommandStatus> ExecuteAsync(
@@ -103,9 +137,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
-            InstantiateCommand command = InstantiateCommand.FromNewCommand(this);
-            ParseResult reparseResult = ParserFactory.CreateParser(command).Parse(args.Tokens);
-            return command.ExecuteAsync(reparseResult, environmentSettings, telemetryLogger, context);
+            return InstantiateCommand.ExecuteAsync(args, environmentSettings, telemetryLogger, context);
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

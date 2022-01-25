@@ -3,11 +3,12 @@
 
 #nullable enable
 
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal class GlobalArgs
+    internal class GlobalArgs : ICommandArgs
     {
         public GlobalArgs(BaseCommand command, ParseResult parseResult)
         {
@@ -17,13 +18,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             DebugReinit = parseResult.GetValueForOption(NewCommand.DebugReinitOption);
             DebugRebuildCache = parseResult.GetValueForOption(NewCommand.DebugRebuildCacheOption);
             DebugShowConfig = parseResult.GetValueForOption(NewCommand.DebugShowConfigOption);
-            CommandName = parseResult.GetNewCommandName();
             ParseResult = parseResult;
+            Command = command;
+            RootCommand = parseResult.GetNewCommandFromParseResult();
         }
 
-        internal ParseResult ParseResult { get; }
+        protected GlobalArgs(GlobalArgs args) : this(args.Command, args.ParseResult) { }
 
-        internal string CommandName { get; private set; }
+        public NewCommand RootCommand { get; }
+
+        public BaseCommand Command { get; }
+
+        public ParseResult ParseResult { get; }
+
+        Command ICommandArgs.Command => Command;
 
         internal bool DebugAttach { get; private set; }
 
@@ -41,6 +49,5 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             return (parseResult.GetValueForOption(command.ColumnsAllOption), parseResult.GetValueForOption(command.ColumnsOption));
         }
-
     }
 }

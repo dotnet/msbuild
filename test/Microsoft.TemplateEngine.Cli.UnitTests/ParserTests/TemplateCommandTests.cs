@@ -55,13 +55,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
-            var parseResult = instantiateCommand.Parse($" new foo");
-            var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
+            var parseResult = myCommand.Parse($" new foo");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             try
             {
-                _ = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+                _ = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             }
             catch (InvalidTemplateParametersException e)
             {

@@ -7,6 +7,7 @@ using System.CommandLine;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
@@ -19,8 +20,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>, ICustomHelp
     {
-        private NewCommand? _parentCommand;
-
         internal InstantiateCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
             Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
@@ -30,14 +29,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
             IsHidden = true;
-        }
-
-        private InstantiateCommand(NewCommand parentCommand, string name, string description)
-            : base(parentCommand, name, description)
-        {
-            _parentCommand = parentCommand;
-            this.AddArgument(ShortNameArgument);
-            this.AddArgument(RemainingArguments);
         }
 
         internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
@@ -52,33 +43,23 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(0, 999)
         };
 
-        internal static InstantiateCommand FromNewCommand(NewCommand parentCommand)
+        internal static Task<NewCommandStatus> ExecuteAsync(NewCommandArgs newCommandArgs, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
         {
-            InstantiateCommand command = new InstantiateCommand(
-                parentCommand,
-                parentCommand.Name,
-                parentCommand.Description ?? SymbolStrings.Command_New_Description);
-            //subcommands are re-added just for the sake of proper help display
-            foreach (var subcommand in parentCommand.Children.OfType<Command>())
-            {
-                command.Add(subcommand);
-            }
-
-            //do not re-add legacy options - they are not needed
-            //do not hardcode option as the caller of CLI (SDK) can add extra options that should be moved
-            foreach (var option in parentCommand.Children.OfType<Option>().Where(o => !parentCommand.LegacyOptions.Contains(o)))
-            {
-                command.Add(option);
-            }
-            return command;
+            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, telemetryLogger, context);
         }
 
-        internal Task<NewCommandStatus> ExecuteAsync(ParseResult parseResult, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
+        internal static async Task<IEnumerable<TemplateGroup>> GetMatchingTemplateGroupsAsync(
+            InstantiateCommandArgs instantiateArgs,
+            TemplatePackageManager templatePackageManager,
+            HostSpecificDataLoader hostSpecificDataLoader,
+            CancellationToken cancellationToken)
         {
-            return ExecuteAsync(ParseContext(parseResult), environmentSettings, telemetryLogger, context);
+            var templates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            var templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
+            return templateGroups.Where(template => template.ShortNames.Contains(instantiateArgs.ShortName));
         }
 
-        internal HashSet<TemplateCommand> GetTemplateCommand(
+        internal static HashSet<TemplateCommand> GetTemplateCommand(
                 InstantiateCommandArgs args,
                 IEngineEnvironmentSettings environmentSettings,
                 TemplatePackageManager templatePackageManager,
@@ -117,23 +98,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new HashSet<TemplateCommand>();
         }
 
-        internal IEngineEnvironmentSettings GetEnvironmentSettingsFromArgs(InstantiateCommandArgs instantiateArgs)
-        {
-            return this.CreateEnvironmentSettings(instantiateArgs, instantiateArgs.ParseResult);
-        }
-
-        internal async Task<IEnumerable<TemplateGroup>> GetMatchingTemplateGroupsAsync(
-            InstantiateCommandArgs instantiateArgs,
-            TemplatePackageManager templatePackageManager,
-            HostSpecificDataLoader hostSpecificDataLoader,
-            CancellationToken cancellationToken)
-        {
-            var templates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
-            var templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
-            return templateGroups.Where(template => template.ShortNames.Contains(instantiateArgs.ShortName));
-        }
-
-        internal void HandleNoMatchingTemplateGroup(InstantiateCommandArgs instantiateArgs, Reporter reporter)
+        internal static void HandleNoMatchingTemplateGroup(InstantiateCommandArgs instantiateArgs, Reporter reporter)
         {
             reporter.WriteLine(
                 string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, $"'{instantiateArgs.ShortName}'").Bold().Red());
@@ -144,10 +109,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             reporter.WriteLine(LocalizableStrings.SearchTemplatesCommand);
             reporter.WriteCommand(CommandExamples.SearchCommandExample(instantiateArgs.CommandName, instantiateArgs.ShortName));
+
             reporter.WriteLine();
         }
 
-        internal NewCommandStatus HandleAmbiguousTemplateGroup(
+        internal static NewCommandStatus HandleAmbiguousTemplateGroup(
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             IEnumerable<TemplateGroup> templateGroups,
@@ -190,7 +156,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        protected async override Task<NewCommandStatus> ExecuteAsync(
+        protected override Task<NewCommandStatus> ExecuteAsync(
+            InstantiateCommandArgs instantiateArgs,
+            IEngineEnvironmentSettings environmentSettings,
+            ITelemetryLogger telemetryLogger,
+            InvocationContext context)
+        {
+            return ExecuteIntAsync(instantiateArgs, environmentSettings, telemetryLogger, context);
+        }
+
+        protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
+
+        private static async Task<NewCommandStatus> ExecuteIntAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
             ITelemetryLogger telemetryLogger,
@@ -234,8 +211,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 cancellationToken).ConfigureAwait(false);
         }
 
-        protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
-
         private static NewCommandStatus HandleAmbiguousLanguage(
             IEngineEnvironmentSettings environmentSettings,
             IEnumerable<CliTemplateInfo> templates,
@@ -268,7 +243,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return NewCommandStatus.NotFound;
         }
 
-        private async Task<NewCommandStatus> HandleTemplateInstantationAsync(
+        private static async Task<NewCommandStatus> HandleTemplateInstantationAsync(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             ITelemetryLogger telemetryLogger,
@@ -279,11 +254,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             HashSet<TemplateCommand> candidates = GetTemplateCommand(args, environmentSettings, templatePackageManager, templateGroup);
             if (candidates.Count == 1)
             {
-                Command commandToRun = _parentCommand is null ? this : _parentCommand;
                 TemplateCommand templateCommandToRun = candidates.Single();
-                templateCommandToRun.SetHandler((InvocationContext context) => templateCommandToRun.InvokeAsync(context, telemetryLogger));
-                commandToRun.AddCommand(templateCommandToRun);
-                return (NewCommandStatus)await commandToRun.InvokeAsync(args.TokensToInvoke).ConfigureAwait(false);
+                args.Command.AddCommand(templateCommandToRun);
+
+                ParseResult updatedParseResult = args.ParseResult.Parser.Parse(args.ParseResult.Tokens.Select(t => t.Value).ToList());
+                return await candidates.Single().InvokeAsync(updatedParseResult, telemetryLogger, cancellationToken).ConfigureAwait(false);
             }
             else if (candidates.Any())
             {
@@ -298,7 +273,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return HandleNoTemplateFoundResult(args, environmentSettings, templatePackageManager, templateGroup, Reporter.Error);
         }
 
-        private NewCommandStatus HandleAmbiguousResult(
+        private static NewCommandStatus HandleAmbiguousResult(
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             IEnumerable<CliTemplateInfo> templates,
@@ -369,7 +344,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        private HashSet<TemplateCommand> ReparseForTemplate(
+        private static HashSet<TemplateCommand> ReparseForTemplate(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
@@ -394,7 +369,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return candidates;
         }
 
-        private HashSet<TemplateCommand> ReparseForDefaultLanguage(
+        private static HashSet<TemplateCommand> ReparseForDefaultLanguage(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
@@ -423,7 +398,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 : candidates;
         }
 
-        private (TemplateCommand? Command, ParseResult? ParseResult)? ReparseForTemplate(
+        private static (TemplateCommand? Command, ParseResult? ParseResult)? ReparseForTemplate(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
@@ -434,7 +409,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             try
             {
                 TemplateCommand command = new TemplateCommand(
-                    this,
+                    args.Command,
                     environmentSettings,
                     templatePackageManager,
                     templateGroup,

@@ -36,10 +36,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         }
 
-        protected BaseCommand(BaseCommand baseCommand, string name, string description)
-             : this(baseCommand._hostBuilder, baseCommand._telemetryLoggerBuilder, baseCommand.Callbacks, name, description) { }
-
         internal NewCommandCallbacks Callbacks { get; }
+
+        protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
+        {
+            return base.GetCompletions(context);
+        }
 
         protected IEngineEnvironmentSettings CreateEnvironmentSettings(GlobalArgs args, ParseResult parseResult)
         {
@@ -89,10 +91,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             this.Handler = this;
         }
-
-        //command called via this constructor is not invokable
-        internal BaseCommand(BaseCommand parent, string name, string description)
-            : base(parent, name, description) { }
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
@@ -150,11 +148,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             GlobalArgs args = new GlobalArgs(this, context.ParseResult);
             IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
             return GetCompletions(context, environmentSettings);
-        }
-
-        protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
-        {
-            return base.GetCompletions(context);
         }
 
         protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context);

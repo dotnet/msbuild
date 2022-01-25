@@ -5,6 +5,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Help;
+using System.CommandLine.Parsing;
 using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -74,11 +75,10 @@ Author: Me
             ITemplateEngineHost host = TestHost.GetVirtualHost();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
-            instantiateCommand.ShowUsage(new[] { "short-name" }, helpContext);
+            InstantiateCommand.ShowUsage(myCommand, new[] { "short-name" }, helpContext);
             Assert.Equal($"Usage:{Environment.NewLine}  new short-name [options] [template options]{Environment.NewLine}{Environment.NewLine}", sw.ToString());
         }
 
@@ -88,11 +88,10 @@ Author: Me
             ITemplateEngineHost host = TestHost.GetVirtualHost();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
-            instantiateCommand.ShowUsage(new[] { "short-name1", "short-name2" }, helpContext);
+            InstantiateCommand.ShowUsage(myCommand, new[] { "short-name1", "short-name2" }, helpContext);
             Assert.Equal($"Usage:{Environment.NewLine}  new short-name1 [options] [template options]{Environment.NewLine}  new short-name2 [options] [template options]{Environment.NewLine}{Environment.NewLine}", sw.ToString());
         }
 
@@ -109,12 +108,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, templateCommand, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
@@ -133,12 +131,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, templateCommand, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
@@ -157,12 +154,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, templateCommand, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
@@ -181,12 +177,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             Assert.Equal($"Template options:{Environment.NewLine}   (No options){Environment.NewLine}", sw.ToString());
@@ -206,12 +201,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
@@ -233,13 +227,12 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand1 = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
-            TemplateCommand templateCommand2 = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
+            TemplateCommand templateCommand1 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
+            TemplateCommand templateCommand2 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand2, templateCommand1 }, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
@@ -259,12 +252,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
@@ -288,13 +280,12 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand1 = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
-            TemplateCommand templateCommand2 = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
+            TemplateCommand templateCommand1 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
+            TemplateCommand templateCommand2 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand2, templateCommand1 }, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
@@ -314,12 +305,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
@@ -339,12 +329,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             Assert.DoesNotContain("(REQUIRED)", sw.ToString());
@@ -363,11 +352,12 @@ Author: Me
             ITemplateEngineHost host = TestHost.GetVirtualHost();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
+            ParseResult parseResult = myCommand.Parse("new -h");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             StringWriter sw = new StringWriter();
 
-            InstantiateCommand.ShowHintForOtherTemplates(templateGroup, templateGroup.Templates[0], instantiateCommand.Name, sw);
+            InstantiateCommand.ShowHintForOtherTemplates(templateGroup, templateGroup.Templates[0], args, sw);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
         }
 
@@ -385,12 +375,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 100), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 100), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
@@ -410,12 +399,11 @@ Author: Me
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            InstantiateCommand instantiateCommand = InstantiateCommand.FromNewCommand(myCommand);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), instantiateCommand, sw);
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
