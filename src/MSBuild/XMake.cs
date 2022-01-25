@@ -28,9 +28,6 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if MSBUILDENABLEVSPROFILING 
-using Microsoft.VisualStudio.Profiler;
-#endif
 
 using FileLogger = Microsoft.Build.Logging.FileLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
@@ -1168,9 +1165,6 @@ namespace Microsoft.Build.CommandLine
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
-#if MSBUILDENABLEVSPROFILING
-                    DataCollection.CommentMarkProfile(8800, "Pending Build Request from MSBuild.exe");
-#endif
                     BuildResultCode? result = null;
 
                     IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
