@@ -501,9 +501,7 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
 #endif
 
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
-#endif
 
             ExitType exitType = ExitType.Success;
 
