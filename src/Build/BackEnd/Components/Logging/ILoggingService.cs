@@ -12,6 +12,8 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     #region Delegates
@@ -267,7 +269,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Register an logger which expects all logging events from the system
         /// </summary>
         /// <param name="logger">The logger to register.</param>
-        ///<returns value="bool">True if the central was registered. False if the central logger was already registered</returns>
+        /// <returns value="bool">True if the central was registered. False if the central logger was already registered</returns>
         bool RegisterLogger(ILogger logger);
 
         /// <summary>

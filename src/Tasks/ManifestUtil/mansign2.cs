@@ -15,6 +15,8 @@ using System.Runtime.InteropServices;
 
 using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
+#nullable disable
+
 namespace System.Deployment.Internal.CodeSigning
 {
     internal static class Win32
@@ -557,7 +559,7 @@ namespace System.Deployment.Internal.CodeSigning
             return ComputeHashFromManifest(manifestDom, false, useSha256);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Cryptographic.Standard", "CA5354:SHA1CannotBeUsed", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
         private static byte[] ComputeHashFromManifest(XmlDocument manifestDom, bool oldFormat, bool useSha256)
         {
             if (oldFormat)

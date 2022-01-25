@@ -12,6 +12,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     internal class SdkResolverLoader
@@ -22,7 +24,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         private readonly string IncludeDefaultResolver = Environment.GetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER");
 
-        //  Test hook for loading SDK Resolvers from additional folders.  Support runtime-specific test hook environment variables,
+        // Test hook for loading SDK Resolvers from additional folders.  Support runtime-specific test hook environment variables,
         //  as an SDK resolver built for .NET Framework probably won't work on .NET Core, and vice versa.
         private readonly string AdditionalResolversFolder = Environment.GetEnvironmentVariable(
 #if NETFRAMEWORK

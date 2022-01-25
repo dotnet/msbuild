@@ -8,6 +8,8 @@ using System.Reflection;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     /// <summary>
@@ -16,7 +18,7 @@ namespace Microsoft.Build.UnitTests.Construction
     public class ElementLocationPublic_Tests
     {
         /// <summary>
-        /// Check that we can get the file name off an element and attribute, even if 
+        /// Check that we can get the file name off an element and attribute, even if
         /// it wouldn't normally have got one because the project wasn't
         /// loaded from disk, or has been edited since.
         /// This is really a test of our XmlDocumentWithLocation.
@@ -82,7 +84,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void LocationStringsMedley()
         {
             string content = @"
-            <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+            <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <UsingTask TaskName='t' AssemblyName='a' Condition='true'/>
                     <UsingTask TaskName='t' AssemblyFile='a' Condition='true'/>
                     <ItemDefinitionGroup Condition='true' Label='l'>

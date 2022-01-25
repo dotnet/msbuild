@@ -1542,7 +1542,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Project has not been given a path to save to.</value>
   </data>
   <data name="OM_MustSetRecordDuplicateInputs" xml:space="preserve">
-    <value>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</value>
+    <value>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</value>
   </data>
   <data name="OM_CannotSaveFileLoadedAsReadOnly" xml:space="preserve">
     <value>Project or targets file "{0}" was loaded in read-only mode, and cannot be saved.</value>
@@ -1898,5 +1898,65 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="ProxyRequestNotScheduledOnInprocNode" xml:space="preserve">
     <value>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</value>
+  </data>
+  <data name="ProjectCacheBeginBuild" xml:space="preserve">
+    <value>Initializing project cache plugin.</value>
+  </data>
+  <data name="ProjectCacheEndBuild" xml:space="preserve">
+    <value>Shutting down project cache plugin.</value>
+  </data>
+  <data name="ProjectCacheQueryStartedWithDefaultTargets" xml:space="preserve">
+    <value>Querying project cache for "{0}" (default targets):</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheQueryStartedWithTargetNames" xml:space="preserve">
+    <value>Querying project cache for "{0}" (targets: {1}):</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
+  </data>
+  <data name="ProjectCacheHitWithDefaultTargets" xml:space="preserve">
+    <value>Project cache hit for "{0}" (default targets).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheHitWithTargetNames" xml:space="preserve">
+    <value>Project cache hit for "{0}" ({1} target(s)).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
+  </data>
+  <data name="ProjectCacheHitWithOutputs" xml:space="preserve">
+    <value>{0} -> Cache Hit</value>
+    <comment>
+      {StrBegin="{0} -> "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </comment>
+  </data>
+  <data name="ProjectCacheMissWithDefaultTargets" xml:space="preserve">
+    <value>Project cache miss for "{0}" (default targets).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheMissWithTargetNames" xml:space="preserve">
+    <value>Project cache miss for "{0}" ({1} target(s)).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
+  </data>
+  <data name="ProjectCacheNotApplicableWithDefaultTargets" xml:space="preserve">
+    <value>Project cache not applicable for "{0}" (default targets).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheNotApplicableWithTargetNames" xml:space="preserve">
+    <value>Project cache not applicable for "{0}" ({1} target(s)).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
   </data>
 </root>

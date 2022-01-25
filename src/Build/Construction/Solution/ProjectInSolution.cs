@@ -19,6 +19,8 @@ using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using System.Collections.ObjectModel;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <remarks>
@@ -45,7 +47,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Web Deployment (.wdproj) projects
         /// </summary>
-        WebDeploymentProject, //  MSBuildFormat, but Whidbey-era ones specify ProjectReferences differently
+        WebDeploymentProject, // MSBuildFormat, but Whidbey-era ones specify ProjectReferences differently
         /// <summary>
         /// Project inside an Enterprise Template project
         /// </summary>
@@ -148,7 +150,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string RelativePath
         {
-            get { return _relativePath; }
+            get
+            {
+                return _relativePath;
+            }
+
             internal set
             {
 #if NETFRAMEWORK && !MONO

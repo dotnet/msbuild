@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.Debugging
 {
     internal static class DebugUtils

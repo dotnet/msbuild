@@ -19,7 +19,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Utilities;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -27,9 +26,11 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
-    using Utilities = Internal.Utilities;
+    using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
     /// Flags for controlling the toolset initialization.
@@ -432,7 +433,7 @@ namespace Microsoft.Build.Evaluation
         /// This is the Windows file version (specifically the value of the FileVersion
         /// resource), not necessarily the assembly version.
         /// If you want the assembly version, use Constants.AssemblyVersion.
-        /// This is not the <see cref="ToolsetsVersion">ToolsetCollectionVersion</see>.
+        /// This is not the <see cref="P:Microsoft.Build.BuildEngine.ToolsetCollection.ToolsVersions*">ToolsetCollection.ToolsVersions</see>.
         /// </remarks>
         public static Version Version
         {
@@ -1733,7 +1734,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void ResetToolsetsForTests(ToolsetConfigurationReader configurationReaderForTestsOnly)
         {
-            InitializeToolsetCollection(configReader:configurationReaderForTestsOnly);
+            InitializeToolsetCollection(configReader: configurationReaderForTestsOnly);
         }
 
 #if FEATURE_WIN32_REGISTRY
@@ -1742,7 +1743,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void ResetToolsetsForTests(ToolsetRegistryReader registryReaderForTestsOnly)
         {
-            InitializeToolsetCollection(registryReader:registryReaderForTestsOnly);
+            InitializeToolsetCollection(registryReader: registryReaderForTestsOnly);
         }
 #endif
 

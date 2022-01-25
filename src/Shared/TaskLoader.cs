@@ -2,10 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Reflection;
 
 using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -35,11 +36,7 @@ namespace Microsoft.Build.Shared
         internal static bool IsTaskClass(Type type, object unused)
         {
             return type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
-#if FEATURE_TYPE_GETINTERFACE
                 type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null);
-#else
-                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITask"));
-#endif
         }
 
         /// <summary>

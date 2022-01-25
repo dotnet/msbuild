@@ -21,6 +21,8 @@ using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidTool
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
 #if FEATURE_REGISTRY_TOOLSETS
@@ -43,7 +45,7 @@ namespace Microsoft.Build.UnitTests.Definition
         private const string testRegistryPath = @"msbuildUnitTests";
 
         /// <summary>
-        /// Store the value of the "VisualStudioVersion" environment variable here so that 
+        /// Store the value of the "VisualStudioVersion" environment variable here so that
         /// we can unset it for the duration of the test.
         /// </summary>
         private string _oldVisualStudioVersion;
@@ -122,7 +124,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 #endif
 
-    #region "Reading from application configuration file tests"
+        #region "Reading from application configuration file tests"
 
 #if FEATURE_SYSTEM_CONFIGURATION
 
@@ -564,7 +566,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                //this should throw ...
+                // this should throw ...
                 string msbuildOverrideTasksPath = null;
                 string defaultOverrideToolsVersion = null;
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
@@ -627,7 +629,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                //this should throw ...
+                // this should throw ...
                 string msbuildOverrideTasksPath = null;
                 string defaultOverrideToolsVersion = null;
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
@@ -667,7 +669,7 @@ namespace Microsoft.Build.UnitTests.Definition
            );
         }
         /// <summary>
-        /// Tests the case when a blank property name is specified in the registry in a 
+        /// Tests the case when a blank property name is specified in the registry in a
         /// sub-toolset.
         /// </summary>
         [Fact]
@@ -727,7 +729,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
 
-            //this should not throw ...
+            // this should not throw ...
             string msbuildOverrideTasksPath;
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
@@ -821,7 +823,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                //this should throw ...
+                // this should throw ...
                 string msbuildOverrideTasksPath = null;
                 string defaultOverrideToolsVersion = null;
                 reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
@@ -955,7 +957,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         /// <summary>
         /// Tests that any escaped xml in config file, is treated well
-        /// Note that this comes for free with the current implementation using the 
+        /// Note that this comes for free with the current implementation using the
         /// framework api to access section in the config file
         /// </summary>
         [Fact]
@@ -986,9 +988,9 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(@"some>value", values["2>.0"].Properties["foo"].EvaluatedValue);
         }
 #endif
-    #endregion
+        #endregion
 
-    #region "GetToolsetData tests"
+        #region "GetToolsetData tests"
 
         /// <summary>
         /// Tests the case where registry and config file contains different toolsVersion
@@ -1353,7 +1355,7 @@ namespace Microsoft.Build.UnitTests.Definition
             key1.SetValue("TaskLocation", @"somePathToTasks");
             key1.SetValue("TargetsLocation", @"D:\somePathToTargets");
             key1.SetValue("SchemaLocation", @"Schemas");
-            key1.SetValue(null, @"D:\somePathToDefault");  //this sets the default value for this key
+            key1.SetValue(null, @"D:\somePathToDefault");  // this sets the default value for this key
 
 #if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -1405,7 +1407,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                // should throw... 
+                // should throw...
                 ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
@@ -2004,9 +2006,9 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// Tests the case where application configuration file overrides a value already specified in the registry, 
-        /// where that registry value is bogus and would otherwise throw.  However, since the config file also 
-        /// contains an entry for that toolset, the registry toolset never gets read, and thus never throws.  
+        /// Tests the case where application configuration file overrides a value already specified in the registry,
+        /// where that registry value is bogus and would otherwise throw.  However, since the config file also
+        /// contains an entry for that toolset, the registry toolset never gets read, and thus never throws.
         /// </summary>
         [Fact]
         public void GetToolsetData_ConflictingPropertyValuesRegistryThrows()
@@ -2113,8 +2115,8 @@ namespace Microsoft.Build.UnitTests.Definition
             try
             {
                 // In the new world of figuring out the ToolsVersion to use, we completely ignore the default
-                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying 
-                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.  
+                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying
+                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
@@ -2124,7 +2126,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 projectCollection.AddToolset(new Toolset("2.0", "20toolsPath", projectCollection, msbuildOverrideTasksPath));
                 projectCollection.AddToolset(new Toolset(ObjectModelHelpers.MSBuildDefaultToolsVersion, "120toolsPath", projectCollection, msbuildOverrideTasksPath));
 
-                string projectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("x.proj", @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"" />");
+                string projectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("x.proj", @"<Project />");
 
                 Project project = projectCollection.LoadProject(projectPath);
 
@@ -2186,8 +2188,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
         /// <summary>
         /// Test the case where nothing is specified in the config file
-        /// Note that config file not present is same as config file 
-        /// with no MSBuildToolsets Section 
+        /// Note that config file not present is same as config file
+        /// with no MSBuildToolsets Section
         /// </summary>
         [Fact]
         public void GetToolsetData_ConfigFileNotPresent()
@@ -2322,9 +2324,9 @@ namespace Microsoft.Build.UnitTests.Definition
             });
         }
 
-    #endregion
+        #endregion
 
-    #region "SetDefaultToolsetVersion tests"
+        #region "SetDefaultToolsetVersion tests"
 
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved when specified
@@ -2835,7 +2837,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal("gv1", values["4.0"].Properties["p2"].EvaluatedValue);
         }
 
-    #endregion
+        #endregion
 
         private ToolsetRegistryReader GetStandardRegistryReader()
         {

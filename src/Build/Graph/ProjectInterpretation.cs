@@ -13,6 +13,8 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     internal sealed class ProjectInterpretation
@@ -40,7 +42,9 @@ namespace Microsoft.Build.Graph
 
         internal enum ProjectType
         {
-            OuterBuild, InnerBuild, NonMultitargeting
+            OuterBuild,
+            InnerBuild,
+            NonMultitargeting,
         }
 
         internal readonly struct ReferenceInfo

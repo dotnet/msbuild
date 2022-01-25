@@ -12,6 +12,8 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class AssignLinkMetadata_Tests

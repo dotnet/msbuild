@@ -4,6 +4,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

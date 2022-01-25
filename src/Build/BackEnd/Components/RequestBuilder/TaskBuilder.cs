@@ -3,10 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+#if FEATURE_APARTMENT_STATE
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Linq;
 using System.Reflection;
+#if FEATURE_APARTMENT_STATE
 using System.Runtime.ExceptionServices;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
@@ -22,6 +26,8 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {

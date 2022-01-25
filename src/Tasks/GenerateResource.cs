@@ -9,7 +9,9 @@ using System.Collections.Generic;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.ComponentModel.Design;
 #endif
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -24,8 +26,10 @@ using System.Runtime.Remoting;
 #endif
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Versioning;
 using System.Security;
+#endif
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -39,6 +43,8 @@ using Microsoft.Build.Utilities;
 #if FEATURE_COM_INTEROP
 using Microsoft.Win32;
 #endif
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -250,7 +256,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The language to use when generating the class source for the strongly typed resource.
+        /// Gets or sets the language to use when generating the class source for the strongly typed resource.
         /// This parameter must match exactly one of the languages used by the CodeDomProvider.
         /// </summary>
         public string StronglyTypedLanguage
@@ -261,7 +267,11 @@ namespace Microsoft.Build.Tasks
                 // try to validate it -- that might prevent future expansion of supported languages.
                 _stronglyTypedLanguage = value;
             }
-            get { return _stronglyTypedLanguage; }
+
+            get
+            {
+                return _stronglyTypedLanguage;
+            }
         }
 
         /// <summary>
@@ -1548,13 +1558,8 @@ namespace Microsoft.Build.Tasks
             {
                 resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources);
             }
-            catch (Exception e)  // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e)  when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
             {
-                if (ExceptionHandling.NotExpectedIoOrXmlException(e) && !(e is MSBuildResXException))
-                {
-                    throw;
-                }
-
                 // Return true, so that resource processing will display the error
                 // No point logging a duplicate error here as well
                 return true;
@@ -1938,7 +1943,7 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
                         // DDB#9819
                         // Customers have reported the following exceptions coming out of this method's call to GetType():
@@ -1949,8 +1954,6 @@ namespace Microsoft.Build.Tasks
                         // Any problem loading the type will get logged later when the resource reader tries it.
                         //
                         // XmlException or an IO exception is also possible from an invalid input file.
-                        if (ExceptionHandling.IsCriticalException(e))
-                            throw;
 
                         // If there was any problem parsing the .resx then log a message and
                         // fall back to using a separate AppDomain.
@@ -2791,13 +2794,9 @@ namespace Microsoft.Build.Tasks
                     {
                         Directory.Delete(currentOutputDirectory); // Remove output directory if empty
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
                         // Fail silently (we are not even checking if the call to File.Delete succeeded)
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
                     }
                 }
                 return false;
@@ -3300,8 +3299,11 @@ namespace Microsoft.Build.Tasks
         {
             String postfix = mainAssembly ? ".resources" : a.GetName().CultureInfo.Name + ".resources";
             foreach (String manifestResourceName in a.GetManifestResourceNames())
+            {
                 if (manifestResourceName.EndsWith(postfix, StringComparison.OrdinalIgnoreCase))
                     return true;
+            }
+
             return false;
         }
 #endif
@@ -3347,13 +3349,13 @@ namespace Microsoft.Build.Tasks
         {
             if (_usePreserializedResources && HaveSystemResourcesExtensionsReference)
             {
-                WriteResources(reader, new PreserializedResourceWriter(File.OpenWrite(filename))); // closes writer for us
+                WriteResources(reader, new PreserializedResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
                 return;
             }
 
             try
             {
-                WriteResources(reader, new ResourceWriter(File.OpenWrite(filename))); // closes writer for us
+                WriteResources(reader, new ResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
             }
             catch (PreserializedResourceWriterRequiredException)
             {
@@ -3448,7 +3450,7 @@ namespace Microsoft.Build.Tasks
             // Generate the STR class
             String[] errors;
             bool generateInternalClass = !_stronglyTypedClassIsPublic;
-            //StronglyTypedResourcesNamespace can be null and this is ok.
+            // StronglyTypedResourcesNamespace can be null and this is ok.
             // If it is null then the default namespace (=stronglyTypedNamespace) is used.
             CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
                     reader.resourcesHashTable,
@@ -3594,7 +3596,9 @@ namespace Microsoft.Build.Tasks
                     {
                         String skip = sr.ReadLine();
                         if (skip.Equals("strings]"))
+                        {
                             _logger.LogWarningWithCodeFromResources(null, fileName, sr.LineNumber - 1, 1, 0, 0, "GenerateResource.ObsoleteStringsTag");
+                        }
                         else
                         {
                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.UnexpectedInfBracket", "[" + skip), fileName, sr.LineNumber - 1, 1);
@@ -3874,7 +3878,7 @@ namespace Microsoft.Build.Tasks
             private int _col;
 
             internal LineNumberStreamReader(String fileName, Encoding encoding, bool detectEncoding)
-                : base(File.Open(fileName, FileMode.Open, FileAccess.Read), encoding, detectEncoding)
+                : base(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read), encoding, detectEncoding)
             {
                 _lineNumber = 1;
                 _col = 0;
@@ -3913,7 +3917,9 @@ namespace Microsoft.Build.Tasks
                         _col = 0;
                     }
                     else
+                    {
                         _col++;
+                    }
                 }
                 return r;
             }
@@ -4049,12 +4055,8 @@ namespace Microsoft.Build.Tasks
                 {
                     _cachedAssemblies[pathToAssembly] = Assembly.UnsafeLoadFrom(pathToAssembly);
                 }
-                catch
+                catch when (!throwOnError)
                 {
-                    if (throwOnError)
-                    {
-                        throw;
-                    }
                 }
             }
 

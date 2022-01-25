@@ -11,9 +11,11 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
-    internal sealed class CachingSdkResolverService: SdkResolverService
+    internal sealed class CachingSdkResolverService : SdkResolverService
     {
         /// <summary>
         /// Stores the cache in a set of concurrent dictionaries.  The main dictionary is by build submission ID and the inner dictionary contains a case-insensitive SDK name and the cached <see cref="SdkResult"/>.

@@ -9,6 +9,8 @@ using Microsoft.Build.Construction;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -20,7 +22,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Parameter element with all attributes set
         /// </summary>
         private static string s_contentAllAttributesSet = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
                               <MyParameter ParameterType='System.String' Output='true' Required='false'/>
@@ -33,7 +35,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Parameter element with no attributes set
         /// </summary>
         private static string s_contentNoAttributesSet = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
                               <MyParameter/>
@@ -79,7 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
                               <MyParameter Invaliid='System.String'/>

@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -26,7 +28,6 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
@@ -39,6 +40,8 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
+
+#nullable disable
 
 namespace Microsoft.Build.CommandLine
 {
@@ -137,17 +140,12 @@ namespace Microsoft.Build.CommandLine
 
                 s_initialized = true;
             }
-            catch (TypeInitializationException ex)
-            {
-                if (ex.InnerException == null
-#if !FEATURE_SYSTEM_CONFIGURATION
-                )
-#else
-                    || ex.InnerException.GetType() != typeof(ConfigurationErrorsException))
+            catch (TypeInitializationException ex) when (ex.InnerException is not null
+#if FEATURE_SYSTEM_CONFIGURATION
+            && ex.InnerException is ConfigurationErrorsException
 #endif
-                {
-                    throw;
-                }
+            )
+            {
                 HandleConfigurationException(ex);
             }
 #if FEATURE_SYSTEM_CONFIGURATION
@@ -185,9 +183,9 @@ namespace Microsoft.Build.CommandLine
                 // One of the exceptions is missing a period!
                 if (message[message.Length - 1] != '.')
                 {
-                    builder.Append(".");
+                    builder.Append('.');
                 }
-                builder.Append(" ");
+                builder.Append(' ');
 
                 exception = exception.InnerException;
             }
@@ -210,7 +208,7 @@ namespace Microsoft.Build.CommandLine
         [MTAThread]
         public static int Main(
 #if !FEATURE_GET_COMMANDLINE
-            string [] args
+            string[] args
 #endif
             )
         {
@@ -480,7 +478,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
             string commandLine
 #else
-            string [] commandLine
+            string[] commandLine
 #endif
             )
         {
@@ -539,11 +537,11 @@ namespace Microsoft.Build.CommandLine
                 // process the detected command line switches -- gather build information, take action on non-build switches, and
                 // check for non-trivial errors
                 string projectFile = null;
-                string[] targets = { };
+                string[] targets = Array.Empty<string>();
                 string toolsVersion = null;
                 Dictionary<string, string> globalProperties = null;
                 Dictionary<string, string> restoreProperties = null;
-                ILogger[] loggers = { };
+                ILogger[] loggers = Array.Empty<ILogger>();
                 LoggerVerbosity verbosity = LoggerVerbosity.Normal;
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
 #if FEATURE_XML_SCHEMA_VALIDATION
@@ -1561,7 +1559,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal static void SetConsoleUI()
         {
-#if FEATURE_CULTUREINFO_CONSOLE_FALLBACK
             Thread thisThread = Thread.CurrentThread;
 
             // Eliminate the complex script cultures from the language selection.
@@ -1592,7 +1589,6 @@ namespace Microsoft.Build.CommandLine
                 thisThread.CurrentUICulture = new CultureInfo("en-US");
                 return;
             }
-#endif
 #if RUNTIME_TYPE_NETCORE
             // https://github.com/dotnet/roslyn/issues/10785#issuecomment-238940601
             // by default, .NET Core doesn't have all code pages needed for Console apps.
@@ -1613,7 +1609,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
             string commandLine,
 #else
-            string [] commandLine,
+            string[] commandLine,
 #endif
             out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile)
         {
@@ -3238,7 +3234,7 @@ namespace Microsoft.Build.CommandLine
                 effectiveVerbosity = ProcessVerbositySwitch(verbosityValue);
             }
 
-            //Gets the currently loaded assembly in which the specified class is defined
+            // Gets the currently loaded assembly in which the specified class is defined
             Assembly engineAssembly = typeof(ProjectCollection).GetTypeInfo().Assembly;
             string loggerClassName = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
             string loggerAssemblyName = engineAssembly.GetName().FullName;
@@ -3301,7 +3297,7 @@ namespace Microsoft.Build.CommandLine
                     fileParameters += $"logFile={Path.Combine(Directory.GetCurrentDirectory(), msbuildLogFileName)}";
                 }
 
-                //Gets the currently loaded assembly in which the specified class is defined
+                // Gets the currently loaded assembly in which the specified class is defined
                 Assembly engineAssembly = typeof(ProjectCollection).GetTypeInfo().Assembly;
                 string loggerClassName = "Microsoft.Build.Logging.DistributedFileLogger";
                 string loggerAssemblyName = engineAssembly.GetName().FullName;

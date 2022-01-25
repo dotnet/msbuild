@@ -7,6 +7,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AppConfig
 {
     public sealed class SpecificVersionPrimary : ResolveAssemblyReferenceTestFixture
@@ -78,19 +80,29 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
         /// <summary>
         /// In this case,
-        /// - A single primary version-strict reference was passed in to assembly version 1.0.0.0
-        /// - An app.config was passed in that promotes a *different* assembly version name from 
-        //    1.0.0.0 to 2.0.0.0
-        /// - Version 1.0.0.0 of the file exists.
-        /// - Version 2.0.0.0 of the file exists.
+        /// <list type="bullet">
+        /// <item>A single primary version-strict reference was passed in to assembly version 1.0.0.0</item>
+        /// <item>
+        /// An app.config was passed in that promotes a *different* assembly version name from 
+        /// 1.0.0.0 to 2.0.0.0
+        /// </item>
+        /// <item>Version 1.0.0.0 of the file exists.</item>
+        /// <item>Version 2.0.0.0 of the file exists.</item>
+        /// </list>
         /// Expected:
-        /// -- The resulting assembly returned should be 1.0.0.0.
+        /// <list type="bullet">
+        /// <item>The resulting assembly returned should be 1.0.0.0.</item>
+        /// </list>
         /// Rationale:
         /// Primary references are never unified. This is because:
-        /// (a) The user expects that a primary reference will be respected.
-        /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
-        ///     dependencies anyway to make things work consistently. This would be a significant
-        ///     perf hit when loading large solutions.
+        /// <list type="number">
+        /// <item>
+        /// The user expects that a primary reference will be respected.</item>
+        /// <item>When FindDependencies is false and AutoUnify is true, we'd have to find all 
+        /// dependencies anyway to make things work consistently. This would be a significant
+        /// perf hit when loading large solutions.
+        /// </item>
+        /// </list>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]

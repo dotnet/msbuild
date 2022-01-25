@@ -13,6 +13,8 @@ using Xunit;
 
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ScannerTest
@@ -446,7 +448,7 @@ namespace Microsoft.Build.UnitTests
 
             lexer = new Scanner("'String with an embedded \\' in it'", ParserOptions.AllowAll);
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.String));
-            //          Assert.AreEqual(String.Compare("String with an embedded ' in it", lexer.IsNextString()), 0);
+            // Assert.AreEqual(String.Compare("String with an embedded ' in it", lexer.IsNextString()), 0);
 
             lexer = new Scanner("'String with a $(Property) inside'", ParserOptions.AllowAll);
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.String));

@@ -4,6 +4,8 @@
 using System.Collections.Concurrent;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>

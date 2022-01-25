@@ -3,6 +3,8 @@
 
 using System.Security;
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>
