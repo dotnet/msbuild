@@ -7,7 +7,7 @@ function InitializeCustomSDKToolset {
 
   # The following frameworks and tools are used only for testing.
   # Do not attempt to install them in source build.
-  if [[ "${DotNetBuildFromSource:-}" == "true" ]]; then
+  if [[ $properties == *"ArcadeBuildFromSource=true"* ]]; then
     return
   fi
 
@@ -20,6 +20,7 @@ function InitializeCustomSDKToolset {
   fi
 
   InitializeDotNetCli true
+  
   if [[ "$DISTRO" != "ubuntu" || "$MAJOR_VERSION" -le 16 ]]; then
     InstallDotNetSharedFramework "1.0.5"
     InstallDotNetSharedFramework "1.1.2"
@@ -43,7 +44,7 @@ function InstallDotNetSharedFramework {
     GetDotNetInstallScript "$dotnet_root"
     local install_script=$_GetDotNetInstallScript
 
-    bash "$install_script" --version $version --install-dir "$dotnet_root" --runtime "dotnet"
+    bash "$install_script" --version $version --install-dir "$dotnet_root" --runtime "dotnet" --skip-non-versioned-files
     local lastexitcode=$?
 
     if [[ $lastexitcode != 0 ]]; then
