@@ -12,7 +12,22 @@ namespace Microsoft.Build.Eventing
     {
         public static class Keywords
         {
+            /// <summary>
+            /// Keyword applied to all MSBuild events.
+            /// </summary>
+            /// <remarks>
+            /// Literally every event should define this.
+            /// </remarks>
             public const EventKeywords All = (EventKeywords)0x1;
+
+            /// <summary>
+            /// Keyword for events that should go in the text performance log when turned on.
+            /// </summary>
+            /// <remarks>
+            /// This keyword should be applied only to events that are low-volume
+            /// and likely to be useful to diagnose perf issues using the
+            /// <see href="https://github.com/dotnet/msbuild/pull/5861">text perf log</see>.
+            /// </remarks>
             public const EventKeywords PerformanceLog = (EventKeywords)0x2;
         }
 
