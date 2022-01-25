@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'">$(LibraryTargetFrameworks);net35</TargetFrameworks>
+    <TargetFrameworks>$(LibraryTargetFrameworks);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'">$(LibraryTargetFrameworks);net35;netstandard2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <WarningsAsErrors>true</WarningsAsErrors>
     <IsPackable>true</IsPackable>
@@ -21,6 +21,10 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
     <AssemblyName>Microsoft.NET.StringTools.net35</AssemblyName>
   </PropertyGroup>
+
+    <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+      <PublishWindowsPdb>false</PublishWindowsPdb>
+    </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
     <PackageReference Include="System.Memory" />
