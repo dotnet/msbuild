@@ -309,9 +309,7 @@ namespace Microsoft.Build.Internal
 #endif
 
                         availableStaticMethods.TryAdd("System.Environment::MachineName", environmentType);
-#if FEATURE_OSVERSION
                         availableStaticMethods.TryAdd("System.Environment::OSVersion", environmentType);
-#endif
                         availableStaticMethods.TryAdd("System.Environment::ProcessorCount", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::StackTrace", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::SystemDirectory", environmentType);
