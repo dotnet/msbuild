@@ -303,10 +303,8 @@ namespace Microsoft.Build.Internal
 
 // All the following properties only have getters
                         availableStaticMethods.TryAdd("System.Environment::CommandLine", environmentType);
-#if FEATURE_64BIT_ENVIRONMENT_QUERY
                         availableStaticMethods.TryAdd("System.Environment::Is64BitOperatingSystem", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::Is64BitProcess", environmentType);
-#endif
 
                         availableStaticMethods.TryAdd("System.Environment::MachineName", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::OSVersion", environmentType);
