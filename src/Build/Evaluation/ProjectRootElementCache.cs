@@ -72,7 +72,7 @@ namespace Microsoft.Build.Evaluation
         /// need to be changed from a linked list, since it's currently O(n).
         /// </remarks>
         private static readonly int s_maximumStrongCacheSize =
-            Convert.ToInt32(Environment.GetEnvironmentVariable("MSBUILDPROJECTROOTELEMENTCACHESIZE") ?? "200", NumberFormatInfo.InvariantInfo);
+            int.TryParse(Environment.GetEnvironmentVariable("MSBUILDPROJECTROOTELEMENTCACHESIZE"), out int cacheSize) ? cacheSize : 200;
 
         /// <summary>
         /// Whether the cache should log activity to the Debug.Out stream
