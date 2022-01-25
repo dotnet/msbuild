@@ -640,42 +640,40 @@ namespace Microsoft.Build.CommandLine
                     }
                     else // regular build
                     {
-                        {
-                            // if everything checks out, and sufficient information is available to start building
-                            if (
-                                !BuildProject(
-                                    projectFile,
-                                    targets,
-                                    toolsVersion,
-                                    globalProperties,
-                                    restoreProperties,
-                                    loggers,
-                                    verbosity,
-                                    distributedLoggerRecords.ToArray(),
+                        // if everything checks out, and sufficient information is available to start building
+                        if (
+                            !BuildProject(
+                                projectFile,
+                                targets,
+                                toolsVersion,
+                                globalProperties,
+                                restoreProperties,
+                                loggers,
+                                verbosity,
+                                distributedLoggerRecords.ToArray(),
 #if FEATURE_XML_SCHEMA_VALIDATION
-                                    needToValidateProject, schemaFile,
+                                needToValidateProject, schemaFile,
 #endif
-                                    cpuCount,
-                                    enableNodeReuse,
-                                    preprocessWriter,
-                                    targetsWriter,
-                                    detailedSummary,
-                                    warningsAsErrors,
-                                    warningsAsMessages,
-                                    enableRestore,
-                                    profilerLogger,
-                                    enableProfiler,
-                                    interactive,
-                                    isolateProjects,
-                                    graphBuildOptions,
-                                    lowPriority,
-                                    inputResultsCaches,
-                                    outputResultsCache,
-                                    commandLine
-                                    ))
-                            {
-                                exitType = ExitType.BuildError;
-                            }
+                                cpuCount,
+                                enableNodeReuse,
+                                preprocessWriter,
+                                targetsWriter,
+                                detailedSummary,
+                                warningsAsErrors,
+                                warningsAsMessages,
+                                enableRestore,
+                                profilerLogger,
+                                enableProfiler,
+                                interactive,
+                                isolateProjects,
+                                graphBuildOptions,
+                                lowPriority,
+                                inputResultsCaches,
+                                outputResultsCache,
+                                commandLine
+                                ))
+                        {
+                            exitType = ExitType.BuildError;
                         }
                     } // end of build
 
@@ -2533,46 +2531,44 @@ namespace Microsoft.Build.CommandLine
                 CommandLineSwitchException.VerifyThrow(nodeModeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
             }
 
+            bool restart = true;
+            while (restart)
             {
-                bool restart = true;
-                while (restart)
+                Exception nodeException = null;
+                NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
+                // normal OOP node case
+                if (nodeModeNumber == 1)
                 {
-                    Exception nodeException = null;
-                    NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
-                    // normal OOP node case
-                    if (nodeModeNumber == 1)
-                    {
-                        OutOfProcNode node = new OutOfProcNode();
+                    OutOfProcNode node = new OutOfProcNode();
 
-                        // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
-                        bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                        string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
-                        bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
+                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
+                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                    string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
+                    bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
 
-                        shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
+                    shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
-                        FileUtilities.ClearCacheDirectory();
-                    }
-                    else if (nodeModeNumber == 2)
-                    {
-                        OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-                        shutdownReason = node.Run(out nodeException);
-                    }
-                    else
-                    {
-                        CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());
-                    }
+                    FileUtilities.ClearCacheDirectory();
+                }
+                else if (nodeModeNumber == 2)
+                {
+                    OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
+                    shutdownReason = node.Run(out nodeException);
+                }
+                else
+                {
+                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());
+                }
 
-                    if (shutdownReason == NodeEngineShutdownReason.Error)
-                    {
-                        Debug.WriteLine("An error has happened, throwing an exception");
-                        throw nodeException;
-                    }
+                if (shutdownReason == NodeEngineShutdownReason.Error)
+                {
+                    Debug.WriteLine("An error has happened, throwing an exception");
+                    throw nodeException;
+                }
 
-                    if (shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
-                    {
-                        restart = false;
-                    }
+                if (shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
+                {
+                    restart = false;
                 }
             }
         }
