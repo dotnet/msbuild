@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using System.Reflection;
 using Microsoft.Build.Eventing;
-using Microsoft.Build.Utilities;
 
 #nullable disable
 

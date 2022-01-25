@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Concurrent;
+#if !FEATURE_THREAD_CULTURE
+using System.Globalization;
+#endif
 using System.Threading;
 using Microsoft.Build.Shared;
 
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
-using System.Globalization;
 
 #nullable disable
 

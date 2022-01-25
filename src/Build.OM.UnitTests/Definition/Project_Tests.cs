@@ -3317,7 +3317,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var project =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
-                    <A Include=`" + longString +  @"`/>
+                    <A Include=`" + longString + @"`/>
                   </ItemGroup>
                 </Project>
                 ";
@@ -3515,7 +3515,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected, project, "1.foo");
         }
 
-		[Fact]
+        [Fact]
         public void GetItemProvenanceShouldWorkWithRemoveElements()
         {
             var project =
@@ -3569,7 +3569,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 ProvenanceResultTupleList expectedProvenance = null;
 
-                var provenanceKind = includeGlob.IndexOfAny(new[]{'*', '?'}) != -1  ? Provenance.Glob : Provenance.StringLiteral;
+                var provenanceKind = includeGlob.IndexOfAny(new[] { '*', '?' }) != -1 ? Provenance.Glob : Provenance.StringLiteral;
                 expectedProvenance = provenanceShouldFindAMatch
                     ? new ProvenanceResultTupleList
                     {
@@ -3709,13 +3709,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 <A Include=`a*;b*;c*` Exclude=`@(E)`/>
 <A Remove=`@(R)`/>
 ",
-        new[] {"aa", "bb", "cc"},
-        new[] {"b", "c"}
+        new[] { "aa", "bb", "cc" },
+        new[] { "b", "c" }
         )]
         [InlineData(
             @"<A Include=`ab*;b|c*;de*`/>",
-            new[] {"ab", "de"},
-            new[] {"bc", "b|c", "b", "c"}
+            new[] { "ab", "de" },
+            new[] { "bc", "b|c", "b", "c" }
             )]
         public void GetAllGlobsShouldProduceGlobThatMatches(string itemContents, string[] stringsThatShouldMatch, string[] stringsThatShouldNotMatch)
         {
@@ -4339,7 +4339,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private string GetSampleProjectContent()
         {
             string projectFileContent = ObjectModelHelpers.CleanupFileContents(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='2.0' InitialTargets='it' DefaultTargets='dt'>
+                    <Project ToolsVersion='2.0' InitialTargets='it' DefaultTargets='dt'>
                         <PropertyGroup Condition=""'$(Configuration)'=='Foo'"">
                             <p>v1</p>
                         </PropertyGroup>

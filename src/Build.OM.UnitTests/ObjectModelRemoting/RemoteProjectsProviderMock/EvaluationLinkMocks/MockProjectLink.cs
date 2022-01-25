@@ -24,8 +24,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return holder.Linker.LinkFactory.Create(link);
         }
 
-
-        /// ProjectLink remoting
+        // ProjectLink remoting
         public MockProjectElementLinkRemoter Xml => this.OwningCollection.ExportElement(this.Source.Xml);
 
         public bool ThrowInsteadOfSplittingItemElement { get => this.Source.ThrowInsteadOfSplittingItemElement; set => this.Source.ThrowInsteadOfSplittingItemElement = value; }

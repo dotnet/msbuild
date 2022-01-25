@@ -1,13 +1,17 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if !RUNTIME_TYPE_NETCORE
 using System;
 using System.IO;
 using System.Diagnostics;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+#endif
 
 #nullable disable
 

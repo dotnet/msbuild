@@ -9,7 +9,9 @@ namespace Microsoft.Build.AppxPackage.Shared
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -21,7 +23,7 @@ using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 using System.Xml.Schema;
 using System.Runtime.Serialization;
-#if !CLR2COMPATIBILITY
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
 using Microsoft.Build.Shared.Debugging;
 #endif
 using Microsoft.Build.Framework;

@@ -9,7 +9,9 @@ using System.Collections.Generic;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.ComponentModel.Design;
 #endif
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -24,8 +26,10 @@ using System.Runtime.Remoting;
 #endif
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Versioning;
 using System.Security;
+#endif
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -252,7 +256,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The language to use when generating the class source for the strongly typed resource.
+        /// Gets or sets the language to use when generating the class source for the strongly typed resource.
         /// This parameter must match exactly one of the languages used by the CodeDomProvider.
         /// </summary>
         public string StronglyTypedLanguage
@@ -263,7 +267,11 @@ namespace Microsoft.Build.Tasks
                 // try to validate it -- that might prevent future expansion of supported languages.
                 _stronglyTypedLanguage = value;
             }
-            get { return _stronglyTypedLanguage; }
+
+            get
+            {
+                return _stronglyTypedLanguage;
+            }
         }
 
         /// <summary>

@@ -37,13 +37,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private string _originalWorkingDirectory;
 
-        #pragma warning disable xUnit1013
+#pragma warning disable xUnit1013
 
         public void LoggingException(Exception e)
         {
         }
 
-        #pragma warning restore xUnit1013
+#pragma warning restore xUnit1013
 
         public RequestBuilder_Tests()
         {
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private BuildRequestConfiguration CreateTestProject(int configId)
         {
             string projectFileContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <ItemGroup>
                         <Compile Include=`b.cs` />

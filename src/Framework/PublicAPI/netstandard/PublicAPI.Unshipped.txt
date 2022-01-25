@@ -1,3 +1,0 @@
-virtual Microsoft.Build.Framework.SdkLogger.LogEvent(params object[] args) -> void
-virtual Microsoft.Build.Framework.SdkLogger.LogEventStart(params object[] args) -> void
-virtual Microsoft.Build.Framework.SdkLogger.LogEventStop(params object[] args) -> void

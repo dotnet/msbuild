@@ -5,12 +5,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 #nullable disable
 
