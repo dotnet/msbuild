@@ -258,24 +258,24 @@ namespace Microsoft.Build.BackEnd.Logging
         bool HasBuildSubmissionLoggedErrors(int submissionId);
 
         /// <summary>
-        /// Returns a hashset of warnings to be logged as errors for the specified project instance ID.
+        /// Get the warnings that will be promoted to errors for the specified context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
-        /// <returns>A Hashset containing warning codes that should be treated as errors.</returns>
+        /// <returns>A collection of warning codes that should be treated as errors.</returns>
         ICollection<string> GetWarningsAsErrors(BuildEventContext context);
 
         /// <summary>
-        /// Returns a hashset of warnings not to be logged as errors for the specified project instance ID.
+        /// Get the warnings that will not be promoted to error for the specified context.
         /// </summary>
         /// <param name="context">The build context through which warnings will not be logged as errors.</param>
-        /// <returns>A Hashset containing warning codes that should not be treated as errors.</returns>
+        /// <returns>A collection of warning codes that should not be treated as errors.</returns>
         ICollection<string> GetWarningsNotAsErrors(BuildEventContext context);
 
         /// <summary>
-        /// Returns a hashset of warnings to be logged as messages for the specified project instance ID.
+        /// Get the warnings that will be demoted to messages for the specified context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
-        /// <returns>A Hashset containing warning codes that should be treated as messages.</returns>
+        /// <returns>A collection of warning codes that should be treated as messages.</returns>
         ICollection<string> GetWarningsAsMessages(BuildEventContext context);
 
         #region Register

@@ -2363,12 +2363,32 @@ namespace Microsoft.Build.CommandLine
                     schemaFile = ProcessValidateSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Validate]);
 #endif
                     invokeBuild = true;
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors) &&
+                        !WarningsAsErrorsSwitchIsEmpty(commandLineSwitches)!)
+                    {
+                        commandLineSwitches.SetSwitchError("NotWarnAsErrorWithoutWarnAsError",
+                        commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors));
+                        commandLineSwitches.ThrowErrors();
+                    }
                 }
             }
 
             ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
+        }
+
+        private static bool WarningsAsErrorsSwitchIsEmpty(CommandLineSwitches commandLineSwitches)
+        {
+            string val = commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors);
+            if (val is null)
+            {
+                return false;
+            }
+
+            int indexOfColon = val.IndexOf(":");
+            return indexOfColon < 0 || indexOfColon == val.Length - 1;
         }
 
         internal static GraphBuildOptions ProcessGraphBuildSwitch(string[] parameters)
@@ -2504,8 +2524,6 @@ namespace Microsoft.Build.CommandLine
 
         private static ISet<string> ProcessWarningRelatedSwitch(CommandLineSwitches commandLineSwitches, CommandLineSwitches.ParameterizedSwitch warningSwitch)
         {
-            // TODO: Parse an environment variable as well?
-
             if (!commandLineSwitches.IsParameterizedSwitchSet(warningSwitch))
             {
                 return null;

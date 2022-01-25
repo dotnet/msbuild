@@ -292,7 +292,12 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
-            return (WarningsAsErrors.Count == 0 && (WarningsNotAsErrors == null || !WarningsNotAsErrors.Contains(warningCode))) || WarningsAsMessages.Contains(warningCode);
+            return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsMessages.Contains(warningCode);
+        }
+
+        private bool WarningAsErrorNotOverriden(string warningCode)
+        {
+            return WarningsNotAsErrors?.Contains(warningCode) != true;
         }
         #endregion
 

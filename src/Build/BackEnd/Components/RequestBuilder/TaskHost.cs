@@ -768,7 +768,12 @@ namespace Microsoft.Build.BackEnd
             }
 
             // An empty set means all warnings are errors.
-            return (WarningsAsErrors.Count == 0 && (WarningsNotAsErrors == null || !WarningsNotAsErrors.Contains(warningCode))) || WarningsAsErrors.Contains(warningCode);
+            return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsErrors.Contains(warningCode);
+        }
+
+        private bool WarningAsErrorNotOverriden(string warningCode)
+        {
+            return WarningsNotAsErrors?.Contains(warningCode) != true;
         }
 
         #endregion

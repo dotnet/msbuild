@@ -1311,7 +1311,6 @@ namespace Microsoft.Build.BackEnd
             ILoggingService loggingService = _projectLoggingContext?.LoggingService;
 
             // Ensure everything that is required is available at this time
-            //
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 if (String.Equals(project.GetPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
