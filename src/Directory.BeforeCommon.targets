@@ -62,7 +62,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_TASK_GENERATERESOURCES</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MULTIPLE_TOOLSETS</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
