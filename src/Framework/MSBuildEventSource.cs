@@ -521,6 +521,54 @@ namespace Microsoft.Build.Eventing
             WriteEvent(70, oldHash, newHash);
         }
 
-#endregion
+        [Event(71, Keywords = Keywords.All)]
+        public void ProjectCacheCreatePluginInstanceStart(string pluginAssemblyPath)
+        {
+            WriteEvent(71, pluginAssemblyPath);
+        }
+
+        [Event(72, Keywords = Keywords.All)]
+        public void ProjectCacheCreatePluginInstanceStop(string pluginAssemblyPath, string pluginTypeName)
+        {
+            WriteEvent(72, pluginAssemblyPath, pluginTypeName);
+        }
+
+        [Event(73, Keywords = Keywords.All)]
+        public void ProjectCacheBeginBuildStart(string pluginTypeName)
+        {
+            WriteEvent(73, pluginTypeName);
+        }
+
+        [Event(74, Keywords = Keywords.All)]
+        public void ProjectCacheBeginBuildStop(string pluginTypeName)
+        {
+            WriteEvent(74, pluginTypeName);
+        }
+
+        [Event(75, Keywords = Keywords.All)]
+        public void ProjectCacheGetCacheResultStart(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(75, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(76, Keywords = Keywords.All)]
+        public void ProjectCacheGetCacheResultStop(string pluginTypeName, string projectPath, string targets, string cacheResultType)
+        {
+            WriteEvent(76, pluginTypeName, projectPath, targets, cacheResultType);
+        }
+
+        [Event(77, Keywords = Keywords.All)]
+        public void ProjectCacheEndBuildStart(string pluginTypeName)
+        {
+            WriteEvent(77, pluginTypeName);
+        }
+
+        [Event(78, Keywords = Keywords.All)]
+        public void ProjectCacheEndBuildStop(string pluginTypeName)
+        {
+            WriteEvent(78, pluginTypeName);
+        }
+
+        #endregion
     }
 }
