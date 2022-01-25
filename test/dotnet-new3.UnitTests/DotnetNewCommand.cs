@@ -16,6 +16,7 @@ namespace Dotnet_new3.IntegrationTests
             // Set dotnet-new3.dll as first Argument to be passed to "dotnet"
             // And use full path since we want to execute in any working directory
             Arguments.Add(Path.GetFullPath("dotnet-new3.dll"));
+            Arguments.Add("new3");
             Arguments.AddRange(args);
         }
 
