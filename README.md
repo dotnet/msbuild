@@ -36,20 +36,20 @@ MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/dotnet/msbuild
 
 ## Building
 
-### Building MSBuild with Visual Studio 2019 on Windows
+### Building MSBuild with Visual Studio 2022 on Windows
 
-For the full supported experience, you will need to have Visual Studio 2019 or higher.
+For the full supported experience, you will need to have Visual Studio 2022 or higher.
 
-To get started on **Visual Studio 2019**:
+To get started on **Visual Studio 2022**:
 
-1. [Install Visual Studio 2019](https://www.visualstudio.com/vs/).  Select the following Workloads:
+1. [Install Visual Studio 2022](https://www.visualstudio.com/vs/).  Select the following Workloads:
   - .NET desktop development
   - .NET Core cross-platform development
-2. Open a `Developer Command Prompt for VS 2019` prompt.
+2. Open a `Developer Command Prompt for VS 2022` prompt.
 3. Clone the source code: `git clone https://github.com/dotnet/msbuild`
   - You may have to [download Git](https://git-scm.com/downloads) first.
 4. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
-5. Open `MSBuild.sln` or `MSBuild.Dev.slnf` in Visual Studio 2019.
+5. Open `MSBuild.sln` or `MSBuild.Dev.slnf` in Visual Studio 2022.
 
 Note: To create a usable MSBuild with your changes, run `.\build.cmd /p:CreateBootstrap=true`.
 To build release, add `-c Release`: `.\build.cmd -c Release /p:CreateBootstrap=true`.
