@@ -2,20 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 
-#if !TASKHOST
-using Microsoft.Build.Evaluation;
+#if !TASKHOST && !MSBUILDENTRYPOINTEXE
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework.Profiler;
-using Microsoft.Build.Execution;
+using System.Collections;
+using System.Linq;
 #endif
 
 #if FEATURE_APPDOMAIN

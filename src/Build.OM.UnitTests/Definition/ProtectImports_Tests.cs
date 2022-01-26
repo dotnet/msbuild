@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public ProtectImports_Tests()
         {
             string importContents =
-                @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                @"<Project>
                     <PropertyGroup>
                         <$propertyName>OldPropertyValue</$propertyName>
                     </PropertyGroup>
@@ -601,7 +601,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private Project GetProject()
         {
             string projectContents =
-                @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                @"<Project>
                     <PropertyGroup>
                         <$propertyName>OldPropertyValueInProject</$propertyName>
                     </PropertyGroup>

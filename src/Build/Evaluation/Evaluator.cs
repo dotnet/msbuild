@@ -25,7 +25,6 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;

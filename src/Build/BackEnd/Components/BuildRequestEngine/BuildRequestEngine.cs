@@ -14,7 +14,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
-using Microsoft.Build.Utilities;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable

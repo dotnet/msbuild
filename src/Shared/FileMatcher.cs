@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 
 #nullable disable
 

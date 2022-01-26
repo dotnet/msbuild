@@ -19,8 +19,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
+#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
+#endif
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -3384,9 +3385,9 @@ namespace Microsoft.Build.Evaluation
                         // The object that we're about to call methods on may have escaped characters
                         // in it, we want to operate on the unescaped string in the function, just as we
                         // want to pass arguments that are unescaped (see below)
-                        if (objectInstance is string)
+                        if (objectInstance is string objectInstanceString)
                         {
-                            objectInstance = EscapingUtilities.UnescapeAll((string)objectInstance);
+                            objectInstance = EscapingUtilities.UnescapeAll(objectInstanceString);
                         }
                     }
 
@@ -3510,9 +3511,9 @@ namespace Microsoft.Build.Evaluation
                     // If the result of the function call is a string, then we need to escape the result
                     // so that we maintain the "engine contains escaped data" state.
                     // The exception is that the user is explicitly calling MSBuild::Unescape or MSBuild::Escape
-                    if (functionResult is string && !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) && !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase))
+                    if (functionResult is string functionResultString && !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) && !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
-                        functionResult = EscapingUtilities.Escape((string)functionResult);
+                        functionResult = EscapingUtilities.Escape(functionResultString);
                     }
 
                     // We have nothing left to parse, so we'll return what we have
@@ -3762,9 +3763,8 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                else if (objectInstance is string[])
+                else if (objectInstance is string[] stringArray)
                 {
-                    string[] stringArray = (string[])objectInstance;
                     if (string.Equals(_methodMethodName, "GetValue", StringComparison.OrdinalIgnoreCase))
                     {
                         if (TryGetArg(args, out int index))

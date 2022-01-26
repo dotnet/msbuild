@@ -459,14 +459,14 @@ namespace Microsoft.Build.UnitTests.Logging
             string targetsFile = Path.Combine(testTempPath, "x.targets");
             string projectfileContent =
                 @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='x.targets'/>
                     </Project>
                 ";
 
             string targetsfileContent = @"
-                 <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                   <UsingTask TaskName='RandomTask' AssemblyName='NotARealTaskLocaiton'/>    
+                 <Project DefaultTargets='Build'>
+                   <UsingTask TaskName='RandomTask' AssemblyName='NotARealTaskLocaiton'/>
                    <Target Name='Build'>
                        <RandomTask/>
                    </Target>
@@ -1900,13 +1900,13 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <param name="buildEvent">Build event which was asked to be processed</param>
             internal override void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
             {
-                if (buildEvent is BuildEventArgs)
+                if (buildEvent is BuildEventArgs buildEventArgs)
                 {
-                    _processedBuildEvent = buildEvent as BuildEventArgs;
+                    _processedBuildEvent = buildEventArgs;
                 }
-                else if (buildEvent is KeyValuePair<int, BuildEventArgs>)
+                else if (buildEvent is KeyValuePair<int, BuildEventArgs> kvp)
                 {
-                    _processedBuildEvent = ((KeyValuePair<int, BuildEventArgs>)buildEvent).Value;
+                    _processedBuildEvent = kvp.Value;
                 }
                 else
                 {

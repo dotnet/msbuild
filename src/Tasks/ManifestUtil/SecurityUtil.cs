@@ -1,28 +1,40 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Framework;
+#endif
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
+#if !RUNTIME_TYPE_NETCORE
 using System.Collections.Generic;
+#endif
 using System.ComponentModel;
 using System.Deployment.Internal.CodeSigning;
 using System.Diagnostics;
+#if !RUNTIME_TYPE_NETCORE
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Globalization;
 using System.IO;
+#if !RUNTIME_TYPE_NETCORE
 using System.Reflection;
+#endif
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+#if !RUNTIME_TYPE_NETCORE
 using System.Security.Permissions;
 using System.Security.Policy;
+#endif
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
+#if !RUNTIME_TYPE_NETCORE
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+#endif
 
 #nullable disable
 
@@ -647,9 +659,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
                         var manifest = new SignedCmiManifest2(doc, useSha256);
                         CmiManifestSigner2 signer;
-                        if (useSha256 && rsa is RSACryptoServiceProvider)
+                        if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
                         {
-                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsa as RSACryptoServiceProvider, useSha256);
+                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
                             signer = new CmiManifestSigner2(csp, cert, useSha256);
                         }
                         else

@@ -13,7 +13,6 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Build.Utilities;
 
 #nullable disable
 

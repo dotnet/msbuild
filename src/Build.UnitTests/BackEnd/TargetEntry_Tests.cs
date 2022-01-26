@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private int _nodeRequestId;
 
-        #pragma warning disable xUnit1013
+#pragma warning disable xUnit1013
 
         /// <summary>
         /// Handles exceptions from the logging system.
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
-        #pragma warning restore xUnit1013
+#pragma warning restore xUnit1013
 
         /// <summary>
         /// Called prior to each test.
@@ -381,8 +381,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (returnsEnabledForThisProject)
                 {
-                    // If returns are enabled, since this is a target with "Outputs", they won't 
-                    // be returned. 
+                    // If returns are enabled, since this is a target with "Outputs", they won't
+                    // be returned.
                     Assert.Empty(results.Items);
                 }
                 else
@@ -474,8 +474,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (returnsEnabledForThisProject)
                 {
-                    // If returns are enabled, since this is a target with "Outputs", they won't 
-                    // be returned. 
+                    // If returns are enabled, since this is a target with "Outputs", they won't
+                    // be returned.
                     Assert.Empty(results.Items);
                 }
                 else
@@ -636,7 +636,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             foreach (bool returnsEnabledForThisProject in returnsEnabled)
             {
                 string content = @"
-<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+<Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
         <SomeItem1 Include=`item1.cs`/>
         <SomeItem2 Include=`item2.cs`/>
@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 foreach (bool returnsEnabledForThisProject in returnsEnabled)
                 {
                     string content = @"
-<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+<Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
         <SomeItem1 Include=`item1.cs`/>
         <SomeItem2 Include=`item2.cs`/>
@@ -780,7 +780,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 foreach (bool returnsEnabledForThisProject in returnsEnabled)
                 {
                     string content = @"
-<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+<Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
         <SomeItem1 Include=`item1.cs`/>
         <SomeItem2 Include=`item2.cs`/>
@@ -835,13 +835,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
         public void AfterTargetsShouldReportFailedBuild()
         {
-            // Since we're creating our own BuildManager, we need to make sure that the default 
+            // Since we're creating our own BuildManager, we need to make sure that the default
             // one has properly relinquished the inproc node
             NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
             nodeProviderInProc?.Dispose();
 
             string content = @"
-<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build'>
 <Target Name='Build'>
  <Message Text='Hello'/>
 </Target>
@@ -891,7 +891,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             finally
             {
-                // and we should clean up after ourselves, too. 
+                // and we should clean up after ourselves, too.
                 if (manager != null)
                 {
                     NodeProviderInProc inProcNodeProvider = ((IBuildComponentHost)manager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
@@ -909,7 +909,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestTargetFinishedRaisedOnInvalidTarget()
         {
             string content = @"
-<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+<Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <Target Name=`OnlyInputs` Inputs=`foo`>
         <Message Text=`This is an invalid target -- this text should never show.` />
     </Target>
@@ -1059,7 +1059,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string returnsAttributeName = returnsAttributeEnabled ? "Returns" : "Outputs";
 
             string projectFileContents = @"
-                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project ToolsVersion='msbuilddefaulttoolsversion'>
 
                     <ItemGroup>
                         <Compile Include='b.cs' />
@@ -1111,11 +1111,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Target Name='SkipCondition' Condition=""'true' == 'false'"" />
 
                     <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>                    
-                        <ErrorTask2 ContinueOnError='False'/>  
-                        <ErrorTask3 /> 
-                        <OnError ExecuteTargets='Foo'/>                  
-                        <OnError ExecuteTargets='Bar'/>                  
+                        <ErrorTask1 ContinueOnError='True'/>
+                        <ErrorTask2 ContinueOnError='False'/>
+                        <ErrorTask3 />
+                        <OnError ExecuteTargets='Foo'/>
+                        <OnError ExecuteTargets='Bar'/>
                     </Target>
 
                     <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>
