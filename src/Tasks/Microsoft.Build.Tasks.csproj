@@ -957,6 +957,9 @@
     <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Force M.B.Framework & Utilities to build as netstandard2.0 so the RoslynCodeTaskFactory can find them. -->
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
@@ -967,6 +970,12 @@
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
+
+  <Target Name="PlaceNetstandardRefAssembliesInRefFolder" BeforeTargets="GetCopyToOutputDirectoryItems">
+    <ItemGroup>
+      <ContentWithTargetPath Include="@(NetstandardRefAssemblies)" CopyToOutputDirectory="PreserveNewest" TargetPath="ref\%(Filename)%(Extension)"/>
+    </ItemGroup>
+  </Target>
 
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
   <ItemGroup>
