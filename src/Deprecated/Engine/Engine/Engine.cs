@@ -2503,7 +2503,7 @@ namespace Microsoft.Build.BuildEngine
                 ArrayList actuallyBuiltTargets;
 
                 // If the tools version is empty take a quick peek at the project file to determine if it has a tools version defined
-                if(String.IsNullOrEmpty(buildRequest.ToolsetVersion))
+                if (String.IsNullOrEmpty(buildRequest.ToolsetVersion))
                 {
                     buildRequest.ToolsetVersion = XmlUtilities.GetAttributeValueForElementFromFile(buildRequest.ProjectFileName, XMakeAttributes.project, XMakeAttributes.toolsVersion);
                     buildRequest.ToolsVersionPeekedFromProjectFile = true;

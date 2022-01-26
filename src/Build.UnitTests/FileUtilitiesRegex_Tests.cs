@@ -525,66 +525,19 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void UncPatternEmptyString_LegacyRegex()
+        public void PatternEmptyString_LegacyRegex()
         {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            UncPattern.IsMatch(winDirectory).ShouldBe(false);
-            UncPattern.IsMatch(unixDirectory).ShouldBe(false);
+            UncPattern.IsMatch(string.Empty).ShouldBeFalse();
+            StartsWithUncPattern.IsMatch(string.Empty).ShouldBeFalse();
+            StartsWithUncPattern.Match(string.Empty).Success.ShouldBeFalse();
         }
 
         [Fact]
-        public void UncPatternEmptyString()
+        public void PatternEmptyString()
         {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            FileUtilitiesRegex.IsUncPattern(winDirectory).ShouldBe(false);
-            FileUtilitiesRegex.IsUncPattern(unixDirectory).ShouldBe(false);
-        }
-
-        [Fact]
-        public void StartWithUncPatternEmptyString_LegacyRegex()
-        {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            StartsWithUncPattern.IsMatch(winDirectory).ShouldBe(false);
-            StartsWithUncPattern.IsMatch(unixDirectory).ShouldBe(false);
-        }
-
-        [Fact]
-        public void StartsWithUncPatternEmptyString()
-        {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            FileUtilitiesRegex.StartsWithUncPattern(winDirectory).ShouldBe(false);
-            FileUtilitiesRegex.StartsWithUncPattern(unixDirectory).ShouldBe(false);
-        }
-
-        [Fact]
-        public void MatchLengthStartWithUncPatternEmptyString_LegacyRegex()
-        {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            var match = StartsWithUncPattern.Match(winDirectory);
-            match.Success.ShouldBeFalse();
-
-            match = StartsWithUncPattern.Match(unixDirectory);
-            match.Success.ShouldBeFalse();
-        }
-
-        [Fact]
-        public void MatchLengthStartWithUncPatternEmptyString()
-        {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            FileUtilitiesRegex.StartsWithUncPatternMatchLength(winDirectory).ShouldBe(-1);
-            FileUtilitiesRegex.StartsWithUncPatternMatchLength(unixDirectory).ShouldBe(-1);
+            FileUtilitiesRegex.IsUncPattern(string.Empty).ShouldBeFalse();
+            FileUtilitiesRegex.StartsWithUncPattern(string.Empty).ShouldBeFalse();
+            FileUtilitiesRegex.StartsWithUncPatternMatchLength(string.Empty).ShouldBe(-1);
         }
     }
 }

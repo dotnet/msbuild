@@ -277,7 +277,7 @@ dotnet_diagnostic.CA1821.severity = warning
 dotnet_diagnostic.CA1822.severity = none
 
 # Avoid unused private fields
-dotnet_diagnostic.CA1823.severity = suggestion
+dotnet_diagnostic.CA1823.severity = warning
 
 # Mark assemblies with NeutralResourcesLanguageAttribute
 dotnet_diagnostic.CA1824.severity = warning
@@ -411,7 +411,7 @@ dotnet_diagnostic.CA2234.severity = none
 dotnet_diagnostic.CA2235.severity = none
 
 # Provide correct arguments to formatting methods
-dotnet_diagnostic.CA2241.severity = suggestion
+dotnet_diagnostic.CA2241.severity = warning
 
 # Test for NaN correctly
 dotnet_diagnostic.CA2242.severity = warning
@@ -771,7 +771,7 @@ dotnet_diagnostic.SA1100.severity = suggestion
 
 dotnet_diagnostic.SA1101.severity = none
 
-dotnet_diagnostic.SA1102.severity = suggestion
+dotnet_diagnostic.SA1102.severity = warning
 
 # Code should not contain empty statements
 dotnet_diagnostic.SA1106.severity = suggestion
@@ -901,7 +901,7 @@ dotnet_diagnostic.SA1217.severity = suggestion
 dotnet_diagnostic.SA1300.severity = suggestion
 
 # Interface names should begin with I
-dotnet_diagnostic.SA1302.severity = suggestion
+dotnet_diagnostic.SA1302.severity = warning
 
 # Const field names should begin with upper-case letter
 dotnet_diagnostic.SA1303.severity = suggestion
@@ -981,7 +981,7 @@ dotnet_diagnostic.SA1502.severity = suggestion
 dotnet_diagnostic.SA1503.severity = suggestion
 
 # All accessors should be single-line or multi-line
-dotnet_diagnostic.SA1504.severity = suggestion
+dotnet_diagnostic.SA1504.severity = warning
 
 # An opening brace should not be followed by a blank line
 dotnet_diagnostic.SA1505.severity = suggestion
@@ -996,7 +996,7 @@ dotnet_diagnostic.SA1507.severity = suggestion
 dotnet_diagnostic.SA1508.severity = warning
 
 # Opening braces should not be preceded by blank line
-dotnet_diagnostic.SA1509.severity = suggestion
+dotnet_diagnostic.SA1509.severity = warning
 
 # 'else' statement should not be preceded by a blank line
 dotnet_diagnostic.SA1510.severity = warning

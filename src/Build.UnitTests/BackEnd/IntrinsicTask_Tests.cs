@@ -3927,7 +3927,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), new PropertyDictionary<ProjectPropertyInstance>());
                     task.ExecuteTask(lookup);
 
-                    return lookup.GetItems(itemType).Select(i => (ObjectModelHelpers.TestItem)new ObjectModelHelpers.ProjectItemInstanceTestItemAdapter(i)).ToList();
+                    return lookup.GetItems(itemType).Select(i => (ObjectModelHelpers.ITestItem)new ObjectModelHelpers.ProjectItemInstanceTestItemAdapter(i)).ToList();
                 },
                 projectContents,
                 inputFiles,

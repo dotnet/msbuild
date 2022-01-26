@@ -220,7 +220,7 @@ namespace Microsoft.Build.Utilities
                 {
                     CommandLine.Append(Environment.NewLine);
                 }
-                else if(CommandLine[CommandLine.Length - 1] != ' ')
+                else if (CommandLine[CommandLine.Length - 1] != ' ')
                 {
                     CommandLine.Append(' ');
                 }

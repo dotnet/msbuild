@@ -474,13 +474,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Print out all of the errors under the ProjectEntryPoint / target
                 foreach (BuildEventArgs errorWarningEvent in valuePair.Value)
                 {
-                    if (errorWarningEvent is BuildErrorEventArgs)
+                    if (errorWarningEvent is BuildErrorEventArgs buildErrorEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(buildErrorEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
                     }
-                    else if (errorWarningEvent is BuildWarningEventArgs)
+                    else if (errorWarningEvent is BuildWarningEventArgs buildWarningEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(buildWarningEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
                     }
                 }
                 WriteNewLine();
