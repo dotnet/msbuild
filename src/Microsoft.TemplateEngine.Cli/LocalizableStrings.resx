@@ -649,7 +649,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>Search failed: not enough information specified for search.</value>
   </data>
   <data name="CliTemplateSearchCoordinator_Info_SearchHelp" xml:space="preserve">
-    <value>To search for templates, specify partial template name or use one of supported filters: {0}.</value>
+    <value>To search for templates, specify partial template name or use one of the supported filters: {0}.</value>
   </data>
   <data name="Generic_ExampleHeader" xml:space="preserve">
     <value>Example:</value>

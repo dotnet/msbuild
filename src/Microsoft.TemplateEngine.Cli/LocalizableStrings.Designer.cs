@@ -572,7 +572,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To search for templates, specify partial template name or use one of supported filters: {0}..
+        ///   Looks up a localized string similar to To search for templates, specify partial template name or use one of the supported filters: {0}..
         /// </summary>
         internal static string CliTemplateSearchCoordinator_Info_SearchHelp {
             get {

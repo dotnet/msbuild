@@ -299,8 +299,8 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
-        <source>To search for templates, specify partial template name or use one of supported filters: {0}.</source>
-        <target state="translated">Para buscar plantillas, especifique el nombre de plantilla parcial o use uno de los filtros admitidos: {0}.</target>
+        <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
+        <target state="needs-review-translation">Para buscar plantillas, especifique el nombre de plantilla parcial o use uno de los filtros admitidos: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">

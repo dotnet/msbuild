@@ -1,5 +1,5 @@
 ﻿Search failed: not enough information specified for search.
-To search for templates, specify partial template name or use one of supported filters: '--author', '--baseline', '--language', '--type', '--tag', '--package'.
+To search for templates, specify partial template name or use one of the supported filters: '--author', '--baseline', '--language', '--type', '--tag', '--package'.
 Examples:
    dotnet-new3 new3 search web
    dotnet-new3 new3 search --author Microsoft

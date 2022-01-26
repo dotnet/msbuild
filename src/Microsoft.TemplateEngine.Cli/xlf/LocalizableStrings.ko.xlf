@@ -299,8 +299,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
-        <source>To search for templates, specify partial template name or use one of supported filters: {0}.</source>
-        <target state="translated">템플릿을 검색하려면 부분 템플릿 이름을 지정하거나 지원되는 필터({0}) 중 하나를 사용하세요.</target>
+        <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
+        <target state="needs-review-translation">템플릿을 검색하려면 부분 템플릿 이름을 지정하거나 지원되는 필터({0}) 중 하나를 사용하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
