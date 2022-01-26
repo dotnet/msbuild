@@ -662,16 +662,6 @@ namespace Microsoft.Build.Tasks
             private const string X64Arch = "X64";
 
             /// <summary>
-            /// X86 architecture name
-            /// </summary>
-            private const string X86Arch = "X86";
-
-            /// <summary>
-            /// ARM architecture name
-            /// </summary>
-            private const string ARMArch = "ARM";
-
-            /// <summary>
             /// ANY CPU architecture name
             /// </summary>
             private const string AnyCPUArch = "Any CPU";

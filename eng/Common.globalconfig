@@ -277,7 +277,7 @@ dotnet_diagnostic.CA1821.severity = warning
 dotnet_diagnostic.CA1822.severity = none
 
 # Avoid unused private fields
-dotnet_diagnostic.CA1823.severity = suggestion
+dotnet_diagnostic.CA1823.severity = warning
 
 # Mark assemblies with NeutralResourcesLanguageAttribute
 dotnet_diagnostic.CA1824.severity = warning

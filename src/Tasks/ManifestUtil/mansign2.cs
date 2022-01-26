@@ -281,20 +281,6 @@ namespace System.Deployment.Internal.CodeSigning
 #endif
         }
 
-        private static XmlElement FindIdElement(XmlElement context, string idValue)
-        {
-            if (context == null)
-                return null;
-
-            XmlElement idReference = context.SelectSingleNode("//*[@Id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            idReference = context.SelectSingleNode("//*[@id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            return context.SelectSingleNode("//*[@ID=\"" + idValue + "\"]") as XmlElement;
-        }
-
         public override XmlElement GetIdElement(XmlDocument document, string idValue)
         {
             // We only care about Id references inside of the KeyInfo section
@@ -319,9 +305,6 @@ namespace System.Deployment.Internal.CodeSigning
         private const string Sha256DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha256";
         private const string Sha1SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         private const string Sha1DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha1";
-
-        private const string wintrustPolicyFlagsRegPath = "Software\\Microsoft\\Windows\\CurrentVersion\\WinTrust\\Trust Providers\\Software Publishing";
-        private const string wintrustPolicyFlagsRegName = "State";
 
         private SignedCmiManifest2() { }
 

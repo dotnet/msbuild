@@ -934,17 +934,7 @@ namespace Microsoft.Build.Tasks
         private static bool allowMOTW;
 
         private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
-
-        private const uint ZoneLocalMachine = 0;
-
-        private const uint ZoneIntranet = 1;
-
-        private const uint ZoneTrusted = 2;
-
         private const uint ZoneInternet = 3;
-
-        private const uint ZoneUntrusted = 4;
-
         private static IInternetSecurityManager internetSecurityManager = null;
 
         // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
