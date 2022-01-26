@@ -203,9 +203,9 @@ namespace Microsoft.Build.BackEnd
             {
                 // If we returned an exception, then we want to throw it when we 
                 // do the get.  
-                if (value is Exception)
+                if (value is Exception ex)
                 {
-                    throw (Exception)value;
+                    throw ex;
                 }
 
                 return value;
@@ -520,21 +520,21 @@ namespace Microsoft.Build.BackEnd
 
                     // "Custom events" in terms of the communications infrastructure can also be, e.g. custom error events, 
                     // in which case they need to be dealt with in the same way as their base type of event. 
-                    if (buildEvent is BuildErrorEventArgs)
+                    if (buildEvent is BuildErrorEventArgs buildErrorEventArgs)
                     {
-                        this.BuildEngine.LogErrorEvent((BuildErrorEventArgs)buildEvent);
+                        this.BuildEngine.LogErrorEvent(buildErrorEventArgs);
                     }
-                    else if (buildEvent is BuildWarningEventArgs)
+                    else if (buildEvent is BuildWarningEventArgs buildWarningEventArgs)
                     {
-                        this.BuildEngine.LogWarningEvent((BuildWarningEventArgs)buildEvent);
+                        this.BuildEngine.LogWarningEvent(buildWarningEventArgs);
                     }
-                    else if (buildEvent is BuildMessageEventArgs)
+                    else if (buildEvent is BuildMessageEventArgs buildMessageEventArgs)
                     {
-                        this.BuildEngine.LogMessageEvent((BuildMessageEventArgs)buildEvent);
+                        this.BuildEngine.LogMessageEvent(buildMessageEventArgs);
                     }
-                    else if (buildEvent is CustomBuildEventArgs)
+                    else if (buildEvent is CustomBuildEventArgs customBuildEventArgs)
                     {
-                        this.BuildEngine.LogCustomEvent((CustomBuildEventArgs)buildEvent);
+                        this.BuildEngine.LogCustomEvent(customBuildEventArgs);
                     }
                     else
                     {

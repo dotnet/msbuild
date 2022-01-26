@@ -659,9 +659,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
                         var manifest = new SignedCmiManifest2(doc, useSha256);
                         CmiManifestSigner2 signer;
-                        if (useSha256 && rsa is RSACryptoServiceProvider)
+                        if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
                         {
-                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsa as RSACryptoServiceProvider, useSha256);
+                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
                             signer = new CmiManifestSigner2(csp, cert, useSha256);
                         }
                         else

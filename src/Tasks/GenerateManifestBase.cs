@@ -248,9 +248,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // Fixup for non-ClickOnce case...
-            if (_manifest is ApplicationManifest)
+            if (_manifest is ApplicationManifest applicationManifest)
             {
-                var applicationManifest = _manifest as ApplicationManifest;
                 if (!applicationManifest.IsClickOnceManifest)
                 {
                     // Don't need publicKeyToken attribute for non-ClickOnce case

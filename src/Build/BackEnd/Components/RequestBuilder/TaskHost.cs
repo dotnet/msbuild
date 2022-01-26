@@ -704,7 +704,7 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 // Test compatibility
-                if(_taskLoggingContext == null)
+                if (_taskLoggingContext == null)
                 {
                     return null;
                 }

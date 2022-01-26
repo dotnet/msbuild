@@ -560,9 +560,9 @@ namespace Microsoft.Build.Tasks
             try
             {
                 object allowUntrustedFiles = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null);
-                if (allowUntrustedFiles is String)
+                if (allowUntrustedFiles is string allowUntrustedFilesString)
                 {
-                    allowMOTW = ((string)allowUntrustedFiles).Equals("true", StringComparison.OrdinalIgnoreCase);
+                    allowMOTW = allowUntrustedFilesString.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
             }
             catch { }
@@ -902,10 +902,10 @@ namespace Microsoft.Build.Tasks
                                 {
                                     foreach (ITaskItem item in _remotedTaskItems)
                                     {
-                                        if (item is MarshalByRefObject)
+                                        if (item is MarshalByRefObject marshalByRefObject)
                                         {
                                             // Tell remoting to forget connections to the taskitem
-                                            RemotingServices.Disconnect((MarshalByRefObject)item);
+                                            RemotingServices.Disconnect(marshalByRefObject);
                                         }
                                     }
                                 }
@@ -2618,9 +2618,8 @@ namespace Microsoft.Build.Tasks
             }
             catch (ArgumentException ae)
             {
-                if (ae.InnerException is XmlException)
+                if (ae.InnerException is XmlException xe)
                 {
-                    XmlException xe = (XmlException) ae.InnerException;
                     _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
                         xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 }

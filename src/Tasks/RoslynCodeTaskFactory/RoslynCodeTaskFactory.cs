@@ -738,7 +738,7 @@ namespace Microsoft.Build.Tasks
 
         private static string[] GetMonoLibDirs()
         {
-            if(NativeMethodsShared.IsMono)
+            if (NativeMethodsShared.IsMono)
             {
                 string monoLibDir = Path.GetDirectoryName(typeof(object).Assembly.Location);
                 string monoLibFacadesDir = Path.Combine(monoLibDir, "Facades");
