@@ -869,31 +869,31 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ConsoleToMSBuild()
         {
-            //Exec with no output
+            // Exec with no output
             Exec exec = PrepareExec("set foo=blah");
-            //Test Set and Get of ConsoleToMSBuild
+            // Test Set and Get of ConsoleToMSBuild
             exec.ConsoleToMSBuild = true;
             Assert.True(exec.ConsoleToMSBuild);
 
             bool result = exec.Execute();
             Assert.True(result);
 
-            //Nothing to run, so the list should be empty
+            // Nothing to run, so the list should be empty
             Assert.Empty(exec.ConsoleOutput);
 
 
-            //first echo prints "Hello stderr" to stderr, second echo prints to stdout
+            // first echo prints "Hello stderr" to stderr, second echo prints to stdout
             string testString = "echo Hello stderr 1>&2\necho Hello stdout";
             exec = PrepareExec(testString);
 
-            //Test Set and Get of ConsoleToMSBuild
+            // Test Set and Get of ConsoleToMSBuild
             exec.ConsoleToMSBuild = true;
             Assert.True(exec.ConsoleToMSBuild);
 
             result = exec.Execute();
             Assert.True(result);
 
-            //Both two lines should had gone to stdout
+            // Both two lines should had gone to stdout
             Assert.Equal(2, exec.ConsoleOutput.Length);
         }
 

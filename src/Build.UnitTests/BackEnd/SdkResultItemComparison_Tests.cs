@@ -55,6 +55,5 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             hashSdkItem1.ShouldBe(hashSdkItem2);
         }
-
     }
 }

@@ -791,6 +791,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         project.GetPropertyValue("p").ShouldBe("val");
                     }
                     else
+                    {
                         switch (policy)
                         {
                             case EvaluationContext.SharingPolicy.Shared:
@@ -802,6 +803,7 @@ namespace Microsoft.Build.UnitTests.Definition
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
                         }
+                    }
                 }
                 );
         }

@@ -38,7 +38,7 @@ using Microsoft.Build.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
-    using Utilities = Internal.Utilities;
+    using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
     /// Represents an evaluated project with design time semantics.
@@ -472,17 +472,14 @@ namespace Microsoft.Build.Evaluation
             {
                 defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
                 // If possible, clear out the XML we just loaded into the XML cache:
                 // if we had loaded the XML from disk into the cache within this constructor,
                 // and then are are bailing out because there is a typo in the XML such that
                 // evaluation failed, we don't want to leave the bad XML in the cache;
                 // the user wouldn't be able to fix the XML file and try again.
-                if (!ExceptionHandling.IsCriticalException(ex))
-                {
-                    projectCollection.TryUnloadProject(Xml);
-                }
+                projectCollection.TryUnloadProject(Xml);
 
                 throw;
             }

@@ -371,7 +371,7 @@ namespace Microsoft.Build.BackEnd
             ISet<string> removeMetadata
         )
         {
-            //todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
+            // todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(keepMetadata != null && removeMetadata != null), originalItem.KeepMetadataLocation, "KeepAndRemoveMetadataMutuallyExclusive");
             List<ProjectItemInstance> items = new List<ProjectItemInstance>();

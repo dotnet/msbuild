@@ -78,7 +78,6 @@ namespace Microsoft.Build.Evaluation
                                 ItemDataCollectionValue<I> newDictionaryEntry = _dictionaryBuilder[newNormalizedValue];
                                 newDictionaryEntry.Add(value.Item);
                                 _dictionaryBuilder[newNormalizedValue] = newDictionaryEntry;
-
                             }
                             else
                             {

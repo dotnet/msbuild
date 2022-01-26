@@ -112,13 +112,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", _xmlInputPath.ItemSpec, e.Message);
                 return false;
             }
@@ -131,13 +126,8 @@ namespace Microsoft.Build.Tasks
                 // Create the expression from query
                 expr = nav.Compile(_query);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPeekPoke.XPathError", _query, e.Message);
                 return false;
             }
@@ -150,13 +140,8 @@ namespace Microsoft.Build.Tasks
             {
                 LoadNamespaces(ref xmlNamespaceManager, Namespaces);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPoke.NamespacesError", e.Message);
                 return false;
             }
@@ -182,13 +167,8 @@ namespace Microsoft.Build.Tasks
                     iter.Current.InnerXml = _value.ItemSpec;
                     Log.LogMessageFromResources(MessageImportance.Low, "XmlPoke.Replaced", iter.Current.Name, _value.ItemSpec);
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     Log.LogErrorWithCodeFromResources("XmlPoke.PokeError", _value.ItemSpec, e.Message);
                     return false;
                 }

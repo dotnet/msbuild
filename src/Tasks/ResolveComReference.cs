@@ -1299,7 +1299,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal IEnumerable<string> GetResolvedAssemblyReferenceItemSpecs()
         {
-            return (ResolvedAssemblyReferences == null) ? Array.Empty<string>(): ResolvedAssemblyReferences.Select(rar => rar.ItemSpec);
+            return (ResolvedAssemblyReferences == null) ? Array.Empty<string>() : ResolvedAssemblyReferences.Select(rar => rar.ItemSpec);
         }
 
         /// <summary>

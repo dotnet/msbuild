@@ -57,13 +57,8 @@ namespace Microsoft.Build.Tasks
 
                 Log.LogError(null, Code, HelpKeyword, File, 0, 0, 0, 0, message);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("ErrorFromResources.LogErrorFailure", Resource, e.Message);
             }
 

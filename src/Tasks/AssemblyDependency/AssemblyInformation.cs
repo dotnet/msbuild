@@ -332,12 +332,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
             }
 
             return frameworkAttribute;
@@ -481,7 +477,7 @@ namespace Microsoft.Build.Tasks
 // Enabling this for MONO, because it's required by GetFrameworkName.
 // More details are in the comment for that method
 #if FEATURE_ASSEMBLYLOADCONTEXT || MONO
-        //  This method copied from DNX source: https://github.com/aspnet/dnx/blob/e0726f769aead073af2d8cd9db47b89e1745d574/src/Microsoft.Dnx.Tooling/Utils/LockFileUtils.cs#L385
+        // This method copied from DNX source: https://github.com/aspnet/dnx/blob/e0726f769aead073af2d8cd9db47b89e1745d574/src/Microsoft.Dnx.Tooling/Utils/LockFileUtils.cs#L385
         //  System.Reflection.Metadata 1.1 is expected to have an API that helps with this.
         /// <summary>
         /// Gets the fixed (required) string arguments of a custom attribute.

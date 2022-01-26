@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-                //Project should get added to the solution
+                // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"ClassLibrary2.csproj");
             }
@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
-                //Project should get added to the solution
+                // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"someproj2.etp");
                 solution.ProjectsInOrder[2].RelativePath.ShouldBe(@"ClassLibrary1.csproj");
@@ -566,7 +566,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         </References>
                     </GENERAL>
                 </EFPROJECT>";
-                //Create the directory for the third project
+                // Create the directory for the third project
                 Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "ETPProjUpgradeTest"));
                 File.WriteAllText(proj3Path, etpProjContent);
 
@@ -580,7 +580,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
-                //Project should get added to the solution
+                // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"someproj2.etp");
                 solution.ProjectsInOrder[2].RelativePath.ShouldBe(@"ETPProjUpgradeTest\someproj3.etp");

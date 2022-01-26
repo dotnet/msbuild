@@ -83,11 +83,8 @@ namespace Microsoft.Build.Internal
                 {
                     return Exists() ? WrappedKey.Name : string.Empty;
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedRegistryException(ex))
-                        throw;
-
                     throw new RegistryException(ex.Message, ex);
                 }
             }
@@ -116,11 +113,8 @@ namespace Microsoft.Build.Internal
             {
                 return Exists() ? WrappedKey.GetValue(name) : null;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
             {
-                if (ExceptionHandling.NotExpectedRegistryException(ex))
-                    throw;
-
                 throw new RegistryException(ex.Message, Name + "@" + name, ex);
             }
         }
@@ -135,11 +129,8 @@ namespace Microsoft.Build.Internal
             {
                 return Exists() ? WrappedKey.GetValueNames() : Array.Empty<string>();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
             {
-                if (ExceptionHandling.NotExpectedRegistryException(ex))
-                    throw;
-
                 throw new RegistryException(ex.Message, Name, ex);
             }
         }
@@ -154,11 +145,8 @@ namespace Microsoft.Build.Internal
             {
                 return Exists() ? WrappedKey.GetSubKeyNames() : Array.Empty<string>();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
             {
-                if (ExceptionHandling.NotExpectedRegistryException(ex))
-                    throw;
-
                 throw new RegistryException(ex.Message, Name, ex);
             }
         }
@@ -219,11 +207,8 @@ namespace Microsoft.Build.Internal
                     {
                         _wrappedKey = _registryHive.OpenSubKey(_registryKeyPath);
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
                     {
-                        if (ExceptionHandling.NotExpectedRegistryException(ex))
-                            throw;
-
                         throw new RegistryException(ex.Message, _wrappedKey == null ? string.Empty : Name, ex);
                     }
                     finally

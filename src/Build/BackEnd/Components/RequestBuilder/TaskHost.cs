@@ -903,7 +903,6 @@ namespace Microsoft.Build.BackEnd
 #endif
                 MessageImportance minimumImportance = _taskHost._taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low;
                 return importance <= minimumImportance;
-
             }
 
             /// <inheritdoc/>

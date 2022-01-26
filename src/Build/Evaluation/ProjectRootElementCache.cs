@@ -245,7 +245,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
                     {
-                        //  Cached project doesn't match preserveFormatting setting, so reload it
+                        // Cached project doesn't match preserveFormatting setting, so reload it
                         projectRootElement.Reload(true, preserveFormatting);
                     }
                 }

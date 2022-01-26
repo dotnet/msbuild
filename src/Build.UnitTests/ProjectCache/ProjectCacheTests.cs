@@ -34,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             _env = TestEnvironment.Create(output);
 
             BuildManager.ProjectCacheItems.ShouldBeEmpty();
-            _env.WithInvariant(new CustomConditionInvariant(() => BuildManager.ProjectCacheItems.Count == 0));
+            _env.WithInvariant(new CustomConditionInvariant(() => BuildManager.ProjectCacheItems.IsEmpty));
         }
 
         public void Dispose()
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             public override string ToString()
             {
-                //return base.ToString();
+                // return base.ToString();
                 return string.Join(
                     ", ",
                     GraphEdges.Select(e => $"{Node(e.Key)}->{FormatChildren(e.Value)}"));
@@ -836,7 +836,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
             buildSession.Logger.AssertMessageCount("MSB4274", 1);
-
         }
 
         private void AssertCacheBuild(
@@ -1295,8 +1294,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 {
                     {1, new []{2}}
                 },
-                extraContentPerProjectNumber:null,
-                extraContentForAllNodes:@$"
+                extraContentPerProjectNumber: null,
+                extraContentForAllNodes: @$"
 <ItemGroup>
     <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
     <{ItemTypeNames.ProjectReferenceTargets} Include=`Build` Targets=`Build` />
@@ -1496,7 +1495,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Theory]
         [InlineData(false, false)]
         // TODO: Reenable when this gets into the main branch.
-        //[InlineData(true, true)]
+        // [InlineData(true, true)]
         public void ParallelStressTestForVsWorkaround(bool useSynchronousLogging, bool disableInprocNode)
         {
             var currentBuildEnvironment = BuildEnvironmentHelper.Instance;

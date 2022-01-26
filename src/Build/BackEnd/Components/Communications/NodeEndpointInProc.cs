@@ -347,7 +347,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_THREAD_CULTURE
                 _packetPump = new Thread(PacketPumpProc);
 #else
-                //  In .NET Core, we need to set the current culture from inside the new thread
+                // In .NET Core, we need to set the current culture from inside the new thread
                 CultureInfo culture = _componentHost.BuildParameters.Culture;
                 CultureInfo uiCulture = _componentHost.BuildParameters.UICulture;
                 _packetPump = new Thread(() =>

@@ -9,7 +9,9 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Build.UnGAC
 {
     // See: https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/fusion/iassemblycache-interface
-    [ComImport, Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport]
+    [Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAssemblyCache
     {
         [PreserveSig]

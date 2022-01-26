@@ -533,7 +533,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         {
             Console.WriteLine("Test: ReadTLogWithDuplicateInRoot");
 
-            //Prepare files
+            // Prepare files
             DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
             DependencyTestHelper.WriteAll("TestFiles\\foo.cpp", "");
             DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");

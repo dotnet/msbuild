@@ -759,7 +759,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Action<string, string> runTest = (include, exclude) =>
             {
-                TestIncludeExclude(projectContents, inputFiles, expectedInclude, include, exclude, normalizeSlashes: true, makeExpectedIncludeAbsolute:makeExpectedIncludeAbsolute);
+                TestIncludeExclude(projectContents, inputFiles, expectedInclude, include, exclude, normalizeSlashes: true, makeExpectedIncludeAbsolute: makeExpectedIncludeAbsolute);
             };
 
             var includeWithForwardSlash = Helpers.ToForwardSlash(includeString);
@@ -781,12 +781,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         // exclude matches include; file is next to project file
         [InlineData(ItemWithIncludeAndExclude,
             @"a", // include item
-            @"", //path relative from projectFile. Empty string if current directory
+            @"", // path relative from projectFile. Empty string if current directory
 
-            @"a", //exclude item
-            "", //path relative from projectFile. Empty string if current directory
+            @"a", // exclude item
+            "", // path relative from projectFile. Empty string if current directory
 
-            new[] //files relative to this test's root directory. The project is one level deeper than the root.
+            new[] // files relative to this test's root directory. The project is one level deeper than the root.
             {
                 @"project\a",
             },
@@ -2095,7 +2095,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        //  TODO: Should remove tests go in project item tests, project item instance tests, or both?
+        // TODO: Should remove tests go in project item tests, project item instance tests, or both?
         [Fact]
         public void Remove()
         {

@@ -113,7 +113,7 @@ dotnet_diagnostic.CA1046.severity = none
 dotnet_diagnostic.CA1047.severity = warning
 
 # Declare types in namespaces
-dotnet_diagnostic.CA1050.severity = suggestion
+dotnet_diagnostic.CA1050.severity = warning
 
 # Do not declare visible instance fields
 dotnet_diagnostic.CA1051.severity = none
@@ -248,7 +248,7 @@ dotnet_diagnostic.CA1801.severity = none
 dotnet_diagnostic.CA1802.severity = warning
 
 # Do not initialize unnecessarily
-dotnet_diagnostic.CA1805.severity = suggestion
+dotnet_diagnostic.CA1805.severity = none
 
 dotnet_diagnostic.CA1806.severity = none
 
@@ -313,7 +313,7 @@ dotnet_diagnostic.CA1834.severity = warning
 dotnet_diagnostic.CA1835.severity = warning
 
 # Prefer IsEmpty over Count
-dotnet_diagnostic.CA1836.severity = suggestion
+dotnet_diagnostic.CA1836.severity = warning
 
 # Use 'Environment.ProcessId'
 dotnet_diagnostic.CA1837.severity = suggestion
@@ -549,7 +549,7 @@ dotnet_diagnostic.CA3077.severity = suggestion
 dotnet_diagnostic.CA3147.severity = warning
 
 # Do Not Use Weak Cryptographic Algorithms
-dotnet_diagnostic.CA5350.severity = suggestion
+dotnet_diagnostic.CA5350.severity = warning
 
 # Do Not Use Broken Cryptographic Algorithms
 dotnet_diagnostic.CA5351.severity = warning
@@ -706,7 +706,7 @@ dotnet_diagnostic.SA1000.severity = none
 dotnet_diagnostic.SA1001.severity = none
 
 # Semicolons should not be preceded by a space
-dotnet_diagnostic.SA1002.severity = suggestion
+dotnet_diagnostic.SA1002.severity = warning
 
 dotnet_diagnostic.SA1003.severity = none
 
@@ -714,7 +714,7 @@ dotnet_diagnostic.SA1003.severity = none
 dotnet_diagnostic.SA1004.severity = warning
 
 # Single line comment should begin with a space
-dotnet_diagnostic.SA1005.severity = suggestion
+dotnet_diagnostic.SA1005.severity = warning
 
 # Region should not be preceded by a space
 dotnet_diagnostic.SA1006.severity = warning
@@ -755,7 +755,7 @@ dotnet_diagnostic.SA1021.severity = suggestion
 dotnet_diagnostic.SA1023.severity = warning
 
 # Colon should be followed by a space
-dotnet_diagnostic.SA1024.severity = suggestion
+dotnet_diagnostic.SA1024.severity = warning
 
 # Code should not contain multiple whitespace characters in a row
 dotnet_diagnostic.SA1025.severity = suggestion
@@ -812,7 +812,7 @@ dotnet_diagnostic.SA1120.severity = suggestion
 dotnet_diagnostic.SA1121.severity = none
 
 # Use string.Empty for empty strings
-dotnet_diagnostic.SA1122.severity = suggestion
+dotnet_diagnostic.SA1122.severity = none
 
 # Region should not be located within a code element
 dotnet_diagnostic.SA1123.severity = suggestion
@@ -820,7 +820,7 @@ dotnet_diagnostic.SA1123.severity = suggestion
 dotnet_diagnostic.SA1124.severity = none
 
 # Use shorthand for nullable types
-dotnet_diagnostic.SA1125.severity = suggestion
+dotnet_diagnostic.SA1125.severity = warning
 
 # Generic type constraints should be on their own line
 dotnet_diagnostic.SA1127.severity = suggestion
@@ -840,13 +840,13 @@ dotnet_diagnostic.SA1131.severity = suggestion
 dotnet_diagnostic.SA1132.severity = warning
 
 # Do not combine attributes
-dotnet_diagnostic.SA1133.severity = suggestion
+dotnet_diagnostic.SA1133.severity = warning
 
 # Each attribute should be placed on its own line of code
-dotnet_diagnostic.SA1134.severity = suggestion
+dotnet_diagnostic.SA1134.severity = warning
 
 # Using directive should be qualified
-dotnet_diagnostic.SA1135.severity = suggestion
+dotnet_diagnostic.SA1135.severity = warning
 
 # Enum values should be on separate lines
 dotnet_diagnostic.SA1136.severity = suggestion
@@ -892,7 +892,7 @@ dotnet_diagnostic.SA1212.severity = none
 dotnet_diagnostic.SA1214.severity = suggestion
 
 # Using static directives should be placed at the correct location
-dotnet_diagnostic.SA1216.severity = suggestion
+dotnet_diagnostic.SA1216.severity = warning
 
 # The using static directives within a C# code file are not sorted alphabetically by full type name.
 dotnet_diagnostic.SA1217.severity = suggestion
@@ -956,7 +956,7 @@ dotnet_diagnostic.SA1405.severity = suggestion
 dotnet_diagnostic.SA1407.severity = suggestion
 
 # Conditional expressions should declare precedence
-dotnet_diagnostic.SA1408.severity = suggestion
+dotnet_diagnostic.SA1408.severity = warning
 
 dotnet_diagnostic.SA1410.severity = none
 
@@ -987,19 +987,19 @@ dotnet_diagnostic.SA1504.severity = suggestion
 dotnet_diagnostic.SA1505.severity = suggestion
 
 # Element documentation headers should not be followed by blank line
-dotnet_diagnostic.SA1506.severity = suggestion
+dotnet_diagnostic.SA1506.severity = warning
 
 # Code should not contain multiple blank lines in a row
 dotnet_diagnostic.SA1507.severity = suggestion
 
 # A closing brace should not be preceded by a blank line
-dotnet_diagnostic.SA1508.severity = suggestion
+dotnet_diagnostic.SA1508.severity = warning
 
 # Opening braces should not be preceded by blank line
 dotnet_diagnostic.SA1509.severity = suggestion
 
 # 'else' statement should not be preceded by a blank line
-dotnet_diagnostic.SA1510.severity = suggestion
+dotnet_diagnostic.SA1510.severity = warning
 
 # Single-line comments should not be followed by blank line
 dotnet_diagnostic.SA1512.severity = suggestion
@@ -1022,10 +1022,10 @@ dotnet_diagnostic.SA1517.severity = none
 dotnet_diagnostic.SA1518.severity = suggestion
 
 # Braces should not be omitted from multi-line child statement
-dotnet_diagnostic.SA1519.severity = suggestion
+dotnet_diagnostic.SA1519.severity = warning
 
 # Use braces consistently
-dotnet_diagnostic.SA1520.severity = suggestion
+dotnet_diagnostic.SA1520.severity = warning
 
 dotnet_diagnostic.SA1600.severity = none
 
