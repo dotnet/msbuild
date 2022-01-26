@@ -1021,7 +1021,8 @@ namespace Microsoft.Build.UnitTests
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         inputResultsCaches: null,
-                                        outputResultsCache: null
+                                        outputResultsCache: null,
+                                        commandLine: null
                         );
                 }
                 finally
