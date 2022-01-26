@@ -35,6 +35,13 @@ stages:
   displayName: Build
   jobs:
   - job: Publish_Build_Configuration
+    pool:
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        name: NetCore1ESPool-Public
+        demands: ImageOverride -equals build.windows.10.amd64.vs2019.open
+      ${{ if eq(variables['System.TeamProject'], 'internal') }}:
+        name: NetCore1ESPool-Internal
+        demands: ImageOverride -equals build.windows.10.amd64.vs2019
     steps:
       - publish: $(Build.SourcesDirectory)\eng\BuildConfiguration
         artifact: BuildConfiguration
@@ -156,8 +163,9 @@ stages:
         publishUsingPipelines: true
         dependsOn:
           - Windows_NT
-        queue:
-          name: Hosted VS2017
+        pool:
+          name: NetCore1ESPool-Internal
+          demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/post-build/post-build.yml
     parameters:
