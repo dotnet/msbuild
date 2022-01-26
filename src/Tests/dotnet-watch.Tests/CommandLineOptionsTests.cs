@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         [Theory]
         [InlineData(new[] { "run" }, new[] { "run" })]
         [InlineData(new[] { "run", "--", "subarg" }, new[] { "run", "--", "subarg" })]
-        [InlineData(new[] { "--", "run", "--", "subarg" }, new[] { "run", "--", "subarg" })]
+        [InlineData(new[] { "--", "run", "--", "subarg" }, new[] { "--", "run", "--", "subarg" })]
         [InlineData(new[] { "--unrecognized-arg" }, new[] { "--unrecognized-arg" })]
         public async Task ParsesRemainingArgs(string[] args, string[] expected)
         {
