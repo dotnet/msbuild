@@ -74,7 +74,7 @@
   </PropertyGroup>
 
   <!-- Produce ONLY reference assemblies and SKIP roslyn analyzers for netstandard2.0 builds. -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' and '$(MSBuildProjectFile)' != 'StringTools.csproj'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' and '$(MSBuildProjectFile)' != 'PortableTask.csproj'">
     <ProduceOnlyReferenceAssembly>true</ProduceOnlyReferenceAssembly>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
