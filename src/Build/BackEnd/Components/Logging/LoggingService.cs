@@ -1750,7 +1750,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             int key = GetWarningsAsErrorOrMessageKey(warningEvent);
 
-            return WarningsNotAsErrors?.Contains(warningEvent.Code) != true && !(_warningsNotAsErrorsByProject.TryGetValue(key, out ISet<string> notToError) && notToError.Contains(warningEvent.Code));
+            return WarningsNotAsErrors?.Contains(warningEvent.Code) != true && !(_warningsNotAsErrorsByProject?.TryGetValue(key, out ISet<string> notToError) == true && notToError.Contains(warningEvent.Code));
         }
 
         /// <summary>
