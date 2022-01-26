@@ -145,7 +145,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// List the supported .net versions.
         /// </summary>
-        private static readonly DotNetFrameworkSpec[] s_dotNetFrameworkSpecs =
+        private static readonly DotNetFrameworkSpec[] DotNetFrameworkSpecs =
         {
             // v1.1
             new DotNetFrameworkSpecLegacy(
@@ -225,7 +225,7 @@ namespace Microsoft.Build.Shared
         /// <remarks>
         /// The items must be ordered by the version, because some methods depend on that fact to find the previous visual studio version.
         /// </remarks>
-        private static readonly VisualStudioSpec[] s_visualStudioSpecs =
+        private static readonly VisualStudioSpec[] VisualStudioSpecs =
         {
             // VS10
             new VisualStudioSpec(visualStudioVersion100, "Windows\\v7.0A", null, null, new []
@@ -376,8 +376,8 @@ namespace Microsoft.Build.Shared
        };
 #endif // FEATURE_WIN32_REGISTRY
 
-        private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict = s_dotNetFrameworkSpecs.ToDictionary(spec => spec.Version);
-        private static readonly IReadOnlyDictionary<Version, VisualStudioSpec> s_visualStudioSpecDict = s_visualStudioSpecs.ToDictionary(spec => spec.Version);
+        private static readonly Lazy<IReadOnlyDictionary<Version, DotNetFrameworkSpec>> DotNetFrameworkSpecDict = new(() => DotNetFrameworkSpecs.ToDictionary(spec => spec.Version));
+        private static readonly Lazy<IReadOnlyDictionary<Version, VisualStudioSpec>> VisualStudioSpecDict = new(() => VisualStudioSpecs.ToDictionary(spec => spec.Version));
 
 #endregion // Static member variables
 
@@ -1112,13 +1112,13 @@ namespace Microsoft.Build.Shared
 
         private static VisualStudioSpec GetVisualStudioSpec(Version version)
         {
-            ErrorUtilities.VerifyThrowArgument(s_visualStudioSpecDict.TryGetValue(version, out VisualStudioSpec spec), "FrameworkLocationHelper.UnsupportedVisualStudioVersion", version);
+            ErrorUtilities.VerifyThrowArgument(VisualStudioSpecDict.Value.TryGetValue(version, out VisualStudioSpec spec), "FrameworkLocationHelper.UnsupportedVisualStudioVersion", version);
             return spec;
         }
 
         private static DotNetFrameworkSpec GetDotNetFrameworkSpec(Version version)
         {
-            ErrorUtilities.VerifyThrowArgument(s_dotNetFrameworkSpecDict.TryGetValue(version, out DotNetFrameworkSpec spec), "FrameworkLocationHelper.UnsupportedFrameworkVersion", version);
+            ErrorUtilities.VerifyThrowArgument(DotNetFrameworkSpecDict.Value.TryGetValue(version, out DotNetFrameworkSpec spec), "FrameworkLocationHelper.UnsupportedFrameworkVersion", version);
             return spec;
         }
 
@@ -1467,11 +1467,11 @@ namespace Microsoft.Build.Shared
                         // i.e. fallback to v110 if the current visual studio version is v120.
                         if (!foundExplicitRule)
                         {
-                            int index = Array.IndexOf(s_visualStudioSpecs, visualStudioSpec);
+                            int index = Array.IndexOf(VisualStudioSpecs, visualStudioSpec);
                             if (index > 0)
                             {
                                 // The items in the array "visualStudioSpecs" must be ordered by version. That would allow us to fallback to the previous visual studio version easily.
-                                VisualStudioSpec fallbackVisualStudioSpec = s_visualStudioSpecs[index - 1];
+                                VisualStudioSpec fallbackVisualStudioSpec = VisualStudioSpecs[index - 1];
                                 generatedPathToDotNetFrameworkSdkTools = FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(
                                     this.Version,
                                     fallbackVisualStudioSpec.Version);
@@ -1564,10 +1564,8 @@ namespace Microsoft.Build.Shared
 #if FEATURE_WIN32_REGISTRY
             private static string FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(Version dotNetFrameworkVersion, Version visualStudioVersion)
             {
-                VisualStudioSpec visualStudioSpec;
-                DotNetFrameworkSpec dotNetFrameworkSpec;
-                if (s_visualStudioSpecDict.TryGetValue(visualStudioVersion, out visualStudioSpec)
-                    && s_dotNetFrameworkSpecDict.TryGetValue(dotNetFrameworkVersion, out dotNetFrameworkSpec)
+                if (VisualStudioSpecDict.Value.TryGetValue(visualStudioVersion, out VisualStudioSpec visualStudioSpec)
+                    && DotNetFrameworkSpecDict.Value.TryGetValue(dotNetFrameworkVersion, out DotNetFrameworkSpec dotNetFrameworkSpec)
                     && visualStudioSpec.SupportedDotNetFrameworkVersions.Contains(dotNetFrameworkVersion))
                 {
                     return dotNetFrameworkSpec.GetPathToDotNetFrameworkSdkTools(visualStudioSpec);
