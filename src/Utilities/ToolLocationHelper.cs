@@ -3399,7 +3399,8 @@ namespace Microsoft.Build.Utilities
             switch (architecture)
             {
                 case DotNetFrameworkArchitecture.Bitness32:
-                    if (ProcessorArchitecture.CurrentProcessArchitecture == ProcessorArchitecture.ARM)
+                    if (ProcessorArchitecture.CurrentProcessArchitecture == ProcessorArchitecture.ARM ||
+                        ProcessorArchitecture.CurrentProcessArchitecture == ProcessorArchitecture.ARM64)
                     {
                         return ProcessorArchitecture.ARM;
                     }
@@ -3410,6 +3411,7 @@ namespace Microsoft.Build.Utilities
                     {
                         NativeMethodsShared.ProcessorArchitectures.X64 => ProcessorArchitecture.AMD64,
                         NativeMethodsShared.ProcessorArchitectures.IA64 => ProcessorArchitecture.IA64,
+                        NativeMethodsShared.ProcessorArchitectures.ARM64 => ProcessorArchitecture.ARM64,
                         // Error, OK, we're trying to get the 64-bit path on a 32-bit machine.
                         // That ... doesn't make sense. 
                         NativeMethodsShared.ProcessorArchitectures.X86 => null,
