@@ -6,9 +6,7 @@
     "dotnet": "6.0.100",
     "vs": {
       "version": "17.0"
-    },
-    "$comment1": "Disable the packaged version of MSBuild; require a VS installation",
-    "xcopy-msbuild": "none"
+    }
   },
   "msbuild-sdks": {
     "Microsoft.Build.CentralPackageVersions": "2.0.1",
