@@ -1091,7 +1091,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Exercises FileUtilities.EnsureSingleQuoted
+        /// Exercises FileUtilities.EnsureSingleQuotes
         /// </summary>
         [Theory]
         [InlineData(null, null)] // Null test
@@ -1105,13 +1105,13 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"'example""", @"''example""'")] // Mixed Quotes - Leading Single
         [InlineData(@"""example'", @"'""example''")] // Mixed Quotes - Leading Double
         [InlineData(@"ex""am'ple", @"'ex""am'ple'")] // Interior Quotes
-        public void EnsureSingleQuotedTest(string path, string expectedResult)
+        public void EnsureSingleQuotesTest(string path, string expectedResult)
         {
-            FileUtilities.EnsureSingleQuoted(path).ShouldBe(expectedResult);
+            FileUtilities.EnsureSingleQuotes(path).ShouldBe(expectedResult);
         }
 
         /// <summary>
-        /// Exercises FileUtilities.EnsureDoubleQuoted
+        /// Exercises FileUtilities.EnsureDoubleQuotes
         /// </summary>
         [Theory]
         [InlineData(null, null)] // Null test
@@ -1125,9 +1125,9 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"'example""", @"""'example""""")] // Mixed Quotes - Leading Single
         [InlineData(@"""example'", @"""""example'""")] // Mixed Quotes - Leading Double
         [InlineData(@"ex""am'ple", @"""ex""am'ple""")] // Interior Quotes
-        public void EnsureDoubleQuotedTest(string path, string expectedResult)
+        public void EnsureDoubleQuotesTest(string path, string expectedResult)
         {
-            FileUtilities.EnsureDoubleQuoted(path).ShouldBe(expectedResult);
+            FileUtilities.EnsureDoubleQuotes(path).ShouldBe(expectedResult);
         }
     }
 }

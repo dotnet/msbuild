@@ -248,9 +248,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        internal static string EnsureSingleQuoted(string path)
+        internal static string EnsureSingleQuotes(string path)
         {
-            return EnsureQuoted(path);
+            return EnsureQuotes(path);
         }
 
         /// <summary>
@@ -258,18 +258,18 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        internal static string EnsureDoubleQuoted(string path)
+        internal static string EnsureDoubleQuotes(string path)
         {
-            return EnsureQuoted(path, isSingleQuote: false);
+            return EnsureQuotes(path, isSingleQuote: false);
         }
 
         /// <summary>
         /// Ensures the path is enclosed within quotes.
         /// </summary>
         /// <param name="path"></param>
-        /// <param name="isSingleQuote">indicates if single or double quotes shoud be used</param>
+        /// <param name="isSingleQuote">indicates if single or double quotes should be used</param>
         /// <returns></returns>
-        internal static string EnsureQuoted(string path, bool isSingleQuote = true)
+        internal static string EnsureQuotes(string path, bool isSingleQuote = true)
         {
             path = FixFilePath(path);
 
