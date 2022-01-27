@@ -22,6 +22,7 @@ using System.IO;
 using System.Reflection;
 #endif
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -32,9 +33,6 @@ using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
-#if !RUNTIME_TYPE_NETCORE
-using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-#endif
 
 #nullable disable
 
@@ -143,15 +141,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static PermissionSet GetNamedPermissionSet(string targetZone, string targetFrameworkMoniker)
         {
-            FrameworkNameVersioning fn;
+            FrameworkName fn;
 
             if (!string.IsNullOrEmpty(targetFrameworkMoniker))
             {
-                fn = new FrameworkNameVersioning(targetFrameworkMoniker);
+                fn = new FrameworkName(targetFrameworkMoniker);
             }
             else
             {
-                fn = new FrameworkNameVersioning(".NETFramework", s_dotNet40Version);
+                fn = new FrameworkName(".NETFramework", s_dotNet40Version);
             }
 
             int majorVersion = fn.Version.Major;
@@ -170,7 +168,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        private static XmlElement GetXmlElement(string targetZone, FrameworkNameVersioning fn)
+        private static XmlElement GetXmlElement(string targetZone, FrameworkName fn)
         {
             IList<string> paths = ToolLocationHelper.GetPathToReferenceAssemblies(fn);
 
@@ -889,7 +887,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return false;
         }
 
-#if NET5_0_OR_GREATER
+#if RUNTIME_TYPE_NETCORE
         [SupportedOSPlatformAttribute("windows")]
 #endif
         private static string GetVersionIndependentToolPath(string toolName)
