@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -26,7 +28,6 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
@@ -678,7 +679,9 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     inputResultsCaches,
-                                    outputResultsCache))
+                                    outputResultsCache,
+                                    commandLine
+                                    ))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -1005,7 +1008,12 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             string[] inputResultsCaches,
-            string outputResultsCache
+            string outputResultsCache,
+#if FEATURE_GET_COMMANDLINE
+            string commandLine
+#else
+            string[] commandLine
+#endif
         )
         {
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
@@ -1206,9 +1214,17 @@ namespace Microsoft.Build.CommandLine
 #endif
                     BuildResultCode? result = null;
 
-                    var messagesToLogInBuildLoggers = Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager
-                        ? null
-                        : GetMessagesToLogInBuildLoggers();
+                    IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+                    if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
+                    {
+                        var commandLineString = 
+#if FEATURE_GET_COMMANDLINE
+                            commandLine;
+#else
+                            string.Join(" ", commandLine);
+#endif
+                        messagesToLogInBuildLoggers = GetMessagesToLogInBuildLoggers(commandLineString);
+                    }
 
                     buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
 
@@ -1354,7 +1370,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers()
+        private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
             return new[]
             {
@@ -1371,7 +1387,7 @@ namespace Microsoft.Build.CommandLine
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "CommandLine",
-                        Environment.CommandLine),
+                        commandLineString),
                     MessageImportance.Low),
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -1558,7 +1574,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal static void SetConsoleUI()
         {
-#if FEATURE_CULTUREINFO_CONSOLE_FALLBACK
             Thread thisThread = Thread.CurrentThread;
 
             // Eliminate the complex script cultures from the language selection.
@@ -1589,7 +1604,6 @@ namespace Microsoft.Build.CommandLine
                 thisThread.CurrentUICulture = new CultureInfo("en-US");
                 return;
             }
-#endif
 #if RUNTIME_TYPE_NETCORE
             // https://github.com/dotnet/roslyn/issues/10785#issuecomment-238940601
             // by default, .NET Core doesn't have all code pages needed for Console apps.
@@ -2444,7 +2458,7 @@ namespace Microsoft.Build.CommandLine
             }
 
 #if !FEATURE_NODE_REUSE
-            if(enableNodeReuse) // Only allowed to pass False on the command line for this switch if the feature is disabled for this installation
+            if (enableNodeReuse) // Only allowed to pass False on the command line for this switch if the feature is disabled for this installation
                 CommandLineSwitchException.Throw("InvalidNodeReuseTrueValue", parameters[parameters.Length - 1]);
 #endif
 

@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup X='Y'/>
                     </Project>
                 ";
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadNoChildren()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup/>
                     </Project>
                 ";
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadBasic()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup Condition='c'>
                             <i1/>
                         </ItemDefinitionGroup>

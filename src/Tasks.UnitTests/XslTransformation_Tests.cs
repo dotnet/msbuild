@@ -865,24 +865,24 @@ namespace Microsoft.Build.UnitTests
 
             CompileDoubleType(doubleTypePath);
 
+            XslTransformation t = new()
             {
-                XslTransformation t = new XslTransformation();
-                t.BuildEngine = engine;
-                t.OutputPaths = outputPaths;
-                t.XmlContent = _xmlDocument;
-                t.XslCompiledDllPath = new TaskItem(doubleTypePath);
-                try
-                {
-                    t.Execute();
-                    Console.WriteLine(engine.Log);
-                }
-                catch (Exception e)
-                {
-                    Assert.Contains("error?", e.Message);
-                }
-
-                System.Diagnostics.Debug.WriteLine(engine.Log);
+                BuildEngine = engine,
+                OutputPaths = outputPaths,
+                XmlContent = _xmlDocument,
+                XslCompiledDllPath = new TaskItem(doubleTypePath),
+            };
+            try
+            {
+                t.Execute();
+                Console.WriteLine(engine.Log);
             }
+            catch (Exception e)
+            {
+                Assert.Contains("error?", e.Message);
+            }
+
+            System.Diagnostics.Debug.WriteLine(engine.Log);
 
             CleanUp(dir);
         }
@@ -912,7 +912,6 @@ namespace Microsoft.Build.UnitTests
             // outputPaths have one output path, lets duplicate it
             TaskItem[] outputMultiPaths = new TaskItem[] { new TaskItem(outputPaths[0].ItemSpec + ".1.xml"),
                 new TaskItem(outputPaths[0].ItemSpec + ".2.xml"), new TaskItem(outputPaths[0].ItemSpec + ".3.xml"), new TaskItem(outputPaths[0].ItemSpec + ".4.xml") };
-
             {
                 XslTransformation t = new XslTransformation();
                 t.BuildEngine = engine;

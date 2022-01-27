@@ -6,8 +6,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
 using System.Linq;
 using System.Runtime.InteropServices;
+#endif
 using System.Runtime.Versioning;
 using System.Reflection;
 using System.Text;

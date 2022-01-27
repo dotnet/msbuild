@@ -150,7 +150,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string RelativePath
         {
-            get { return _relativePath; }
+            get
+            {
+                return _relativePath;
+            }
+
             internal set
             {
 #if NETFRAMEWORK && !MONO
