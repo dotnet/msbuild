@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 #if !SILVERLIGHT
 #if FEATURE_CONSTRAINED_EXECUTION
 using System.Runtime.ConstrainedExecution;
@@ -16,8 +17,15 @@ namespace Microsoft.Build.Collections
     /// <summary>
     /// Duplicated because internal to mscorlib
     /// </summary>
-    internal static class HashHelpers
+    internal static partial class HashHelpers
     {
+        public const uint HashCollisionThreshold = 100;
+
+        // This is the maximum prime smaller than Array.MaxArrayLength
+        internal const int MaxPrimeArrayLength = 0x7FEFFFFD;
+
+        public const int HashPrime = 101;
+
         // Table of prime numbers to use as hash table sizes. 
         // The entry used for capacity is the smallest prime number in this array
         // that is larger than twice the previous capacity. 
@@ -60,23 +68,23 @@ namespace Microsoft.Build.Collections
         {
             Debug.Assert(min >= 0, "min less than zero; handle overflow checking before calling HashHelpers");
 
-            for (int i = 0; i < primes.Length; i++)
+            foreach (int prime in primes)
             {
-                int prime = primes[i];
                 if (prime >= min)
                 {
                     return prime;
                 }
             }
 
-            // Outside of our predefined table. Compute the hard way. 
-            for (int i = (min | 1); i < Int32.MaxValue; i += 2)
+            // Outside of our predefined table. Compute the hard way.
+            for (int i = (min | 1); i < int.MaxValue; i += 2)
             {
-                if (IsPrime(i))
+                if (IsPrime(i) && ((i - 1) % HashPrime != 0))
                 {
                     return i;
                 }
             }
+
             return min;
         }
 
@@ -92,15 +100,35 @@ namespace Microsoft.Build.Collections
 
             // Allow the hashtables to grow to maximum possible size (~2G elements) before encoutering capacity overflow.
             // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
-            if ((uint) newSize > MaxPrimeArrayLength)
+            if ((uint)newSize > MaxPrimeArrayLength && MaxPrimeArrayLength > oldSize)
             {
+                Debug.Assert(MaxPrimeArrayLength == GetPrime(MaxPrimeArrayLength), "Invalid MaxPrimeArrayLength");
                 return MaxPrimeArrayLength;
             }
 
             return GetPrime(newSize);
         }
 
-        // This is the maximum prime smaller than Array.MaxArrayLength
-        internal const int MaxPrimeArrayLength = 0x7FEFFFFD;
+        /// <summary>Returns approximate reciprocal of the divisor: ceil(2**64 / divisor).</summary>
+        /// <remarks>This should only be used on 64-bit.</remarks>
+        public static ulong GetFastModMultiplier(uint divisor) =>
+            ulong.MaxValue / divisor + 1;
+
+        /// <summary>Performs a mod operation using the multiplier pre-computed with <see cref="GetFastModMultiplier"/>.</summary>
+        /// <remarks>This should only be used on 64-bit.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint FastMod(uint value, uint divisor, ulong multiplier)
+        {
+            // We use modified Daniel Lemire's fastmod algorithm (https://github.com/dotnet/runtime/pull/406),
+            // which allows to avoid the long multiplication if the divisor is less than 2**31.
+            Debug.Assert(divisor <= int.MaxValue);
+
+            // This is equivalent of (uint)Math.BigMul(multiplier * value, divisor, out _). This version
+            // is faster than BigMul currently because we only need the high bits.
+            uint highbits = (uint)(((((multiplier * value) >> 32) + 1) * divisor) >> 32);
+
+            Debug.Assert(highbits == value % divisor);
+            return highbits;
+        }
     }
 }
