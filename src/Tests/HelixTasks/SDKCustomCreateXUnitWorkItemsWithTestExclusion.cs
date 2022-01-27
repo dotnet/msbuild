@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
                     }
                 }
 
-                partitionedWorkItem.Add(new Microsoft.Build.Utilities.TaskItem(assemblyPartitionInfo.DisplayName, new Dictionary<string, string>()
+                partitionedWorkItem.Add(new Microsoft.Build.Utilities.TaskItem(assemblyPartitionInfo.DisplayName + testIdentityDifferentiator, new Dictionary<string, string>()
                     {
                         { "Identity", assemblyPartitionInfo.DisplayName + testIdentityDifferentiator},
                         { "PayloadDirectory", publishDirectory },
