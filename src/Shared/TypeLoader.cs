@@ -14,17 +14,24 @@ using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 #if !NETFRAMEWORK
 using System.Runtime.Loader;
 #endif
 using System.Threading;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace Microsoft.Build.Shared
 {
+    internal struct TaskRuntimeInformation
+    {
+        public bool TaskHostNeeded;
+        public string Architecture;
+        public string Runtime;
+    }
+
     /// <summary>
     /// This class is used to load types from their assemblies.
     /// </summary>
@@ -321,14 +328,74 @@ namespace Microsoft.Build.Shared
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
                 runtimeInformation = new() { TaskHostNeeded = taskHostFactoryExplicitlyRequested };
-                if (!taskHostFactoryExplicitlyRequested && _assemblyLoadInfo.AssemblyFile is not null)
+                if (_assemblyLoadInfo.AssemblyFile is not null)
                 {
-                    ProcessorArchitecture taskArch = AssemblyName.GetAssemblyName(_assemblyLoadInfo.AssemblyFile).ProcessorArchitecture;
-                    bool msbuildIs64Bit = RuntimeInformation.ProcessArchitecture == Architecture.X64;
-                    runtimeInformation.TaskHostNeeded = msbuildIs64Bit ? Required32Bit(taskArch) : Required64Bit(taskArch);
-                    if (runtimeInformation.TaskHostNeeded)
+                    using (FileStream stream = File.OpenRead(_assemblyLoadInfo.AssemblyFile))
+                    using (PEReader reader = new(stream))
                     {
-                        runtimeInformation.Architecture = msbuildIs64Bit ? "x86" : "x64";
+                        MetadataReader metadataReader = reader.GetMetadataReader();
+                        AssemblyDefinition assemblyDef = metadataReader.GetAssemblyDefinition();
+                        string targetFramework = null;
+                        foreach (CustomAttributeHandle attrHandle in assemblyDef.GetCustomAttributes())
+                        {
+                            CustomAttribute attr = metadataReader.GetCustomAttribute(attrHandle);
+                            if (attr.Constructor.Kind == HandleKind.MemberReference && metadataReader.GetString(metadataReader.GetTypeReference((TypeReferenceHandle)metadataReader.GetMemberReference((MemberReferenceHandle)attr.Constructor).Parent).Name).Equals("TargetFrameworkAttribute"))
+                            {
+                                BlobReader blobReader = metadataReader.GetBlobReader(attr.Value);
+                                blobReader.ReadInt16();
+                                targetFramework = blobReader.ReadSerializedString();
+                                break;
+                            }
+                        }
+
+                        Attribute msbuildFramework = Assembly.GetExecutingAssembly().GetCustomAttribute(typeof(TargetFrameworkAttribute));
+                        bool netcoremsbuild = msbuildFramework is not null && msbuildFramework is TargetFrameworkAttribute tfa && !tfa.FrameworkDisplayName.Contains("Framework");
+                        if (targetFramework is not null)
+                        {
+                            if (netcoremsbuild)
+                            {
+                                if (targetFramework.Contains("Framework"))
+                                {
+                                    runtimeInformation.Runtime = targetFramework.Contains("4.") ?
+                                        XMakeAttributes.MSBuildRuntimeValues.clr4 :
+                                        XMakeAttributes.MSBuildRuntimeValues.clr2;
+                                }
+                            }
+                            else
+                            {
+                                if (!targetFramework.Contains("Framework"))
+                                {
+                                    runtimeInformation.Runtime = XMakeAttributes.MSBuildRuntimeValues.net;
+                                }
+                            }
+                        }
+
+                        if (runtimeInformation.Runtime is not null)
+                        {
+                            ErrorUtilities.ThrowArgument("Shared.CurrentRuntimeDoesNotMatchTask", typeName, netcoremsbuild ? ".NET Framework" : ".NET Core", netcoremsbuild ? ".NET Core" : ".NET Framework");
+                        }
+
+                        bool msbuildIs64Bit = RuntimeInformation.ProcessArchitecture == Architecture.X64;
+                        Machine machineArch = reader.PEHeaders.CoffHeader.Machine;
+                        if (msbuildIs64Bit && Required32Bit(machineArch))
+                        {
+                            runtimeInformation.Architecture = XMakeAttributes.MSBuildArchitectureValues.x86;
+                        }
+                        else if (!msbuildIs64Bit && Required64Bit(machineArch))
+                        {
+                            runtimeInformation.Architecture = XMakeAttributes.MSBuildArchitectureValues.x64;
+                        }
+
+                        if (netcoremsbuild && runtimeInformation.Architecture == XMakeAttributes.MSBuildArchitectureValues.x86)
+                        {
+                            // Don't support automatic architecture correction on core for some reason?
+                            ErrorUtilities.ThrowArgument("Shared.32BitTaskOnCore");
+                        }
+
+                        if (runtimeInformation.Architecture is not null || runtimeInformation.Runtime is not null)
+                        {
+                            runtimeInformation.TaskHostNeeded = true;
+                        }
                     }
                 }
 
@@ -341,14 +408,14 @@ namespace Microsoft.Build.Shared
                 return typeInfo;
             }
 
-            private bool Required32Bit(ProcessorArchitecture arch)
+            private bool Required32Bit(Machine arch)
             {
-                return arch == ProcessorArchitecture.X86 || arch == ProcessorArchitecture.Arm;
+                return arch == Machine.AM33 || arch == Machine.Arm || arch == Machine.ArmThumb2 || arch == Machine.I386 || arch == Machine.Alpha || arch == Machine.M32R;
             }
 
-            private bool Required64Bit(ProcessorArchitecture arch)
+            private bool Required64Bit(Machine arch)
             {
-                return arch == ProcessorArchitecture.IA64 || arch == ProcessorArchitecture.Amd64;
+                return arch == Machine.Amd64 || arch == Machine.Arm64 || arch == Machine.IA64 || arch == Machine.Alpha64;
             }
 
             /// <summary>
@@ -757,12 +824,6 @@ namespace Microsoft.Build.Shared
                 var sigReader = reader.GetBlobReader(reader.GetTypeSpecification(handle).Signature);
                 return new SignatureDecoder<string, object>(Instance, reader, genericContext).DecodeType(ref sigReader);
             }
-        }
-
-        internal struct TaskRuntimeInformation
-        {
-            public string Architecture;
-            public bool TaskHostNeeded;
         }
     }
 }

@@ -297,12 +297,18 @@ namespace Microsoft.Build.BackEnd
                 // If the user requested a task host but provided us with an assembly name rather than an assembly file, pretend they didn't.
                 // Finding the path to the assembly file the runtime would load without actually loading the assembly would likely be a bug farm.
                 // Also, this should be a very unusual case.
-                _typeInformation = _typeLoader.Load(taskName, loadInfo, taskHostFactoryExplicitlyRequested && (loadInfo.AssemblyFile is not null || loadInfo.AssemblyName.StartsWith("Microsoft.Build")), out TypeLoader.TaskRuntimeInformation runtimeInformation);
+                _typeInformation = _typeLoader.Load(taskName, loadInfo, taskHostFactoryExplicitlyRequested && (loadInfo.AssemblyFile is not null || loadInfo.AssemblyName.StartsWith("Microsoft.Build")), out TaskRuntimeInformation runtimeInformation);
                 _taskHostFactoryExplicitlyRequested = runtimeInformation.TaskHostNeeded;
                 if (runtimeInformation.Architecture is not null)
                 {
                     taskFactoryIdentityParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                     taskFactoryIdentityParameters[XMakeAttributes.architecture] = runtimeInformation.Architecture;
+                    _factoryIdentityParameters = taskFactoryIdentityParameters;
+                }
+                if (runtimeInformation.Runtime is not null)
+                {
+                    taskFactoryIdentityParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    taskFactoryIdentityParameters[XMakeAttributes.runtime] = runtimeInformation.Runtime;
                     _factoryIdentityParameters = taskFactoryIdentityParameters;
                 }
 

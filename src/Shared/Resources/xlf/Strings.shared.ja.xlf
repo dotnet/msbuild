@@ -60,6 +60,16 @@
         <target state="translated">MSBuild は有効な "{0}" オブジェクトを必要としています。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.32BitTaskOnCore">
+        <source>MSB5030: .NET Core MSBuild does not support 32-bit tasks.</source>
+        <target state="new">MSB5030: .NET Core MSBuild does not support 32-bit tasks.</target>
+        <note>{StrBegin="MSB5030: "}</note>
+      </trans-unit>
+      <trans-unit id="Shared.CurrentRuntimeDoesNotMatchTask">
+        <source>MSB5029: The '{0}' task was built for {1}, but MSBuild in use targets {2}. MSBuild does not support building tasks across frameworks.</source>
+        <target state="new">MSB5029: The '{0}' task was built for {1}, but MSBuild in use targets {2}. MSBuild does not support building tasks across frameworks.</target>
+        <note>{StrBegin="MSB5029: "}</note>
+      </trans-unit>
       <trans-unit id="Shared.PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
         <target state="translated">パス: {0} は OS のパスの上限を越えています。完全修飾のファイル名は {1} 文字以下にする必要があります。</target>

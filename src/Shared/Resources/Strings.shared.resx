@@ -278,10 +278,18 @@
     <value>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</value>
     <comment>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</comment>
   </data>
+  <data name="Shared.CurrentRuntimeDoesNotMatchTask">
+    <value>MSB5029: The '{0}' task was built for {1}, but MSBuild in use targets {2}. MSBuild does not support building tasks across frameworks.</value>
+    <comment>{StrBegin="MSB5029: "}</comment>
+  </data>
+  <data name="Shared.32BitTaskOnCore">
+    <value>MSB5030: .NET Core MSBuild does not support 32-bit tasks.</value>
+    <comment>{StrBegin="MSB5030: "}</comment>
+  </data>
   <!--
         The shared message bucket is: MSB5001 - MSB5999
 
-        Next message code should be MSB5029
+        Next message code should be MSB5031
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
