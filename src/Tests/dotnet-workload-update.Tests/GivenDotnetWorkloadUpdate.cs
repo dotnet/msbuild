@@ -367,6 +367,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 workloadInstaller: installer,
                 nugetPackageDownloader: nugetDownloader,
                 workloadManifestUpdater: manifestUpdater,
+                dotnetDir: dotnetRoot,
                 userProfileDir: testDirectory,
                 version: "6.0.100");
 
