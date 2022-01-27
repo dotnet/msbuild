@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="pcchPath">The requested maximum length of CachePath, and upon return, the actual length of CachePath.</param>
         /// 
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
-        internal static extern int GetCachePath([In] AssemblyCacheFlags cacheFlags, char[] cachePath, ref int pcchPath);
+        internal static extern int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char[] cachePath, ref int pcchPath);
 #endif
 
         //------------------------------------------------------------------------------
@@ -1129,7 +1129,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="dwLength">The size, in bytes, of the returned szBuffer.</param>
         /// <returns>HResult.</returns>
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern uint GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, char[] szBuffer, int cchBuffer, out int dwLength);
+        internal static extern uint GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, [Out] char[] szBuffer, int cchBuffer, out int dwLength);
 #endif
         #endregion
 

@@ -569,6 +569,7 @@ namespace Microsoft.Build.Tasks
             {
                 char[] runtimeVersion;
                 uint hresult;
+                int dwLength;
 #if DEBUG
                 // Just to make sure and exercise the code that doubles the size
                 // every time GetRequestedRuntimeInfo fails due to insufficient buffer size.
@@ -579,19 +580,12 @@ namespace Microsoft.Build.Tasks
                 do
                 {
                     runtimeVersion = new char[bufferLength];
-                    hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out _);
+                    hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out dwLength);
                     bufferLength *= 2;
                 }
                 while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
 
-                if (hresult == NativeMethodsShared.S_OK)
-                {
-                    return new string(runtimeVersion);
-                }
-                else
-                {
-                    return string.Empty;
-                }
+                return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength) : string.Empty;
             }
             else
             {

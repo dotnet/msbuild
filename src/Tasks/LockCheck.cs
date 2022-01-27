@@ -214,7 +214,10 @@ namespace Microsoft.Build.Tasks
 
             // See http://blogs.msdn.com/b/oldnewthing/archive/2012/02/17/10268840.aspx.
             char[] key = new char[CCH_RM_SESSION_KEY + 1];
-            key[0] = '\0';
+            for (int i = 0; i < key.Length; i++)
+            {
+                key[i] = '\0';
+            }
 
             int res = RmStartSession(out uint handle, 0, key);
             if (res != 0)

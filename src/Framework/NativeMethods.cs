@@ -965,7 +965,7 @@ internal static class NativeMethods
 
                 if (length > 0)
                 {
-                    string fullPath = fullPathBuffer.ToString();
+                    string fullPath = new(fullPathBuffer);
                     path = fullPath;
                 }
             }
