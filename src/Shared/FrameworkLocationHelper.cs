@@ -33,7 +33,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Indicates the 64-bit .NET Framework
         /// </summary>
-        Bitness64 = 2
+        Bitness64 = 2,
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Version visualStudioVersion170 = new Version(17, 0);
 
         // keep this up-to-date; always point to the latest visual studio version.
-        internal static readonly Version visualStudioVersionLatest = visualStudioVersion160;
+        internal static readonly Version visualStudioVersionLatest = visualStudioVersion170;
 
         private const string dotNetFrameworkRegistryPath = "SOFTWARE\\Microsoft\\.NETFramework";
         private const string dotNetFrameworkSetupRegistryPath = "SOFTWARE\\Microsoft\\NET Framework Setup\\NDP";
@@ -145,7 +145,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// List the supported .net versions.
         /// </summary>
-        private static readonly DotNetFrameworkSpec[] DotNetFrameworkSpecs =
+        private static DotNetFrameworkSpec[] DotNetFrameworkSpecs() => new DotNetFrameworkSpec[]
         {
             // v1.1
             new DotNetFrameworkSpecLegacy(
@@ -225,7 +225,7 @@ namespace Microsoft.Build.Shared
         /// <remarks>
         /// The items must be ordered by the version, because some methods depend on that fact to find the previous visual studio version.
         /// </remarks>
-        private static readonly VisualStudioSpec[] VisualStudioSpecs =
+        private static readonly Lazy<VisualStudioSpec[]> VisualStudioSpecs = new(() => new VisualStudioSpec[]
         {
             // VS10
             new VisualStudioSpec(visualStudioVersion100, "Windows\\v7.0A", null, null, new []
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion40,
                 dotNetFrameworkVersion45,
                 dotNetFrameworkVersion451,
-                dotNetFrameworkVersion452
+                dotNetFrameworkVersion452,
             }),
 
             // VS14
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion451,
                 dotNetFrameworkVersion452,
                 dotNetFrameworkVersion46,
-                dotNetFrameworkVersion461
+                dotNetFrameworkVersion461,
             }),
 
             // VS15
@@ -328,7 +328,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
             }),
-        };
+        });
 
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
@@ -373,11 +373,11 @@ namespace Microsoft.Build.Shared
             { (dotNetFrameworkVersion471, visualStudioVersion160), (dotNetFrameworkVersion47, visualStudioVersion160) },
             { (dotNetFrameworkVersion472, visualStudioVersion160), (dotNetFrameworkVersion471, visualStudioVersion160) },
             { (dotNetFrameworkVersion48, visualStudioVersion160), (dotNetFrameworkVersion472, visualStudioVersion160) },
-       };
+        };
 #endif // FEATURE_WIN32_REGISTRY
 
-        private static readonly Lazy<IReadOnlyDictionary<Version, DotNetFrameworkSpec>> DotNetFrameworkSpecDict = new(() => DotNetFrameworkSpecs.ToDictionary(spec => spec.Version));
-        private static readonly Lazy<IReadOnlyDictionary<Version, VisualStudioSpec>> VisualStudioSpecDict = new(() => VisualStudioSpecs.ToDictionary(spec => spec.Version));
+        private static readonly Lazy<IReadOnlyDictionary<Version, DotNetFrameworkSpec>> DotNetFrameworkSpecDict = new(() => DotNetFrameworkSpecs().ToDictionary(spec => spec.Version));
+        private static readonly Lazy<IReadOnlyDictionary<Version, VisualStudioSpec>> VisualStudioSpecDict = new(() => VisualStudioSpecs.Value.ToDictionary(spec => spec.Version));
 
 #endregion // Static member variables
 
@@ -1467,11 +1467,11 @@ namespace Microsoft.Build.Shared
                         // i.e. fallback to v110 if the current visual studio version is v120.
                         if (!foundExplicitRule)
                         {
-                            int index = Array.IndexOf(VisualStudioSpecs, visualStudioSpec);
+                            int index = Array.IndexOf(VisualStudioSpecs.Value, visualStudioSpec);
                             if (index > 0)
                             {
                                 // The items in the array "visualStudioSpecs" must be ordered by version. That would allow us to fallback to the previous visual studio version easily.
-                                VisualStudioSpec fallbackVisualStudioSpec = VisualStudioSpecs[index - 1];
+                                VisualStudioSpec fallbackVisualStudioSpec = VisualStudioSpecs.Value[index - 1];
                                 generatedPathToDotNetFrameworkSdkTools = FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(
                                     this.Version,
                                     fallbackVisualStudioSpec.Version);
