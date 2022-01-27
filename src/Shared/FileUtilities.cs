@@ -244,6 +244,58 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Ensures the path is enclosed within single quotes.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        internal static string EnsureSingleQuoted(string path)
+        {
+            return EnsureQuoted(path);
+        }
+
+        /// <summary>
+        /// Ensures the path is enclosed within double quotes.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        internal static string EnsureDoubleQuoted(string path)
+        {
+            return EnsureQuoted(path, isSingleQuote: false);
+        }
+
+        /// <summary>
+        /// Ensures the path is enclosed within quotes.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="isSingleQuote">indicates if single or double quotes shoud be used</param>
+        /// <returns></returns>
+        internal static string EnsureQuoted(string path, bool isSingleQuote = true)
+        {
+            path = FixFilePath(path);
+
+            const char singleQuote = '\'';
+            const char doubleQuote = '\"';
+            var targetQuote = isSingleQuote ? singleQuote : doubleQuote;
+            var convertQuote = isSingleQuote ? doubleQuote : singleQuote;
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                // Special case: convert the quotes.
+                if (path.Length > 1 && path[0] == convertQuote && path[path.Length - 1] == convertQuote)
+                {
+                    path = $"{targetQuote}{path.Substring(1, path.Length - 2)}{targetQuote}";
+                }
+                // Enclose the path in a set of the 'target' quote unless the string is already quoted with the 'target' quotes.
+                else if (path.Length == 1 || (path.Length > 1 && (path[0] != targetQuote || path[path.Length - 1] != targetQuote)))
+                {
+                    path = $"{targetQuote}{path}{targetQuote}";
+                }
+            }
+
+            return path;
+        }
+
+        /// <summary>
         /// Indicates if the given file-spec ends with a slash.
         /// </summary>
         /// <param name="fileSpec">The file spec.</param>
