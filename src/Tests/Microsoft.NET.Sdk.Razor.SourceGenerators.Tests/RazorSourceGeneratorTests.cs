@@ -998,7 +998,7 @@ public class HeaderTagHelper : TagHelper
                     var sourceText = sourceResult.SourceText.ToString();
                     Assert.Contains("public partial class Counter", sourceText);
                     // Regression test for https://github.com/dotnet/aspnetcore/issues/36116. Verify that @onclick is resolved as a component, and not as a regular attribute
-                    Assert.Contains("__builder.AddAttribute(2, \"onclick\", Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,", sourceText);
+                    Assert.Contains("__builder.AddAttribute(2, \"onclick\", global::Microsoft.AspNetCore.Components.EventCallback.Factory.Create<global::Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,", sourceText);
                 });
         }
 
@@ -1040,7 +1040,7 @@ public class HeaderTagHelper : TagHelper
                 {
                     var sourceText = sourceResult.SourceText.ToString();
                     Assert.Contains("public partial class Counter", sourceText);
-                    Assert.Contains("__builder.AddAttribute(2, \"onclick\", Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,", sourceText);
+                    Assert.Contains("__builder.AddAttribute(2, \"onclick\", global::Microsoft.AspNetCore.Components.EventCallback.Factory.Create<global::Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,", sourceText);
                 });
 
             var updatedOptionsProvider = new TestAnalyzerConfigOptionsProvider();
@@ -1208,7 +1208,7 @@ public class HeaderTagHelper : TagHelper
                         var sourceText = sourceResult.SourceText.ToString();
                         Assert.Contains("public partial class Counter", sourceText);
                         // Regression test for https://github.com/dotnet/aspnetcore/issues/36116. Verify that @onclick is resolved as a component, and not as a regular attribute
-                        Assert.Contains("__builder.AddAttribute(2, \"onclick\", Microsoft.AspNetCore.Components.EventCallback.Factory.Create<Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,", sourceText);
+                        Assert.Contains("__builder.AddAttribute(2, \"onclick\", global::Microsoft.AspNetCore.Components.EventCallback.Factory.Create<global::Microsoft.AspNetCore.Components.Web.MouseEventArgs>(this,", sourceText);
                     });
 
                 Assert.Collection(
