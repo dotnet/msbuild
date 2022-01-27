@@ -4,8 +4,10 @@
 using Microsoft.DotNet.Cli.Utils;
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -14,8 +16,8 @@ namespace Microsoft.DotNet.Cli
         private const string FsiDllName = @"FSharp/fsi.dll";
         private const string FsiExeName = @"FSharp/fsi.exe";
 
-        public FsiForwardingApp(IEnumerable<string> argsToForward)
-            : base(GetFsiAppPath(), argsToForward)
+        public FsiForwardingApp(ParseResult parseResult)
+            : base(GetFsiAppPath(), parseResult.GetArguments())
         {
         }
 
