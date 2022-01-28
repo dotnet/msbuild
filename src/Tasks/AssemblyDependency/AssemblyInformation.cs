@@ -567,36 +567,20 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_MSCOREE
             if (NativeMethodsShared.IsWindows)
             {
-                char[] runtimeVersion;
-                uint hresult;
-                string output = string.Empty;
-#if DEBUG
-                // Just to make sure and exercise the code that doubles the size
-                // every time GetRequestedRuntimeInfo fails due to insufficient buffer size.
-                int bufferLength = 1;
-#else
-                int bufferLength = 11; // 11 is the length of a runtime version and null terminator v2.0.50727/0
-#endif
-                do
+                unsafe
                 {
-                    runtimeVersion = System.Buffers.ArrayPool<char>.Shared.Rent(bufferLength);
-                    try
-                    {
-                        hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out int dwLength);
-                        bufferLength *= 2;
-                        if (hresult == NativeMethodsShared.S_OK)
-                        {
-                            output = new string(runtimeVersion, 0, dwLength - 1);
-                        }
-                    }
-                    finally
-                    {
-                        System.Buffers.ArrayPool<char>.Shared.Return(runtimeVersion);
-                    }
-                }
-                while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
+                    // Run the first GetFileVersion to get the required buffer size.
+                    int bufferLength = 1;
+                    uint hresult = NativeMethods.GetFileVersion(path, null, bufferLength, out int dwLength);
 
-                return output;
+                    // Allocate buffer based on the returned length.
+                    bufferLength = dwLength;
+                    char* runtimeVersion = stackalloc char[dwLength];
+
+                    // Get the RuntimeVersion in this second call.
+                    hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out dwLength);
+                    return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength - 1) : string.Empty;
+                }                
             }
             else
             {
