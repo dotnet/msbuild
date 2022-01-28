@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="pcchPath">The requested maximum length of CachePath, and upon return, the actual length of CachePath.</param>
         /// 
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
-        internal static extern int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char[] cachePath, ref int pcchPath);
+        internal static extern unsafe int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char* cachePath, ref int pcchPath);
 #endif
 
         //------------------------------------------------------------------------------

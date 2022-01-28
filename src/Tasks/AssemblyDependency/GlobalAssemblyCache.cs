@@ -372,11 +372,13 @@ namespace Microsoft.Build.Tasks
         internal static string GetGacPath()
         {
             int gacPathLength = 0;
-            NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, null, ref gacPathLength);
-            char[] gacPath = new char[gacPathLength];
-            NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, gacPath, ref gacPathLength);
-
-            return new string(gacPath, 0, gacPathLength-1);
+            unsafe
+            {
+                NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, null, ref gacPathLength);
+                char* gacPath = stackalloc char[gacPathLength];
+                NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, gacPath, ref gacPathLength);
+                return new string(gacPath, 0, gacPathLength - 1);
+            }
         }
     }
 }

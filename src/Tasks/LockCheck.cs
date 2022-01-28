@@ -56,10 +56,10 @@ namespace Microsoft.Build.Tasks
             string[] rgsServiceNames);
 
         [DllImport(RestartManagerDll, CharSet = CharSet.Unicode)]
-        private static extern int RmStartSession(
+        private static extern unsafe int RmStartSession(
             out uint pSessionHandle,
             int dwSessionFlags,
-            char[] strSessionKey);
+            char* strSessionKey);
 
         [DllImport(RestartManagerDll)]
         private static extern int RmEndSession(uint pSessionHandle);
@@ -211,15 +211,16 @@ namespace Microsoft.Build.Tasks
             }
 
             const int maxRetries = 6;
+            uint handle;
+            int res;
 
-            // See http://blogs.msdn.com/b/oldnewthing/archive/2012/02/17/10268840.aspx.
-            char[] key = new char[CCH_RM_SESSION_KEY + 1];
-            for (int i = 0; i < key.Length; i++)
+            unsafe
             {
-                key[i] = '\0';
+                // See http://blogs.msdn.com/b/oldnewthing/archive/2012/02/17/10268840.aspx.
+                char* key = stackalloc char[CCH_RM_SESSION_KEY + 1];
+                res = RmStartSession(out handle, 0, key);
             }
 
-            int res = RmStartSession(out uint handle, 0, key);
             if (res != 0)
             {
                 throw GetException(res, "RmStartSession", "Failed to begin restart manager session.");
