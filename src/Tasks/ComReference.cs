@@ -408,7 +408,7 @@ namespace Microsoft.Build.Tasks
         {
             bool success = false;
             char[] buffer = null;
-            int pathLength = 0;
+            string output = string.Empty;
 
             // Try increased buffer sizes if on longpath-enabled Windows
             for (int bufferSize = NativeMethodsShared.MAX_PATH; !success && bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
@@ -417,10 +417,14 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     var handleRef = new System.Runtime.InteropServices.HandleRef(buffer, handle);
-                    pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, bufferSize);
+                    int pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, bufferSize);
 
                     bool isBufferTooSmall = (uint)Marshal.GetLastWin32Error() == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER;
                     success = pathLength != 0 && !isBufferTooSmall;
+                    if (success)
+                    {
+                        output = new string(buffer, 0, pathLength);
+                    }
                 }
                 finally
                 {
@@ -428,7 +432,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return success ? new string(buffer, 0, pathLength) : string.Empty;
+            return output;
         }
 
         /// <summary>

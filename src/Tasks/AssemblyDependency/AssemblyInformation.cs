@@ -569,7 +569,7 @@ namespace Microsoft.Build.Tasks
             {
                 char[] runtimeVersion;
                 uint hresult;
-                int dwLength;
+                string output = string.Empty;
 #if DEBUG
                 // Just to make sure and exercise the code that doubles the size
                 // every time GetRequestedRuntimeInfo fails due to insufficient buffer size.
@@ -579,13 +579,24 @@ namespace Microsoft.Build.Tasks
 #endif
                 do
                 {
-                    runtimeVersion = new char[bufferLength];
-                    hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out dwLength);
-                    bufferLength *= 2;
+                    runtimeVersion = System.Buffers.ArrayPool<char>.Shared.Rent(bufferLength);
+                    try
+                    {
+                        hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out int dwLength);
+                        bufferLength *= 2;
+                        if (hresult == NativeMethodsShared.S_OK)
+                        {
+                            output = new string(runtimeVersion, 0, dwLength - 1);
+                        }
+                    }
+                    finally
+                    {
+                        System.Buffers.ArrayPool<char>.Shared.Return(runtimeVersion);
+                    }
                 }
                 while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
 
-                return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength - 1) : string.Empty;
+                return output;
             }
             else
             {
@@ -783,7 +794,7 @@ namespace Microsoft.Build.Tasks
             // Construct the assembly name. (Note asmNameLength should/must be > 0.)
             var assemblyName = new AssemblyName
             {
-                Name = new string(asmNameBuf, 0, (int) asmNameLength - 1),
+                Name = new string(asmNameBuf, 0, (int)asmNameLength - 1),
                 Version = new Version(
                     asmMeta.usMajorVersion,
                     asmMeta.usMinorVersion,
@@ -904,7 +915,7 @@ namespace Microsoft.Build.Tasks
                     // Read the PE header signature
 
                     sr.BaseStream.Position = peHeaderOffset;
-                    if (!ReadBytes(sr, (byte) 'P', (byte) 'E', 0, 0))
+                    if (!ReadBytes(sr, (byte)'P', (byte)'E', 0, 0))
                     {
                         return string.Empty;
                     }
