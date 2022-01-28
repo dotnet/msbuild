@@ -49,7 +49,6 @@ internal static class NativeMethods
     internal const int MAX_PATH = 260;
 
     private const string kernel32Dll = "kernel32.dll";
-    private const string mscoreeDLL = "mscoree.dll";
 
     private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
     private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
