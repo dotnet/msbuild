@@ -585,7 +585,7 @@ namespace Microsoft.Build.Tasks
                 }
                 while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
 
-                return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength) : string.Empty;
+                return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength-1) : string.Empty;
             }
             else
             {

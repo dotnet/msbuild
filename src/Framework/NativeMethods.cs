@@ -965,7 +965,7 @@ internal static class NativeMethods
 
                 if (length > 0)
                 {
-                    string fullPath = new(fullPathBuffer);
+                    string fullPath = new(fullPathBuffer, 0, length);
                     path = fullPath;
                 }
             }
@@ -1004,7 +1004,7 @@ internal static class NativeMethods
 
                 if (length > 0)
                 {
-                    string fullPath = new(fullPathBuffer);
+                    string fullPath = new(fullPathBuffer, 0, length);
                     path = fullPath;
                 }
             }
