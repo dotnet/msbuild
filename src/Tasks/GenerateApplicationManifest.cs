@@ -219,7 +219,7 @@ namespace Microsoft.Build.Tasks
                         name = Path.GetFileName(item.ItemSpec);
                     }
                     FileReference file = AddFileFromItem(item);
-                    if (!file.ImportComComponent(item.ItemSpec, manifest.OutputMessages, name))
+                    if (NativeMethodsShared.IsWindows && !file.ImportComComponent(item.ItemSpec, manifest.OutputMessages, name))
                     {
                         success = false;
                     }
@@ -386,7 +386,7 @@ namespace Microsoft.Build.Tasks
             }
             else if (String.IsNullOrEmpty(manifest.Publisher))
             {
-                string org = Util.GetRegisteredOrganization();
+                string org = NativeMethodsShared.IsWindows ? Util.GetRegisteredOrganization() : string.Empty;
                 if (!String.IsNullOrEmpty(org))
                 {
                     manifest.Publisher = org;

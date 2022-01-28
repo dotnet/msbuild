@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+#if RUNTIME_TYPE_NETCORE
+using System.Runtime.Versioning;
+#endif
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 
@@ -75,6 +78,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         public static CultureInfo DefaultCultureInfo => System.Threading.Thread.CurrentThread.CurrentUICulture;
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         // This is the 4.0 property and will always point to the Dev10 registry key so that we don't break backwards compatibility.
         // Applications relying on 4.5 will need to use the new method that is introduced in 4.5.
         public static string DefaultPath
@@ -102,6 +108,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         // A new method in 4.5 to get the default path for bootstrapper packages.
         // This method is not going to cache the path as it could be different depending on the Visual Studio version.
         public static string GetDefaultPath(string visualStudioVersion)
@@ -153,6 +162,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return Directory.GetCurrentDirectory();
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         // Gets the list of additional paths to inspect for packages as defined in the registry
         public static List<string> AdditionalPackagePaths
         {
@@ -202,6 +214,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         private static string ReadRegistryString(RegistryKey key, string path, string registryValue)
         {
             RegistryKey subKey = key.OpenSubKey(path, false);

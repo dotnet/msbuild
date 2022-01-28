@@ -9,7 +9,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+#if RUNTIME_TYPE_NETCORE
 using System.Runtime.Versioning;
+#endif
 using System.Text;
 using System.Threading;
 
@@ -24,7 +26,7 @@ using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 namespace Microsoft.Build.Framework;
 internal static class NativeMethods
 {
-    #region Constants
+#region Constants
 
     internal const uint ERROR_INSUFFICIENT_BUFFER = 0x8007007A;
     internal const uint STARTUP_LOADER_SAFEMODE = 0x10;
@@ -80,9 +82,9 @@ internal static class NativeMethods
         internal const CharSet AutoOrUnicode = CharSet.Unicode;
 #endif
 
-    #endregion
+#endregion
 
-    #region Enums
+#region Enums
 
     private enum PROCESSINFOCLASS : int
     {
@@ -207,9 +209,9 @@ internal static class NativeMethods
         Unknown
     }
 
-    #endregion
+#endregion
 
-    #region Structs
+#region Structs
 
     /// <summary>
     /// Structure that contain information about the system on which we are running
@@ -577,9 +579,9 @@ internal static class NativeMethods
         return -1;
     }
 
-    #endregion
+#endregion
 
-    #region Member data
+#region Member data
 
     internal static bool HasMaxPath => MaxPath == MAX_PATH;
 

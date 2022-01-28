@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// </summary>
         public BootstrapperBuilder()
         {
-            _path = Util.DefaultPath;
+            _path = NativeMethodsShared.IsWindows ? Util.DefaultPath : string.Empty;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// <param name="visualStudioVersion">The version of Visual Studio that is used to build this bootstrapper.</param>
         public BootstrapperBuilder(string visualStudioVersion)
         {
-            _path = Util.GetDefaultPath(visualStudioVersion);
+            _path = NativeMethodsShared.IsWindows ? Util.GetDefaultPath(visualStudioVersion) : string.Empty;
         }
 
         #region IBootstrapperBuilder Members
@@ -447,7 +447,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             BuildPackages(settings, null, null, files, null);
 
             List<string> packagePaths = new List<string>() { invariantPath };
-            packagePaths.AddRange(Util.AdditionalPackagePaths.Select(p => Util.AddTrailingChar(p.ToLowerInvariant(), System.IO.Path.DirectorySeparatorChar)));
+            if (NativeMethodsShared.IsWindows)
+            {
+                packagePaths.AddRange(Util.AdditionalPackagePaths.Select(p => Util.AddTrailingChar(p.ToLowerInvariant(), System.IO.Path.DirectorySeparatorChar)));
+            }
 
             foreach (string file in files)
             {
@@ -591,7 +594,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             XmlElement rootElement = _document.CreateElement("Products", BOOTSTRAPPER_NAMESPACE);
 
             List<string> packagePaths = new List<string>() { PackagePath };
-            packagePaths.AddRange(Util.AdditionalPackagePaths);
+            if (NativeMethodsShared.IsWindows)
+            {
+                packagePaths.AddRange(Util.AdditionalPackagePaths);
+            }
+
             foreach (string packagePath in packagePaths)
             {
                 if (FileSystems.Default.DirectoryExists(packagePath))

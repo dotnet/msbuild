@@ -39,7 +39,7 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            if (LauncherPath == null)
+            if (LauncherPath == null && NativeMethodsShared.IsWindows)
             {
                 // Launcher lives next to ClickOnce bootstrapper.
                 // GetDefaultPath obtains the root ClickOnce boostrapper path.

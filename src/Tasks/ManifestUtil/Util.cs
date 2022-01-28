@@ -13,6 +13,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+#if RUNTIME_TYPE_NETCORE
+using System.Runtime.Versioning;
+#endif
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -250,6 +253,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return logPath;
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         public static string GetRegisteredOrganization()
         {
             RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", false);
@@ -515,7 +521,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return path;
         }
 
-        #region ItemComparer 
+#region ItemComparer 
         private static readonly ItemComparer s_itemComparer = new ItemComparer();
         private class ItemComparer : IComparer
         {
@@ -541,7 +547,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return String.Compare(item1.ItemSpec, item2.ItemSpec, StringComparison.Ordinal);
             }
         }
-        #endregion
+#endregion
 
         public static Version ConvertFrameworkVersionToString(string version)
         {
