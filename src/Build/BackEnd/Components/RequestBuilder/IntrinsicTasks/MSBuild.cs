@@ -351,7 +351,7 @@ namespace Microsoft.Build.BackEnd
                                                 UnloadProjectsOnCompletion,
                                                 ToolsVersion,
                                                 SkipNonexistentTargets
-                                                );
+                                                ).ConfigureAwait(false);
 
                         if (!executeResult)
                         {
@@ -381,7 +381,7 @@ namespace Microsoft.Build.BackEnd
             // We need to build all the projects that were not skipped
             if (BuildInParallel)
             {
-                success = await BuildProjectsInParallel(propertiesTable, undefinePropertiesArray, targetLists, success, skipProjects);
+                success = await BuildProjectsInParallel(propertiesTable, undefinePropertiesArray, targetLists, success, skipProjects).ConfigureAwait(false);
             }
 
             return success;
@@ -421,7 +421,7 @@ namespace Microsoft.Build.BackEnd
                 UnloadProjectsOnCompletion,
                 ToolsVersion,
                 SkipNonexistentTargets
-            );
+            ).ConfigureAwait(false);
 
             if (!executeResult)
             {
@@ -648,7 +648,7 @@ namespace Microsoft.Build.BackEnd
                 // as the *calling* project file.
 
                 var taskHost = (TaskHost)buildEngine;
-                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
+                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets).ConfigureAwait(false);
 
                 bool currentTargetResult = result.Result;
                 IList<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = result.TargetOutputsPerProject;

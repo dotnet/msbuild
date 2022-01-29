@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
             Process p = Process.Start(psi); // sleep 10m.
 
             // Verify the process is running.
-            await Task.Delay(500);
+            await Task.Delay(500).ConfigureAwait(false);
             p.HasExited.ShouldBe(false);
 
             // Kill the process.

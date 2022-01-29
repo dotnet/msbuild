@@ -94,7 +94,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             // further information (set by VS) from it required by the plugin.
             if (!pluginDescriptor.VsWorkaround)
             {
-                await service.BeginBuildAsync();
+                await service.BeginBuildAsync().ConfigureAwait(false);
             }
 
             return service;
@@ -124,7 +124,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         projectDescriptor.ProjectGraph,
                         projectDescriptor.EntryPoints),
                     pluginLogger,
-                    _cancellationToken);
+                    _cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -220,7 +220,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             {
                 try
                 {
-                    (CacheResult cacheResult, int projectContextId) = await ProcessCacheRequest(cacheRequest);
+                    (CacheResult cacheResult, int projectContextId) = await ProcessCacheRequest(cacheRequest).ConfigureAwait(false);
                     _buildManager.PostCacheResult(cacheRequest, cacheResult, projectContextId);
                 }
                 catch (Exception e)
@@ -272,13 +272,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
                             new TaskCompletionSource<bool>(),
                             null) is null)
                     {
-                        await LateInitializePluginForVsWorkaround(request);
+                        await LateInitializePluginForVsWorkaround(request).ConfigureAwait(false);
                         LateInitializationForVSWorkaroundCompleted.SetResult(true);
                     }
                     else
                     {
                         // Can't be null. If the thread got here it means another thread initialized the completion source.
-                        await LateInitializationForVSWorkaroundCompleted!.Task;
+                        await LateInitializationForVSWorkaroundCompleted!.Task.ConfigureAwait(false);
                     }
                 }
 
@@ -299,7 +299,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 CacheResult cacheResult;
                 try
                 {
-                    cacheResult = await GetCacheResultAsync(buildRequest, cacheRequest.Configuration, buildEventContext);
+                    cacheResult = await GetCacheResultAsync(buildRequest, cacheRequest.Configuration, buildEventContext).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -383,7 +383,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         _projectCacheDescriptor.PluginAssemblyPath!,
                         graphEntryPointsFromSolutionConfig,
                         projectGraph: null,
-                        _projectCacheDescriptor.PluginSettings));
+                        _projectCacheDescriptor.PluginSettings)).ConfigureAwait(false);
             }
 
             static IReadOnlyCollection<ProjectGraphEntryPoint> GenerateGraphEntryPointsFromSolutionConfigurationXml(
@@ -503,7 +503,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             try
             {
                 MSBuildEventSource.Log.ProjectCacheGetCacheResultStart(_projectCachePluginTypeName, buildRequest.ProjectFullPath, targetNames);
-                cacheResult = await _projectCachePlugin.GetCacheResultAsync(buildRequest, pluginLogger, _cancellationToken);
+                cacheResult = await _projectCachePlugin.GetCacheResultAsync(buildRequest, pluginLogger, _cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -589,7 +589,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 _loggingService.LogComment(buildEventContext, MessageImportance.Low, "ProjectCacheEndBuild");
                 MSBuildEventSource.Log.ProjectCacheEndBuildStart(_projectCachePluginTypeName);
 
-                await _projectCachePlugin.EndBuildAsync(pluginLogger, _cancellationToken);
+                await _projectCachePlugin.EndBuildAsync(pluginLogger, _cancellationToken).ConfigureAwait(false);
 
                 if (pluginLogger.HasLoggedErrors)
                 {

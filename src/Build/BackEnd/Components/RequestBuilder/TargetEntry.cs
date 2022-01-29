@@ -505,7 +505,7 @@ namespace Microsoft.Build.BackEnd
                                 }
 
                                 // We either have some work to do or at least we need to infer outputs from inputs.
-                                bucketResult = await ProcessBucket(taskBuilder, targetLoggingContext, GetTaskExecutionMode(dependencyResult), lookupForInference, lookupForExecution);
+                                bucketResult = await ProcessBucket(taskBuilder, targetLoggingContext, GetTaskExecutionMode(dependencyResult), lookupForInference, lookupForExecution).ConfigureAwait(false);
 
                                 // Now aggregate the result with the existing known results.  There are four rules, assuming the target was not 
                                 // skipped due to being up-to-date:
@@ -819,7 +819,7 @@ namespace Microsoft.Build.BackEnd
                     ProjectTargetInstanceChild targetChildInstance = _target.Children[currentTask];
 
                     // Execute the task.
-                    lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken);
+                    lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken).ConfigureAwait(false);
 
                     if (lastResult.ResultCode == WorkUnitResultCode.Failed)
                     {

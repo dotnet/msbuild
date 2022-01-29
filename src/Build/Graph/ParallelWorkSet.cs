@@ -150,7 +150,7 @@ namespace Microsoft.Build.Graph
 
                     while (!shouldStopAllWorkers)
                     {
-                        await _semaphore.WaitAsync(_cancellationToken);
+                        await _semaphore.WaitAsync(_cancellationToken).ConfigureAwait(false);
 
                         try
                         {

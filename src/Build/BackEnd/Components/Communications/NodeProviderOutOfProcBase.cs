@@ -729,7 +729,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, _headerByte, _headerByte.Length);
+                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, _headerByte, _headerByte.Length).ConfigureAwait(false);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -751,7 +751,7 @@ namespace Microsoft.Build.BackEnd
 
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, packetData, packetLength);
+                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, packetData, packetLength).ConfigureAwait(false);
                         if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
                         {
                             return;
@@ -915,7 +915,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Wait up to 100ms until all remaining packets are sent.
                     // We don't need to wait long, just long enough for the Task to start running on the ThreadPool.
-                    await Task.WhenAny(_packetWriteDrainTask, Task.Delay(100));
+                    await Task.WhenAny(_packetWriteDrainTask, Task.Delay(100)).ConfigureAwait(false);
                 }
                 if (_exitPacketState == ExitPacketState.ExitPacketSent)
                 {

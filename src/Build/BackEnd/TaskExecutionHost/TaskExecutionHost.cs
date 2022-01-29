@@ -656,15 +656,15 @@ namespace Microsoft.Build.BackEnd
                 // Kick off a task to log the message so that we don't block the calling thread.
                 Task.Run(async delegate
                 {
-                    await _taskExecutionIdle.ToTask(CancelFirstWarningWaitInterval);
+                    await _taskExecutionIdle.ToTask(CancelFirstWarningWaitInterval).ConfigureAwait(false);
                     if (!_taskExecutionIdle.WaitOne(0))
                     {
                         DisplayCancelWaitMessage();
-                        await _taskExecutionIdle.ToTask(CancelWarningWaitInterval);
+                        await _taskExecutionIdle.ToTask(CancelWarningWaitInterval).ConfigureAwait(false);
                         while (!_taskExecutionIdle.WaitOne(0))
                         {
                             DisplayCancelWaitMessage();
-                            await _taskExecutionIdle.ToTask(CancelWarningWaitInterval);
+                            await _taskExecutionIdle.ToTask(CancelWarningWaitInterval).ConfigureAwait(false);
                         }
                     }
                 });

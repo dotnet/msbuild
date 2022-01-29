@@ -929,7 +929,7 @@ namespace Microsoft.Build.BackEnd
                 List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
 
                 // This is really a legacy CallTarget invocation
-                ITargetResult[] results = await _targetBuilderCallback.LegacyCallTarget(targetNames, ContinueOnError, _taskLocation);
+                ITargetResult[] results = await _targetBuilderCallback.LegacyCallTarget(targetNames, ContinueOnError, _taskLocation).ConfigureAwait(false);
 
                 if (returnTargetOutputs)
                 {
@@ -952,7 +952,7 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 // Post the request, then yield up the thread.
-                result = await BuildProjectFilesInParallelAsync(projectFileNames, targetNames, globalProperties, undefineProperties, toolsVersion, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
+                result = await BuildProjectFilesInParallelAsync(projectFileNames, targetNames, globalProperties, undefineProperties, toolsVersion, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets).ConfigureAwait(false);
             }
 
             return result;
@@ -1102,7 +1102,7 @@ namespace Microsoft.Build.BackEnd
                 if (projectFileNames.Length == 1 && projectFileNames[0] == null && globalProperties[0] == null && (undefineProperties == null || undefineProperties[0] == null) && toolsVersion[0] == null)
                 {
                     // This is really a legacy CallTarget invocation
-                    ITargetResult[] results = await _targetBuilderCallback.LegacyCallTarget(targetNames, ContinueOnError, _taskLocation);
+                    ITargetResult[] results = await _targetBuilderCallback.LegacyCallTarget(targetNames, ContinueOnError, _taskLocation).ConfigureAwait(false);
 
                     if (returnTargetOutputs)
                     {
@@ -1157,7 +1157,7 @@ namespace Microsoft.Build.BackEnd
                         toolsVersion ?? Array.Empty<string>(),
                         targetNames ?? Array.Empty<string>(),
                         waitForResults: true,
-                        skipNonexistentTargets: skipNonexistentTargets);
+                        skipNonexistentTargets: skipNonexistentTargets).ConfigureAwait(false);
 
                     // Even if one of the projects fails to build and therefore has no outputs, it should still have an entry in the results array (albeit with an empty list in it)
                     ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length, "{0}!={1}.", results.Length, projectFileNames.Length);

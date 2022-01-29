@@ -92,7 +92,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    await DownloadAsync(uri, cancellationToken);
+                    await DownloadAsync(uri, cancellationToken).ConfigureAwait(false);
                     break;
                 }
                 catch (OperationCanceledException e) when (e.CancellationToken == cancellationToken)

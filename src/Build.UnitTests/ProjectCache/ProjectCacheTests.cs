@@ -210,7 +210,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             public override async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, PluginLoggerBase logger, CancellationToken cancellationToken)
             {
-                return await _getCacheResultDelegate(buildRequest, logger, cancellationToken);
+                return await _getCacheResultDelegate(buildRequest, logger, cancellationToken).ConfigureAwait(false);
             }
 
             public override Task EndBuildAsync(PluginLoggerBase logger, CancellationToken cancellationToken)
@@ -305,7 +305,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 if (_projectQuerySleepTime is not null)
                 {
-                    await Task.Delay(_projectQuerySleepTime.Value, cancellationToken);
+                    await Task.Delay(_projectQuerySleepTime.Value, cancellationToken).ConfigureAwait(false);
                 }
 
                 QueryStartStops.Enqueue(queryId);
@@ -1449,7 +1449,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     {
                         if (projectNumber == 2)
                         {
-                            await task2Completion.Task;
+                            await task2Completion.Task.ConfigureAwait(false);
                         }
 
                         return testData.GetExpectedCacheResultForProjectNumber(projectNumber);

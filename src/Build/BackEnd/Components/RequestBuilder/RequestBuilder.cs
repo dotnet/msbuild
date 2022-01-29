@@ -374,7 +374,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Send the requests off
-            BuildResult[] results = await StartNewBuildRequests(requests);
+            BuildResult[] results = await StartNewBuildRequests(requests).ConfigureAwait(false);
 
             ErrorUtilities.VerifyThrow(requests.Length == results.Length, "# results != # requests");
 
@@ -406,7 +406,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                handle = await handles.ToTask();
+                handle = await handles.ToTask().ConfigureAwait(false);
             }
 
             RestoreOperatingEnvironment();
@@ -772,7 +772,7 @@ namespace Microsoft.Build.BackEnd
                     SetCommonWorkerThreadParameters();
                 }
                 MSBuildEventSource.Log.RequestThreadProcStart();
-                await BuildAndReport();
+                await BuildAndReport().ConfigureAwait(false);
                 MSBuildEventSource.Log.RequestThreadProcStop();
             }
             catch (ThreadAbortException)
@@ -807,7 +807,7 @@ namespace Microsoft.Build.BackEnd
             // Start the build request            
             try
             {
-                result = await BuildProject();
+                result = await BuildProject().ConfigureAwait(false);
             }
             catch (InvalidProjectFileException ex)
             {
@@ -950,7 +950,7 @@ namespace Microsoft.Build.BackEnd
                     CultureInfo savedCulture = CultureInfo.CurrentCulture;
                     CultureInfo savedUICulture = CultureInfo.CurrentUICulture;
 
-                    handle = await handles.ToTask();
+                    handle = await handles.ToTask().ConfigureAwait(false);
 
                     CultureInfo.CurrentCulture = savedCulture;
                     CultureInfo.CurrentUICulture = savedUICulture;
@@ -1155,14 +1155,14 @@ namespace Microsoft.Build.BackEnd
                 (_requestEntry.RequestConfiguration.ResultsNodeId != _componentHost.BuildParameters.NodeId))
             {
                 // This indicates to the system that we will block waiting for a results transfer.  We will block here until those results become available.
-                await BlockOnTargetInProgress(Microsoft.Build.BackEnd.BuildRequest.InvalidGlobalRequestId, null);
+                await BlockOnTargetInProgress(BackEnd.BuildRequest.InvalidGlobalRequestId, null).ConfigureAwait(false);
 
                 // All of the results should now be on this node.
                 ErrorUtilities.VerifyThrow(_requestEntry.RequestConfiguration.ResultsNodeId == _componentHost.BuildParameters.NodeId, "Results for configuration {0} were not retrieved from node {1}", _requestEntry.RequestConfiguration.ConfigurationId, _requestEntry.RequestConfiguration.ResultsNodeId);
             }
 
             // Build the targets
-            BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this, allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
+            BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this, allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token).ConfigureAwait(false);
 
             result = _requestEntry.Request.ProxyTargets == null
                 ? result

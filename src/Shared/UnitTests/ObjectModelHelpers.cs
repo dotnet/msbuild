@@ -1976,7 +1976,7 @@ namespace Microsoft.Build.UnitTests
                     completion.SetResult(submission.BuildResult);
                 }, null);
 
-                return await completion.Task;
+                return await completion.Task.ConfigureAwait(false);
             }
 
             public GraphBuildResult BuildGraphSubmission(GraphBuildRequestData requestData)

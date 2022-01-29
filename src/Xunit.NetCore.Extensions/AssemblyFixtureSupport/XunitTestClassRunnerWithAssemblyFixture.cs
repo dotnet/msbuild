@@ -27,7 +27,7 @@ namespace Xunit.NetCore.Extensions
 
         protected override async Task AfterTestClassStartingAsync()
         {
-            await base.AfterTestClassStartingAsync();
+            await base.AfterTestClassStartingAsync().ConfigureAwait(false);
 
             Aggregator.Run(() =>
             {

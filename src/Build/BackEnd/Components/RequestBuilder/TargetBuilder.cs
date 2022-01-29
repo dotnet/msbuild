@@ -159,13 +159,13 @@ namespace Microsoft.Build.BackEnd
 
             // Push targets onto the stack.  This method will reverse their push order so that they
             // get built in the same order specified in the array.
-            await PushTargets(targets, null, baseLookup, false, false, TargetBuiltReason.None);
+            await PushTargets(targets, null, baseLookup, false, false, TargetBuiltReason.None).ConfigureAwait(false);
 
             // Now process the targets
             ITaskBuilder taskBuilder = _componentHost.GetComponent(BuildComponentType.TaskBuilder) as ITaskBuilder;
             try
             {
-                await ProcessTargetStack(taskBuilder);
+                await ProcessTargetStack(taskBuilder).ConfigureAwait(false);
             }
             finally
             {
@@ -276,9 +276,9 @@ namespace Microsoft.Build.BackEnd
                         targetToPush.Add(new TargetSpecification(targets[i], taskLocation));
 
                         // We push the targets one at a time to emulate the original CallTarget behavior.
-                        bool pushed = await PushTargets(targetToPush, currentTargetEntry, callTargetLookup, false, true, TargetBuiltReason.None);
+                        bool pushed = await PushTargets(targetToPush, currentTargetEntry, callTargetLookup, false, true, TargetBuiltReason.None).ConfigureAwait(false);
                         ErrorUtilities.VerifyThrow(pushed, "Failed to push any targets onto the stack.  Target: {0} Current Target: {1}", targets[i], currentTargetEntry.Target.Name);
-                        await ProcessTargetStack(taskBuilder);
+                        await ProcessTargetStack(taskBuilder).ConfigureAwait(false);
 
                         if (!_cancellationToken.IsCancellationRequested)
                         {
@@ -322,7 +322,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         async Task<BuildResult[]> IRequestBuilderCallback.BuildProjects(string[] projectFiles, Microsoft.Build.Collections.PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets)
         {
-            return await _requestBuilderCallback.BuildProjects(projectFiles, properties, toolsVersions, targets, waitForResults, skipNonexistentTargets);
+            return await _requestBuilderCallback.BuildProjects(projectFiles, properties, toolsVersions, targets, waitForResults, skipNonexistentTargets).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -432,7 +432,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Push our after targets, if any.  Our parent is the parent of the target after which we are running.
                             IList<TargetSpecification> afterTargets = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunAfter(currentTargetEntry.Name);
-                            bool didPushTargets = await PushTargets(afterTargets, currentTargetEntry.ParentEntry, currentTargetEntry.Lookup, currentTargetEntry.ErrorTarget, currentTargetEntry.StopProcessingOnCompletion, TargetBuiltReason.AfterTargets);
+                            bool didPushTargets = await PushTargets(afterTargets, currentTargetEntry.ParentEntry, currentTargetEntry.Lookup, currentTargetEntry.ErrorTarget, currentTargetEntry.StopProcessingOnCompletion, TargetBuiltReason.AfterTargets).ConfigureAwait(false);
 
                             // If we have after targets, the last one to run will inherit the stopProcessing flag and we will reset ours.  If we didn't push any targets, then we shouldn't clear the
                             // flag because it means we are still on the bottom of this CallTarget stack.
@@ -453,7 +453,7 @@ namespace Microsoft.Build.BackEnd
                             // inherit the stop processing flag and we will reset it.
                             // Our parent is the target before which we run, just like a depends-on target.
                             IList<TargetSpecification> beforeTargets = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunBefore(currentTargetEntry.Name);
-                            bool pushedTargets = await PushTargets(beforeTargets, currentTargetEntry, currentTargetEntry.Lookup, currentTargetEntry.ErrorTarget, stopProcessingStack, TargetBuiltReason.BeforeTargets);
+                            bool pushedTargets = await PushTargets(beforeTargets, currentTargetEntry, currentTargetEntry.Lookup, currentTargetEntry.ErrorTarget, stopProcessingStack, TargetBuiltReason.BeforeTargets).ConfigureAwait(false);
                             if (beforeTargets.Count != 0 && pushedTargets)
                             {
                                 stopProcessingStack = false;
@@ -462,7 +462,7 @@ namespace Microsoft.Build.BackEnd
                             // And if we have dependencies to run, push them now.
                             if (dependencies != null)
                             {
-                                await PushTargets(dependencies, currentTargetEntry, currentTargetEntry.Lookup, false, false, TargetBuiltReason.DependsOn);
+                                await PushTargets(dependencies, currentTargetEntry, currentTargetEntry.Lookup, false, false, TargetBuiltReason.DependsOn).ConfigureAwait(false);
                             }
                         }
 
@@ -473,7 +473,7 @@ namespace Microsoft.Build.BackEnd
                         // It's possible that our target got pushed onto the stack for one build and had dependencies process, then a re-entrant build started actively building
                         // the target, encountered a legacy CallTarget, pushed new work onto the stack, and yielded back to here. Instead of starting the already-partially-
                         // built target, wait for the other one to complete. Then CheckSkipTarget will skip it here.
-                        bool wasActivelyBuilding = await CompleteOutstandingActiveRequests(currentTargetEntry.Name);
+                        bool wasActivelyBuilding = await CompleteOutstandingActiveRequests(currentTargetEntry.Name).ConfigureAwait(false);
 
                         // It's possible that our target got pushed onto the stack for one build and had its dependencies process, then a re-entrant build came in and
                         // actually built this target while we were waiting, so that by the time we get here, it's already been finished.  In this case, just blow it away.
@@ -486,7 +486,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Execute all of the tasks on this target.
                             MSBuildEventSource.Log.TargetStart(currentTargetEntry.Name);
-                            await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken);
+                            await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken).ConfigureAwait(false);
                             MSBuildEventSource.Log.TargetStop(currentTargetEntry.Name);
                         }
 
@@ -501,7 +501,7 @@ namespace Microsoft.Build.BackEnd
                             try
                             {
                                 await PushTargets(errorTargets, currentTargetEntry, currentTargetEntry.Lookup, true,
-                                    false, TargetBuiltReason.None);
+                                    false, TargetBuiltReason.None).ConfigureAwait(false);
                             }
                             catch
                             {
@@ -686,7 +686,7 @@ namespace Microsoft.Build.BackEnd
                     if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)
                     {
                         // Another request elsewhere is building it.  We need to wait.
-                        await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetSpecification.TargetName, null);
+                        await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetSpecification.TargetName, null).ConfigureAwait(false);
 
                         // If we come out of here and the target is *still* active, it means the scheduler detected a circular dependency and told us to
                         // continue so we could throw the exception.
@@ -766,7 +766,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Another request is building the target. Wait for that, sending partial results
                     // for this request, which may be required to unblock it.
-                    await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetName, _buildResult);
+                    await _requestBuilderCallback.BlockOnTargetInProgress(idOfAlreadyBuildingRequest, targetName, _buildResult).ConfigureAwait(false);
 
                     return true;
                 }

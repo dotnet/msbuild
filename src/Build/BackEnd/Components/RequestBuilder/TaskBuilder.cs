@@ -177,12 +177,12 @@ namespace Microsoft.Build.BackEnd
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             if ((mode & TaskExecutionMode.InferOutputsOnly) == TaskExecutionMode.InferOutputsOnly)
             {
-                taskResult = await ExecuteTask(TaskExecutionMode.InferOutputsOnly, inferLookup);
+                taskResult = await ExecuteTask(TaskExecutionMode.InferOutputsOnly, inferLookup).ConfigureAwait(false);
             }
 
             if ((mode & TaskExecutionMode.ExecuteTaskAndGatherOutputs) == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
             {
-                taskResult = await ExecuteTask(TaskExecutionMode.ExecuteTaskAndGatherOutputs, executeLookup);
+                taskResult = await ExecuteTask(TaskExecutionMode.ExecuteTaskAndGatherOutputs, executeLookup).ConfigureAwait(false);
             }
 
             return taskResult;
@@ -328,7 +328,7 @@ namespace Microsoft.Build.BackEnd
                 for (int i = 0; i < buckets.Count; i++)
                 {
                     // Execute the batch bucket, pass in which bucket we are executing so that we know when to get a new taskId for the bucket.
-                    taskResult = await ExecuteBucket(taskHost, (ItemBucket)buckets[i], mode, lookupHash);
+                    taskResult = await ExecuteBucket(taskHost, (ItemBucket)buckets[i], mode, lookupHash).ConfigureAwait(false);
 
                     aggregateResult = aggregateResult.AggregateResult(taskResult);
 
@@ -440,7 +440,7 @@ namespace Microsoft.Build.BackEnd
                             }
                             else
                             {
-                                taskResult = await InitializeAndExecuteTask(taskLoggingContext, bucket, taskIdentityParameters, taskHost, howToExecuteTask);
+                                taskResult = await InitializeAndExecuteTask(taskLoggingContext, bucket, taskIdentityParameters, taskHost, howToExecuteTask).ConfigureAwait(false);
                             }
 
                             if (lookupHash != null)
@@ -658,7 +658,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // UNDONE: Move this and the task host.
                 taskHost.LoggingContext = taskLoggingContext;
-                WorkUnitResult executionResult = await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
+                WorkUnitResult executionResult = await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask).ConfigureAwait(false);
 
                 ErrorUtilities.VerifyThrow(executionResult != null, "Unexpected null execution result");
 
@@ -791,7 +791,7 @@ namespace Microsoft.Build.BackEnd
 
                             try
                             {
-                                taskResult = await msbuildTask.ExecuteInternal();
+                                taskResult = await msbuildTask.ExecuteInternal().ConfigureAwait(false);
                             }
                             finally
                             {
@@ -802,7 +802,7 @@ namespace Microsoft.Build.BackEnd
                     else if (taskType == typeof(CallTarget))
                     {
                         CallTarget callTargetTask = host.TaskInstance as CallTarget;
-                        taskResult = await callTargetTask.ExecuteInternal();
+                        taskResult = await callTargetTask.ExecuteInternal().ConfigureAwait(false);
                     }
                     else
                     {
