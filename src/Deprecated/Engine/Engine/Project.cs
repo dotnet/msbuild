@@ -4426,7 +4426,7 @@ namespace Microsoft.Build.BuildEngine
         /// This is only for the purposes of adding statically-declared items in the logical
         /// project file, or items added to the project file by an IDE modifying the project contents.
         /// </summary>
-        /// <param name="itemToInclude">The specific item to add to the project</param>
+        /// <param name="item">The specific item to add to the project</param>
         internal void AddToItemListByNameIgnoringCondition(BuildItem item)
         {
             // Get a reference to the project-level hash table which is supposed to
@@ -4453,7 +4453,7 @@ namespace Microsoft.Build.BuildEngine
         /// This is only for the purposes of adding statically-declared items in the logical
         /// project file, or items added to the project file by an IDE modifying the project contents.
         /// </summary>
-        /// <param name="itemToInclude">The specific item to add to the project</param>
+        /// <param name="item">The specific item to add to the project</param>
         internal void AddToItemListByName(BuildItem item)
         {
             // Get a reference to the project-level hash table which is supposed to

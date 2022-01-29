@@ -125,6 +125,7 @@ namespace Microsoft.Build.BuildEngine
         /// Internal constructor
         /// </summary>
         /// <param name="importElement"></param>
+        /// <param name="parentProject"></param>
         /// <param name="isImported"></param>
         /// <owner>LukaszG</owner>
         internal Import(XmlElement importElement, Project parentProject, bool isImported)

@@ -203,7 +203,7 @@ namespace Microsoft.Build.BuildEngine
         /// This method is called to adjust the execution time for the task by subtracting the time
         /// spent waiting for results
         /// </summary>
-        /// <param name="entryTime"></param>
+        /// <param name="waitStartTime"></param>
         internal void NotifyOfWait(long waitStartTime)
         {
             // Move the start time forward by the period of the wait

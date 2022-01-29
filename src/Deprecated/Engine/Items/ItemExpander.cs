@@ -123,7 +123,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>SumedhK</owner>
         /// <param name="s"></param>
         /// <param name="parentNode"></param>
-        /// <param name="itemsByType"></param>
+        /// <param name="readOnlyLookup"></param>
         /// <returns>Given string, with embedded item vectors expanded.</returns>
         internal static string ExpandEmbeddedItemVectors(string s, XmlNode parentNode, ReadOnlyLookup readOnlyLookup)
         {
@@ -149,7 +149,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>SumedhK;RGoel</owner>
         /// <param name="itemVectorExpression"></param>
         /// <param name="parentNode"></param>
-        /// <param name="itemsByType"></param>
+        /// <param name="readOnlyLookup"></param>
         /// <returns>a virtual BuildItemGroup containing the items resulting from the expression, or null if the expression was invalid.</returns>
         internal static BuildItemGroup ItemizeItemVector
         (
@@ -337,7 +337,6 @@ namespace Microsoft.Build.BuildEngine
         /// </example>
         /// <owner>SumedhK</owner>
         /// <param name="itemVector"></param>
-        /// <param name="isUnknownItemType">(out) true if the referenced item does not exist</param>
         /// <returns>expanded item vector</returns>
         private string ExpandItemVector(Match itemVector)
         {

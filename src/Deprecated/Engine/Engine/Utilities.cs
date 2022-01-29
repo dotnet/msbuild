@@ -153,6 +153,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="conditionAttribute">XML attribute on which the condition is evaluated</param>
         /// <param name="expander">All the data available for expanding embedded properties, metadata, and items</param>
         /// <param name="itemListOptions"></param>
+        /// <param name="parentProject"></param>
         /// <returns>true, if the expression evaluates to true, otherwise false</returns>
         internal static bool EvaluateCondition
         (
@@ -183,7 +184,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="expander">All the data available for expanding embedded properties, metadata, and items</param>
         /// <param name="itemListOptions"></param>
         /// <param name="loggingServices">Can be null</param>
-        /// <param name="eventContext"> contains contextual information for logging events</param>
+        /// <param name="buildEventContext"> contains contextual information for logging events</param>
         /// <returns>true, if the expression evaluates to true, otherwise false</returns>
         internal static bool EvaluateCondition
         (

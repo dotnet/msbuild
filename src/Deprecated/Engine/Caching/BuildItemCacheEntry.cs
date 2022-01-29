@@ -25,7 +25,7 @@ namespace Microsoft.Build.BuildEngine
         /// Public constructor
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="taskItems"></param>
+        /// <param name="buildItems"></param>
         internal BuildItemCacheEntry(string name, BuildItem[] buildItems)
             : base(name)
         {

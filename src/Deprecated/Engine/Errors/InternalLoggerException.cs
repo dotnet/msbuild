@@ -80,6 +80,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="e">Can be null.</param>
         /// <param name="errorCode"></param>
         /// <param name="helpKeyword"></param>
+        /// <param name="initializationException"></param>
         internal InternalLoggerException
         (
             string message,
@@ -215,6 +216,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="innerException"></param>
         /// <param name="e">Can be null.</param>
         /// <param name="messageResourceName"></param>
+        /// <param name="initializationException"></param>
         /// <param name="messageArgs"></param>
         internal static void Throw
         (

@@ -55,6 +55,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="msbuildProject"></param>
         /// <param name="toolsVersionOverride">Tools Version override (may be null).
         /// Any /tv:xxx switch would cause a value here.</param>
+        /// <param name="projectBuildEventContext"></param>
         /// <returns></returns>
         /// <owner>RGoel</owner>
         static internal void Generate(SolutionParser solution, Project msbuildProject, string toolsVersionOverride, BuildEventContext projectBuildEventContext)
@@ -469,7 +470,7 @@ namespace Microsoft.Build.BuildEngine
         /// fall back on the tools version of the solution wrapper project.
         /// </summary>
         /// <param name="parentEngine"></param>
-        /// <param name="toolsVersionOverride"></param>
+        /// <param name="wrapperProjectToolsVersion"></param>
         /// <returns></returns>
         private static string DetermineChildProjectToolsVersion(Engine parentEngine, string wrapperProjectToolsVersion)
         {
@@ -497,6 +498,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="msbuildTargetName"></param>
         /// <param name="configurationName"></param>
         /// <param name="platformName"></param>
+        /// <param name="specifyProjectToolsVersion"></param>
         /// <returns></returns>
         /// <owner>RGoel, LukaszG</owner>
         static private BuildTask AddMSBuildTaskElement
@@ -679,6 +681,7 @@ namespace Microsoft.Build.BuildEngine
         /// Adds MSBuild and ResolveVCProjectOutput tasks to a project target to pre-resolve its project references
         /// </summary>
         /// <param name="solution"></param>
+        /// <param name="msbuildProject"></param>
         /// <param name="target"></param>
         /// <param name="proj"></param>
         /// <param name="solutionConfiguration"></param>
@@ -797,6 +800,7 @@ namespace Microsoft.Build.BuildEngine
         /// replaced with file references)
         /// </summary>
         /// <param name="solution"></param>
+        /// <param name="msbuildProject"></param>
         /// <param name="target"></param>
         /// <param name="proj"></param>
         /// <param name="solutionConfiguration"></param>
@@ -1513,6 +1517,7 @@ namespace Microsoft.Build.BuildEngine
         /// Emit warnings when the project type is unknown.
         /// </summary>
         /// <param name="msbuildProject">The project to add the target to</param>
+        /// <param name="solution"></param>
         /// <param name="proj">The project to add as a target.</param>
         /// <param name="subTargetName">The target to call within the project that's being added.</param>
         /// <param name="errorMessage">Optional detailed error message to print out in case we already tried accessing the
@@ -2164,6 +2169,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="solution"></param>
         /// <param name="parentEngine"></param>
+        /// <param name="projectBuildEventContext"></param>
         /// <owner>LukaszG</owner>
         static internal void ConvertVcToVcDependenciesToReferences(SolutionParser solution, Engine parentEngine, BuildEventContext projectBuildEventContext)
         {

@@ -1109,6 +1109,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <summary>
         /// Given a filespec, find the files that match. 
         /// </summary>
+        /// <param name="projectDirectory"></param>
         /// <param name="filespec">Get files that match the given file spec.</param>
         /// <returns>The array of files.</returns>
         internal static string[] GetFiles
@@ -1124,6 +1125,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <summary>
         /// Given a filespec, find the files that match. 
         /// </summary>
+        /// <param name="projectDirectory"></param>
         /// <param name="filespec">Get files that match the given file spec.</param>
         /// <param name="getFileSystemEntries">Get files that match the given file spec.</param>
         /// <param name="directoryExists">Determine whether a directory exists.</param>

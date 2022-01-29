@@ -56,6 +56,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="itemNames">Item types being batched on: null indicates no batching is occurring</param>
         /// <param name="itemMetadata">Hashtable of item metadata values: null indicates no batching is occurring</param>
+        /// <param name="lookup"></param>
+        /// <param name="bucketSequenceNumber"></param>
         internal ItemBucket
         (
             ICollection itemNames,

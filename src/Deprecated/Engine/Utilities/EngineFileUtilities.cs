@@ -15,6 +15,7 @@ namespace Microsoft.Build.BuildEngine
         /// assuming that it wasn't really intended to be a filename (as items are not required to necessarily represent files).
         /// </summary>
         /// <owner>RGoel</owner>
+        /// <param name="directory"></param>
         /// <param name="filespec">The filespec to evaluate.</param>
         /// <returns>Array of file paths.</returns>
         internal static string[] GetFileListEscaped

@@ -399,8 +399,8 @@ namespace Microsoft.Build.BuildEngine
         /// Expands the given unexpanded property expression using the properties in the
         /// given BuildPropertyGroup.
         /// </summary>
-        /// <param name="unexpandedProperty"></param>
-        /// <param name="properties"></param>
+        /// <param name="property"></param>
+        /// <param name="expander"></param>
         /// <returns></returns>
         private string ExpandProperty(PropertyDefinition property, Expander expander)
         {

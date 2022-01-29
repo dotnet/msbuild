@@ -47,6 +47,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         /// <owner>t-jeffv</owner>
         /// <param name="e">Error to format</param>
+        /// <param name="removeCarriageReturn"></param>
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildErrorEventArgs e, bool removeCarriageReturn)
         {
@@ -76,6 +77,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         /// <owner>t-jeffv, sumedhk</owner>
         /// <param name="e">Warning to format</param>
+        /// <param name="removeCarriageReturn"></param>
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildWarningEventArgs e, bool removeCarriageReturn)
         {

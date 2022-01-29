@@ -12,7 +12,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// For a given VC project, retrieves the projects it references 
         /// </summary>
-        /// <param name="projectPath"></param>
+        /// <param name="project"></param>
         /// <returns></returns>
         /// <owner>LukaszG</owner>
         static internal List<string> GetReferencedProjectGuids(XmlDocument project)

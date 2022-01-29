@@ -162,6 +162,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Constructor, from an existing &lt;PropertyGroup&gt; XML element.
         /// </summary>
+        /// <param name="parentProject"></param>
         /// <param name="importedFilename"></param>
         /// <param name="condition"></param>
         /// <owner>RGoel</owner>
@@ -281,6 +282,7 @@ namespace Microsoft.Build.BuildEngine
         /// Constructor which creates a new &lt;PropertyGroup&gt; in the XML document
         /// specified.
         /// </summary>
+        /// <param name="parentProject"></param>
         /// <param name="ownerDocument"></param>
         /// <param name="importedFromAnotherProject"></param>
         /// <owner>RGoel</owner>
@@ -1459,7 +1461,7 @@ namespace Microsoft.Build.BuildEngine
         /// Verifies group is persisted.
         /// </summary>
         /// <param name="errorResourceName"></param>
-        /// <param name="args"></param>
+        /// <param name="arg"></param>
         /// <owner>JomoF</owner>
         private void MustBePersisted
         (

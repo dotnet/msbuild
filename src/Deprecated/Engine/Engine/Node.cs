@@ -151,6 +151,8 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="entries"></param>
         /// <param name="scopeName"></param>
         /// <param name="scopeProperties"></param>
+        /// <param name="scopeToolsVersion"></param>
+        /// <param name="cacheContentType"></param>
         internal Exception PostCacheEntriesToHost(CacheEntry[] entries, string scopeName, BuildPropertyGroup scopeProperties, string scopeToolsVersion, CacheContentType cacheContentType)
         {
             try
@@ -170,6 +172,8 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="names"></param>
         /// <param name="scopeName"></param>
         /// <param name="scopeProperties"></param>
+        /// <param name="scopeToolsVersion"></param>
+        /// <param name="cacheContentType"></param>
         /// <returns></returns>
         internal CacheEntry[] GetCachedEntriesFromHost(string[] names, string scopeName, BuildPropertyGroup scopeProperties, string scopeToolsVersion, CacheContentType cacheContentType)
         {

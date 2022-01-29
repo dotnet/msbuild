@@ -322,6 +322,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs a custom-priority comment with all registered loggers using the specified resource string.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="importance"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
@@ -371,6 +372,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs an error with all registered loggers using the specified resource string.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="location"></param>
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
@@ -383,6 +385,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs an error with all registered loggers using the specified resource string.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="subcategoryResourceName">Can be null.</param>
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
@@ -402,6 +405,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs an error with all registered loggers using the given text.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="subcategoryResourceName">Can be null.</param>
         /// <param name="errorCode">Can be null.</param>
         /// <param name="helpKeyword">Can be null.</param>
@@ -441,6 +445,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs an error regarding an invalid project file with all registered loggers.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="invalidProjectFileException"></param>
         virtual internal void LogInvalidProjectFileError(BuildEventContext buildEventContext, InvalidProjectFileException invalidProjectFileException)
         {
@@ -475,6 +480,7 @@ namespace Microsoft.Build.BuildEngine
         /// This will include a stack dump.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="exception"></param>
         /// <param name="file"></param>
         virtual internal void LogFatalBuildError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file)
@@ -487,6 +493,7 @@ namespace Microsoft.Build.BuildEngine
         /// This will include a stack dump.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="exception"></param>
         /// <param name="file"></param>
         /// <param name="taskName"></param>
@@ -502,6 +509,7 @@ namespace Microsoft.Build.BuildEngine
         /// This will include a stack dump.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="exception"></param>
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
@@ -539,6 +547,7 @@ namespace Microsoft.Build.BuildEngine
         /// This will include a stack dump.
         /// </summary>
         /// <owner>RGoel</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="exception"></param>
         /// <param name="file"></param>
         /// <param name="taskName"></param>
@@ -566,10 +575,11 @@ namespace Microsoft.Build.BuildEngine
         /// Logs a warning with all registered loggers using the specified resource string.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
-         virtual internal void LogWarning(BuildEventContext buildEventContext, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+        virtual internal void LogWarning(BuildEventContext buildEventContext, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             LogWarning(buildEventContext,null, file, messageResourceName, messageArgs);
         }
@@ -578,6 +588,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs a warning with all registered loggers using the specified resource string.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="subcategoryResourceName">Can be null.</param>
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
@@ -597,6 +608,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs a warning with all registered loggers using the given text.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="subcategoryResourceName">Can be null.</param>
         /// <param name="warningCode">Can be null.</param>
         /// <param name="helpKeyword">Can be null.</param>
@@ -730,6 +742,9 @@ namespace Microsoft.Build.BuildEngine
         /// Logs that a project build has started with all registered loggers.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="projectId"></param>
+        /// <param name="parentBuildEventContext"></param>
+        /// <param name="projectBuildEventContext"></param>
         /// <param name="projectFile">project file</param>
         /// <param name="targetNames">target names</param>
         /// <param name="properties">properties list</param>
@@ -779,6 +794,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs that a project build has finished with all registered loggers.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="projectFile"></param>
         /// <param name="success"></param>
         virtual internal void LogProjectFinished(BuildEventContext buildEventContext, string projectFile, bool success)
@@ -803,6 +819,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs that a target build has started with all registered loggers.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="targetName">Name of target</param>
         /// <param name="projectFile">Main project file</param>
         /// <param name="projectFileOfTargetElement">Project file actually containing the target</param>
@@ -827,6 +844,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs that a target build has finished with all registered loggers.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="targetName"></param>
         /// <param name="projectFile">main project file</param>
         /// <param name="success"></param>
@@ -856,6 +874,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs that task execution has started with all registered loggers.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="taskName"></param>
         /// <param name="projectFile"></param>
         /// <param name="projectFileOfTaskNode">project file actually containing the task</param>
@@ -880,6 +899,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs that a task has finished executing with all registered loggers.
         /// </summary>
         /// <owner>SumedhK</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="taskName"></param>
         /// <param name="projectFile"></param>
         /// <param name="success"></param>

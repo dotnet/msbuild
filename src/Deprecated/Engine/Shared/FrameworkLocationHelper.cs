@@ -470,9 +470,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>JomoF</owner>
         /// <param name="currentRuntimePath">The path to the runtime that is currently executing.</param>
         /// <param name="prefix">Should be something like 'v1.2' that indicates the runtime version we want.</param>
-        /// <param name="frameworkVersion">Should be the full version number of the runtime version we want.</param>
         /// <param name="getDirectories">Delegate to method that can return filesystem entries.</param>
-        /// <param name="useHeuristic">Whether we should fall back to a search heuristic if other searches fail.</param>
         /// <returns>Will return 'null' if there is no target frameworks on this machine.</returns>
         internal static string FindDotNetFrameworkPath
         (

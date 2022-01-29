@@ -44,6 +44,7 @@ namespace Microsoft.Build.BuildEngine
         /// This constructor initializes all required data.
         /// </summary>
         /// <owner>JomoF</owner>
+        /// <param name="buildEventContext"></param>
         /// <param name="loggingServices"></param>
         /// <param name="binPath"></param>
         internal ProjectSchemaValidationHandler(BuildEventContext buildEventContext, EngineLoggingServices loggingServices, string binPath)

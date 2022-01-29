@@ -48,6 +48,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Adds a new VCBuild task element to the specified target
         /// </summary>
+        /// <param name="msbuildProject"></param>
         /// <param name="target">The target to add the VCBuild task to</param>
         /// <param name="solutionPath">Path to the solution if any</param>
         /// <param name="projectPath">Path to the solution if any</param>
@@ -291,9 +292,9 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Looks up a path from the registry if present, and checks whether VCBuild.exe is there.
         /// </summary>
-        /// <param name="subKey">Registry key to open</param>
+        /// <param name="root"></param>
+        /// <param name="subKeyName">Registry key to open</param>
         /// <param name="valueName">Value under that key to read</param>
-        /// <param name="messageToLogIfNotFound">Low-pri message to log if registry key isn't found</param>
         /// <param name="relativePathFromValueOnLayout">Relative path from the key value to vcbuild.exe for layout installs</param>
         /// <param name="relativePathFromValueOnBatch">Relative path from the key value to vcbuild.exe for batch installs</param>
         /// <returns>Path to vcbuild.exe, or null if it's not found</returns>

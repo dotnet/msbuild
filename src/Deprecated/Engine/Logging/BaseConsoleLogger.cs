@@ -501,7 +501,7 @@ namespace Microsoft.Build.BuildEngine
         /// items, using the cached reference to the list from the 
         /// appropriate ProjectStarted event.
         /// </summary>
-        /// <param name="items">List of items</param>
+        /// <param name="itemTypes">List of items</param>
         internal void WriteItems(SortedList itemTypes)
         {
             if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)

@@ -23,7 +23,7 @@ namespace Microsoft.Build.BuildEngine
         /// Public constructor
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="taskItems"></param>
+        /// <param name="buildItems"></param>
         /// <param name="buildResult"></param>
         internal BuildResultCacheEntry(string name, BuildItem[] buildItems, bool buildResult)
             : base(name, buildItems)

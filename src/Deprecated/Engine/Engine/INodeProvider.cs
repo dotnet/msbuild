@@ -64,7 +64,7 @@ namespace Microsoft.Build.BuildEngine
         /// node during intermediate evaluation
         /// </summary>
         /// <param name="nodeIndex"></param>
-        /// <param name="buildRequest"></param>
+        /// <param name="buildResult"></param>
         void PostBuildResultToNode(int nodeIndex, BuildResult buildResult);
 
         /// <summary>

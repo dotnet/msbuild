@@ -81,7 +81,7 @@ namespace Microsoft.Build.BuildEngine
         /// Determines whether the collection contains a Toolset with matching
         /// tools version.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="toolsVersion"></param>
         /// <returns></returns>
         public bool Contains(string toolsVersion)
         {

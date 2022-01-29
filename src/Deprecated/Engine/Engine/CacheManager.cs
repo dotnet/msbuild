@@ -129,6 +129,8 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="entries"></param>
         /// <param name="scopeName"></param>
         /// <param name="scopeProperties"></param>
+        /// <param name="scopeToolsVersion"></param>
+        /// <param name="cacheContentType"></param>
         internal void SetCacheEntries(CacheEntry[] entries, string scopeName, BuildPropertyGroup scopeProperties, string scopeToolsVersion, CacheContentType cacheContentType)
         {
             // If the list exists search for matching scope properties otherwise create the list
@@ -144,6 +146,8 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="names"></param>
         /// <param name="scopeName"></param>
         /// <param name="scopeProperties"></param>
+        /// <param name="scopeToolsVersion"></param>
+        /// <param name="cacheContentType"></param>
         /// <returns></returns>
         internal CacheEntry[] GetCacheEntries(string[] names, string scopeName, BuildPropertyGroup scopeProperties, string scopeToolsVersion, CacheContentType cacheContentType)
         {
@@ -192,6 +196,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="projectName"></param>
         /// <param name="buildPropertyGroup"></param>
         /// <param name="toolsVersion"></param>
+        /// <param name="cacheContentType"></param>
         internal void ClearCacheScope(string projectName, BuildPropertyGroup buildPropertyGroup, string toolsVersion, CacheContentType cacheContentType)
         {
             // Retrieve list of scopes by this name

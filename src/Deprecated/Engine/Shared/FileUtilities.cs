@@ -720,7 +720,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// for directories) was called - but with the advantage that a FileInfo object is returned
         /// that can be queried (e.g., for LastWriteTime) without hitting the disk again.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <returns>FileInfo around path if it is an existing /file/, else null</returns>
         internal static FileInfo GetFileInfoNoThrow(string filePath)
         {

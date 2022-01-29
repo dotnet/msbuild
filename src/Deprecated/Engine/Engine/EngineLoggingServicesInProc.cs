@@ -31,6 +31,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="eventSource"></param>
         /// <param name="onlyLogCriticalEvents"></param>
+        /// <param name="flushRequestEvent"></param>
         internal EngineLoggingServicesInProc(EventSource eventSource, bool onlyLogCriticalEvents, ManualResetEvent flushRequestEvent)
         {
             this.onlyLogCriticalEvents = onlyLogCriticalEvents;

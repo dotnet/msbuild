@@ -140,7 +140,6 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="parentNode"></param>
         /// <param name="parentProjectForChildren"></param>
         /// <param name="importedFromAnotherProject"></param>
-        /// <param name="options"></param>
         /// <param name="nestingDepth">Number of parent &lt;Choose&gt; elements this is nested inside</param>
         private void ProcessWhenChildren
             (

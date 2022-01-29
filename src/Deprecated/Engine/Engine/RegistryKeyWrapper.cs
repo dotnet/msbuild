@@ -30,6 +30,7 @@ namespace Microsoft.Build.BuildEngine
         /// Does not check for a null key.
         /// </summary>
         /// <param name="wrappedKey"></param>
+        /// <param name="registryHive"></param>
         protected RegistryKeyWrapper(RegistryKey wrappedKey, RegistryKey registryHive)
         {
             this.wrappedKey = wrappedKey;
@@ -41,7 +42,7 @@ namespace Microsoft.Build.BuildEngine
         /// and assumes the key is underneath HKLM
         /// Note that registryKeyPath should be relative to HKLM.
         /// </summary>
-        /// <param name="registryKey"></param>
+        /// <param name="registryKeyPath"></param>
         internal RegistryKeyWrapper(string registryKeyPath)
             : this(registryKeyPath, Registry.LocalMachine)
         {
@@ -50,7 +51,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Initializes this RegistryKeyWrapper to wrap the key at the specified path
         /// </summary>
-        /// <param name="registryKey"></param>
+        /// <param name="registryKeyPath"></param>
         /// <param name="registryHive"></param>
         internal RegistryKeyWrapper(string registryKeyPath, RegistryKey registryHive)
         {

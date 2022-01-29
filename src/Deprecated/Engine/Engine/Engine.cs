@@ -2719,7 +2719,10 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="existingProject"></param>
         /// <param name="projectFullPath"></param>
         /// <param name="globalPropertiesToUse"></param>
+        /// <param name="toolsVersion"></param>
+        /// <param name="targetNames"></param>
         /// <param name="buildEventContext"></param>
+        /// <param name="toolsVersionPeekedFromProjectFile"></param>
         internal Project GetMatchingProject
             (
             Project existingProject,
@@ -2858,16 +2861,17 @@ namespace Microsoft.Build.BuildEngine
         /// currently loaded in the IDE, and the IDE controls what Configuration/Platform each
         /// project should be built with, so we have to honor that too.  So, the order in which
         /// we look at global properties are:
-        ///
+        /// 
         ///     1.  Whatever global properties the parent project was building with.  (The parent
         ///         project is the one that called the &lt;MSBuild&lt; task.
         ///     2.  If the child project was already previously loaded by the host, whatever global
         ///         properties were sent into the child project by the host (via Project.GlobalProperties).
         ///     3.  Whatever properties were passed into the "Properties" parameter of the &lt;MSBuild&lt;
         ///         task.
-        ///
+        /// 
         /// </summary>
         /// <param name="parentProjectGlobalProperties"></param>
+        /// <param name="postMergeProperties"></param>
         /// <param name="childProjectFile"></param>
         /// <param name="globalPropertiesPassedIntoTask"></param>
         /// <owner>RGoel</owner>

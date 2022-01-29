@@ -904,6 +904,8 @@ namespace Microsoft.Build.BuildEngine
         /// NOTE: Internal for unit test purposes only.
         /// </remarks>
         /// <owner>danmose</owner>
+        /// <param name="dependencyAnalysisDetailEntry"></param>
+        /// <param name="projectDirectory"></param>
         /// <param name="inputs"></param>
         /// <param name="outputs"></param>
         /// <returns>true, if any "input" is newer than any "output", or if any input or output does not exist.</returns>

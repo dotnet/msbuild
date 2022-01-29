@@ -411,20 +411,21 @@ namespace Microsoft.Build.BuildEngine
         /// This method takes a string which may contain any number of
         /// "$(propertyname)" tags in it.  It replaces all those tags with
         /// the actual property values, and returns a new string.  For example,
-        ///
+        /// 
         ///     string processedString =
         ///         propertyBag.ExpandProperties("Value of NoLogo is $(NoLogo).");
-        ///
+        /// 
         /// This code might produce:
-        ///
+        /// 
         ///     processedString = "Value of NoLogo is true."
-        ///
+        /// 
         /// If the sourceString contains an embedded property which doesn't
         /// have a value, then we replace that tag with an empty string.
-        ///
+        /// 
         /// This method leaves the expression escaped.  Callers may need to unescape on their own as appropriate.
         /// </summary>
         /// <param name="expression"></param>
+        /// <param name="expressionNode"></param>
         /// <returns></returns>
         /// <owner>RGoel, JomoF</owner>
         private object ExpandPropertiesLeaveTypedAndEscaped
@@ -865,7 +866,7 @@ namespace Microsoft.Build.BuildEngine
         /// "TaskLocation" is the name of the value.  The name of the value and the preceding "@" may be omitted if
         /// the default value is desired.
         /// </summary>
-        /// <param name="registryLocation">Expression to expand, eg "Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation"</param>
+        /// <param name="registryExpression">Expression to expand, eg "Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation"</param>
         /// <param name="node">Location associated with the expression, for purposes of good error messages</param>
         /// <returns></returns>
         private string ExpandRegistryValue(string registryExpression, XmlNode node)

@@ -44,7 +44,7 @@ namespace Microsoft.Build.BuildEngine
         /// for a list of its node descriptions, and add these nodes to a master list of nodes which can be used
         /// by the scheduler. QUESTION: Do we allow duplicate Node Providers?
         /// </summary>
-        /// <param name="providerToRegister"></param>
+        /// <param name="nodeProviderToRegister"></param>
         /// <returns></returns>
         internal bool RegisterNodeProvider(INodeProvider nodeProviderToRegister)
         {

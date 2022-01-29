@@ -495,7 +495,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// A table indicating if a particular event type should be forwarded
         /// The value is type int rather than bool to avoid the problem of JITting generics.
-        /// Dictionary<string, int> is already compiled into mscorlib.
+        /// Dictionary{string, int} is already compiled into mscorlib.
         /// </summary>
         private Dictionary<string, int> forwardingTable;
 

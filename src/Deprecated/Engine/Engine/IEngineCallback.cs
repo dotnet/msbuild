@@ -37,6 +37,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="scopeName"></param>
         /// <param name="scopeProperties"></param>
         /// <param name="scopeToolsVersion"></param>
+        /// <param name="cacheContentType"></param>
         Exception PostCacheEntriesToHost(int nodeId, CacheEntry[] entries, string scopeName, BuildPropertyGroup scopeProperties, string scopeToolsVersion, CacheContentType cacheContentType);
 
         /// <summary>
@@ -47,6 +48,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="scopeName"></param>
         /// <param name="scopeProperties"></param>
         /// <param name="scopeToolsVersion"></param>
+        /// <param name="cacheContentType"></param>
         /// <returns></returns>
         CacheEntry[] GetCachedEntriesFromHost(int nodeId, string[] names, string scopeName, BuildPropertyGroup scopeProperties, string scopeToolsVersion, CacheContentType cacheContentType);
 

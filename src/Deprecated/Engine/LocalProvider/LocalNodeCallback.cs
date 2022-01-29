@@ -277,6 +277,8 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="names"></param>
         /// <param name="scopeName"></param>
         /// <param name="scopeProperties"></param>
+        /// <param name="scopeToolsVersion"></param>
+        /// <param name="cacheContentType"></param>
         /// <returns></returns>
         public CacheEntry[] GetCachedEntriesFromHost(int nodeId, string[] names, string scopeName, BuildPropertyGroup scopeProperties, string scopeToolsVersion, CacheContentType cacheContentType)
         {
@@ -293,6 +295,8 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="entries"></param>
         /// <param name="scopeName"></param>
         /// <param name="scopeProperties"></param>
+        /// <param name="scopeToolsVersion"></param>
+        /// <param name="cacheContentType"></param>
         public Exception PostCacheEntriesToHost(int nodeId, CacheEntry[] entries, string scopeName, BuildPropertyGroup scopeProperties, string scopeToolsVersion, CacheContentType cacheContentType)
         {
             LocalCallDescriptorForPostingCacheEntriesToHost callDescriptor =

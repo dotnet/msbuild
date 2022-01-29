@@ -459,6 +459,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="globalProperties"></param>
         /// <param name="targetOutputsPerProject"></param>
         /// <param name="toolsVersions">Tools Version to overrides per project. May contain null values</param>
+        /// <param name="useResultsCache"></param>
         /// <param name="unloadProjectsOnCompletion"></param>
         /// <returns>result of call to engine</returns>
         public bool BuildProjectFilesInParallel

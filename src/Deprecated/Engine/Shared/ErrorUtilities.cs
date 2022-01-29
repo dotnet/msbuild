@@ -369,7 +369,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// This method is thread-safe.
         /// </remarks>
         /// <owner>RGoel, SumedhK</owner>
-        /// <param name="innerException">Can be null.</param>
         /// <param name="resourceName"></param>
         /// <param name="args"></param>
         internal static void ThrowArgument
@@ -593,6 +592,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>SumedhK</owner>
         /// <param name="parameter"></param>
         /// <param name="parameterName"></param>
+        /// <param name="resourceName"></param>
         internal static void VerifyThrowArgumentNull(object parameter, string parameterName, string resourceName)
         {
             if (parameter == null)

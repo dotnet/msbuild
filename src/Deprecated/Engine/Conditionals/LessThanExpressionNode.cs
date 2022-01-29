@@ -4,7 +4,7 @@
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
-    /// Compares for left < right
+    /// Compares for left &lt; right
     /// </summary>
     internal sealed class LessThanExpressionNode : NumericComparisonExpressionNode
     {

@@ -384,6 +384,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="ownerDocument">can be null</param>
         /// <param name="name">can be null</param>
+        /// <param name="include"></param>
+        /// <param name="itemDefinitionLibrary"></param>
         internal BuildItem(XmlDocument ownerDocument, string name, string include, ItemDefinitionLibrary itemDefinitionLibrary)
             : this(ownerDocument, name, include, true /* create custom metadata cache */, itemDefinitionLibrary)
         {
@@ -399,7 +401,10 @@ namespace Microsoft.Build.BuildEngine
         /// when a build generates a large number of items.
         /// </remarks>
         /// <param name="ownerDocument">can be null</param>
-        /// <param name="name">can be null</param> 
+        /// <param name="name">can be null</param>
+        /// <param name="include"></param>
+        /// <param name="createCustomMetadataCache"></param>
+        /// <param name="itemDefinitionLibrary"></param> 
         private BuildItem(XmlDocument ownerDocument, string name, string include, bool createCustomMetadataCache, ItemDefinitionLibrary itemDefinitionLibrary)
         {
             BuildItemHelper(ownerDocument, name, include, createCustomMetadataCache, itemDefinitionLibrary);
@@ -408,8 +413,11 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Common code for constructors. If an ownerDocument is passed in, it's a persisted element.
         /// </summary>
+        /// <param name="ownerDocument"></param>
         /// <param name="itemName">can be null</param>
-        /// <param name="itemDefinitionLibrary">can only be null if ownerDocument is null</param>
+        /// <param name="itemInclude"></param>
+        /// <param name="createCustomMetadataCache"></param>
+        /// <param name="itemDefinitionLibraryToUse">can only be null if ownerDocument is null</param>
         private void BuildItemHelper(XmlDocument ownerDocument, string itemName, string itemInclude, bool createCustomMetadataCache, ItemDefinitionLibrary itemDefinitionLibraryToUse)
         {
             // Only check for null. It's legal to make BuildItems with empty
@@ -612,6 +620,7 @@ namespace Microsoft.Build.BuildEngine
             set { itemDefinitionLibrary = value; }
         }
 
+        /// <summary>
         /// Accessor for the item's "include" string.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -965,7 +974,7 @@ namespace Microsoft.Build.BuildEngine
         /// Initializes a persisted item from an existing item element which exists either in the main project file or in one of
         /// the imported files.
         /// </summary>
-        /// <param name="itemElementToParse"></param>
+        /// <param name="element"></param>
         private void InitializeFromItemElement(XmlElement element)
         {
             this.xml = new BuildItemGroupChildXml(element, ChildType.BuildItemAdd);

@@ -136,11 +136,11 @@ namespace Microsoft.Build.BuildEngine
                 yield return new PropertyDefinition(propertyName, propertyValue, toolsVersionWrapper.Name + "@" + propertyName);
             }
         }
-        
+
         /// <summary>
         /// Reads a string value from the specified registry key
         /// </summary>
-        /// <param name="baseKeyWrapper">wrapper around key</param>
+        /// <param name="wrapper">wrapper around key</param>
         /// <param name="valueName">name of the value</param>
         /// <returns>string data in the value</returns>
         private static string GetValue(RegistryKeyWrapper wrapper, string valueName)

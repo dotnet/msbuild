@@ -872,6 +872,7 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>
         /// This method is "internal" for unit-testing purposes only.
         /// </remarks>
+        /// <param name="lookup"></param>
         /// <param name="taskOutputSpecification"></param>
         /// <param name="taskParameterName"></param>
         /// <param name="itemName">can be null</param>
@@ -1081,6 +1082,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Uses the given task output specification to (statically) infer the task's outputs.
         /// </summary>
+        /// <param name="lookup"></param>
         /// <param name="taskOutputSpecification"></param>
         /// <param name="taskParameterName"></param>
         /// <param name="itemName">can be null</param>

@@ -50,8 +50,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Basic constructor.
         /// </summary>
-        /// <param name="serializationInfo"></param>
-        /// <param name="streamingContext"></param>
+        /// <param name="info"></param>
+        /// <param name="context"></param>
         protected InvalidToolsetDefinitionException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -139,6 +139,7 @@ namespace Microsoft.Build.BuildEngine
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
         /// </summary>
+        /// <param name="innerException"></param>
         /// <param name="resourceName"></param>
         /// <param name="args"></param>
         internal static void Throw

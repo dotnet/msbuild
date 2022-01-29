@@ -109,6 +109,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Array of build requests that must complete before the current 
         /// target can make forward process
+        /// </summary>
         internal BuildRequest[] OutstandingBuildRequests
         {
             get

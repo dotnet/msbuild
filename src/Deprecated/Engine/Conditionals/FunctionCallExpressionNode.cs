@@ -103,6 +103,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="function">Function name for errors</param>
         /// <param name="argumentNode">Argument to be expanded</param>
+        /// <param name="state"></param>
         /// <returns>Scalar result</returns>
         /// <owner>danmose</owner>
         private string ExpandArgumentForScalarParameter(string function, GenericExpressionNode argumentNode, ConditionEvaluationState state)
@@ -137,6 +138,7 @@ namespace Microsoft.Build.BuildEngine
         /// Check that the number of function arguments is correct.
         /// </summary>
         /// <param name="expected"></param>
+        /// <param name="state"></param>
         private void VerifyArgumentCount(int expected, ConditionEvaluationState state)
         {
             ProjectErrorUtilities.VerifyThrowInvalidProject

@@ -373,7 +373,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Called by the engine to indicate that a node has run out of work
         /// </summary>
-        /// <param name="nodeIndex"></param>
+        /// <param name="nodeId"></param>
         internal void NotifyOfBlockedNode(int nodeId)
         {
             if (Engine.debugMode)
