@@ -83,6 +83,8 @@ namespace Dotnet_new3.IntegrationTests
             {
                 //remove versions
                 var finalOutput = Regex.Replace(output, "Version=[A-Za-z0-9\\.]+", "Version=<version>");
+                //removes the delimiter line as we don't know the length of last columns containing paths above
+                finalOutput = Regex.Replace(finalOutput, "---[ -]*", "%delimiter%");
                 //remove tokens
                 finalOutput = Regex.Replace(finalOutput, "PublicKeyToken=[A-Za-z0-9]+", "PublicKeyToken=<token>");
                 return finalOutput;
