@@ -22,7 +22,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var razorSourceGeneratorOptionsWithDiagnostics = context.AnalyzerConfigOptionsProvider
                 .Combine(context.ParseOptionsProvider)
                 .Select(ComputeRazorSourceGeneratorOptions);
-            var razorSourceGeneratorOptions = razorSourceGeneratorOptionsWithDiagnostics.ReportDiagnostics(context);
+
+            var razorSourceGeneratorOptions = razorSourceGeneratorOptionsWithDiagnostics
+                .ReportDiagnostics(context);
 
             var sourceItemsWithDiagnostics = context.AdditionalTextsProvider
                 .Where(static (file) => file.Path.EndsWith(".razor", StringComparison.OrdinalIgnoreCase) || file.Path.EndsWith(".cshtml", StringComparison.OrdinalIgnoreCase))
@@ -52,22 +54,17 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 return false;
             });
 
-            var componentFiles = sourceItems.Where(static file => file.FilePath.EndsWith(".razor", StringComparison.OrdinalIgnoreCase));
+            var componentFiles = sourceItems.Where(
+                static file => file.FilePath.EndsWith(".razor", StringComparison.OrdinalIgnoreCase) && !file.FilePath.EndsWith("_Imports.razor", StringComparison.OrdinalIgnoreCase));
 
             var generatedDeclarationCode = componentFiles
                 .Combine(importFiles.Collect())
                 .Combine(razorSourceGeneratorOptions)
+                .WithRazorSourceGeneratorComparer()
                 .Select(static (pair, _) =>
                 {
-
                     var ((sourceItem, importFiles), razorSourceGeneratorOptions) = pair;
                     RazorSourceGeneratorEventSource.Log.GenerateDeclarationCodeStart(sourceItem.FilePath);
-
-                    if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
-                    {
-                        RazorSourceGeneratorEventSource.Log.GenerateDeclarationCodeStop(sourceItem.FilePath);
-                        return null;
-                    }
 
                     var projectEngine = GetDeclarationProjectEngine(sourceItem, importFiles, razorSourceGeneratorOptions);
 
@@ -96,17 +93,12 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var tagHelpersFromCompilation = context.CompilationProvider
                 .Combine(generatedDeclarationSyntaxTrees.Collect())
                 .Combine(razorSourceGeneratorOptions)
+                .WithRazorSourceGeneratorComparer()
                 .Select(static (pair, _) =>
                 {
                     RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromCompilationStart();
 
-                    var ((compilation, generatedDeclarationSyntaxTrees), razorSourceGeneratorOptions) = pair;
-
-                    if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
-                    {
-                        RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromCompilationStop();
-                        return ImmutableArray<TagHelperDescriptor>.Empty;
-                    }
+                    var ((compilation, generatedDeclarationSyntaxTrees), _) = pair;
 
                     var tagHelperFeature = new StaticCompilationTagHelperFeature();
                     var discoveryProjectEngine = GetDiscoveryProjectEngine(compilation.References.ToImmutableArray(), tagHelperFeature);
@@ -116,65 +108,33 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     tagHelperFeature.Compilation = compilationWithDeclarations;
                     tagHelperFeature.TargetAssembly = compilationWithDeclarations.Assembly;
 
-                    var result = (IList<TagHelperDescriptor>)tagHelperFeature.GetDescriptors();
+                    var result = tagHelperFeature.GetDescriptors().ToImmutableHashSet();
                     RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromCompilationStop();
                     return result;
                 })
-                .WithLambdaComparer(static (a, b) =>
-                {
-                    if (a.Count != b.Count)
-                    {
-                        return false;
-                    }
-
-                    for (var i = 0; i < a.Count; i++)
-                    {
-                        if (!a[i].Equals(b[i]))
-                        {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }, getHashCode: static a => a.Count);
+                .WithLambdaComparer(static (a, b) => a.SetEquals(b), static item => item.Count.GetHashCode());
 
             var tagHelpersFromReferences = context.CompilationProvider
-                .Combine(razorSourceGeneratorOptions)
                 .Combine(hasRazorFiles)
-                .WithLambdaComparer(static (a, b) =>
+                .Combine(razorSourceGeneratorOptions)
+                .WithRazorSourceGeneratorComparer(static (a, b) =>
                 {
-                    var ((compilationA, razorSourceGeneratorOptionsA), hasRazorFilesA) = a;
-                    var ((compilationB, razorSourceGeneratorOptionsB), hasRazorFilesB) = b;
+                    var (compilationA, _) = a;
+                    var (compilationB, hasRazorFilesB) = b;
 
-                    if (!compilationA.References.SequenceEqual(compilationB.References))
+                    if (!hasRazorFilesB)
                     {
-                        return false;
+                        // If there aren't any razor files, we can use previously cached results
+                        return true;
                     }
 
-                    if (razorSourceGeneratorOptionsA != razorSourceGeneratorOptionsB)
-                    {
-                        return false;
-                    }
-
-                    return hasRazorFilesA == hasRazorFilesB;
-                },
-                static item =>
-                {
-                    // we'll use the number of references as a hashcode.
-                    var ((compilationA, razorSourceGeneratorOptionsA), hasRazorFilesA) = item;
-                    return compilationA.References.GetHashCode();
+                    return compilationA.References.SequenceEqual(compilationB.References);
                 })
                 .Select(static (pair, _) =>
                 {
                     RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromReferencesStart();
 
-                    var ((compilation, razorSourceGeneratorOptions), hasRazorFiles) = pair;
-
-                    if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
-                    {
-                        RazorSourceGeneratorEventSource.Log.DiscoverTagHelpersFromReferencesStop();
-                        return ImmutableArray<TagHelperDescriptor>.Empty;
-                    }
+                    var ((compilation, hasRazorFiles), _) = pair;
 
                     if (!hasRazorFiles)
                     {
@@ -213,7 +173,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     }
 
                     var allTagHelpers = new TagHelperDescriptor[count];
-                    tagHelpersFromCompilation.CopyTo(allTagHelpers, 0);
+                    var i = 0;
+                    foreach (var item in tagHelpersFromCompilation)
+                    {
+                        allTagHelpers[i++] = item;
+                    }
                     tagHelpersFromReferences.CopyTo(allTagHelpers, tagHelpersFromCompilation.Count);
 
                     return allTagHelpers;
@@ -222,19 +186,14 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var generatedOutput = sourceItems
                 .Combine(importFiles.Collect())
                 .Combine(allTagHelpers)
-                .Combine(razorSourceGeneratorOptions)
                 .Combine(context.ParseOptionsProvider)
+                .Combine(razorSourceGeneratorOptions)
+                .WithRazorSourceGeneratorComparer()
                 .Select(static (pair, _) =>
                 {
-                    var ((((sourceItem, imports), allTagHelpers), razorSourceGeneratorOptions), parserOptions) = pair;
+                    var ((((sourceItem, imports), allTagHelpers), parserOptions), razorSourceGeneratorOptions) = pair;
 
                     RazorSourceGeneratorEventSource.Log.RazorCodeGenerateStart(sourceItem.FilePath);
-
-                    if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
-                    {
-                        RazorSourceGeneratorEventSource.Log.RazorCodeGenerateStop(sourceItem.FilePath);
-                        return default;
-                    }
 
                     // Add a generated suffix so tools, such as coverlet, consider the file to be generated
                     var hintName = GetIdentifierFromPath(sourceItem.RelativePhysicalPath) + ".g.cs";
@@ -249,12 +208,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 })
                 .WithLambdaComparer(static (a, b) =>
                 {
-                    if (a.hintName is null)
-                    {
-                        // Source generator is suppressed.
-                        return false;
-                    }
-
                     if (a.csharpDocument.Diagnostics.Count > 0 || b.csharpDocument.Diagnostics.Count > 0)
                     {
                         // if there are any diagnostics, treat the documents as unequal and force RegisterSourceOutput to be called uncached.
@@ -264,16 +217,17 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     return string.Equals(a.csharpDocument.GeneratedCode, b.csharpDocument.GeneratedCode, StringComparison.Ordinal);
                 }, static a => StringComparer.Ordinal.GetHashCode(a.csharpDocument));
 
-            context.RegisterSourceOutput(generatedOutput, static (context, pair) =>
+            context.RegisterSourceOutput(generatedOutput.Combine(razorSourceGeneratorOptions), static (context, pair) =>
             {
-                var (hintName, csharpDocument) = pair;
-                RazorSourceGeneratorEventSource.Log.AddSyntaxTrees(hintName);
-                if (hintName is null)
+                var ((hintName, csharpDocument), razorSourceGeneratorOptions) = pair;
+
+                if (razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
                 {
                     // Source generator is suppressed.
                     return;
                 }
 
+                RazorSourceGeneratorEventSource.Log.AddSyntaxTrees(hintName);
                 for (var i = 0; i < csharpDocument.Diagnostics.Count; i++)
                 {
                     var razorDiagnostic = csharpDocument.Diagnostics[i];

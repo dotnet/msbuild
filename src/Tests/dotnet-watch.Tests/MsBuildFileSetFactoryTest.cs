@@ -367,7 +367,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         }
 
         private static DotNetWatchOptions GetWatchOptions() => 
-            new DotNetWatchOptions(false, false, false, false, false);
+            new DotNetWatchOptions(false, false, false, false, false, false);
 
         private static string GetTestProjectPath(TestAsset target) => Path.Combine(GetTestProjectDirectory(target), target.TestProject.Name + ".csproj");
 

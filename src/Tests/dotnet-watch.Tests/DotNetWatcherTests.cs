@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync(arguments: new[] { "wait" });
             var source = Path.Combine(app.SourceDirectory, "Program.cs");
-            const string messagePrefix = "watch : Running dotnet with the following arguments: run";
+            const string messagePrefix = "dotnet watch ⌚ Running dotnet with the following arguments: run";
 
             // Verify that the first run does not use --no-restore
             Assert.Contains(app.Process.Output, p => string.Equals(messagePrefix + " -- wait", p.Trim()));
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync(arguments: new[] { "wait" });
             var source = Path.Combine(app.SourceDirectory, "KitchenSink.csproj");
-            const string messagePrefix = "watch : Running dotnet with the following arguments: run";
+            const string messagePrefix = "dotnet watch ⌚ Running dotnet with the following arguments: run";
 
             // Verify that the first run does not use --no-restore
             Assert.Contains(app.Process.Output, p => string.Equals(messagePrefix + " -- wait", p.Trim()));
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            await app.Process.GetOutputLineAsync("Environment: Development", TimeSpan.FromSeconds(10));
+            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development", TimeSpan.FromSeconds(10));
         }
 
         [CoreMSBuildOnlyFact]
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            await app.Process.GetOutputLineAsync("Environment: Development", TimeSpan.FromSeconds(10));
+            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development", TimeSpan.FromSeconds(10));
         }
     }
 }
