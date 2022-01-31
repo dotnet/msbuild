@@ -286,7 +286,7 @@ namespace Microsoft.Build.Shared
                     path = $"{targetQuote}{path.Substring(1, path.Length - 2)}{targetQuote}";
                 }
                 // Enclose the path in a set of the 'target' quote unless the string is already quoted with the 'target' quotes.
-                else if (path.Length == 1 || (path[0] != targetQuote || path[path.Length - 1] != targetQuote))
+                else if (path.Length == 1 || path[0] != targetQuote || path[path.Length - 1] != targetQuote)
                 {
                     path = $"{targetQuote}{path}{targetQuote}";
                 }
