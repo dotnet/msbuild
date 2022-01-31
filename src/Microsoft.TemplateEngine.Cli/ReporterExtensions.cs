@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -31,8 +29,14 @@ namespace Microsoft.TemplateEngine.Cli
         internal static void WriteCommandOutput(this Reporter reporter, Dotnet.Result process)
         {
             reporter.WriteLine(LocalizableStrings.CommandOutput);
-            reporter.WriteStdOut(process.StdOut);
-            reporter.WriteStdErr(process.StdErr);
+            if (!string.IsNullOrWhiteSpace(process.StdOut))
+            {
+                reporter.WriteStdOut(process.StdOut);
+            }
+            if (!string.IsNullOrWhiteSpace(process.StdErr))
+            {
+                reporter.WriteStdErr(process.StdErr);
+            }
         }
 
         /// <summary>

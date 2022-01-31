@@ -15,11 +15,11 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Callback to be executed on first run of the template engine.
         /// </summary>
-        public Action<IEngineEnvironmentSettings> OnFirstRun { get; set; }
+        public Action<IEngineEnvironmentSettings>? OnFirstRun { get; set; }
 
         /// <summary>
         /// Callback to be executed to restore a project.
         /// </summary>
-        public Func<string, bool> RestoreProject { get; set; }
+        public Func<string, bool>? RestoreProject { get; set; }
     }
 }

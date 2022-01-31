@@ -5,16 +5,16 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public class TelemetryLogger : ITelemetryLogger
     {
-        private readonly Action<string, IDictionary<string, string>, IDictionary<string, double>> _trackEvent;
+        private readonly Action<string, IDictionary<string, string?>?, IDictionary<string, double>?>? _trackEvent;
         private readonly bool _writeToConsole;
 
-        public TelemetryLogger(Action<string, IDictionary<string, string>, IDictionary<string, double>> trackEvent, bool writeToConsole = false)
+        public TelemetryLogger(Action<string, IDictionary<string, string?>?, IDictionary<string, double>?>? trackEvent, bool writeToConsole = false)
         {
             _trackEvent = trackEvent;
             _writeToConsole = writeToConsole;
         }
 
-        public void TrackEvent(string eventName, IDictionary<string, string> properties = null, IDictionary<string, double> measurements = null)
+        public void TrackEvent(string eventName, IDictionary<string, string?>? properties = null, IDictionary<string, double>? measurements = null)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli
                     if (properties != null)
                     {
                         Console.WriteLine("Properties:");
-                        foreach (KeyValuePair<string, string> property in properties)
+                        foreach (KeyValuePair<string, string?> property in properties)
                         {
                             Console.WriteLine($"\t{property.Key} = {property.Value}");
                         }

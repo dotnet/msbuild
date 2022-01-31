@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using System.CommandLine;
 using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
@@ -134,7 +132,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     Reporter.Error.WriteLine(ex.Message.Bold().Red());
                 }
 
-                Reporter.Error.WriteLine(ex.StackTrace.Bold().Red());
+                if (!string.IsNullOrWhiteSpace(ex.StackTrace))
+                {
+                    Reporter.Error.WriteLine(ex.StackTrace.Bold().Red());
+                }
                 return 1;
             }
         }

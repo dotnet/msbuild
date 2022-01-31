@@ -27,12 +27,12 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             _settings = settings;
         }
 
-        internal TabularOutput<T> DefineColumn(Func<T, string> binder, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
+        internal TabularOutput<T> DefineColumn(Func<T, string> binder, string? header = null, string? columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
         {
-            return DefineColumn(binder, out object c, header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn, rightAlign);
+            return DefineColumn(binder, out object? c, header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn, rightAlign);
         }
 
-        internal TabularOutput<T> DefineColumn(Func<T, string> binder, out object column, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
+        internal TabularOutput<T> DefineColumn(Func<T, string> binder, out object? column, string? header = null, string? columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
         {
             column = null;
             if ((_settings.ColumnsToDisplay.Count == 0 && defaultColumn) || showAlways || (!string.IsNullOrWhiteSpace(columnName) && _settings.ColumnsToDisplay.Contains(columnName)) || _settings.DisplayAllColumns)
@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             int headerLines = 0;
             for (int i = 0; i < _columns.Count; ++i)
             {
-                header[i] = new TextWrapper(_columns[i].Header, _columns[i].MaxWidth, _settings.NewLine, _settings.ShrinkReplacement);
+                header[i] = new TextWrapper(_columns[i].Header ?? string.Empty, _columns[i].MaxWidth, _settings.NewLine, _settings.ShrinkReplacement);
                 headerLines = Math.Max(headerLines, header[i].LineCount);
                 columnWidthLookup[i] = header[i].MaxWidth;
             }
@@ -170,10 +170,14 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             return b.ToString();
         }
 
-        internal TabularOutput<T> OrderBy(object columnToken, IComparer<string> comparer = null)
+        internal TabularOutput<T> OrderBy(object? columnToken, IComparer<string>? comparer = null)
         {
+            if (columnToken is not ColumnDefinition columnDefinition)
+            {
+                throw new ArgumentException($"{nameof(columnToken)} is not of type {nameof(ColumnDefinition)}", nameof(columnToken));
+            }
             comparer = comparer ?? StringComparer.Ordinal;
-            int index = _columns.IndexOf(columnToken as ColumnDefinition);
+            int index = _columns.IndexOf(columnDefinition);
 
             if (index < 0)
             {
@@ -184,10 +188,14 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             return this;
         }
 
-        internal TabularOutput<T> OrderByDescending(object columnToken, IComparer<string> comparer = null)
+        internal TabularOutput<T> OrderByDescending(object? columnToken, IComparer<string>? comparer = null)
         {
+            if (columnToken is not ColumnDefinition columnDefinition)
+            {
+                throw new ArgumentException($"{nameof(columnToken)} is not of type {nameof(ColumnDefinition)}", nameof(columnToken));
+            }
             comparer = comparer ?? StringComparer.Ordinal;
-            int index = _columns.IndexOf(columnToken as ColumnDefinition);
+            int index = _columns.IndexOf(columnDefinition);
 
             if (index < 0)
             {
@@ -251,7 +259,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             while (amountForShrinkableColumnToGiveUp > 0)
             {
                 //picks up the widest column to shrink first
-                ColumnDefinition columnToShrink = _columns.Aggregate<ColumnDefinition, ColumnDefinition>(null, (selectedColumn, currentColumn) =>
+                ColumnDefinition? columnToShrink = _columns.Aggregate<ColumnDefinition, ColumnDefinition?>(null, (selectedColumn, currentColumn) =>
                 {
                     if (currentColumn.ShrinkIfNeeded && currentColumn.CalculatedWidth > currentColumn.MinWidth)
                     {
@@ -281,7 +289,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             private readonly Func<T, string> _binder;
             private readonly TabularOutputSettings _settings;
 
-            internal ColumnDefinition(TabularOutputSettings settings, string header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
+            internal ColumnDefinition(TabularOutputSettings settings, string? header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
             {
                 Header = header;
                 MaxWidth = maxWidth > 0 ? maxWidth : int.MaxValue;
@@ -292,7 +300,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                 RightAlign = rightAlign;
             }
 
-            internal string Header { get; }
+            internal string? Header { get; }
 
             internal int CalculatedWidth { get; set; }
 

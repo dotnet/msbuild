@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
@@ -105,7 +103,7 @@ namespace Microsoft.TemplateEngine.Cli
             InitializeNuGetCredentialService(args.Interactive);
 
             NewCommandStatus resultStatus = NewCommandStatus.Success;
-            _telemetryLogger.TrackEvent(args.RootCommand.Name + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, args.TemplatePackages.Count.ToString() } });
+            _telemetryLogger.TrackEvent(args.RootCommand.Name + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string?> { { TelemetryConstants.ToInstallCount, args.TemplatePackages.Count.ToString() } });
 
             var details = new Dictionary<string, string>();
             if (args.AdditionalSources?.Count > 0)
@@ -454,7 +452,7 @@ namespace Microsoft.TemplateEngine.Cli
                        .For(
                            new TabularOutputSettings(_engineEnvironmentSettings.Environment),
                            displayableResults)
-                       .DefineColumn(r => r.Identifier, out object packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
+                       .DefineColumn(r => r.Identifier, out object? packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
                        .DefineColumn(r => r.CurrentVersion, LocalizableStrings.ColumnNameCurrentVersion, showAlways: true)
                        .DefineColumn(r => r.LatestVersion, LocalizableStrings.ColumnNameLatestVersion, showAlways: true)
                        .OrderBy(packageColumn, StringComparer.CurrentCultureIgnoreCase);

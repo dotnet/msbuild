@@ -1,4 +1,5 @@
 ﻿#nullable enable
+
 Microsoft.TemplateEngine.Cli.Components
 Microsoft.TemplateEngine.Cli.HostSpecificDataLoader
 Microsoft.TemplateEngine.Cli.HostSpecificDataLoader.HostSpecificDataLoader(Microsoft.TemplateEngine.Abstractions.IEngineEnvironmentSettings! engineEnvironment) -> void
@@ -15,7 +16,4 @@ Microsoft.TemplateEngine.Cli.IHostSpecificDataLoader.ReadHostSpecificTemplateDat
 Microsoft.TemplateEngine.Cli.ITelemetryLogger
 Microsoft.TemplateEngine.Cli.TelemetryLogger
 static Microsoft.TemplateEngine.Cli.Components.AllComponents.get -> System.Collections.Generic.IReadOnlyList<(System.Type! Type, Microsoft.TemplateEngine.Abstractions.IIdentifiedComponent! Instance)>!
-~Microsoft.TemplateEngine.Cli.ITelemetryLogger.TrackEvent(string eventName, System.Collections.Generic.IDictionary<string, string> properties = null, System.Collections.Generic.IDictionary<string, double> measurements = null) -> void
-~Microsoft.TemplateEngine.Cli.TelemetryLogger.TelemetryLogger(System.Action<string, System.Collections.Generic.IDictionary<string, string>, System.Collections.Generic.IDictionary<string, double>> trackEvent, bool writeToConsole = false) -> void
-~Microsoft.TemplateEngine.Cli.TelemetryLogger.TrackEvent(string eventName, System.Collections.Generic.IDictionary<string, string> properties = null, System.Collections.Generic.IDictionary<string, double> measurements = null) -> void
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.UsageExamples.get -> System.Collections.Generic.IReadOnlyList<string!>!

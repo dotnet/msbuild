@@ -10,8 +10,6 @@ using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-#nullable enable
-
 namespace Microsoft.TemplateEngine.Cli
 {
     public class HostSpecificDataLoader : IHostSpecificDataLoader

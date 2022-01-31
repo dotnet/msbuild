@@ -7,6 +7,7 @@
     <EnablePublicApiAnalyzer>true</EnablePublicApiAnalyzer>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <DefineConstants>$(DefineConstants);WCWIDTH_VISIBILITY_INTERNAL</DefineConstants>
   </PropertyGroup>
   <ItemGroup>

@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using System.CommandLine;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
@@ -143,7 +141,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     .For(
                         new TabularOutputSettings(environment),
                         templateGroups)
-                    .DefineColumn(t => t.GroupIdentity ?? t.Templates[0].Identity, out object identityColumn, LocalizableStrings.ColumnNameIdentity, showAlways: true)
+                    .DefineColumn(t => t.GroupIdentity ?? t.Templates[0].Identity, out object? identityColumn, LocalizableStrings.ColumnNameIdentity, showAlways: true)
                     .DefineColumn(t => t.Name, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
                     .DefineColumn(t => string.Join(",", t.ShortNames), LocalizableStrings.ColumnNameShortName, showAlways: true)
                     .DefineColumn(t => string.Join(",", t.Languages), LocalizableStrings.ColumnNameLanguage, showAlways: true)
@@ -321,12 +319,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         .For(
                             new TabularOutputSettings(environment),
                             templates)
-                        .DefineColumn(t => t.Identity, out object identityColumn, LocalizableStrings.ColumnNameIdentity, showAlways: true)
+                        .DefineColumn(t => t.Identity, out object? identityColumn, LocalizableStrings.ColumnNameIdentity, showAlways: true)
                         .DefineColumn(t => t.Name, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
                         .DefineColumn(t => string.Join(",", t.ShortNameList), LocalizableStrings.ColumnNameShortName, showAlways: true)
-                        .DefineColumn(t => t.GetLanguage(), LocalizableStrings.ColumnNameLanguage, showAlways: true)
-                        .DefineColumn(t => t.Precedence.ToString(), out object prcedenceColumn, LocalizableStrings.ColumnNamePrecedence, showAlways: true)
-                        .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, showAlways: true, shrinkIfNeeded: true, minWidth: 10)
+                        .DefineColumn(t => t.GetLanguage() ?? string.Empty, LocalizableStrings.ColumnNameLanguage, showAlways: true)
+                        .DefineColumn(t => t.Precedence.ToString(), out object? prcedenceColumn, LocalizableStrings.ColumnNamePrecedence, showAlways: true)
+                        .DefineColumn(t => t.Author ?? string.Empty, LocalizableStrings.ColumnNameAuthor, showAlways: true, shrinkIfNeeded: true, minWidth: 10)
                         .DefineColumn(t => Task.Run(() => GetTemplatePackage(t)).GetAwaiter().GetResult(), LocalizableStrings.ColumnNamePackage, showAlways: true)
                         .OrderBy(identityColumn, StringComparer.CurrentCultureIgnoreCase)
                         .OrderByDescending(prcedenceColumn, new NullOrEmptyIsLastStringComparer());

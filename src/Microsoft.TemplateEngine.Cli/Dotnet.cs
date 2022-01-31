@@ -8,14 +8,14 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal class Dotnet
     {
-        private ProcessStartInfo _info;
-        private DataReceivedEventHandler _errorDataReceived;
-        private StringBuilder _stderr;
-        private StringBuilder _stdout;
-        private DataReceivedEventHandler _outputDataReceived;
+        private ProcessStartInfo? _info;
+        private DataReceivedEventHandler? _errorDataReceived;
+        private StringBuilder? _stderr;
+        private StringBuilder? _stdout;
+        private DataReceivedEventHandler? _outputDataReceived;
         private bool _anyNonEmptyStderrWritten;
 
-        internal string Command => string.Concat(_info.FileName, " ", _info.Arguments);
+        internal string Command => string.Concat(_info?.FileName, " ", _info?.Arguments);
 
         internal static Dotnet Restore(params string[] args)
         {
@@ -45,7 +45,7 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        internal static Dotnet AddPackageReference(string projectFile, string packageName, string version = null)
+        internal static Dotnet AddPackageReference(string projectFile, string packageName, string? version = null)
         {
             string argString;
             if (version == null)
@@ -141,7 +141,18 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal Result Execute()
         {
-            Process p = Process.Start(_info);
+            if (_info == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            Process? p = Process.Start(_info);
+
+            if (p == null)
+            {
+                return new Result(_stdout?.ToString(), "Failed to start the process", 1);
+            }
+
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
             p.ErrorDataReceived += OnErrorDataReceived;
@@ -173,12 +184,12 @@ namespace Microsoft.TemplateEngine.Cli
 
         private void CaptureStreamStdOut(object sender, DataReceivedEventArgs e)
         {
-            _stdout.AppendLine(e.Data);
+            _stdout?.AppendLine(e.Data);
         }
 
         private void CaptureStreamStdErr(object sender, DataReceivedEventArgs e)
         {
-            _stderr.AppendLine(e.Data);
+            _stderr?.AppendLine(e.Data);
         }
 
         private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -193,16 +204,16 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal class Result
         {
-            internal Result(string stdout, string stderr, int exitCode)
+            internal Result(string? stdout, string? stderr, int exitCode)
             {
                 StdErr = stderr;
                 StdOut = stdout;
                 ExitCode = exitCode;
             }
 
-            internal string StdErr { get; }
+            internal string? StdErr { get; }
 
-            internal string StdOut { get; }
+            internal string? StdOut { get; }
 
             internal int ExitCode { get; }
         }

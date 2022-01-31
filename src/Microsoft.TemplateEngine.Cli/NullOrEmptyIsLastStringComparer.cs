@@ -5,7 +5,7 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal class NullOrEmptyIsLastStringComparer : IComparer<string>
     {
-        public int Compare(string x, string y)
+        public int Compare(string? x, string? y)
         {
             if (string.Equals(x, y, StringComparison.OrdinalIgnoreCase))
             {
