@@ -599,7 +599,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Returns a collection of warnings to be demoted to messatges for the specified build context.
+        /// Returns a collection of warnings to be demoted to messages for the specified build context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as messages.</param>
         /// <returns>
@@ -609,6 +609,16 @@ namespace Microsoft.Build.BackEnd.Logging
             return GetWarningsForProject(context, _warningsAsMessagesByProject, WarningsAsMessages);
         }
 
+        /// <summary>
+        /// Helper method that unifies the logic for GetWarningsAsErrors, GetWarningsNotAsErrors, and GetWarningsAsMessages.
+        /// Specifically, this method returns a collection of codes that, within the context of a particular project, should
+        /// be treated specially. These tend to come from setting the associated properties in the project file. These are
+        /// added to previously known codes as necessary.
+        /// </summary>
+        /// <param name="context">The specific context in which to consider special treatment for warnings.</param>
+        /// <param name="warningsByProject">A dictionary of all warnings to be treated special by for which projects.</param>
+        /// <param name="warnings">Warning codes we already know should be promoted, demoted, or not promoted as relevant.</param>
+        /// <returns></returns>
         private ICollection<string> GetWarningsForProject(BuildEventContext context, IDictionary<int, ISet<string>> warningsByProject, ISet<string> warnings)
         {
             int key = GetWarningsAsErrorOrMessageKey(context);
@@ -628,21 +638,42 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
+        /// <summary>
+        /// Adds warning codes that should be treated as errors to the known set.
+        /// </summary>
+        /// <param name="buildEventContext">The context in which to consider possible warnings to be promoted.</param>
+        /// <param name="codes">Codes to promote</param>
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
         {
             AddWarningsAsMessagesOrErrors(ref _warningsAsErrorsByProject, buildEventContext, codes);
         }
 
+        /// <summary>
+        /// Adds warning codes that should not be treated as errors even if WarnAsError is empty (specifying that all warnings should be promoted).
+        /// </summary>
+        /// <param name="buildEventContext">The context in which to consider warnings not to be promoted.</param>
+        /// <param name="codes">Codes not to promote</param>
         public void AddWarningsNotAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
         {
             AddWarningsAsMessagesOrErrors(ref _warningsNotAsErrorsByProject, buildEventContext, codes);
         }
 
+        /// <summary>
+        /// Adds warning codes that should be treated as messages.
+        /// </summary>
+        /// <param name="buildEventContext">The context in which to consider warnings to be demoted.</param>
+        /// <param name="codes">Codes to demote</param>
         public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
         {
             AddWarningsAsMessagesOrErrors(ref _warningsAsMessagesByProject, buildEventContext, codes);
         }
 
+        /// <summary>
+        /// Adds warning codes to be treated or not treated as warnings or errors to the set of project-specific codes.
+        /// </summary>
+        /// <param name="warningsByProject">Dictionary with what warnings are currently known (by project) that we will add to.</param>
+        /// <param name="buildEventContext">Context for the project to be added</param>
+        /// <param name="codes">Codes to add</param>
         private void AddWarningsAsMessagesOrErrors(ref IDictionary<int, ISet<string>> warningsByProject, BuildEventContext buildEventContext, ISet<string> codes)
         {
             lock (_lockObject)
