@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installer.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].Item1);
             installer.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].Item3);
-            installer.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.100"));
+            installer.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand(sdkVersion));
             installer.InstalledManifests[0].offlineCache.Should().Be(null);
         }
 
@@ -196,7 +196,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installer.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].Item1);
             installer.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].Item3);
-            installer.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.100"));
+            installer.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand(sdkVersion));
             installer.InstalledManifests[0].offlineCache.Should().Be(new DirectoryPath(cachePath));
         }
 
