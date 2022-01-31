@@ -10,25 +10,35 @@ namespace Dotnet_new3.IntegrationTests
 {
     internal static class Helpers
     {
-        internal static void InstallNuGetTemplate(string packageName, ITestOutputHelper log, string workingDirectory, string homeDirectory)
+        internal static void InstallNuGetTemplate(string packageName, ITestOutputHelper log, string homeDirectory, string? workingDirectory = null)
         {
-            new DotnetNewCommand(log, "-i", packageName)
-                  .WithCustomHive(homeDirectory)
-                  .WithWorkingDirectory(workingDirectory)
-                  .Execute()
+            DotnetNewCommand command = new DotnetNewCommand(log, "-i", packageName)
+                  .WithCustomHive(homeDirectory);
+            if (!string.IsNullOrWhiteSpace(workingDirectory))
+            {
+                command.WithWorkingDirectory(workingDirectory);
+            }
+
+            command.Execute()
                   .Should()
                   .ExitWith(0)
                   .And
                   .NotHaveStdErr();
         }
 
-        internal static string InstallTestTemplate(string templateName, ITestOutputHelper log, string workingDirectory, string homeDirectory)
+        internal static string InstallTestTemplate(string templateName, ITestOutputHelper log, string homeDirectory, string? workingDirectory = null)
         {
             string testTemplate = TestUtils.GetTestTemplateLocation(templateName);
-            new DotnetNewCommand(log, "-i", testTemplate)
-                  .WithCustomHive(homeDirectory)
-                  .WithWorkingDirectory(workingDirectory)
-                  .Execute()
+
+            DotnetNewCommand command = new DotnetNewCommand(log, "-i", testTemplate)
+                .WithCustomHive(homeDirectory);
+
+            if (!string.IsNullOrWhiteSpace(workingDirectory))
+            {
+                command.WithWorkingDirectory(workingDirectory);
+            }
+
+            command.Execute()
                   .Should()
                   .ExitWith(0)
                   .And

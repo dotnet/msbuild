@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using System.IO.Compression;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
@@ -86,7 +84,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "basic")
                 .WithCustomHive(home)
@@ -131,7 +129,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallNuGetTemplate("Microsoft.DotNet.Web.ProjectTemplates.5.0", _log, workingDirectory, home);
+            Helpers.InstallNuGetTemplate("Microsoft.DotNet.Web.ProjectTemplates.5.0", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "webapp", "-o", "webapp")
                 .WithCustomHive(home)
@@ -159,7 +157,7 @@ namespace Dotnet_new3.IntegrationTests
             string home = TestUtils.CreateTemporaryFolder("Home");
             string templateLocation = TestUtils.GetTestTemplateLocation("TemplateWithBinaryFile");
 
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "TestAssets.TemplateWithBinaryFile")
                 .WithCustomHive(home)
@@ -187,7 +185,7 @@ namespace Dotnet_new3.IntegrationTests
 
             using var packageManager = new PackageManager();
             string packageLocation = packageManager.PackTestTemplatesNuGetPackage();
-            Helpers.InstallNuGetTemplate(packageLocation, _log, workingDirectory, home);
+            Helpers.InstallNuGetTemplate(packageLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "TestAssets.TemplateWithBinaryFile")
                 .WithCustomHive(home)
@@ -213,7 +211,7 @@ namespace Dotnet_new3.IntegrationTests
             string home = TestUtils.CreateTemporaryFolder("Home");
             using var packageManager = new PackageManager();
             string packageLocation = await packageManager.GetNuGetPackage("Microsoft.DotNet.Web.Spa.ProjectTemplates.6.0", version: "6.0.0-preview.6.21355.2").ConfigureAwait(false);
-            Helpers.InstallNuGetTemplate(packageLocation, _log, workingDirectory, home);
+            Helpers.InstallNuGetTemplate(packageLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "angular", "-o", "angular")
                .WithCustomHive(home)
@@ -275,7 +273,7 @@ namespace Dotnet_new3.IntegrationTests
             //#endif
             //For extension test cases the template has 'test.<extension>' file defined.
 
-            Helpers.InstallTestTemplate("TemplateWithConditions", _log, workingDirectory, home);
+            Helpers.InstallTestTemplate("TemplateWithConditions", _log, home, workingDirectory);
             new DotnetNewCommand(_log, "TestAssets.TemplateWithConditions", "--A", "true")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)

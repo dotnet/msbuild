@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
@@ -63,7 +61,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())

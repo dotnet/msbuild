@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
@@ -24,7 +22,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("SourceWithExcludeAndWithout", _log, workingDirectory, home);
+            Helpers.InstallTestTemplate("SourceWithExcludeAndWithout", _log, home, workingDirectory);
             new DotnetNewCommand(_log, "withexclude")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)

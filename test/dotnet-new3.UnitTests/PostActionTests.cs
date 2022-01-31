@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
@@ -35,7 +33,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "MyProject")
                 .WithCustomHive(home)
@@ -69,7 +67,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "MyProject", "--firstRename", "Awesome")
                 .WithCustomHive(home)
@@ -103,7 +101,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "TemplateApplication")
                 .WithCustomHive(home)
@@ -144,7 +142,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "TemplateApplication")
                 .WithCustomHive(home)
@@ -188,7 +186,7 @@ namespace Dotnet_new3.IntegrationTests
             string templateName = "TestAssets.PostActions.RunScript.Basic";
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
@@ -221,7 +219,7 @@ namespace Dotnet_new3.IntegrationTests
             string templateName = "TestAssets.PostActions.RunScript.DoNotRedirect";
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
@@ -246,7 +244,7 @@ namespace Dotnet_new3.IntegrationTests
             string templateName = "TestAssets.PostActions.RunScript.Redirect";
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
@@ -271,7 +269,7 @@ namespace Dotnet_new3.IntegrationTests
             string templateName = "TestAssets.PostActions.RunScript.RedirectOnError";
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
@@ -304,7 +302,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
@@ -334,7 +332,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, templateName)
                    .WithCustomHive(home)
@@ -372,7 +370,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution")
@@ -405,7 +403,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution")
@@ -445,7 +443,7 @@ namespace Dotnet_new3.IntegrationTests
             string templateName = "TestAssets.PostActions.Instructions.Basic";
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
@@ -468,7 +466,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "MyProject", "--dry-run")
                 .WithCustomHive(home)
@@ -494,7 +492,7 @@ Action would have been taken automatically:
             string templateName = "TestAssets.PostActions.UnknownPostAction";
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
@@ -516,7 +514,7 @@ Action would have been taken automatically:
             string templateName = "TestAssets.PostActions.RunScript.Basic";
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "no")
                 .WithCustomHive(home)

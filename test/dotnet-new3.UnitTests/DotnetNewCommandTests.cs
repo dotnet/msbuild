@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
@@ -43,9 +41,9 @@ namespace Dotnet_new3.IntegrationTests
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            Helpers.InstallNuGetTemplate("microsoft.dotnet.wpf.projecttemplates", _log, workingDirectory, home);
-            Helpers.InstallNuGetTemplate("microsoft.dotnet.winforms.projecttemplates", _log, workingDirectory, home);
-            Helpers.InstallNuGetTemplate("microsoft.dotnet.web.projecttemplates.6.0", _log, workingDirectory, home);
+            Helpers.InstallNuGetTemplate("microsoft.dotnet.wpf.projecttemplates", _log, home, workingDirectory);
+            Helpers.InstallNuGetTemplate("microsoft.dotnet.winforms.projecttemplates", _log, home, workingDirectory);
+            Helpers.InstallNuGetTemplate("microsoft.dotnet.web.projecttemplates.6.0", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log)
                 .WithCustomHive(home)

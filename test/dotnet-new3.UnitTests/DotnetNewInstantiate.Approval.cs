@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using System.Text.RegularExpressions;
 using ApprovalTests;
 using FluentAssertions;
@@ -67,8 +65,8 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, home);
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, "basic")
                 .WithCustomHive(home)
@@ -88,8 +86,8 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string templateOneLocation = Helpers.InstallTestTemplate("TemplateResolution/SameShortName/BasicFSharp", _log, workingDirectory, home);
-            string templateTwoLocation = Helpers.InstallTestTemplate("TemplateResolution/SameShortName/BasicVB", _log, workingDirectory, home);
+            string templateOneLocation = Helpers.InstallTestTemplate("TemplateResolution/SameShortName/BasicFSharp", _log, home, workingDirectory);
+            string templateTwoLocation = Helpers.InstallTestTemplate("TemplateResolution/SameShortName/BasicVB", _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, "basic")
                 .WithCustomHive(home)
@@ -208,8 +206,8 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            var templateOneLocation = Helpers.InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate1", _log, workingDirectory, home);
-            var templateTwoLocation = Helpers.InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate2", _log, workingDirectory, home);
+            var templateOneLocation = Helpers.InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate1", _log, home, workingDirectory);
+            var templateTwoLocation = Helpers.InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate2", _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, "basic")
                 .WithCustomHive(home)
@@ -284,7 +282,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            var templateLocation = Helpers.InstallTestTemplate("Invalid/InvalidHostData", _log, workingDirectory, home);
+            var templateLocation = Helpers.InstallTestTemplate("Invalid/InvalidHostData", _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, "TestAssets.Invalid.InvalidHostData")
                 .WithCustomHive(home)

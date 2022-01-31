@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
@@ -145,7 +143,7 @@ Web Config                                    webconfig                  Config
 Worker Service                                worker         [C#],F#     Common/Worker/Web     ";
 
             string home = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallNuGetTemplate("Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0", _log, null, home);
+            Helpers.InstallNuGetTemplate("Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0", _log, home, null);
 
             new DotnetNewCommand(_log, command)
                 .WithCustomHive(home)
@@ -587,7 +585,7 @@ Worker Service                                worker         [C#],F#     Common/
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDir = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateGrouping", _log, workingDir, home);
+            Helpers.InstallTestTemplate("TemplateGrouping", _log, home, workingDir);
 
             new DotnetNewCommand(_log, "--list", "--columns-all")
                 .WithCustomHive(home)

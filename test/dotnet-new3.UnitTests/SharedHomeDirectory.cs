@@ -28,7 +28,7 @@ namespace Dotnet_new3.IntegrationTests
 
         public void Dispose() => Directory.Delete(HomeDirectory, true);
 
-        public void InstallPackage(string packageName, string workingDirectory = null, string nugetSource = null)
+        public void InstallPackage(string packageName, string? workingDirectory = null, string? nugetSource = null)
         {
             if (!_installedPackages.Add(packageName))
             {

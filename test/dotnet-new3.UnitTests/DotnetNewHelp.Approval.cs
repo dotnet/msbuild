@@ -218,8 +218,8 @@ namespace Dotnet_new3.IntegrationTests
         public void CannotShowHelpForTemplate_WhenAmbiguousLanguageChoice()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, _fixture.HomeDirectory);
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, _fixture.HomeDirectory);
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, _fixture.HomeDirectory, workingDirectory);
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, _fixture.HomeDirectory, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, "basic", "--help")
                 .WithCustomHive(_fixture.HomeDirectory)
@@ -334,7 +334,7 @@ namespace Dotnet_new3.IntegrationTests
             string templateName = "TestAssets.PostActions.RunScript.Basic";
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             var commandResult = new DotnetNewCommand(_log, templateName, "--help")
                 .WithCustomHive(home)

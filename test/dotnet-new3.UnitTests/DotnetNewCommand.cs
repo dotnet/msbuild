@@ -20,7 +20,7 @@ namespace Dotnet_new3.IntegrationTests
             Arguments.AddRange(args);
         }
 
-        public DotnetNewCommand WithCustomHive(string path = null)
+        public DotnetNewCommand WithCustomHive(string? path = null)
         {
             path ??= TestUtils.CreateTemporaryFolder();
             Arguments.Add("--debug:custom-hive");

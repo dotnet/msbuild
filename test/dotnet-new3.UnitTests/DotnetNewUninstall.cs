@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
@@ -29,7 +27,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string testTemplate = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
+            string testTemplate = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
@@ -102,7 +100,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string templateLocation = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
+            string templateLocation = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
@@ -200,8 +198,8 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string basicFSharp = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
-            string basicVB = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, home);
+            string basicFSharp = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
+            string basicVB = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive(home).WithDebug()
@@ -246,8 +244,8 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string basicFSharp = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
-            string basicVB = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, home);
+            string basicFSharp = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
+            string basicVB = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive(home).WithDebug()
@@ -483,13 +481,13 @@ namespace Dotnet_new3.IntegrationTests
 
             Directory.CreateDirectory(testFolderWithSpace);
             TestUtils.DirectoryCopy(TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp"), testFolderWithSpace, copySubDirs: true);
-            Helpers.InstallNuGetTemplate(testFolderWithSpace, _log, workingDirectory, home);
+            Helpers.InstallNuGetTemplate(testFolderWithSpace, _log, home, workingDirectory);
 
             string testFolderWithoutSpace = Path.Combine(workingDirectory, "MyTestFolder");
 
             Directory.CreateDirectory(testFolderWithoutSpace);
             TestUtils.DirectoryCopy(TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicVB"), testFolderWithoutSpace, copySubDirs: true);
-            Helpers.InstallNuGetTemplate(testFolderWithoutSpace, _log, workingDirectory, home);
+            Helpers.InstallNuGetTemplate(testFolderWithoutSpace, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "-u")
                 .WithCustomHive(home)
