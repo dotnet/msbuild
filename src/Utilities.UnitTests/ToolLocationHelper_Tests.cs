@@ -761,13 +761,13 @@ namespace Microsoft.Build.UnitTests
             // Test out of range .net version.
             foreach (var vsVersion in EnumVisualStudioVersions())
             {
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey((TargetDotNetFrameworkVersion)99, vsVersion) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey((TargetDotNetFrameworkVersion)99, vsVersion));
             }
 
             // Test out of range visual studio version.
             foreach (var dotNetVersion in EnumDotNetFrameworkVersions())
             {
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(dotNetVersion, (VisualStudioVersion)99) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(dotNetVersion, (VisualStudioVersion)99));
             }
 
             foreach (var vsVersion in EnumVisualStudioVersions())
@@ -779,7 +779,7 @@ namespace Microsoft.Build.UnitTests
                 ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version20, vsVersion).ShouldBe(FrameworkLocationHelper.fullDotNetFrameworkRegistryKey);
 
                 // v3.0
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version30, vsVersion) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version30, vsVersion));
 
                 // v3.5
                 ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version35, vsVersion).ShouldBe(
@@ -810,39 +810,39 @@ namespace Microsoft.Build.UnitTests
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version45, VisualStudioVersion.Version140).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK46);
 
             // v4.5.1
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version110) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version110));
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version120).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK81A);
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version140).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK46);
 
             // v4.5.2
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version452, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version452, VisualStudioVersion.Version110) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version452, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version452, VisualStudioVersion.Version110));
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version452, VisualStudioVersion.Version120).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK81A);
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version452, VisualStudioVersion.Version140).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK46);
 
             // v4.6
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version110) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version120) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version110));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version120));
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version140).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK46);
 
             // v4.6.1
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version110) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version120) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version110));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version120));
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version140).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK461);
 
             // v4.6.2
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version110) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version120) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version110));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version120));
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version462, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK462);
 
             // v4.7
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version110) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version120) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version110));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version120));
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version47, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK47);
 
             // v4.7.1
@@ -874,13 +874,13 @@ namespace Microsoft.Build.UnitTests
             // Test out of range .net version.
             foreach (var vsVersion in EnumVisualStudioVersions())
             {
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue((TargetDotNetFrameworkVersion)99, vsVersion) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue((TargetDotNetFrameworkVersion)99, vsVersion));
             }
 
             // Test out of range visual studio version.
             foreach (var dotNetVersion in EnumDotNetFrameworkVersions())
             {
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(dotNetVersion, (VisualStudioVersion)99) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(dotNetVersion, (VisualStudioVersion)99));
             }
 
             string InstallationFolder = "InstallationFolder";
@@ -894,7 +894,7 @@ namespace Microsoft.Build.UnitTests
                 ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version20, vsVersion).ShouldBe(FrameworkLocationHelper.dotNetFrameworkSdkInstallKeyValueV20);
 
                 // v3.0
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version30, vsVersion) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version30, vsVersion));
 
                 // v3.5
                 ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version35, vsVersion).ShouldBe(InstallationFolder);
@@ -907,15 +907,15 @@ namespace Microsoft.Build.UnitTests
             }
 
             // v4.5.1
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version110) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version110));
             ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version120).ShouldBe(InstallationFolder);
             ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version140).ShouldBe(InstallationFolder);
 
             // v4.6
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version110) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version120) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version110));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version120));
             ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version140).ShouldBe(InstallationFolder);
         }
 
@@ -930,13 +930,13 @@ namespace Microsoft.Build.UnitTests
             // Test out of range .net version.
             foreach (var vsVersion in EnumVisualStudioVersions())
             {
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToDotNetFrameworkSdk((TargetDotNetFrameworkVersion)99, vsVersion) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToDotNetFrameworkSdk((TargetDotNetFrameworkVersion)99, vsVersion));
             }
 
             // Test out of range visual studio version.
             foreach (var dotNetVersion in EnumDotNetFrameworkVersions())
             {
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToDotNetFrameworkSdk(dotNetVersion, (VisualStudioVersion)99) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToDotNetFrameworkSdk(dotNetVersion, (VisualStudioVersion)99));
             }
 
             string pathToSdk35InstallRoot = Path.Combine(FrameworkLocationHelper.programFiles32, @"Microsoft SDKs\Windows\v7.0A\");
@@ -970,7 +970,7 @@ namespace Microsoft.Build.UnitTests
                 ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version20, vsVersion).ShouldBe(FrameworkLocationHelper.PathToDotNetFrameworkSdkV20);
 
                 // v3.0
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version30, vsVersion) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version30, vsVersion));
 
                 // v3.5
                 ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version35, vsVersion).ShouldBe(pathToSdk35InstallRoot);
@@ -989,15 +989,15 @@ namespace Microsoft.Build.UnitTests
             ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version45, VisualStudioVersion.Version140).ShouldBe(pathToSdkV4InstallRootOnVS14);
 
             // v4.5.1
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version110) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version110));
             ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version120).ShouldBe(pathToSdkV4InstallRootOnVS12);
             ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version451, VisualStudioVersion.Version140).ShouldBe(pathToSdkV4InstallRootOnVS14);
 
             // v4.6
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version100) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version110) );
-            Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version120) );
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version110));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version120));
             ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version140).ShouldBe(pathToSdkV4InstallRootOnVS14);
         }
 
@@ -1010,7 +1010,7 @@ namespace Microsoft.Build.UnitTests
             // Test out of range .net version.
             foreach (var vsVersion in EnumVisualStudioVersions())
             {
-                Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToWindowsSdk((TargetDotNetFrameworkVersion)99, vsVersion) );
+                Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToWindowsSdk((TargetDotNetFrameworkVersion)99, vsVersion));
             }
 
             string pathToWindowsSdkV80 = GetRegistryValueHelper(RegistryHive.LocalMachine, RegistryView.Registry32, @"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0", "InstallationFolder");
@@ -1021,7 +1021,7 @@ namespace Microsoft.Build.UnitTests
                 // v1.1, v2.0, v3.0, v3.5, v4.0
                 foreach (var dotNetVersion in EnumDotNetFrameworkVersions().Where(v => v <= TargetDotNetFrameworkVersion.Version40))
                 {
-                    Should.Throw<ArgumentException>( () => ToolLocationHelper.GetPathToWindowsSdk(dotNetVersion, vsVersion) );
+                    Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPathToWindowsSdk(dotNetVersion, vsVersion));
                 }
 
                 // v4.5
@@ -1098,7 +1098,7 @@ namespace Microsoft.Build.UnitTests
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName='VerifySdkPaths' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
-                         <ParameterGroup>     
+                         <ParameterGroup>
                              <Sdk35ToolsPath />
                              <Sdk40ToolsPath />
                              <WindowsSDK80Path />
@@ -1151,9 +1151,9 @@ namespace Microsoft.Build.UnitTests
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIsEmpty()
         {
             string projectContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='4.0'>
+                    <Project ToolsVersion='4.0'>
                         <UsingTask TaskName='VerifySdkPaths' TaskFactory='CodeTaskFactory' AssemblyName='Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' >
-                         <ParameterGroup>     
+                         <ParameterGroup>
                              <Sdk35ToolsPath />
                              <Sdk40ToolsPath />
                              <WindowsSDK80Path />
@@ -1193,9 +1193,9 @@ namespace Microsoft.Build.UnitTests
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs10()
         {
             string projectContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='4.0'>
+                    <Project ToolsVersion='4.0'>
                         <UsingTask TaskName='VerifySdkPaths' TaskFactory='CodeTaskFactory' AssemblyName='Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' >
-                         <ParameterGroup>     
+                         <ParameterGroup>
                              <Sdk35ToolsPath />
                              <Sdk40ToolsPath />
                              <WindowsSDK80Path />
@@ -1237,9 +1237,9 @@ namespace Microsoft.Build.UnitTests
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs11()
         {
             string projectContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='4.0'>
+                    <Project ToolsVersion='4.0'>
                         <UsingTask TaskName='VerifySdkPaths' TaskFactory='CodeTaskFactory' AssemblyName='Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' >
-                         <ParameterGroup>     
+                         <ParameterGroup>
                              <Sdk35ToolsPath />
                              <Sdk40ToolsPath />
                              <WindowsSDK80Path />
@@ -2679,7 +2679,7 @@ namespace Microsoft.Build.UnitTests
                                                     (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
                                                         => ToolLocationHelper.GetPathToReferenceAssemblies(
                                                                             frameworkName, "v" + frameworkVersion, frameworkProfile,
-                                                                            targetFrameworkRootPath:null, targetFrameworkFallbackSearchPaths:fallbackSearchPaths));
+                                                                            targetFrameworkRootPath: null, targetFrameworkFallbackSearchPaths: fallbackSearchPaths));
             }
         }
 
@@ -2732,7 +2732,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         private void CheckGetPathToReferenceAssemblies(TestEnvironment env, string customFrameworkDir, string fallbackSearchPaths, Func<string, string, string, string, string, IList<string>> getPathToReferenceAssemblies)
-         {
+        {
             string frameworkName = "Foo Framework";
             string frameworkVersion = "0.1";
             string frameworkVersionWithV = "v" + frameworkVersion;
@@ -2751,8 +2751,8 @@ namespace Microsoft.Build.UnitTests
             {
                 stdLibPaths.Count.ShouldBe(1);
                 stdLibPaths[0].ShouldBe(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar, stdLibPaths[0]);
-             }
-         }
+            }
+        }
 
         [Fact]
         public void GetPathToReferenceAssembliesWithNullTargetFrameworkRootPath()
@@ -2935,21 +2935,21 @@ namespace Microsoft.Build.UnitTests
                 switch (version)
                 {
                     case TargetDotNetFrameworkVersion.Version40:
-                    {
-                        return DotNetReferenceAssemblies40Installed ? DotNet40ReferenceAssemblyPath : null;
-                    }
+                        {
+                            return DotNetReferenceAssemblies40Installed ? DotNet40ReferenceAssemblyPath : null;
+                        }
                     case TargetDotNetFrameworkVersion.Version35:
-                    {
-                        return DotNetReferenceAssemblies35Installed ? DotNet35ReferenceAssemblyPath : null;
-                    }
+                        {
+                            return DotNetReferenceAssemblies35Installed ? DotNet35ReferenceAssemblyPath : null;
+                        }
                     case TargetDotNetFrameworkVersion.Version30:
-                    {
-                        return DotNetReferenceAssemblies30Installed ? DotNet30ReferenceAssemblyPath : null;
-                    }
+                        {
+                            return DotNetReferenceAssemblies30Installed ? DotNet30ReferenceAssemblyPath : null;
+                        }
                     default:
-                    {
-                        return null;
-                    }
+                        {
+                            return null;
+                        }
                 }
             }
 
@@ -2962,25 +2962,25 @@ namespace Microsoft.Build.UnitTests
                 switch (version)
                 {
                     case TargetDotNetFrameworkVersion.Version20:
-                    {
-                        return DotNet20Installed ? DotNet20FrameworkPath : null;
-                    }
+                        {
+                            return DotNet20Installed ? DotNet20FrameworkPath : null;
+                        }
                     case TargetDotNetFrameworkVersion.Version30:
-                    {
-                        return DotNet30Installed ? DotNet30FrameworkPath : null;
-                    }
+                        {
+                            return DotNet30Installed ? DotNet30FrameworkPath : null;
+                        }
                     case TargetDotNetFrameworkVersion.Version35:
-                    {
-                        return DotNet35Installed ? DotNet35FrameworkPath : null;
-                    }
+                        {
+                            return DotNet35Installed ? DotNet35FrameworkPath : null;
+                        }
                     case TargetDotNetFrameworkVersion.Version40:
-                    {
-                        return DotNet40Installed ? DotNet40FrameworkPath : null;
-                    }
+                        {
+                            return DotNet40Installed ? DotNet40FrameworkPath : null;
+                        }
                     default:
-                    {
-                        return null;
-                    }
+                        {
+                            return null;
+                        }
                 }
             }
         }
@@ -3176,7 +3176,7 @@ namespace Microsoft.Build.UnitTests
 
             // Try a path with invalid chars which does not exist
             string directoryWithInvalidChars = "c:\\<>?";
-            var paths = new List<string> {directoryWithInvalidChars};
+            var paths = new List<string> { directoryWithInvalidChars };
             Should.Throw<ArgumentException>(() => { ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform); });
         }
 
@@ -3709,7 +3709,7 @@ namespace Microsoft.Build.UnitTests
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>" +
                    @"<SDKDirectoryRoot>" + testDirectoryRoot + "</SDKDirectoryRoot>" +
                     @"<SDKLocation1>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation('SDkWithManifest, Version=2.0','MyPlatform','8.0', '$(SDKDirectoryRoot)',''))</SDKLocation1>
-                      <SDKLocation2>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation('SDkWithManifest, Version=V2.0','MyPlatform','8.0', '$(SDKDirectoryRoot)',''))</SDKLocation2>                 
+                      <SDKLocation2>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformExtensionSDKLocation('SDkWithManifest, Version=V2.0','MyPlatform','8.0', '$(SDKDirectoryRoot)',''))</SDKLocation2>
                       <SDKLocation3>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('MyPlatform','8.0', '$(SDKDirectoryRoot)',''))</SDKLocation3>
                       <SDKName>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName('MyPlatform','8.0', '$(SDKDirectoryRoot)', ''))</SDKName>
                  </PropertyGroup>
@@ -4120,7 +4120,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKWithMatchingPlatformNotMatchingVersion()
         {
-            ToolLocationHelper.GetPlatformsForSDK("MyPlatform", new Version("0.0.0.0"), new[] {_fakeStructureRoot}, null).Any().ShouldBeFalse();
+            ToolLocationHelper.GetPlatformsForSDK("MyPlatform", new Version("0.0.0.0"), new[] { _fakeStructureRoot }, null).Any().ShouldBeFalse();
         }
 
         /// <summary>
@@ -4130,7 +4130,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKForLegacyPlatformSDK()
         {
-            ToolLocationHelper.GetPlatformsForSDK("Windows", new Version("8.0"), new[] {_fakeStructureRoot}, null).Any().ShouldBeFalse();
+            ToolLocationHelper.GetPlatformsForSDK("Windows", new Version("8.0"), new[] { _fakeStructureRoot }, null).Any().ShouldBeFalse();
         }
 
         /// <summary>
@@ -4192,7 +4192,7 @@ namespace Microsoft.Build.UnitTests
         {
             // create directories and files in them
 
-            //  root1
+            // root1
             //     subdir
             //         file1.txt
             //     file1.txt
@@ -4203,13 +4203,13 @@ namespace Microsoft.Build.UnitTests
 
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyFindRootFolderWhereAllFilesExist");
             string[] rootDirectories = new string[] { Path.Combine(testDirectoryRoot, "Root1"), Path.Combine(testDirectoryRoot, "Root2") };
-            
-            for(int i = 0; i < rootDirectories.Length; i++)
+
+            for (int i = 0; i < rootDirectories.Length; i++)
             {
                 // create directory
                 string subdir = Path.Combine(rootDirectories[i], "Subdir");
                 Directory.CreateDirectory(subdir);
-                var fileInSubDir = string.Format("file{0}.txt", i+1);
+                var fileInSubDir = string.Format("file{0}.txt", i + 1);
                 File.Create(Path.Combine(rootDirectories[i], "file1.txt")).Close();
                 File.Create(Path.Combine(subdir, fileInSubDir)).Close();
             }
@@ -4607,11 +4607,11 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(
                     Path.Combine(tempPath, "MyPlatform", "9.0", "Platforms", "Sparkle", "3.3.3.3")); // no platform.xml
 
-                //Bad because of v in the sdk version
+                // Bad because of v in the sdk version
                 Directory.CreateDirectory(
                     Path.Combine(tempPath, "Windows", "v1.0", "ExtensionSDKs", "AnotherAssembly", "v1.1"));
 
-                //Bad because no extensionsdks directory under the platform version
+                // Bad because no extensionsdks directory under the platform version
                 Directory.CreateDirectory(Path.Combine(tempPath, "Windows", "v3.0") + Path.DirectorySeparatorChar);
 
                 // Bad because the directory under the identifier is not a version
@@ -4846,17 +4846,17 @@ namespace Microsoft.Build.UnitTests
             switch (hive)
             {
                 case RegistryHive.CurrentUser:
-                {
-                    return Registry.CurrentUser;
-                }
+                    {
+                        return Registry.CurrentUser;
+                    }
                 case RegistryHive.LocalMachine:
-                {
-                    return Registry.LocalMachine;
-                }
+                    {
+                        return Registry.LocalMachine;
+                    }
                 default:
-                {
-                    return null;
-                }
+                    {
+                        return null;
+                    }
             }
         }
 #endif

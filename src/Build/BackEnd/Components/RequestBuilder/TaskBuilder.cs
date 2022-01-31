@@ -3,10 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+#if FEATURE_APARTMENT_STATE
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Linq;
 using System.Reflection;
+#if FEATURE_APARTMENT_STATE
 using System.Runtime.ExceptionServices;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;

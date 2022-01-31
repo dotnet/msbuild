@@ -10,7 +10,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
 
    <!--
         With MSBuild 12, we've changed MSBuildToolsPath to for the first time point to a directory

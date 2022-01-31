@@ -20,8 +20,11 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal enum StrongNameLevel
     {
-        None, DelaySigned, FullySigned, Unknown
-    };
+        None,
+        DelaySigned,
+        FullySigned,
+        Unknown,
+    }
 
     /// <summary>
     /// Strong naming utilities.

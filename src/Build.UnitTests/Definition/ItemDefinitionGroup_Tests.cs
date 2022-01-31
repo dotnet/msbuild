@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionGroupExistsInProject()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
                             <First>1st</First>
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void MultipleItemDefinitionGroupExistsInProject()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
                             <First>1st</First>
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void EmptyItemsInheritValues()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
                             <First>1st</First>
@@ -115,7 +115,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemMetadataOverridesInheritedValues()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
                             <First>1st</First>
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 Project p = new Project(XmlReader.Create(new StringReader(
-                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemGroup>
                         <Compile Include='a.cs'>
                             <Foo>Bar</Foo>
@@ -190,7 +190,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 Project p = new Project(XmlReader.Create(new StringReader(
-                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemGroup>
                         <Compile Include='a.cs'>
                             <Foo>Bar</Foo>
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 Project p = new Project(XmlReader.Create(new StringReader(
-                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemGroup>
                         <Compile Include='a.cs'>
                             <Foo>Bar</Foo>
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemMetadataReferringToDifferentItemGivesEmptyValue()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
                             <First>1st</First>
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void EmptyItemDefinitionGroup()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                     </ItemDefinitionGroup>
                     <ItemGroup>
@@ -302,7 +302,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void EmptyItemDefinitions()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile />
                     </ItemDefinitionGroup>
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-   <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+   <Project ToolsVersion='msbuilddefaulttoolsversion'>
 
     <ItemDefinitionGroup>
       <CppCompile>
@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-   <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+   <Project ToolsVersion='msbuilddefaulttoolsversion'>
 
     <ItemDefinitionGroup>
       <CppCompile>
@@ -380,7 +380,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-   <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+   <Project ToolsVersion='msbuilddefaulttoolsversion'>
 
     <ItemDefinitionGroup>
       <CppCompile>
@@ -413,7 +413,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionGroupWithFalseCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup Condition=""'$(Foo)'!=''"">
                         <Compile>
                             <First>1st</First>
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionGroupWithTrueCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup Condition=""'$(Foo)'==''"">
                         <Compile>
                             <First>1st</First>
@@ -465,7 +465,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionWithFalseCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile  Condition=""'$(Foo)'!=''"">
                             <First>1st</First>
@@ -491,7 +491,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionWithTrueCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile Condition=""'$(Foo)'==''"">
                             <First>1st</First>
@@ -517,7 +517,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionMetadataWithFalseCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
                             <First Condition=""'$(Foo)'!=''"">1st</First>
@@ -543,7 +543,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionMetadataWithTrueCondition()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
                             <First Condition=""'$(Foo)'==''"">1st</First>
@@ -569,7 +569,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionMetadataCopiedToTaskItem()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                 <ItemDefinitionGroup>
                     <ItemA>
                         <MetaA>M-A(b)</MetaA>
@@ -604,7 +604,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionMetadataCopiedToTaskItem2()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                 <ItemDefinitionGroup>
                     <ItemA>
                         <MetaA>M-A(b)</MetaA>
@@ -642,7 +642,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionMetadataCopiedToTaskItem3()
         {
             Project p = new Project(XmlReader.Create(new StringReader(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                 <ItemDefinitionGroup>
                     <ItemA>
                         <MetaA>M-A(b)</MetaA>
@@ -685,7 +685,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <CppCompile Include='a.cpp'/>
                   </ItemGroup>
@@ -693,7 +693,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <CppCompile>
                       <Defines>DEBUG</Defines>
                     </CppCompile>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemGroup>
                     <CppCompile Include='b.cpp'/>
                   </ItemGroup>
@@ -712,7 +712,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -720,7 +720,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <i Condition=""'%24'=='$'"">
                       <m Condition=""'%24'=='$'"">%24(xyz)</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)]""/>
                   </Target>
@@ -737,7 +737,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -745,7 +745,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <j>
                       <m>m1</m>
                     </j>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)]""/>
                   </Target>
@@ -761,7 +761,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -770,13 +770,13 @@ namespace Microsoft.Build.UnitTests.Definition
                       <m>m1</m>
                       <n>n1</n>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemDefinitionGroup>
                     <i>
                       <m>m2</m>
                       <o>o1</o>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)-%(i.n)-%(i.o)]""/>
                   </Target>
@@ -795,12 +795,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 // We don't allow item expressions on an ItemDefinitionGroup because there are no items when IDG is evaluated.
                 MockLogger logger = new MockLogger();
                 Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>@(x)</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                 </Project>
             ")));
                 p.Build("t", new ILogger[] { logger });
@@ -815,7 +815,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 // We don't allow unqualified metadata on an ItemDefinitionGroup because we don't know what item type it refers to.
                 MockLogger logger = new MockLogger();
                 Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup Condition=""'%(m)'=='m1'""/>
                 </Project>
             ")));
@@ -832,7 +832,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 // We don't allow qualified metadata because it's not worth distinguishing from unqualified, when you can just move the condition to the child.
                 MockLogger logger = new MockLogger();
                 Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup Condition=""'%(x.m)'=='m1'""/>
                 </Project>
             ")));
@@ -845,7 +845,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                     <j Include='j1'/>
@@ -857,16 +857,16 @@ namespace Microsoft.Build.UnitTests.Definition
                     <j>
                       <n>n1</n>
                     </j>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemDefinitionGroup>
                     <i Condition=""'%(m)'=='m1'"">
                       <m>m2</m>
                     </i>
                     <!-- verify j metadata is distinct -->
                     <j Condition=""'%(j.n)'=='n1' and '%(n)'=='n1'"">
-                      <n>n2</n>   
+                      <n>n2</n>
                     </j>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)]""/>
                     <Message Text=""[%(j.n)]""/>
@@ -883,7 +883,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -891,12 +891,12 @@ namespace Microsoft.Build.UnitTests.Definition
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemDefinitionGroup>
                     <i Condition=""'%(i.m)'=='m1' and '%(m)'=='m1'"">
                       <m>m2</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)]""/>
                   </Target>
@@ -912,7 +912,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -920,12 +920,12 @@ namespace Microsoft.Build.UnitTests.Definition
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemDefinitionGroup>
                     <i Condition=""'%(m)'=='m2' or '%(i.m)'!='m1'"">
                       <m>m3</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)]""/>
                   </Target>
@@ -941,7 +941,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -950,12 +950,12 @@ namespace Microsoft.Build.UnitTests.Definition
                       <m>m1</m>
                       <n>n1</n>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemDefinitionGroup>
                     <i>
                       <m Condition=""'%(m)'=='m1' and '%(n)'=='n1' and '%(i.m)'=='m1'"">m2</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)]""/>
                   </Target>
@@ -971,7 +971,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -980,7 +980,7 @@ namespace Microsoft.Build.UnitTests.Definition
                       <m>m1</m>
                       <n>n1</n>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemDefinitionGroup>
                     <i>
                       <m Condition=""'%(m)'=='m2' or !('%(n)'=='n1') or '%(i.m)' != 'm1'"">m3</m>
@@ -1001,7 +1001,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -1009,12 +1009,12 @@ namespace Microsoft.Build.UnitTests.Definition
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemDefinitionGroup>
                     <i Condition=""'%(j.m)'=='' and '%(j.m)'!='x'"">
                       <m Condition=""'%(j.m)'=='' and '%(j.m)'!='x'"">m2</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)]""/>
                   </Target>
@@ -1027,8 +1027,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
         /// <summary>
         /// Make ItemDefinitionGroup inside a target produce a nice error.
-        /// It will normally produce an error due to the invalid child tag, but 
-        /// we want to error even if there's no child tag. This will make it 
+        /// It will normally produce an error due to the invalid child tag, but
+        /// we want to error even if there's no child tag. This will make it
         /// easier to support it inside targets in a future version.
         /// </summary>
         [Fact]
@@ -1038,7 +1038,7 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 MockLogger logger = new MockLogger();
                 Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <Target Name=""t"">
                     <ItemDefinitionGroup/>
                   </Target>
@@ -1056,7 +1056,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionGroupTask()
         {
             MockLogger ml = Helpers.BuildProjectWithNewOMExpectSuccess(String.Format(@"
-                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                         <UsingTask TaskName=""ItemDefinitionGroup"" AssemblyFile=""{0}""/>
                         <Target Name=""Build"">
                             <Microsoft.Build.UnitTests.Definition.ItemDefinitionGroup/>
@@ -1073,7 +1073,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <CppCompile Include='a.cpp'>
                       <Defines>RETAIL</Defines>
@@ -1084,7 +1084,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <CppCompile>
                       <Defines>DEBUG</Defines>
                     </CppCompile>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(CppCompile.Identity)==%(CppCompile.Defines)]""/>
                   </Target>
@@ -1100,7 +1100,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <CppCompile Include='a.cpp'>
                       <WarningLevel>4</WarningLevel>
@@ -1110,7 +1110,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <CppCompile>
                       <Defines>DEBUG</Defines>
                     </CppCompile>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(CppCompile.Identity)==%(CppCompile.Defines)]""/>
                     <Message Text=""[%(CppCompile.Identity)==%(CppCompile.WarningLevel)]""/>
@@ -1127,7 +1127,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -1135,7 +1135,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <ItemGroup>
                       <i>
@@ -1156,7 +1156,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -1164,7 +1164,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <ItemGroup>
                       <i Condition=""'%(i.m)'=='m1'"">
@@ -1190,18 +1190,18 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 importedFile = FileUtilities.GetTemporaryFile();
                 File.WriteAllText(importedFile, @"
-                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project ToolsVersion='msbuilddefaulttoolsversion'>
                   <ItemDefinitionGroup>
                     <CppCompile>
                       <Defines>DEBUG</Defines>
                     </CppCompile>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                 </Project>
             ");
                 Project p = new Project(XmlReader.Create(new StringReader(@"
-                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                       <ItemGroup>
-                        <CppCompile Include='a.cpp'/>                      
+                        <CppCompile Include='a.cpp'/>
                       </ItemGroup>
                       <Import Project='" + importedFile + @"'/>
                       <Target Name=""t"">
@@ -1227,12 +1227,12 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ProjectAddNewItemPicksUpProjectItemDefinitions()
         {
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                 </Project>
                 ")));
 
@@ -1250,12 +1250,12 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ProjectAddNewItemExistingGroupPicksUpProjectItemDefinitions()
         {
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemGroup>
                     <i Include='i2'>
                       <m>m2</m>
@@ -1276,13 +1276,13 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>m1</m>
                       <n>n1</n>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <CreateItem Include=""i1"" AdditionalMetadata=""n=n2"">
                       <Output ItemName=""i"" TaskParameter=""Include""/>
@@ -1302,13 +1302,13 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>m1</m>
                       <n>n1</n>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <ItemGroup>
                       <i Include=""i1"">
@@ -1334,12 +1334,12 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemGroup>
                     <i Include=""i1""/>
                   </ItemGroup>
@@ -1365,12 +1365,12 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemGroup>
                     <i Include=""i1""/>
                   </ItemGroup>
@@ -1403,7 +1403,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>m1</m>
@@ -1411,7 +1411,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <j>
                       <m>m2</m>
                     </j>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemGroup>
                     <i Include=""n1""/>
                     <j Include=""@(i)""/>
@@ -1443,7 +1443,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>im1</m>
@@ -1461,7 +1461,7 @@ namespace Microsoft.Build.UnitTests.Definition
                       <q>kq4</q>
                       <r>kr4</r>
                     </k>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemGroup>
                     <i Include=""1"">
                       <o>io2</o>
@@ -1535,7 +1535,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>im1</m>
@@ -1552,7 +1552,7 @@ namespace Microsoft.Build.UnitTests.Definition
                       <m>km4</m>
                       <q>kq4</q>
                     </k>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <ItemGroup>
                     <i Include=""1"">
                       <o>io2</o>
@@ -1591,16 +1591,16 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>m1</m>
                       <n>~%(m)~</n>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                     <ItemGroup>
                       <i Include=""i1""/>
-                    </ItemGroup>   
+                    </ItemGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)][%(i.n)]""/>
                   </Target>
@@ -1617,16 +1617,16 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>~%(n)~</m>
                       <n>n1</n>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                     <ItemGroup>
                       <i Include=""i1""/>
-                    </ItemGroup>   
+                    </ItemGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)][%(i.n)]""/>
                   </Target>
@@ -1643,17 +1643,17 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
                       <m>m1</m>
                       <n>%(i.m)</n>
                       <o>%(j.m)</o>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                     <ItemGroup>
                       <i Include=""i1""/>
-                    </ItemGroup>   
+                    </ItemGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(i.m)][%(i.n)][%(i.o)]""/>
                   </Target>
@@ -1670,7 +1670,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             MockLogger logger = new MockLogger();
             Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <PropertyGroup>
                     <Defines>CODEANALYSIS</Defines>
                   </PropertyGroup>
@@ -1682,7 +1682,7 @@ namespace Microsoft.Build.UnitTests.Definition
                       <Defines Condition=""'$(BuildFlavor)'=='ret'"">$(Defines);RETAIL</Defines>
                       <Defines Condition=""'$(BuildFlavor)'=='chk'"">$(Defines);DEBUG</Defines>
                     </CppCompile>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[%(CppCompile.Identity)==%(CppCompile.Defines)]""/>
                   </Target>
@@ -1711,7 +1711,7 @@ namespace Microsoft.Build.UnitTests.Definition
             try
             {
                 otherProject = FileUtilities.GetTemporaryFile();
-                string otherProjectContent = @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                string otherProjectContent = @"<Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -1719,7 +1719,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <i>
                       <m>m2</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[CHILD:%(i.m)]""/>
                   </Target>
@@ -1732,7 +1732,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 MockLogger logger = new MockLogger();
                 Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
                   </ItemGroup>
@@ -1740,7 +1740,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <i>
                       <m>m1</m>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"">
                     <Message Text=""[PARENT-before:%(i.m)]""/>
                     <MSBuild Projects=""" + otherProject + @"""/>
@@ -1767,7 +1767,7 @@ namespace Microsoft.Build.UnitTests.Definition
             try
             {
                 otherProject = FileUtilities.GetTemporaryFile();
-                string otherProjectContent = @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                string otherProjectContent = @"<Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'>
                        <m>m1</m>
@@ -1777,7 +1777,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     <i>
                       <n>n1</n>
                     </i>
-                  </ItemDefinitionGroup> 
+                  </ItemDefinitionGroup>
                   <Target Name=""t"" Outputs=""@(i)"">
                     <Message Text=""[CHILD:%(i.Identity):m=%(i.m),n=%(i.n)]""/>
                   </Target>
@@ -1790,7 +1790,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 MockLogger logger = new MockLogger();
                 Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <Target Name=""t"">
                     <MSBuild Projects=""" + otherProject + @""">
                        <Output TaskParameter='TargetOutputs' ItemName='i'/>

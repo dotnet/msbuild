@@ -10,7 +10,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
 
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
-using System.Linq;
 
 #nullable disable
 
@@ -261,11 +260,7 @@ namespace Microsoft.Build.Logging
         {
             return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-#if FEATURE_TYPE_GETINTERFACE
                 (type.GetTypeInfo().GetInterface("IForwardingLogger") != null);
-#else
-                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "IForwardingLogger"));
-#endif
         }
 
         /// <summary>
@@ -277,11 +272,7 @@ namespace Microsoft.Build.Logging
         {
             return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-#if FEATURE_TYPE_GETINTERFACE
                 (type.GetTypeInfo().GetInterface("ILogger") != null);
-#else
-                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "ILogger"));
-#endif
         }
 
         /// <summary>

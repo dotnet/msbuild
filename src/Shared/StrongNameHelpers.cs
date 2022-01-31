@@ -307,7 +307,10 @@ namespace Microsoft.Runtime.Hosting
     /// version of the interface.
     /// </summary>
     [System.Security.SecurityCritical]
-    [ComImport, ComConversionLoss, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
+    [ComImport]
+    [ComConversionLoss]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
     internal interface IClrStrongNameUsingIntPtr
     {
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
@@ -525,7 +528,10 @@ namespace Microsoft.Runtime.Hosting
     /// all APIs return HResults rather than throw exceptions.
     /// </summary> 
     [System.Security.SecurityCritical]
-    [ComImport, ComConversionLoss, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
+    [ComImport]
+    [ComConversionLoss]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
     internal interface IClrStrongName
     {
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]

@@ -314,5 +314,4 @@ namespace Microsoft.Build.ObjectModelRemoting
         }
         #endregion
     }
-
 }

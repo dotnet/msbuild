@@ -498,7 +498,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LogCustomAfterTaskIsDone()
         {
             string projectFileContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                               <Using Namespace='System' />
@@ -534,7 +534,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LogCommentAfterTaskIsDone()
         {
             string projectFileContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                               <Using Namespace='System' />
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LogWarningAfterTaskIsDone()
         {
             string projectFileContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                               <Using Namespace='System' />
@@ -606,7 +606,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LogErrorAfterTaskIsDone()
         {
             string projectFileContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                               <Using Namespace='System' />
@@ -975,7 +975,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         internal class MyCustomBuildEventArgsNotSerializable : CustomBuildEventArgs
         {
-            //  If binary serialization is not available, then we use a simple serializer which relies on a default constructor.  So to test
+            // If binary serialization is not available, then we use a simple serializer which relies on a default constructor.  So to test
             //  what happens for an event that's not serializable, don't include a default constructor.
             /// <summary>
             /// Default constructor

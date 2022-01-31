@@ -966,8 +966,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return TaskRegistry; }
-            set { TaskRegistry = value; }
+            {
+                return TaskRegistry;
+            }
+
+            set
+            {
+                TaskRegistry = value;
+            }
         }
 
         /// <summary>
@@ -1074,8 +1080,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return InitialTargets; }
-            set { InitialTargets = value; }
+            {
+                return InitialTargets;
+            }
+
+            set
+            {
+                InitialTargets = value;
+            }
         }
 
         /// <summary>
@@ -1086,8 +1098,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return DefaultTargets; }
-            set { DefaultTargets = value; }
+            {
+                return DefaultTargets;
+            }
+
+            set
+            {
+                DefaultTargets = value;
+            }
         }
 
         /// <summary>
@@ -2579,19 +2597,8 @@ namespace Microsoft.Build.Execution
                         clearedVariables.Add(environmentVariable);
                     }
                 }
-#if (!STANDALONEBUILD)
-                wrapperProjectXml = Microsoft.Build.BuildEngine.SolutionWrapperProject.Generate(projectFile, toolsVersion, projectBuildEventContext);
-#else
                 wrapperProjectXml = "";
-#endif
             }
-#if (!STANDALONEBUILD)
-            catch (Microsoft.Build.BuildEngine.InvalidProjectFileException ex)
-            {
-                // Whenever calling the old engine, we must translate its exception types into ours
-                throw new InvalidProjectFileException(ex.ProjectFile, ex.LineNumber, ex.ColumnNumber, ex.EndLineNumber, ex.EndColumnNumber, ex.Message, ex.ErrorSubcategory, ex.ErrorCode, ex.HelpKeyword, ex.InnerException);
-            }
-#endif
             finally
             {
                 // Set the cleared environment variables back to what they were.

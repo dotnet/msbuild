@@ -8,7 +8,6 @@
     <AdditionalTlbExpAsmPaths>$(XMakeRefPath)</AdditionalTlbExpAsmPaths>
     <PublishTlbPath>$(XMakeRefPath)</PublishTlbPath>
     <GenerateAssemblyRefs>true</GenerateAssemblyRefs>
-    <DefineConstants Condition="'$(MSBUILDENABLEVSPROFILING)' != ''">$(DefineConstants);MSBUILDENABLEVSPROFILING</DefineConstants>
     <CopyToSuiteBin>true</CopyToSuiteBin>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which contains the legacy compatibility shim for the MSBuild engine.  NOTE: This assembly is deprecated.</PackageDescription>

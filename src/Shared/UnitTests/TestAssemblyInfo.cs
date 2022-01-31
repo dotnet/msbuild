@@ -11,12 +11,12 @@ using Xunit;
 
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]
 
-//  Register test framework for assembly fixture
+// Register test framework for assembly fixture
 [assembly: TestFramework("Xunit.NetCore.Extensions.XunitTestFrameworkWithAssemblyFixture", "Xunit.NetCore.Extensions")]
 
 [assembly: AssemblyFixture(typeof(MSBuildTestAssemblyFixture))]
 
-//  Wrap a TestEnvironment around each test method and class so if invariants have changed we will know where
+// Wrap a TestEnvironment around each test method and class so if invariants have changed we will know where
 [assembly: AssemblyFixture(typeof(MSBuildTestEnvironmentFixture), LifetimeScope = AssemblyFixtureAttribute.Scope.Class)]
 [assembly: AssemblyFixture(typeof(MSBuildTestEnvironmentFixture), LifetimeScope = AssemblyFixtureAttribute.Scope.Method)]
 
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
 
         public MSBuildTestAssemblyFixture()
         {
-            //  Set field to indicate tests are running in the TestInfo class in Microsoft.Build.Framework.
+            // Set field to indicate tests are running in the TestInfo class in Microsoft.Build.Framework.
             //  See the comments on the TestInfo class for an explanation of why it works this way.
             var frameworkAssembly = typeof(Microsoft.Build.Framework.ITask).Assembly;
             var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
 
             _testEnvironment.DoNotLaunchDebugger();
 
-            //  Reset the VisualStudioVersion environment variable.  This will be set if tests are run from a VS command prompt.  However,
+            // Reset the VisualStudioVersion environment variable.  This will be set if tests are run from a VS command prompt.  However,
             //  if the environment variable is set, it will interfere with tests which set the SubToolsetVersion
             //  (VerifySubToolsetVersionSetByConstructorOverridable), as the environment variable would take precedence.
             _testEnvironment.SetEnvironmentVariable("VisualStudioVersion", string.Empty);
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
 
             SetDotnetHostPath(_testEnvironment);
 
-            //  Use a project-specific temporary path
+            // Use a project-specific temporary path
             //  This is so multiple test projects can be run in parallel without sharing the same temp directory
             var subdirectory = Path.GetRandomFileName();
 
