@@ -322,7 +322,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetFrameworkSubsets
         {
-            get { return _targetFrameworkSubsets; }
+            get
+            {
+                return _targetFrameworkSubsets;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "TargetFrameworkSubsets");
@@ -450,7 +454,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] InstalledAssemblySubsetTables
         {
-            get { return _installedAssemblySubsetTables; }
+            get
+            {
+                return _installedAssemblySubsetTables;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "InstalledAssemblySubsetTables");
@@ -477,7 +485,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] FullFrameworkAssemblyTables
         {
-            get { return _fullFrameworkAssemblyTables; }
+            get
+            {
+                return _fullFrameworkAssemblyTables;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkAssemblyTables");
@@ -1237,9 +1249,8 @@ namespace Microsoft.Build.Tasks
                     // Log general resolution exceptions.
                     foreach (Exception error in generalResolutionExceptions)
                     {
-                        if (error is InvalidReferenceAssemblyNameException)
+                        if (error is InvalidReferenceAssemblyNameException e)
                         {
-                            InvalidReferenceAssemblyNameException e = (InvalidReferenceAssemblyNameException)error;
                             Log.LogWarningWithCodeFromResources("General.MalformedAssemblyName", e.SourceItemSpec);
                         }
                         else
@@ -1257,9 +1268,9 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (Resolver r in dependencyTable.Resolvers)
                 {
-                    if (r is AssemblyFoldersExResolver)
+                    if (r is AssemblyFoldersExResolver assemblyFoldersExResolver)
                     {
-                        AssemblyFoldersEx assemblyFoldersEx = ((AssemblyFoldersExResolver)r).AssemblyFoldersExLocations;
+                        AssemblyFoldersEx assemblyFoldersEx = assemblyFoldersExResolver.AssemblyFoldersExLocations;
 
                         if (assemblyFoldersEx != null && _showAssemblyFoldersExLocations.TryGetValue(r.SearchPath, out messageImportance))
                         {
@@ -2633,12 +2644,8 @@ namespace Microsoft.Build.Tasks
                         getAssemblyMetadata(resolvedReference.FullPath, assemblyMetadataCache, out result, out scatterFiles, out frameworkName);
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
                 }
             }
 

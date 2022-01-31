@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
                 var folder = env.CreateFolder().Path;
                 var projFile = Path.Combine(folder, ProjectFileName);
 
-                //"Debug", "netstandard1.3"
+                // "Debug", "netstandard1.3"
                 DirectoryInfo ProjectFileFolder =
                     new DirectoryInfo(PortableTaskFolderPath).EnumerateDirectories().First().EnumerateDirectories().First();
 

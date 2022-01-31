@@ -284,11 +284,8 @@ namespace Microsoft.Build.BackEnd
                 escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
                 IDictionary nonGenericEscapedMetadata = copyFromAsITaskItem2.CloneCustomMetadataEscaped();
 
-                if (nonGenericEscapedMetadata is Dictionary<string, string>)
-                {
-                    escapedMetadata = (Dictionary<string, string>)nonGenericEscapedMetadata;
-                }
-                else
+                escapedMetadata = nonGenericEscapedMetadata as Dictionary<string, string>;
+                if (escapedMetadata is null)
                 {
                     escapedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                     foreach (object key in nonGenericEscapedMetadata.Keys)

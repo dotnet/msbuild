@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadEmptyTarget()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'/>
                     </Project>
                 ";
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target/>
                     </Project>
                 ";
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target XX='YY'/>
                     </Project>
                 ";
@@ -310,7 +310,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         /// <summary>
         /// Set return value.  Verify that setting to the empty string and null are
-        /// both allowed and have distinct behaviour. 
+        /// both allowed and have distinct behaviour.
         /// </summary>
         [Fact]
         public void SetReturns()
@@ -345,7 +345,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectTargetElement GetTargetXml()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t' Inputs='i' Outputs='o' DependsOnTargets='d' Condition='c'>
                             <t1/>
                             <t2/>

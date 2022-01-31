@@ -262,7 +262,7 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 yield return new object[]
                 {
-                    new Dictionary<int, int[]> //graph nodes and ProjectReference edges
+                    new Dictionary<int, int[]> // graph nodes and ProjectReference edges
                     {
                         {1, null},
                         {2, null}

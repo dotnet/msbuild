@@ -414,7 +414,7 @@ namespace Microsoft.Build.UnitTests
         public void AppendSwitchWithOddNumberOfLiteralQuotesInParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendSwitchIfNotNull("/D", @"A='""'");     //   /DA='"'
+            c.AppendSwitchIfNotNull("/D", @"A='""'");     // /DA='"'
             c.ShouldBe(@"/D""A='\""'"""); //   /D"A='\"'"
         }
 
@@ -467,7 +467,6 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
-        
     }
 
     internal static class CommandLineBuilderExtensionMethods

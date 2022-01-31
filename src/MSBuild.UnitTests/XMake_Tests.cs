@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -456,7 +455,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":\"foo foo\"=\"bar bar\";\"baz=onga\"");
             doubleQuotesRemovedFromArg.ShouldBe(6);
         }
-        
+
         [Fact]
         public void ExtractSwitchParametersTestDoubleDash()
         {
@@ -494,7 +493,7 @@ namespace Microsoft.Build.UnitTests
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
             MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":\"foo foo\"=\"bar bar\";\"baz=onga\"");
             doubleQuotesRemovedFromArg.ShouldBe(6);
-        }        
+        }
 
         [Fact]
         public void GetLengthOfSwitchIndicatorTest()
@@ -627,7 +626,6 @@ namespace Microsoft.Build.UnitTests
            );
         }
 
-#if FEATURE_CULTUREINFO_CONSOLE_FALLBACK
         /// <summary>
         /// Regression test for bug where the MSBuild.exe command-line app
         /// would sometimes set the UI culture to just "en" which is considered a "neutral" UI
@@ -653,7 +651,6 @@ namespace Microsoft.Build.UnitTests
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
         }
-#endif
 
 #if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
@@ -702,7 +699,7 @@ namespace Microsoft.Build.UnitTests
                 var pathToProjectFile = Path.Combine(startDirectory, "foo.proj");
                 string projectString =
                    "<?xml version='1.0' encoding='utf-8'?>" +
-                    "<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='X'>" +
+                    "<Project ToolsVersion='X'>" +
                     "<Target Name='t'></Target>" +
                     "</Project>";
                 File.WriteAllText(pathToProjectFile, projectString);
@@ -739,7 +736,6 @@ namespace Microsoft.Build.UnitTests
             // If there's a space in the %TEMP% path, the config file is read in the static constructor by the URI class and we catch there;
             // if there's not, we will catch when we try to read the toolsets. Either is fine; we just want to not crash.
             (output.Contains("MSB1043") || output.Contains("MSB4136")).ShouldBeTrue("Output should contain 'MSB1043' or 'MSB4136'");
-
         }
 #endif
 
@@ -795,7 +791,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     sw.WriteLine(projectString);
                 }
-                //Should pass
+                // Should pass
 #if FEATURE_GET_COMMANDLINE
                 MSBuildApp.Execute(@"c:\bin\msbuild.exe " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
 #else
@@ -815,7 +811,7 @@ namespace Microsoft.Build.UnitTests
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             string projectString =
                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-                    "<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">" +
+                    "<Project ToolsVersion=\"4.0\">" +
                     "<Target Name=\"t\"><Message Text=\"[Hello]\"/></Target>" +
                     "</Project>";
             string tempdir = Path.GetTempPath();
@@ -830,11 +826,11 @@ namespace Microsoft.Build.UnitTests
                     sw.WriteLine(projectString);
                 }
 #if FEATURE_GET_COMMANDLINE
-                //Should pass
+                // Should pass
                 MSBuildApp.Execute(@$"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}"" /verbosity:detailed " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
 
 #else
-                //Should pass
+                // Should pass
                 MSBuildApp.Execute(
                     new[]
                         {
@@ -1288,10 +1284,10 @@ namespace Microsoft.Build.UnitTests
 
         private void RunPriorityBuildTest(ProcessPriorityClass expectedPrority, params string[] arguments)
         {
-            string[] aggregateArguments = arguments.Union(new[] { " /nr:false /v:diag "}).ToArray();
+            string[] aggregateArguments = arguments.Union(new[] { " /nr:false /v:diag " }).ToArray();
 
             string contents = ObjectModelHelpers.CleanupFileContents(@"
-<Project DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project DefaultTargets=""Build"">
  <Target Name=""Build"">
     <Message Text=""Task priority is '$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)'""/>
  </Target>
@@ -1716,9 +1712,9 @@ namespace Microsoft.Build.UnitTests
                 RobustDelete(projectDirectory);
             }
         }
-#endregion
+        #endregion
 
-#region ProcessFileLoggerSwitches
+        #region ProcessFileLoggerSwitches
         /// <summary>
         /// Test the case where no file logger switches are given, should be no file loggers attached
         /// </summary>
@@ -1961,9 +1957,9 @@ namespace Microsoft.Build.UnitTests
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
-#endregion
+        #endregion
 
-#region ProcessConsoleLoggerSwitches
+        #region ProcessConsoleLoggerSwitches
         [Fact]
         public void ProcessConsoleLoggerSwitches()
         {
@@ -2011,14 +2007,14 @@ namespace Microsoft.Build.UnitTests
             distributedLogger.CentralLogger.Parameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameters passed in"
             distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
         }
-#endregion
+        #endregion
 
         [Fact]
         public void RestoreFirstReevaluatesImportGraph()
         {
             string guid = Guid.NewGuid().ToString("N");
 
-            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project>
 
   <PropertyGroup>
     <RestoreFirstProps>{Guid.NewGuid():N}.props</RestoreFirstProps>
@@ -2033,7 +2029,7 @@ namespace Microsoft.Build.UnitTests
 
   <Target Name=""Restore"">
     <ItemGroup>
-      <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
+      <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
     </ItemGroup>
 
     <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
@@ -2053,7 +2049,7 @@ namespace Microsoft.Build.UnitTests
             string guid2 = Guid.NewGuid().ToString("N");
             string restoreFirstProps = $"{Guid.NewGuid():N}.props";
 
-            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project>
 
   <PropertyGroup>
     <RestoreFirstProps>{restoreFirstProps}</RestoreFirstProps>
@@ -2069,7 +2065,7 @@ namespace Microsoft.Build.UnitTests
   <Target Name=""Restore"">
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
     <ItemGroup>
-      <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
+      <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
     </ItemGroup>
 
     <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
@@ -2079,7 +2075,7 @@ namespace Microsoft.Build.UnitTests
 
             IDictionary<string, string> preExistingProps = new Dictionary<string, string>
             {
-                { restoreFirstProps, $@"<Project ToolsVersion=""Current"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                { restoreFirstProps, $@"<Project ToolsVersion=""Current"">
   <PropertyGroup>
     <PropertyA>{guid1}</PropertyA>
   </PropertyGroup>
@@ -2100,7 +2096,7 @@ namespace Microsoft.Build.UnitTests
             string guid2 = Guid.NewGuid().ToString("N");
             string restoreFirstProps = $"{Guid.NewGuid():N}.props";
 
-            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project>
 
   <PropertyGroup>
     <RestoreFirstProps>{restoreFirstProps}</RestoreFirstProps>
@@ -2116,7 +2112,7 @@ namespace Microsoft.Build.UnitTests
   <Target Name=""Restore"">
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
     <ItemGroup>
-      <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
+      <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid2}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
     </ItemGroup>
 
     <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
@@ -2126,7 +2122,7 @@ namespace Microsoft.Build.UnitTests
 
             IDictionary<string, string> preExistingProps = new Dictionary<string, string>
             {
-                { restoreFirstProps, $@"<Project ToolsVersion=""Current"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                { restoreFirstProps, $@"<Project ToolsVersion=""Current"">
   <PropertyGroup>
     <PropertyA>{guid1}</PropertyA>
   </PropertyGroup>
@@ -2190,7 +2186,7 @@ $@"<Project>
         [Fact]
         public void MultipleTargetsDoesNotCrash()
         {
-            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project>
   <Target Name=""Target1"">
     <Message Text=""7514CB1641A948D0A3930C5EC2DC1940"" />
   </Target>
@@ -2235,7 +2231,7 @@ $@"<Project>
         [InlineData("/interactive /p:NuGetInteractive=true")]
         public void InteractiveSetsBuiltInProperty(string arguments)
         {
-            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
 
   <Target Name=""Build"">
     <Message Text=""MSBuildInteractive = [$(MSBuildInteractive)]"" />
@@ -2255,7 +2251,7 @@ $@"<Project>
         public void BinaryLogContainsImportedFiles()
         {
             var testProject = _env.CreateFile("Importer.proj", ObjectModelHelpers.CleanupFileContents(@"
-            <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            <Project>
                 <Import Project=""TestProject.proj"" />
 
                 <Target Name=""Build"">
@@ -2264,7 +2260,7 @@ $@"<Project>
             </Project>"));
 
             _env.CreateFile("TestProject.proj", @"
-            <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            <Project>
               <Target Name=""Build"">
                 <Message Text=""Hello from TestProject!"" />
               </Target>
@@ -2327,7 +2323,7 @@ EndGlobal
 
             string testMessage = "Hello from TestProject!";
             _env.CreateFile("TestProject.proj", @$"
-            <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            <Project>
               <Target Name=""Build"">
                 <Message Text=""{testMessage}"" />
               </Target>
@@ -2476,7 +2472,7 @@ EndGlobal
             }
         }
 
-        private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null,  IDictionary<string, string> envsToCreate = null, params string[] arguments)
+        private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null, IDictionary<string, string> envsToCreate = null, params string[] arguments)
         {
             (bool result, string output) = ExecuteMSBuildExe(projectContents, filesToCreate, envsToCreate, arguments);
 

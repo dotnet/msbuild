@@ -312,7 +312,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>true</returns>
         public override bool Execute()
         {
-            //Does Nothing: getters do all the work
+            // Does Nothing: getters do all the work
 
             return true;
         }

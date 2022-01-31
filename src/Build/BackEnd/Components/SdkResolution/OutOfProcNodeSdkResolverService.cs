@@ -4,7 +4,6 @@
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
@@ -29,7 +28,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// The cache of responses which is cleared between builds.
         /// </summary>
-        private readonly ConcurrentDictionary<string, Lazy<SdkResult>> _responseCache = new ConcurrentDictionary<string, Lazy<SdkResult>>(MSBuildNameIgnoreCaseComparer.Default);
+        private readonly ConcurrentDictionary<string, SdkResult> _responseCache = new ConcurrentDictionary<string, SdkResult>(MSBuildNameIgnoreCaseComparer.Default);
 
         /// <summary>
         /// An event to signal when a response has been received.
@@ -66,29 +65,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
-            bool wasResultCached = true;
-
-            MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(submissionId, sdk.Name, solutionPath, projectPath);
-
             // Get a cached response if possible, otherwise send the request
-            Lazy<SdkResult> sdkResultLazy = _responseCache.GetOrAdd(
+            var sdkResult = _responseCache.GetOrAdd(
                 sdk.Name,
-                key => new Lazy<SdkResult>(() =>
+                key =>
                 {
-                    wasResultCached = false;
-
-                    return RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
-                }));
-
-            SdkResult sdkResult = sdkResultLazy.Value;
+                    var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                    return result;
+                });
 
             if (sdkResult.Version != null && !SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
             {
                 // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.
                 loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, sdkResult.Version, sdkResult.ElementLocation, sdk.Version);
             }
-
-            MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(submissionId, sdk.Name, solutionPath, projectPath, _lastResponse.Success, wasResultCached);
 
             return sdkResult;
         }

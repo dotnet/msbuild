@@ -25,7 +25,6 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -1229,7 +1228,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -1880,7 +1878,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     projectList ??= new List<ProjectRootElement>();
 
-                    //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
+                    // Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
                     //  any projects from paths returned by the SDK Resolver.
                     projectList.Insert(0, CreateProjectForSdkResult(sdkResult));
                 }
@@ -1894,7 +1892,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        //  Creates a project to set the properties and include the items from an SdkResult
+        // Creates a project to set the properties and include the items from an SdkResult
         private ProjectRootElement CreateProjectForSdkResult(SdkResult sdkResult)
         {
             int propertiesAndItemsHash;
@@ -1937,7 +1935,7 @@ namespace Microsoft.Build.Evaluation
             propertiesAndItemsHash = hash.ToHashCode();
 #endif
 
-            //  Generate a unique filename for the generated project for each unique set of properties and items.
+            // Generate a unique filename for the generated project for each unique set of properties and items.
             string projectPath = _projectRootElement.FullPath + ".SdkResolver." + propertiesAndItemsHash + ".proj";
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)

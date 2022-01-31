@@ -554,7 +554,7 @@ namespace Microsoft.Build.Tasks.Xaml
                         switchRelations.Status = attribute.InnerText;
                         break;
                     default:
-                        //LogError("InvalidAttribute", attribute.Name);
+                        // LogError("InvalidAttribute", attribute.Name);
                         break;
                 }
             }

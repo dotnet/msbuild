@@ -226,7 +226,7 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             List<string> overriddenSwitches = new List<string>();
 
-            //Collect the overrided switches
+            // Collect the overrided switches
             foreach (KeyValuePair<string, CommandLineToolSwitch> overriddenSwitch in ActiveToolSwitches)
             {
                 foreach (KeyValuePair<string, string> overridePair in overriddenSwitch.Value.Overrides)

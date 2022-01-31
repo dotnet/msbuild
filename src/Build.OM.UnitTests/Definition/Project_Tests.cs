@@ -2054,7 +2054,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             result.ShouldBeFalse();
 
-            mockLogger.Errors[0].Code.ShouldBe("MSB4112"); //                 "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
+            mockLogger.Errors[0].Code.ShouldBe("MSB4112"); // "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
         }
 
         /// <summary>
@@ -2109,10 +2109,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 result = project.Build(new ILogger[] { mockLogger });
             }
-            catch
-            {
-                throw;
-            }
             finally
             {
                 project.ProjectCollection.UnregisterAllLoggers();
@@ -2120,9 +2116,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             result.ShouldBeTrue();
 
-            mockLogger.WarningCount.ShouldBe(0); //                 "Log should not contain MSB4011 because the build logger will not receive evaluation messages."
+            mockLogger.WarningCount.ShouldBe(0); // "Log should not contain MSB4011 because the build logger will not receive evaluation messages."
 
-            collectionLogger.Warnings[0].Code.ShouldBe("MSB4011"); //                 "Log should contain MSB4011 because the project collection logger should have been used for evaluation."
+            collectionLogger.Warnings[0].Code.ShouldBe("MSB4011"); // "Log should contain MSB4011 because the project collection logger should have been used for evaluation."
         }
 
         /// <summary>
@@ -3321,7 +3317,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var project =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
-                    <A Include=`" + longString +  @"`/>
+                    <A Include=`" + longString + @"`/>
                   </ItemGroup>
                 </Project>
                 ";
@@ -3519,7 +3515,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected, project, "1.foo");
         }
 
-		[Fact]
+        [Fact]
         public void GetItemProvenanceShouldWorkWithRemoveElements()
         {
             var project =
@@ -3573,7 +3569,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 ProvenanceResultTupleList expectedProvenance = null;
 
-                var provenanceKind = includeGlob.IndexOfAny(new[]{'*', '?'}) != -1  ? Provenance.Glob : Provenance.StringLiteral;
+                var provenanceKind = includeGlob.IndexOfAny(new[] { '*', '?' }) != -1 ? Provenance.Glob : Provenance.StringLiteral;
                 expectedProvenance = provenanceShouldFindAMatch
                     ? new ProvenanceResultTupleList
                     {
@@ -3683,25 +3679,25 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-//        [InlineData(
+// [InlineData(
 //            @"
-//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-//<A Remove=`e*;f*`/>
-//",
+// <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+// <A Remove=`e*;f*`/>
+// ",
 //        new[] {"ba"},
 //        new[] {"a", "ca", "da", "ea", "fa"}
 //        )]
 //        [InlineData(
 //            @"
-//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-//",
+// <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+// ",
 //        new[] {"ba", "ea", "fa"},
 //        new[] {"a", "ca", "da"}
 //        )]
 //        [InlineData(
 //            @"
-//<A Include=`a;b*;c*;d*;e*;f*`/>
-//",
+// <A Include=`a;b*;c*;d*;e*;f*`/>
+// ",
 //        new[] {"ba", "ca", "da", "ea", "fa"},
 //        new[] {"a"}
 //        )]
@@ -3713,13 +3709,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 <A Include=`a*;b*;c*` Exclude=`@(E)`/>
 <A Remove=`@(R)`/>
 ",
-        new[] {"aa", "bb", "cc"},
-        new[] {"b", "c"}
+        new[] { "aa", "bb", "cc" },
+        new[] { "b", "c" }
         )]
         [InlineData(
             @"<A Include=`ab*;b|c*;de*`/>",
-            new[] {"ab", "de"},
-            new[] {"bc", "b|c", "b", "c"}
+            new[] { "ab", "de" },
+            new[] { "bc", "b|c", "b", "c" }
             )]
         public void GetAllGlobsShouldProduceGlobThatMatches(string itemContents, string[] stringsThatShouldMatch, string[] stringsThatShouldNotMatch)
         {
@@ -4257,7 +4253,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static void AssertGlobResult(GlobResultList expected, string project, string itemType)
         {
-            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs(itemType) ;
+            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs(itemType);
             AssertGlobResultsEqual(expected, globs);
         }
 
@@ -4343,7 +4339,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private string GetSampleProjectContent()
         {
             string projectFileContent = ObjectModelHelpers.CleanupFileContents(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='2.0' InitialTargets='it' DefaultTargets='dt'>
+                    <Project ToolsVersion='2.0' InitialTargets='it' DefaultTargets='dt'>
                         <PropertyGroup Condition=""'$(Configuration)'=='Foo'"">
                             <p>v1</p>
                         </PropertyGroup>

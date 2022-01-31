@@ -140,7 +140,7 @@ namespace Microsoft.Build.Evaluation
                     _evaluationProfiler._evaluationStack.Peek()._exclusiveTime.Start();
                 }
 
-                //  Add elapsed times to evaluation counter dictionaries
+                // Add elapsed times to evaluation counter dictionaries
                 if (!_evaluationProfiler.ProfiledResult.Value.ProfiledLocations.TryGetValue(Location, out var previousTimeSpent))
                 {
                     previousTimeSpent = new ProfiledLocation(TimeSpan.Zero, TimeSpan.Zero, 0);

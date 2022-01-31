@@ -45,7 +45,7 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("{FullPath} #Children={Count} DefaultTargets={DefaultTargets} ToolsVersion={ToolsVersion} InitialTargets={InitialTargets} ExplicitlyLoaded={IsExplicitlyLoaded}")]
     public class ProjectRootElement : ProjectElementContainer
     {
-        /// Constants for default (empty) project file.
+        // Constants for default (empty) project file.
         private const string EmptyProjectFileContent = "{0}<Project{1}{2}>\r\n</Project>";
         private const string EmptyProjectFileXmlDeclaration = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
         private const string EmptyProjectFileToolsVersion = " ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\"";
@@ -2084,13 +2084,8 @@ namespace Microsoft.Build.Construction
                     StreamTimeUtc = null;
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.NotExpectedIoOrXmlException(ex))
             {
-                if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
-                {
-                    throw;
-                }
-
                 BuildEventFileInfo fileInfo = ex is XmlException xmlException
                     ? new BuildEventFileInfo(fullPath, xmlException)
                     : new BuildEventFileInfo(fullPath);

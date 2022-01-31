@@ -238,7 +238,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
             ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
-            ErrorUtilities.VerifyThrow(!_pendingResourceRequests.IsEmpty, "No pending resource requests");
+            ErrorUtilities.VerifyThrow(_pendingResourceRequests.Any(), "No pending resource requests");
             VerifyEntryInActiveOrWaitingState();
 
             _pendingResourceRequests.Dequeue()(response);
@@ -290,19 +290,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     taskCleanedUp = _requestTask.Wait(BuildParameters.RequestBuilderShutdownTimeout);
                 }
-                catch (AggregateException e)
+                catch (AggregateException e) when (InnerExceptionsAreAllCancelledExceptions(e))
                 {
-                    AggregateException flattenedException = e.Flatten();
-
-                    if (flattenedException.InnerExceptions.All(ex => (ex is TaskCanceledException || ex is OperationCanceledException)))
-                    {
-                        // ignore -- just indicates that the task finished cancelling before we got a chance to wait on it.  
-                        taskCleanedUp = true;
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    // ignore -- just indicates that the task finished cancelling before we got a chance to wait on it.  
+                    taskCleanedUp = true;
                 }
 
                 if (!taskCleanedUp)
@@ -314,6 +305,11 @@ namespace Microsoft.Build.BackEnd
             }
 
             _isZombie = true;
+        }
+
+        private bool InnerExceptionsAreAllCancelledExceptions(AggregateException e)
+        {
+            return e.Flatten().InnerExceptions.All(ex => ex is TaskCanceledException || ex is OperationCanceledException);
         }
 
         #region IRequestBuilderCallback Members
@@ -718,9 +714,7 @@ namespace Microsoft.Build.BackEnd
             CultureInfo.CurrentCulture = _componentHost.BuildParameters.Culture;
             CultureInfo.CurrentUICulture = _componentHost.BuildParameters.UICulture;
 
-#if FEATURE_THREAD_PRIORITY
             Thread.CurrentThread.Priority = _componentHost.BuildParameters.BuildThreadPriority;
-#endif
             Thread.CurrentThread.IsBackground = true;
 
             // NOTE: This is safe to do because we have specified long-running so we get our own new thread.
@@ -826,16 +820,6 @@ namespace Microsoft.Build.BackEnd
 
                 thrownException = ex;
             }
-            catch (LoggerException ex)
-            {
-                // Polite logger failure
-                thrownException = ex;
-            }
-            catch (InternalLoggerException ex)
-            {
-                // Logger threw arbitrary exception
-                thrownException = ex;
-            }
             catch (Exception ex)
             {
                 thrownException = ex;
@@ -876,13 +860,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     _projectLoggingContext.LogProjectFinished(result.OverallResult == BuildResultCode.Success);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    if (ExceptionHandling.IsCriticalException(ex))
-                    {
-                        throw;
-                    }
-
                     if (result.Exception == null)
                     {
                         result.Exception = ex;
