@@ -1493,16 +1493,13 @@ internal static class NativeMethods
     internal static extern IntPtr LoadLibrary(string fileName);
 
     /// <summary>
-    /// Gets the fully qualified filename of the currently executing .exe
+    /// Gets the fully qualified filename of the currently executing .exe.
     /// </summary>
+    /// <param name="hModule"><see cref="HandleRef"/> of the module for which we are finding the file name.</param>
+    /// <param name="buffer">The character buffer used to return the file name.</param>
+    /// <param name="length">The length of the buffer.</param>
     [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-    internal static extern int GetModuleFileName(
-#if FEATURE_HANDLEREF
-            HandleRef hModule,
-#else
-            IntPtr hModule,
-#endif
-            [Out] char[] buffer, int length);
+    internal static extern int GetModuleFileName(HandleRef hModule,[Out] char[] buffer,int length);
 
     [DllImport("kernel32.dll")]
     internal static extern IntPtr GetStdHandle(int nStdHandle);
