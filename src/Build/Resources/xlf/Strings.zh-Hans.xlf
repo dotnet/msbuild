@@ -221,12 +221,12 @@
       </trans-unit>
       <trans-unit id="ProjectCacheBeginBuild">
         <source>Initializing project cache plugin.</source>
-        <target state="new">Initializing project cache plugin.</target>
+        <target state="translated">正在初始化项目缓存插件。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheEndBuild">
         <source>Shutting down project cache plugin.</source>
-        <target state="new">Shutting down project cache plugin.</target>
+        <target state="translated">正在关闭项目缓存插件。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheException">
@@ -236,21 +236,21 @@
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
-        <target state="new">Project cache hit for "{0}" (default targets).</target>
+        <target state="translated">项目缓存命中 "{0}" (默认目标)。</target>
         <note>
       LOCALIZATION: {0} is a file path.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithOutputs">
         <source>{0} -&gt; Cache Hit</source>
-        <target state="new">{0} -&gt; Cache Hit</target>
+        <target state="translated">{0} -&gt; 缓存命中</target>
         <note>
       {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithTargetNames">
         <source>Project cache hit for "{0}" ({1} target(s)).</source>
-        <target state="new">Project cache hit for "{0}" ({1} target(s)).</target>
+        <target state="translated">项目缓存命中 "{0}" ({1} 个目标)。</target>
         <note>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </note>
@@ -262,28 +262,28 @@
       </trans-unit>
       <trans-unit id="ProjectCacheMissWithDefaultTargets">
         <source>Project cache miss for "{0}" (default targets).</source>
-        <target state="new">Project cache miss for "{0}" (default targets).</target>
+        <target state="translated">项目缓存未命中 "{0}" (默认目标)。</target>
         <note>
       LOCALIZATION: {0} is a file path.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheMissWithTargetNames">
         <source>Project cache miss for "{0}" ({1} target(s)).</source>
-        <target state="new">Project cache miss for "{0}" ({1} target(s)).</target>
+        <target state="translated">项目缓存未命中 "{0}" ({1} 目标)。</target>
         <note>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
         <source>Project cache not applicable for "{0}" (default targets).</source>
-        <target state="new">Project cache not applicable for "{0}" (default targets).</target>
+        <target state="translated">项目缓存不适用于 "{0}" (默认目标)。</target>
         <note>
       LOCALIZATION: {0} is a file path.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
         <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
-        <target state="new">Project cache not applicable for "{0}" ({1} target(s)).</target>
+        <target state="translated">项目缓存不适用于 "{0}" ({1} 目标)。</target>
         <note>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </note>
@@ -295,14 +295,14 @@
       </trans-unit>
       <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
         <source>Querying project cache for "{0}" (default targets):</source>
-        <target state="new">Querying project cache for "{0}" (default targets):</target>
+        <target state="translated">正在查询 "{0}" 的项目缓存(默认目标):</target>
         <note>
       LOCALIZATION: {0} is a file path.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
         <source>Querying project cache for "{0}" (targets: {1}):</source>
-        <target state="new">Querying project cache for "{0}" (targets: {1}):</target>
+        <target state="translated">正在查询 "{0}" 的项目缓存(目标: {1}):</target>
         <note>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </note>
@@ -2153,7 +2153,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
         <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
-        <target state="new">Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</target>
+        <target state="translated">加载项目时未使用 ProjectLoadSettings.RecordDuplicateButNotCircularImports 标记。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">

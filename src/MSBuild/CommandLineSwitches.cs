@@ -44,9 +44,6 @@ namespace Microsoft.Build.CommandLine
             FileLogger7,
             FileLogger8,
             FileLogger9,
-#if (!STANDALONEBUILD)
-            OldOM,
-#endif
             DistributedFileLogger,
 #if DEBUG
             WaitForDebugger,
@@ -219,9 +216,6 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "filelogger7", "fl7" },            ParameterlessSwitch.FileLogger7,           null),
             new ParameterlessSwitchInfo(  new string[] { "filelogger8", "fl8" },            ParameterlessSwitch.FileLogger8,           null),
             new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },            ParameterlessSwitch.FileLogger9,           null),
-#if (!STANDALONEBUILD)
-            new ParameterlessSwitchInfo(  new string[] { "oldom" },                         ParameterlessSwitch.OldOM,                 null),
-#endif
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null),
 #if DEBUG
             new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null),
