@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
     [GuidAttribute("00020406-0000-0000-C000-000000000046")]
     [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
     [ComImport]
-    internal interface UCOMICreateITypeLib
+    internal interface ICreateTypeLib
     {
         void CreateTypeInfo();
         void SetName();
@@ -785,7 +785,9 @@ namespace Microsoft.Build.Tasks
         #region PInvoke
         private const string Crypt32DLL = "crypt32.dll";
         private const string Advapi32DLL = "advapi32.dll";
+#if !RUNTIME_TYPE_NETCORE
         private const string MscoreeDLL = "mscoree.dll";
+#endif
 
         //------------------------------------------------------------------------------
         // CreateHardLink
@@ -1133,9 +1135,9 @@ namespace Microsoft.Build.Tasks
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern uint GetFileVersion(String szFullPath, StringBuilder szBuffer, int cchBuffer, out uint dwLength);
 #endif
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
 #if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
         /// <summary>
         /// Given a pointer to a metadata blob, read the string parameter from it.  Returns true if
@@ -1256,8 +1258,8 @@ namespace Microsoft.Build.Tasks
 
             return count;
         }
-        #endregion
-        #region InternalClass
+#endregion
+#region InternalClass
 #if FEATURE_COM_INTEROP
         /// <summary>
         /// This class is a wrapper over the native GAC enumeration API.
@@ -1497,6 +1499,6 @@ namespace Microsoft.Build.Tasks
             }
         }
 #endif
-        #endregion
+#endregion
     }
 }

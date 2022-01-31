@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+#if MICROSOFT_BUILD_ENGINE_UNITTESTS
 using System.Text;
 using Microsoft.Build.BackEnd.Logging;
+#endif
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -22,7 +24,9 @@ namespace Microsoft.Build.UnitTests
     public partial class TestEnvironment
     {
         // reset the default build manager and the state it might have accumulated from other tests
+#pragma warning disable CA1823 // Avoid unused private fields
         private object _resetBuildManager = new ResetDefaultBuildManager();
+#pragma warning restore CA1823 // Avoid unused private fields
 
         private class ResetDefaultBuildManager
         {

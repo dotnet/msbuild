@@ -147,15 +147,7 @@ namespace Microsoft.Build.Shared
 
         private static Assembly GetEntryAssembly()
         {
-#if FEATURE_ASSEMBLY_GETENTRYASSEMBLY
             return System.Reflection.Assembly.GetEntryAssembly();
-#else
-            var getEntryAssembly = typeof(Assembly).GetMethod("GetEntryAssembly");
-
-            FrameworkErrorUtilities.VerifyThrowInternalNull(getEntryAssembly, "Assembly does not have the method GetEntryAssembly");
-
-            return (Assembly) getEntryAssembly.Invoke(null, Array.Empty<object>());
-#endif
         }
 
 #if !FEATURE_CULTUREINFO_GETCULTURES

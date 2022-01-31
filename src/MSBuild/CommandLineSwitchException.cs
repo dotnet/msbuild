@@ -56,7 +56,6 @@ namespace Microsoft.Build.CommandLine
             StreamingContext context
         ) :
             base(info, context)
-
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 

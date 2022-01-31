@@ -1453,13 +1453,13 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             BuildEventArgs buildEventArgs = null;
 
-            if (loggingEvent is BuildEventArgs)
+            if (loggingEvent is BuildEventArgs bea)
             {
-                buildEventArgs = (BuildEventArgs)loggingEvent;
+                buildEventArgs = bea;
             }
-            else if (loggingEvent is KeyValuePair<int, BuildEventArgs>)
+            else if (loggingEvent is KeyValuePair<int, BuildEventArgs> kvp)
             {
-                buildEventArgs = ((KeyValuePair<int, BuildEventArgs>)loggingEvent).Value;
+                buildEventArgs = kvp.Value;
             }
             else
             {
@@ -1523,13 +1523,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 _warningsAsMessagesByProject?.Remove(key);
             }
 
-            if (loggingEvent is BuildEventArgs)
+            if (loggingEvent is BuildEventArgs loggingEventBuildArgs)
             {
-                RouteBuildEvent((BuildEventArgs)loggingEvent);
+                RouteBuildEvent(loggingEventBuildArgs);
             }
-            else if (loggingEvent is KeyValuePair<int, BuildEventArgs>)
+            else if (loggingEvent is KeyValuePair<int, BuildEventArgs> loggingEventKeyValuePair)
             {
-                RouteBuildEvent((KeyValuePair<int, BuildEventArgs>)loggingEvent);
+                RouteBuildEvent(loggingEventKeyValuePair);
             }
         }
 

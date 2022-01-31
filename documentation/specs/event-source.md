@@ -21,7 +21,6 @@ EventSource is primarily used to profile code. For MSBuild specifically, a major
 | GenerateResourceOverall | Uses resource APIs to transform resource files into strongly-typed resource classes. |
 | LoadDocument | Loads an XMLDocumentWithLocation from a path.
 | MSBuildExe | Executes MSBuild from the command line. |
-| OutOfProcSdkResolverServiceRequestSdkPathFromMainNode | An out-of-proc node requests an SDK be resolved from the main node. |
 | PacketReadSize | Reports the size of a packet sent between nodes. Note that this does not include time information. |
 | Parse | Parses an XML document into a ProjectRootElement. |
 | ProjectGraphConstruction | Constructs a dependency graph among projects. |
@@ -33,7 +32,6 @@ EventSource is primarily used to profile code. For MSBuild specifically, a major
 | ReusableStringBuilderFactory | Uses and resizes (if necessary) of ReusableStringBuilders. |
 | ReusableStringBuilderFactoryUnbalanced | Identifies improper usage from multiple threads or buggy code: multiple Gets were called without a Relase. |
 | Save | Saves a project to the file system if dirty, creating directories as necessary. |
-| SdkResolverEvent | An SDK resolver logs an event. |
 | SdkResolverResolveSdk | A single SDK resolver is called. |
 | SdkResolverServiceInitialize | Initializes SDK resolvers. |
 | Target | Executes a target. |
