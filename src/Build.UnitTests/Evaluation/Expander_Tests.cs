@@ -1571,11 +1571,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             xmlattribute.Value = "abc123" + new Random().Next();
             string expandedString = expander.ExpandIntoStringLeaveEscaped(xmlattribute.Value, ExpanderOptions.ExpandAll, MockElementLocation.Instance);
 
-#if FEATURE_STRING_INTERN
             // Verify neither string got interned, so that this test is meaningful
             Assert.Null(string.IsInterned(xmlattribute.Value));
             Assert.Null(string.IsInterned(expandedString));
-#endif
 
             // Finally verify Expander indeed didn't create a new string.
             Assert.True(Object.ReferenceEquals(xmlattribute.Value, expandedString));
