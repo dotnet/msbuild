@@ -10,12 +10,6 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using System.Globalization;
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#if MSBUILDENABLEVSPROFILING 
-using Microsoft.VisualStudio.Profiler;
-#endif
-#endif
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
@@ -344,14 +338,6 @@ namespace Microsoft.Build.BuildEngine
             string toolsVersion
         )
         {
-#if MSBUILDENABLEVSPROFILING 
-            try
-            {
-                DataCollection.CommentMarkProfile(8808, "Construct Project Using Old OM - Start");
-#endif 
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectConstructBegin, CodeMarkerEvent.perfMSBuildProjectConstructEnd))
-#endif
             {
                 if (engine == null)
                 {
@@ -438,13 +424,6 @@ namespace Microsoft.Build.BuildEngine
                 this.GlobalProperties = this.parentEngine.GlobalProperties;
                 this.EnvironmentProperties = this.parentEngine.EnvironmentProperties;
             }
-#if MSBUILDENABLEVSPROFILING 
-            }
-            finally
-            {
-                DataCollection.CommentMarkProfile(8809, "Construct Project Using Old OM - End");
-            }
-#endif
         }
 
         /// <summary>
@@ -1779,18 +1758,11 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrowArgument(projectFileName.Length > 0, "EmptyProjectFileName");
             ErrorUtilities.VerifyThrowArgument(File.Exists(projectFileName), "ProjectFileNotFound", projectFileName);
 
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectLoadFromFileBegin, CodeMarkerEvent.perfMSBuildProjectLoadFromFileEnd))
-#endif
             {
                 string projectFullFileName = Path.GetFullPath(projectFileName);
 
                 try
                 {
-#if MSBUILDENABLEVSPROFILING 
-                string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} Using Old OM - Start", projectFullFileName);
-                DataCollection.CommentMarkProfile(8806, beginProjectLoad);
-#endif
                     XmlDocument projectDocument = null;
                     if (IsSolutionFilename(projectFileName))
                     {
@@ -1892,9 +1864,6 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // Flush the logging queue
                     ParentEngine.LoggingServices.ProcessPostedLoggingEvents();
-#if MSBUILDENABLEVSPROFILING 
-                DataCollection.CommentMarkProfile(8807, "Load Project Using Old OM - End");
-#endif
                 }
             }
         }
@@ -2116,17 +2085,7 @@ namespace Microsoft.Build.BuildEngine
             Encoding encoding
             )
         {
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectSaveToFileBegin, CodeMarkerEvent.perfMSBuildProjectSaveToFileEnd))
-#endif
             {
-#if MSBUILDENABLEVSPROFILING 
-            try
-            {
-                string beginProjectSave = String.Format(CultureInfo.CurrentCulture, "Save Project {0} Using Old OM - Start", projectFileName);
-                DataCollection.CommentMarkProfile(8810, beginProjectSave);
-#endif
-
                 // HIGHCHAR: Project.SaveToFileWithEncoding accepts encoding from caller.
                 using (ProjectWriter projectWriter = new ProjectWriter(projectFileName, encoding))
                 {
@@ -2143,14 +2102,6 @@ namespace Microsoft.Build.BuildEngine
 
                 // reset the dirty flag
                 dirtyNeedToSaveProjectFile = false;
-#if MSBUILDENABLEVSPROFILING 
-            }
-            finally
-            {
-                string endProjectSave = String.Format(CultureInfo.CurrentCulture, "Save Project {0} Using Old OM - End", projectFileName);
-                DataCollection.CommentMarkProfile(8810, endProjectSave);
-            }
-#endif
             }
         }
 
@@ -4268,16 +4219,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         private void EvaluateProject(bool currentlyLoading)
         {
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
-#endif
             {
-#if MSBUILDENABLEVSPROFILING 
-                try
-                {
-                    string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} Using Old OM - Start", this.FullFileName);
-                    DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
-#endif
                 string currentPerThreadProjectDirectory = Project.PerThreadProjectDirectory;
 
                 try
@@ -4333,14 +4275,6 @@ namespace Microsoft.Build.BuildEngine
                     // host is depending on the current directory to find projects
                     Project.PerThreadProjectDirectory = currentPerThreadProjectDirectory;
                 }
-#if MSBUILDENABLEVSPROFILING 
-                }
-                finally
-                {
-                    string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} Using Old OM - End", this.FullFileName);
-                    DataCollection.CommentMarkProfile(8813, beginProjectEvaluate);
-                }
-#endif
             }
         }
 

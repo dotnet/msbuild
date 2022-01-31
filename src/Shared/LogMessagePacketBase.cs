@@ -141,21 +141,10 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal abstract class LogMessagePacketBase : INodePacket
     {
-#if FEATURE_DOTNETVERSION
         /// <summary>
         /// The packet version, which is based on the CLR version. Cached because querying Environment.Version each time becomes an allocation bottleneck.
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
-#else
-        private static readonly int s_defaultPacketVersion = GetDefaultPacketVersion();
-
-        private static int GetDefaultPacketVersion()
-        {
-            Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;
-            Version coreAssemblyVersion = coreAssembly.GetName().Version;
-            return 1000 + (coreAssemblyVersion.Major * 10) + coreAssemblyVersion.Minor;
-        }
-#endif
 
         /// <summary>
         /// Dictionary of methods used to read BuildEventArgs.

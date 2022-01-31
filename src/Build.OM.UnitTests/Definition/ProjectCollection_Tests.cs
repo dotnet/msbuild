@@ -1062,11 +1062,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
 
             var collection = new ProjectCollection();
-#if STANDALONEBUILD
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
-#else
-            Assert.Equal("2.0", collection.DefaultToolsVersion);
-#endif
         }
 
         /// <summary>
