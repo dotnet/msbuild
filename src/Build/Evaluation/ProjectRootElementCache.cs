@@ -71,14 +71,13 @@ namespace Microsoft.Build.Evaluation
         /// If this number is increased much higher, the datastructure may
         /// need to be changed from a linked list, since it's currently O(n).
         /// </remarks>
-#pragma warning disable CA1802 // Use literals where appropriate
-        private static readonly int s_maximumStrongCacheSize = 200;
-#pragma warning restore CA1802 // Use literals where appropriate
+        private static readonly int s_maximumStrongCacheSize =
+            int.TryParse(Environment.GetEnvironmentVariable("MSBUILDPROJECTROOTELEMENTCACHESIZE"), out int cacheSize) ? cacheSize : 200;
 
         /// <summary>
         /// Whether the cache should log activity to the Debug.Out stream
         /// </summary>
-        private static bool s_debugLogCacheActivity;
+        private static bool s_debugLogCacheActivity = Environment.GetEnvironmentVariable("MSBUILDDEBUGXMLCACHE") == "1";
 
         /// <summary>
         /// Whether the cache should check file content for cache entry invalidation.
@@ -86,7 +85,7 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// Value shall be true only in case of testing. Outside QA tests it shall be false.
         /// </remarks>
-        private static bool s_сheckFileContent;
+        private static bool s_сheckFileContent = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT"));
 
 #if DEBUG
         /// <summary>
@@ -122,24 +121,6 @@ namespace Microsoft.Build.Evaluation
         /// Locking object for this shared cache
         /// </summary>
         private Object _locker = new Object();
-
-        /// <summary>
-        /// Static constructor to choose cache size.
-        /// </summary>
-        static ProjectRootElementCache()
-        {
-            // Configurable in case a customer has related perf problems after shipping and so that
-            // we can measure different values for perf easily.
-            string userSpecifiedSize = Environment.GetEnvironmentVariable("MSBUILDPROJECTROOTELEMENTCACHESIZE");
-            if (!String.IsNullOrEmpty(userSpecifiedSize))
-            {
-                // Not catching as this is an undocumented setting
-                s_maximumStrongCacheSize = Convert.ToInt32(userSpecifiedSize, NumberFormatInfo.InvariantInfo);
-            }
-
-            s_debugLogCacheActivity = Environment.GetEnvironmentVariable("MSBUILDDEBUGXMLCACHE") == "1";
-            s_сheckFileContent = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT"));
-        }
 
         /// <summary>
         /// Creates an empty cache.
