@@ -218,6 +218,13 @@ namespace Microsoft.Build.Tasks
             {
                 // See http://blogs.msdn.com/b/oldnewthing/archive/2012/02/17/10268840.aspx.
                 char* key = stackalloc char[CCH_RM_SESSION_KEY + 1];
+
+                // Explicitly zero initialize the buffer.
+                for(int i = 0; i < (CCH_RM_SESSION_KEY + 1); i++)
+                {
+                    key[i] = '\0';
+                }
+
                 res = RmStartSession(out handle, 0, key);
             }
 
