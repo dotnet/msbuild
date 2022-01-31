@@ -3,6 +3,8 @@
 
 using Microsoft.Build.Collections;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

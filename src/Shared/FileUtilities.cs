@@ -20,6 +20,8 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -81,7 +83,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
-        /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/Microsoft/msbuild/issues/781#issuecomment-243942514
+        /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
         /// </summary>
         internal static readonly char[] InvalidPathChars = new char[]
         {
@@ -94,7 +96,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Copied from https://github.com/dotnet/corefx/blob/387cf98c410bdca8fd195b28cbe53af578698f94/src/System.Runtime.Extensions/src/System/IO/Path.Windows.cs#L18
-        /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/Microsoft/msbuild/issues/781#issuecomment-243942514
+        /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
         /// </summary>
         internal static readonly char[] InvalidFileNameChars = new char[]
         {
@@ -285,7 +287,7 @@ namespace Microsoft.Build.Shared
             if (fullPath != null)
             {
                 int i = fullPath.Length;
-                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar) ;
+                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar);
                 return FixFilePath(fullPath.Substring(0, i));
             }
             return null;
@@ -447,7 +449,7 @@ namespace Microsoft.Build.Shared
 
         internal static string FixFilePath(string path)
         {
-            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
+            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/'); // .Replace("//", "/");
         }
 
 #if !CLR2COMPATIBILITY
@@ -822,7 +824,7 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static void DeleteWithoutTrailingBackslash(string path, bool recursive = false)
         {
-            //  Some tests (such as FileMatcher and Evaluation tests) were failing with an UnauthorizedAccessException or directory not empty.
+            // Some tests (such as FileMatcher and Evaluation tests) were failing with an UnauthorizedAccessException or directory not empty.
             //  This retry logic works around that issue.
             const int NUM_TRIES = 3;
             for (int i = 0; i < NUM_TRIES; i++)
@@ -831,17 +833,17 @@ namespace Microsoft.Build.Shared
                 {
                     Directory.Delete(EnsureNoTrailingSlash(path), recursive);
 
-                    //  If we got here, the directory was successfully deleted
+                    // If we got here, the directory was successfully deleted
                     return;
                 }
                 catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
                 {
                     if (i == NUM_TRIES - 1)
                     {
-                        //var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-                        //string fileString = string.Join(Environment.NewLine, files);
-                        //string message = $"Unable to delete directory '{path}'.  Contents:" + Environment.NewLine + fileString;
-                        //throw new IOException(message, ex);
+                        // var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+                        // string fileString = string.Join(Environment.NewLine, files);
+                        // string message = $"Unable to delete directory '{path}'.  Contents:" + Environment.NewLine + fileString;
+                        // throw new IOException(message, ex);
                         throw;
                     }
                 }
@@ -1088,27 +1090,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Helper function to create an Uri object from path.
-        /// </summary>
-        /// <param name="path">path string</param>
-        /// <returns>uri object</returns>
-        private static Uri CreateUriFromPath(string path)
-        {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
-
-            Uri pathUri;
-
-            // Try absolute first, then fall back on relative, otherwise it
-            // makes some absolute UNC paths like (\\foo\bar) relative ...
-            if (!Uri.TryCreate(path, UriKind.Absolute, out pathUri))
-            {
-                pathUri = new Uri(path, UriKind.Relative);
-            }
-
-            return pathUri;
-        }
-
-        /// <summary>
         /// Normalizes the path if and only if it is longer than max path,
         /// or would be if rooted by the current directory.
         /// This may make it shorter by removing ".."'s.
@@ -1228,7 +1209,7 @@ namespace Microsoft.Build.Shared
 
         internal static string NormalizeForPathComparison(this string s) => s.ToPlatformSlash().TrimTrailingSlashes();
 
-        // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
+        // TODO: assumption on file system case sensitivity: https://github.com/dotnet/msbuild/issues/781
         internal static bool PathsEqual(string path1, string path2)
         {
             if (path1 == null && path2 == null)

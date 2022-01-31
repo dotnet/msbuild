@@ -18,6 +18,8 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     public sealed class RoslynCodeTaskFactory : ITaskFactory
@@ -256,27 +258,29 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        ///  <summary>
-        ///  Parses and validates the body of the &lt;UsingTask /&gt;.
-        ///  </summary>
-        ///  <param name="log">A <see cref="TaskLoggingHelper"/> used to log events during parsing.</param>
-        ///  <param name="taskName">The name of the task.</param>
-        ///  <param name="taskBody">The raw inner XML string of the &lt;UsingTask />&gt; to parse and validate.</param>
+        /// <summary>
+        /// Parses and validates the body of the &lt;UsingTask /&gt;.
+        /// </summary>
+        /// <param name="log">A <see cref="TaskLoggingHelper"/> used to log events during parsing.</param>
+        /// <param name="taskName">The name of the task.</param>
+        /// <param name="taskBody">The raw inner XML string of the &lt;UsingTask />&gt; to parse and validate.</param>
         /// <param name="parameters">An <see cref="ICollection{TaskPropertyInfo}"/> containing parameters for the task.</param>
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object that receives the details of the parsed task.</param>
-        /// <returns><code>true</code> if the task body was successfully parsed, otherwise <code>false</code>.</returns>
-        ///  <remarks>
-        ///  The <paramref name="taskBody"/> will look like this:
-        ///  <![CDATA[
+        /// <returns><c>true</c> if the task body was successfully parsed, otherwise <c>false</c>.</returns>
+        /// <remarks>
+        /// The <paramref name="taskBody"/> will look like this:
+        /// <code>
+        /// <![CDATA[
         ///
-        ///    <Using Namespace="Namespace" />
-        ///    <Reference Include="AssemblyName|AssemblyPath" />
-        ///    <Code Type="Fragment|Method|Class" Language="cs|vb" Source="Path">
-        ///      // Source code
-        ///    </Code>
+        /// <Using Namespace="Namespace" />
+        /// <Reference Include="AssemblyName|AssemblyPath" />
+        /// <Code Type="Fragment|Method|Class" Language="cs|vb" Source="Path">
+        ///   // Source code
+        /// </Code>
         ///
-        ///  ]]>
-        ///  </remarks>
+        /// ]]>
+        /// </code>
+        /// </remarks>
         internal static bool TryLoadTaskBody(TaskLoggingHelper log, string taskName, string taskBody, ICollection<TaskPropertyInfo> parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo)
         {
             taskInfo = new RoslynCodeTaskFactoryTaskInfo
@@ -734,7 +738,7 @@ namespace Microsoft.Build.Tasks
 
         private static string[] GetMonoLibDirs()
         {
-            if(NativeMethodsShared.IsMono)
+            if (NativeMethodsShared.IsMono)
             {
                 string monoLibDir = Path.GetDirectoryName(typeof(object).Assembly.Location);
                 string monoLibFacadesDir = Path.Combine(monoLibDir, "Facades");

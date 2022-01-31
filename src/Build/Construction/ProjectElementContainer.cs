@@ -10,6 +10,8 @@ using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -29,7 +31,7 @@ namespace Microsoft.Build.Construction
         /// External projects support
         /// </summary>
         internal ProjectElementContainer(ProjectElementContainerLink link)
-            :base(link)
+            : base(link)
         {
         }
 
@@ -95,7 +97,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Number of children of any kind
         /// </summary>
-        public int Count { get => Link != null ? ContainerLink.Count : _count ; private set => _count = value; }
+        public int Count { get => Link != null ? ContainerLink.Count : _count; private set => _count = value; }
 
         /// <summary>
         /// First child, if any, otherwise null.
@@ -421,7 +423,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrow(Link == null, "External project");
 
-            //  Assumes that child.ExpressedAsAttribute is true
+            // Assumes that child.ExpressedAsAttribute is true
             Debug.Assert(child.ExpressedAsAttribute, nameof(SetElementAsAttributeValue) + " method requires that " +
                 nameof(child.ExpressedAsAttribute) + " property of child is true");
 
@@ -462,7 +464,7 @@ namespace Microsoft.Build.Construction
                 // todo children represented as attributes need to be placed in order too
                 //  Assume that the name of the child has already been validated to conform with rules in XmlUtilities.VerifyThrowArgumentValidElementName
 
-                //  Make sure we're not trying to add multiple attributes with the same name
+                // Make sure we're not trying to add multiple attributes with the same name
                 ProjectErrorUtilities.VerifyThrowInvalidProject(!XmlElement.HasAttribute(child.XmlElement.Name),
                     XmlElement.Location, "InvalidChildElementDueToDuplication", child.XmlElement.Name, ElementName);
 
@@ -470,7 +472,7 @@ namespace Microsoft.Build.Construction
             }
             else
             {
-                //  We want to add the XmlElement to the same position in the child list as the corresponding ProjectElement.
+                // We want to add the XmlElement to the same position in the child list as the corresponding ProjectElement.
                 //  Depending on whether the child ProjectElement has a PreviousSibling or a NextSibling, we may need to
                 //  use the InsertAfter, InsertBefore, or AppendChild methods to add it in the right place.
                 //
@@ -485,11 +487,11 @@ namespace Microsoft.Build.Construction
 
                 if (TrySearchLeftSiblings(child.PreviousSibling, SiblingIsExplicitElement, out ProjectElement referenceSibling))
                 {
-                    //  Add after previous sibling
+                    // Add after previous sibling
                     XmlElement.InsertAfter(child.XmlElement, referenceSibling.XmlElement);
                     if (XmlDocument.PreserveWhitespace)
                     {
-                        //  Try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
+                        // Try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
                         //  after, and inserting the same whitespace between the previous node and the one we added
                         if (referenceSibling.XmlElement.PreviousSibling?.NodeType == XmlNodeType.Whitespace)
                         {
@@ -500,12 +502,12 @@ namespace Microsoft.Build.Construction
                 }
                 else if (TrySearchRightSiblings(child.NextSibling, SiblingIsExplicitElement, out referenceSibling))
                 {
-                    //  Add as first child
+                    // Add as first child
                     XmlElement.InsertBefore(child.XmlElement, referenceSibling.XmlElement);
 
                     if (XmlDocument.PreserveWhitespace)
                     {
-                        //  Try to match the surrounding formatting by checking the whitespace that precedes where we inserted
+                        // Try to match the surrounding formatting by checking the whitespace that precedes where we inserted
                         //  the new node, and inserting the same whitespace between the node we added and the one after it.
                         if (child.XmlElement.PreviousSibling?.NodeType == XmlNodeType.Whitespace)
                         {
@@ -516,12 +518,12 @@ namespace Microsoft.Build.Construction
                 }
                 else
                 {
-                    //  Add as only child
+                    // Add as only child
                     XmlElement.AppendChild(child.XmlElement);
 
                     if (XmlDocument.PreserveWhitespace)
                     {
-                        //  If the empty parent has whitespace in it, delete it
+                        // If the empty parent has whitespace in it, delete it
                         if (XmlElement.FirstChild.NodeType == XmlNodeType.Whitespace)
                         {
                             XmlElement.RemoveChild(XmlElement.FirstChild);
@@ -575,14 +577,14 @@ namespace Microsoft.Build.Construction
 
                 if (XmlDocument.PreserveWhitespace)
                 {
-                    //  If we are trying to preserve formatting of the file, then also remove any whitespace
+                    // If we are trying to preserve formatting of the file, then also remove any whitespace
                     //  that came before the node we removed.
                     if (previousSibling?.NodeType == XmlNodeType.Whitespace)
                     {
                         XmlElement.RemoveChild(previousSibling);
                     }
 
-                    //  If we removed the last non-whitespace child node, set IsEmpty to true so that we get:
+                    // If we removed the last non-whitespace child node, set IsEmpty to true so that we get:
                     //      <ItemName />
                     //  instead of:
                     //      <ItemName>

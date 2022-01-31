@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +18,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     ///     The proxy targets are left in the build result (i.e., both GetTargetPath and Build will appear in the build result).
     ///     Real targets can be committed in which case msbuild only keeps the proxy target in the build result.
     /// </summary>
-    public class ProxyTargets: ITranslatable
+    public class ProxyTargets : ITranslatable
     {
         private Dictionary<string, string> _proxyTargetToRealTargetMap = null!;
 

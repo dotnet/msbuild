@@ -9,6 +9,8 @@ using Microsoft.Build.Exceptions;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class InvalidProjectFileExceptionTests
@@ -89,7 +91,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Regression test for https://github.com/Microsoft/msbuild/issues/1286
+        /// Regression test for https://github.com/dotnet/msbuild/issues/1286
         /// </summary>
         [Fact]
         public void LogErrorShouldHavePathAndLocation()
@@ -112,7 +114,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Assert.Equal(3, e.LineNumber);
                 Assert.Equal(38, e.ColumnNumber);
-                Assert.Equal(file, e.ProjectFile); // https://github.com/Microsoft/msbuild/issues/1286
+                Assert.Equal(file, e.ProjectFile); // https://github.com/dotnet/msbuild/issues/1286
             }
             finally
             {

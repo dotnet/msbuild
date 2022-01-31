@@ -16,6 +16,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class CommandLineSwitchesTests
@@ -294,6 +296,22 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("restoreproperty")]
+        [InlineData("RESTOREPROPERTY")]
+        [InlineData("RestoreProperty")]
+        [InlineData("rp")]
+        [InlineData("RP")]
+        public void RestorePropertySwitchIdentificationTests(string property)
+        {
+            CommandLineSwitches.IsParameterizedSwitch(property, out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch, out string duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.RestoreProperty);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldBe("MissingPropertyError");
+            unquoteParameters.ShouldBeTrue();
+        }
+
+        [Theory]
         [InlineData("logger")]
         [InlineData("LOGGER")]
         [InlineData("Logger")]
@@ -546,7 +564,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new[] {"true", "  NoBuild  ", "  ", "foo"});
 
@@ -558,9 +576,9 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph" }, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph" }, switches);
 
-            switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new string[0]);
+            switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(Array.Empty<string>());
 
             switches.HaveErrors().ShouldBeFalse();
         }
@@ -981,9 +999,9 @@ namespace Microsoft.Build.UnitTests
                                         "ScoobyDoo",
                                         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
                                         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
-                                        new ILogger[] { },
+                                        Array.Empty<ILogger>(),
                                         LoggerVerbosity.Normal,
-                                        new DistributedLoggerRecord[] { },
+                                        Array.Empty<DistributedLoggerRecord>(),
 #if FEATURE_XML_SCHEMA_VALIDATION
                                         false,
                                         null,
@@ -1003,7 +1021,8 @@ namespace Microsoft.Build.UnitTests
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         inputResultsCaches: null,
-                                        outputResultsCache: null
+                                        outputResultsCache: null,
+                                        commandLine: null
                         );
                 }
                 finally
@@ -1223,9 +1242,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ProcessBooleanSwitchTest()
         {
-            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: true, resourceName: null).ShouldBeTrue();
+            MSBuildApp.ProcessBooleanSwitch(Array.Empty<string>(), defaultValue: true, resourceName: null).ShouldBeTrue();
 
-            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: false, resourceName: null).ShouldBeFalse();
+            MSBuildApp.ProcessBooleanSwitch(Array.Empty<string>(), defaultValue: false, resourceName: null).ShouldBeFalse();
 
             MSBuildApp.ProcessBooleanSwitch(new [] { "true" }, defaultValue: false, resourceName: null).ShouldBeTrue();
 
@@ -1239,7 +1258,7 @@ namespace Microsoft.Build.UnitTests
             var emptyOptions = new GraphBuildOptions();
             var noBuildOptions = new GraphBuildOptions {Build = false};
 
-            yield return new object[] {new string[0], emptyOptions, null};
+            yield return new object[] {Array.Empty<string>(), emptyOptions, null};
 
             yield return new object[] {new[] {"true"}, emptyOptions, null};
 
@@ -1315,7 +1334,6 @@ namespace Microsoft.Build.UnitTests
             yield return new object[] { $"C:\\a_path\\with{Path.GetInvalidPathChars().First()}invalid\\chars" };
         }
 
-#if FEATURE_RESOURCEMANAGER_GETRESOURCESET
         /// <summary>
         /// Verifies that help messages are correctly formed with the right width and leading spaces.
         /// </summary>
@@ -1379,7 +1397,6 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
-#endif
 
         /// <summary>
         /// Verifies that a switch collection has an error registered for the given command line arg.

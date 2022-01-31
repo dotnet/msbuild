@@ -5,6 +5,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -57,7 +59,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal ProjectLoggingContext LogProjectStarted(BuildRequestEntry requestEntry)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
-            return new ProjectLoggingContext(this, requestEntry, requestEntry.Request.ParentBuildEventContext);
+            return new ProjectLoggingContext(this, requestEntry);
         }
 
         /// <summary>
@@ -75,7 +77,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Order is important here because the Project getter will throw if IsCached.
             int evaluationId = (configuration != null && !configuration.IsCached && configuration.Project != null) ? configuration.Project.EvaluationId : BuildEventContext.InvalidEvaluationId;
 
-            return new ProjectLoggingContext(this, request, configuration.ProjectFullPath, configuration.ToolsVersion, request.ParentBuildEventContext, evaluationId);
+            return new ProjectLoggingContext(this, request, configuration.ProjectFullPath, configuration.ToolsVersion, evaluationId);
         }
 
         /// <summary>

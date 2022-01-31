@@ -15,6 +15,8 @@ using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -284,8 +286,7 @@ namespace Microsoft.Build.BackEnd.Logging
             string queueCapacityEnvironment = Environment.GetEnvironmentVariable("MSBUILDLOGGINGQUEUECAPACITY");
             if (!String.IsNullOrEmpty(queueCapacityEnvironment))
             {
-                uint localQueueCapacity;
-                if (UInt32.TryParse(queueCapacityEnvironment, out localQueueCapacity))
+                if (UInt32.TryParse(queueCapacityEnvironment, out uint localQueueCapacity))
                 {
                     _queueCapacity = localQueueCapacity;
                 }
@@ -525,9 +526,17 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (_includeEvaluationPropertiesAndItems == null)
                 {
-                    var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
-                    // .All() on an empty list defaults to true, we want to default to false
-                    _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    var escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
+                    if (escapeHatch.HasValue)
+                    {
+                        _includeEvaluationPropertiesAndItems = escapeHatch.Value;
+                    }
+                    else
+                    {
+                        var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
+                        // .All() on an empty list defaults to true, we want to default to false
+                        _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    }
                 }
 
                 return _includeEvaluationPropertiesAndItems ?? false;
@@ -1315,17 +1324,8 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 logger?.Shutdown();
             }
-            catch (LoggerException)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
-                throw;
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 InternalLoggerException.Throw(e, null, "FatalErrorDuringLoggerShutdown", false, logger.GetType().Name);
             }
         }
@@ -1407,13 +1407,13 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             BuildEventArgs buildEventArgs = null;
 
-            if (loggingEvent is BuildEventArgs)
+            if (loggingEvent is BuildEventArgs bea)
             {
-                buildEventArgs = (BuildEventArgs)loggingEvent;
+                buildEventArgs = bea;
             }
-            else if (loggingEvent is KeyValuePair<int, BuildEventArgs>)
+            else if (loggingEvent is KeyValuePair<int, BuildEventArgs> kvp)
             {
-                buildEventArgs = ((KeyValuePair<int, BuildEventArgs>)loggingEvent).Value;
+                buildEventArgs = kvp.Value;
             }
             else
             {
@@ -1475,13 +1475,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 _warningsAsMessagesByProject?.Remove(GetWarningsAsErrorOrMessageKey(projectFinishedEvent));
             }
 
-            if (loggingEvent is BuildEventArgs)
+            if (loggingEvent is BuildEventArgs loggingEventBuildArgs)
             {
-                RouteBuildEvent((BuildEventArgs)loggingEvent);
+                RouteBuildEvent(loggingEventBuildArgs);
             }
-            else if (loggingEvent is KeyValuePair<int, BuildEventArgs>)
+            else if (loggingEvent is KeyValuePair<int, BuildEventArgs> loggingEventKeyValuePair)
             {
-                RouteBuildEvent((KeyValuePair<int, BuildEventArgs>)loggingEvent);
+                RouteBuildEvent(loggingEventKeyValuePair);
             }
         }
 
@@ -1493,8 +1493,7 @@ namespace Microsoft.Build.BackEnd.Logging
             TryRaiseProjectStartedEvent(nodeEvent.Value);
 
             // Get the sink which will handle the build event, then send the event to that sink
-            IBuildEventSink sink;
-            bool gotSink = _eventSinkDictionary.TryGetValue(nodeEvent.Key, out sink);
+            bool gotSink = _eventSinkDictionary.TryGetValue(nodeEvent.Key, out IBuildEventSink sink);
             if (gotSink && sink != null)
             {
                 // Sinks in the eventSinkDictionary are expected to not be null.
@@ -1586,17 +1585,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     logger.Initialize(sourceForLogger);
                 }
             }
-            catch (LoggerException)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
-                throw;
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 InternalLoggerException.Throw(e, null, "FatalErrorWhileInitializingLogger", true, logger.GetType().Name);
             }
 

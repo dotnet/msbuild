@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -181,7 +183,7 @@ namespace Microsoft.Build.Tasks
         /// if they aren't used.  ConsoleOutput is a combination of stdout and stderr.
         /// </summary>
         [Output]
-        public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray();
+        public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>() : _nonEmptyOutput.ToArray();
 
         #endregion
 
@@ -370,7 +372,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="message"></param>
         protected override void LogToolCommand(string message)
         {
-            //Dont print the command line if Echo is Off.
+            // Dont print the command line if Echo is Off.
             if (!EchoOff)
             {
                 base.LogToolCommand(Command);
@@ -513,7 +515,7 @@ namespace Microsoft.Build.Tasks
                 var systemCmd = ToolLocationHelper.GetPathToSystemFile("cmd.exe");
 
 #if WORKAROUND_COREFX_19110
-                // Work around https://github.com/Microsoft/msbuild/issues/2273 and
+                // Work around https://github.com/dotnet/msbuild/issues/2273 and
                 // https://github.com/dotnet/corefx/issues/19110, which result in
                 // a bad path being returned above on Nano Server SKUs of Windows.
                 if (!FileSystems.Default.FileExists(systemCmd))
@@ -598,7 +600,7 @@ namespace Microsoft.Build.Tasks
                 if (NativeMethodsShared.IsWindows)
                 {
                     commandLine.AppendSwitch("/Q"); // echo off
-                    if(!Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd)
+                    if (!Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd)
                     {
                         commandLine.AppendSwitch("/D"); // do not load AutoRun configuration from the registry (perf)
                     }

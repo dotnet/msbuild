@@ -5,6 +5,8 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -12,26 +14,6 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class GetFrameworkPath : TaskExtension
     {
-        static GetFrameworkPath()
-        {
-            s_path           = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest));
-            s_version11Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11));
-            s_version20Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20));
-            s_version30Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version30));
-            s_version35Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35));
-            s_version40Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40));
-            s_version45Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45));
-            s_version451Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version451));
-            s_version452Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version452));
-            s_version46Path  = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version46));
-            s_version461Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version461));
-            s_version462Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version462));
-            s_version47Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version47));
-            s_version471Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version471));
-            s_version472Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version472));
-            s_version48Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version48));
-        }
-
         #region ITask Members
 
         /// <summary>
@@ -50,23 +32,22 @@ namespace Microsoft.Build.Tasks
         // it still seems to give an advantage perhaps because there is one less string copy.
         // In a large build, this adds up.
         // PERF NOTE: We also only find paths we are actually asked for (via <Output> tags)
-
-        private static readonly Lazy<string> s_path;
-        private static readonly Lazy<string> s_version11Path;
-        private static readonly Lazy<string> s_version20Path;
-        private static readonly Lazy<string> s_version30Path;
-        private static readonly Lazy<string> s_version35Path;
-        private static readonly Lazy<string> s_version40Path;
-        private static readonly Lazy<string> s_version45Path;
-        private static readonly Lazy<string> s_version451Path;
-        private static readonly Lazy<string> s_version452Path;
-        private static readonly Lazy<string> s_version46Path;
-        private static readonly Lazy<string> s_version461Path;
-        private static readonly Lazy<string> s_version462Path;
-        private static readonly Lazy<string> s_version47Path;
-        private static readonly Lazy<string> s_version471Path;
-        private static readonly Lazy<string> s_version472Path;
-        private static readonly Lazy<string> s_version48Path;
+        private static readonly Lazy<string> s_path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest));
+        private static readonly Lazy<string> s_version11Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11));
+        private static readonly Lazy<string> s_version20Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20));
+        private static readonly Lazy<string> s_version30Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version30));
+        private static readonly Lazy<string> s_version35Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35));
+        private static readonly Lazy<string> s_version40Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40));
+        private static readonly Lazy<string> s_version45Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45));
+        private static readonly Lazy<string> s_version451Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version451));
+        private static readonly Lazy<string> s_version452Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version452));
+        private static readonly Lazy<string> s_version46Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version46));
+        private static readonly Lazy<string> s_version461Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version461));
+        private static readonly Lazy<string> s_version462Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version462));
+        private static readonly Lazy<string> s_version47Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version47));
+        private static readonly Lazy<string> s_version471Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version471));
+        private static readonly Lazy<string> s_version472Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version472));
+        private static readonly Lazy<string> s_version48Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version48));
 
         /// <summary>
         /// Path to the latest framework, whatever version it happens to be

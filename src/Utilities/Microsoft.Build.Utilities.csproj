@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -26,7 +26,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard' and '$(DotNetBuildFromSource)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
   </ItemGroup>
 
@@ -130,12 +130,6 @@
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>Shared\ResourceUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReuseableStringBuilder.cs">
-      <Link>Shared\ReuseableStringBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\StringBuilderCache.cs">
-      <Link>Shared\StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>Shared\TaskLoggingHelper.cs</Link>

@@ -16,6 +16,8 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -369,7 +371,7 @@ namespace Microsoft.Build.BackEnd
             ISet<string> removeMetadata
         )
         {
-            //todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
+            // todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(keepMetadata != null && removeMetadata != null), originalItem.KeepMetadataLocation, "KeepAndRemoveMetadataMutuallyExclusive");
             List<ProjectItemInstance> items = new List<ProjectItemInstance>();
@@ -427,7 +429,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // The expression is not of the form "@(X)". Treat as string
 
-                    // Pass the non wildcard expanded excludes here to fix https://github.com/Microsoft/msbuild/issues/2621
+                    // Pass the non wildcard expanded excludes here to fix https://github.com/dotnet/msbuild/issues/2621
                     string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(
                         Project.Directory,
                         includeSplit,

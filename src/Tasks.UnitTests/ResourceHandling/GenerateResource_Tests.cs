@@ -17,6 +17,8 @@ using Xunit.Abstractions;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
     [Trait("Category", "mono-osx-failing")]
@@ -1407,10 +1409,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// STR-emitted code has the correct types.
         /// </summary>
         /// <remarks>
-        /// Regression test for legacy-codepath-resources case of https://github.com/microsoft/msbuild/issues/4582
+        /// Regression test for legacy-codepath-resources case of https://github.com/dotnet/msbuild/issues/4582
         /// </remarks>
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/2272")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/2272")]
         public void StronglyTypedResourcesEmitTypeIntoClass()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -2715,8 +2717,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/microsoft/msbuild/issues/4094")]
-        [SkipOnMono("https://github.com/Microsoft/msbuild/issues/677")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
+        [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2893,8 +2895,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// Assembly.LoadFrom instead.
         /// </summary>
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/microsoft/msbuild/issues/4094")]
-        [SkipOnMono("https://github.com/Microsoft/msbuild/issues/677")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
+        [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3261,7 +3263,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Assert.True(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
         }
 
-        //  Regression test for https://github.com/Microsoft/msbuild/issues/2206
+        // Regression test for https://github.com/dotnet/msbuild/issues/2206
         [Theory]
         [InlineData("\n")]
         [InlineData("\r\n")]
@@ -3616,7 +3618,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             if (tagName != null)
             {
-                txt.Append("[");
+                txt.Append('[');
                 txt.Append(tagName);
                 txt.Append("]\xd\xa");
             }
@@ -3736,7 +3738,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <returns>The name of the resx file</returns>
         public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null, TestEnvironment env = null)
         {
-            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite:resxFileToWrite);
+            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite: resxFileToWrite);
         }
 
         /// <summary>

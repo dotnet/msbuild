@@ -18,6 +18,8 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -516,6 +518,10 @@ Build
             Write((int)e.Kind);
             WriteDeduplicatedString(e.ItemType);
             WriteTaskItemList(e.Items, e.LogItemMetadata);
+            if (e.Kind == TaskParameterMessageKind.AddItem)
+            {
+                CheckForFilesToEmbed(e.ItemType, e.Items);
+            }
         }
 
         private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true, bool writeLineAndColumn = false)
@@ -917,10 +923,10 @@ Build
 
             // Don't sort metadata because we want the binary log to be fully roundtrippable
             // and we need to preserve the original order.
-            //if (nameValueListBuffer.Count > 1)
-            //{
+            // if (nameValueListBuffer.Count > 1)
+            // {
             //    nameValueListBuffer.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
-            //}
+            // }
 
             WriteNameValueList();
 

@@ -30,6 +30,8 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -287,6 +289,27 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
                     return new NodeContext(nodeId, msbuildProcess, nodeStream, factory, terminateNode);
                 }
+
+                if (msbuildProcess.HasExited)
+                {
+                    if (Traits.Instance.DebugNodeCommunication)
+                    {
+                        try
+                        {
+                            CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with exit code {1}. This can indicate a crash at startup", msbuildProcess.Id, msbuildProcess.ExitCode);
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // This case is common on Windows where we called CreateProcess and the Process object
+                            // can't get the exit code.
+                            CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with unknown exit code. This can indicate a crash at startup", msbuildProcess.Id);
+                        }
+                    }
+                }
+                else
+                {
+                    CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node", msbuildProcess.Id);
+                }
             }
 
             // We were unable to launch a node.
@@ -329,7 +352,7 @@ namespace Microsoft.Build.BackEnd
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-        //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
+        // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
         private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
@@ -1055,7 +1078,7 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-            private bool ReadAndRoutePacket(NodePacketType packetType, byte [] packetData, int packetLength)
+            private bool ReadAndRoutePacket(NodePacketType packetType, byte[] packetData, int packetLength)
             {
                 try
                 {

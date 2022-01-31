@@ -6,6 +6,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
     /// <summary>
@@ -312,5 +314,4 @@ namespace Microsoft.Build.ObjectModelRemoting
         }
         #endregion
     }
-
 }

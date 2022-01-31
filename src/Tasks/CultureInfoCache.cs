@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -17,35 +19,34 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class CultureInfoCache
     {
-        private static readonly HashSet<string> ValidCultureNames;
+        private static readonly HashSet<string> ValidCultureNames = InitializeValidCultureNames();
 
-        static CultureInfoCache()
+        static HashSet<string> InitializeValidCultureNames()
         {
-            ValidCultureNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
 #if !FEATURE_CULTUREINFO_GETCULTURES
             if (!AssemblyUtilities.CultureInfoHasGetCultures())
             {
-                ValidCultureNames = HardcodedCultureNames;
-                return;
+                return HardcodedCultureNames;
             }
 #endif
-
+            HashSet<string> validCultureNames = new(StringComparer.OrdinalIgnoreCase);
             foreach (CultureInfo cultureName in AssemblyUtilities.GetAllCultures())
             {
-                ValidCultureNames.Add(cultureName.Name);
+                validCultureNames.Add(cultureName.Name);
             }
 
             // https://docs.microsoft.com/en-gb/windows/desktop/Intl/using-pseudo-locales-for-localization-testing
             // These pseudo-locales are available in versions of Windows from Vista and later.
             // However, from Windows 10, version 1803, they are not returned when enumerating the
             // installed cultures, even if the registry keys are set. Therefore, add them to the list manually.
-            var pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
+            string[] pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
 
             foreach (string pseudoLocale in pseudoLocales)
             {
-                ValidCultureNames.Add(pseudoLocale);
+                validCultureNames.Add(pseudoLocale);
             }
+
+            return validCultureNames;
         }
 
         /// <summary>

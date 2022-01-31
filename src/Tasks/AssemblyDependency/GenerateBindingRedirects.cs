@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -103,12 +105,12 @@ namespace Microsoft.Build.Tasks
 
             var writeOutput = true;
 
-            if(FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec))
+            if (FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec))
             {
                 try
                 {
                     var outputDoc = LoadAppConfig(OutputAppConfigFile);
-                    if(outputDoc.ToString() == doc.ToString())
+                    if (outputDoc.ToString() == doc.ToString())
                     {
                         writeOutput = false;
                     }
@@ -128,7 +130,7 @@ namespace Microsoft.Build.Tasks
                 OutputAppConfigFile.SetMetadata(ItemMetadataNames.targetPath, TargetName);
             }
 
-            if(writeOutput)
+            if (writeOutput)
             {
                 using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
                 {

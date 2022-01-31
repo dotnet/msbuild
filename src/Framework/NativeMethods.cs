@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -18,6 +17,8 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework;
 internal static class NativeMethods
@@ -54,9 +55,7 @@ internal static class NativeMethods
 
     internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
 
-#if FEATURE_HANDLEREF
     internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
-#endif
 
     internal static IntPtr NullIntPtr = new IntPtr(0);
 
@@ -71,12 +70,6 @@ internal static class NativeMethods
     internal const uint WAIT_ABANDONED_0 = 0x00000080;
     internal const uint WAIT_OBJECT_0 = 0x00000000;
     internal const uint WAIT_TIMEOUT = 0x00000102;
-
-#if FEATURE_CHARSET_AUTO
-    internal const CharSet AutoOrUnicode = CharSet.Auto;
-#else
-        internal const CharSet AutoOrUnicode = CharSet.Unicode;
-#endif
 
     #endregion
 
@@ -252,7 +245,7 @@ internal static class NativeMethods
     /// <summary>
     /// Contains information about the current state of both physical and virtual memory, including extended memory
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, CharSet = AutoOrUnicode)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     internal class MemoryStatus
     {
         /// <summary>
@@ -1048,37 +1041,67 @@ internal static class NativeMethods
     /// </remarks>
     internal static DateTime GetLastWriteFileUtcTime(string fullPath)
     {
-        DateTime fileModifiedTime = DateTime.MinValue;
-
-        if (IsWindows)
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+        if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
         {
-            if (Traits.Instance.EscapeHatches.AlwaysUseContentTimestamp)
-            {
-                return GetContentLastWriteFileUtcTime(fullPath);
-            }
-
-            WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = GetFileAttributesEx(fullPath, 0, ref data);
-
-            if (success && (data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
-            {
-                long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
-                fileModifiedTime = DateTime.FromFileTimeUtc(dt);
-
-                // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp.
-                if ((data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT && !Traits.Instance.EscapeHatches.UseSymlinkTimeInsteadOfTargetTime)
-                {
-                    fileModifiedTime = GetContentLastWriteFileUtcTime(fullPath);
-                }
-            }
-
-            return fileModifiedTime;
+            return LastWriteFileUtcTime(fullPath);
         }
-        else
+
+        bool isNonModifiable = FileClassifier.Shared.IsNonModifiable(fullPath);
+        if (isNonModifiable)
         {
-            return File.Exists(fullPath)
-                    ? File.GetLastWriteTimeUtc(fullPath)
+            if (ImmutableFilesTimestampCache.Shared.TryGetValue(fullPath, out DateTime modifiedAt))
+            {
+                return modifiedAt;
+            }
+        }
+
+        DateTime modifiedTime = LastWriteFileUtcTime(fullPath);
+
+        if (isNonModifiable && modifiedTime != DateTime.MinValue)
+        {
+            ImmutableFilesTimestampCache.Shared.TryAdd(fullPath, modifiedTime);
+        }
+
+        return modifiedTime;
+#else
+        return LastWriteFileUtcTime(fullPath);
+#endif
+
+        DateTime LastWriteFileUtcTime(string path)
+        {
+            DateTime fileModifiedTime = DateTime.MinValue;
+
+            if (IsWindows)
+            {
+                if (Traits.Instance.EscapeHatches.AlwaysUseContentTimestamp)
+                {
+                    return GetContentLastWriteFileUtcTime(path);
+                }
+
+                WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = NativeMethods.GetFileAttributesEx(path, 0, ref data);
+
+                if (success && (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0)
+                {
+                    long dt = ((long) (data.ftLastWriteTimeHigh) << 32) | ((long) data.ftLastWriteTimeLow);
+                    fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+
+                    // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp.
+                    if ((data.fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT && !Traits.Instance.EscapeHatches.UseSymlinkTimeInsteadOfTargetTime)
+                    {
+                        fileModifiedTime = GetContentLastWriteFileUtcTime(path);
+                    }
+                }
+
+                return fileModifiedTime;
+            }
+            else
+            {
+                return File.Exists(path)
+                    ? File.GetLastWriteTimeUtc(path)
                     : DateTime.MinValue;
+            }
         }
     }
 
@@ -1089,7 +1112,7 @@ internal static class NativeMethods
     /// <returns>The last write time of the file, or DateTime.MinValue if the file does not exist.</returns>
     /// <remarks>
     /// This is the most accurate timestamp-extraction mechanism, but it is too slow to use all the time.
-    /// See https://github.com/Microsoft/msbuild/issues/2052.
+    /// See https://github.com/dotnet/msbuild/issues/2052.
     /// </remarks>
     private static DateTime GetContentLastWriteFileUtcTime(string fullPath)
     {
@@ -1195,14 +1218,10 @@ internal static class NativeMethods
                     // Kill this process, so that no further children can be created.
                     thisProcess.Kill();
                 }
-                catch (Win32Exception e)
+                catch (Win32Exception e) when (e.NativeErrorCode == ERROR_ACCESS_DENIED)
                 {
                     // Access denied is potentially expected -- it happens when the process that
                     // we're attempting to kill is already dead.  So just ignore in that case.
-                    if (e.NativeErrorCode != ERROR_ACCESS_DENIED)
-                    {
-                        throw;
-                    }
                 }
 
                 // Now enumerate our children.  Children of this process are any process which has this process id as its parent
@@ -1488,11 +1507,7 @@ internal static class NativeMethods
     /// </summary>
     [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
     internal static extern int GetModuleFileName(
-#if FEATURE_HANDLEREF
             HandleRef hModule,
-#else
-            IntPtr hModule,
-#endif
             [Out] StringBuilder buffer, int length);
 
     [DllImport("kernel32.dll")]
@@ -1538,7 +1553,7 @@ internal static class NativeMethods
     private static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, uint cb, ref int pSize);
 
     [return: MarshalAs(UnmanagedType.Bool)]
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatus lpBuffer);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
@@ -1547,10 +1562,10 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
     internal static extern int GetLongPathName([In] string path, [Out] StringBuilder fullpath, [In] int length);
 
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     internal static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, int nSize);
 
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     internal static extern bool ReadFile(SafeFileHandle hFile, byte[] lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, IntPtr lpOverlapped);
 
     /// <summary>
@@ -1567,7 +1582,7 @@ internal static class NativeMethods
     internal const uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
     internal const uint OPEN_EXISTING = 3;
 
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, CallingConvention = CallingConvention.StdCall,
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall,
         SetLastError = true)]
     internal static extern SafeFileHandle CreateFile(
         string lpFileName,
@@ -1628,11 +1643,7 @@ internal static class NativeMethods
         // VS needs this in order to allow the in-proc compilers to properly initialize, since they will make calls from the
         // build thread which the main thread (blocked on BuildSubmission.Execute) must service.
         int waitIndex;
-#if FEATURE_HANDLE_SAFEWAITHANDLE
         IntPtr handlePtr = handle.SafeWaitHandle.DangerousGetHandle();
-#else
-            IntPtr handlePtr = handle.GetSafeWaitHandle().DangerousGetHandle();
-#endif
         int returnValue = CoWaitForMultipleHandles(COWAIT_FLAGS.COWAIT_NONE, timeout, 1, new IntPtr[] { handlePtr }, out waitIndex);
 
         if (!(returnValue == 0 || ((uint)returnValue == RPC_S_CALLPENDING && timeout != Timeout.Infinite)))

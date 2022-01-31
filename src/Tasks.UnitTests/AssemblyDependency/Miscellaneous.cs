@@ -16,6 +16,8 @@ using Xunit.Abstractions;
 using Shouldly;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>
@@ -929,7 +931,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = assemblies;
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
             t.SearchPaths = DefaultPaths;
-            t.AllowedRelatedFileExtensions = new string[] { @".licenses", ".xml" }; //no .pdb or .config
+            t.AllowedRelatedFileExtensions = new string[] { @".licenses", ".xml" }; // no .pdb or .config
             Execute(t);
 
             Assert.Single(t.ResolvedFiles);
@@ -1779,7 +1781,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Single(t.ResolvedFiles);
-            Assert.Equal("{HintPathFromItem}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom")); //                 "Assembly should have been resolved from HintPathFromItem!"
+            Assert.Equal("{HintPathFromItem}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom")); // "Assembly should have been resolved from HintPathFromItem!"
         }
 
         /// <summary>
@@ -3312,7 +3314,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns></returns>
         private ReferenceTable GenerateTableWithAssemblyFromTheGlobalLocation(string location)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
@@ -3514,7 +3516,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.TargetFrameworkDirectories = new string[] { };
+            t.TargetFrameworkDirectories = Array.Empty<string>();
             t.SearchPaths = new string[] { "{RawFileName}" };
             Execute(t);
             Assert.Equal(@"true", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
@@ -3589,7 +3591,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
             ResourceManager resources = new ResourceManager("Microsoft.Build.Tasks.Strings", Assembly.GetExecutingAssembly());
 
-            //Unresolved primary reference with itemspec "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null".
+            // Unresolved primary reference with itemspec "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null".
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_ADllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_CDllPath);
@@ -4538,13 +4540,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m1.netmodule")); //                 "Expected to find scatter file m1."
+            Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m1.netmodule")); // "Expected to find scatter file m1."
 
-            Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m2.netmodule")); //                 "Expected to find scatter file m2."
+            Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m2.netmodule")); // "Expected to find scatter file m2."
 
-            Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m1.netmodule")); //                 "Expected to find scatter file m1 in CopyLocalFiles."
+            Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m1.netmodule")); // "Expected to find scatter file m1 in CopyLocalFiles."
 
-            Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m2.netmodule")); //                 "Expected to find scatter file m2 in CopyLocalFiles."
+            Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m2.netmodule")); // "Expected to find scatter file m2 in CopyLocalFiles."
         }
 
         /// <summary>
@@ -4598,7 +4600,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assert.Equal(0, String.Compare(i.GetMetadata("CopyLocal"), "false", StringComparison.OrdinalIgnoreCase));
             }
 
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"C:\Regress317975\B.dll")); //                 "Expected to find lower version listed in dependencies."
+            Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"C:\Regress317975\B.dll")); // "Expected to find lower version listed in dependencies."
         }
 
         /// <summary>
@@ -5637,10 +5639,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListGenerateBlackListEmptyAssemblyInfoNoRedistAssemblies()
         {
-            RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[0]);
+            RedistList redistList = RedistList.GetRedistList(Array.Empty<AssemblyTableInfo>());
             List<Exception> whiteListErrors = new List<Exception>();
             List<string> whiteListErrorFileNames = new List<string>();
-            Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[0], whiteListErrors, whiteListErrorFileNames);
+            Dictionary<string, string> blackList = redistList.GenerateBlackList(Array.Empty<AssemblyTableInfo>(), whiteListErrors, whiteListErrorFileNames);
             Assert.Null(blackList); // "Should return null if the AssemblyTableInfo is empty and the redist list is empty"
         }
 
@@ -5658,7 +5660,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[0], whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(Array.Empty<AssemblyTableInfo>(), whiteListErrors, whiteListErrorFileNames);
 
                 // Since there were no white list expect the black list to return null
                 Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
@@ -6206,7 +6208,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                SubsetListFinder finder = new SubsetListFinder(new string[0]);
+                SubsetListFinder finder = new SubsetListFinder(Array.Empty<string>());
                 finder.GetSubsetListPathsFromDisk(null);
             }
            );
@@ -6229,7 +6231,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SubsetListFinderEmptySubsetToSearchFor()
         {
-            SubsetListFinder finder = new SubsetListFinder(new string[0]);
+            SubsetListFinder finder = new SubsetListFinder(Array.Empty<string>());
             string[] returnArray = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
             Assert.Empty(returnArray); // "Expected the array returned to be 0 length"
         }
@@ -6526,7 +6528,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             targetFrameworks = new string[] { "Client", "Framework" };
             Assert.Equal("Client, Framework", ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null));
 
-            targetFrameworks = new string[0];
+            targetFrameworks = Array.Empty<string>();
             Assert.True(String.IsNullOrEmpty(ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null)));
 
             targetFrameworks = null;
@@ -6541,7 +6543,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             installedSubSetTable = new ITaskItem[] { new TaskItem("c:\\foo\\Client.xml"), new TaskItem("D:\\foo\\bar\\Framework2\\"), new TaskItem("D:\\foo\\bar\\Framework"), new TaskItem("Nothing") };
             Assert.Equal("Client, Framework, Nothing", ResolveAssemblyReference.GenerateSubSetName(null, installedSubSetTable));
 
-            installedSubSetTable = new ITaskItem[0];
+            installedSubSetTable = Array.Empty<ITaskItem>();
             Assert.True(String.IsNullOrEmpty(ResolveAssemblyReference.GenerateSubSetName(null, installedSubSetTable)));
 
             installedSubSetTable = null;
@@ -6580,7 +6582,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             referenceTable.RemoveReferencesMarkedForExclusion(true, String.Empty);
 
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
-            string subSetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { }, null);
+            string subSetName = ResolveAssemblyReference.GenerateSubSetName(Array.Empty<string>(), null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList", taskItem.ItemSpec, subSetName);
             Assert.False(Object.ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
             Assert.Single(table2); // "Expected there to be one elements in the dictionary"
@@ -6817,7 +6819,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTableDependentItemsInBlackList4()
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
@@ -6995,7 +6997,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         private static ReferenceTable MakeEmptyReferenceTable(TaskLoggingHelper log)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
@@ -7101,7 +7103,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify setting certain combinations of Profile parameters will case an error to be logged and rar to fail execution.
         ///
         /// Test the case where the profile name is not set and ProfileFullFrameworkFolders is set.
-        ///</summary>
+        /// </summary>
         [Fact]
         public void TestProfileParameterCombinations()
         {
@@ -7116,7 +7118,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when the frameworkdirectory metadata is not set on the ProfileFullFrameworkAssemblyTables that an
         /// error is logged and rar fails.
-        ///</summary>
+        /// </summary>
         [Fact]
         public void TestFrameworkDirectoryMetadata()
         {
@@ -7177,7 +7179,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        ///Initialize the black list and use it to remove references from the reference table
+        /// Initialize the black list and use it to remove references from the reference table
         /// </summary>
         private void InitializeExclusionList(ReferenceTable referenceTable, AssemblyNameExtension[] assembliesForBlackList, out Dictionary<string, string> blackList)
         {
@@ -7317,7 +7319,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 t.TargetFrameworkDirectories = new string[] { Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5") };
                 t.InstalledAssemblyTables = new ITaskItem[] { new TaskItem(redistListPath) };
                 // Only the explicitly specified redist list should be used
-                t.TargetFrameworkSubsets = new string[0];
+                t.TargetFrameworkSubsets = Array.Empty<string>();
 
                 // Create a subset list which should be read in
                 string explicitSubsetListContents =
@@ -7739,19 +7741,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
         }
 
+        /// <summary>
         /// Consider this dependency chain:
         ///
         /// App
-        ///   References - A
-        ///        Depends on B
-        ///        Will be found by hintpath.
-        ///   References -B
-        ///        No hintpath
-        ///        Exists in A.dll's folder.
-        ///
+        /// <code>
+        /// <![CDATA[
+        /// References - A
+        ///      Depends on B
+        ///      Will be found by hintpath.
+        /// References -B
+        ///      No hintpath
+        ///      Exists in A.dll's folder.
+        /// ]]>
+        /// </code>
         /// B.dll should be unresolved even though its in A's folder because primary resolution needs to work
         /// without looking at dependencies because of the load-time perf scenarios don't look at dependencies.
         /// We must be consistent between primaries resolved with FindDependencies=true and FindDependencies=false.
+        /// </summary>
         [Fact]
         public void ByDesignRelatedTo454863_PrimaryReferencesDontResolveToParentFolders()
         {

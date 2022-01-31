@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -305,7 +307,13 @@ namespace Microsoft.Build.Tasks
 
             if (String.IsNullOrEmpty(pathToTool) || !FileSystems.Default.FileExists(pathToTool))
             {
-                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
+                // The bitness of al.exe should match the platform being built
+                // Yoda condition prevents null reference exception if Platform is null.
+                string archToLookFor =  "x86".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? Platform :
+                                        "x64".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? ProcessorArchitecture.AMD64 : // x64 maps to AMD64 in GeneratePathToTool
+                                        ProcessorArchitecture.CurrentProcessArchitecture;
+
+                pathToTool = SdkToolsPathUtility.GeneratePathToTool(f => SdkToolsPathUtility.FileInfoExists(f), archToLookFor, SdkToolsPath, ToolExe, Log, true);
             }
 
             return pathToTool;

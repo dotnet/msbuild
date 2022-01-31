@@ -10,6 +10,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
@@ -311,5 +313,4 @@ namespace Microsoft.Build.Evaluation
             }
         }
     }
-    
 }

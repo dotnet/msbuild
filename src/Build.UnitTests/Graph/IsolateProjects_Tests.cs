@@ -13,6 +13,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph.UnitTests
 {
     public class IsolateProjectsTests : IDisposable
@@ -135,10 +137,10 @@ BuildEngine5.BuildProjectFilesInParallel(
             {
                 // OSX links /var into /private, which makes Path.GetTempPath() to return "/var..." but Directory.GetCurrentDirectory to return "/private/var..."
                 // this discrepancy fails the msbuild undeclared reference enforcements due to failed path equality checks
-                _env.SetTempPath(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")), deleteTempDirectory:true);
+                _env.SetTempPath(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N")), deleteTempDirectory: true);
             }
 
-            // todo investigate why out of proc builds fail on macos https://github.com/Microsoft/msbuild/issues/3915
+            // todo investigate why out of proc builds fail on macos https://github.com/dotnet/msbuild/issues/3915
             var disableInProcNode = !NativeMethodsShared.IsOSX;
 
             _buildParametersPrototype = new BuildParameters
@@ -182,7 +184,7 @@ BuildEngine5.BuildProjectFilesInParallel(
                 });
         }
 
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/3876")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/3876")]
         public void CacheEnforcementShouldFailWhenReferenceWasNotPreviouslyBuiltAndOnContinueOnError()
         {
             CacheEnforcementImpl(addContinueOnError: true);
@@ -282,9 +284,9 @@ BuildEngine5.BuildProjectFilesInParallel(
 
         [Theory]
         [InlineData(false, "BuildUndeclaredReference")]
-//        [InlineData(false, "BuildUndeclaredReferenceViaTask")] https://github.com/microsoft/msbuild/issues/4385
+// [InlineData(false, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
         [InlineData(true, "BuildUndeclaredReference")]
-//        [InlineData(true, "BuildUndeclaredReferenceViaTask")] https://github.com/microsoft/msbuild/issues/4385
+// [InlineData(true, "BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
         public void UndeclaredReferenceEnforcementShouldFailOnUndeclaredReference(bool addContinueOnError, string targetName)
         {
             AssertBuild(new[] { targetName },
@@ -301,7 +303,7 @@ BuildEngine5.BuildProjectFilesInParallel(
 
         [Theory]
         [InlineData("BuildUndeclaredReference")]
-//        [InlineData("BuildUndeclaredReferenceViaTask")] https://github.com/microsoft/msbuild/issues/4385
+// [InlineData("BuildUndeclaredReferenceViaTask")] https://github.com/dotnet/msbuild/issues/4385
         public void UndeclaredReferenceEnforcementShouldFailOnPreviouslyBuiltButUndeclaredReferences(string targetName)
         {
             AssertBuild(new[] { targetName },

@@ -7,6 +7,8 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -32,7 +34,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadEmptyItemGroup()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup/>
                     </Project>
                 ";
@@ -50,7 +52,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadItemGroupTwoItems()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'/>
                             <i Include='i2'/>

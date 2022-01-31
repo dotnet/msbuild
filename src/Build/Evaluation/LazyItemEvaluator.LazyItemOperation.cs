@@ -11,6 +11,8 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
@@ -27,7 +29,7 @@ namespace Microsoft.Build.Evaluation
             protected readonly Expander<P, I> _expander;
             protected readonly bool _conditionResult;
 
-            //  This is used only when evaluating an expression, which instantiates
+            // This is used only when evaluating an expression, which instantiates
             //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
             internal ItemSpec<P, I> Spec => _itemSpec;
@@ -77,7 +79,7 @@ namespace Microsoft.Build.Evaluation
                                   .ToImmutableList();
             }
 
-            // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/Microsoft/msbuild/issues/2328
+            // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/dotnet/msbuild/issues/2328
             protected virtual void MutateItems(ImmutableList<I> items) { }
 
             protected virtual void SaveItems(ImmutableList<I> items, OrderedItemDataCollection.Builder listBuilder) { }

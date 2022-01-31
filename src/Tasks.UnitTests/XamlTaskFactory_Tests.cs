@@ -16,6 +16,8 @@ using System.Xaml;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 {
     #region Tests for Load and Parse methods
@@ -354,7 +356,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             finally
             {
                 // This throws because the file is still in use!
-                //if (File.Exists(tmpXamlFile))
+                // if (File.Exists(tmpXamlFile))
                 //    File.Delete(tmpXamlFile);
             }
         }

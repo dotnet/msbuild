@@ -11,6 +11,8 @@ using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -282,7 +284,7 @@ namespace Microsoft.Build.Construction
                 exclusiveItemOperation = XMakeAttributes.update;
             }
 
-            //  At most one of the include, remove, or update attributes may be specified
+            // At most one of the include, remove, or update attributes may be specified
             if (exclusiveAttributeCount > 1)
             {
                 XmlAttributeWithLocation errorAttribute = remove.Length > 0 ? (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.remove] : (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.update];
@@ -357,7 +359,7 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            //  Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
+            // Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
             //  error instead of unexpected behavior
             if (KnownAttributesOnItemIgnoreCase.Contains(name))
             {
@@ -366,7 +368,7 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            //  Reserve attributes starting with underscores in case we need to add more built-in attributes later
+            // Reserve attributes starting with underscores in case we need to add more built-in attributes later
             if (name[0] == '_')
             {
                 isReservedAttributeName = false;

@@ -12,6 +12,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -21,7 +23,7 @@ namespace Microsoft.Build.Tasks
     {
         #region fields
 
-        ///<summary>
+        /// <summary>
         /// Regex for breaking up the sdk reference include into pieces.
         /// Example: XNA, Version=8.0
         /// </summary>
@@ -658,16 +660,6 @@ namespace Microsoft.Build.Tasks
             /// Neutral architecture name
             /// </summary>
             private const string X64Arch = "X64";
-
-            /// <summary>
-            /// X86 architecture name
-            /// </summary>
-            private const string X86Arch = "X86";
-
-            /// <summary>
-            /// ARM architecture name
-            /// </summary>
-            private const string ARMArch = "ARM";
 
             /// <summary>
             /// ANY CPU architecture name

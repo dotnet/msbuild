@@ -18,6 +18,8 @@ using Shouldly;
 using Xunit;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
@@ -640,7 +642,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ContextCachesCommonOutOfProjectCone(itemSpecPathIsRelative: false, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
         }
 
-        [Theory (Skip="https://github.com/Microsoft/msbuild/issues/3889")]
+        [Theory (Skip="https://github.com/dotnet/msbuild/issues/3889")]
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
         // projects should cache glob expansions when the __relative__ glob is shared between projects and points outside of project cone
         public void ContextCachesCommonOutOfProjectConeRelativeGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
@@ -789,6 +791,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         project.GetPropertyValue("p").ShouldBe("val");
                     }
                     else
+                    {
                         switch (policy)
                         {
                             case EvaluationContext.SharingPolicy.Shared:
@@ -800,6 +803,7 @@ namespace Microsoft.Build.UnitTests.Definition
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
                         }
+                    }
                 }
                 );
         }

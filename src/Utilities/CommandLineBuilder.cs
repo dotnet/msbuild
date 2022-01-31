@@ -10,6 +10,8 @@ using Microsoft.Build.Framework;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -110,19 +112,19 @@ namespace Microsoft.Build.Utilities
         public override string ToString() => CommandLine.ToString();
 
         // Use if escaping of hyphens is supposed to take place
-        private static readonly string s_allowedUnquotedRegexNoHyphen =
+        private const string s_allowedUnquotedRegexNoHyphen =
                          "^"                             // Beginning of line
                        + @"[a-z\\/:0-9\._+=]*"
                        + "$";
 
-        private static readonly string s_definitelyNeedQuotesRegexWithHyphen = @"[|><\s,;\-""]+";
+        private const string s_definitelyNeedQuotesRegexWithHyphen = @"[|><\s,;\-""]+";
 
         // Use if escaping of hyphens is not to take place
-        private static readonly string s_allowedUnquotedRegexWithHyphen =
+        private const string s_allowedUnquotedRegexWithHyphen =
                         "^"                             // Beginning of line
                        + @"[a-z\\/:0-9\._\-+=]*"       //  Allow hyphen to be unquoted
                        + "$";
-        private static readonly string s_definitelyNeedQuotesRegexNoHyphen = @"[|><\s,;""]+";
+        private const string s_definitelyNeedQuotesRegexNoHyphen = @"[|><\s,;""]+";
 
         /// <summary>
         ///  Should hyphens be quoted or not
@@ -218,9 +220,9 @@ namespace Microsoft.Build.Utilities
                 {
                     CommandLine.Append(Environment.NewLine);
                 }
-                else if(CommandLine[CommandLine.Length - 1] != ' ')
+                else if (CommandLine[CommandLine.Length - 1] != ' ')
                 {
-                    CommandLine.Append(" ");
+                    CommandLine.Append(' ');
                 }
             }
         }

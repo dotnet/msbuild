@@ -10,6 +10,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     internal class LockCheck
@@ -81,8 +83,6 @@ namespace Microsoft.Build.Tasks
             public FILETIME ProcessStartTime;
         }
 
-        const int RM_INVALID_SESSION = -1;
-        const int RM_INVALID_PROCESS = -1;
         const int CCH_RM_MAX_APP_NAME = 255;
         const int CCH_RM_MAX_SVC_NAME = 63;
         const int ERROR_SEM_TIMEOUT = 121;

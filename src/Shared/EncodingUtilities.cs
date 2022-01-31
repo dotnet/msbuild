@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -197,7 +199,7 @@ namespace Microsoft.Build.Shared
         /// the characters we plan to put in the file. If it isn't, we can fall back to UTF-8.
         ///
         /// Why not always UTF-8? Because tools don't always handle it well. See
-        /// https://github.com/Microsoft/msbuild/issues/397
+        /// https://github.com/dotnet/msbuild/issues/397
         /// </remarks>
         internal static Encoding BatchFileEncoding(string contents, string encodingSpecification)
         {
@@ -211,7 +213,7 @@ namespace Microsoft.Build.Shared
             // When Windows is configured to use UTF-8 by default, the above returns
             // a UTF-8-with-BOM encoding, which cmd.exe can't interpret. Force the no-BOM
             // encoding if the returned encoding would have emitted one (preamble is nonempty).
-            // See https://github.com/Microsoft/msbuild/issues/4268
+            // See https://github.com/dotnet/msbuild/issues/4268
             if (defaultEncoding is UTF8Encoding e && e.GetPreamble().Length > 0)
             {
                 defaultEncoding = EncodingUtilities.Utf8WithoutBom;

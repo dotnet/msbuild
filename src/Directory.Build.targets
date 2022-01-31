@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build">
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -85,7 +85,7 @@
 
   <ItemGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">
     <!-- Ensure API stability for shipping packages -->
-    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" Condition="'$(DotNetBuildFromSource)' != 'true'" />
 
     <AdditionalFiles Include="PublicAPI/$(PublicApiTfm)/PublicAPI.Shipped.txt" />
     <AdditionalFiles Include="PublicAPI/$(PublicApiTfm)/PublicAPI.Unshipped.txt" />
@@ -113,7 +113,7 @@
   </Target>
 
   <!-- Override in-box GenerateSatelliteAssemblies, as we are using CoreGenerateSatelliteAssemblies instead.
-       With https://github.com/Microsoft/msbuild/pull/2726 this is no longer necessary, but that change is not
+       With https://github.com/dotnet/msbuild/pull/2726 this is no longer necessary, but that change is not
        in VS 15.5 (which is what we use for Jenkins right now). -->
   <Target Name="GenerateSatelliteAssemblies" />
 

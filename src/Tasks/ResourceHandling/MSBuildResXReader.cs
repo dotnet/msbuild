@@ -10,6 +10,8 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
     internal class MSBuildResXReader
@@ -70,13 +72,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         // Consts from https://github.com/dotnet/winforms/blob/16b192389b377c647ab3d280130781ab1a9d3385/src/System.Windows.Forms/src/System/Resources/ResXResourceWriter.cs#L46-L63
         private const string Beta2CompatSerializedObjectMimeType = "text/microsoft-urt/psuedoml-serialized/base64";
         private const string CompatBinSerializedObjectMimeType = "text/microsoft-urt/binary-serialized/base64";
-        private const string CompatSoapSerializedObjectMimeType = "text/microsoft-urt/soap-serialized/base64";
         private const string BinSerializedObjectMimeType = "application/x-microsoft.net.object.binary.base64";
-        private const string SoapSerializedObjectMimeType = "application/x-microsoft.net.object.soap.base64";
-        private const string DefaultSerializedObjectMimeType = BinSerializedObjectMimeType;
         private const string ByteArraySerializedObjectMimeType = "application/x-microsoft.net.object.bytearray.base64";
-        private const string ResMimeType = "text/microsoft-resx";
-
         private const string StringTypeNamePrefix = "System.String, mscorlib,";
         private const string StringTypeName40 = "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
         private const string MemoryStreamTypeNamePrefix = "System.IO.MemoryStream, mscorlib,";

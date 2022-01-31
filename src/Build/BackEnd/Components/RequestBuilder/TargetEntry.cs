@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -22,6 +22,8 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -408,13 +410,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal async Task ExecuteTarget(ITaskBuilder taskBuilder, BuildRequestEntry requestEntry, ProjectLoggingContext projectLoggingContext, CancellationToken cancellationToken)
         {
-#if MSBUILDENABLEVSPROFILING 
-            try
-            {
-                string beginTargetBuild = String.Format(CultureInfo.CurrentCulture, "Build Target {0} in Project {1} - Start", this.Name, projectFullPath);
-                DataCollection.CommentMarkProfile(8800, beginTargetBuild);
-#endif 
-
             try
             {
                 VerifyState(_state, TargetEntryState.Execution);
@@ -666,14 +661,6 @@ namespace Microsoft.Build.BackEnd
             {
                 _isExecuting = false;
             }
-#if MSBUILDENABLEVSPROFILING 
-            }
-            finally
-            {
-                string endTargetBuild = String.Format(CultureInfo.CurrentCulture, "Build Target {0} in Project {1} - End", this.Name, projectFullPath);
-                DataCollection.CommentMarkProfile(8801, endTargetBuild);
-            }
-#endif
         }
 
         /// <summary>

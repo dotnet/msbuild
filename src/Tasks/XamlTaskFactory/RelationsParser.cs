@@ -7,6 +7,8 @@ using System.Xml;
 using System.IO;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Xaml
 {
     /// <summary>
@@ -552,7 +554,7 @@ namespace Microsoft.Build.Tasks.Xaml
                         switchRelations.Status = attribute.InnerText;
                         break;
                     default:
-                        //LogError("InvalidAttribute", attribute.Name);
+                        // LogError("InvalidAttribute", attribute.Name);
                         break;
                 }
             }

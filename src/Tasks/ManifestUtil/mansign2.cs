@@ -15,6 +15,8 @@ using System.Runtime.InteropServices;
 
 using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
+#nullable disable
+
 namespace System.Deployment.Internal.CodeSigning
 {
     internal static class Win32
@@ -279,20 +281,6 @@ namespace System.Deployment.Internal.CodeSigning
 #endif
         }
 
-        private static XmlElement FindIdElement(XmlElement context, string idValue)
-        {
-            if (context == null)
-                return null;
-
-            XmlElement idReference = context.SelectSingleNode("//*[@Id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            idReference = context.SelectSingleNode("//*[@id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            return context.SelectSingleNode("//*[@ID=\"" + idValue + "\"]") as XmlElement;
-        }
-
         public override XmlElement GetIdElement(XmlDocument document, string idValue)
         {
             // We only care about Id references inside of the KeyInfo section
@@ -317,9 +305,6 @@ namespace System.Deployment.Internal.CodeSigning
         private const string Sha256DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha256";
         private const string Sha1SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         private const string Sha1DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha1";
-
-        private const string wintrustPolicyFlagsRegPath = "Software\\Microsoft\\Windows\\CurrentVersion\\WinTrust\\Trust Providers\\Software Publishing";
-        private const string wintrustPolicyFlagsRegName = "State";
 
         private SignedCmiManifest2() { }
 
@@ -512,8 +497,9 @@ namespace System.Deployment.Internal.CodeSigning
 
             byte[] cspPublicKeyBlob;
 
-            if(snKey is RSACryptoServiceProvider){
-                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider((RSACryptoServiceProvider)snKey, useSha256)).ExportCspBlob(false);
+            if (snKey is RSACryptoServiceProvider rsacsp)
+            {
+                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider(rsacsp, useSha256)).ExportCspBlob(false);
                 if (cspPublicKeyBlob == null || cspPublicKeyBlob.Length == 0)
                 {
                     throw new CryptographicException(Win32.NTE_BAD_KEY);
@@ -557,7 +543,7 @@ namespace System.Deployment.Internal.CodeSigning
             return ComputeHashFromManifest(manifestDom, false, useSha256);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Cryptographic.Standard", "CA5354:SHA1CannotBeUsed", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
         private static byte[] ComputeHashFromManifest(XmlDocument manifestDom, bool oldFormat, bool useSha256)
         {
             if (oldFormat)
@@ -929,9 +915,9 @@ namespace System.Deployment.Internal.CodeSigning
 
             // Setup up XMLDSIG engine.
             ManifestSignedXml2 signedXml = new ManifestSignedXml2(signatureParent);
-            if (signer.StrongNameKey is RSACryptoServiceProvider)
+            if (signer.StrongNameKey is RSACryptoServiceProvider rsacsp)
             {
-                signedXml.SigningKey = GetFixedRSACryptoServiceProvider(signer.StrongNameKey as RSACryptoServiceProvider, useSha256);
+                signedXml.SigningKey = GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
             }
             else
             {

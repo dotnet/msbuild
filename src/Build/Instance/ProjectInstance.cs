@@ -29,6 +29,8 @@ using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     using Utilities = Microsoft.Build.Internal.Utilities;
@@ -964,8 +966,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return TaskRegistry; }
-            set { TaskRegistry = value; }
+            {
+                return TaskRegistry;
+            }
+
+            set
+            {
+                TaskRegistry = value;
+            }
         }
 
         /// <summary>
@@ -1072,8 +1080,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return InitialTargets; }
-            set { InitialTargets = value; }
+            {
+                return InitialTargets;
+            }
+
+            set
+            {
+                InitialTargets = value;
+            }
         }
 
         /// <summary>
@@ -1084,8 +1098,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return DefaultTargets; }
-            set { DefaultTargets = value; }
+            {
+                return DefaultTargets;
+            }
+
+            set
+            {
+                DefaultTargets = value;
+            }
         }
 
         /// <summary>
@@ -2577,19 +2597,8 @@ namespace Microsoft.Build.Execution
                         clearedVariables.Add(environmentVariable);
                     }
                 }
-#if (!STANDALONEBUILD)
-                wrapperProjectXml = Microsoft.Build.BuildEngine.SolutionWrapperProject.Generate(projectFile, toolsVersion, projectBuildEventContext);
-#else
                 wrapperProjectXml = "";
-#endif
             }
-#if (!STANDALONEBUILD)
-            catch (Microsoft.Build.BuildEngine.InvalidProjectFileException ex)
-            {
-                // Whenever calling the old engine, we must translate its exception types into ours
-                throw new InvalidProjectFileException(ex.ProjectFile, ex.LineNumber, ex.ColumnNumber, ex.EndLineNumber, ex.EndColumnNumber, ex.Message, ex.ErrorSubcategory, ex.ErrorCode, ex.HelpKeyword, ex.InnerException);
-            }
-#endif
             finally
             {
                 // Set the cleared environment variables back to what they were.
@@ -2812,7 +2821,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CreateImportsSnapshot(IList<ResolvedImport> importClosure, IList<ResolvedImport> importClosureWithDuplicates)
         {
-            _importPaths = new List<string>(importClosure.Count - 1 /* outer project */);
+            _importPaths = new List<string>(Math.Max(0, importClosure.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosure)
             {
                 // Exclude outer project itself
@@ -2824,7 +2833,7 @@ namespace Microsoft.Build.Execution
 
             ImportPaths = _importPaths.AsReadOnly();
 
-            _importPathsIncludingDuplicates = new List<string>(importClosureWithDuplicates.Count - 1 /* outer project */);
+            _importPathsIncludingDuplicates = new List<string>(Math.Max(0, importClosureWithDuplicates.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosureWithDuplicates)
             {
                 // Exclude outer project itself
@@ -2909,7 +2918,7 @@ namespace Microsoft.Build.Execution
 
                 if (item.DirectMetadata != null)
                 {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(item.DirectMetadataCount);
+                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                     foreach (ProjectMetadata directMetadatum in item.DirectMetadata)
                     {
                         ProjectMetadataInstance directMetadatumInstance = new ProjectMetadataInstance(directMetadatum);

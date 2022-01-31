@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -138,7 +140,7 @@ namespace Microsoft.Build.Execution
             continueOnError,
             msbuildRuntime,
             msbuildArchitecture,
-            new CopyOnWriteDictionary<(string, ElementLocation)>(8, StringComparer.OrdinalIgnoreCase),
+            new CopyOnWriteDictionary<(string, ElementLocation)>(StringComparer.OrdinalIgnoreCase),
             new List<ProjectTaskInstanceChild>(),
             location,
             condition == string.Empty ? null : ElementLocation.EmptyLocation,
@@ -382,7 +384,7 @@ namespace Microsoft.Build.Execution
                 ref localParameters,
                 ParametersKeyTranslator,
                 ParametersValueTranslator,
-                count => new CopyOnWriteDictionary<(string, ElementLocation)>(count));
+                count => new CopyOnWriteDictionary<(string, ElementLocation)>());
 
             if (translator.Mode == TranslationDirection.ReadFromStream && localParameters != null)
             {
