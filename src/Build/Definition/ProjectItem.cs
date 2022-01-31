@@ -184,8 +184,14 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return _xml.Include; }
-            set { Rename(value); }
+            {
+                return _xml.Include;
+            }
+
+            set
+            {
+                Rename(value);
+            }
         }
 
         /// <summary>

@@ -80,7 +80,6 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                 (from folder in collection.AssemblyFolders
                  let targetVersion = VersionUtilities.ConvertToVersion(targetRuntimeVersion)
                  let replacementVersion = GetFrameworkVersion(folder.FrameworkVersion)
-                 
                  where targetVersion != null && targetVersion >= replacementVersion
                  orderby folder.FrameworkVersion descending 
                  select folder).ToList();

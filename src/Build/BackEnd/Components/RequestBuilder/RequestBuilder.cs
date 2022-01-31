@@ -714,9 +714,7 @@ namespace Microsoft.Build.BackEnd
             CultureInfo.CurrentCulture = _componentHost.BuildParameters.Culture;
             CultureInfo.CurrentUICulture = _componentHost.BuildParameters.UICulture;
 
-#if FEATURE_THREAD_PRIORITY
             Thread.CurrentThread.Priority = _componentHost.BuildParameters.BuildThreadPriority;
-#endif
             Thread.CurrentThread.IsBackground = true;
 
             // NOTE: This is safe to do because we have specified long-running so we get our own new thread.

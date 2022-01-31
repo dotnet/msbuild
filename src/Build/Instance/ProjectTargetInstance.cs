@@ -493,14 +493,12 @@ namespace Microsoft.Build.Execution
 
                 foreach (ProjectTaskInstanceChild outputInstance in taskInstance.Outputs)
                 {
-                    if (outputInstance is ProjectTaskOutputItemInstance)
+                    if (outputInstance is ProjectTaskOutputItemInstance outputItemInstance)
                     {
-                        ProjectTaskOutputItemInstance outputItemInstance = outputInstance as ProjectTaskOutputItemInstance;
                         taskElement.AddOutputItem(outputItemInstance.TaskParameter, outputItemInstance.ItemType, outputItemInstance.Condition);
                     }
-                    else if (outputInstance is ProjectTaskOutputPropertyInstance)
+                    else if (outputInstance is ProjectTaskOutputPropertyInstance outputPropertyInstance)
                     {
-                        ProjectTaskOutputPropertyInstance outputPropertyInstance = outputInstance as ProjectTaskOutputPropertyInstance;
                         taskElement.AddOutputItem(outputPropertyInstance.TaskParameter, outputPropertyInstance.PropertyName, outputPropertyInstance.Condition);
                     }
                 }

@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         private static ProjectTaskOutputPropertyInstance GetSampleTaskOutputInstance()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                        <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p' Condition='c' PropertyName='p1'/>

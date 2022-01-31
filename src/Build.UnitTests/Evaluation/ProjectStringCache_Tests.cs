@@ -44,26 +44,11 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 ProjectStringCache cache = new ProjectStringCache();
                 XmlDocumentWithLocation document1 = new XmlDocumentWithLocation();
                 document1.StringCache = cache;
-#if FEATURE_XML_LOADPATH
                 document1.Load(path);
-#else
-                var xmlReadSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    document1.Load(xmlReader);
-                }
-#endif
 
                 XmlDocumentWithLocation document2 = new XmlDocumentWithLocation();
                 document2.StringCache = cache;
-#if FEATURE_XML_LOADPATH
                 document2.Load(path);
-#else
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    document2.Load(xmlReader);
-                }
-#endif
 
                 XmlNodeList nodes1 = document1.GetElementsByTagName("ItemGroup");
                 XmlNodeList nodes2 = document2.GetElementsByTagName("ItemGroup");
@@ -109,26 +94,11 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 ProjectStringCache cache = new ProjectStringCache();
                 XmlDocumentWithLocation document1 = new XmlDocumentWithLocation();
                 document1.StringCache = cache;
-#if FEATURE_XML_LOADPATH
                 document1.Load(path);
-#else
-                var xmlReadSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    document1.Load(xmlReader);
-                }
-#endif
 
                 XmlDocumentWithLocation document2 = new XmlDocumentWithLocation();
                 document2.StringCache = cache;
-#if FEATURE_XML_LOADPATH
                 document2.Load(path);
-#else
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    document2.Load(xmlReader);
-                }
-#endif
 
                 string outerXml1 = document1.OuterXml;
                 string outerXml2 = document2.OuterXml;
@@ -198,15 +168,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 ProjectRootElement pre1 = ProjectRootElement.Create(collection);
                 pre1.XmlDocument.StringCache = cache;
                 pre1.FullPath = path;
-#if FEATURE_XML_LOADPATH
                 pre1.XmlDocument.Load(path);
-#else
-                var xmlReadSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    pre1.XmlDocument.Load(xmlReader);
-                }
-#endif
 
                 entryCount = cache.Count;
                 Assert.True(entryCount > 0);
@@ -214,14 +176,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 ProjectRootElement pre2 = ProjectRootElement.Create(collection);
                 pre2.XmlDocument.StringCache = cache;
                 pre2.FullPath = path;
-#if FEATURE_XML_LOADPATH
                 pre2.XmlDocument.Load(path);
-#else
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    pre2.XmlDocument.Load(xmlReader);
-                }
-#endif
 
                 // Entry count should not have changed
                 Assert.Equal(entryCount, cache.Count);

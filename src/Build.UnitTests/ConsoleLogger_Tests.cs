@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
         private Dictionary<string, string> _environment;
 
         private static string s_dummyProjectContents = @"
-         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+         <Project>
             <Target Name='XXX'>
                <Message Text='[hee haw]'/>
             </Target>
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests
                 _simulatedConsole.Append("<reset color>");
             }
 
-            public static implicit operator string (SimulatedConsole sc)
+            public static implicit operator string(SimulatedConsole sc)
             {
                 return sc.ToString();
             }
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests
             <ItemGroup>
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
-    
+
                 <ProjectConfigurationDescription Include='Number=$(Number)' />
                 <ProjectConfigurationDescription Include='TargetFramework=$(TargetFramework)' />
             </ItemGroup>
@@ -1433,10 +1433,10 @@ namespace Microsoft.Build.UnitTests
             string prop1;
             string prop2;
             string prop3;
-            if (cl is SerialConsoleLogger)
+            if (cl is SerialConsoleLogger scl)
             {
-                var propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
-                ((SerialConsoleLogger)cl).WriteProperties(propertyList);
+                var propertyList = scl.ExtractPropertyList(properties);
+                scl.WriteProperties(propertyList);
                 prop1 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop1", "val1");
                 prop2 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop2", "val2");
                 prop3 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "pro(p3)", "va;%3b;l3");
@@ -1688,10 +1688,10 @@ namespace Microsoft.Build.UnitTests
             string item3spec;
             string item3metadatum = string.Empty;
 
-            if (cl is SerialConsoleLogger)
+            if (cl is SerialConsoleLogger scl)
             {
-                SortedList itemList = ((SerialConsoleLogger)cl).ExtractItemList(items);
-                ((SerialConsoleLogger)cl).WriteItems(itemList);
+                SortedList itemList = scl.ExtractItemList(items);
+                scl.WriteItems(itemList);
                 item1spec = "spec" + Environment.NewLine;
                 item2spec = "spec2" + Environment.NewLine;
                 item3spec = "(spec;3" + Environment.NewLine;
@@ -1770,10 +1770,10 @@ namespace Microsoft.Build.UnitTests
                     cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
                 }
 
-                if (cl is SerialConsoleLogger)
+                if (cl is SerialConsoleLogger scl)
                 {
-                    SortedList itemList = ((SerialConsoleLogger)cl).ExtractItemList(items);
-                    ((SerialConsoleLogger)cl).WriteItems(itemList);
+                    SortedList itemList = scl.ExtractItemList(items);
+                    scl.WriteItems(itemList);
                 }
                 else
                 {
