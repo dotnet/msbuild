@@ -19,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
-            string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "whatever");
+            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "whatever");
             Assert.Null(canonical);
         }
 
@@ -32,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
-            string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "OtherName", "whatever");
+            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "OtherName", "whatever");
             Assert.Null(canonical);
         }
 
@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
-            string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "whatever");
+            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "whatever");
             Assert.Null(canonical);
         }
 
@@ -74,7 +74,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
-            string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "foo");
+            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "foo");
             Assert.Equal("foo", canonical);
         }
 
@@ -94,7 +94,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
-            string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "f");
+            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "f");
             Assert.Null(canonical);
         }
 
@@ -116,7 +116,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
-            string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "f");
+            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "f");
             Assert.Null(canonical);
         }
 
@@ -136,7 +136,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
-            string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "FOO");
+            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "FOO");
             Assert.Equal("FOO", canonical);
         }
 
@@ -158,7 +158,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
 
-            string canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "foo");
+            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "foo");
             Assert.Null(canonical);
         }
     }

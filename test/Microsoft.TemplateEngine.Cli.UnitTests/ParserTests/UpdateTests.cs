@@ -51,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((UpdateCommand)parseResult.CommandResult.Command, parseResult);
 
-            Assert.Equal(2, args.AdditionalSources.Count);
+            Assert.Equal(2, args.AdditionalSources?.Count);
             Assert.Contains("my-custom-source1", args.AdditionalSources);
             Assert.Contains("my-custom-source2", args.AdditionalSources);
         }
@@ -150,7 +150,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((BaseUpdateCommand)parseResult.CommandResult.Command, parseResult);
 
-            Assert.Equal(2, args.AdditionalSources.Count);
+            Assert.Equal(2, args.AdditionalSources?.Count);
             Assert.Contains("my-custom-source1", args.AdditionalSources);
             Assert.Contains("my-custom-source2", args.AdditionalSources);
         }

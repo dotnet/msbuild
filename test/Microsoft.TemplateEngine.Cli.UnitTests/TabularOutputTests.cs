@@ -287,14 +287,14 @@ Dotnet 本地...  tool-manifest
             var columnOption = SharedOptionsFactory.CreateColumnsOption();
 
             //Gets suggestions defined in column options
-            var suggestedValues = columnOption.GetCompletions().Select(c => c.Label).ToList();
+            List<string?> suggestedValues = columnOption.GetCompletions().Select(c => c.Label).ToList<string?>();
             suggestedValues.Sort();
 
             //Gets constants defined in TabularOutputSettings.ColumnNams
-            List<string> columnNamesConstants = (typeof(TabularOutputSettings.ColumnNames))
+            List<string?> columnNamesConstants = (typeof(TabularOutputSettings.ColumnNames))
                 .GetFields(BindingFlags.NonPublic | BindingFlags.Static)
                 .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
-                .Select(fi => (string)fi.GetValue(null)) 
+                .Select(fi => (string?)fi.GetValue(null)) 
                 .ToList();
             columnNamesConstants.Sort();
 
