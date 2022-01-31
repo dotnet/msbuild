@@ -14,12 +14,6 @@ namespace Microsoft.Build.UnitTests
 {
     public class PerfLogTests
     {
-#if USE_MSBUILD_DLL_EXTN
-        private const string MSBuildExeName = "MSBuild.dll";
-#else
-        private const string MSBuildExeName = "MSBuild.exe";
-#endif
-
         private readonly ITestOutputHelper _output;
 
         public PerfLogTests(ITestOutputHelper output)

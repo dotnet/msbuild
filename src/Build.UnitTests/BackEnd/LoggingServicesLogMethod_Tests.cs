@@ -1900,13 +1900,13 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <param name="buildEvent">Build event which was asked to be processed</param>
             internal override void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
             {
-                if (buildEvent is BuildEventArgs)
+                if (buildEvent is BuildEventArgs buildEventArgs)
                 {
-                    _processedBuildEvent = buildEvent as BuildEventArgs;
+                    _processedBuildEvent = buildEventArgs;
                 }
-                else if (buildEvent is KeyValuePair<int, BuildEventArgs>)
+                else if (buildEvent is KeyValuePair<int, BuildEventArgs> kvp)
                 {
-                    _processedBuildEvent = ((KeyValuePair<int, BuildEventArgs>)buildEvent).Value;
+                    _processedBuildEvent = kvp.Value;
                 }
                 else
                 {

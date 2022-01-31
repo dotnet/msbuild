@@ -58,8 +58,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #if !RUNTIME_TYPE_NETCORE
         private const int Fx2MajorVersion = 2;
         private const int Fx3MajorVersion = 3;
-#endif
         private static readonly Version s_dotNet40Version = new Version("4.0");
+#endif
         private static readonly Version s_dotNet45Version = new Version("4.5");
 
 #if !RUNTIME_TYPE_NETCORE
@@ -659,9 +659,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
                         var manifest = new SignedCmiManifest2(doc, useSha256);
                         CmiManifestSigner2 signer;
-                        if (useSha256 && rsa is RSACryptoServiceProvider)
+                        if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
                         {
-                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsa as RSACryptoServiceProvider, useSha256);
+                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
                             signer = new CmiManifestSigner2(csp, cert, useSha256);
                         }
                         else

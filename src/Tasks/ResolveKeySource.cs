@@ -24,7 +24,9 @@ namespace Microsoft.Build.Tasks
     public class ResolveKeySource : TaskExtension
     {
         private const string pfxFileExtension = ".pfx";
+#if !RUNTIME_TYPE_NETCORE
         private const string pfxFileContainerPrefix = "VS_KEY_";
+#endif
         
         #region Properties
 

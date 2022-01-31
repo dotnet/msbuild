@@ -2153,7 +2153,7 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
         <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
-        <target state="new">Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</target>
+        <target state="translated">Project wurde nicht mit dem Flag ProjectLoadSettings.RecordDuplicateButNotCircularImports geladen.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">

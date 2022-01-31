@@ -1,0 +1,2 @@
+Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.get -> System.Threading.ThreadPriority
+Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.set -> void

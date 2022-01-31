@@ -26,12 +26,12 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public override bool Execute()
         {
-            if(!string.IsNullOrEmpty(WarningCode))
+            if (!string.IsNullOrEmpty(WarningCode))
             {
                 Log.LogWarning(null, WarningCode, null, null, 0, 0, 0, 0, "Warning Logged!", null);
             }
 
-            if(!string.IsNullOrEmpty(ErrorCode))
+            if (!string.IsNullOrEmpty(ErrorCode))
             {
                 Log.LogError(null, ErrorCode, null, null, 0, 0, 0, 0, "Error Logged!", null);
             }

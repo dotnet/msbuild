@@ -278,9 +278,7 @@ namespace Microsoft.Build.Execution
             _nodeExeLocation = other._nodeExeLocation;
             NodeId = other.NodeId;
             _onlyLogCriticalEvents = other._onlyLogCriticalEvents;
-#if FEATURE_THREAD_PRIORITY
             BuildThreadPriority = other.BuildThreadPriority;
-#endif
             _toolsetProvider = other._toolsetProvider;
             ToolsetDefinitionLocations = other.ToolsetDefinitionLocations;
             _toolsetProvider = other._toolsetProvider;
@@ -307,13 +305,10 @@ namespace Microsoft.Build.Execution
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
-#if FEATURE_THREAD_PRIORITY
         /// <summary>
         /// Gets or sets the desired thread priority for building.
         /// </summary>
         public ThreadPriority BuildThreadPriority { get; set; } = ThreadPriority.Normal;
-
-#endif
 
         /// <summary>
         /// By default if the number of processes is set to 1 we will use Asynchronous logging. However if we want to use synchronous logging when the number of cpu's is set to 1

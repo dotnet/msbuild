@@ -9,9 +9,7 @@ namespace Microsoft.Build.AppxPackage.Shared
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
 using System.Diagnostics.CodeAnalysis;
-#endif
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -304,7 +302,6 @@ namespace Microsoft.Build.Shared
             return true;
         }
 
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
         /// <summary>
         /// Dump any unhandled exceptions to a file so they can be diagnosed
         /// </summary>
@@ -314,7 +311,6 @@ namespace Microsoft.Build.Shared
             Exception ex = (Exception)e.ExceptionObject;
             DumpExceptionToFile(ex);
         }
-#endif
 
         /// <summary>
         /// Dump the exception information to a file
