@@ -675,7 +675,6 @@ namespace Microsoft.Build.CommandLine
                             {
                                 exitType = ExitType.BuildError;
                             }
-                        }
                     } // end of build
 
                     DateTime t2 = DateTime.Now;
