@@ -55,9 +55,7 @@ internal static class NativeMethods
 
     internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
 
-#if FEATURE_HANDLEREF
     internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
-#endif
 
     internal static IntPtr NullIntPtr = new IntPtr(0);
 
@@ -72,12 +70,6 @@ internal static class NativeMethods
     internal const uint WAIT_ABANDONED_0 = 0x00000080;
     internal const uint WAIT_OBJECT_0 = 0x00000000;
     internal const uint WAIT_TIMEOUT = 0x00000102;
-
-#if FEATURE_CHARSET_AUTO
-    internal const CharSet AutoOrUnicode = CharSet.Auto;
-#else
-        internal const CharSet AutoOrUnicode = CharSet.Unicode;
-#endif
 
     #endregion
 
@@ -253,7 +245,7 @@ internal static class NativeMethods
     /// <summary>
     /// Contains information about the current state of both physical and virtual memory, including extended memory
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, CharSet = AutoOrUnicode)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     internal class MemoryStatus
     {
         /// <summary>
@@ -1515,11 +1507,7 @@ internal static class NativeMethods
     /// </summary>
     [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
     internal static extern int GetModuleFileName(
-#if FEATURE_HANDLEREF
             HandleRef hModule,
-#else
-            IntPtr hModule,
-#endif
             [Out] StringBuilder buffer, int length);
 
     [DllImport("kernel32.dll")]
@@ -1565,7 +1553,7 @@ internal static class NativeMethods
     private static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, uint cb, ref int pSize);
 
     [return: MarshalAs(UnmanagedType.Bool)]
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatus lpBuffer);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
@@ -1574,10 +1562,10 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
     internal static extern int GetLongPathName([In] string path, [Out] StringBuilder fullpath, [In] int length);
 
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     internal static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, int nSize);
 
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     internal static extern bool ReadFile(SafeFileHandle hFile, byte[] lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, IntPtr lpOverlapped);
 
     /// <summary>
@@ -1594,7 +1582,7 @@ internal static class NativeMethods
     internal const uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
     internal const uint OPEN_EXISTING = 3;
 
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, CallingConvention = CallingConvention.StdCall,
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall,
         SetLastError = true)]
     internal static extern SafeFileHandle CreateFile(
         string lpFileName,
@@ -1655,11 +1643,7 @@ internal static class NativeMethods
         // VS needs this in order to allow the in-proc compilers to properly initialize, since they will make calls from the
         // build thread which the main thread (blocked on BuildSubmission.Execute) must service.
         int waitIndex;
-#if FEATURE_HANDLE_SAFEWAITHANDLE
         IntPtr handlePtr = handle.SafeWaitHandle.DangerousGetHandle();
-#else
-            IntPtr handlePtr = handle.GetSafeWaitHandle().DangerousGetHandle();
-#endif
         int returnValue = CoWaitForMultipleHandles(COWAIT_FLAGS.COWAIT_NONE, timeout, 1, new IntPtr[] { handlePtr }, out waitIndex);
 
         if (!(returnValue == 0 || ((uint)returnValue == RPC_S_CALLPENDING && timeout != Timeout.Infinite)))
