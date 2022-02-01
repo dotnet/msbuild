@@ -1533,10 +1533,10 @@ internal static class NativeMethods
     private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatus lpBuffer);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-    internal static extern unsafe int GetShortPathName(string path, [Out] char[] fullpath, [In] int length);
+    internal static extern int GetShortPathName(string path, [Out] char[] fullpath, [In] int length);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-    internal static extern unsafe int GetLongPathName([In] string path, [Out] char[] fullpath, [In] int length);
+    internal static extern int GetLongPathName([In] string path, [Out] char[] fullpath, [In] int length);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     internal static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, int nSize);
