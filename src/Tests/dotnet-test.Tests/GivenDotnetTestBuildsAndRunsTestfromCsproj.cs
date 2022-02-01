@@ -585,7 +585,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [PlatformSpecificFact(TestPlatforms.FreeBSD | TestPlatforms.OSX)]
+        [PlatformSpecificFact(TestPlatforms.FreeBSD)]
         public void ItShouldShowWarningMessageOnCollectCodeCoverage()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
