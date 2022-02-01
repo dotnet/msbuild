@@ -13,7 +13,6 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -1140,7 +1139,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Unc()
         {
-            //Check UNC functionality
+            // Check UNC functionality
             ValidateFileMatch
                 (
                 "\\\\server\\c$\\**\\*.cs",
@@ -1424,7 +1423,7 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [InlineData(
-            @"src/**/*.cs", //  Include Pattern
+            @"src/**/*.cs", // Include Pattern
             new string[] //  Matching files
             {
                 @"src/a.cs",
@@ -1432,7 +1431,7 @@ namespace Microsoft.Build.UnitTests
             }
             )]
         [InlineData(
-            @"src/test/**/*.cs", //  Include Pattern
+            @"src/test/**/*.cs", // Include Pattern
             new string[] //  Matching files
             {
                 @"src/test/a.cs",
@@ -1440,7 +1439,7 @@ namespace Microsoft.Build.UnitTests
             }
             )]
         [InlineData(
-            @"src/test/**/a/b/**/*.cs", //  Include Pattern
+            @"src/test/**/a/b/**/*.cs", // Include Pattern
             new string[] //  Matching files
             {
                 @"src/test/dir\a\b\a.cs",
@@ -1454,18 +1453,18 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [InlineData(
-            @"**\*.cs", //  Include Pattern
+            @"**\*.cs", // Include Pattern
             new[] //  Exclude patterns
             {
                 @"bin\**"
             },
-            new string[] //  Matching files
+            new string[] // Matching files
             {
             },
-            new string[] //  Non matching files
+            new string[] // Non matching files
             {
             },
-            new[] //  Non matching files that shouldn't be touched
+            new[] // Non matching files that shouldn't be touched
             {
                 @"bin\foo.cs",
                 @"bin\bar\foo.cs",
@@ -1473,21 +1472,21 @@ namespace Microsoft.Build.UnitTests
             }
             )]
         [InlineData(
-            @"**\*.cs", //  Include Pattern
+            @"**\*.cs", // Include Pattern
             new[] //  Exclude patterns
             {
                 @"bin\**"
             },
-            new[] //  Matching files
+            new[] // Matching files
             {
                 "a.cs",
                 @"b\b.cs",
             },
-            new[] //  Non matching files
+            new[] // Non matching files
             {
                 @"b\b.txt"
             },
-            new[] //  Non matching files that shouldn't be touched
+            new[] // Non matching files that shouldn't be touched
             {
                 @"bin\foo.cs",
                 @"bin\bar\foo.cs",
@@ -1503,24 +1502,24 @@ namespace Microsoft.Build.UnitTests
         public void ExcludeSpecificFiles()
         {
             MatchDriverWithDifferentSlashes(
-                @"**\*.cs",     //  Include Pattern
+                @"**\*.cs",     // Include Pattern
                 new[]    //  Exclude patterns
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new[]    //  Matching files
+                new[]    // Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new[]    //  Non matching files
+                new[]    // Non matching files
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                Array.Empty<string>()    //  Non matching files that shouldn't be touched
+                Array.Empty<string>()    // Non matching files that shouldn't be touched
             );
         }
 
@@ -1528,27 +1527,27 @@ namespace Microsoft.Build.UnitTests
         public void ExcludePatternAndSpecificFiles()
         {
             MatchDriverWithDifferentSlashes(
-                @"**\*.cs",     //  Include Pattern
+                @"**\*.cs",     // Include Pattern
                 new[]    //  Exclude patterns
                 {
                     @"bin\**",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new[]    //  Matching files
+                new[]    // Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new[]    //  Non matching files
+                new[]    // Non matching files
                 {
                     @"foo.txt",
                     @"Foo\foo.txt",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new[]    //  Non matching files that shouldn't be touched
+                new[]    // Non matching files that shouldn't be touched
                 {
                     @"bin\foo.cs",
                     @"bin\bar\foo.cs",

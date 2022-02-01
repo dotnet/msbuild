@@ -30,7 +30,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
-using Microsoft.Build.Utilities;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -909,7 +908,7 @@ namespace Microsoft.Build.Execution
                     {
                         // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
                         if (exceptionsThrownInEndBuild ||
-                            _overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId))
+                            (_overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId)))
                         {
                             _overallBuildSuccess = false;
                         }
@@ -1762,7 +1761,6 @@ namespace Microsoft.Build.Execution
                         ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
                         _overallBuildSuccess = false;
                     }
-
                 }
             }
         }

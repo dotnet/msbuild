@@ -20,7 +20,6 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
@@ -648,11 +647,7 @@ namespace Microsoft.Build.BackEnd
 
             // Let the task finish now.  If cancellation worked, hopefully it finishes sooner than it would have otherwise.
             // If the task builder crashed, this could have already been disposed
-#if FEATURE_HANDLE_SAFEWAITHANDLE
             if (!_taskExecutionIdle.SafeWaitHandle.IsClosed)
-#else
-            if (!_taskExecutionIdle.GetSafeWaitHandle().IsClosed)
-#endif
             {
                 // Kick off a task to log the message so that we don't block the calling thread.
                 Task.Run(async delegate

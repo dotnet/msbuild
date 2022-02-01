@@ -2355,7 +2355,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
 
         [Fact]
-        //FIXME: mono: looks for csc.exe
+        // FIXME: mono: looks for csc.exe
         // https://github.com/dotnet/msbuild/issues/677
         [Trait("Category", "mono-osx-failing")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
@@ -2533,7 +2533,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// absolute path).  The fix was to use Assembly.LoadFrom instead.
         /// </summary>
         [Fact]
-        //FIXME: mono: looks for csc.exe
+        // FIXME: mono: looks for csc.exe
         // https://github.com/dotnet/msbuild/issues/677
         [Trait("Category", "mono-osx-failing")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()

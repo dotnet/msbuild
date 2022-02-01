@@ -97,7 +97,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public BuildRequest()
         {
-
         }
 
         private BuildRequest(

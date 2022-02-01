@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask AssemblyFile='af' TaskFactory='AssemblyFactory'>
                             <Task NotValidAttribute='OHI'/>
                        </UsingTask>
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Task>
                             Contents
                         </Task>
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectUsingTaskBodyElement GetBodyXml()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                             <Task Evaluate='false'>Contents</Task>
                        </UsingTask>

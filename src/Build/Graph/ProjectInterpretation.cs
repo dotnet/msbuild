@@ -42,7 +42,9 @@ namespace Microsoft.Build.Graph
 
         internal enum ProjectType
         {
-            OuterBuild, InnerBuild, NonMultitargeting
+            OuterBuild,
+            InnerBuild,
+            NonMultitargeting,
         }
 
         internal readonly struct ReferenceInfo

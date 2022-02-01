@@ -27,8 +27,6 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.ObjectModelRemoting;
-using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
@@ -38,7 +36,7 @@ using Microsoft.Build.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
-    using Utilities = Internal.Utilities;
+    using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
     /// Represents an evaluated project with design time semantics.

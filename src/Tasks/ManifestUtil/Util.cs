@@ -29,9 +29,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static readonly string logPath = GetLogPath();
         private static readonly char[] s_fileNameInvalidChars = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
         private static StreamWriter s_logFileWriter;
+#if !RUNTIME_TYPE_NETCORE
         // Major, Minor, Build and Revision of CLR v2.0
         private static readonly int[] s_clrVersion2 = { 2, 0, 50727, 0 };
-#if RUNTIME_TYPE_NETCORE
+#else
         // Major, Minor, Build and Revision of CLR v4.0
         private static readonly int[] s_clrVersion4 = { 4, 0, 30319, 0 };
 #endif
@@ -101,10 +102,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             StringBuilder sb = new StringBuilder(value);
             int i = 0;
             while (i < sb.Length)
+            {
                 if (sb[i] < ' ')
                     sb.Remove(i, 1);
                 else
                     ++i;
+            }
+
             return sb.ToString();
         }
 
@@ -337,8 +341,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string PlatformToProcessorArchitecture(string platform)
         {
             for (int i = 0; i < s_platforms.Length; ++i)
+            {
                 if (String.Equals(platform, s_platforms[i], StringComparison.OrdinalIgnoreCase))
                     return s_processorArchitectures[i];
+            }
+
             return null;
         }
 
@@ -403,6 +410,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (!logging)
                 return;
             if (s_logFileWriter == null)
+            {
                 try
                 {
                     s_logFileWriter = new StreamWriter(Path.Combine(logPath, "Microsoft.Build.Tasks.log"), false);
@@ -423,6 +431,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                     return;
                 }
+            }
+
             s_logFileWriter.WriteLine(text);
             s_logFileWriter.Flush();
         }

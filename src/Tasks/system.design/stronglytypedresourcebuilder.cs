@@ -203,7 +203,7 @@ namespace Microsoft.Build.Tasks
             AddGeneratedCodeAttributeforMember(srClass);
 
             TypeAttributes ta = internalClass ? TypeAttributes.NotPublic : TypeAttributes.Public;
-            //ta |= TypeAttributes.Sealed;
+            // ta |= TypeAttributes.Sealed;
             srClass.TypeAttributes = ta;
             srClass.Comments.Add(new CodeCommentStatement(DocCommentSummaryStart, true));
             srClass.Comments.Add(new CodeCommentStatement(SR.GetString(SR.ClassDocComment), true));

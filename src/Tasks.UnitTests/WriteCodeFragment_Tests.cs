@@ -1064,7 +1064,6 @@ namespace Microsoft.Build.UnitTests
                 Assert.False(result, engine.Log);
 
                 engine.AssertLogContains(errorCode);
-
             }
             finally
             {

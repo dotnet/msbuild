@@ -52,7 +52,11 @@ namespace Microsoft.Build.Evaluation
 
                 public ItemData this[int index]
                 {
-                    get { return _listBuilder[index]; }
+                    get
+                    {
+                        return _listBuilder[index];
+                    }
+
                     set
                     {
                         // Update the dictionary if it exists.
@@ -78,7 +82,6 @@ namespace Microsoft.Build.Evaluation
                                 ItemDataCollectionValue<I> newDictionaryEntry = _dictionaryBuilder[newNormalizedValue];
                                 newDictionaryEntry.Add(value.Item);
                                 _dictionaryBuilder[newNormalizedValue] = newDictionaryEntry;
-
                             }
                             else
                             {

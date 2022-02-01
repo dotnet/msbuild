@@ -9,7 +9,9 @@ using System.Collections.Generic;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.ComponentModel.Design;
 #endif
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -24,8 +26,10 @@ using System.Runtime.Remoting;
 #endif
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Versioning;
 using System.Security;
+#endif
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -252,7 +256,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The language to use when generating the class source for the strongly typed resource.
+        /// Gets or sets the language to use when generating the class source for the strongly typed resource.
         /// This parameter must match exactly one of the languages used by the CodeDomProvider.
         /// </summary>
         public string StronglyTypedLanguage
@@ -263,7 +267,11 @@ namespace Microsoft.Build.Tasks
                 // try to validate it -- that might prevent future expansion of supported languages.
                 _stronglyTypedLanguage = value;
             }
-            get { return _stronglyTypedLanguage; }
+
+            get
+            {
+                return _stronglyTypedLanguage;
+            }
         }
 
         /// <summary>
@@ -537,29 +545,6 @@ namespace Microsoft.Build.Tasks
         {
             // do nothing
         }
-
-#if FEATURE_COM_INTEROP
-        /// <summary>
-        /// Static constructor checks the registry opt-out for mark-of-the-web rejection.
-        /// </summary>
-        static GenerateResource()
-        {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                allowMOTW = true;
-                return;
-            }
-            try
-            {
-                object allowUntrustedFiles = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null);
-                if (allowUntrustedFiles is String)
-                {
-                    allowMOTW = ((string)allowUntrustedFiles).Equals("true", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            catch { }
-        }
-#endif
 
         /// <summary>
         /// Logs a Resgen.exe command line that indicates what parameters were
@@ -894,10 +879,10 @@ namespace Microsoft.Build.Tasks
                                 {
                                     foreach (ITaskItem item in _remotedTaskItems)
                                     {
-                                        if (item is MarshalByRefObject)
+                                        if (item is MarshalByRefObject marshalByRefObject)
                                         {
                                             // Tell remoting to forget connections to the taskitem
-                                            RemotingServices.Disconnect((MarshalByRefObject)item);
+                                            RemotingServices.Disconnect(marshalByRefObject);
                                         }
                                     }
                                 }
@@ -923,20 +908,10 @@ namespace Microsoft.Build.Tasks
         }
 
 #if FEATURE_COM_INTEROP
-        private static bool allowMOTW;
+        private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) is string allowUntrustedFiles && allowUntrustedFiles.Equals("true", StringComparison.OrdinalIgnoreCase));
 
         private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
-
-        private const uint ZoneLocalMachine = 0;
-
-        private const uint ZoneIntranet = 1;
-
-        private const uint ZoneTrusted = 2;
-
         private const uint ZoneInternet = 3;
-
-        private const uint ZoneUntrusted = 4;
-
         private static IInternetSecurityManager internetSecurityManager = null;
 
         // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
@@ -944,7 +919,7 @@ namespace Microsoft.Build.Tasks
         private bool IsDangerous(String filename)
         {
             // If they are opted out, there's no work to do
-            if (allowMOTW)
+            if (AllowMOTW)
             {
                 return false;
             }
@@ -2610,9 +2585,8 @@ namespace Microsoft.Build.Tasks
             }
             catch (ArgumentException ae)
             {
-                if (ae.InnerException is XmlException)
+                if (ae.InnerException is XmlException xe)
                 {
-                    XmlException xe = (XmlException) ae.InnerException;
                     _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
                         xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 }
@@ -3291,8 +3265,11 @@ namespace Microsoft.Build.Tasks
         {
             String postfix = mainAssembly ? ".resources" : a.GetName().CultureInfo.Name + ".resources";
             foreach (String manifestResourceName in a.GetManifestResourceNames())
+            {
                 if (manifestResourceName.EndsWith(postfix, StringComparison.OrdinalIgnoreCase))
                     return true;
+            }
+
             return false;
         }
 #endif
@@ -3439,7 +3416,7 @@ namespace Microsoft.Build.Tasks
             // Generate the STR class
             String[] errors;
             bool generateInternalClass = !_stronglyTypedClassIsPublic;
-            //StronglyTypedResourcesNamespace can be null and this is ok.
+            // StronglyTypedResourcesNamespace can be null and this is ok.
             // If it is null then the default namespace (=stronglyTypedNamespace) is used.
             CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
                     reader.resourcesHashTable,

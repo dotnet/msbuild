@@ -21,7 +21,7 @@ using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 using System.Xml.Schema;
 using System.Runtime.Serialization;
-#if !CLR2COMPATIBILITY
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
 using Microsoft.Build.Shared.Debugging;
 #endif
 using Microsoft.Build.Framework;
@@ -34,12 +34,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ExceptionHandling
     {
-        private static readonly string s_debugDumpPath;
-
-        static ExceptionHandling()
-        {
-            s_debugDumpPath = GetDebugDumpPath();
-        }
+        private static readonly string s_debugDumpPath = GetDebugDumpPath();
 
         /// <summary>
         /// Gets the location of the directory used for diagnostic log files.
@@ -302,7 +297,6 @@ namespace Microsoft.Build.Shared
             return true;
         }
 
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
         /// <summary>
         /// Dump any unhandled exceptions to a file so they can be diagnosed
         /// </summary>
@@ -312,14 +306,13 @@ namespace Microsoft.Build.Shared
             Exception ex = (Exception)e.ExceptionObject;
             DumpExceptionToFile(ex);
         }
-#endif
 
         /// <summary>
         /// Dump the exception information to a file
         /// </summary>
         internal static void DumpExceptionToFile(Exception ex)
         {
-            //  Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
+            // Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
             //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
             //  applied to a static method.
             lock (typeof(ExceptionHandling))
