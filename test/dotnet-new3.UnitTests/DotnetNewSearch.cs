@@ -3,19 +3,24 @@
 
 using System.Text;
 using Microsoft.NET.TestFramework.Assertions;
+using VerifyTests;
+using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class DotnetNewSearch : IClassFixture<SharedHomeDirectory>
+    [UsesVerify]
+    public class DotnetNewSearch : IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
     {
         private readonly SharedHomeDirectory _sharedHome;
+        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewSearch(SharedHomeDirectory sharedHome, ITestOutputHelper log)
+        public DotnetNewSearch(SharedHomeDirectory sharedHome, VerifySettingsFixture verifySettings, ITestOutputHelper log)
         {
             _sharedHome = sharedHome;
+            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 
@@ -51,7 +56,7 @@ namespace Dotnet_new3.IntegrationTests
         [Theory]
         [InlineData("--search")]
         [InlineData("search")]
-        public void CannotExecuteEmptyCriteria(string testCase)
+        public Task CannotExecuteEmptyCriteria(string testCase)
         {
             var commandResult = new DotnetNewCommand(_log, testCase)
                 .WithCustomHive(_sharedHome.HomeDirectory)
@@ -60,7 +65,9 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should().Fail()
                 .And.NotHaveStdOut();
 
-            ApprovalTests.Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+                .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
         }
 
         [Theory]

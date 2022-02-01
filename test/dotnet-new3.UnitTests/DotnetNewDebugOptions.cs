@@ -6,17 +6,22 @@ using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
+using VerifyTests;
+using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class DotnetNewDebugOptions
+    [UsesVerify]
+    public class DotnetNewDebugOptions : IClassFixture<VerifySettingsFixture>
     {
+        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewDebugOptions(ITestOutputHelper log)
+        public DotnetNewDebugOptions(VerifySettingsFixture verifySettings, ITestOutputHelper log)
         {
+            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 
@@ -69,7 +74,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public void CanShowConfigWithDebugShowConfig()
+        public Task CanShowConfigWithDebugShowConfig()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             var commandResult = new DotnetNewCommand(_log, "--debug:show-config")
@@ -77,18 +82,21 @@ namespace Dotnet_new3.IntegrationTests
                .Execute();
 
             commandResult.Should().ExitWith(0).And.NotHaveStdErr();
-            ApprovalTests.Approvals.Verify(commandResult.StdOut, (output) =>
-            {
-                //remove versions
-                var finalOutput = Regex.Replace(output, "Version=[A-Za-z0-9\\.]+", "Version=<version>");
-                //removes the delimiter line as we don't know the length of last columns containing paths above
-                finalOutput = Regex.Replace(finalOutput, "---[ -]*", "%delimiter%");
-                //removes the spaces after the header of last column
-                finalOutput = Regex.Replace(finalOutput, "Assembly[ ]*", "Assembly");
-                //remove tokens
-                finalOutput = Regex.Replace(finalOutput, "PublicKeyToken=[A-Za-z0-9]+", "PublicKeyToken=<token>");
-                return finalOutput;
-            });
+
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .AddScrubber(output =>
+                {
+                    string finalOutput = output.ToString();
+                    //remove versions
+                    output.ScrubByRegex("Version=[A-Za-z0-9\\.]+", "Version=<version>");
+                    //remove tokens
+                    output.ScrubByRegex("PublicKeyToken=[A-Za-z0-9]+", "PublicKeyToken=<token>");
+
+                    //removes the delimiter line as we don't know the length of last columns containing paths above
+                    output.ScrubTableHeaderDelimiter();
+                    //removes the spaces after "Assembly" column header as we don't know the amount of spaces after it
+                    output.ScrubByRegex("Assembly *", "Assembly");
+                });
         }
 
         [Fact]

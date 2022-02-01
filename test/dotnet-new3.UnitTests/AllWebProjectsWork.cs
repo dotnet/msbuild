@@ -1,24 +1,28 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using ApprovalTests;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
+using VerifyTests;
+using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class AllWebProjectsWork : IClassFixture<WebProjectsFixture>
+    [UsesVerify]
+    public class AllWebProjectsWork : IClassFixture<WebProjectsFixture>, IClassFixture<VerifySettingsFixture>
     {
         private readonly WebProjectsFixture _fixture;
         private readonly ITestOutputHelper _log;
+        private readonly VerifySettings _verifySettings;
 
-        public AllWebProjectsWork(WebProjectsFixture fixture, ITestOutputHelper log)
+        public AllWebProjectsWork(WebProjectsFixture fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log)
         {
             _fixture = fixture;
             _log = log;
+            _verifySettings = verifySettings.Settings;
         }
 
         [Theory]
@@ -64,7 +68,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public void CanShowHelp_WebAPI()
+        public Task CanShowHelp_WebAPI()
         {
             var commandResult = new DotnetNewCommand(_log, "webapi", "-h")
                .WithCustomHive(_fixture.HomeDirectory)
@@ -77,11 +81,11 @@ namespace Dotnet_new3.IntegrationTests
                .And
                .NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CanShowHelp_Mvc()
+        public Task CanShowHelp_Mvc()
         {
             var commandResult = new DotnetNewCommand(_log, "mvc", "-h")
                .WithCustomHive(_fixture.HomeDirectory)
@@ -94,13 +98,13 @@ namespace Dotnet_new3.IntegrationTests
                .And
                .NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Theory]
         [InlineData("webapp")]
         [InlineData("razor")]
-        public void CanShowHelp_Webapp(string templateName)
+        public Task CanShowHelp_Webapp(string templateName)
         {
             var commandResult = new DotnetNewCommand(_log, templateName, "-h")
                .WithCustomHive(_fixture.HomeDirectory)
@@ -113,7 +117,9 @@ namespace Dotnet_new3.IntegrationTests
                .And
                .NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
         }
     }
 

@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="FakeItEasy" />
-    <PackageReference Include="Verify.XUnit" Version="14.2.0" />
+    <PackageReference Include="Verify.XUnit" />
     
   </ItemGroup>
 

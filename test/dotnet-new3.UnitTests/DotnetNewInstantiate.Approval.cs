@@ -2,18 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.RegularExpressions;
-using ApprovalTests;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
+using VerifyXunit;
 using Xunit;
 
 namespace Dotnet_new3.IntegrationTests
 {
+    [UsesVerify]
     public partial class DotnetNewInstantiate
     {
         [Fact]
-        public void CannotInstantiateUnknownTemplate()
+        public Task CannotInstantiateUnknownTemplate()
         {
             var commandResult = new DotnetNewCommand(_log, "webapp")
                 .WithCustomHive(_fixture.HomeDirectory)
@@ -25,11 +26,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
         }
 
         [Fact]
-        public void CannotInstantiateTemplateWithUnknownLanguage()
+        public Task CannotInstantiateTemplateWithUnknownLanguage()
         {
             var commandResult = new DotnetNewCommand(_log, "console", "--language", "D#")
                 .WithCustomHive(_fixture.HomeDirectory)
@@ -41,11 +42,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
         }
 
         [Fact]
-        public void CannotInstantiateTemplateWithUnknownType()
+        public Task CannotInstantiateTemplateWithUnknownType()
         {
             var commandResult = new DotnetNewCommand(_log, "console", "--type", "item")
                 .WithCustomHive(_fixture.HomeDirectory)
@@ -57,11 +58,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
         }
 
         [Fact]
-        public void CannotInstantiateTemplate_WhenAmbiguousLanguageChoice()
+        public Task CannotInstantiateTemplate_WhenAmbiguousLanguageChoice()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -78,11 +79,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
         }
 
         [Fact]
-        public void CannotInstantiateTemplate_WhenAmbiguousShortNameChoice()
+        public Task CannotInstantiateTemplate_WhenAmbiguousShortNameChoice()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -99,21 +100,22 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr, (output) =>
-            {
-                //package locaions are machine specific so we cannot use them in approval tests
-                //replace them with directory name
-                var finalOutput = output.Replace(templateOneLocation, Path.GetFileName(templateOneLocation)).Replace(templateTwoLocation, Path.GetFileName(templateTwoLocation));
-                //removes the delimiter line as we don't know the length of last columns containing paths above
-                finalOutput = Regex.Replace(finalOutput, "-+[ -]*", "%delimiter%");
-                //replace the "Package" column header as we don't know the amount of spaces after it (depends on the paths above)
-                finalOutput = Regex.Replace(finalOutput, "Package *", "Package");
-                return finalOutput;
-            });
+            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+                .AddScrubber(output =>
+                {
+                    //package locaions are machine specific so we cannot use them in approval tests
+                    output.Replace(templateOneLocation, "%TEMPLATE ONE LOCATION%");
+                    output.Replace(templateTwoLocation, "%TEMPLATE TWO LOCATION%");
+
+                    //removes the delimiter line as we don't know the length of last columns containing paths above
+                    output.ScrubTableHeaderDelimiter();
+                    //removes the spaces after "Package" column header as we don't know the amount of spaces after it (depends on the paths above)
+                    output.ScrubByRegex("Package *", "Package");
+                });
         }
 
         [Fact]
-        public void CannotInstantiateTemplate_WhenFullNameIsUsed()
+        public Task CannotInstantiateTemplate_WhenFullNameIsUsed()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -126,11 +128,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Should().Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
         }
 
         [Fact]
-        public void CannotInstantiateTemplate_WhenParameterIsInvalid()
+        public Task CannotInstantiateTemplate_WhenParameterIsInvalid()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -144,11 +146,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
         }
 
         [Fact]
-        public void CannotInstantiateTemplate_WhenChoiceParameterValueIsInvalid()
+        public Task CannotInstantiateTemplate_WhenChoiceParameterValueIsInvalid()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -162,11 +164,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
         }
 
         [Fact]
-        public void CannotInstantiateTemplate_WhenChoiceParameterValueIsNotComplete()
+        public Task CannotInstantiateTemplate_WhenChoiceParameterValueIsNotComplete()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -180,11 +182,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
         }
 
         [Fact]
-        public void CannotInstantiateTemplate_OnMultipleParameterErrors()
+        public Task CannotInstantiateTemplate_OnMultipleParameterErrors()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -198,11 +200,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut();
 
-            Approvals.Verify(commandResult.StdErr);
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
         }
 
         [Fact]
-        public void CannotInstantiateTemplate_WhenPrecedenceIsSame()
+        public Task CannotInstantiateTemplate_WhenPrecedenceIsSame()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -221,20 +223,22 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining(templateOneLocation)
                 .And.HaveStdErrContaining(templateTwoLocation);
 
-            Approvals.Verify(commandResult.StdErr, (output) =>
-            {
-                //package locaions are machine specific so we cannot use them in approval tests
-                var finalOutput = output.Replace(templateOneLocation, "").Replace(templateTwoLocation, "");
-                //removes the delimiter line as we don't know the length of last columns containing paths above
-                finalOutput = Regex.Replace(finalOutput, "-+[ -]*", "");
-                //removes the "Package" column header as we don't know the amount of spaces after it (depends on the paths above)
-                finalOutput = Regex.Replace(finalOutput, "Package *", "");
-                return finalOutput;
-            });
+            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+                .AddScrubber(output =>
+                {
+                    //package locaions are machine specific so we cannot use them in approval tests
+                    output.Replace(templateOneLocation, "%TEMPLATE ONE LOCATION%");
+                    output.Replace(templateTwoLocation, "%TEMPLATE TWO LOCATION%");
+
+                    //removes the delimiter line as we don't know the length of last columns containing paths above
+                    output.ScrubTableHeaderDelimiter();
+                    //removes the spaces after "Package" column header as we don't know the amount of spaces after it (depends on the paths above)
+                    output.ScrubByRegex("Package *", "Package");
+                });
         }
 
         [Fact]
-        public void CannotOverwriteFilesWithoutForce()
+        public Task CannotOverwriteFilesWithoutForce()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -262,23 +266,22 @@ namespace Dotnet_new3.IntegrationTests
                 commandResult.Should().HaveStdErrContaining(file);
             }
 
-            Approvals.Verify(commandResult.StdErr, (output) =>
-            {
-                //unify directory separators
-                output = output.Replace("\\", " / ");
-
-                //order of files may vary, replace filename with placeholders
-                //filenames are verified above
-                foreach (var file in expectedFiles)
+            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+                .AddScrubber(output =>
                 {
-                    output = output.Replace(file, "%FILENAME%");
-                }
-                return output;
-            });
+                    //unify directory separators
+                    output = output.Replace("\\", " / ");
+                    //order of files may vary, replace filename with placeholders
+                    //filenames are verified above
+                    foreach (var file in expectedFiles)
+                    {
+                        output = output.Replace(file, "%FILENAME%");
+                    }
+                });
         }
 
         [Fact]
-        public void CanShowWarning_WhenHostDataIsIncorrect()
+        public Task CanShowWarning_WhenHostDataIsIncorrect()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -294,13 +297,13 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut, (output) =>
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            .AddScrubber(output =>
             {
                 //output contains path to host.json file - it is machine-specific.
-                output = output.Replace($"{templateLocation}{Path.DirectorySeparatorChar}", "<%TEMPLATE ROOT%>");
+                output.Replace($"{templateLocation}{Path.DirectorySeparatorChar}", "%TEMPLATE ROOT%");
                 //details varies based on OS
-                output = Regex.Replace(output, "(Details: )([^\\r\\n]*)", $"$1<%DETAILS%>");
-                return output;
+                output.ScrubDetails();
             });
         }
 

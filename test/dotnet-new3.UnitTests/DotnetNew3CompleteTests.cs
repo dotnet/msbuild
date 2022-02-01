@@ -1,27 +1,30 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using ApprovalTests;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
-using NuGet.Versioning;
+using VerifyTests;
+using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class DotnetNew3CompleteTests
+    [UsesVerify]
+    public class DotnetNew3CompleteTests : IClassFixture<VerifySettingsFixture>
     {
+        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNew3CompleteTests(ITestOutputHelper log)
+        public DotnetNew3CompleteTests(VerifySettingsFixture verifySettings, ITestOutputHelper log)
         {
+            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 
         [Fact]
-        public void CanDoTabCompletion()
+        public Task CanDoTabCompletion()
         {
             string homeDir = TestUtils.CreateTemporaryFolder();
             var commandResult = new DotnetNewCommand(_log, "complete", $"new3 --debug:custom-hive {homeDir} ")
@@ -33,7 +36,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped

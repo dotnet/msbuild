@@ -5,19 +5,22 @@ using System.IO.Compression;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
+using VerifyTests;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public partial class DotnetNewInstantiate : IClassFixture<SharedHomeDirectory>
+    public partial class DotnetNewInstantiate : IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
     {
         private readonly SharedHomeDirectory _fixture;
+        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewInstantiate(SharedHomeDirectory fixture, ITestOutputHelper log)
+        public DotnetNewInstantiate(SharedHomeDirectory fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log)
         {
             _fixture = fixture;
+            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 

@@ -1,15 +1,15 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using ApprovalTests;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
+using VerifyXunit;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
+    [UsesVerify]
     public partial class DotnetNewHelp
     {
         [Theory]
@@ -18,7 +18,7 @@ namespace Dotnet_new3.IntegrationTests
         [InlineData("--help")]
         [InlineData("-?")]
         [InlineData("/?")]
-        public void CanShowHelp(string command)
+        public Task CanShowHelp(string command)
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -30,13 +30,15 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
         }
 
         [Theory]
         [InlineData("-h")]
         [InlineData("--help")]
-        public void CanShowHelp_Install(string option)
+        public Task CanShowHelp_Install(string option)
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -48,13 +50,15 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
         }
 
         [Theory]
         [InlineData("-h")]
         [InlineData("--help")]
-        public void CanShowHelp_Update(string option)
+        public Task CanShowHelp_Update(string option)
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -66,13 +70,15 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
         }
 
         [Theory]
         [InlineData("-h")]
         [InlineData("--help")]
-        public void CanShowHelp_Uninstall(string option)
+        public Task CanShowHelp_Uninstall(string option)
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -84,13 +90,15 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                 .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
         }
 
         [Theory]
         [InlineData("-h")]
         [InlineData("--help")]
-        public void CanShowHelp_List(string option)
+        public Task CanShowHelp_List(string option)
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -102,13 +110,15 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
         }
 
         [Theory]
         [InlineData("-h")]
         [InlineData("--help")]
-        public void CanShowHelp_Search(string option)
+        public Task CanShowHelp_Search(string option)
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -120,13 +130,18 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
         }
 
         [Theory]
-        [InlineData("console -h")]
-        [InlineData("console --help")]
-        public void CanShowHelpForTemplate_Console(string command)
+        [InlineData("console -h", "console")]
+        [InlineData("console --help", "console")]
+        [InlineData("classlib -h", "classlib")]
+        [InlineData("classlib --help", "classlib")]
+        [InlineData("globaljson -h", "globaljson")]
+        public Task CanShowHelpForTemplate(string command, string setName)
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -141,52 +156,13 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.NotHaveStdOutContaining("Usage: new3 [options]");
 
-            Approvals.Verify(commandResult.StdOut);
-        }
-
-        [Theory]
-        [InlineData("classlib -h")]
-        [InlineData("classlib --help")]
-        public void CanShowHelpForTemplate_Classlib(string command)
-        {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-
-            var commandResult = new DotnetNewCommand(_log, command.Split(" "))
-                .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(workingDirectory)
-                .Execute();
-
-            commandResult
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.NotHaveStdOutContaining("Usage: new3 [options]");
-
-            Approvals.Verify(commandResult.StdOut);
-        }
-
-        [Theory]
-        [InlineData("globaljson -h")]
-        public void CanShowHelpForTemplate_GlobalJson(string command)
-        {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-
-            var commandResult = new DotnetNewCommand(_log, command.Split(" "))
-                .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(workingDirectory)
-                .Execute();
-
-            commandResult
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.NotHaveStdOutContaining("Usage: new3 [options]");
-
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .UseTextForParameters(setName)
+                .DisableRequireUniquePrefix();
         }
 
         [Fact]
-        public void CannotShowHelpForTemplate_PartialNameMatch()
+        public Task CannotShowHelpForTemplate_PartialNameMatch()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -196,11 +172,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Execute();
 
             commandResult.Should().Pass().And.NotHaveStdErr();
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CannotShowHelpForTemplate_FullNameMatch()
+        public Task CannotShowHelpForTemplate_FullNameMatch()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -211,11 +187,11 @@ namespace Dotnet_new3.IntegrationTests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CannotShowHelpForTemplate_WhenAmbiguousLanguageChoice()
+        public Task CannotShowHelpForTemplate_WhenAmbiguousLanguageChoice()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
             Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, _fixture.HomeDirectory, workingDirectory);
@@ -228,11 +204,11 @@ namespace Dotnet_new3.IntegrationTests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CanShowHelpForTemplate_MatchOnChoice()
+        public Task CanShowHelpForTemplate_MatchOnChoice()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -246,11 +222,11 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.NotHaveStdOutContaining("Usage: new3 [options]");
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CannotShowHelpForTemplate_MatchOnChoiceWithoutValue()
+        public Task CannotShowHelpForTemplate_MatchOnChoiceWithoutValue()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -261,11 +237,11 @@ namespace Dotnet_new3.IntegrationTests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CannotShowHelpForTemplate_MatchOnUnexistingParam()
+        public Task CannotShowHelpForTemplate_MatchOnUnexistingParam()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -276,11 +252,11 @@ namespace Dotnet_new3.IntegrationTests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CanShowHelpForTemplate_MatchOnNonChoiceParam()
+        public Task CanShowHelpForTemplate_MatchOnNonChoiceParam()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -291,11 +267,11 @@ namespace Dotnet_new3.IntegrationTests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr().And.NotHaveStdOutContaining("Usage: new3 [options]");
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CanShowHelpForTemplate_MatchOnLanguage()
+        public Task CanShowHelpForTemplate_MatchOnLanguage()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -309,11 +285,11 @@ namespace Dotnet_new3.IntegrationTests
                     .And.NotHaveStdErr()
                     .And.NotHaveStdOutContaining("Usage: new3 [options]");
 
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CannotShowHelpForTemplate_MatchOnNonChoiceParamWithoutValue()
+        public Task CannotShowHelpForTemplate_MatchOnNonChoiceParamWithoutValue()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -324,11 +300,11 @@ namespace Dotnet_new3.IntegrationTests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
-        public void CanShowAllowScriptsOption()
+        public Task CanShowAllowScriptsOption()
         {
             string templateLocation = "PostActions/RunScript/Basic";
             string templateName = "TestAssets.PostActions.RunScript.Basic";
@@ -342,7 +318,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Execute();
 
             commandResult.Should().Pass().And.NotHaveStdErr();
-            Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
     }
 }

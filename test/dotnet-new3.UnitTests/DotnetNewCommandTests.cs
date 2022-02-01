@@ -4,22 +4,27 @@
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
+using VerifyTests;
+using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class DotnetNewCommandTests
+    [UsesVerify]
+    public class DotnetNewCommandTests : IClassFixture<VerifySettingsFixture>
     {
+        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewCommandTests(ITestOutputHelper log)
+        public DotnetNewCommandTests(VerifySettingsFixture verifySettings, ITestOutputHelper log)
         {
+            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 
         [Fact]
-        public void CanShowBasicInfo()
+        public Task CanShowBasicInfo()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -32,7 +37,7 @@ namespace Dotnet_new3.IntegrationTests
             commandResult.Should()
                 .ExitWith(0).And.NotHaveStdErr();
 
-            ApprovalTests.Approvals.Verify(commandResult.StdOut);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
         [Fact]
