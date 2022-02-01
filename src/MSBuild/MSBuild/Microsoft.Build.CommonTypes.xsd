@@ -3386,6 +3386,9 @@ elementFormDefault="qualified">
                     <xs:attribute name="CertificateThumbprint" use="required" />
                     <xs:attribute name="SigningTarget" use="required" />
                     <xs:attribute name="TimestampUrl" />
+                    <xs:attribute name="TargetFrameworkIdentifier" />
+                    <xs:attribute name="TargetFrameworkVersion" />
+                    <xs:attribute name="DisallowMansignTimestampFallback" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
