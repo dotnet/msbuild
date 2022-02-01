@@ -221,12 +221,12 @@
       </trans-unit>
       <trans-unit id="ProjectCacheBeginBuild">
         <source>Initializing project cache plugin.</source>
-        <target state="new">Initializing project cache plugin.</target>
+        <target state="translated">Inicjowanie wtyczki pamięci podręcznej projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheEndBuild">
         <source>Shutting down project cache plugin.</source>
-        <target state="new">Shutting down project cache plugin.</target>
+        <target state="translated">Zamykanie wtyczki pamięci podręcznej projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheException">
@@ -236,21 +236,21 @@
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
-        <target state="new">Project cache hit for "{0}" (default targets).</target>
+        <target state="translated">Trafienie pamięci podręcznej projektu dla „{0}” (domyślne elementy docelowe).</target>
         <note>
       LOCALIZATION: {0} is a file path.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithOutputs">
         <source>{0} -&gt; Cache Hit</source>
-        <target state="new">{0} -&gt; Cache Hit</target>
+        <target state="translated">{0} -&gt; Trafienia w pamięci podręcznej</target>
         <note>
       {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithTargetNames">
         <source>Project cache hit for "{0}" ({1} target(s)).</source>
-        <target state="new">Project cache hit for "{0}" ({1} target(s)).</target>
+        <target state="translated">Trafienie w pamięci podręcznej projektu dla „{0}” ({1} elementów docelowych).</target>
         <note>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </note>
@@ -262,28 +262,28 @@
       </trans-unit>
       <trans-unit id="ProjectCacheMissWithDefaultTargets">
         <source>Project cache miss for "{0}" (default targets).</source>
-        <target state="new">Project cache miss for "{0}" (default targets).</target>
+        <target state="translated">Chybienia w pamięci podręcznej projektu dla „{0}” (domyślne elementy docelowe).</target>
         <note>
       LOCALIZATION: {0} is a file path.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheMissWithTargetNames">
         <source>Project cache miss for "{0}" ({1} target(s)).</source>
-        <target state="new">Project cache miss for "{0}" ({1} target(s)).</target>
+        <target state="translated">Chybienia w pamięci podręcznej projektu dla „{0}” (domyślne elementy docelowe: {1}).</target>
         <note>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
         <source>Project cache not applicable for "{0}" (default targets).</source>
-        <target state="new">Project cache not applicable for "{0}" (default targets).</target>
+        <target state="translated">Pamięć podręczna projektu nie ma zastosowania do „{0}” (domyślne elementy docelowe).</target>
         <note>
       LOCALIZATION: {0} is a file path.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
         <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
-        <target state="new">Project cache not applicable for "{0}" ({1} target(s)).</target>
+        <target state="translated">Pamięć podręczna projektu nie ma zastosowania do „{0}” (domyślne elementy docelowe: {1}).</target>
         <note>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </note>
@@ -295,14 +295,14 @@
       </trans-unit>
       <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
         <source>Querying project cache for "{0}" (default targets):</source>
-        <target state="new">Querying project cache for "{0}" (default targets):</target>
+        <target state="translated">Badanie pamięci podręcznej projektu dla „{0}” (domyślne elementy docelowe):</target>
         <note>
       LOCALIZATION: {0} is a file path.
     </note>
       </trans-unit>
       <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
         <source>Querying project cache for "{0}" (targets: {1}):</source>
-        <target state="new">Querying project cache for "{0}" (targets: {1}):</target>
+        <target state="translated">Badanie pamięci podręcznej projektu dla „{0}” (domyślne elementy docelowe: {1}):</target>
         <note>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </note>

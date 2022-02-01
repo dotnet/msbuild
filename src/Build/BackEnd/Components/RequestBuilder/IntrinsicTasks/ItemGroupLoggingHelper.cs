@@ -44,7 +44,9 @@ namespace Microsoft.Build.BackEnd
         /// to materialize the Message as that's a declaration assembly. We inject the logic
         /// here.
         /// </summary>
+#pragma warning disable CA1810 // Initialize reference type static fields inline
         static ItemGroupLoggingHelper()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
         {
             BuildEventArgs.ResourceStringFormatter = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword;
             TaskParameterEventArgs.MessageGetter = GetTaskParameterText;

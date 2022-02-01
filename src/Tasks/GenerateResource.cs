@@ -546,29 +546,6 @@ namespace Microsoft.Build.Tasks
             // do nothing
         }
 
-#if FEATURE_COM_INTEROP
-        /// <summary>
-        /// Static constructor checks the registry opt-out for mark-of-the-web rejection.
-        /// </summary>
-        static GenerateResource()
-        {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                allowMOTW = true;
-                return;
-            }
-            try
-            {
-                object allowUntrustedFiles = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null);
-                if (allowUntrustedFiles is string allowUntrustedFilesString)
-                {
-                    allowMOTW = allowUntrustedFilesString.Equals("true", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            catch { }
-        }
-#endif
-
         /// <summary>
         /// Logs a Resgen.exe command line that indicates what parameters were
         /// passed to this task. Since this task is replacing Resgen, and we used
@@ -931,7 +908,7 @@ namespace Microsoft.Build.Tasks
         }
 
 #if FEATURE_COM_INTEROP
-        private static bool allowMOTW;
+        private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) is string allowUntrustedFiles && allowUntrustedFiles.Equals("true", StringComparison.OrdinalIgnoreCase));
 
         private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
         private const uint ZoneInternet = 3;
@@ -942,7 +919,7 @@ namespace Microsoft.Build.Tasks
         private bool IsDangerous(String filename)
         {
             // If they are opted out, there's no work to do
-            if (allowMOTW)
+            if (AllowMOTW)
             {
                 return false;
             }

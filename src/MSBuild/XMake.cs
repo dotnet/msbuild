@@ -121,7 +121,9 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Static constructor
         /// </summary>
+#pragma warning disable CA1810 // Initialize reference type static fields inline
         static MSBuildApp()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
         {
             try
             {
