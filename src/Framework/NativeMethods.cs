@@ -953,28 +953,25 @@ internal static class NativeMethods
 
         if (path != null)
         {
-            unsafe
+            int length = GetShortPathName(path, null, 0);
+            int errorCode = Marshal.GetLastWin32Error();
+
+            if (length > 0)
             {
-                int length = GetShortPathName(path, null, 0);
-                int errorCode = Marshal.GetLastWin32Error();
+                char[] fullPathBuffer = new char[length];
+                length = GetShortPathName(path, fullPathBuffer, length);
+                errorCode = Marshal.GetLastWin32Error();
 
                 if (length > 0)
                 {
-                    char* fullPathBuffer = stackalloc char[length];
-                    length = GetShortPathName(path, fullPathBuffer, length);
-                    errorCode = Marshal.GetLastWin32Error();
-
-                    if (length > 0)
-                    {
-                        string fullPath = new(fullPathBuffer, 0, length);
-                        path = fullPath;
-                    }
+                    string fullPath = new(fullPathBuffer, 0, length);
+                    path = fullPath;
                 }
+            }
 
-                if (length == 0 && errorCode != 0)
-                {
-                    ThrowExceptionForErrorCode(errorCode);
-                }
+            if (length == 0 && errorCode != 0)
+            {
+                ThrowExceptionForErrorCode(errorCode);
             }
         }
 
@@ -995,28 +992,25 @@ internal static class NativeMethods
 
         if (path != null)
         {
-            unsafe
+            int length = GetLongPathName(path, null, 0);
+            int errorCode = Marshal.GetLastWin32Error();
+
+            if (length > 0)
             {
-                int length = GetLongPathName(path, null, 0);
-                int errorCode = Marshal.GetLastWin32Error();
+                char[] fullPathBuffer = new char[length];
+                length = GetLongPathName(path, fullPathBuffer, length);
+                errorCode = Marshal.GetLastWin32Error();
 
                 if (length > 0)
                 {
-                    char* fullPathBuffer = stackalloc char[length];
-                    length = GetLongPathName(path, fullPathBuffer, length);
-                    errorCode = Marshal.GetLastWin32Error();
-
-                    if (length > 0)
-                    {
-                        string fullPath = new(fullPathBuffer, 0, length);
-                        path = fullPath;
-                    }
+                    string fullPath = new(fullPathBuffer, 0, length);
+                    path = fullPath;
                 }
+            }
 
-                if (length == 0 && errorCode != 0)
-                {
-                    ThrowExceptionForErrorCode(errorCode);
-                }
+            if (length == 0 && errorCode != 0)
+            {
+                ThrowExceptionForErrorCode(errorCode);
             }
         }
 
@@ -1098,7 +1092,7 @@ internal static class NativeMethods
 
                 if (success && (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0)
                 {
-                    long dt = ((long) (data.ftLastWriteTimeHigh) << 32) | ((long) data.ftLastWriteTimeLow);
+                    long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
                     fileModifiedTime = DateTime.FromFileTimeUtc(dt);
 
                     // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp.
@@ -1499,7 +1493,7 @@ internal static class NativeMethods
     /// <param name="buffer">The character buffer used to return the file name.</param>
     /// <param name="length">The length of the buffer.</param>
     [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-    internal static extern int GetModuleFileName(HandleRef hModule,[Out] char[] buffer,int length);
+    internal static extern int GetModuleFileName(HandleRef hModule, [Out] char[] buffer, int length);
 
     [DllImport("kernel32.dll")]
     internal static extern IntPtr GetStdHandle(int nStdHandle);
@@ -1548,10 +1542,10 @@ internal static class NativeMethods
     private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatus lpBuffer);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-    internal static extern unsafe int GetShortPathName(string path, [Out] char* fullpath, [In] int length);
+    internal static extern unsafe int GetShortPathName(string path, [Out] char[] fullpath, [In] int length);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-    internal static extern unsafe int GetLongPathName([In] string path, [Out] char* fullpath, [In] int length);
+    internal static extern unsafe int GetLongPathName([In] string path, [Out] char[] fullpath, [In] int length);
 
     [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
     internal static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, int nSize);
@@ -1643,7 +1637,7 @@ internal static class NativeMethods
 
         if (!(returnValue == 0 || ((uint)returnValue == RPC_S_CALLPENDING && timeout != Timeout.Infinite)))
         {
-           throw new InternalErrorException($"Received {returnValue} from CoWaitForMultipleHandles, but expected 0 (S_OK)");
+            throw new InternalErrorException($"Received {returnValue} from CoWaitForMultipleHandles, but expected 0 (S_OK)");
         }
 
         return returnValue == 0;
