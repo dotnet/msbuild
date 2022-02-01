@@ -47,6 +47,22 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
+        public void CannotInstantiateTemplateWithUnknownType()
+        {
+            var commandResult = new DotnetNewCommand(_log, "console", "--type", "item")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut();
+
+            Approvals.Verify(commandResult.StdErr);
+        }
+
+        [Fact]
         public void CannotInstantiateTemplate_WhenAmbiguousLanguageChoice()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");

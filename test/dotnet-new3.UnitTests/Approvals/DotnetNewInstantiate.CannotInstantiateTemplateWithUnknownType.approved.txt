@@ -1,0 +1,7 @@
+﻿No templates found matching: 'console', --type='item'.
+Allowed values for '--type' option are: 'project'.
+
+To list installed templates, run:
+   dotnet-new3 new3 list
+To search for the templates on NuGet.org, run:
+   dotnet-new3 new3 search console

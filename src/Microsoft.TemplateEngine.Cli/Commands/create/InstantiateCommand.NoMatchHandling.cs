@@ -192,15 +192,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, baseInputParameters).Bold().Red());
             foreach (var option in new[]
                 {
-                    new { Option = languageOption, Condition = matchInfos.All(mi => !mi.IsLanguageMatch) },
-                    new { Option = typeOption, Condition = matchInfos.All(mi => !mi.IsTypeMatch) },
-                    new { Option = baselineOption, Condition = matchInfos.All(mi => !mi.IsBaselineMatch) },
+                    new { Option = languageOption, Condition = matchInfos.All(mi => !mi.IsLanguageMatch), AllowedValues = templateGroup.Languages },
+                    new { Option = typeOption, Condition = matchInfos.All(mi => !mi.IsTypeMatch), AllowedValues = templateGroup.Types },
+                    new { Option = baselineOption, Condition = matchInfos.All(mi => !mi.IsBaselineMatch), AllowedValues = (IReadOnlyList<string?>)templateGroup.Baselines },
                 })
             {
                 if (option.Condition && result.FindResultFor(option.Option) is { } optionResult)
                 {
-                    string availableLanguagesStr = string.Join(", ", templateGroup.Languages.Select(l => $"'{l}'").OrderBy(l => l, StringComparer.OrdinalIgnoreCase));
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplateOptions_Error_AllowedValuesForOptionList, optionResult.Token.Value, availableLanguagesStr));
+                    string allowedValues = string.Join(", ", option.AllowedValues.Select(l => $"'{l}'").OrderBy(l => l, StringComparer.OrdinalIgnoreCase));
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplateOptions_Error_AllowedValuesForOptionList, optionResult.Token.Value, allowedValues));
                 }
             }
 
