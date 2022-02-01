@@ -253,7 +253,7 @@ dotnet_diagnostic.CA1805.severity = none
 dotnet_diagnostic.CA1806.severity = none
 
 # Initialize reference type static fields inline
-dotnet_diagnostic.CA1810.severity = suggestion
+dotnet_diagnostic.CA1810.severity = warning
 
 # Avoid uninstantiated internal classes
 dotnet_diagnostic.CA1812.severity = none
