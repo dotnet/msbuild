@@ -199,7 +199,7 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>3de52f5c16e5ae445abaec7810515391da7c76d5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Components.Analyzers" Version="7.0.0-preview.2.22080.2">
+    <Dependency Name="Microsoft.AspNetCore.Components.SdkAnalyzers" Version="7.0.0-preview.2.22080.2">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>3de52f5c16e5ae445abaec7810515391da7c76d5</Sha>
     </Dependency>
