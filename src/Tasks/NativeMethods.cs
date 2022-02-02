@@ -1053,10 +1053,8 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// GetCachePath from fusion.dll.
-        /// Using StringBuilder here is a way to pass a preallocated buffer of characters to (native) functions that require it.
         /// A common design pattern in unmanaged C++ is calling a function twice, once to determine the length of the string
-        /// and then again to pass the client-allocated character buffer. StringBuilder is the most straightforward way
-        /// to allocate a mutable buffer of characters and pass it around.
+        /// and then again to pass the client-allocated character buffer.
         /// </summary>
         /// <param name="cacheFlags">Value that indicates the source of the cached assembly.</param>
         /// <param name="cachePath">The returned pointer to the path.</param>

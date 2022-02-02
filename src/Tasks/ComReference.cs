@@ -408,7 +408,6 @@ namespace Microsoft.Build.Tasks
         {
             bool success = false;
             char[] buffer = null;
-            string output = string.Empty;
 
             // Try increased buffer sizes if on longpath-enabled Windows
             for (int bufferSize = NativeMethodsShared.MAX_PATH; !success && bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
@@ -423,7 +422,7 @@ namespace Microsoft.Build.Tasks
                     success = pathLength != 0 && !isBufferTooSmall;
                     if (success)
                     {
-                        output = new string(buffer, 0, pathLength);
+                        return new string(buffer, 0, pathLength);
                     }
                 }
                 finally
@@ -432,7 +431,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return output;
+            return string.Empty;
         }
 
         /// <summary>

@@ -580,24 +580,24 @@ namespace Microsoft.Build.Tasks
                 unsafe
                 {
                     // Allocate an initial buffer 
-                    char* runtimeVersionInitial = stackalloc char[bufferLength];
+                    char* runtimeVersion = stackalloc char[bufferLength];
 
                     // Run GetFileVersion, this should succeed using the initial buffer.
                     // It also returns the dwLength which is used if there is insufficient buffer.
-                    uint hresult = NativeMethods.GetFileVersion(path, runtimeVersionInitial, bufferLength, out int dwLength);
+                    uint hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out int dwLength);
 
                     if (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER)
                     {
                         // Allocate new buffer based on the returned length.
-                        char* runtimeVersion = stackalloc char[dwLength];
+                        char* runtimeVersion2 = stackalloc char[dwLength];
+                        runtimeVersion = runtimeVersion2;
 
                         // Get the RuntimeVersion in this second call.
                         bufferLength = dwLength;
                         hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out dwLength);
-                        return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength - 1) : string.Empty;
                     }
 
-                    return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersionInitial, 0, dwLength - 1) : string.Empty;
+                    return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength - 1) : string.Empty;
                 }                
             }
             else
@@ -607,14 +607,13 @@ namespace Microsoft.Build.Tasks
 #else
                 return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
 #endif
-                }
+        }
 
-
-                /// <summary>
-                /// Import assembly dependencies.
-                /// </summary>
-                /// <returns>The array of assembly dependencies.</returns>
-                private AssemblyNameExtension[] ImportAssemblyDependencies()
+        /// <summary>
+        /// Import assembly dependencies.
+        /// </summary>
+        /// <returns>The array of assembly dependencies.</returns>
+        private AssemblyNameExtension[] ImportAssemblyDependencies()
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             var asmRefs = new List<AssemblyNameExtension>();

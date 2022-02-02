@@ -432,7 +432,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                SetCopyLocalToFalseOnGacOrNoPIAAssemblies(resolvedReferenceList, GlobalAssemblyCache.GetGacPath());
+                SetCopyLocalToFalseOnGacOrNoPIAAssemblies(resolvedReferenceList, GlobalAssemblyCache.GacPath);
 
                 ResolvedModules = moduleList.ToArray();
                 ResolvedFiles = resolvedReferenceList.ToArray();
