@@ -130,7 +130,8 @@ namespace Microsoft.Build.Shared
         internal LoadedType Load
         (
             string typeName,
-            AssemblyLoadInfo assembly
+            AssemblyLoadInfo assembly,
+            bool _
         )
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);

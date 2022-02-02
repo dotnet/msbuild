@@ -35,6 +35,7 @@
     <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
   </ItemGroup>

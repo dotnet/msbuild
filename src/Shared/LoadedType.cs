@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Framework;
 
@@ -20,8 +21,8 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Creates an instance of this class for the given type.
         /// </summary>
-        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo)
-            : this(type, assemblyLoadInfo, null)
+        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Dictionary<string, Type> otherTypes = null)
+            : this(type, assemblyLoadInfo, null, otherTypes)
         {
         }
 
@@ -31,7 +32,7 @@ namespace Microsoft.Build.Shared
         /// <param name="type">The Type to be loaded</param>
         /// <param name="assemblyLoadInfo">Information used to load the assembly</param>
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
-        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Assembly loadedAssembly)
+        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Assembly loadedAssembly, Dictionary<string, Type> otherTypes = null)
         {
             ErrorUtilities.VerifyThrow(type != null, "We must have the type.");
             ErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
@@ -41,8 +42,11 @@ namespace Microsoft.Build.Shared
             _loadedAssembly = loadedAssembly;
 
             CheckForHardcodedSTARequirement();
-            HasLoadInSeparateAppDomainAttribute();
-            HasSTAThreadAttribute();
+            _hasLoadInSeparateAppDomainAttribute = this.Type.GetTypeInfo().IsDefined(otherTypes?.TryGetValue("LoadInSeparateAppDomainAttribute", out Type appDomainAttr) == true ? appDomainAttr : typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
+            if (_hasSTAThreadAttribute is null)
+            {
+                _hasSTAThreadAttribute = this.Type.GetTypeInfo().IsDefined(otherTypes?.TryGetValue("RunInSTAAttribute", out Type STAAttr) == true ? STAAttr : typeof(RunInSTAAttribute), true /* inherited */);
+            }
         }
 
 
@@ -56,11 +60,6 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         public bool HasLoadInSeparateAppDomainAttribute()
         {
-            if (_hasLoadInSeparateAppDomainAttribute == null)
-            {
-                _hasLoadInSeparateAppDomainAttribute = this.Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
-            }
-
             return (bool)_hasLoadInSeparateAppDomainAttribute;
         }
 
@@ -71,11 +70,6 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         public bool HasSTAThreadAttribute()
         {
-            if (_hasSTAThreadAttribute == null)
-            {
-                _hasSTAThreadAttribute = this.Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
-            }
-
             return (bool)_hasSTAThreadAttribute;
         }
 

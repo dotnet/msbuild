@@ -279,7 +279,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
-                _loadedType = _typeLoader.Load(taskName, loadInfo);
+                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
