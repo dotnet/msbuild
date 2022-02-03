@@ -75,14 +75,14 @@ namespace Microsoft.TemplateEngine.Cli
 
         protected override Option GetBaseOption(IReadOnlyList<string> aliases)
         {
-            Option option = new Option<string>(
+            Option<string> option = new Option<string>(
                 aliases.ToArray(),
                 parseArgument: result => GetParseChoiceArgument(this)(result))
             {
                 Arity = new ArgumentArity(DefaultIfOptionWithoutValue == null ? 1 : 0, 1)
             };
 
-            option.FromAmong(Choices.Keys.ToArray());
+            option.FromAmongCaseInsensitive(Choices.Keys.ToArray());
             return option;
         }
 

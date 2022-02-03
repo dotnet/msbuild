@@ -40,5 +40,26 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             return false;
         }
+
+        /// <summary>
+        /// Case insensitive version for <see cref="System.CommandLine.OptionExtensions.FromAmong{TOption}(TOption, string[])"/>.
+        /// </summary>
+        internal static void FromAmongCaseInsensitive(this Option<string> option, params string[] allowedValues)
+        {
+            option.AddValidator(optionResult => ValidateAllowedValues(optionResult, allowedValues));
+            option.AddCompletions(allowedValues);
+        }
+
+        private static void ValidateAllowedValues(OptionResult optionResult, string[] allowedValues)
+        {
+            var invalidArguments = optionResult.Tokens.Where(token => !allowedValues.Contains(token.Value, StringComparer.OrdinalIgnoreCase));
+            if (invalidArguments.Any())
+            {
+                optionResult.ErrorMessage = string.Format(
+                    LocalizableStrings.Commands_Validator_WrongArgumentValue,
+                    string.Join(", ", invalidArguments.Select(arg => $"'{arg.Value}'")),
+                    string.Join(", ", allowedValues.Select(allowedValue => $"'{allowedValue}'")));
+            }
+        }
     }
 }

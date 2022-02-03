@@ -770,4 +770,8 @@ The header is followed by the list of parameters and their errors (might be seve
   <data name="NoTemplatesFound" xml:space="preserve">
     <value>No templates installed.</value>
   </data>
+  <data name="Commands_Validator_WrongArgumentValue" xml:space="preserve">
+    <value>Argument(s) {0} are not recognized. Must be one of: {1}.</value>
+    <comment>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</comment>
+  </data>
 </root>

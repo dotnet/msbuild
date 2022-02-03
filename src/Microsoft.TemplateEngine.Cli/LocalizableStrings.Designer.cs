@@ -725,6 +725,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Argument(s) {0} are not recognized. Must be one of: {1}..
+        /// </summary>
+        internal static string Commands_Validator_WrongArgumentValue {
+            get {
+                return ResourceManager.GetString("Commands_Validator_WrongArgumentValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unrecognized command or argument(s): {0}..
         /// </summary>
         internal static string Commands_Validator_WrongTokens {

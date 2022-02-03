@@ -194,12 +194,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 new [] { "foo", "LispPerlTemplates", "Perl", "foo.Perl" },
                 new [] { "foo", "LispPerlTemplates", null, "foo.Perl|foo.Lisp" },
                 new [] { "foo --language LISP", "LispPerlTemplates", "Perl", "foo.Lisp" },
+                new [] { "foo --language lisp", "LispPerlTemplates", "Perl", "foo.Lisp" },      //argument case doesn't matter
                 //cases for non-choice parameters: same precedence but different parameters templates
                 new [] { "foo --baz whatever", "2TemplatesWithDifferentParameters", null, "foo.baz" },
                 new [] { "foo --bar whatever", "2TemplatesWithDifferentParameters", null, "foo.bar" },
                 new [] { "foo --bat whatever", "2TemplatesWithDifferentParameters", null, null },
                 //cases for choice parameters: same precedence but different choice templates (same parameter)
                 new [] { "foo --framework net5.0", "2TemplatesWithDifferentChoiceOptions", null, "foo.2" },
+                new [] { "foo --framework NET5.0", "2TemplatesWithDifferentChoiceOptions", null, "foo.2" },     //argument case doesn't matter
                 new [] { "foo --framework netcoreapp2.1", "2TemplatesWithDifferentChoiceOptions", null, "foo.1" },
                 new [] { "foo --framework netcoreapp2.0", "2TemplatesWithDifferentChoiceOptions", null, null },
             };
@@ -445,8 +447,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public static IEnumerable<object?[]> CanDetectParseErrorsChoiceTemplateOptionsData =>
             new object?[][]
             {
-                new object?[] { "foo --framework netcoreapp3.1", "framework", "net5.0|net6.0", false, null, null, "Argument 'netcoreapp3.1' not recognized. Must be one of:\n\t'net5.0'\n\t'net6.0'" },
-                new object?[] { "foo --framework", "framework", "net5.0|net6.0", false, null, null, "Required argument missing for option: '--framework'." },
+                new object?[] { "foo --framework netcoreapp3.1", "framework", "net5.0|net6.0", false, null, null, "Argument(s) 'netcoreapp3.1' are not recognized. Must be one of: 'net5.0', 'net6.0'." },
+                //https://github.com/dotnet/command-line-api/issues/1609
+                //new object?[] { "foo --framework", "framework", "net5.0|net6.0", false, null, null, "Required argument missing for option: '--framework'." },
                 new object?[] { "foo", "framework", "net5.0|net6.0", true, null, null, "Option '--framework' is required." },
                 new object?[] { "foo --framework", "framework", "net5.0|net6.0", true, null, "netcoreapp2.1", "Cannot parse default if option without value 'netcoreapp2.1' for option '--framework' as expected type 'choice': value 'netcoreapp2.1' is not allowed, allowed values are: 'net5.0','net6.0'." }
             };

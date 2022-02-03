@@ -60,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 LanguageOption = SharedOptionsFactory.CreateLanguageOption();
                 LanguageOption.Description = SymbolStrings.TemplateCommand_Option_Language;
-                LanguageOption.FromAmong(templateLanguage);
+                LanguageOption.FromAmongCaseInsensitive(templateLanguage);
 
                 if (!string.IsNullOrWhiteSpace(defaultLanguage)
                      && buildDefaultLanguageValidation)
@@ -85,7 +85,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 TypeOption = SharedOptionsFactory.CreateTypeOption();
                 TypeOption.Description = SymbolStrings.TemplateCommand_Option_Type;
-                TypeOption.FromAmong(templateType);
+                TypeOption.FromAmongCaseInsensitive(templateType);
                 this.AddOption(TypeOption);
             }
 
@@ -93,7 +93,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 BaselineOption = SharedOptionsFactory.CreateBaselineOption();
                 BaselineOption.Description = SymbolStrings.TemplateCommand_Option_Baseline;
-                BaselineOption.FromAmong(template.BaselineInfo.Select(b => b.Key).Where(b => !string.IsNullOrWhiteSpace(b)).ToArray());
+                BaselineOption.FromAmongCaseInsensitive(template.BaselineInfo.Select(b => b.Key).Where(b => !string.IsNullOrWhiteSpace(b)).ToArray());
                 this.AddOption(BaselineOption);
             }
 

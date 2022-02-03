@@ -388,6 +388,11 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Komut başarılı oldu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Commands_Validator_WrongArgumentValue">
+        <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
+        <target state="new">Argument(s) {0} are not recognized. Must be one of: {1}.</target>
+        <note>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</note>
+      </trans-unit>
       <trans-unit id="Commands_Validator_WrongTokens">
         <source>Unrecognized command or argument(s): {0}.</source>
         <target state="new">Unrecognized command or argument(s): {0}.</target>
