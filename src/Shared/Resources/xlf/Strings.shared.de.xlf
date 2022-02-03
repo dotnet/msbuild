@@ -22,6 +22,11 @@
         <target state="translated">MSB4008: Eine mit der Aufgabenassembly "{0}" in Konflikt stehende Assembly wurde in "{1}" gefunden.</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
+      <trans-unit id="DebugPathTooLong">
+        <source>MSB5029: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="new">MSB5029: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</target>
+        <note>{StrBegin="MSB5029: "}</note>
+      </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
         <target state="translated">Es wurde erwartet, dass der Ereignistyp "{0}" mithilfe des .NET-Serialisierers serialisierbar ist. Das Ereignis war nicht serialisierbar und wurde ignoriert.</target>
