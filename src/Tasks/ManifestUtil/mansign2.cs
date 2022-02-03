@@ -328,7 +328,7 @@ namespace System.Deployment.Internal.CodeSigning
 #if RUNTIME_TYPE_NETCORE
         [SupportedOSPlatform("windows")]
 #endif
-        internal void Sign(CmiManifestSigner2 signer, string timeStampUrl)
+        internal void Sign(CmiManifestSigner2 signer, string timeStampUrl, bool disallowMansignTimestampFallback = false)
         {
             // Reset signer infos.
             _strongNameSignerInfo = null;
@@ -359,7 +359,7 @@ namespace System.Deployment.Internal.CodeSigning
 
                 // Now create the license DOM, and then sign it.
                 licenseDom = CreateLicenseDom(signer, ExtractPrincipalFromManifest(), ComputeHashFromManifest(_manifestDom, _useSha256));
-                AuthenticodeSignLicenseDom(licenseDom, signer, timeStampUrl, _useSha256);
+                AuthenticodeSignLicenseDom(licenseDom, signer, timeStampUrl, _useSha256, disallowMansignTimestampFallback);
             }
             StrongNameSignManifestDom(_manifestDom, licenseDom, signer, _useSha256);
         }
@@ -694,7 +694,7 @@ namespace System.Deployment.Internal.CodeSigning
 #if RUNTIME_TYPE_NETCORE
         [SupportedOSPlatform("windows")]
 #endif
-        private static void AuthenticodeSignLicenseDom(XmlDocument licenseDom, CmiManifestSigner2 signer, string timeStampUrl, bool useSha256)
+        private static void AuthenticodeSignLicenseDom(XmlDocument licenseDom, CmiManifestSigner2 signer, string timeStampUrl, bool useSha256, bool disallowMansignTimestampFallback)
         {
             // Make sure it is RSA, as this is the only one Fusion will support.
 #if RUNTIME_TYPE_NETCORE
@@ -765,7 +765,7 @@ namespace System.Deployment.Internal.CodeSigning
             // Time stamp it if requested.
             if (!string.IsNullOrEmpty(timeStampUrl))
             {
-                TimestampSignedLicenseDom(licenseDom, timeStampUrl, useSha256);
+                TimestampSignedLicenseDom(licenseDom, timeStampUrl, useSha256, disallowMansignTimestampFallback);
             }
 
             // Wrap it inside a RelData element.
@@ -849,7 +849,7 @@ namespace System.Deployment.Internal.CodeSigning
             return timestamp;
         }
 
-        private static void TimestampSignedLicenseDom(XmlDocument licenseDom, string timeStampUrl, bool useSha256)
+        private static void TimestampSignedLicenseDom(XmlDocument licenseDom, string timeStampUrl, bool useSha256, bool disallowMansignTimestampFallback)
         {
             XmlNamespaceManager nsm = new XmlNamespaceManager(licenseDom.NameTable);
             nsm.AddNamespace("r", LicenseNamespaceUri);
@@ -868,31 +868,38 @@ namespace System.Deployment.Internal.CodeSigning
             // Catch CryptographicException to ensure fallback to old code (non-RFC3161)
             catch (CryptographicException)
             {
-                Win32.CRYPT_DATA_BLOB timestampBlob = new Win32.CRYPT_DATA_BLOB();
-
-                byte[] licenseXml = Encoding.UTF8.GetBytes(licenseDom.OuterXml);
-
-                unsafe
+                if (disallowMansignTimestampFallback)
                 {
-                    fixed (byte* pbLicense = licenseXml)
-                    {
-                        Win32.CRYPT_DATA_BLOB licenseBlob = new Win32.CRYPT_DATA_BLOB();
-                        IntPtr pvLicense = new IntPtr(pbLicense);
-                        licenseBlob.cbData = (uint)licenseXml.Length;
-                        licenseBlob.pbData = pvLicense;
+                    throw;
+                }
+                else
+                {
+                    Win32.CRYPT_DATA_BLOB timestampBlob = new Win32.CRYPT_DATA_BLOB();
 
-                        int hr = Win32.CertTimestampAuthenticodeLicense(ref licenseBlob, timeStampUrl, ref timestampBlob);
-                        if (hr != Win32.S_OK)
+                    byte[] licenseXml = Encoding.UTF8.GetBytes(licenseDom.OuterXml);
+
+                    unsafe
+                    {
+                        fixed (byte* pbLicense = licenseXml)
                         {
-                            throw new CryptographicException(hr);
+                            Win32.CRYPT_DATA_BLOB licenseBlob = new Win32.CRYPT_DATA_BLOB();
+                            IntPtr pvLicense = new IntPtr(pbLicense);
+                            licenseBlob.cbData = (uint)licenseXml.Length;
+                            licenseBlob.pbData = pvLicense;
+
+                            int hr = Win32.CertTimestampAuthenticodeLicense(ref licenseBlob, timeStampUrl, ref timestampBlob);
+                            if (hr != Win32.S_OK)
+                            {
+                                throw new CryptographicException(hr);
+                            }
                         }
                     }
-                }
 
-                byte[] timestampSignature = new byte[timestampBlob.cbData];
-                Marshal.Copy(timestampBlob.pbData, timestampSignature, 0, timestampSignature.Length);
-                Win32.HeapFree(Win32.GetProcessHeap(), 0, timestampBlob.pbData);
-                timestamp = Encoding.UTF8.GetString(timestampSignature);
+                    byte[] timestampSignature = new byte[timestampBlob.cbData];
+                    Marshal.Copy(timestampBlob.pbData, timestampSignature, 0, timestampSignature.Length);
+                    Win32.HeapFree(Win32.GetProcessHeap(), 0, timestampBlob.pbData);
+                    timestamp = Encoding.UTF8.GetString(timestampSignature);
+                }
             }
 
             XmlElement asTimestamp = licenseDom.CreateElement("as", "Timestamp", AuthenticodeNamespaceUri);

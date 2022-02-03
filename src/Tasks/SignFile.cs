@@ -40,6 +40,8 @@ namespace Microsoft.Build.Tasks
         public String TargetFrameworkVersion { get; set; }
 
         public string TimestampUrl { get; set; }
+        
+        public bool DisallowMansignTimestampFallback { get; set; } = false;
 
 #if RUNTIME_TYPE_NETCORE
         [SupportedOSPlatform("windows")]
@@ -48,9 +50,13 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                SecurityUtilities.SignFile(CertificateThumbprint,
-                TimestampUrl == null ? null : new Uri(TimestampUrl),
-                SigningTarget.ItemSpec, TargetFrameworkVersion, TargetFrameworkIdentifier);
+                SecurityUtilities.SignFile(
+                    CertificateThumbprint,
+                    TimestampUrl == null ? null : new Uri(TimestampUrl),
+                    SigningTarget.ItemSpec, 
+                    TargetFrameworkVersion, 
+                    TargetFrameworkIdentifier,
+                    DisallowMansignTimestampFallback);
                 return true;
             }
             catch (ArgumentException ex) when (ex.ParamName.Equals("certThumbprint"))
