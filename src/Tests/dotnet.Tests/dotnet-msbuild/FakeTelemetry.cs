@@ -20,6 +20,10 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
         }
 
+        public void Dispose()
+        {
+        }
+
         public LogEntry LogEntry { get; private set; }
 
     }
