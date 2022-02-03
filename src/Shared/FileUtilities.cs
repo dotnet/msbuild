@@ -270,6 +270,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string TrimAndStripAnyQuotes(string path)
         {
+            if (path is null)
+            {
+                return path;
+            }
+
             // Trim returns the same string if trimming isn't needed
             path = path.Trim();
             path = path.Trim(new char[] { '"' });

@@ -23,8 +23,8 @@ namespace Microsoft.Build.Shared.Debugging
 
         static DebugUtils()
         {
-            string environmentDebugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
-            var debugDirectory = environmentDebugPath;
+            string environmentDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
+            string debugDirectory = environmentDebugPath;
 
             if (Traits.Instance.DebugEngine)
             {
@@ -33,24 +33,16 @@ namespace Microsoft.Build.Shared.Debugging
                 // Probe writeability
                 try
                 {
-                    string testFilePath = Path.Combine(debugDirectory, "textFile.txt");
-                    File.WriteAllText(testFilePath, "Successfully wrote to file.");
-                    File.Delete(testFilePath);
+                    debugDirectory = ProbeWriteability(debugDirectory);
                 }
-                catch (UnauthorizedAccessException)
+                catch (ArgumentException)
                 {
-                    // Failed to write to the specified directory; redirecting to TEMP
-                    debugDirectory = Path.Combine(Path.GetTempPath(), "MSBuild_Logs");
+                    // This can happen if MSBUILDDEBUGPATH contains invalid characters, but the current working directory may still work.
+                    debugDirectory = ProbeWriteability(Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs"));
                 }
-                catch (SecurityException)
-                {
-                    // Failed to write to the specified directory; redirecting to TEMP
-                    debugDirectory = Path.Combine(Path.GetTempPath(), "MSBuild_Logs");
-                }
-                catch (PathTooLongException)
-                {
-                    ErrorUtilities.ThrowArgument("DebugPathTooLong", debugDirectory);
-                }
+
+                // Redirect to TEMP if we failed to write to either MSBUILDDEBUGPATH or the current working directory.
+                debugDirectory ??= Path.Combine(Path.GetTempPath(), "MSBuild_Logs");
 
                 // Out of proc nodes do not know the startup directory so set the environment variable for them.
                 if (string.IsNullOrWhiteSpace(environmentDebugPath))
@@ -65,6 +57,32 @@ namespace Microsoft.Build.Shared.Debugging
             }
 
             DebugPath = debugDirectory;
+        }
+
+        private static string ProbeWriteability(string path)
+        {
+            try
+            {
+                string testFilePath = Path.Combine(path, "textFile.txt");
+                File.WriteAllText(testFilePath, "Successfully wrote to file.");
+                File.Delete(testFilePath);
+                return path;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Failed to write to the specified directory
+                return null;
+            }
+            catch (SecurityException)
+            {
+                // Failed to write to the specified directory
+                return null;
+            }
+            catch (PathTooLongException)
+            {
+                ErrorUtilities.ThrowArgument("DebugPathTooLong", path);
+                return null; // Should never reach here.
+            }
         }
 
         private static readonly Lazy<NodeMode> ProcessNodeMode = new(
