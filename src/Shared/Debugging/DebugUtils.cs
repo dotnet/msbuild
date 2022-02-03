@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Security;
 using System.Text.RegularExpressions;
 
 #nullable disable
@@ -28,6 +29,28 @@ namespace Microsoft.Build.Shared.Debugging
             if (Traits.Instance.DebugEngine)
             {
                 debugDirectory ??= Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
+
+                // Probe writeability
+                try
+                {
+                    string testFilePath = Path.Combine(debugDirectory, "textFile.txt");
+                    File.WriteAllText(testFilePath, "Successfully wrote to file.");
+                    File.Delete(testFilePath);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Failed to write to the specified directory; redirecting to TEMP
+                    debugDirectory = Path.Combine(Path.GetTempPath(), "MSBuild_Logs");
+                }
+                catch (SecurityException)
+                {
+                    // Failed to write to the specified directory; redirecting to TEMP
+                    debugDirectory = Path.Combine(Path.GetTempPath(), "MSBuild_Logs");
+                }
+                catch (PathTooLongException)
+                {
+                    ErrorUtilities.ThrowArgument("DebugPathTooLong", debugDirectory);
+                }
 
                 // Out of proc nodes do not know the startup directory so set the environment variable for them.
                 if (string.IsNullOrWhiteSpace(environmentDebugPath))
