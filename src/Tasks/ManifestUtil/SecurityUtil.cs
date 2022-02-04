@@ -860,9 +860,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             if (NativeMethodsShared.IsWindows && (toolPath == null || !FileSystems.Default.FileExists(toolPath)))
             {
-#pragma warning disable CA1416 // Validate platform compatibility
                 toolPath = GetVersionIndependentToolPath(ToolName);
-#pragma warning restore CA1416
             }
             if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
             {

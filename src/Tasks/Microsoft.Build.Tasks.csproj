@@ -971,6 +971,7 @@
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
+  <!-- Mimics AddRefAssemblies from MSBuild.csproj -->
   <Target Name="AddRefAssemblies" 
           DependsOnTargets="ResolveAssemblyReferences"
           BeforeTargets="AssignTargetPaths">
