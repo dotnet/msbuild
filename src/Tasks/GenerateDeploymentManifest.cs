@@ -141,11 +141,8 @@ namespace Microsoft.Build.Tasks
             }
             else if (String.IsNullOrEmpty(manifest.Publisher))
             {
-                string org = string.Empty;
-                if (NativeMethodsShared.IsWindows)
-                {
-                    org = Util.GetRegisteredOrganization();
-                }
+                string org = NativeMethodsShared.IsWindows ? Util.GetRegisteredOrganization() : string.Empty;
+
                 manifest.Publisher = !String.IsNullOrEmpty(org) ? org : manifest.Product;
             }
             Debug.Assert(!String.IsNullOrEmpty(manifest.Publisher));
