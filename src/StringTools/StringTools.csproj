@@ -22,9 +22,10 @@
     <AssemblyName>Microsoft.NET.StringTools.net35</AssemblyName>
   </PropertyGroup>
 
-    <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-      <PublishWindowsPdb>false</PublishWindowsPdb>
-    </PropertyGroup>
+  <!-- pdb publishing fails builds in the ns2.0 flavor -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PublishWindowsPdb>false</PublishWindowsPdb>
+  </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
     <PackageReference Include="System.Memory" />

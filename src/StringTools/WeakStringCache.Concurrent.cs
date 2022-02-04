@@ -32,12 +32,12 @@ namespace Microsoft.NET.StringTools
         {
             int hashCode = internable.GetHashCode();
 
-            StringWeakHandle handle;
+            StringWeakHandle? handle;
             string? result;
 
             // Get the existing handle from the cache and lock it while we're dereferencing it to prevent a race with the Scavenge
             // method running on another thread and freeing the handle from underneath us.
-            if (_stringsByHashCode.TryGetValue(hashCode, out handle!))
+            if (_stringsByHashCode.TryGetValue(hashCode, out handle))
             {
                 lock (handle)
                 {

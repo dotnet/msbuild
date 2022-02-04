@@ -185,7 +185,7 @@ namespace Microsoft.Build.Tasks
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 
-#if NET5_0_OR_GREATER
+#if RUNTIME_TYPE_NETCORE
                             using (Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false))
 #else
                             using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
@@ -242,19 +242,20 @@ namespace Microsoft.Build.Tasks
                 }
 
 #if RUNTIME_TYPE_NETCORE
+                // net5.0 included StatusCode in the HttpRequestException.
                 switch (httpRequestException.StatusCode)
                 {
                     case HttpStatusCode.InternalServerError:
                     case HttpStatusCode.RequestTimeout:
                         return true;
                 }
-#endif
+            }
+#else
             }
 
-#if !RUNTIME_TYPE_NETCORE
+            // framework workaround for HttpRequestException not containing StatusCode
             if (actualException is CustomHttpRequestException customHttpRequestException)
             {
-                // A wrapped CustomHttpRequestException has the status code from the error
                 switch (customHttpRequestException.StatusCode)
                 {
                     case HttpStatusCode.InternalServerError:
@@ -263,6 +264,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 #endif
+
 
             if (actualException is WebException webException)
             {
@@ -312,6 +314,7 @@ namespace Microsoft.Build.Tasks
 #if !RUNTIME_TYPE_NETCORE
         /// <summary>
         /// Represents a wrapper around the <see cref="HttpRequestException"/> that also contains the <see cref="HttpStatusCode"/>.
+        /// DEPRECATED as of net5.0, which included the StatusCode in the HttpRequestException class.
         /// </summary>
         private sealed class CustomHttpRequestException : HttpRequestException
         {
@@ -325,7 +328,7 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-private bool ShouldSkip(HttpResponseMessage response, FileInfo destinationFile)
+        private bool ShouldSkip(HttpResponseMessage response, FileInfo destinationFile)
         {
             return SkipUnchangedFiles
                    && destinationFile.Exists
