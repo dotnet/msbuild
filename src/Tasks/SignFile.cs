@@ -9,9 +9,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
-#if RUNTIME_TYPE_NETCORE
-using System.Runtime.Versioning;
-#endif
 
 #nullable disable
 
@@ -43,11 +40,13 @@ namespace Microsoft.Build.Tasks
         
         public bool DisallowMansignTimestampFallback { get; set; } = false;
 
-#if RUNTIME_TYPE_NETCORE
-        [SupportedOSPlatform("windows")]
-#endif
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", "SignFile");
+                return false;
+            }
             try
             {
                 SecurityUtilities.SignFile(
