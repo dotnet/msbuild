@@ -548,6 +548,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
         /// <param name="disallowMansignTimestampFallback">Disallow fallback to legacy timestamping when RFC3161 timestamping fails during manifest signing</param>
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
