@@ -14,7 +14,7 @@
       return
   }
 
-  $runTestsCannotRunOnHelixArgs = ("-configuration", $configuration, "-ci", $officialBuildIdArgs)
+  $runTestsCannotRunOnHelixArgs = ("-configuration", $configuration, "-ci", $officialBuildIdArgs) + $additionalMSBuildParameters.Split(' ')
   $runTestsOnHelixArgs = ("-configuration", $configuration,
     "-ci",
   "-restore",
