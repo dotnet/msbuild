@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             var typeInfoList = GetTypeInfoList(assemblyPath);
             var assemblyInfoList = new List<AssemblyPartitionInfo>();
             var partitionList = new List<Partition>();
-            AssemblyInfoBuilder.Build(assemblyPath, _methodLimit, typeInfoList, out partitionList, out assemblyInfoList, netFramework = false);
+            AssemblyInfoBuilder.Build(assemblyPath, _methodLimit, typeInfoList, out partitionList, out assemblyInfoList, netFramework);
 
             // If the scheduling didn't actually produce multiple partition then send back an unpartitioned
             // representation.

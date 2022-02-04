@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
             string assemblyName = Path.GetFileName(targetPath);
 
-            string driver = $"{PathToDotnet} exec ";
+            string driver = $"{PathToDotnet}";
 
             // netfx tests should only run on Windows full framework for testing VS scenarios
             // These tests have to be executed slightly differently and we give them a different Identity so ADO can tell them apart
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             var partitionedWorkItem = new List<ITaskItem>();
             foreach (var assemblyPartitionInfo in assemblyPartitionInfos)
             {
-                string command = $"{driver}{assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
+                string command = $"{driver} exec {assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
                 if (netFramework)
                 {
                     command = $"{driver} test {assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} --results-directory .\\ --logger trx --filter \"{assemblyPartitionInfo.ClassListArgumentString}\"";
