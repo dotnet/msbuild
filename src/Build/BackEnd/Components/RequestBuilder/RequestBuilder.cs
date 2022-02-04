@@ -823,6 +823,18 @@ namespace Microsoft.Build.BackEnd
             catch (Exception ex)
             {
                 thrownException = ex;
+                if (ex is BuildAbortedException)
+                {
+                    // The build was likely cancelled. We do not need to log an error in this case.
+                }
+                else if (_projectLoggingContext is null)
+                {
+                    _nodeLoggingContext.LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                }
+                else
+                {
+                    _projectLoggingContext.LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                }
 
                 if (ExceptionHandling.IsCriticalException(ex))
                 {
