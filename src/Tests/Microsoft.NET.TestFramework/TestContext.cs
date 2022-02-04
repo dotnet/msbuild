@@ -127,6 +127,10 @@ namespace Microsoft.NET.TestFramework
             {
                 testContext.TestExecutionDirectory = commandLine.TestExecutionDirectory;
             }
+            else if (Environment.GetEnvironmentVariable("testExecutionDirectory") != null)
+            {
+                testContext.TestExecutionDirectory = Environment.GetEnvironmentVariable("testExecutionDirectory");
+            }
             else if (runAsTool)
             {
                 testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(), "dotnetSdkTests", Path.GetRandomFileName());

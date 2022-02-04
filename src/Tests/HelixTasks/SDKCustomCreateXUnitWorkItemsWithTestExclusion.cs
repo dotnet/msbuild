@@ -125,28 +125,31 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             // netfx tests should only run on Windows full framework for testing VS scenarios
             // These tests have to be executed slightly differently and we give them a different Identity so ADO can tell them apart
             var runtimeTargetFrameworkParsed = NuGetFramework.Parse(runtimeTargetFramework);
-            var testParameters = "";
             var testIdentityDifferentiator = "";
+            bool netFramework = false;
             if (runtimeTargetFrameworkParsed.Framework != ".NETCoreApp")
             {
-                driver = $"{PathToDotnet} test ";
-                testParameters = "-- ";
                 testIdentityDifferentiator = ".netfx";
+                netFramework = true;
             }
 
             // On mac due to https://github.com/dotnet/sdk/issues/3923, we run against workitem directory
             // but on Windows, if we running against working item diretory, we would hit long path.
-            string testExecutionDirectory = IsPosixShell ? "-testExecutionDirectory $TestExecutionDirectory" : "-testExecutionDirectory %TestExecutionDirectory%";
+            string testExecutionDirectory = netFramework ? "-e testExecutionDirectory=%TestExecutionDirectory%" : IsPosixShell ? "-testExecutionDirectory $TestExecutionDirectory"  : "-testExecutionDirectory %TestExecutionDirectory%";
 
-            string msbuildAdditionalSdkResolverFolder = IsPosixShell ? "" : "-msbuildAdditionalSdkResolverFolder %HELIX_CORRELATION_PAYLOAD%\\r";
+            string msbuildAdditionalSdkResolverFolder = netFramework ? "-e msbuildAdditionalSdkResolverFolder=%HELIX_CORRELATION_PAYLOAD%\\r" : IsPosixShell ? "" : "-msbuildAdditionalSdkResolverFolder %HELIX_CORRELATION_PAYLOAD%\\r";
 
             var scheduler = new AssemblyScheduler(methodLimit: 32);
-            var assemblyPartitionInfos = scheduler.Schedule(targetPath);
+            var assemblyPartitionInfos = scheduler.Schedule(targetPath, netFramework: netFramework);
 
             var partitionedWorkItem = new List<ITaskItem>();
             foreach (var assemblyPartitionInfo in assemblyPartitionInfos)
             {
-                string command = $"{driver}{assemblyName} {testParameters}{testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
+                string command = $"{driver}{assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
+                if (netFramework)
+                {
+                    command = $"{driver} test {assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} --results-directory .\\ --logger trx --filter \"{assemblyPartitionInfo.ClassListArgumentString}\"";
+                }
 
                 Log.LogMessage($"Creating work item with properties Identity: {assemblyName}, PayloadDirectory: {publishDirectory}, Command: {command}");
 

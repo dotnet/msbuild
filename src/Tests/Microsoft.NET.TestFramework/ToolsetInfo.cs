@@ -294,6 +294,10 @@ namespace Microsoft.NET.TestFramework
                 {
                     ret.SdkResolverPath = Path.Combine(commandLine.MsbuildAdditionalSdkResolverFolder, configuration, "net472", "SdkResolvers");
                 }
+                else if (Environment.GetEnvironmentVariable("msbuildAdditionalSdkResolverFolder") != null)
+                {
+                    ret.SdkResolverPath = Path.Combine(Environment.GetEnvironmentVariable("msbuildAdditionalSdkResolverFolder"), configuration, "net472", "SdkResolvers");
+                }
                 else
                 {
                     throw new InvalidOperationException("Microsoft.DotNet.MSBuildSdkResolver path is not provided, set msbuildAdditionalSdkResolverFolder on test commandline or set repoRoot");
