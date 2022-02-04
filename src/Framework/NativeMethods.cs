@@ -716,7 +716,7 @@ internal static class NativeMethods
     /// <summary>
     /// Gets a flag indicating if we are running under some version of Windows
     /// </summary>
-#if NET5_0_OR_GREATER
+#if RUNTIME_TYPE_NETCORE
     [SupportedOSPlatformGuard("windows")]
 #endif
     internal static bool IsWindows
