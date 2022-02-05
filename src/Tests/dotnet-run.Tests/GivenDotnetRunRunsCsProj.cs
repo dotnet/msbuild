@@ -688,5 +688,25 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                .And
                .HaveStdOutContaining(expectedValue);
         }
+
+        [Fact]
+        public void ItIncludesCommandArgumentSpecifiedInLaunchSettings()
+        {
+            var expectedValue = "TestAppCommandLineArguments";
+            var secondExpectedValue = "SecondTestAppCommandLineArguments";
+            var testAppName = "TestAppWithLaunchSettings";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            new DotnetCommand(Log, "run")
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute()
+               .Should()
+               .Pass()
+               .And
+               .HaveStdOutContaining(expectedValue)
+               .And
+               .HaveStdOutContaining(secondExpectedValue);
+        }
     }
 }

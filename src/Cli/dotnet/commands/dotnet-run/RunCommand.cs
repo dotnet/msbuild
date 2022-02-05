@@ -72,6 +72,10 @@ namespace Microsoft.DotNet.Tools.Run
                         //NOTE: MSBuild variables are not expanded like they are in VS
                         targetCommand.EnvironmentVariable(entry.Key, value);
                     }
+                    if (launchSettings.CommandLineArgs != null)
+                    {
+                        targetCommand.SetCommandArgs(launchSettings.CommandLineArgs);
+                    }
                 }
 
                 // Ignore Ctrl-C for the remainder of the command's execution

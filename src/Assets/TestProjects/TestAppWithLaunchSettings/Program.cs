@@ -11,6 +11,14 @@ namespace ConsoleApplication
         {
             Console.WriteLine("Hello world");
             Console.WriteLine($"MyCoolEnvironmentVariableKey={Environment.GetEnvironmentVariable("MyCoolEnvironmentVariableKey")}");
+            if (args.Length > 0)
+            {
+                Console.WriteLine(args[0]);
+            }
+            if (args.Length > 1)
+            {
+                Console.WriteLine(args[1]);
+            }
         }
     }
 }
