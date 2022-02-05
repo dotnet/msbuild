@@ -529,6 +529,25 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     string targetFrameworkVersion,
                                     string targetFrameworkIdentifier)
         {
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, targetFrameworkIdentifier, false);
+        }
+
+        /// <summary>
+        /// Signs a ClickOnce manifest or PE file.
+        /// </summary>
+        /// <param name="certThumbprint">Hexadecimal string that contains the SHA-1 hash of the certificate.</param>
+        /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
+        /// <param name="path">Path of the file to sign with the certificate.</param>
+        /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
+        /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
+        /// <param name="disallowMansignTimestampFallback">Disallow fallback to legacy timestamping when RFC3161 timestamping fails during manifest signing</param>
+        public static void SignFile(string certThumbprint,
+                                    Uri timestampUrl,
+                                    string path,
+                                    string targetFrameworkVersion,
+                                    string targetFrameworkIdentifier,
+                                    bool disallowMansignTimestampFallback)
+        {
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
 
             if (String.IsNullOrEmpty(certThumbprint))
@@ -563,7 +582,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     // Use SHA-256 digest for .NET Core apps
                     isTargetFrameworkSha256Supported = true;
                 }
-                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources);
+                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources, disallowMansignTimestampFallback);
             }
             else
             {
@@ -611,7 +630,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             SignFileInternal(cert, timestampUrl, path, true, resources);
         }
 
-        private static void SignFileInternal(X509Certificate2 cert, Uri timestampUrl, string path, bool targetFrameworkSupportsSha256, System.Resources.ResourceManager resources)
+        private static void SignFileInternal(X509Certificate2 cert,
+                                            Uri timestampUrl,
+                                            string path,
+                                            bool targetFrameworkSupportsSha256,
+                                            System.Resources.ResourceManager resources,
+                                            bool disallowMansignTimestampFallback = false)
         {
             if (cert == null)
             {
@@ -686,7 +710,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         if (timestampUrl == null)
                             manifest.Sign(signer);
                         else
-                            manifest.Sign(signer, timestampUrl.ToString());
+                            manifest.Sign(signer, timestampUrl.ToString(), disallowMansignTimestampFallback);
                         doc.Save(path);
                     }
                     catch (Exception ex)
@@ -790,9 +814,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (timestampUrl != null)
             {
                 commandLine.AppendFormat(CultureInfo.InvariantCulture,
-                                                "{0} {1} ",
-                                                useRFC3161Timestamp ? "/tr" : "/t",
-                                                timestampUrl.ToString());
+                                            "{0} {1} ",
+                                            useRFC3161Timestamp ? "/tr" : "/t",
+                                            timestampUrl.ToString());
             }
             commandLine.AppendFormat(CultureInfo.InvariantCulture, "\"{0}\"", path);
             return commandLine.ToString();
