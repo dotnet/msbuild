@@ -1449,7 +1449,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     {
                         if (projectNumber == 2)
                         {
-                            await task2Completion.Task.ConfigureAwait(false);
+                            await task2Completion.Task.ConfigureAwait(true);
                         }
 
                         return testData.GetExpectedCacheResultForProjectNumber(projectNumber);
