@@ -26,7 +26,7 @@ namespace Xunit.NetCore.Extensions
         protected override async Task AfterTestAssemblyStartingAsync()
         {
             // Let everything initialize
-            await base.AfterTestAssemblyStartingAsync().ConfigureAwait(false);
+            await base.AfterTestAssemblyStartingAsync().ConfigureAwait(true);
 
             // Go find all the AssemblyFixtureAttributes adorned on the test assembly
             Aggregator.Run(() =>

@@ -300,10 +300,10 @@ namespace Microsoft.Build.Tasks.UnitTests
             };
 
             var runaway = Task.Run(() => downloadFile.Execute());
-            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(true);
             runaway.IsCompleted.ShouldBeTrue("Task did not cancel");
 
-            var result = await runaway.ConfigureAwait(false);
+            var result = await runaway.ConfigureAwait(true);
             result.ShouldBeFalse(() => _mockEngine.Log);
         }
 
