@@ -28,21 +28,18 @@ namespace Microsoft.Build.Shared.Debugging
 
             if (Traits.Instance.DebugEngine)
             {
-                debugDirectory ??= Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
-
-                // Probe writeability
-                try
+                if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory))
                 {
-                    debugDirectory = ProbeWriteability(debugDirectory);
+                    // Debug directory is writable; no need for fallbacks
                 }
-                catch (ArgumentException)
+                else if (FileUtilities.CanWriteToDirectory(Directory.GetCurrentDirectory()))
                 {
-                    // This can happen if MSBUILDDEBUGPATH contains invalid characters, but the current working directory may still work.
-                    debugDirectory = ProbeWriteability(Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs"));
+                    debugDirectory = Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
                 }
-
-                // Redirect to TEMP if we failed to write to either MSBUILDDEBUGPATH or the current working directory.
-                debugDirectory ??= Path.Combine(Path.GetTempPath(), "MSBuild_Logs");
+                else
+                {
+                    debugDirectory = Path.Combine(Path.GetTempPath(), "MSBuild_Logs");
+                }
 
                 // Out of proc nodes do not know the startup directory so set the environment variable for them.
                 if (string.IsNullOrWhiteSpace(environmentDebugPath))
@@ -57,32 +54,6 @@ namespace Microsoft.Build.Shared.Debugging
             }
 
             DebugPath = debugDirectory;
-        }
-
-        private static string ProbeWriteability(string path)
-        {
-            try
-            {
-                string testFilePath = Path.Combine(path, "textFile.txt");
-                File.WriteAllText(testFilePath, "Successfully wrote to file.");
-                File.Delete(testFilePath);
-                return path;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Failed to write to the specified directory
-                return null;
-            }
-            catch (SecurityException)
-            {
-                // Failed to write to the specified directory
-                return null;
-            }
-            catch (PathTooLongException)
-            {
-                ErrorUtilities.ThrowArgument("DebugPathTooLong", path);
-                return null; // Should never reach here.
-            }
         }
 
         private static readonly Lazy<NodeMode> ProcessNodeMode = new(

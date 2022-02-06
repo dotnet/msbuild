@@ -278,14 +278,10 @@
     <value>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</value>
     <comment>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</comment>
   </data>
-  <data name="DebugPathTooLong" Visibility="Public">
-    <value>MSB5029: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</value>
-    <comment>{StrBegin="MSB5029: "}</comment>
-  </data>
   <!--
         The shared message bucket is: MSB5001 - MSB5999
 
-        Next message code should be MSB5030
+        Next message code should be MSB5029
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

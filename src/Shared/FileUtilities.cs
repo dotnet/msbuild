@@ -166,6 +166,30 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Returns whether MSBuild can write to the given directory. Throws for PathTooLongExceptions
+        /// but not other exceptions.
+        /// </summary>
+        internal static bool CanWriteToDirectory(string directory)
+        {
+            try
+            {
+                string testFilePath = Path.Combine(directory, "textFile.txt");
+                File.WriteAllText(testFilePath, "Successfully wrote to file.");
+                File.Delete(testFilePath);
+                return true;
+            }
+            catch (PathTooLongException)
+            {
+                ErrorUtilities.ThrowArgument("DebugPathTooLong", directory);
+                return false; // Should never reach here.
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Clears the MSBuild runtime cache
         /// </summary>
         internal static void ClearCacheDirectory()
