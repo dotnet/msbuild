@@ -159,10 +159,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                  ResourceName="PublishSingleFileRequiresVersion30" />
 
-    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and $(RuntimeIdentifier.StartsWith('win7-'))"
-                 ResourceName="SingleFileWin7Incompatible"
-                 FormatArguments="$(RuntimeIdentifier)" />
-
     <!-- The TFM version checks for PublishReadyToRun PublishTrimmed only generate warnings in .Net core 3.1
          because we do not want the behavior to be a breaking change compared to version 3.0 -->
 

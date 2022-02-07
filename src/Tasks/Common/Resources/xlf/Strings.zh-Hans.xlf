@@ -755,11 +755,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1179: 使用“--runtime”时，必需选择“--自包含”或“--非自包含”选项。</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: 指定的运行时标识符“{0}”不意味着 Windows 7 兼容性。单个文件发布与 Windows 7 不兼容。</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
-      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: "AdditionalProbingPaths" 被指定给 GenerateRuntimeConfigurationFiles，但被跳过，因为 "RuntimeConfigDevPath" 为空。</target>

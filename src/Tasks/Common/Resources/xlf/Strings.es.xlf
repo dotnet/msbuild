@@ -755,11 +755,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1179: Se requiere una de las opciones "--self-contained" o "--no-self-contained" cuando se usa "--runtime".</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: El identificador en tiempo de ejecución especificado '{0}" implica compatibilidad con Windows 7. La publicación de archivos únicos no es compatible con Windows 7.</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
-      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: Se especificaron valores adicionales de "AdditionalProbingPaths" para GenerateRuntimeConfigurationFiles, pero se van a omitir porque el valor de "RuntimeConfigDevPath" está vacío.</target>
