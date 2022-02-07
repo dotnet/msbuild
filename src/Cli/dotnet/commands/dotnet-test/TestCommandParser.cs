@@ -1,10 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test;
@@ -25,7 +24,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> SettingsOption = new ForwardedOption<string>(new string[] { "-s", "--settings" }, LocalizableStrings.CmdSettingsDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdSettingsFile
-        }.ForwardAsSingle(o => $"-property:VSTestSetting={CommandDirectoryContext.GetFullPath(o)}");
+        }.ForwardAsSingle(o => $"-property:VSTestSetting={SurroundWithDoubleQuotes(CommandDirectoryContext.GetFullPath(o))}");
 
         public static readonly Option<bool> ListTestsOption = new ForwardedOption<bool>(new string[] { "-t", "--list-tests" }, LocalizableStrings.CmdListTestsDescription)
               .ForwardAs("-property:VSTestListTests=true");
@@ -38,12 +37,12 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> FilterOption = new ForwardedOption<string>("--filter", LocalizableStrings.CmdTestCaseFilterDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdTestCaseFilterExpression
-        }.ForwardAsSingle(o => $"-property:VSTestTestCaseFilter={o}");
+        }.ForwardAsSingle(o => $"-property:VSTestTestCaseFilter={SurroundWithDoubleQuotes(o)}");
 
         public static readonly Option<IEnumerable<string>> AdapterOption = new ForwardedOption<IEnumerable<string>>(new string[] { "--test-adapter-path" }, LocalizableStrings.CmdTestAdapterPathDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdTestAdapterPath
-        }.ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Select(CommandDirectoryContext.GetFullPath))}\"")
+        }.ForwardAsSingle(o => $"-property:VSTestTestAdapterPath={SurroundWithDoubleQuotes(string.Join(";", o.Select(CommandDirectoryContext.GetFullPath)))}")
         .AllowSingleArgPerToken();
 
         public static readonly Option<IEnumerable<string>> LoggerOption = new ForwardedOption<IEnumerable<string>>(new string[] { "-l", "--logger" }, LocalizableStrings.CmdLoggerDescription)
@@ -53,19 +52,19 @@ namespace Microsoft.DotNet.Cli
         {
             var loggersString = string.Join(";", GetSemiColonEscapedArgs(o));
 
-            return $"-property:VSTestLogger=\"{loggersString}\"";
+            return $"-property:VSTestLogger={SurroundWithDoubleQuotes(loggersString)}";
         })
         .AllowSingleArgPerToken();
 
         public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdOutputDir
-        }.ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o)}");
+        }.ForwardAsSingle(o => $"-property:OutputPath={SurroundWithDoubleQuotes(CommandDirectoryContext.GetFullPath(o))}");
 
         public static readonly Option<string> DiagOption = new ForwardedOption<string>(new string[] { "-d", "--diag" }, LocalizableStrings.CmdPathTologFileDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdPathToLogFile
-        }.ForwardAsSingle(o => $"-property:VSTestDiag={CommandDirectoryContext.GetFullPath(o)}");
+        }.ForwardAsSingle(o => $"-property:VSTestDiag={SurroundWithDoubleQuotes(CommandDirectoryContext.GetFullPath(o))}");
 
         public static readonly Option<bool> NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.CmdNoBuildDescription)
             .ForwardAs("-property:VSTestNoBuild=true");
@@ -73,12 +72,12 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> ResultsOption = new ForwardedOption<string>(new string[] { "--results-directory" }, LocalizableStrings.CmdResultsDirectoryDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdPathToResultsDirectory
-        }.ForwardAsSingle(o => $"-property:VSTestResultsDirectory={CommandDirectoryContext.GetFullPath(o)}");
+        }.ForwardAsSingle(o => $"-property:VSTestResultsDirectory={SurroundWithDoubleQuotes(CommandDirectoryContext.GetFullPath(o))}");
 
         public static readonly Option<IEnumerable<string>> CollectOption = new ForwardedOption<IEnumerable<string>>("--collect", LocalizableStrings.cmdCollectDescription)
         {
             ArgumentHelpName = LocalizableStrings.cmdCollectFriendlyName
-        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", GetSemiColonEscapedArgs(o))}\"")
+        }.ForwardAsSingle(o => $"-property:VSTestCollect={SurroundWithDoubleQuotes(string.Join(";", GetSemiColonEscapedArgs(o)))}")
         .AllowSingleArgPerToken();
 
         public static readonly Option<bool> BlameOption = new ForwardedOption<bool>("--blame", LocalizableStrings.CmdBlameDescription)
@@ -184,6 +183,20 @@ namespace Microsoft.DotNet.Cli
             }
 
             return array;
+        }
+
+        /// <summary>
+        /// Adding double quotes around the property helps MSBuild arguments parser and avoid incorrect splits on ',' or ';'.
+        /// </summary>
+        private static string SurroundWithDoubleQuotes(string s)
+        {
+            if (s.StartsWith("\"", StringComparison.Ordinal)
+                && s.EndsWith("\"", StringComparison.Ordinal))
+            {
+                return s;
+            }
+
+            return string.Concat("\"", s, "\"");
         }
     }
 }
