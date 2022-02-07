@@ -66,7 +66,7 @@ DOSKEY killdotnet=taskkill /F /IM dotnet.exe /T ^& taskkill /F /IM VSTest.Consol
 `$env:DOTNET_ROOT="$env:DOTNET_INSTALL_DIR"
 `$env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR="$env:DOTNET_INSTALL_DIR"
 
-`$env:PATH="$env:DOTNET_INSTALL_DIR;$env:PATH"
+`$env:PATH="$env:DOTNET_INSTALL_DIR;" + `$env:PATH
 `$env:NUGET_PACKAGES="$env:NUGET_PACKAGES"
 
 function killdotnet {
