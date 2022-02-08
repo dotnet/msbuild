@@ -185,11 +185,11 @@ namespace Microsoft.Build.Tasks
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 
+                            using (Stream responseStream = await response.Content.ReadAsStreamAsync(
 #if RUNTIME_TYPE_NETCORE
-                            using (Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false))
-#else
-                            using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                            cancellationToken
 #endif
+                            ).ConfigureAwait(false))
                             {
                                 await responseStream.CopyToAsync(target, 1024, cancellationToken).ConfigureAwait(false);
                             }

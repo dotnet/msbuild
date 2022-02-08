@@ -77,8 +77,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' and '$(MSBuildProjectFile)' != 'PortableTask.csproj'">
     <ProduceOnlyReferenceAssembly>true</ProduceOnlyReferenceAssembly>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
-    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzers>false</RunAnalyzers>
   </PropertyGroup>
 </Project>
