@@ -690,7 +690,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
-        public void ItIncludesCommandArgumentSpecifiedInLaunchSettings()
+        public void ItIncludesCommandArgumentsSpecifiedInLaunchSettings()
         {
             var expectedValue = "TestAppCommandLineArguments";
             var secondExpectedValue = "SecondTestAppCommandLineArguments";
@@ -707,6 +707,26 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                .HaveStdOutContaining(expectedValue)
                .And
                .HaveStdOutContaining(secondExpectedValue);
+        }
+
+        [Fact]
+        public void ItCLIArgsOverrideCommandArgumentsSpecifiedInLaunchSettings()
+        {
+            var expectedValue = "TestAppCommandLineArguments";
+            var secondExpectedValue = "SecondTestAppCommandLineArguments";
+            var testAppName = "TestAppWithLaunchSettings";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            new DotnetCommand(Log, "run", "-- test")
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute()
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining(expectedValue)
+               .And
+               .NotHaveStdOutContaining(secondExpectedValue);
         }
     }
 }
