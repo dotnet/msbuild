@@ -565,44 +565,48 @@ namespace Microsoft.Build.CommandLine
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile);
 
-                if (ProcessCommandLineSwitches(
-                        switchesFromAutoResponseFile,
-                        switchesNotFromAutoResponseFile,
-                        ref projectFile,
-                        ref targets,
-                        ref toolsVersion,
-                        ref globalProperties,
-                        ref loggers,
-                        ref verbosity,
-                        ref distributedLoggerRecords,
+                bool buildCanBeInvoked = ProcessCommandLineSwitches(
+                                            switchesFromAutoResponseFile,
+                                            switchesNotFromAutoResponseFile,
+                                            ref projectFile,
+                                            ref targets,
+                                            ref toolsVersion,
+                                            ref globalProperties,
+                                            ref loggers,
+                                            ref verbosity,
+                                            ref distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
-                        ref needToValidateProject,
-                        ref schemaFile,
+                                            ref needToValidateProject,
+                                            ref schemaFile,
 #endif
-                        ref cpuCount,
-                        ref enableNodeReuse,
-                        ref preprocessWriter,
-                        ref targetsWriter,
-                        ref detailedSummary,
-                        ref warningsAsErrors,
-                        ref warningsAsMessages,
-                        ref enableRestore,
-                        ref interactive,
-                        ref profilerLogger,
-                        ref enableProfiler,
-                        ref restoreProperties,
-                        ref isolateProjects,
-                        ref graphBuildOptions,
-                        ref inputResultsCaches,
-                        ref outputResultsCache,
-                        ref lowPriority,
-                        recursing: false,
+                                            ref cpuCount,
+                                            ref enableNodeReuse,
+                                            ref preprocessWriter,
+                                            ref targetsWriter,
+                                            ref detailedSummary,
+                                            ref warningsAsErrors,
+                                            ref warningsAsMessages,
+                                            ref enableRestore,
+                                            ref interactive,
+                                            ref profilerLogger,
+                                            ref enableProfiler,
+                                            ref restoreProperties,
+                                            ref isolateProjects,
+                                            ref graphBuildOptions,
+                                            ref inputResultsCaches,
+                                            ref outputResultsCache,
+                                            ref lowPriority,
+                                            recursing: false,
 #if FEATURE_GET_COMMANDLINE
-                        commandLine
+                                            commandLine
 #else
-                        string.Join(' ', commandLine)
+                                            string.Join(' ', commandLine)
 #endif
-                        ))
+                );
+
+                CommandLineSwitches.SwitchesFromResponseFiles = null;
+
+                if (buildCanBeInvoked)
                 {
                     // Unfortunately /m isn't the default, and we are not yet brave enough to make it the default.
                     // However we want to give a hint to anyone who is building single proc without realizing it that there
