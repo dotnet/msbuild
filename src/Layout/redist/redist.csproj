@@ -35,6 +35,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeStyle" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
     <PackageReference Include="Microsoft.NET.ILLink.Analyzers" Version="$(MicrosoftNETILLinkAnalyzerPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" ExcludeAssets="contentFiles" GeneratePathProperty="true" />
 
     <!-- Lift up dependencies of dependencies to prevent build tasks from getting pinned to older versions -->
     <PackageReference Include="System.CodeDom" Version="$(SystemCodeDomPackageVersion)" />
@@ -69,4 +70,17 @@
       <Analyzer Remove="@(Analyzer)"/>
     </ItemGroup>
   </Target>
+
+  <Target Name="_ResolvePublishFSharpNuGetPackages"
+       AfterTargets="CoreCompile">
+
+    <PropertyGroup>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'!='release'">Shipping</FSharpCorePath>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'=='release'">Release</FSharpCorePath>
+    </PropertyGroup>
+    <ItemGroup>
+        <ItemsToPushToBlobFeed Include="$(PkgMicrosoft_FSharp_Compiler)\contentFiles\$(FSharpCorePath)\FSharp.Core.*.nupkg"/>
+        <ItemsToPushToBlobFeed Include="$(PkgMicrosoft_FSharp_Compiler)\contentFiles\$(FSharpCorePath)\FSharp.Compiler.Service.*.nupkg" />
+    </ItemGroup>
+ </Target>
 </Project>
