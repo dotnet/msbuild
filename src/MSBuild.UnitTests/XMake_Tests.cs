@@ -51,8 +51,7 @@ namespace Microsoft.Build.UnitTests
             var arguments = new List<string>();
             arguments.AddRange(new[] { "/p:a=b", "/p:c=d" });
 
-            string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
             parameters[0].ShouldBe("a=b");
@@ -69,8 +68,7 @@ namespace Microsoft.Build.UnitTests
                 "--p:maxcpucount=8"
             };
 
-            string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
             parameters[0].ShouldBe("a=b");
@@ -85,8 +83,7 @@ namespace Microsoft.Build.UnitTests
             var arguments = new List<string>();
             arguments.AddRange(new[] { "/m:2" });
 
-            string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters[0].ShouldBe("2");
@@ -103,8 +100,7 @@ namespace Microsoft.Build.UnitTests
             var arguments = new List<string>();
             arguments.AddRange(new[] { "/m:3", "/m" });
 
-            string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters[1].ShouldBe(Convert.ToString(NativeMethodsShared.GetLogicalCoreCount()));
@@ -124,8 +120,7 @@ namespace Microsoft.Build.UnitTests
             var arguments = new List<string>();
             arguments.AddRange(new[] { "/m:" });
 
-            string command = string.Empty;
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches, command);
+            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters.Length.ShouldBe(0);
@@ -610,7 +605,6 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<CommandLineSwitchException>(() =>
             {
-                // Too big
                 MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "foo" });
             }
            );
@@ -621,6 +615,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<CommandLineSwitchException>(() =>
             {
+                // Too big
                 MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "1025" });
             }
            );
@@ -773,7 +768,7 @@ namespace Microsoft.Build.UnitTests
         /// Tests that the environment gets passed on to the node during build.
         /// </summary>
         [Fact]
-        public void TestEnvironment()
+        public void TestEnvironmentTest()
         {
             string projectString = ObjectModelHelpers.CleanupFileContents(
                    @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -951,6 +946,25 @@ namespace Microsoft.Build.UnitTests
             successfulExit.ShouldBeTrue();
 
             output.ShouldContain("[A=1]");
+        }
+
+        [Fact]
+        public void ResponseFileSwitchesAppearInCommandLine()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                TransientTestFile autoRspFile = env.CreateFile(folder, AutoResponseFileName, "-nowarn:MSB1001 @myRsp.rsp %NONEXISTENTENVIRONMENTVARIABLE%");
+                TransientTestFile projectFile = env.CreateFile(folder, "project.proj", "<Project><Target Name=\"T\"><Message Text=\"Text\"/></Target></Project>");
+                TransientTestFile rpsFile = env.CreateFile(folder, "myRsp.rsp", "-nr:false -m:2");
+                env.SetCurrentDirectory(folder.Path);
+                string output = RunnerUtilities.ExecMSBuild("project.proj -nologo", out bool success);
+                success.ShouldBeFalse();
+                output.ShouldContain("-nr:false -m:2");
+                output.ShouldContain("-nowarn:MSB1001 @myRsp.rsp %NONEXISTENTENVIRONMENTVARIABLE%");
+                output.ShouldContain("project.proj -nologo");
+                output.ShouldContain(": %NONEXISTENTENVIRONMENTVARIABLE%");
+            }
         }
 
         /// <summary>

@@ -1552,7 +1552,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Internal for unit testing only.
         /// </remarks>
-        internal static void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine)
+        internal static void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine = "")
         {
             foreach (string commandLineArg in commandLineArgs)
             {

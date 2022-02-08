@@ -712,7 +712,7 @@ namespace Microsoft.Build.CommandLine
         /// Called to flag an error when an unrecognized switch is detected on the command line.
         /// </summary>
         /// <param name="badCommandLineArg"></param>
-        internal void SetUnknownSwitchError(string badCommandLineArgValue, string commandLine)
+        internal void SetUnknownSwitchError(string badCommandLineArgValue, string commandLine = "")
         {
             SetSwitchError("UnknownSwitchError", badCommandLineArgValue, commandLine);
         }
@@ -721,7 +721,7 @@ namespace Microsoft.Build.CommandLine
         /// Called to flag an error when a switch that doesn't take parameters is found with parameters on the command line.
         /// </summary>
         /// <param name="badCommandLineArg"></param>
-        internal void SetUnexpectedParametersError(string badCommandLineArgValue, string commandLine)
+        internal void SetUnexpectedParametersError(string badCommandLineArgValue, string commandLine = "")
         {
             SetSwitchError("UnexpectedParametersError", badCommandLineArgValue, commandLine);
         }
@@ -825,7 +825,7 @@ namespace Microsoft.Build.CommandLine
         /// considered to be on the "left", and the switches being appended are on the "right".
         /// </remarks>
         /// <param name="switchesToAppend"></param>
-        internal void Append(CommandLineSwitches switchesToAppend, string commandLine)
+        internal void Append(CommandLineSwitches switchesToAppend, string commandLine = "")
         {
             // if this collection doesn't already have an error registered, but the collection being appended does
             if (!HaveErrors() && switchesToAppend.HaveErrors())
