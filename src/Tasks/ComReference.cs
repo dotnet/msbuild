@@ -409,7 +409,7 @@ namespace Microsoft.Build.Tasks
             char[] buffer = null;
 
             // Try increased buffer sizes if on longpath-enabled Windows
-            for (int bufferSize = NativeMethodsShared.MAX_PATH; bufferSize <= NativeMethodsShared.MaxPath && bufferSize <= int.MaxValue / 2; bufferSize *= 2)
+            for (int bufferSize = NativeMethodsShared.MAX_PATH; bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
             {
                 buffer = System.Buffers.ArrayPool<char>.Shared.Rent(bufferSize);
                 try
@@ -427,6 +427,9 @@ namespace Microsoft.Build.Tasks
                 {
                     System.Buffers.ArrayPool<char>.Shared.Return(buffer);
                 }
+
+                // Double check that the buffer is not insanely big
+                ErrorUtilities.VerifyThrow(bufferSize <= int.MaxValue / 2, "Buffer size approaching int.MaxValue");
             }
 
             return string.Empty;
