@@ -515,8 +515,8 @@
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
       <trans-unit id="General.TaskRequiresWindows">
-        <source>MSB3096: Task "{0}" is only supported on Windows devices.</source>
-        <target state="new">MSB3096: Task "{0}" is only supported on Windows devices.</target>
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="new">MSB3096: Task "{0}" is only supported when building on Windows.</target>
         <note>{StrBegin="MSB3096: "}</note>
       </trans-unit>
       <trans-unit id="General.UndefineProperties">

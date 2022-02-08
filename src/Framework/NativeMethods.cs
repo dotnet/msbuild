@@ -24,6 +24,24 @@ using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 #nullable disable
 
 namespace Microsoft.Build.Framework;
+
+#if NETFRAMEWORK || NETSTANDARD2_0
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
+internal class SupportedOSPlatformGuard : Attribute
+{
+    internal SupportedOSPlatformGuard(string platformName)
+    {
+    }
+}
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Class)]
+internal class SupportedOSPlatform : Attribute
+{
+    internal SupportedOSPlatform(string platformName)
+    {
+    }
+}
+#endif
+
 internal static class NativeMethods
 {
 #region Constants
@@ -74,7 +92,7 @@ internal static class NativeMethods
     internal const uint WAIT_OBJECT_0 = 0x00000000;
     internal const uint WAIT_TIMEOUT = 0x00000102;
 
-    #endregion
+#endregion
 
 #region Enums
 
@@ -712,13 +730,10 @@ internal static class NativeMethods
 #if !CLR2COMPATIBILITY
     private static bool? _isWindows;
 #endif
-
     /// <summary>
     /// Gets a flag indicating if we are running under some version of Windows
     /// </summary>
-#if RUNTIME_TYPE_NETCORE && NET5_0_OR_GREATER
     [SupportedOSPlatformGuard("windows")]
-#endif
     internal static bool IsWindows
     {
 #if CLR2COMPATIBILITY

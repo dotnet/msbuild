@@ -12,13 +12,15 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Versioning;
 #endif
 
+#if NETFRAMEWORK
+using Microsoft.Build.Framework;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
-#if RUNTIME_TYPE_NETCORE
     [SupportedOSPlatform("windows")]
-#endif
     internal class ComImporter
     {
         private readonly OutputMessageCollection _outputMessages;

@@ -17,6 +17,11 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 using Microsoft.Build.Shared.FileSystem;
+#if RUNTIME_TYPE_NETCORE
+using System.Runtime.Versioning;
+#else
+using Microsoft.Build.Framework;
+#endif
 
 #nullable disable
 
@@ -28,6 +33,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     [ComVisible(true)]
     [Guid("1D9FE38A-0226-4b95-9C6B-6DFFA2236270")]
     [ClassInterface(ClassInterfaceType.None)]
+    [SupportedOSPlatform("windows")]
     public class BootstrapperBuilder : IBootstrapperBuilder
     {
         private static readonly bool s_logging = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSPLOG"));
@@ -76,7 +82,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// </summary>
         public BootstrapperBuilder()
         {
-            _path = NativeMethodsShared.IsWindows ? Util.DefaultPath : string.Empty;
+            _path = Util.DefaultPath;
         }
 
         /// <summary>
@@ -85,7 +91,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// <param name="visualStudioVersion">The version of Visual Studio that is used to build this bootstrapper.</param>
         public BootstrapperBuilder(string visualStudioVersion)
         {
-            _path = NativeMethodsShared.IsWindows ? Util.GetDefaultPath(visualStudioVersion) : string.Empty;
+            _path = Util.GetDefaultPath(visualStudioVersion);
         }
 
         #region IBootstrapperBuilder Members
@@ -447,10 +453,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             BuildPackages(settings, null, null, files, null);
 
             List<string> packagePaths = new List<string>() { invariantPath };
-            if (NativeMethodsShared.IsWindows)
-            {
-                packagePaths.AddRange(Util.AdditionalPackagePaths.Select(p => Util.AddTrailingChar(p.ToLowerInvariant(), System.IO.Path.DirectorySeparatorChar)));
-            }
+            packagePaths.AddRange(Util.AdditionalPackagePaths.Select(p => Util.AddTrailingChar(p.ToLowerInvariant(), System.IO.Path.DirectorySeparatorChar)));
 
             foreach (string file in files)
             {
@@ -594,10 +597,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             XmlElement rootElement = _document.CreateElement("Products", BOOTSTRAPPER_NAMESPACE);
 
             List<string> packagePaths = new List<string>() { PackagePath };
-            if (NativeMethodsShared.IsWindows)
-            {
-                packagePaths.AddRange(Util.AdditionalPackagePaths);
-            }
+            packagePaths.AddRange(Util.AdditionalPackagePaths);
 
             foreach (string packagePath in packagePaths)
             {

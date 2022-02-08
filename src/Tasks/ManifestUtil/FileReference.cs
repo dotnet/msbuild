@@ -11,6 +11,10 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Xml.Serialization;
 
+#if NETFRAMEWORK
+using Microsoft.Build.Framework;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
@@ -47,9 +51,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public ComClass[] ComClasses => _comClasses;
 
-#if RUNTIME_TYPE_NETCORE
         [SupportedOSPlatform("windows")]
-#endif
         internal bool ImportComComponent(string path, OutputMessageCollection outputMessages, string outputDisplayName)
         {
             var importer = new ComImporter(path, outputMessages, outputDisplayName);

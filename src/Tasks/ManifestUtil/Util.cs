@@ -253,9 +253,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return logPath;
         }
 
-#if RUNTIME_TYPE_NETCORE
         [SupportedOSPlatform("windows")]
-#endif
         public static string GetRegisteredOrganization()
         {
             RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", false);

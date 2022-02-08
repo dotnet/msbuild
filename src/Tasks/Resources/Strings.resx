@@ -572,7 +572,7 @@
     <comment>{StrBegin="MSB3094: "}</comment>
   </data>
   <data name="General.TaskRequiresWindows">
-    <value>MSB3096: Task "{0}" is only supported on Windows devices.</value>
+    <value>MSB3096: Task "{0}" is only supported when building on Windows.</value>
     <comment>{StrBegin="MSB3096: "}</comment>
   </data>
   <!--

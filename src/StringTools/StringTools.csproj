@@ -22,7 +22,8 @@
     <AssemblyName>Microsoft.NET.StringTools.net35</AssemblyName>
   </PropertyGroup>
 
-  <!-- pdb publishing fails builds in the ns2.0 flavor -->
+  <!-- pdb publishing fails builds for reference-only assemblies. -->
+  <!-- https://github.com/dotnet/msbuild/pull/6148. -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PublishWindowsPdb>false</PublishWindowsPdb>
   </PropertyGroup>

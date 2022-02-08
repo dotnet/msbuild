@@ -148,9 +148,9 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (HttpRequestException e)
                     {
-                        // HttpRequestException does not have the status code so its wrapped and thrown here so that later on we can determine
-                        // if a retry is possible based on the status code
 #if RUNTIME_TYPE_NETCORE
+                        // MSBuild History: CustomHttpRequestException was created as a wrapper over HttpRequestException
+                        // so it could include the StatusCode. As of net5.0, the statuscode is now in HttpRequestException.
                         throw new HttpRequestException(e.Message, e.InnerException, response.StatusCode);
 #else
                         throw new CustomHttpRequestException(e.Message, e.InnerException, response.StatusCode);
