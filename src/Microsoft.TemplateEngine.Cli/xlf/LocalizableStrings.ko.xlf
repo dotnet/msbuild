@@ -857,10 +857,25 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">명령이 '{0}' 템플릿 패키지를 두 번 설치하려고 시도하고 있습니다. 인수를 확인하고 재시도하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
+        <source>Installing the template packages will override the available template packages.</source>
+        <target state="new">Installing the template packages will override the available template packages.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_PackageIsAvailable">
+        <source>The following template packages are already available:</source>
+        <target state="new">The following template packages are already available:</target>
+        <note>Followed by list of packages that are available</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
         <source>The following template packages will be installed:</source>
         <target state="translated">다음 템플릿 패키지가 설치됩니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_UseForceToOverride">
+        <source>To install these template packages anyway, apply '{0}' option:</source>
+        <target state="new">To install these template packages anyway, apply '{0}' option:</target>
+        <note>{0} is option to use (--force). Followed by command to use to install the packages.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
         <source>Failed to uninstall {0}, reason: {1}.</source>

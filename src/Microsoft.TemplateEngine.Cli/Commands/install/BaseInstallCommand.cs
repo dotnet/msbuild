@@ -23,6 +23,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddArgument(NameArgument);
             this.AddOption(InteractiveOption);
             this.AddOption(AddSourceOption);
+            this.AddOption(ForceOption);
         }
 
         internal static Argument<string[]> NameArgument { get; } = new("package")
@@ -34,6 +35,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
 
         internal virtual Option<string[]> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
+
+        internal virtual Option<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption().WithDescription(SymbolStrings.Option_Install_Force);
 
         protected NewCommand ParentCommand { get; }
 

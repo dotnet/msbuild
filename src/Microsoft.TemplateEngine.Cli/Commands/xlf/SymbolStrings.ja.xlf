@@ -153,6 +153,11 @@ If command is specified without the argument, it lists all the template packages
         <target state="new">If specified, the settings will be not preserved on file system.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Option_Install_Force">
+        <source>Allows to install the template package even if the same package is already available from different sources.</source>
+        <target state="new">Allows to install the template package even if the same package is already available from different sources.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_Interactive">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>

@@ -25,6 +25,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             Interactive = parseResult.GetValueForOption(installCommand.InteractiveOption);
             AdditionalSources = parseResult.GetValueForOption(installCommand.AddSourceOption);
+            Force = parseResult.GetValueForOption(installCommand.ForceOption);
         }
 
         public IReadOnlyList<string> TemplatePackages { get; }
@@ -32,5 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public bool Interactive { get; }
 
         public IReadOnlyList<string>? AdditionalSources { get; }
+
+        public bool Force { get; }
     }
 }

@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.CommandLine;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
@@ -160,6 +162,12 @@ namespace Microsoft.TemplateEngine.Cli
             }
             Reporter.Output.WriteLine();
 
+            bool validated = await ValidateInstallationRequestsAsync(args, installRequests, cancellationToken).ConfigureAwait(false);
+            if (!validated)
+            {
+                return NewCommandStatus.CreateFailed;
+            }
+
             IReadOnlyList<InstallResult> installResults = await managedSourceProvider.InstallAsync(installRequests, cancellationToken).ConfigureAwait(false);
             foreach (InstallResult result in installResults)
             {
@@ -286,6 +294,54 @@ namespace Microsoft.TemplateEngine.Cli
                         LocalizableStrings.TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError,
                         ex.ToString()));
             }
+        }
+
+        private async Task<bool> ValidateInstallationRequestsAsync(InstallCommandArgs args, List<InstallRequest> installRequests, CancellationToken cancellationToken)
+        {
+            var templatePackages = await _templatePackageManager.GetTemplatePackagesAsync(force: false, cancellationToken).ConfigureAwait(false);
+            IReadOnlyList<(string Id, string Version)> unmanagedTemplatePackages = templatePackages
+                .Where(tp => tp is not IManagedTemplatePackage)
+                .Select(tp => NuGetUtils.GetNuGetPackageInfo(_engineEnvironmentSettings, tp.MountPointUri))
+                .Where(i => i != default)
+                .ToList();
+
+            HashSet<(InstallRequest Request, (string Id, string Version) PackageInfo)> invalidTemplatePackages = new();
+
+            foreach (var installRequest in installRequests)
+            {
+                var foundPackage = unmanagedTemplatePackages.FirstOrDefault(package => string.Equals(package.Id, installRequest.PackageIdentifier, StringComparison.OrdinalIgnoreCase));
+                if (foundPackage != default)
+                {
+                    invalidTemplatePackages.Add((installRequest, foundPackage));
+                }
+            }
+
+            if (invalidTemplatePackages.Any())
+            {
+                Reporter reporter = args.Force ? Reporter.Output : Reporter.Error;
+
+                reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_PackageIsAvailable);
+                foreach (var request in invalidTemplatePackages)
+                {
+                    reporter.WriteLine($"{request.PackageInfo.Id}::{request.PackageInfo.Version}".Indent());
+                }
+                reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_OverrideNotice);
+                reporter.WriteLine();
+
+                if (!args.Force)
+                {
+                    Option forceOption = SharedOptionsFactory.CreateForceOption();
+
+                    reporter.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Install_Info_UseForceToOverride, forceOption.Aliases.First()));
+                    reporter.WriteCommand(
+                        Example
+                            .For<InstallCommand>(args.ParseResult)
+                            .WithArgument(InstallCommand.NameArgument, installRequests.Select(ir => ir.DisplayName).ToArray())
+                            .WithOption(forceOption));
+                    return false;
+                }
+            }
+            return true;
         }
 
         private async Task<(NewCommandStatus, Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>)> DetermineSourcesToUninstallAsync(UninstallCommandArgs commandArgs, CancellationToken cancellationToken)

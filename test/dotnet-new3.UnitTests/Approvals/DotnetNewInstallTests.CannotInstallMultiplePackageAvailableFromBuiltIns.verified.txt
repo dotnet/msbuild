@@ -1,0 +1,6 @@
+﻿The following template packages are already available:
+   Microsoft.DotNet.Common.ItemTemplates::%VERSION%
+Installing the template packages will override the available template packages.
+
+To install these template packages anyway, apply '--force' option:
+   dotnet-new3 new3 install Microsoft.DotNet.Common.ItemTemplates::6.0.100 Microsoft.DotNet.Web.ItemTemplates::5.0.0 --force

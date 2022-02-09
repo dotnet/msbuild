@@ -74,7 +74,13 @@ namespace Dotnet_new3
                     {
                         string expandedPath = Environment.ExpandEnvironmentVariables(sourceLocation).Replace('\\', Path.DirectorySeparatorChar);
                         IEnumerable<string> expandedPaths = InstallRequestPathResolution.ExpandMaskedPath(expandedPath, _settings);
-                        templatePackages.AddRange(expandedPaths.Select(path => new TemplatePackage(this, path, _settings.Host.FileSystem.GetLastWriteTimeUtc(path))));
+                        foreach (string path in expandedPaths)
+                        {
+                            if (_settings.Host.FileSystem.FileExists(path) || _settings.Host.FileSystem.DirectoryExists(path))
+                            {
+                                templatePackages.Add(new TemplatePackage(this, path, _settings.Host.FileSystem.GetLastWriteTimeUtc(path)));
+                            }
+                        }
                     }
                 }
 

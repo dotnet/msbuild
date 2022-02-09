@@ -55,4 +55,8 @@ namespace Dotnet_new3.IntegrationTests
   <ItemGroup>
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
+    <Exec Command="dotnet pack $(SolutionDir)template_feed\Microsoft.DotNet.Common.ProjectTemplates.7.0" />
+    <Exec Command="dotnet pack $(SolutionDir)template_feed\Microsoft.DotNet.Common.ItemTemplates" />
+  </Target>
 </Project>

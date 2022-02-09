@@ -7,8 +7,21 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <Content Include="defaultinstall.template.list.debug">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>defaultinstall.template.list</Link>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' != 'Debug'">
+    <Content Include="defaultinstall.template.list.release">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>defaultinstall.template.list</Link>
+    </Content>
+  </ItemGroup>
+
   <ItemGroup>
-    <None Update="**\*.list" CopyToOutputDirectory="Always" />
     <None Update="dotnet-new3.sh" CopyToOutputDirectory="Always" />
     <None Update="dotnet-new3.cmd" CopyToOutputDirectory="Always" />
   </ItemGroup>

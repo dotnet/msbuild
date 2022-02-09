@@ -325,6 +325,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allows to install the template package even if the same package is already available from different sources..
+        /// </summary>
+        internal static string Option_Install_Force {
+            get {
+                return ResourceManager.GetString("Option_Install_Force", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Allows the command to stop and wait for user input or action (for example to complete authentication)..
         /// </summary>
         internal static string Option_Interactive {

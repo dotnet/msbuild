@@ -59,6 +59,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 _commandParts.AddRange(args.Select(a => a.Any(char.IsWhiteSpace) ? $"'{a}'" : a));
                 return this;
             }
+            if (option.Arity.MinimumNumberOfValues == 0)
+            {
+                return this;
+            }
 
             _commandParts.Add(CommandLineUtils.FormatArgumentUsage(option));
             return this;

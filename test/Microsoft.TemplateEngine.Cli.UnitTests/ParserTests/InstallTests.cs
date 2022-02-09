@@ -95,6 +95,27 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
         [Fact]
+        public void Install_CanParseForceOption()
+        {
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse($"new install source --force");
+            InstallCommandArgs args = new InstallCommandArgs((InstallCommand)parseResult.CommandResult.Command, parseResult);
+
+            Assert.True(args.Force);
+            Assert.Single(args.TemplatePackages);
+            Assert.Contains("source", args.TemplatePackages);
+
+            parseResult = myCommand.Parse($"new install source");
+            args = new InstallCommandArgs((InstallCommand)parseResult.CommandResult.Command, parseResult);
+
+            Assert.False(args.Force);
+            Assert.Single(args.TemplatePackages);
+            Assert.Contains("source", args.TemplatePackages);
+        }
+
+        [Fact]
         public void Install_CanParseMultipleArgs()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));

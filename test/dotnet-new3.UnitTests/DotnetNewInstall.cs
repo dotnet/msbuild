@@ -5,19 +5,22 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
+using VerifyTests;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class DotnetNewInstallTests : IClassFixture<DiagnosticFixture>
+    public partial class DotnetNewInstallTests : IClassFixture<DiagnosticFixture>, IClassFixture<VerifySettingsFixture>
     {
+        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
         private readonly IMessageSink _messageSink;
 
-        public DotnetNewInstallTests(DiagnosticFixture diagnosisFixture, ITestOutputHelper log)
+        public DotnetNewInstallTests(DiagnosticFixture diagnosisFixture, VerifySettingsFixture verifySettings, ITestOutputHelper log)
         {
+            _verifySettings = verifySettings.Settings;
             _log = log;
             _messageSink = diagnosisFixture.DiagnosticSink;
         }

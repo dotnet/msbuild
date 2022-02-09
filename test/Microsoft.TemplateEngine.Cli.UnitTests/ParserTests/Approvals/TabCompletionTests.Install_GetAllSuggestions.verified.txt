@@ -7,6 +7,13 @@
     Detail: Specifies a NuGet source to use during install.
   },
   {
+    Label: --force,
+    Kind: Keyword,
+    SortText: --force,
+    InsertText: --force,
+    Detail: Allows to install the template package even if the same package is already available from different sources.
+  },
+  {
     Label: --interactive,
     Kind: Keyword,
     SortText: --interactive,
