@@ -15,18 +15,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         public RazorConfiguration Configuration { get; set; } = RazorConfiguration.Default;
 
         /// <summary>
-        /// Gets a flag that determines if the source generator waits for the debugger to attach.
-        /// <para>
-        /// To configure this using MSBuild, use the <c>_RazorSourceGeneratorDebug</c> property.
-        /// For instance <c>dotnet msbuild /p:_RazorSourceGeneratorDebug=true</c>
-        /// </para>
-        /// </summary>
-        public bool WaitForDebugger { get; set; } = false;
-
-        /// <summary>
         /// Gets a flag that determines if generated Razor views and Pages includes the <c>RazorSourceChecksumAttribute</c>.
         /// </summary>
-        public bool GenerateMetadataSourceChecksumAttributes { get; set; } = false;
+        public bool GenerateMetadataSourceChecksumAttributes { get; set; }
 
         /// <summary>
         /// Gets a flag that determines if the source generator should no-op.
@@ -36,7 +27,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         /// The property is set by the SDK via an editor config.
         /// </para>
         /// </summary>
-        public bool SuppressRazorSourceGenerator { get; set; } = false;
+        public bool SuppressRazorSourceGenerator { get; set; }
 
         /// <summary>
         /// Gets the CSharp language version currently used by the compilation.
@@ -46,14 +37,17 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         /// <summary>
         /// Gets a flag that determines if localized component names should be supported.</c>.
         /// </summary>
-        public bool SupportLocalizedComponentNames { get; set; } = false;
+        public bool SupportLocalizedComponentNames { get; set; }
 
         public bool Equals(RazorSourceGenerationOptions other)
+            => SuppressRazorSourceGenerator == other.SuppressRazorSourceGenerator && EqualsIgnoringSupression(other);
+
+        public bool EqualsIgnoringSupression(RazorSourceGenerationOptions other)
         {
-            return RootNamespace == other.RootNamespace &&
-                Configuration == other.Configuration &&
+            return
+                RootNamespace == other.RootNamespace &&
+                Configuration.Equals(other.Configuration) &&
                 GenerateMetadataSourceChecksumAttributes == other.GenerateMetadataSourceChecksumAttributes &&
-                SuppressRazorSourceGenerator == other.SuppressRazorSourceGenerator &&
                 CSharpLanguageVersion == other.CSharpLanguageVersion &&
                 SupportLocalizedComponentNames == other.SupportLocalizedComponentNames;
         }

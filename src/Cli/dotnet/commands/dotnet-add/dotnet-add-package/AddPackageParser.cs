@@ -4,9 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -21,7 +23,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Argument<string> CmdPackageArgument = new Argument<string>(LocalizableStrings.CmdPackage)
         {
             Description = LocalizableStrings.CmdPackageDescription
-        }.AddSuggestions((parseResult, match) => QueryNuGet(match));
+        }.AddCompletions((context) => QueryNuGet(context.WordToComplete).Select(match => new CompletionItem(match)));
 
         public static readonly Option<string> VersionOption = new ForwardedOption<string>(new string[] { "-v", "--version" }, LocalizableStrings.CmdVersionDescription)
         {
@@ -71,7 +73,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(InteractiveOption);
             command.AddOption(PrereleaseOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new AddPackageReferenceCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new AddPackageReferenceCommand(parseResult).Execute());
 
             return command;
         }

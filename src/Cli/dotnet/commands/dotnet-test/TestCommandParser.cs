@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<IEnumerable<string>> CollectOption = new ForwardedOption<IEnumerable<string>>("--collect", LocalizableStrings.cmdCollectDescription)
         {
             ArgumentHelpName = LocalizableStrings.cmdCollectFriendlyName
-        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", o)}\"")
+        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", GetSemiColonEscapedArgs(o))}\"")
         .AllowSingleArgPerToken();
 
         public static readonly Option<bool> BlameOption = new ForwardedOption<bool>("--blame", LocalizableStrings.CmdBlameDescription)
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.LongFormArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>(TestCommand.Run);
+            command.SetHandler(TestCommand.Run);
 
             return command;
         }

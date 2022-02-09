@@ -431,7 +431,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
         }
 
-        [WindowsOnlyFact]
+        [PlatformSpecificFact(TestPlatforms.Windows)]
         public void ItCreatesCoverageFileWhenCodeCoverageEnabledByRunsettings()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("11");
@@ -508,8 +508,109 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
+        [PlatformSpecificFact(TestPlatforms.Windows)]
+        public void ItCreatesCoberturaFileProvidedByCommandInResultsDirectory()
+        {
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("15");
+
+            string resultsDirectory = Path.Combine(testProjectDirectory, "RD");
+
+            // Delete resultsDirectory if it exist
+            if (Directory.Exists(resultsDirectory))
+            {
+                Directory.Delete(resultsDirectory, true);
+            }
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .Execute(
+                                            "--collect", "Code Coverage;Format=Cobertura",
+                                            "--results-directory", resultsDirectory);
+
+            // Verify test results
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total:     2");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().Contain("Failed:     1");
+            }
+
+            // Verify coverage file.
+            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            FileInfo[] coverageFileInfos = d.GetFiles("*.cobertura.xml", SearchOption.AllDirectories);
+            Assert.Single(coverageFileInfos);
+
+            result.ExitCode.Should().Be(1);
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Windows)]
+        public void ItHandlesMultipleCollectCommandInResultsDirectory()
+        {
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("16");
+
+            string resultsDirectory = Path.Combine(testProjectDirectory, "RD");
+
+            // Delete resultsDirectory if it exist
+            if (Directory.Exists(resultsDirectory))
+            {
+                Directory.Delete(resultsDirectory, true);
+            }
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .Execute(
+                                            "--collect", "XPlat Code Coverage;arg1=val1",
+                                            "--collect", "Another Coverage Collector;arg1=val1",
+                                            "--results-directory", resultsDirectory);
+
+            // Verify test results
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total:     2");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().Contain("Failed:     1");
+                result.StdOut.Should().Contain("Unable to find a datacollector with friendly name 'XPlat Code Coverage'");
+                result.StdOut.Should().Contain("Could not find data collector 'XPlat Code Coverage'");
+                result.StdOut.Should().Contain("Unable to find a datacollector with friendly name 'Another Coverage Collector'");
+                result.StdOut.Should().Contain("Could not find data collector 'Another Coverage Collector'");
+            }
+
+            // Verify coverage file.
+            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
+            Assert.Empty(coverageFileInfos);
+
+            result.ExitCode.Should().Be(1);
+        }
+
         [PlatformSpecificFact(TestPlatforms.FreeBSD)]
         public void ItShouldShowWarningMessageOnCollectCodeCoverage()
+        {
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .Execute(
+                                            "--collect", "Code Coverage",
+                                            "--filter", "VSTestPassTest");
+
+            // Verify test results
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows and Linux x64.");
+                result.StdOut.Should().Contain("Total:     1");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().NotContain("Failed!");
+            }
+
+            result.ExitCode.Should().Be(0);
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Linux, Skip="https://github.com/dotnet/sdk/issues/22865")]
+        public void ItShouldShowWarningMessageOnCollectCodeCoverageThatProfilerWasNotInitialized()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
 

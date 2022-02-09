@@ -72,10 +72,11 @@ namespace Microsoft.DotNet.Cli
             return symbolResult switch
             {
                 CommandResult commandResult => commandResult.Token,
-                OptionResult optionResult => optionResult.Token ??
-                                             new Token($"--{optionResult.Option.Name}", TokenType.Option),
-                ArgumentResult argResult => new Token(argResult.GetValueOrDefault<string>(), TokenType.Argument),
-                _ => null
+                OptionResult optionResult => optionResult.Token == default ?
+                                             new Token($"--{optionResult.Option.Name}", TokenType.Option, optionResult.Option)
+                                             : optionResult.Token,
+                ArgumentResult argResult => new Token(argResult.GetValueOrDefault<string>(), TokenType.Argument, argResult.Argument),
+                _ => default
             };
         }
     }

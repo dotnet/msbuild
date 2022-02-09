@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli
             Command command = new Command("uninstall", LocalizableStrings.CommandDescription);
             command.AddArgument(WorkloadIdArgument);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadUninstallCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadUninstallCommand(parseResult).Execute());
 
             return command;
         }

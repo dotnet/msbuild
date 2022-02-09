@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VerbosityOption);
             command.AddOption(VersionOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadSearchCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadSearchCommand(parseResult).Execute());
 
             return command;
         }

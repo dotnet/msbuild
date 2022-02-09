@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(ProjectPathArgument);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new RemoveProjectFromSolutionCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new RemoveProjectFromSolutionCommand(parseResult).Execute());
 
             return command;
         }

@@ -171,9 +171,9 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 DotnetHelpBuilder dotnetHelpBuilder = new DotnetHelpBuilder(windowWidth);
-                dotnetHelpBuilder.Customize(FormatCommandCommon.DiagnosticsOption, defaultValue: Tools.Format.LocalizableStrings.whichever_ids_are_listed_in_the_editorconfig_file);
-                dotnetHelpBuilder.Customize(FormatCommandCommon.IncludeOption, defaultValue: Tools.Format.LocalizableStrings.all_files_in_the_solution_or_project);
-                dotnetHelpBuilder.Customize(FormatCommandCommon.ExcludeOption, defaultValue: Tools.Format.LocalizableStrings.none);
+                dotnetHelpBuilder.CustomizeSymbol(FormatCommandCommon.DiagnosticsOption, defaultValue: Tools.Format.LocalizableStrings.whichever_ids_are_listed_in_the_editorconfig_file);
+                dotnetHelpBuilder.CustomizeSymbol(FormatCommandCommon.IncludeOption, defaultValue: Tools.Format.LocalizableStrings.all_files_in_the_solution_or_project);
+                dotnetHelpBuilder.CustomizeSymbol(FormatCommandCommon.ExcludeOption, defaultValue: Tools.Format.LocalizableStrings.none);
 
                 SetHelpCustomizations(dotnetHelpBuilder);
 
@@ -184,18 +184,18 @@ namespace Microsoft.DotNet.Cli
             {
                 foreach (var option in HelpDescriptionCustomizations.Keys)
                 {
-                    Func<ParseResult, string> descriptionCallback = (ParseResult parseResult) =>
+                    Func<HelpContext, string> descriptionCallback = (HelpContext context) =>
                     {
                         foreach (var (command, helpText) in HelpDescriptionCustomizations[option])
                         {
-                            if (parseResult.CommandResult.Command.Equals(command))
+                            if (context.ParseResult.CommandResult.Command.Equals(command))
                             {
                                 return helpText;
                             }
                         }
                         return null;
                     };
-                    builder.Customize(option, secondColumnText: descriptionCallback);
+                    builder.CustomizeSymbol(option, secondColumnText: descriptionCallback);
                 }
             }
 
@@ -232,8 +232,8 @@ namespace Microsoft.DotNet.Cli
                     }
                     else if (command.Name.Equals(AddPackageParser.GetCommand().Name) || command.Name.Equals(AddCommandParser.GetCommand().Name))
                     {
-                        // Don't show package suggestions in help
-                        AddPackageParser.CmdPackageArgument.Suggestions.Clear();
+                        // Don't show package completions in help
+                        AddPackageParser.CmdPackageArgument.Completions.Clear();
                     }
 
                     base.Write(context);

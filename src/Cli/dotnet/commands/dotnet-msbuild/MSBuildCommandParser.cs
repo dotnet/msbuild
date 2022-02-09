@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
         {
             var command = new DocumentedCommand("msbuild", DocsLink, LocalizableStrings.AppFullName);
 
-            command.Handler = CommandHandler.Create<ParseResult>(MSBuildCommand.Run);
+            command.SetHandler(MSBuildCommand.Run);
 
             return command;
         }

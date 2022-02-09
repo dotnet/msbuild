@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
 			command.AddOption(CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription));
 
-            command.Handler = CommandHandler.Create<ParseResult>(StoreCommand.Run);
+            command.SetHandler(StoreCommand.Run);
 
             return command;
         }

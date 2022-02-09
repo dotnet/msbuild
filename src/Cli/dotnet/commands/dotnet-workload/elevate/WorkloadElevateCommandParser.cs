@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli
                 IsHidden = true
             };
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadElevateCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadElevateCommand(parseResult).Execute());
 
             return command;
         }
