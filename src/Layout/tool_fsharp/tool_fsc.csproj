@@ -34,7 +34,7 @@
           CopyToPublishDirectory="PreserveNewest"
           DestinationSubPath="%(FilesToCopyFromFSharpCompilerPackage.SubDir)%(Filename)%(Extension)"
           RelativePath="%(FilesToCopyFromFSharpCompilerPackage.SubDir)%(Filename)%(Extension)"
-          TargetPath="%(FilesToCopyFromFSharpCompilerPackage.SubDir)%(Filename%(Extension))" />
+          TargetPath="%(FilesToCopyFromFSharpCompilerPackage.SubDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
   </Target>
