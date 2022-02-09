@@ -143,6 +143,7 @@ jobs:
                 -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
                 -officialBuildIdArgs "$(_OfficialBuildIdArgs)"
                 $(_Test)
+                -additionalMSBuildParameters "$(_InternalRuntimeDownloadArgs)"
         displayName: Run Tests in Helix and non Helix in parallel
         condition: succeededOrFailed()
         env:
