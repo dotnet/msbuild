@@ -24,3 +24,5 @@ set TestExecutionDirectory=%TEMP%\dotnetSdkTests\%RandomDirectoryName%
 set DOTNET_CLI_HOME=%TestExecutionDirectory%\.dotnet
 mkdir %TestExecutionDirectory%
 robocopy %HELIX_CORRELATION_PAYLOAD%\t\TestExecutionDirectoryFiles %TestExecutionDirectory%
+
+dotnet new

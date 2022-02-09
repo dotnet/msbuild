@@ -589,7 +589,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 .BeEmpty();
         }
 
-        [Theory(Skip = "https://github.com/dotnet/sdk/issues/23533")]
+        [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public void GivenAnInstalledPackageUninstallRemovesThePackage(bool testMockBehaviorIsInSync)
