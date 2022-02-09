@@ -13,9 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-#if RUNTIME_TYPE_NETCORE
 using System.Runtime.Versioning;
-#endif
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;

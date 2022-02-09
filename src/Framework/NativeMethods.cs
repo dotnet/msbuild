@@ -9,9 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-#if RUNTIME_TYPE_NETCORE
 using System.Runtime.Versioning;
-#endif
 using System.Text;
 using System.Threading;
 
@@ -24,23 +22,6 @@ using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 #nullable disable
 
 namespace Microsoft.Build.Framework;
-
-#if NETFRAMEWORK || NETSTANDARD2_0
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
-internal class SupportedOSPlatformGuard : Attribute
-{
-    internal SupportedOSPlatformGuard(string platformName)
-    {
-    }
-}
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Class)]
-internal class SupportedOSPlatform : Attribute
-{
-    internal SupportedOSPlatform(string platformName)
-    {
-    }
-}
-#endif
 
 internal static class NativeMethods
 {

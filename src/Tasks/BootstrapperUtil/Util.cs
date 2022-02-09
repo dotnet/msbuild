@@ -5,14 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-#if RUNTIME_TYPE_NETCORE
 using System.Runtime.Versioning;
-#endif
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
-#if NETFRAMEWORK
-using Microsoft.Build.Framework;
-#endif
 
 #nullable disable
 

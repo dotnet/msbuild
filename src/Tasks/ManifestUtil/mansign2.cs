@@ -12,12 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using System.Runtime.InteropServices;
-
-#if RUNTIME_TYPE_NETCORE
 using System.Runtime.Versioning;
-#else
-using Microsoft.Build.Framework;
-#endif
 
 using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 

@@ -17,11 +17,7 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 using Microsoft.Build.Shared.FileSystem;
-#if RUNTIME_TYPE_NETCORE
 using System.Runtime.Versioning;
-#else
-using Microsoft.Build.Framework;
-#endif
 
 #nullable disable
 

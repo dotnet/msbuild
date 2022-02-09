@@ -7,13 +7,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Resources;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 #if RUNTIME_TYPE_NETCORE
 using System.Runtime.InteropServices.ComTypes;
-using System.Runtime.Versioning;
-#endif
-
-#if NETFRAMEWORK
-using Microsoft.Build.Framework;
 #endif
 
 #nullable disable

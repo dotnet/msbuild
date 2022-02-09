@@ -5,15 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-#if RUNTIME_TYPE_NETCORE
 using System.Runtime.Versioning;
-#endif
 using System.Text;
 using System.Xml.Serialization;
-
-#if NETFRAMEWORK
-using Microsoft.Build.Framework;
-#endif
 
 #nullable disable
 
