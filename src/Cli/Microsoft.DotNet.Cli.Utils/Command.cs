@@ -188,6 +188,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public string CommandArgs => _process.StartInfo.Arguments;
 
+        public ICommand SetCommandArgs(string commandArgs)
+        {
+            _process.StartInfo.Arguments = commandArgs;
+            return this;
+        }
+
         private string FormatProcessInfo(ProcessStartInfo info)
         {
             if (string.IsNullOrWhiteSpace(info.Arguments))

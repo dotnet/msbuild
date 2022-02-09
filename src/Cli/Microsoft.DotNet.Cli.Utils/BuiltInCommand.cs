@@ -183,5 +183,9 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             throw new NotImplementedException();
         }
+        public ICommand SetCommandArgs(string commandArgs)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
