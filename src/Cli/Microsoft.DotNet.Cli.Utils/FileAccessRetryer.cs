@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
                 catch (IOException)
                 {
-                    Thread.Sleep(nextWaitTime);
+                    Task.Run(() => Task.Delay(nextWaitTime)).Wait();
                     nextWaitTime *= 2;
                     remainRetry--;
                     if (remainRetry == 0)

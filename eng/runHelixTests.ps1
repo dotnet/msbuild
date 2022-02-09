@@ -8,7 +8,6 @@ Param(
 Write-Host "Running tests in Helix..."
 
 $runTestsOnHelixArgs = ("-configuration", $configuration,
-"-prepareMachine",
 "-ci",
 "-restore",
 "-test",

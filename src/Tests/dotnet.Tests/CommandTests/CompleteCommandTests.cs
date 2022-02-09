@@ -89,31 +89,16 @@ namespace Microsoft.DotNet.Tests.Commands
         public void GivenNewCommandItDisplaysCompletions()
         {
             var expected = new[] {
-                "--columns",
-                "--dry-run",
-                "--force",
                 "--help",
-                "--install",
-                "--language",
-                "--list",
-                "--interactive",
-                "--name",
-                "--nuget-source",
-                "--output",
-                "--type",
-                "--uninstall",
                 "-?",
                 "-h",
-                "-i",
-                "-l",
-                "-lang",
-                "-n",
-                "-o",
-                "-u",
                 "/?",
                 "/h",
-                "--update-check",
-                "--update-apply"
+                "install",
+                "list",
+                "search",
+                "uninstall",
+                "update"
             };
 
             var reporter = new BufferedReporter();

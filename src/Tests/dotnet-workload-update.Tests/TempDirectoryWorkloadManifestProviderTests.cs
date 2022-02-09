@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
@@ -44,7 +45,7 @@ namespace dotnet.Tests
         }
 
         [WindowsOnlyFact]
-        public void ItShouldReturnListOfManifestFiles()
+        public async Task ItShouldReturnListOfManifestFiles()
         {
             Initialize(nameof(ItShouldReturnListOfManifestFiles));
             NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(new DirectoryPath(_updaterDir),
@@ -61,8 +62,8 @@ namespace dotnet.Tests
             string package = DownloadSamplePackage(new PackageId("Microsoft.NET.Workload.Emscripten.Manifest-6.0.100"),
                 NuGetVersion.Parse("6.0.0-preview.7.21377.2"), nuGetPackageDownloader);
 
-            workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(new List<string> {package},
-                new DirectoryPath(_manifestDirectory)).GetAwaiter().GetResult();
+            await workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(new List<string> {package},
+                new DirectoryPath(_manifestDirectory));
 
             TempDirectoryWorkloadManifestProvider tempDirectoryWorkloadManifestProvider =
                 new TempDirectoryWorkloadManifestProvider(_manifestDirectory, mockWorkloadResolver.GetSdkFeatureBand());

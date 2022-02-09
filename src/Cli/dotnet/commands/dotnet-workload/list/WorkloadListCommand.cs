@@ -7,6 +7,7 @@ using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
@@ -145,7 +146,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         internal UpdateAvailableEntry[] GetUpdateAvailable(IEnumerable<WorkloadId> installedList)
         {
             HashSet<WorkloadId> installedWorkloads = installedList.ToHashSet();
-            _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(_includePreviews).Wait();
+            Task.Run(() => _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(_includePreviews)).Wait();
             IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion,
                 Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestsToUpdate =
                 _workloadManifestUpdater.CalculateManifestUpdates();
