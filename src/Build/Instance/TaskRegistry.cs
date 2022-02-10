@@ -22,7 +22,6 @@ using System.Collections.ObjectModel;
 using Microsoft.Build.Shared.FileSystem;
 
 using Microsoft.NET.StringTools;
-using System.Linq;
 
 #nullable disable
 
@@ -701,7 +700,8 @@ namespace Microsoft.Build.Execution
             {
                 // Key the dictionary based on Unqualified task names
                 // This is to support partial matches on tasks like Foo.Bar and Baz.Bar
-                string unqualifiedTaskName = taskName.Split('.').Last();
+                string[] nameComponents = taskName.Split('.');
+                string unqualifiedTaskName = nameComponents[nameComponents.Length - 1];
 
                 // Is the task already registered?
                 if (overriddenTasks.TryGetValue(unqualifiedTaskName, out List<RegisteredTaskRecord> recs))
@@ -722,7 +722,7 @@ namespace Microsoft.Build.Execution
                     List<RegisteredTaskRecord> unqualifiedTaskNameMatches = new();
                     unqualifiedTaskNameMatches.Add(newRecord);
                     overriddenTasks.Add(unqualifiedTaskName, unqualifiedTaskNameMatches);
-                    loggingService.LogComment(context, MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName);
+                    loggingService.LogComment(context, MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName, projectUsingTaskInXml.OverrideLocation);
                 }
             }
 

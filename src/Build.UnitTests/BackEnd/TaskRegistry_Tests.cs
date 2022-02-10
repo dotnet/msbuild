@@ -706,9 +706,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         Array.Empty<string>(),
                         null);
 
-                    var result = buildManager.Build(
+                    buildManager.Build(
                         parameters,
-                        request);
+                        request).OverallResult.ShouldBe<BuildResultCode>(BuildResultCode.Failure);
 
                     // We should see MSB4275: Multiple usingtask overrides with the same name
                     logger.AssertLogContains("MSB4275");
