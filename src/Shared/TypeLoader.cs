@@ -214,7 +214,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// What is the type for the given type name, this may be null if the typeName does not map to a type.
             /// </summary>
-            private ConcurrentDictionary<string, (Type, Dictionary<string, Type>)> _typeNameToType;
+            private ConcurrentDictionary<string, Type> _typeNameToType;
 
             /// <summary>
             /// List of public types in the assembly which match the type filter and their corresponding types
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Shared
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
                 // Only one thread should be doing operations on this instance of the object at a time.
-                (Type type, Dictionary<string, Type> otherTypes) type = _typeNameToType.GetOrAdd(typeName, (key) =>
+                Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
                 {
                     if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
                     {
@@ -265,7 +265,7 @@ namespace Microsoft.Build.Shared
                             Type t2 = Type.GetType(typeName + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
                             if (t2 != null)
                             {
-                                return (!_isDesiredType(t2, null) ? null : t2, null);
+                                return !_isDesiredType(t2, null) ? null : t2;
                             }
                         }
                         catch (ArgumentException)
@@ -276,14 +276,13 @@ namespace Microsoft.Build.Shared
                         }
                     }
 
-                    Dictionary<string, Type> otherTypes = null;
                     if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
                     {
                         lock (_lockObject)
                         {
                             if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
                             {
-                                otherTypes = ScanAssemblyForPublicTypes(useTaskHost);
+                                ScanAssemblyForPublicTypes(useTaskHost);
                                 Interlocked.Exchange(ref _haveScannedPublicTypes, ~0);
                             }
                         }
@@ -294,24 +293,24 @@ namespace Microsoft.Build.Shared
                         // if type matches partially on its name
                         if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
                         {
-                            return (desiredTypeInAssembly.Value, otherTypes);
+                            return desiredTypeInAssembly.Value;
                         }
                     }
 
-                    return (null, null);
+                    return null;
                 });
 
-                return type.type != null ? new LoadedType(type.type, _assemblyLoadInfo, _loadedAssembly, type.otherTypes) : null;
+                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) : null;
             }
 
             /// <summary>
             /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on 
             /// to find tasks, loggers, and task factories.
             /// </summary>
-            private Dictionary<string, Type> ScanAssemblyForPublicTypes(bool useTaskHost)
+            private void ScanAssemblyForPublicTypes(bool useTaskHost)
             {
                 // we need to search the assembly for the type...
-                Dictionary<string, Type> typeReferences = useTaskHost ? LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo) : LoadAssembly(_assemblyLoadInfo);
+                _loadedAssembly = useTaskHost ? LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo) : LoadAssembly(_assemblyLoadInfo);
 
                 // only look at public types
                 Type[] allPublicTypesInAssembly = _loadedAssembly.GetExportedTypes();
@@ -322,8 +321,6 @@ namespace Microsoft.Build.Shared
                         _publicTypeNameToType.Add(publicType.FullName, publicType);
                     }
                 }
-
-                return typeReferences;
             }
 
             /// <summary>
@@ -331,26 +328,26 @@ namespace Microsoft.Build.Shared
             /// </summary>
             /// <param name="assemblyLoadInfo"></param>
             /// <returns></returns>
-            private Dictionary<string, Type> LoadAssembly(AssemblyLoadInfo assemblyLoadInfo)
+            private Assembly LoadAssembly(AssemblyLoadInfo assemblyLoadInfo)
             {
                 try
                 {
                     if (assemblyLoadInfo.AssemblyName != null)
                     {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-                        _loadedAssembly = Assembly.Load(assemblyLoadInfo.AssemblyName);
+                        return Assembly.Load(assemblyLoadInfo.AssemblyName);
 #else
-                    _loadedAssembly = Assembly.Load(new AssemblyName(assemblyLoadInfo.AssemblyName));
+                    return Assembly.Load(new AssemblyName(assemblyLoadInfo.AssemblyName));
 #endif
                     }
                     else
                     {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-                        _loadedAssembly = Assembly.UnsafeLoadFrom(assemblyLoadInfo.AssemblyFile);
+                        return Assembly.UnsafeLoadFrom(assemblyLoadInfo.AssemblyFile);
 #else
                     var baseDir = Path.GetDirectoryName(assemblyLoadInfo.AssemblyFile);
                     s_coreClrAssemblyLoader.AddDependencyLocation(baseDir);
-                    _loadedAssembly = s_coreClrAssemblyLoader.LoadFromPath(assemblyLoadInfo.AssemblyFile);
+                    return s_coreClrAssemblyLoader.LoadFromPath(assemblyLoadInfo.AssemblyFile);
 #endif
                     }
                 }
@@ -361,11 +358,9 @@ namespace Microsoft.Build.Shared
                     // NOTE: don't use ErrorUtilities.VerifyThrowFileExists() here because that will hit the disk again
                     throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation, e);
                 }
-
-                return null;
             }
 
-            private Dictionary<string, Type> LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
+            private Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
             {
                 string path = assemblyLoadInfo.AssemblyFile;
 
@@ -392,16 +387,7 @@ namespace Microsoft.Build.Shared
                 localPaths.AddRange(runtimePaths);
 
                 MetadataLoadContext loadContext = new(new PathAssemblyResolver(localPaths));
-                _loadedAssembly = loadContext.LoadFromAssemblyPath(path);
-
-                Dictionary<string, Type> otherTypes = new();
-                Assembly frameworkAssembly = loadContext.LoadFromAssemblyPath(Path.Combine(msbuildLocation, "Microsoft.Build.Framework.dll"));
-                IEnumerable<Type> types = frameworkAssembly.GetExportedTypes().Where(t => t.Name.Equals("LoadInSeparateAppDomainAttribute") || t.Name.Equals("RunInSTAAttribute") || t.Name.Equals("IGeneratedTask"));
-                foreach (Type t in types)
-                {
-                    otherTypes.Add(t.Name, t);
-                }
-                return otherTypes;
+                return loadContext.LoadFromAssemblyPath(path);
             }
         }
     }

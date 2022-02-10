@@ -1012,7 +1012,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (parameter != null)
                 {
-                    Type parameterType = parameter.PropertyType;
+                    Type parameterType = Type.GetType(parameter.PropertyType.AssemblyQualifiedName);
 
                     EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 

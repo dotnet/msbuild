@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Framework;
 
@@ -21,8 +22,8 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Creates an instance of this class for the given type.
         /// </summary>
-        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Dictionary<string, Type> otherTypes = null)
-            : this(type, assemblyLoadInfo, null, otherTypes)
+        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo)
+            : this(type, assemblyLoadInfo, null)
         {
         }
 
@@ -32,27 +33,45 @@ namespace Microsoft.Build.Shared
         /// <param name="type">The Type to be loaded</param>
         /// <param name="assemblyLoadInfo">Information used to load the assembly</param>
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
-        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Assembly loadedAssembly, Dictionary<string, Type> otherTypes = null)
+        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Assembly loadedAssembly)
         {
             ErrorUtilities.VerifyThrow(type != null, "We must have the type.");
             ErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
 
-            _type = type;
+            try
+            {
+                Type t = Type.GetType(type.AssemblyQualifiedName);
+                if (t.Assembly.Location.Equals(loadedAssembly.Location, StringComparison.OrdinalIgnoreCase))
+                {
+                    _type = t;
+                }
+            }
+            catch (Exception) { }
+            _type ??= type;
             _assembly = assemblyLoadInfo;
             _loadedAssembly = loadedAssembly;
 
             CheckForHardcodedSTARequirement();
-            _hasLoadInSeparateAppDomainAttribute = this.Type.GetTypeInfo().IsDefined(otherTypes?.TryGetValue("LoadInSeparateAppDomainAttribute", out Type appDomainAttr) == true ? appDomainAttr : typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
-            if (_hasSTAThreadAttribute is null)
-            {
-                _hasSTAThreadAttribute = this.Type.GetTypeInfo().IsDefined(otherTypes?.TryGetValue("RunInSTAAttribute", out Type STAAttr) == true ? STAAttr : typeof(RunInSTAAttribute), true /* inherited */);
-            }
+            _hasLoadInSeparateAppDomainAttribute = loadedAssembly is null ?
+                this.Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */) :
+#if NET35
+                false; // Should never reach here.
+#else
+                CustomAttributeData.GetCustomAttributes(type).Any(attr => attr.AttributeType.Name.Equals("LoadInSeparateAppDomainAttribute"));
+#endif
+            _hasSTAThreadAttribute ??= loadedAssembly is null ?
+                this.Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */) :
+#if NET35
+                false; // Should never reach here.
+#else
+                CustomAttributeData.GetCustomAttributes(type).Any(attr => attr.AttributeType.Name.Equals("RunInSTAAttribute"));
+#endif
         }
 
 
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
         /// <summary>
         /// Gets whether there's a LoadInSeparateAppDomain attribute on this type.
         /// Caches the result - since it can't change during the build.
@@ -73,7 +92,7 @@ namespace Microsoft.Build.Shared
             return (bool)_hasSTAThreadAttribute;
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Determines if the task has a hardcoded requirement for STA thread usage.
@@ -96,7 +115,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        #region Properties
+#region Properties
 
         /// <summary>
         /// Gets the type that was loaded from an assembly.
@@ -134,7 +153,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        #endregion
+#endregion
 
         // the type that was loaded
         private Type _type;

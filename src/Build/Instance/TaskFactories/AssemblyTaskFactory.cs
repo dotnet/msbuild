@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Threading.Tasks;
@@ -149,11 +150,20 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
-            PropertyInfo[] infos = _loadedType.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            var propertyInfos = new TaskPropertyInfo[infos.Length];
-            for (int i = 0; i < infos.Length; i++)
+            PropertyInfo[] properties = (_loadedType.LoadedAssembly?.GetType(_loadedType.Type.Name) ?? _loadedType.Type).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            var propertyInfos = new TaskPropertyInfo[properties.Length];
+            for (int i = 0; i < properties.Length; i++)
             {
-                propertyInfos[i] = new ReflectableTaskPropertyInfo(infos[i]);
+                if (_loadedType.LoadedAssembly is null)
+                {
+                    propertyInfos[i] = new ReflectableTaskPropertyInfo(properties[i]);
+                }
+                else
+                {
+                    bool output = CustomAttributeData.GetCustomAttributes(properties[i]).Any(attr => attr.AttributeType.Name.Equals("OutputAttribute"));
+                    bool required = CustomAttributeData.GetCustomAttributes(properties[i]).Any(attr => attr.AttributeType.Name.Equals("RequiredAttribute"));
+                    propertyInfos[i] = new ReflectableTaskPropertyInfo(properties[i], output, required);
+                }
             }
 
             return propertyInfos;
