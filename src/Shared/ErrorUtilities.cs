@@ -53,8 +53,7 @@ namespace Microsoft.Build.Shared
 
         internal static void VerifyThrowInternalError(bool condition, string message, params object[] args)
         {
-            // do nothing if there is a cancellation requested and there is state mismatch.
-            if (s_throwExceptions && !condition && (bool)args[0] == false)
+            if (s_throwExceptions && !condition)
             {
                 throw new InternalErrorException(ResourceUtilities.FormatString(message, args));
             }

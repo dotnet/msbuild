@@ -250,10 +250,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         new NullableBool(isDesignTimeBuild),
                         null);
 
-                    ErrorUtilities.VerifyThrowInternalError(
+                    if (!_cancellationToken.IsCancellationRequested)
+                    {
+                        ErrorUtilities.VerifyThrowInternalError(
                         previousValue is null || previousValue == false || isDesignTimeBuild,
-                        "Either all builds in a build session or design time builds, or none",
-                        (_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested));
+                        "Either all builds in a build session or design time builds, or none");
+                    }
 
                     // No point progressing with expensive plugin initialization or cache query if design time build detected.
                     if (DesignTimeBuildsDetected)
@@ -283,12 +285,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     }
                 }
 
-                ErrorUtilities.VerifyThrowInternalError(
-                    LateInitializationForVSWorkaroundCompleted is null ||
-                    (_projectCacheDescriptor.VsWorkaround && LateInitializationForVSWorkaroundCompleted.Task.IsCompleted),
-                    "Completion source should be null when this is not the VS workaround",
-                    (_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested));
-
+                if (!_cancellationToken.IsCancellationRequested)
+                {
+                    ErrorUtilities.VerifyThrowInternalError(
+                                        LateInitializationForVSWorkaroundCompleted is null ||
+                                        (_projectCacheDescriptor.VsWorkaround && LateInitializationForVSWorkaroundCompleted.Task.IsCompleted),
+                                        "Completion source should be null when this is not the VS workaround");
+                }
+                
                 BuildRequestData buildRequest = new BuildRequestData(
                     cacheRequest.Configuration.Project,
                     cacheRequest.Submission.BuildRequestData.TargetNames.ToArray());
@@ -592,11 +596,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 MSBuildEventSource.Log.ProjectCacheEndBuildStart(_projectCachePluginTypeName);
 
                 await _projectCachePlugin.EndBuildAsync(pluginLogger, _cancellationToken);
-                bool isCanceled = (_cancellationToken.CanBeCanceled && !_cancellationToken.IsCancellationRequested);
-                /* mismatches between the current plugin state and expected state can occur when force quitting via ctrl+c, and these mismatches are logged as errors
-                 so we will only throw if the application has not been canceled.
+
+                /* Mismatches between the current plugin state and expected state can occur when cancelled. Under normal circumstances we would want those mismatches to be
+                 * logged as an error. However, in this case the mismatch is caused by the cancellation and should be ignored.
                 */
-                if (pluginLogger.HasLoggedErrors && !isCanceled)
+                if (pluginLogger.HasLoggedErrors && !_cancellationToken.IsCancellationRequested)
                 {
                     ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheShutdownFailed");
                 }
@@ -659,7 +663,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             lock (this)
             {
-                ErrorUtilities.VerifyThrowInternalError(_serviceState == expectedState, $"Expected state {expectedState}, actual state {_serviceState}", (_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested));
+                if (!_cancellationToken.IsCancellationRequested)
+                {
+                    ErrorUtilities.VerifyThrowInternalError(_serviceState == expectedState, $"Expected state {expectedState}, actual state {_serviceState}");
+                }
             }
         }
 
@@ -667,7 +674,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             lock (this)
             {
-                ErrorUtilities.VerifyThrowInternalError(_serviceState != unexpectedState, $"Unexpected state {_serviceState}", (_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested));
+                if (!_cancellationToken.IsCancellationRequested)
+                {
+                    ErrorUtilities.VerifyThrowInternalError(_serviceState != unexpectedState, $"Unexpected state {_serviceState}");
+                }
             }
         }
 
