@@ -108,6 +108,16 @@ namespace Microsoft.Build.Tasks
             set => _useApplicationTrust = value;
         }
 
+        public override bool Execute()
+        {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateApplicationManifest));
+                return false;
+            }
+            return base.Execute();
+        }
+
         protected override Type GetObjectType()
         {
             return typeof(ApplicationManifest);

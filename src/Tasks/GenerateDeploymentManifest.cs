@@ -150,6 +150,16 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
+        public override bool Execute()
+        {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateDeploymentManifest));
+                return false;
+            }
+            return base.Execute();
+        }
+
         protected override Type GetObjectType()
         {
             return typeof(DeployManifest);

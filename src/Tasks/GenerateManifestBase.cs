@@ -272,6 +272,12 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateManifestBase));
+                return false;
+            }
+
             bool success = true;
 
             Type manifestType = GetObjectType();
