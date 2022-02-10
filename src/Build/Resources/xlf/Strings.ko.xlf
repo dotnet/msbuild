@@ -225,8 +225,8 @@
         <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
-        <source>Created an override using task: {0}</source>
-        <target state="new">Created an override using task: {0}</target>
+        <source>Created an override using task: {0} at {1}</source>
+        <target state="new">Created an override using task: {0} at {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheBeginBuild">

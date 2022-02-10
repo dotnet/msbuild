@@ -337,7 +337,7 @@
     <comment>{StrBegin="MSB4275: "}</comment>
   </data>
   <data name="OverrideUsingTaskElementCreated" xml:space="preserve">
-    <value>Created an override using task: {0}</value>
+    <value>Created an override using task: {0} at {1}</value>
   </data>
   <data name="OverrideTasksFileFailure" xml:space="preserve">
     <value>MSB4194: The override tasks file could not be successfully loaded. {0}</value>
