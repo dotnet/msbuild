@@ -1768,7 +1768,8 @@ namespace Microsoft.Build.BackEnd
                         {
                             ErrorUtilities.VerifyThrowInternalError(
                                 _configCache.HasConfiguration(request.ConfigurationId),
-                                "A request should have a configuration if it makes it this far in the build process.");
+                                "A request should have a configuration if it makes it this far in the build process.",
+                                false);
 
                             var config = _configCache[request.ConfigurationId];
                             var globalProperties = string.Join(
