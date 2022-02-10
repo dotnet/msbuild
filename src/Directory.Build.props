@@ -15,6 +15,9 @@
     <!-- Ensure that compiler errors emit full paths so that files
          can be correctly annotated in GitHub. -->
     <GenerateFullPaths>true</GenerateFullPaths>
+    
+    <!-- https://github.com/NuGet/Home/issues/8684 -->
+    <NoWarn>$(NoWarn);NU5131</NoWarn>
 
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
@@ -73,6 +76,9 @@
     <RuntimeOutputPlatformTarget>AnyCPU</RuntimeOutputPlatformTarget>
   </PropertyGroup>
 
+  <PropertyGroup>
+  </PropertyGroup>
+
   <!-- Produce ONLY reference assemblies and SKIP roslyn analyzers for netstandard2.0 builds. -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' and '$(MSBuildProjectFile)' != 'PortableTask.csproj'">
     <!-- ProduceOnlyReferenceAssembly and ProduceReferenceAssembly are mutually exclusive compiler flags. -->
@@ -81,8 +87,6 @@
     <RunAnalyzers>false</RunAnalyzers>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificContentInPackage);ShipRefAssembliesToNuGetPackage</TargetsForTfmSpecificBuildOutput>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <!-- https://github.com/NuGet/Home/issues/8684 -->
-    <NoWarn>$(NoWarn);NU5131</NoWarn>
     <PublishWindowsPdb>false</PublishWindowsPdb>
   </PropertyGroup>
 
