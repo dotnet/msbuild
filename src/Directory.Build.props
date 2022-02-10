@@ -83,6 +83,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- https://github.com/NuGet/Home/issues/8684 -->
     <NoWarn>$(NoWarn);NU5131</NoWarn>
+    <PublishWindowsPdb>false</PublishWindowsPdb>
   </PropertyGroup>
 
     <Target Name="ShipRefAssembliesToNuGetPackage" Condition="'$(TargetFramework)' == 'netstandard2.0'">
