@@ -44,7 +44,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", "SignFile");
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(SignFile));
                 return false;
             }
             try

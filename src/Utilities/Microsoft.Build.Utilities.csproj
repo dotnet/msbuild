@@ -4,7 +4,7 @@
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(LibraryTargetFrameworks);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <RootNamespace>Microsoft.Build.Utilities</RootNamespace>
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>

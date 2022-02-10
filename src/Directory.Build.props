@@ -27,9 +27,9 @@
     <Platforms>AnyCPU;x64</Platforms>
 
     <!-- Defaults for target frameworks and architecture -->
-    <LibraryTargetFrameworks>$(FullFrameworkTFM);net6.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net6.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">$(FullFrameworkTFM)</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks>$(FullFrameworkTFM);net6.0;netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net6.0;netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">$(FullFrameworkTFM);netstandard2.0</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
@@ -75,8 +75,23 @@
 
   <!-- Produce ONLY reference assemblies and SKIP roslyn analyzers for netstandard2.0 builds. -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' and '$(MSBuildProjectFile)' != 'PortableTask.csproj'">
+    <!-- ProduceOnlyReferenceAssembly and ProduceReferenceAssembly are mutually exclusive compiler flags. -->
     <ProduceOnlyReferenceAssembly>true</ProduceOnlyReferenceAssembly>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <RunAnalyzers>false</RunAnalyzers>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificContentInPackage);ShipRefAssembliesToNuGetPackage</TargetsForTfmSpecificBuildOutput>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- https://github.com/NuGet/Home/issues/8684 -->
+    <NoWarn>$(NoWarn);NU5131</NoWarn>
   </PropertyGroup>
+
+    <Target Name="ShipRefAssembliesToNuGetPackage" Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <!-- Ensure ns2.0 ref assemblies are placed under `ref/netstandard2.0` in the NuGet package -->
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="@(BuiltProjectOutputGroupOutput);@(FinalDocFile)">
+          <PackagePath>ref/$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+
 </Project>

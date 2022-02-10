@@ -957,11 +957,10 @@
     <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Force M.B.Framework & Utilities to build as netstandard2.0 so the RoslynCodeTaskFactory can find them. -->
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+        <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
+        <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj"/>
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj"/>
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
   <ItemGroup>

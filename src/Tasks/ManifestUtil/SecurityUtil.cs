@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
@@ -30,9 +31,6 @@ using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
-#if !NET5_0_OR_GREATER
-using Microsoft.Build.Framework;
-#endif
 
 #nullable disable
 
