@@ -21,7 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Program.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
 
     <!-- Note: These items are showing up in solution explorer even though Visible is set to false -->
     <None Include="$(MSBuildThisFileDirectory)..\Assets\**\*.*" CopyToPublishDirectory="PreserveNewest" 
