@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Threading.Tasks;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -122,7 +123,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
-                    Arguments = new[] { "run", "-f", "net5.0", "--", "foo=bar" },
+                    Arguments = new[] { "run", "-f", ToolsetInfo.CurrentTargetFramework, "--", "foo=bar" },
                 }
             };
             await filter.ProcessAsync(context, default);
@@ -134,7 +135,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await filter.ProcessAsync(context, default);
 
             // Assert
-            Assert.Equal(new[] { "run", "--no-restore", "-f", "net5.0", "--", "foo=bar" }, context.ProcessSpec.Arguments);
+            Assert.Equal(new[] { "run", "--no-restore", "-f", ToolsetInfo.CurrentTargetFramework, "--", "foo=bar" }, context.ProcessSpec.Arguments);
         }
 
         [Fact]

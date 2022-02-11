@@ -390,12 +390,10 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_retries_on_failure_to_create_apphost()
         {
-            const string TFM = "net5.0";
-
             var testProject = new TestProject()
             {
                 Name = "RetryAppHost",
-                TargetFrameworks = TFM,
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -410,7 +408,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var intermediateDirectory = buildCommand.GetIntermediateDirectory(targetFramework: TFM).FullName;
+            var intermediateDirectory = buildCommand.GetIntermediateDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework).FullName;
 
             File.SetLastWriteTimeUtc(
                 Path.Combine(

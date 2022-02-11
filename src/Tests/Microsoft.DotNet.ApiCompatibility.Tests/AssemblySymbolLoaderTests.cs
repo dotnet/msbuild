@@ -36,7 +36,7 @@ namespace MyNamespace
         // We need to target a framework compatible with what the test is being
         // built for so that we resolve the references correctly.
 #if NETCOREAPP
-        private const string TargetFrameworks = "net5.0";
+        private const string TargetFrameworks = ToolsetInfo.CurrentTargetFramework;
 #else
         private const string TargetFrameworks = "net471";
 #endif
@@ -163,7 +163,7 @@ namespace MyNamespace
 
             TestProject testProject = new(assemblyName)
             {
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = false,
             };
 
