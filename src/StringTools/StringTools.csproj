@@ -37,7 +37,4 @@
     <Compile Remove="InternableString.Simple.cs" />
     <Compile Remove="WeakStringCache.Locking.cs" />
   </ItemGroup>
-
-  <Target Name="UpdateXlf" Condition="'$(TargetFramework)' == 'net35'">
-  </Target>
 </Project>

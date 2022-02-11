@@ -37,7 +37,6 @@ namespace Microsoft.Build.Tasks
         public String TargetFrameworkVersion { get; set; }
 
         public string TimestampUrl { get; set; }
-        
         public bool DisallowMansignTimestampFallback { get; set; } = false;
 
         public override bool Execute()
