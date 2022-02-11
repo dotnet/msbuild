@@ -265,7 +265,6 @@ namespace Microsoft.Build.Tasks
             }
 #endif
 
-
             if (actualException is WebException webException)
             {
                 // WebException is thrown when accessing the Content of the response

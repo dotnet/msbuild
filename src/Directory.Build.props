@@ -76,9 +76,6 @@
     <RuntimeOutputPlatformTarget>AnyCPU</RuntimeOutputPlatformTarget>
   </PropertyGroup>
 
-  <PropertyGroup>
-  </PropertyGroup>
-
   <!-- Produce ONLY reference assemblies and SKIP roslyn analyzers for netstandard2.0 builds. -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' and '$(MSBuildProjectFile)' != 'PortableTask.csproj'">
     <!-- ProduceOnlyReferenceAssembly and ProduceReferenceAssembly are mutually exclusive compiler flags. -->
@@ -87,16 +84,17 @@
     <RunAnalyzers>false</RunAnalyzers>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificContentInPackage);ShipRefAssembliesToNuGetPackage</TargetsForTfmSpecificBuildOutput>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- pdb publishing fails builds for reference-only assemblies. -->
+    <!-- https://github.com/dotnet/msbuild/pull/6148. -->
     <PublishWindowsPdb>false</PublishWindowsPdb>
   </PropertyGroup>
 
-    <Target Name="ShipRefAssembliesToNuGetPackage" Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <!-- Ensure ns2.0 ref assemblies are placed under `ref/netstandard2.0` in the NuGet package -->
+  <!-- Ensure ns2.0 ref assemblies are placed under `ref/netstandard2.0` in the NuGet package -->
+  <Target Name="ShipRefAssembliesToNuGetPackage" Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <ItemGroup>
       <TfmSpecificPackageFile Include="@(BuiltProjectOutputGroupOutput);@(FinalDocFile)">
           <PackagePath>ref/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>
-
 </Project>

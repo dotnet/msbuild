@@ -594,7 +594,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
             List<string> packagePaths = new List<string>() { PackagePath };
             packagePaths.AddRange(Util.AdditionalPackagePaths);
-
             foreach (string packagePath in packagePaths)
             {
                 if (FileSystems.Default.DirectoryExists(packagePath))
