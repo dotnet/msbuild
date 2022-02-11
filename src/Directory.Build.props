@@ -93,10 +93,10 @@
     <PublishWindowsPdb>false</PublishWindowsPdb>
   </PropertyGroup>
 
-  <!-- Ensure ns2.0 ref assemblies are placed under `ref/netstandard2.0` in the NuGet package -->
+  <!-- Ensure ref assemblies are placed under `ref/$(TargetFramework)` in the NuGet package -->
   <Target Name="ShipRefAssembliesToNuGetPackage" BeforeTargets="Pack" Condition="$(IsInnerBuild) == true">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="@(IntermediateRefAssembly);@(FinalDocFile)">
+      <TfmSpecificPackageFile Include="$(TargetRefPath);@(FinalDocFile)">
           <PackagePath>ref/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
       <!-- ns2.0 builds use `BuiltProjectOutputGroupOutput` for output ref assemblies -->
