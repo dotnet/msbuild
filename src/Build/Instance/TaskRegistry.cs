@@ -436,7 +436,7 @@ namespace Microsoft.Build.Execution
                         targetLoggingContext.LogComment(MessageImportance.Low, "TaskFoundFromFactory", taskName, taskFactory.Name);
                     }
 
-                    if (taskFactory.TaskFactoryLoadedType.HasSTAThreadAttribute())
+                    if (taskFactory.TaskFactoryLoadedType.HasSTAThreadAttribute)
                     {
                         targetLoggingContext.LogComment(MessageImportance.Low, "TaskNeedsSTA", taskName);
                     }
@@ -1327,7 +1327,7 @@ namespace Microsoft.Build.Execution
                                 }
 
                                 // Make sure we only look for task factory classes when loading based on the name
-                                loadedType = s_taskFactoryTypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo, false);
+                                loadedType = s_taskFactoryTypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo);
 
                                 if (loadedType == null)
                                 {

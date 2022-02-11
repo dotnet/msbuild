@@ -24,13 +24,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class TypeLoader
     {
-#if FEATURE_ASSEMBLYLOADCONTEXT
-        /// <summary>
-        /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
-        /// </summary>
-        private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new CoreClrAssemblyLoader();
-#endif
-
         /// <summary>
         /// Cache to keep track of the assemblyLoadInfos based on a given type filter.
         /// </summary>
@@ -138,6 +131,60 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Load an assembly given its AssemblyLoadInfo
+        /// </summary>
+        /// <param name="assemblyLoadInfo"></param>
+        /// <returns></returns>
+        private static Assembly LoadAssembly(AssemblyLoadInfo assemblyLoadInfo)
+        {
+            try
+            {
+                if (assemblyLoadInfo.AssemblyName != null)
+                {
+                    return Assembly.Load(assemblyLoadInfo.AssemblyName);
+                }
+                else
+                {
+                    return Assembly.UnsafeLoadFrom(assemblyLoadInfo.AssemblyFile);
+                }
+            }
+            catch (ArgumentException e)
+            {
+                // Assembly.Load() and Assembly.LoadFrom() will throw an ArgumentException if the assembly name is invalid
+                // convert to a FileNotFoundException because it's more meaningful
+                // NOTE: don't use ErrorUtilities.VerifyThrowFileExists() here because that will hit the disk again
+                throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation, e);
+            }
+        }
+
+        private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
+        {
+            string path = assemblyLoadInfo.AssemblyFile;
+
+            if (path is null)
+            {
+#if NETFRAMEWORK
+                AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
+                setup.LoaderOptimization = LoaderOptimization.SingleDomain;
+                AppDomain appDomain = AppDomain.CreateDomain("appDomainToFindPath", null, setup);
+                path = appDomain.Load(new AssemblyName(assemblyLoadInfo.AssemblyName)).Location;
+                AppDomain.Unload(appDomain);
+#else
+                AssemblyLoadContext alc = new("loadContextToFindPath", true);
+                path = alc.LoadFromAssemblyName(new AssemblyName(assemblyLoadInfo.AssemblyName)).Location;
+                alc.Unload();
+#endif
+            }
+
+            string[] runtimePaths = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
+            List<string> localPaths = new(Directory.GetFiles(Path.GetDirectoryName(path), "*.dll"));
+            localPaths.AddRange(runtimePaths);
+
+            MetadataLoadContext loadContext = new(new PathAssemblyResolver(localPaths));
+            return loadContext.LoadFromAssemblyPath(path);
+        }
+
+        /// <summary>
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
@@ -146,7 +193,7 @@ namespace Microsoft.Build.Shared
         (
             string typeName,
             AssemblyLoadInfo assembly,
-            bool useTaskHost
+            bool useTaskHost = false
         )
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost);
@@ -321,73 +368,6 @@ namespace Microsoft.Build.Shared
                         _publicTypeNameToType.Add(publicType.FullName, publicType);
                     }
                 }
-            }
-
-            /// <summary>
-            /// Load an assembly given its AssemblyLoadInfo
-            /// </summary>
-            /// <param name="assemblyLoadInfo"></param>
-            /// <returns></returns>
-            private Assembly LoadAssembly(AssemblyLoadInfo assemblyLoadInfo)
-            {
-                try
-                {
-                    if (assemblyLoadInfo.AssemblyName != null)
-                    {
-#if !FEATURE_ASSEMBLYLOADCONTEXT
-                        return Assembly.Load(assemblyLoadInfo.AssemblyName);
-#else
-                    return Assembly.Load(new AssemblyName(assemblyLoadInfo.AssemblyName));
-#endif
-                    }
-                    else
-                    {
-#if !FEATURE_ASSEMBLYLOADCONTEXT
-                        return Assembly.UnsafeLoadFrom(assemblyLoadInfo.AssemblyFile);
-#else
-                    var baseDir = Path.GetDirectoryName(assemblyLoadInfo.AssemblyFile);
-                    s_coreClrAssemblyLoader.AddDependencyLocation(baseDir);
-                    return s_coreClrAssemblyLoader.LoadFromPath(assemblyLoadInfo.AssemblyFile);
-#endif
-                    }
-                }
-                catch (ArgumentException e)
-                {
-                    // Assembly.Load() and Assembly.LoadFrom() will throw an ArgumentException if the assembly name is invalid
-                    // convert to a FileNotFoundException because it's more meaningful
-                    // NOTE: don't use ErrorUtilities.VerifyThrowFileExists() here because that will hit the disk again
-                    throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation, e);
-                }
-            }
-
-            private Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
-            {
-                string path = assemblyLoadInfo.AssemblyFile;
-
-                if (path is null)
-                {
-#if NETFRAMEWORK
-                    AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
-                    setup.LoaderOptimization = LoaderOptimization.SingleDomain;
-                    AppDomain appDomain = AppDomain.CreateDomain("appDomainToFindPath", null, setup);
-                    path = appDomain.Load(new AssemblyName(assemblyLoadInfo.AssemblyName)).Location;
-                    AppDomain.Unload(appDomain);
-#else
-                    AssemblyLoadContext alc = new("loadContextToFindPath", true);
-                    path = alc.LoadFromAssemblyName(new AssemblyName(assemblyLoadInfo.AssemblyName)).Location;
-                    alc.Unload();
-#endif
-                }
-
-                string[] runtimePaths = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
-                string msbuildLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string[] msbuildPaths = Directory.GetFiles(msbuildLocation, "*.dll");
-                List<string> localPaths = new(Directory.GetFiles(Path.GetDirectoryName(path), "*.dll"));
-                localPaths.AddRange(msbuildPaths);
-                localPaths.AddRange(runtimePaths);
-
-                MetadataLoadContext loadContext = new(new PathAssemblyResolver(localPaths));
-                return loadContext.LoadFromAssemblyPath(path);
             }
         }
     }

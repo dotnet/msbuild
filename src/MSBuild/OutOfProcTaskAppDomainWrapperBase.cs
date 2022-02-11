@@ -133,7 +133,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             OutOfProcTaskHostTaskResult taskResult;
-            if (taskType.HasSTAThreadAttribute())
+            if (taskType.HasSTAThreadAttribute)
             {
 #if FEATURE_APARTMENT_STATE
                 taskResult = InstantiateAndExecuteTaskInSTAThread(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn,

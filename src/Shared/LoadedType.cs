@@ -51,21 +51,38 @@ namespace Microsoft.Build.Shared
             _assembly = assemblyLoadInfo;
             _loadedAssembly = loadedAssembly;
 
-            CheckForHardcodedSTARequirement();
-            _hasLoadInSeparateAppDomainAttribute = loadedAssembly is null ?
-                this.Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */) :
-#if NET35
-                false; // Should never reach here.
-#else
-                CustomAttributeData.GetCustomAttributes(type).Any(attr => attr.AttributeType.Name.Equals("LoadInSeparateAppDomainAttribute"));
+            HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
+            if (loadedAssembly is null)
+            {
+                HasLoadInSeparateAppDomainAttribute = this.Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
+                HasSTAThreadAttribute = this.Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
+                IsMarshalByRef = this.Type.GetTypeInfo().IsMarshalByRef;
+            }
+            else
+            {
+#if !NET35
+                Type t = type;
+                while (type is not null)
+                {
+                    if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals("LoadInSeparateAppDomainAttribute")))
+                    {
+                        HasLoadInSeparateAppDomainAttribute = true;
+                    }
+
+                    if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals("RunInSTAAttribute")))
+                    {
+                        HasSTAThreadAttribute = true;
+                    }
+
+                    if (t.IsMarshalByRef)
+                    {
+                        IsMarshalByRef = true;
+                    }
+
+                    t = t.BaseType;
+                }
 #endif
-            _hasSTAThreadAttribute ??= loadedAssembly is null ?
-                this.Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */) :
-#if NET35
-                false; // Should never reach here.
-#else
-                CustomAttributeData.GetCustomAttributes(type).Any(attr => attr.AttributeType.Name.Equals("RunInSTAAttribute"));
-#endif
+            }
         }
 
 
@@ -74,30 +91,25 @@ namespace Microsoft.Build.Shared
 #region Methods
         /// <summary>
         /// Gets whether there's a LoadInSeparateAppDomain attribute on this type.
-        /// Caches the result - since it can't change during the build.
         /// </summary>
-        /// <returns></returns>
-        public bool HasLoadInSeparateAppDomainAttribute()
-        {
-            return (bool)_hasLoadInSeparateAppDomainAttribute;
-        }
+        public bool HasLoadInSeparateAppDomainAttribute { get; }
 
         /// <summary>
         /// Gets whether there's a STAThread attribute on the Execute method of this type.
-        /// Caches the result - since it can't change during the build.
         /// </summary>
-        /// <returns></returns>
-        public bool HasSTAThreadAttribute()
-        {
-            return (bool)_hasSTAThreadAttribute;
-        }
+        public bool HasSTAThreadAttribute { get; }
+
+        /// <summary>
+        /// Gets whether this type implements MarshalByRefObject.
+        /// </summary>
+        public bool IsMarshalByRef { get; }
 
 #endregion
 
         /// <summary>
         /// Determines if the task has a hardcoded requirement for STA thread usage.
         /// </summary>
-        private void CheckForHardcodedSTARequirement()
+        private bool CheckForHardcodedSTARequirement()
         {
             // Special hard-coded attributes for certain legacy tasks which need to run as STA because they were written before
             // we changed to running all tasks in MTA.
@@ -109,10 +121,12 @@ namespace Microsoft.Build.Shared
                 {
                     if (String.Equals(assemblyName.Name, "PresentationBuildTasks", StringComparison.OrdinalIgnoreCase))
                     {
-                        _hasSTAThreadAttribute = true;
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
 #region Properties
@@ -159,12 +173,6 @@ namespace Microsoft.Build.Shared
         private Type _type;
         // the assembly the type was loaded from
         private AssemblyLoadInfo _assembly;
-
-        // whether the loadinseparateappdomain attribute is applied to this type
-        private bool? _hasLoadInSeparateAppDomainAttribute;
-
-        // whether the STAThread attribute is applied to this type
-        private bool? _hasSTAThreadAttribute;
 
         /// <summary>
         /// Assembly, if any, that we loaded for this type.

@@ -53,7 +53,7 @@ namespace Microsoft.Build.Shared
             )
         {
 #if FEATURE_APPDOMAIN
-            bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute();
+            bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute;
             s_resolverLoadedType = null;
             taskAppDomain = null;
             ITask taskInstanceInOtherAppDomain = null;
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Shared
 #if FEATURE_APPDOMAIN
                 if (separateAppDomain)
                 {
-                    if (!loadedType.Type.GetTypeInfo().IsMarshalByRef)
+                    if (!loadedType.IsMarshalByRef)
                     {
                         logError
                         (

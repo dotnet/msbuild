@@ -256,12 +256,12 @@ namespace Microsoft.Build.BackEnd
 
             TaskRequirements requirements = TaskRequirements.None;
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute())
+            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute)
             {
                 requirements |= TaskRequirements.RequireSTAThread;
             }
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute())
+            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute)
             {
                 requirements |= TaskRequirements.RequireSeparateAppDomain;
 
