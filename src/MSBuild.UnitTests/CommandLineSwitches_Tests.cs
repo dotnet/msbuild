@@ -1195,7 +1195,8 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            string command = "{0}"; // This is a hack so the error message contains the exact resource string.
+            // Set "expanded" content to match the placeholder so the verify can use the exact resource string as "expected."
+            string command = "{0}";
             MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches, command);
 
             VerifySwitchError(commandLineSwitches, "/warnasmessage", AssemblyResources.GetString("MissingWarnAsMessageParameterError"));

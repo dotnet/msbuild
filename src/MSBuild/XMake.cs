@@ -1795,7 +1795,7 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
 
-                        CommandLineSwitches.SwitchesFromResponseFiles[responseFile] = string.Join(" ", argsFromResponseFile);
+                        CommandLineSwitches.SwitchesFromResponseFiles.Add((responseFile, string.Join(" ", argsFromResponseFile)));
 
                         GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, commandLine);
                     }

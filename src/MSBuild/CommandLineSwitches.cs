@@ -396,7 +396,7 @@ namespace Microsoft.Build.CommandLine
         private DetectedParameterizedSwitch[] _parameterizedSwitches;
         // NOTE: the above arrays are instance members because this class is not required to be a singleton
 
-        internal static Dictionary<string, string> SwitchesFromResponseFiles = new();
+        internal static List<(string path, string contents)> SwitchesFromResponseFiles = new();
 
         /// <summary>
         /// Default constructor.
@@ -807,9 +807,9 @@ namespace Microsoft.Build.CommandLine
                 else
                 {
                     StringBuilder sb = StringBuilderCache.Acquire();
-                    foreach (KeyValuePair<string, string> kvp in SwitchesFromResponseFiles)
+                    foreach ((string path, string contents) in SwitchesFromResponseFiles)
                     {
-                        sb.Append($"\n{ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResponseFileSwitchFromLocation", kvp.Value, kvp.Key)}");
+                        sb.Append($"\n{ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResponseFileSwitchFromLocation", contents, path)}");
                     }
                     CommandLineSwitchException.Throw("SwitchErrorWithArguments", _badCommandLineArg, ResourceUtilities.GetResourceString(_errorMessage), _commandLine, StringBuilderCache.GetStringAndRelease(sb));
                 }
