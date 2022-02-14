@@ -57,7 +57,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="INodePacketHandler.PacketReceived"/>
         public override void PacketReceived(int node, INodePacket packet)
         {
-            if (packet.Type != NodePacketType.ResolveSdkRequest || packet is not SdkResolverRequest request)
+            if (packet is not SdkResolverRequest request)
             {
                 return;
             }
