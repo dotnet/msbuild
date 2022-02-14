@@ -294,9 +294,9 @@ namespace Microsoft.NET.TestFramework
                 {
                     ret.SdkResolverPath = Path.Combine(commandLine.MsbuildAdditionalSdkResolverFolder, configuration, "net472", "SdkResolvers");
                 }
-                else if (Environment.GetEnvironmentVariable("msbuildAdditionalSdkResolverFolder") != null)
+                else if (Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER") != null)
                 {
-                    ret.SdkResolverPath = Path.Combine(Environment.GetEnvironmentVariable("msbuildAdditionalSdkResolverFolder"), configuration, "net472", "SdkResolvers");
+                    ret.SdkResolverPath = Path.Combine(Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER"), configuration, "net472", "SdkResolvers");
                 }
                 else
                 {

@@ -25,4 +25,5 @@ set DOTNET_CLI_HOME=%TestExecutionDirectory%\.dotnet
 mkdir %TestExecutionDirectory%
 robocopy %HELIX_CORRELATION_PAYLOAD%\t\TestExecutionDirectoryFiles %TestExecutionDirectory%
 
+REM call dotnet new so the first run message doesn't interfere with the first test
 dotnet new
