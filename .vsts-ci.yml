@@ -45,10 +45,10 @@ stages:
       pool:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           name: NetCore1ESPool-Public
-          demands: ImageOverride -equals Windows.Amd64.VS2022.Pre.Open
+          demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
           name: NetCore1ESPool-Internal
-          demands: ImageOverride -equals Windows.Amd64.VS2022.Pre
+          demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
       helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
       strategy:
         matrix:
@@ -73,14 +73,14 @@ stages:
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
             name: NetCore1ESPool-Public
-            demands: ImageOverride -equals Windows.Amd64.VS2022.Pre.Open
+            demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre.Open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
             name: NetCore1ESPool-Internal
-            demands: ImageOverride -equals Windows.Amd64.VS2022.Pre
+            demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
+          helixTargetQueue: Windows.Amd64.VS2022.Pre
         strategy:
           matrix:
             Build_Debug:
