@@ -8,7 +8,7 @@
 
 # Resources
  * [MSBuild Resources](wiki/MSBuild-Resources.md)
- * [MSBuild Overview](Contributions/MSBuild-overview.md)
+ * [Contributed documentation](Contributions/README.md)
  * [MSBuild Tips & Tricks](wiki/MSBuild-Tips-&-Tricks.md)
  * [Binary log](wiki/Binary-Log.md)
  * [Providing Binary Logs for investigation](wiki/Providing-Binary-Logs.md)
