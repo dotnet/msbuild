@@ -1,4 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
   <PropertyGroup>
     <TargetFrameworks>net472;$(ToolsetTargetFramework)</TargetFrameworks>
     <TargetFrameworks Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">$(ToolsetTargetFramework)</TargetFrameworks>
@@ -37,10 +44,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
     <Reference Include="System.Core" />
   </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

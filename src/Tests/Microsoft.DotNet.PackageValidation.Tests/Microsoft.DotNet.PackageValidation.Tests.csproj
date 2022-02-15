@@ -1,4 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+  <PropertyGroup>
+    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
@@ -20,7 +25,18 @@
     <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetBuildTasksPackageVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetBuildTasksPackageVersion)" />
-
   </ItemGroup>
+
+  <Target Name="CopyCompatibilityFilesForTests" AfterTargets="Publish">
+    <ItemGroup>
+      <CompatibilityFiles Include="..\..\Compatibility\Microsoft.DotNet.Compatibility\**" />
+      <CompatibilityFiles Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.Compatibility.targets" />   
+  </ItemGroup>
+    <Copy
+      SourceFiles="@(CompatibilityFiles)"
+      DestinationFiles="@(CompatibilityFiles->'$(PublishDir)Compatibility\Microsoft.DotNet.Compatibility\%(RecursiveDir)%(Filename)%(Extension)')"/>
+  </Target>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>
