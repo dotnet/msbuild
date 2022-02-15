@@ -8,7 +8,7 @@ MSBuild implements an actual language (... MSBuildian?). For syntax it uses XML.
 
 MSBuild has two data structures:
 - [properties](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-properties): single valued, scalars. Like `string foo` in C#
-- [items](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-items): multi valued, vectors. Like `string[] foo` in C#.
+- [items](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-items): multi valued, arrays. Like `string[] foo` in C#. Except that each array has a name called an `item-type`, and each element may not only have a value, but also have associated key-value pairs known as metadata.
 
 Typewise, everything is a string in MSBuild.
 
@@ -28,7 +28,7 @@ Evaluation does not execute the targets in a project. It only interprets and sto
 
 The second phase of msbuild interpretation is target execution. This happens in the [TargetBuilder](https://github.com/dotnet/msbuild/blob/bd00d6cba24d41efd6f54699c3fdbefb9f5034a1/src/Build/BackEnd/Components/RequestBuilder/TargetBuilder.cs#L100). The `TargetBuilder` uses a stack to execute targets. The initial state is the state contained inside a given `ProjectInstance`. So targets execute in a stack based manner and mutate the global state inside a `ProjectInstance`.
 
-What's the difference between `Project` and `ProjectInstance`? Sad story, but they are duplicates. `Project` objects are specialized in introspecting / analyzing MSBuild code and also in providing high level project editing operations. `ProjectInstance` objects are  read only. So the objects in the `Project` tree point back to their corresponding `ProjectRootElement` AST elements. The objects in the `ProjectInstance` tree do not point back to the `ProjectRootElement` elements (so they have a much smaller memory footprint). For example, the `Project` tree is used by Visual Studio to analyze msbuild projects, and to reflect UI changes all the way down to the XML elements. The `TargetBuilder` only works with the lighter weight `ProjectInstance` tree, since it only needs to read state.
+What's the difference between `Project` and `ProjectInstance`? While both represent evaluated projects, they are intended for different use cases. `Project` objects are specialized in introspecting / analyzing MSBuild code and also in providing high level project editing operations. `ProjectInstance` objects are  read only. So the objects in the `Project` tree point back to their corresponding `ProjectRootElement` AST elements. The objects in the `ProjectInstance` tree do not point back to the `ProjectRootElement` elements (so they have a much smaller memory footprint). For example, the `Project` tree is used by Visual Studio to analyze msbuild projects, and to reflect UI changes all the way down to the XML elements. The `TargetBuilder` only works with the lighter weight `ProjectInstance` tree, since it only needs to read state.
 
 # MSBuild APIs and components
 - `Project` / `ProjectInstance`: entrypoint APIs for working with MSBuild evaluations.
