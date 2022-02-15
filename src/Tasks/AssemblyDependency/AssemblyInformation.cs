@@ -569,30 +569,36 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_MSCOREE
             if (NativeMethodsShared.IsWindows)
             {
-                StringBuilder runtimeVersion;
-                uint hresult;
 #if DEBUG
-                // Just to make sure and exercise the code that doubles the size
-                // every time GetRequestedRuntimeInfo fails due to insufficient buffer size.
+                // Just to make sure and exercise the code that uses dwLength to allocate the buffer
+                // when GetRequestedRuntimeInfo fails due to insufficient buffer size.
                 int bufferLength = 1;
 #else
                 int bufferLength = 11; // 11 is the length of a runtime version and null terminator v2.0.50727/0
 #endif
-                do
-                {
-                    runtimeVersion = new StringBuilder(bufferLength);
-                    hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out _);
-                    bufferLength *= 2;
-                } while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
 
-                if (hresult == NativeMethodsShared.S_OK)
+                unsafe
                 {
-                    return runtimeVersion.ToString();
-                }
-                else
-                {
-                    return String.Empty;
-                }
+                    // Allocate an initial buffer 
+                    char* runtimeVersion = stackalloc char[bufferLength];
+
+                    // Run GetFileVersion, this should succeed using the initial buffer.
+                    // It also returns the dwLength which is used if there is insufficient buffer.
+                    uint hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out int dwLength);
+
+                    if (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER)
+                    {
+                        // Allocate new buffer based on the returned length.
+                        char* runtimeVersion2 = stackalloc char[dwLength];
+                        runtimeVersion = runtimeVersion2;
+
+                        // Get the RuntimeVersion in this second call.
+                        bufferLength = dwLength;
+                        hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out dwLength);
+                    }
+
+                    return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength - 1) : string.Empty;
+                }                
             }
             else
             {
@@ -602,7 +608,6 @@ namespace Microsoft.Build.Tasks
                 return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
 #endif
         }
-
 
         /// <summary>
         /// Import assembly dependencies.
@@ -790,7 +795,7 @@ namespace Microsoft.Build.Tasks
             // Construct the assembly name. (Note asmNameLength should/must be > 0.)
             var assemblyName = new AssemblyName
             {
-                Name = new string(asmNameBuf, 0, (int) asmNameLength - 1),
+                Name = new string(asmNameBuf, 0, (int)asmNameLength - 1),
                 Version = new Version(
                     asmMeta.usMajorVersion,
                     asmMeta.usMinorVersion,
@@ -911,7 +916,7 @@ namespace Microsoft.Build.Tasks
                     // Read the PE header signature
 
                     sr.BaseStream.Position = peHeaderOffset;
-                    if (!ReadBytes(sr, (byte) 'P', (byte) 'E', 0, 0))
+                    if (!ReadBytes(sr, (byte)'P', (byte)'E', 0, 0))
                     {
                         return string.Empty;
                     }
