@@ -2289,7 +2289,8 @@ namespace Microsoft.Build.CommandLine
                         !WarningsAsErrorsSwitchIsEmpty(commandLineSwitches)!)
                     {
                         commandLineSwitches.SetSwitchError("NotWarnAsErrorWithoutWarnAsError",
-                        commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors));
+                        commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors),
+                        commandLine);
                         commandLineSwitches.ThrowErrors();
                     }
                 }
