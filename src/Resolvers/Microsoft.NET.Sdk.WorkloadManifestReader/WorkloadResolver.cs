@@ -144,7 +144,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         {
                             if (FXVersion.Compare(dependency.Value, resolvedDependency.ParsedVersion) > 0)
                             {
-                                throw new WorkloadManifestCompositionException(Strings.ManifestDependencyVersionTooLow, dependency.Key, dependency.Value, resolvedDependency.Version, manifest.Id, manifest.InformationalPath);
+                                throw new WorkloadManifestCompositionException(Strings.ManifestDependencyVersionTooLow, dependency.Key, resolvedDependency.Version, dependency.Value, manifest.Id, manifest.InformationalPath);
                             }
                         }
                         else
