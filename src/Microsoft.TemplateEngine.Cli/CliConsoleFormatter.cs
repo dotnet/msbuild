@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal sealed class CliConsoleFormatter : ConsoleFormatter, IDisposable
     {
-        private readonly IDisposable _optionsReloadToken;
+        private readonly IDisposable? _optionsReloadToken;
         private ConsoleFormatterOptions _formatterOptions;
 
         public CliConsoleFormatter(IOptionsMonitor<ConsoleFormatterOptions> options) : base(nameof(CliConsoleFormatter))
