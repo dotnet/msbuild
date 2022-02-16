@@ -55,10 +55,57 @@ namespace Microsoft.Build.Tasks
             uint nServices,
             string[] rgsServiceNames);
 
+        /// <summary>
+        /// Starts a new Restart Manager session.
+        /// A maximum of 64 Restart Manager sessions per user session
+        /// can be open on the system at the same time. When this
+        /// function starts a session, it returns a session handle
+        /// and session key that can be used in subsequent calls to
+        /// the Restart Manager API.
+        /// </summary>
+        /// <param name="pSessionHandle">
+        /// A pointer to the handle of a Restart Manager session.
+        /// The session handle can be passed in subsequent calls
+        /// to the Restart Manager API.
+        /// </param>
+        /// <param name="dwSessionFlags">
+        /// Reserved. This parameter should be 0.
+        /// </param>
+        /// <param name="strSessionKey">
+        /// A null-terminated string that contains the session key
+        /// to the new session. The string must be allocated before
+        /// calling the RmStartSession function.
+        /// </param>
+        /// <returns>System error codes that are defined in Winerror.h.</returns>
+        /// <remarks>
+        /// The Rm­­StartSession function doesn’t properly null-terminate
+        /// the session key, even though the function is documented as
+        /// returning a null-terminated string. To work around this bug,
+        /// we pre-fill the buffer with null characters so that whatever
+        /// ends gets written will have a null terminator (namely, one of
+        /// the null characters we placed ahead of time).
+        /// <para>
+        /// see <see href="http://blogs.msdn.com/b/oldnewthing/archive/2012/02/17/10268840.aspx"/>.
+        /// </para>
+        /// </remarks>
         [DllImport(RestartManagerDll, CharSet = CharSet.Unicode)]
-        private static extern int RmStartSession(out uint pSessionHandle,
-            int dwSessionFlags, StringBuilder strSessionKey);
+        private static extern unsafe int RmStartSession(
+            out uint pSessionHandle,
+            int dwSessionFlags,
+            char* strSessionKey);
 
+        /// <summary>
+        /// Ends the Restart Manager session.
+        /// This function should be called by the primary installer that
+        /// has previously started the session by calling the <see cref="RmStartSession"/>
+        /// function. The RmEndSession function can be called by a secondary installer
+        /// that is joined to the session once no more resources need to be registered
+        /// by the secondary installer.
+        /// </summary>
+        /// <param name="pSessionHandle">A handle to an existing Restart Manager session.</param>
+        /// <returns>
+        /// The function can return one of the system error codes that are defined in Winerror.h.
+        /// </returns>
         [DllImport(RestartManagerDll)]
         private static extern int RmEndSession(uint pSessionHandle);
 
@@ -207,11 +254,16 @@ namespace Microsoft.Build.Tasks
             }
 
             const int maxRetries = 6;
+            uint handle;
+            int res;
 
-            // See http://blogs.msdn.com/b/oldnewthing/archive/2012/02/17/10268840.aspx.
-            var key = new StringBuilder(new string('\0', CCH_RM_SESSION_KEY + 1));
+            unsafe
+            {
+                // See http://blogs.msdn.com/b/oldnewthing/archive/2012/02/17/10268840.aspx.
+                char* key = stackalloc char[CCH_RM_SESSION_KEY + 1];
+                res = RmStartSession(out handle, 0, key);
+            }
 
-            int res = RmStartSession(out uint handle, 0, key);
             if (res != 0)
             {
                 throw GetException(res, "RmStartSession", "Failed to begin restart manager session.");

@@ -1304,19 +1304,16 @@ namespace Microsoft.Build.BackEnd
         private void ConfigureWarningsAsErrorsAndMessages()
         {
             // Gather needed objects
-            //
             ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
             BuildEventContext buildEventContext = _projectLoggingContext?.BuildEventContext;
             ILoggingService loggingService = _projectLoggingContext?.LoggingService;
 
             // Ensure everything that is required is available at this time
-            //
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 if (String.Equals(project.GetPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
-                    //
                     loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else
@@ -1327,6 +1324,13 @@ namespace Microsoft.Build.BackEnd
                     {
                         loggingService.AddWarningsAsErrors(buildEventContext, warningsAsErrors);
                     }
+                }
+
+                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsNotAsErrors));
+
+                if (warningsNotAsErrors?.Count > 0)
+                {
+                    loggingService.AddWarningsNotAsErrors(buildEventContext, warningsNotAsErrors);
                 }
 
                 ISet<string> warningsAsMessages = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsMessages));
