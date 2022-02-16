@@ -1392,10 +1392,10 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "bin", "Debug", "PackageLibraryDirectDependency.1.0.0.nupkg"),
                 filePaths: new[]
                 {
-                    Path.Combine("content", "js", "pkg-direct-dep.js"),
-                    Path.Combine("content", "css", "site.css"),
-                    Path.Combine("contentFiles", "js", "pkg-direct-dep.js"),
-                    Path.Combine("contentFiles", "css", "site.css"),
+                    Path.Combine("content", "wwwroot", "js", "pkg-direct-dep.js"),
+                    Path.Combine("content", "wwwroot", "css", "site.css"),
+                    Path.Combine("contentFiles", "wwwroot", "js", "pkg-direct-dep.js"),
+                    Path.Combine("contentFiles", "wwwroot", "css", "site.css"),
                 });
         }
 
@@ -1444,14 +1444,14 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "bin", "Debug", "PackageLibraryDirectDependency.1.0.0.nupkg"),
                 filePaths: new[]
                 {
-                    Path.Combine("content", "js", "pkg-direct-dep.js"),
-                    Path.Combine("content", "css", "site.css"),
+                    Path.Combine("content", "wwwroot", "js", "pkg-direct-dep.js"),
+                    Path.Combine("content", "wwwroot", "css", "site.css"),
                     Path.Combine("content", "Components", "App.razor.css"),
                     // This is to make sure we don't include the unscoped css file on the package.
                     Path.Combine("content", "Components", "App.razor.css"),
                     Path.Combine("content", "Components", "App.razor.rz.scp.css"),
-                    Path.Combine("contentFiles", "js", "pkg-direct-dep.js"),
-                    Path.Combine("contentFiles", "css", "site.css"),
+                    Path.Combine("contentFiles", "wwwroot", "js", "pkg-direct-dep.js"),
+                    Path.Combine("contentFiles", "wwwroot", "css", "site.css"),
                     Path.Combine("contentFiles", "Components", "App.razor.css"),
                     Path.Combine("contentFiles", "Components", "App.razor.rz.scp.css"),
                 });
@@ -1488,7 +1488,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 });
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/38371")]
         public void Pack_NoBuild_DoesNotIncludeFilesAsContent()
         {
             var testAsset = "PackageLibraryDirectDependency";
@@ -1509,12 +1509,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "bin", "Debug", "PackageLibraryDirectDependency.1.0.0.nupkg"),
                 filePaths: new[]
                 {
-                    Path.Combine("content", "js", "pkg-direct-dep.js"),
+                    Path.Combine("content", "wwwroot", "js", "pkg-direct-dep.js"),
                     Path.Combine("content", "PackageLibraryDirectDependency.bundle.scp.css"),
-                    Path.Combine("content", "css", "site.css"),
-                    Path.Combine("contentFiles", "js", "pkg-direct-dep.js"),
+                    Path.Combine("content", "wwwroot", "css", "site.css"),
+                    Path.Combine("contentFiles", "wwwroot", "js", "pkg-direct-dep.js"),
                     Path.Combine("contentFiles", "PackageLibraryDirectDependency.bundle.scp.css"),
-                    Path.Combine("contentFiles", "css", "site.css"),
+                    Path.Combine("contentFiles", "wwwroot", "css", "site.css"),
                 });
         }
 
