@@ -1012,6 +1012,7 @@ namespace Microsoft.Build.UnitTests
                                         new StringWriter(),
                                         false,
                                         warningsAsErrors: null,
+                                        warningsNotAsErrors: null,
                                         warningsAsMessages: null,
                                         enableRestore: false,
                                         profilerLogger: null,

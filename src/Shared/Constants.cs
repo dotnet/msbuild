@@ -39,6 +39,11 @@ namespace Microsoft.Build.Shared
         internal const string WarningsAsErrors = "MSBuildWarningsAsErrors";
 
         /// <summary>
+        /// Name of the property that indicates a list of warnings to not treat as errors.
+        /// </summary>
+        internal const string WarningsNotAsErrors = "MSBuildWarningsNotAsErrors";
+
+        /// <summary>
         /// Name of the property that indicates the list of warnings to treat as messages.
         /// </summary>
         internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";

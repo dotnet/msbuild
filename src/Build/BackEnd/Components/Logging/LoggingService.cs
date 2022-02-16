@@ -221,6 +221,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private IDictionary<int, ISet<string>> _warningsAsErrorsByProject;
 
         /// <summary>
+        /// A list of warnings to not to be promoted to errors for an associated <see cref="BuildEventContext"/>.
+        /// </summary>
+        private IDictionary<int, ISet<string>> _warningsNotAsErrorsByProject;
+
+        /// <summary>
         /// A list of warnings to treat as messages for an associated <see cref="BuildEventContext"/>.
         /// </summary>
         private IDictionary<int, ISet<string>> _warningsAsMessagesByProject;
@@ -481,6 +486,15 @@ namespace Microsoft.Build.BackEnd.Logging
         } = null;
 
         /// <summary>
+        /// Get of warnings to not treat as errors. Only has any effect if WarningsAsErrors is empty but not null.
+        /// </summary>
+        public ISet<string> WarningsNotAsErrors
+        {
+            get;
+            set;
+        } = null;
+
+        /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
         public ISet<string> WarningsAsMessages
@@ -563,83 +577,115 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Returns a hashset of warnings to be logged as errors for the specified build context.
+        /// Returns a collection of warnings to be logged as errors for the specified build context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
         /// <returns>
         /// </returns>
         public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
         {
-            int key = GetWarningsAsErrorOrMessageKey(context);
-
-            if (_warningsAsErrorsByProject != null && _warningsAsErrorsByProject.TryGetValue(key, out ISet<string> warningsAsErrors))
-            {
-                if (WarningsAsErrors != null)
-                {
-                    warningsAsErrors.UnionWith(WarningsAsErrors);
-                }
-
-                return warningsAsErrors;
-            }
-            else
-            {
-                return WarningsAsErrors;
-            }
+            return GetWarningsForProject(context, _warningsAsErrorsByProject, WarningsAsErrors);
         }
 
+        /// <summary>
+        /// Returns a collection of warnings not to be logged as errors for the specified build context.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be kept as warnings.</param>
+        /// <returns>
+        /// </returns>
+        public ICollection<string> GetWarningsNotAsErrors(BuildEventContext context)
+        {
+            return GetWarningsForProject(context, _warningsNotAsErrorsByProject, WarningsNotAsErrors);
+        }
+
+        /// <summary>
+        /// Returns a collection of warnings to be demoted to messages for the specified build context.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as messages.</param>
+        /// <returns>
+        /// </returns>
         public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
         {
+            return GetWarningsForProject(context, _warningsAsMessagesByProject, WarningsAsMessages);
+        }
+
+        /// <summary>
+        /// Helper method that unifies the logic for GetWarningsAsErrors, GetWarningsNotAsErrors, and GetWarningsAsMessages.
+        /// Specifically, this method returns a collection of codes that, within the context of a particular project, should
+        /// be treated specially. These tend to come from setting the associated properties in the project file. These are
+        /// added to previously known codes as necessary.
+        /// </summary>
+        /// <param name="context">The specific context in which to consider special treatment for warnings.</param>
+        /// <param name="warningsByProject">A dictionary of all warnings to be treated special by for which projects.</param>
+        /// <param name="warnings">Warning codes we already know should be promoted, demoted, or not promoted as relevant.</param>
+        /// <returns></returns>
+        private ICollection<string> GetWarningsForProject(BuildEventContext context, IDictionary<int, ISet<string>> warningsByProject, ISet<string> warnings)
+        {
             int key = GetWarningsAsErrorOrMessageKey(context);
 
-            if (_warningsAsMessagesByProject != null && _warningsAsMessagesByProject.TryGetValue(key, out ISet<string> warningsAsMessages))
+            if (warningsByProject != null && warningsByProject.TryGetValue(key, out ISet<string> newWarnings))
             {
-                if (WarningsAsMessages != null)
+                if (warnings != null)
                 {
-                    warningsAsMessages.UnionWith(WarningsAsMessages);
+                    newWarnings.UnionWith(warnings);
                 }
 
-                return warningsAsMessages;
+                return newWarnings;
             }
             else
             {
-                return WarningsAsMessages;
+                return warnings;
             }
         }
 
+        /// <summary>
+        /// Adds warning codes that should be treated as errors to the known set.
+        /// </summary>
+        /// <param name="buildEventContext">The context in which to consider possible warnings to be promoted.</param>
+        /// <param name="codes">Codes to promote</param>
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
         {
-            lock (_lockObject)
-            {
-                int key = GetWarningsAsErrorOrMessageKey(buildEventContext);
-
-                if (_warningsAsErrorsByProject == null)
-                {
-                    _warningsAsErrorsByProject = new ConcurrentDictionary<int, ISet<string>>();
-                }
-
-                if (!_warningsAsErrorsByProject.ContainsKey(key))
-                {
-                    // The same project instance can be built multiple times with different targets.  In this case the codes have already been added
-                    _warningsAsErrorsByProject[key] = new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase);
-                }
-            }
+            AddWarningsAsMessagesOrErrors(ref _warningsAsErrorsByProject, buildEventContext, codes);
         }
 
+        /// <summary>
+        /// Adds warning codes that should not be treated as errors even if WarnAsError is empty (specifying that all warnings should be promoted).
+        /// </summary>
+        /// <param name="buildEventContext">The context in which to consider warnings not to be promoted.</param>
+        /// <param name="codes">Codes not to promote</param>
+        public void AddWarningsNotAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
+        {
+            AddWarningsAsMessagesOrErrors(ref _warningsNotAsErrorsByProject, buildEventContext, codes);
+        }
+
+        /// <summary>
+        /// Adds warning codes that should be treated as messages.
+        /// </summary>
+        /// <param name="buildEventContext">The context in which to consider warnings to be demoted.</param>
+        /// <param name="codes">Codes to demote</param>
         public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
+        {
+            AddWarningsAsMessagesOrErrors(ref _warningsAsMessagesByProject, buildEventContext, codes);
+        }
+
+        /// <summary>
+        /// Adds warning codes to be treated or not treated as warnings or errors to the set of project-specific codes.
+        /// </summary>
+        /// <param name="warningsByProject">Dictionary with what warnings are currently known (by project) that we will add to.</param>
+        /// <param name="buildEventContext">Context for the project to be added</param>
+        /// <param name="codes">Codes to add</param>
+        private void AddWarningsAsMessagesOrErrors(ref IDictionary<int, ISet<string>> warningsByProject, BuildEventContext buildEventContext, ISet<string> codes)
         {
             lock (_lockObject)
             {
                 int key = GetWarningsAsErrorOrMessageKey(buildEventContext);
 
-                if (_warningsAsMessagesByProject == null)
-                {
-                    _warningsAsMessagesByProject = new ConcurrentDictionary<int, ISet<string>>();
-                }
+                warningsByProject ??= new ConcurrentDictionary<int, ISet<string>>();
 
-                if (!_warningsAsMessagesByProject.ContainsKey(key))
+                if (!warningsByProject.ContainsKey(key))
                 {
                     // The same project instance can be built multiple times with different targets.  In this case the codes have already been added
-                    _warningsAsMessagesByProject[key] = new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase);
+                    warningsByProject[key] = new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -1471,8 +1517,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
-                _warningsAsErrorsByProject?.Remove(GetWarningsAsErrorOrMessageKey(projectFinishedEvent));
-                _warningsAsMessagesByProject?.Remove(GetWarningsAsErrorOrMessageKey(projectFinishedEvent));
+                int key = GetWarningsAsErrorOrMessageKey(projectFinishedEvent);
+                _warningsAsErrorsByProject?.Remove(key);
+                _warningsNotAsErrorsByProject?.Remove(key);
+                _warningsAsMessagesByProject?.Remove(key);
             }
 
             if (loggingEvent is BuildEventArgs loggingEventBuildArgs)
@@ -1712,14 +1760,12 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool ShouldTreatWarningAsMessage(BuildWarningEventArgs warningEvent)
         {
             // This only applies if the user specified /nowarn at the command-line or added the warning code through the object model
-            //
             if (WarningsAsMessages?.Contains(warningEvent.Code) == true)
             {
                 return true;
             }
 
             // This only applies if the user specified <MSBuildWarningsAsMessages /> and there is a valid ProjectInstanceId
-            //
             if (_warningsAsMessagesByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 if (_warningsAsMessagesByProject.TryGetValue(GetWarningsAsErrorOrMessageKey(warningEvent), out ISet<string> codesByProject))
@@ -1731,6 +1777,13 @@ namespace Microsoft.Build.BackEnd.Logging
             return false;
         }
 
+        private bool WarningAsErrorNotOverriden(BuildWarningEventArgs warningEvent)
+        {
+            int key = GetWarningsAsErrorOrMessageKey(warningEvent);
+
+            return WarningsNotAsErrors?.Contains(warningEvent.Code) != true && !(_warningsNotAsErrorsByProject?.TryGetValue(key, out ISet<string> notToError) == true && notToError.Contains(warningEvent.Code));
+        }
+
         /// <summary>
         /// Determines if the specified warning should be treated as an error.
         /// </summary>
@@ -1739,12 +1792,10 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool ShouldTreatWarningAsError(BuildWarningEventArgs warningEvent)
         {
             // This only applies if the user specified /warnaserror from the command-line or added an empty set through the object model
-            //
             if (WarningsAsErrors != null)
             {
                 // Global warnings as errors apply to all projects.  If the list is empty or contains the code, the warning should be treated as an error
-                //
-                if (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningEvent.Code))
+                if ((WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningEvent)) || WarningsAsErrors.Contains(warningEvent.Code))
                 {
                     return true;
                 }
@@ -1752,17 +1803,19 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // This only applies if the user specified <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors or <MSBuildWarningsAsErrors />
             // and there is a valid ProjectInstanceId for the warning.
-            //
             if (_warningsAsErrorsByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 // Attempt to get the list of warnings to treat as errors for the current project
-                //
-                if (_warningsAsErrorsByProject.TryGetValue(GetWarningsAsErrorOrMessageKey(warningEvent), out ISet<string> codesByProject))
+                int key = GetWarningsAsErrorOrMessageKey(warningEvent);
+                if (_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> codesByProject))
                 {
                     // We create an empty set if all warnings should be treated as errors so that should be checked first.
                     // If the set is not empty, check the specific code.
-                    //
-                    return codesByProject != null && (codesByProject.Count == 0 || codesByProject.Contains(warningEvent.Code));
+                    ISet<string> codesToIgnoreByProject = null;
+                    _warningsNotAsErrorsByProject?.TryGetValue(key, out codesToIgnoreByProject);
+                    return codesByProject != null &&
+                        ((codesByProject.Count == 0 && (codesToIgnoreByProject is null || !codesToIgnoreByProject.Contains(warningEvent.Code)))
+                        || codesByProject.Contains(warningEvent.Code));
                 }
             }
 

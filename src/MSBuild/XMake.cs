@@ -552,6 +552,7 @@ namespace Microsoft.Build.CommandLine
                 TextWriter targetsWriter = null;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
+                ISet<string> warningsNotAsErrors = null;
                 ISet<string> warningsAsMessages = null;
                 bool enableRestore = Traits.Instance.EnableRestoreFirst;
                 ProfilerLogger profilerLogger = null;
@@ -586,6 +587,7 @@ namespace Microsoft.Build.CommandLine
                                             ref targetsWriter,
                                             ref detailedSummary,
                                             ref warningsAsErrors,
+                                            ref warningsNotAsErrors,
                                             ref warningsAsMessages,
                                             ref enableRestore,
                                             ref interactive,
@@ -664,27 +666,27 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                                 needToValidateProject, schemaFile,
 #endif
-                                cpuCount,
-                                enableNodeReuse,
-                                preprocessWriter,
-                                targetsWriter,
-                                detailedSummary,
-                                warningsAsErrors,
-                                warningsAsMessages,
-                                enableRestore,
-                                profilerLogger,
-                                enableProfiler,
-                                interactive,
-                                isolateProjects,
-                                graphBuildOptions,
-                                lowPriority,
-                                inputResultsCaches,
-                                outputResultsCache,
-                                commandLine
-                                ))
-                        {
-                            exitType = ExitType.BuildError;
-                        }
+                                    cpuCount,
+                                    enableNodeReuse,
+                                    preprocessWriter,
+                                    targetsWriter,
+                                    detailedSummary,
+                                    warningsAsErrors,
+                                    warningsNotAsErrors,
+                                    warningsAsMessages,
+                                    enableRestore,
+                                    profilerLogger,
+                                    enableProfiler,
+                                    interactive,
+                                    isolateProjects,
+                                    graphBuildOptions,
+                                    lowPriority,
+                                    inputResultsCaches,
+                                    outputResultsCache,
+                                    commandLine))
+                            {
+                                exitType = ExitType.BuildError;
+                            }
                     } // end of build
 
                     DateTime t2 = DateTime.Now;
@@ -963,6 +965,7 @@ namespace Microsoft.Build.CommandLine
             TextWriter targetsWriter,
             bool detailedSummary,
             ISet<string> warningsAsErrors,
+            ISet<string> warningsNotAsErrors,
             ISet<string> warningsAsMessages,
             bool enableRestore,
             ProfilerLogger profilerLogger,
@@ -1139,6 +1142,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.DetailedSummary = detailedSummary;
                     parameters.LogTaskInputs = logTaskInputs;
                     parameters.WarningsAsErrors = warningsAsErrors;
+                    parameters.WarningsNotAsErrors = warningsNotAsErrors;
                     parameters.WarningsAsMessages = warningsAsMessages;
                     parameters.Interactive = interactive;
                     parameters.IsolateProjects = isolateProjects;
@@ -2023,6 +2027,7 @@ namespace Microsoft.Build.CommandLine
             ref TextWriter targetsWriter,
             ref bool detailedSummary,
             ref ISet<string> warningsAsErrors,
+            ref ISet<string> warningsNotAsErrors,
             ref ISet<string> warningsAsMessages,
             ref bool enableRestore,
             ref bool interactive,
@@ -2141,6 +2146,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref targetsWriter,
                                                                ref detailedSummary,
                                                                ref warningsAsErrors,
+                                                               ref warningsNotAsErrors,
                                                                ref warningsAsMessages,
                                                                ref enableRestore,
                                                                ref interactive,
@@ -2192,6 +2198,8 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     warningsAsErrors = ProcessWarnAsErrorSwitch(commandLineSwitches);
+
+                    warningsNotAsErrors = ProcessWarnNotAsErrorSwitch(commandLineSwitches);
 
                     warningsAsMessages = ProcessWarnAsMessageSwitch(commandLineSwitches);
 
@@ -2276,12 +2284,32 @@ namespace Microsoft.Build.CommandLine
                     schemaFile = ProcessValidateSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Validate]);
 #endif
                     invokeBuild = true;
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors) &&
+                        !WarningsAsErrorsSwitchIsEmpty(commandLineSwitches)!)
+                    {
+                        commandLineSwitches.SetSwitchError("NotWarnAsErrorWithoutWarnAsError",
+                        commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors));
+                        commandLineSwitches.ThrowErrors();
+                    }
                 }
             }
 
             ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
+        }
+
+        private static bool WarningsAsErrorsSwitchIsEmpty(CommandLineSwitches commandLineSwitches)
+        {
+            string val = commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors);
+            if (val is null)
+            {
+                return false;
+            }
+
+            int indexOfColon = val.IndexOf(":");
+            return indexOfColon < 0 || indexOfColon == val.Length - 1;
         }
 
         internal static GraphBuildOptions ProcessGraphBuildSwitch(string[] parameters)
@@ -2415,18 +2443,16 @@ namespace Microsoft.Build.CommandLine
             return writer;
         }
 
-        internal static ISet<string> ProcessWarnAsErrorSwitch(CommandLineSwitches commandLineSwitches)
+        private static ISet<string> ProcessWarningRelatedSwitch(CommandLineSwitches commandLineSwitches, CommandLineSwitches.ParameterizedSwitch warningSwitch)
         {
-            // TODO: Parse an environment variable as well?
-
-            if (!commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors))
+            if (!commandLineSwitches.IsParameterizedSwitchSet(warningSwitch))
             {
                 return null;
             }
 
-            string[] parameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors];
+            string[] parameters = commandLineSwitches[warningSwitch];
 
-            ISet<string> warningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ISet<string> warningSwitches = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string code in parameters
                 .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
@@ -2435,37 +2461,30 @@ namespace Microsoft.Build.CommandLine
                 {
                     // An empty /warnaserror is added as "null".  In this case, the list is cleared
                     // so that all warnings are treated errors
-                    warningsAsErrors.Clear();
+                    warningSwitches.Clear();
                 }
                 else if (!string.IsNullOrWhiteSpace(code))
                 {
-                    warningsAsErrors.Add(code.Trim());
+                    warningSwitches.Add(code.Trim());
                 }
             }
 
-            return warningsAsErrors;
+            return warningSwitches;
+        }
+
+        internal static ISet<string> ProcessWarnAsErrorSwitch(CommandLineSwitches commandLineSwitches)
+        {
+            return ProcessWarningRelatedSwitch(commandLineSwitches, CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors);
         }
 
         internal static ISet<string> ProcessWarnAsMessageSwitch(CommandLineSwitches commandLineSwitches)
         {
-            if (!commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsAsMessages))
-            {
-                return null;
-            }
+            return ProcessWarningRelatedSwitch(commandLineSwitches, CommandLineSwitches.ParameterizedSwitch.WarningsAsMessages);
+        }
 
-            string[] parameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.WarningsAsMessages];
-
-            ISet<string> warningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (string code in parameters
-                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries))
-                .Where(i => !string.IsNullOrWhiteSpace(i))
-                .Select(i => i.Trim()))
-            {
-                warningsAsMessages.Add(code);
-            }
-
-            return warningsAsMessages;
+        internal static ISet<string> ProcessWarnNotAsErrorSwitch(CommandLineSwitches commandLineSwitches)
+        {
+            return ProcessWarningRelatedSwitch(commandLineSwitches, CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors);
         }
 
         internal static bool ProcessBooleanSwitch(string[] parameters, bool defaultValue, string resourceName)
@@ -3664,6 +3683,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_30_BinaryLoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_28_WarnAsErrorSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_40_WarnNotAsErrorSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_29_WarnAsMessageSwitch"));
 #if FEATURE_XML_SCHEMA_VALIDATION
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));

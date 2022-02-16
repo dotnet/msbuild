@@ -283,7 +283,7 @@ namespace Microsoft.Build.Graph
                 valueComparer: StringComparer.OrdinalIgnoreCase,
                 items: solutionEntryPoint.GlobalProperties ?? ImmutableDictionary<string, string>.Empty);
 
-            var solution = SolutionFile.Parse(FileUtilities.NormalizePath(solutionEntryPoint.ProjectFile));
+            var solution = SolutionFile.Parse(solutionEntryPoint.ProjectFile);
 
             if (solution.SolutionParserWarnings.Count != 0 || solution.SolutionParserErrorCodes.Count != 0)
             {
@@ -410,7 +410,7 @@ namespace Microsoft.Build.Graph
 
                     AddGraphBuildGlobalVariable(globalPropertyDictionary);
 
-                    var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
+                    var configurationMetadata = new ConfigurationMetadata(entryPoint.ProjectFile, globalPropertyDictionary);
                     entryPointConfigurationMetadata.Add(configurationMetadata);
                 }
 
