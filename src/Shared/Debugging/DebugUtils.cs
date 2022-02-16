@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared.FileSystem;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Security;
-using System.Security.Principal;
 using System.Text.RegularExpressions;
 
 #nullable disable
@@ -48,20 +46,6 @@ namespace Microsoft.Build.Shared.Debugging
                 {
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugDirectory);
                 }
-
-#if NETFRAMEWORK
-                string source = "MSBuild";
-                using (EventLog eventLog = new(source))
-                {
-                    if (!EventLog.SourceExists(source))
-                    {
-                        EventLog.CreateEventSource(source, "MSBuild_Logs");
-                    }
-
-                    eventLog.Source = source;
-                    eventLog.WriteEntry($"Binary logs and other build information will be written to {debugDirectory}. If this is wrong, set the environment variable MSBUILDDEBUGPATH to an appropriate value.");
-                }
-#endif
             }
 
             if (debugDirectory is not null)
