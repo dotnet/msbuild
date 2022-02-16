@@ -224,7 +224,7 @@
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
         <source>NETSDK1176: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="translated">NETSDK1176: A compressão em um único pacote de arquivos só é suportada quando se publica uma aplicação autocontida.</target>
+        <target state="new">NETSDK1176: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
         <note>{StrBegin="NETSDK1176: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
