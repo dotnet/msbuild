@@ -321,11 +321,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            var parseResult = myCommand.Parse($" new {command}");
+            Parser parser = ParserFactory.CreateParser(myCommand);
+            var parseResult = parser.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser parser = ParserFactory.CreateParser(templateCommand);
-            ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
+            Parser templateCommandParser = ParserFactory.CreateParser(templateCommand);
+            ParseResult templateParseResult = templateCommandParser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
 
             if (string.IsNullOrWhiteSpace(expectedValue))
@@ -451,7 +452,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 //https://github.com/dotnet/command-line-api/issues/1609
                 //new object?[] { "foo --framework", "framework", "net5.0|net6.0", false, null, null, "Required argument missing for option: '--framework'." },
                 new object?[] { "foo", "framework", "net5.0|net6.0", true, null, null, "Option '--framework' is required." },
-                new object?[] { "foo --framework", "framework", "net5.0|net6.0", true, null, "netcoreapp2.1", "Cannot parse default if option without value 'netcoreapp2.1' for option '--framework' as expected type 'choice': value 'netcoreapp2.1' is not allowed, allowed values are: 'net5.0','net6.0'." }
+                new object?[] { "foo --framework", "framework", "net5.0|net6.0", true, null, "netcoreapp2.1", $"Cannot parse default if option without value 'netcoreapp2.1' for option '--framework' as expected type 'choice': value 'netcoreapp2.1' is not allowed, allowed values are: 'net5.0','net6.0'. Did you mean one of the following?{Environment.NewLine}net5.0{Environment.NewLine}net6.0" }
             };
 
         [Theory]
@@ -477,12 +478,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
-            var parseResult = myCommand.Parse($" new {command}");
+            Parser parser = ParserFactory.CreateParser(myCommand);
+            var parseResult = parser.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser parser = ParserFactory.CreateParser(templateCommand);
-            ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
+            Parser templateCommandParser = ParserFactory.CreateParser(templateCommand);
+            ParseResult templateParseResult = templateCommandParser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
             Assert.Equal(expectedError, templateParseResult.Errors.Single().Message);
         }
