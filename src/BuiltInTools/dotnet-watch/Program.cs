@@ -149,6 +149,8 @@ Examples:
                 new[] { "--non-interactive" },
                 "Runs dotnet-watch in non-interative mode. This option is only supported when running with Hot Reload enabled. " +
                 "Use this option to prevent console input from being captured.");
+            var forwardedArguments = new Argument<string[]>("forwardedArgs", "Arguments to pass to the child dotnet process");
+
             var root = new RootCommand(Description)
             {
                  quiet,
@@ -158,10 +160,10 @@ Examples:
                  longProjectOption,
                  shortProjectOption,
                  listOption,
+                 forwardedArguments
             };
 
-            root.TreatUnmatchedTokensAsErrors = false;
-            var binder = new CommandLineOptionsBinder(longProjectOption, shortProjectOption, quiet, listOption, noHotReloadOption, nonInteractiveOption, verbose, reporter);
+            var binder = new CommandLineOptionsBinder(longProjectOption, shortProjectOption, quiet, listOption, noHotReloadOption, nonInteractiveOption, verbose, forwardedArguments, reporter);
             root.SetHandler((CommandLineOptions options) => handler(options), binder);
             return root;
         }
@@ -427,6 +429,8 @@ Examples:
             private readonly Option<bool> _noHotReloadOption;
             private readonly Option<bool> _nonInteractiveOption;
             private readonly Option<bool> _verboseOption;
+
+            private readonly Argument<string[]> _argumentsToForward;
             private readonly IReporter _reporter;
 
             internal CommandLineOptionsBinder(
@@ -437,6 +441,7 @@ Examples:
                 Option<bool> noHotReloadOption,
                 Option<bool> nonInteractiveOption,
                 Option<bool> verboseOption,
+                Argument<string[]> argumentsToForward,
                 IReporter reporter)
             {
                 _longProjectOption = longProjectOption;
@@ -446,6 +451,7 @@ Examples:
                 _noHotReloadOption = noHotReloadOption;
                 _nonInteractiveOption = nonInteractiveOption;
                 _verboseOption = verboseOption;
+                _argumentsToForward = argumentsToForward;
                 _reporter = reporter;
             }
 
@@ -464,18 +470,6 @@ Examples:
                         projectValue = projectShortValue;
                     }
                 }
-                var remainingArguments = new List<string>();
-                if (parseResults.UnparsedTokens.Any() && parseResults.UnmatchedTokens.Any())
-                {
-                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
-                    remainingArguments.Add("--");
-                    remainingArguments.AddRange(parseResults.UnparsedTokens);
-                }
-                else
-                {
-                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
-                    remainingArguments.AddRange(parseResults.UnparsedTokens);
-                }
 
                 var options = new CommandLineOptions
                 {
@@ -485,7 +479,7 @@ Examples:
                     NonInteractive = parseResults.GetValueForOption(_nonInteractiveOption),
                     Verbose = parseResults.GetValueForOption(_verboseOption),
                     Project = projectValue,
-                    RemainingArguments = remainingArguments.AsReadOnly(),
+                    RemainingArguments = parseResults.GetValueForArgument(_argumentsToForward),
                 };
                 return options;
             }

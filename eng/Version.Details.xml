@@ -252,13 +252,13 @@
       <Sha>4353ed51ea5a7ee1d123447326038b17cf4ea757</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="System.CommandLine" Version="2.0.0-beta3.22109.1">
+    <Dependency Name="System.CommandLine" Version="2.0.0-beta3.22114.1">
       <Uri>https://github.com/dotnet/command-line-api</Uri>
-      <Sha>d886a772f4f6212baaf8b388d27c52704e4b7e5b</Sha>
+      <Sha>3e0db9e5830f2722645b9a576f80e3650b50f23a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.command-line-api" Version="0.1.310901">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.command-line-api" Version="0.1.311401">
       <Uri>https://github.com/dotnet/command-line-api</Uri>
-      <Sha>d886a772f4f6212baaf8b388d27c52704e4b7e5b</Sha>
+      <Sha>3e0db9e5830f2722645b9a576f80e3650b50f23a</Sha>
       <SourceBuild RepoName="command-line-api" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-externals" Version="7.0.0-alpha.1.22114.1">
