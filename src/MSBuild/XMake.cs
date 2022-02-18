@@ -563,43 +563,53 @@ namespace Microsoft.Build.CommandLine
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
+                CommandLineSwitches.SwitchesFromResponseFiles ??= new();
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile);
 
-                if (ProcessCommandLineSwitches(
-                        switchesFromAutoResponseFile,
-                        switchesNotFromAutoResponseFile,
-                        ref projectFile,
-                        ref targets,
-                        ref toolsVersion,
-                        ref globalProperties,
-                        ref loggers,
-                        ref verbosity,
-                        ref distributedLoggerRecords,
+                bool buildCanBeInvoked = ProcessCommandLineSwitches(
+                                            switchesFromAutoResponseFile,
+                                            switchesNotFromAutoResponseFile,
+                                            ref projectFile,
+                                            ref targets,
+                                            ref toolsVersion,
+                                            ref globalProperties,
+                                            ref loggers,
+                                            ref verbosity,
+                                            ref distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
-                        ref needToValidateProject,
-                        ref schemaFile,
+                                            ref needToValidateProject,
+                                            ref schemaFile,
 #endif
-                        ref cpuCount,
-                        ref enableNodeReuse,
-                        ref preprocessWriter,
-                        ref targetsWriter,
-                        ref detailedSummary,
-                        ref warningsAsErrors,
-                        ref warningsNotAsErrors,
-                        ref warningsAsMessages,
-                        ref enableRestore,
-                        ref interactive,
-                        ref profilerLogger,
-                        ref enableProfiler,
-                        ref restoreProperties,
-                        ref isolateProjects,
-                        ref graphBuildOptions,
-                        ref inputResultsCaches,
-                        ref outputResultsCache,
-                        ref lowPriority,
-                        recursing: false
-                        ))
+                                            ref cpuCount,
+                                            ref enableNodeReuse,
+                                            ref preprocessWriter,
+                                            ref targetsWriter,
+                                            ref detailedSummary,
+                                            ref warningsAsErrors,
+                                            ref warningsNotAsErrors,
+                                            ref warningsAsMessages,
+                                            ref enableRestore,
+                                            ref interactive,
+                                            ref profilerLogger,
+                                            ref enableProfiler,
+                                            ref restoreProperties,
+                                            ref isolateProjects,
+                                            ref graphBuildOptions,
+                                            ref inputResultsCaches,
+                                            ref outputResultsCache,
+                                            ref lowPriority,
+                                            recursing: false,
+#if FEATURE_GET_COMMANDLINE
+                                            commandLine
+#else
+                                            string.Join(' ', commandLine)
+#endif
+                );
+
+                CommandLineSwitches.SwitchesFromResponseFiles = null;
+
+                if (buildCanBeInvoked)
                 {
                     // Unfortunately /m isn't the default, and we are not yet brave enough to make it the default.
                     // However we want to give a hint to anyone who is building single proc without realizing it that there
@@ -1525,16 +1535,22 @@ namespace Microsoft.Build.CommandLine
             // discard the first piece, because that's the path to the executable -- the rest are args
             commandLineArgs.RemoveAt(0);
 
+#if FEATURE_GET_COMMANDLINE
+            string fullCommandLine = $"'{commandLine}'";
+#else
+            string fullCommandLine = $"'{string.Join(' ', commandLine)}'";
+#endif
+
             // parse the command line, and flag syntax errors and obvious switch errors
             switchesNotFromAutoResponseFile = new CommandLineSwitches();
-            GatherCommandLineSwitches(commandLineArgs, switchesNotFromAutoResponseFile);
+            GatherCommandLineSwitches(commandLineArgs, switchesNotFromAutoResponseFile, fullCommandLine);
 
             // parse the auto-response file (if "/noautoresponse" is not specified), and combine those switches with the
             // switches on the command line
             switchesFromAutoResponseFile = new CommandLineSwitches();
             if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
             {
-                GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile);
+                GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile, fullCommandLine);
             }
         }
 
@@ -1545,7 +1561,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Internal for unit testing only.
         /// </remarks>
-        internal static void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches)
+        internal static void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine = "")
         {
             foreach (string commandLineArg in commandLineArgs)
             {
@@ -1556,7 +1572,7 @@ namespace Microsoft.Build.CommandLine
                     // response file switch starts with @
                     if (unquotedCommandLineArg.StartsWith("@", StringComparison.Ordinal))
                     {
-                        GatherResponseFileSwitch(unquotedCommandLineArg, commandLineSwitches);
+                        GatherResponseFileSwitch(unquotedCommandLineArg, commandLineSwitches, commandLine);
                     }
                     else
                     {
@@ -1622,15 +1638,15 @@ namespace Microsoft.Build.CommandLine
 
                         if (CommandLineSwitches.IsParameterlessSwitch(switchName, out var parameterlessSwitch, out var duplicateSwitchErrorMessage))
                         {
-                            GatherParameterlessCommandLineSwitch(commandLineSwitches, parameterlessSwitch, switchParameters, duplicateSwitchErrorMessage, unquotedCommandLineArg);
+                            GatherParameterlessCommandLineSwitch(commandLineSwitches, parameterlessSwitch, switchParameters, duplicateSwitchErrorMessage, unquotedCommandLineArg, commandLine);
                         }
                         else if (CommandLineSwitches.IsParameterizedSwitch(switchName, out var parameterizedSwitch, out duplicateSwitchErrorMessage, out var multipleParametersAllowed, out var missingParametersErrorMessage, out var unquoteParameters, out var allowEmptyParameters))
                         {
-                            GatherParameterizedCommandLineSwitch(commandLineSwitches, parameterizedSwitch, switchParameters, duplicateSwitchErrorMessage, multipleParametersAllowed, missingParametersErrorMessage, unquoteParameters, unquotedCommandLineArg, allowEmptyParameters);
+                            GatherParameterizedCommandLineSwitch(commandLineSwitches, parameterizedSwitch, switchParameters, duplicateSwitchErrorMessage, multipleParametersAllowed, missingParametersErrorMessage, unquoteParameters, unquotedCommandLineArg, allowEmptyParameters, commandLine);
                         }
                         else
                         {
-                            commandLineSwitches.SetUnknownSwitchError(unquotedCommandLineArg);
+                            commandLineSwitches.SetUnknownSwitchError(unquotedCommandLineArg, commandLine);
                         }
                     }
                 }
@@ -1718,7 +1734,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="unquotedCommandLineArg"></param>
         /// <param name="commandLineSwitches"></param>
-        private static void GatherResponseFileSwitch(string unquotedCommandLineArg, CommandLineSwitches commandLineSwitches)
+        private static void GatherResponseFileSwitch(string unquotedCommandLineArg, CommandLineSwitches commandLineSwitches, string commandLine)
         {
             try
             {
@@ -1726,11 +1742,11 @@ namespace Microsoft.Build.CommandLine
 
                 if (responseFile.Length == 0)
                 {
-                    commandLineSwitches.SetSwitchError("MissingResponseFileError", unquotedCommandLineArg);
+                    commandLineSwitches.SetSwitchError("MissingResponseFileError", unquotedCommandLineArg, commandLine);
                 }
                 else if (!FileSystems.Default.FileExists(responseFile))
                 {
-                    commandLineSwitches.SetParameterError("ResponseFileNotFoundError", unquotedCommandLineArg);
+                    commandLineSwitches.SetParameterError("ResponseFileNotFoundError", unquotedCommandLineArg, commandLine);
                 }
                 else
                 {
@@ -1744,7 +1760,7 @@ namespace Microsoft.Build.CommandLine
                     {
                         if (string.Equals(responseFile, includedResponseFile, StringComparison.OrdinalIgnoreCase))
                         {
-                            commandLineSwitches.SetParameterError("RepeatedResponseFileError", unquotedCommandLineArg);
+                            commandLineSwitches.SetParameterError("RepeatedResponseFileError", unquotedCommandLineArg, commandLine);
                             isRepeatedResponseFile = true;
                             break;
                         }
@@ -1783,25 +1799,27 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
 
-                        GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches);
+                        CommandLineSwitches.SwitchesFromResponseFiles.Add((responseFile, string.Join(" ", argsFromResponseFile)));
+
+                        GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, commandLine);
                     }
                 }
             }
             catch (NotSupportedException e)
             {
-                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e);
+                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e, commandLine);
             }
             catch (SecurityException e)
             {
-                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e);
+                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e, commandLine);
             }
             catch (UnauthorizedAccessException e)
             {
-                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e);
+                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e, commandLine);
             }
             catch (IOException e)
             {
-                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e);
+                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e, commandLine);
             }
         }
 
@@ -1819,7 +1837,8 @@ namespace Microsoft.Build.CommandLine
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch,
             string switchParameters,
             string duplicateSwitchErrorMessage,
-            string unquotedCommandLineArg
+            string unquotedCommandLineArg,
+            string commandLine
         )
         {
             // switch should not have any parameters
@@ -1833,12 +1852,12 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    commandLineSwitches.SetSwitchError(duplicateSwitchErrorMessage, unquotedCommandLineArg);
+                    commandLineSwitches.SetSwitchError(duplicateSwitchErrorMessage, unquotedCommandLineArg, commandLine);
                 }
             }
             else
             {
-                commandLineSwitches.SetUnexpectedParametersError(unquotedCommandLineArg);
+                commandLineSwitches.SetUnexpectedParametersError(unquotedCommandLineArg, commandLine);
             }
         }
 
@@ -1864,7 +1883,8 @@ namespace Microsoft.Build.CommandLine
             string missingParametersErrorMessage,
             bool unquoteParameters,
             string unquotedCommandLineArg,
-            bool allowEmptyParameters
+            bool allowEmptyParameters,
+            string commandLine
         )
         {
             if (// switch must have parameters
@@ -1872,35 +1892,52 @@ namespace Microsoft.Build.CommandLine
                 // unless the parameters are optional
                 (missingParametersErrorMessage == null))
             {
+                // skip the parameter indicator (if any)
+                if (switchParameters.Length > 0)
+                {
+                    switchParameters = switchParameters.Substring(1);
+                }
+
+                if (parameterizedSwitch == CommandLineSwitches.ParameterizedSwitch.Project && IsEnvironmentVariable(switchParameters))
+                {
+                    commandLineSwitches.SetSwitchError("EnvironmentVariableAsSwitch", unquotedCommandLineArg, commandLine);
+                }
+
                 // check if switch is duplicated, and if that's allowed
                 if (!commandLineSwitches.IsParameterizedSwitchSet(parameterizedSwitch) ||
                     (duplicateSwitchErrorMessage == null))
                 {
-                    // skip the parameter indicator (if any)
-                    if (switchParameters.Length > 0)
-                    {
-                        switchParameters = switchParameters.Substring(1);
-                    }
-
                     // save the parameters after unquoting and splitting them if necessary
                     if (!commandLineSwitches.SetParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters, allowEmptyParameters))
                     {
                         // if parsing revealed there were no real parameters, flag an error, unless the parameters are optional
                         if (missingParametersErrorMessage != null)
                         {
-                            commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg);
+                            commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg, commandLine);
                         }
                     }
                 }
                 else
                 {
-                    commandLineSwitches.SetSwitchError(duplicateSwitchErrorMessage, unquotedCommandLineArg);
+                    commandLineSwitches.SetSwitchError(duplicateSwitchErrorMessage, unquotedCommandLineArg, commandLine);
                 }
             }
             else
             {
-                commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg);
+                commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg, commandLine);
             }
+        }
+
+        /// <summary>
+        /// Checks whether envVar is an environment variable. MSBuild uses
+        /// Environment.ExpandEnvironmentVariables(string), which only
+        /// considers %-delimited variables.
+        /// </summary>
+        /// <param name="envVar">A possible environment variable</param>
+        /// <returns>Whether envVar is an environment variable</returns>
+        private static bool IsEnvironmentVariable(string envVar)
+        {
+            return envVar.StartsWith("%") && envVar.EndsWith("%") && envVar.Length > 1;
         }
 
         /// <summary>
@@ -1928,13 +1965,13 @@ namespace Microsoft.Build.CommandLine
         /// switches from the auto-response file with the switches passed in.
         /// Returns true if the response file was found.
         /// </summary>
-        private static bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile)
+        private static bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
         {
             string autoResponseFile = Path.Combine(path, autoResponseFileName);
-            return GatherAutoResponseFileSwitchesFromFullPath(autoResponseFile, switchesFromAutoResponseFile);
+            return GatherAutoResponseFileSwitchesFromFullPath(autoResponseFile, switchesFromAutoResponseFile, commandLine);
         }
 
-        private static bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile)
+        private static bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
         {
             bool found = false;
 
@@ -1942,13 +1979,13 @@ namespace Microsoft.Build.CommandLine
             if (FileSystems.Default.FileExists(autoResponseFile))
             {
                 found = true;
-                GatherResponseFileSwitch($"@{autoResponseFile}", switchesFromAutoResponseFile);
+                GatherResponseFileSwitch($"@{autoResponseFile}", switchesFromAutoResponseFile, commandLine);
 
                 // if the "/noautoresponse" switch was set in the auto-response file, flag an error
                 if (switchesFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
                 {
                     switchesFromAutoResponseFile.SetSwitchError("CannotAutoDisableAutoResponseFile",
-                        switchesFromAutoResponseFile.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.NoAutoResponse));
+                        switchesFromAutoResponseFile.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.NoAutoResponse), commandLine);
                 }
 
                 if (switchesFromAutoResponseFile.HaveAnySwitchesBeenSet())
@@ -2002,7 +2039,8 @@ namespace Microsoft.Build.CommandLine
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
             ref bool lowPriority,
-            bool recursing
+            bool recursing,
+            string commandLine
         )
         {
             bool invokeBuild = false;
@@ -2013,8 +2051,8 @@ namespace Microsoft.Build.CommandLine
             // (1) switches from the msbuild.rsp file/s, including recursively included response files
             // (2) switches from the command line, including recursively included response file switches inserted at the point they are declared with their "@" symbol
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
-            commandLineSwitches.Append(switchesFromAutoResponseFile);    // lowest precedence
-            commandLineSwitches.Append(switchesNotFromAutoResponseFile);
+            commandLineSwitches.Append(switchesFromAutoResponseFile, commandLine);    // lowest precedence
+            commandLineSwitches.Append(switchesNotFromAutoResponseFile, commandLine);
 
 #if DEBUG
             if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.WaitForDebugger])
@@ -2072,13 +2110,13 @@ namespace Microsoft.Build.CommandLine
                         // gather any switches from the first Directory.Build.rsp found in the project directory or above
                         string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
 
-                        bool found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
+                        bool found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, commandLine);
 
                         // Don't look for more response files if it's only in the same place we already looked (next to the exe)
                         if (!string.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
                         {
                             // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                            found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
+                            found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile, commandLine);
                         }
 
                         if (found)
@@ -2120,7 +2158,8 @@ namespace Microsoft.Build.CommandLine
                                                                ref inputResultsCaches,
                                                                ref outputResultsCache,
                                                                ref lowPriority,
-                                                               recursing: true
+                                                               recursing: true,
+                                                               commandLine
                                                              );
                         }
                     }
@@ -2250,7 +2289,8 @@ namespace Microsoft.Build.CommandLine
                         !WarningsAsErrorsSwitchIsEmpty(commandLineSwitches)!)
                     {
                         commandLineSwitches.SetSwitchError("NotWarnAsErrorWithoutWarnAsError",
-                        commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors));
+                        commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors),
+                        commandLine);
                         commandLineSwitches.ThrowErrors();
                     }
                 }

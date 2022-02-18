@@ -55,6 +55,15 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
     that itself launches MSBuild on a number of other projects.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="EnvironmentVariableAsSwitch">
+        <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</source>
+        <target state="new">MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This error is shown when a user passes in an environment variable (including from a response file)
+      but the environment variable is not defined.
+    </note>
+      </trans-unit>
       <trans-unit id="FatalError">
         <source>MSBUILD : error MSB1025: An internal failure occurred while running MSBuild.</source>
         <target state="translated">MSBUILD : error MSB1025: 執行 MSBuild 時發生內部錯誤。</target>
@@ -1316,6 +1325,13 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
     message does not need in-line parameters because the exception takes care of displaying the invalid arg.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="ResponseFileSwitchFromLocation">
+        <source>'{0}' came from '{1}'</source>
+        <target state="new">'{0}' came from '{1}'</target>
+        <note>
+      These are response file switches with the location of the response file on disk.
+    </note>
+      </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>
         <target state="translated">正在使用結構描述檔 "{0}" 驗證專案。</target>
@@ -1342,6 +1358,15 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is printed if the default schema does not exist or in the extremely unlikely event
     that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="SwitchErrorWithArguments">
+        <source>{0}
+    Full command line: '{1}'
+  Switches appended by response files:{2}</source>
+        <target state="new">{0}
+    Full command line: '{1}'
+  Switches appended by response files:{2}</target>
+        <note />
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
