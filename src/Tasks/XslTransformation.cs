@@ -12,6 +12,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -98,13 +100,8 @@ namespace Microsoft.Build.Tasks
                 xmlinput = new XmlInput(XmlInputPaths, XmlContent);
                 xsltinput = new XsltInput(XslInputPath, XslContent, XslCompiledDllPath, Log);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.ArgumentError", e.Message);
                 return false;
             }
@@ -130,13 +127,8 @@ namespace Microsoft.Build.Tasks
             {
                 arguments = ProcessXsltArguments(Parameters);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.XsltArgumentsError", e.Message);
                 return false;
             }
@@ -153,13 +145,8 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("XslTransform.PrecompiledXsltError");
                 return false;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.XsltLoadError", e.Message);
                 return false;
             }
@@ -180,13 +167,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.TransformError", e.Message);
                 return false;
             }
@@ -334,9 +316,9 @@ namespace Microsoft.Build.Tasks
             {
                 if (XmlMode == XmlModes.XmlFile)
                 {
-                    return XmlReader.Create(_data[itemPos]);
+                    return XmlReader.Create(new StreamReader(_data[itemPos]), new XmlReaderSettings { CloseInput = true }, _data[itemPos]);
                 }
-                else // xmlModes.Xml 
+                else // xmlModes.Xml
                 {
                     return XmlReader.Create(new StringReader(_data[itemPos]));
                 }
@@ -459,7 +441,10 @@ namespace Microsoft.Build.Tasks
                             _log.LogMessageFromResources(MessageImportance.Low, "XslTransform.UseTrustedSettings", _data);
                         }
 
-                        xslct.Load(new XPathDocument(XmlReader.Create(_data)), settings, new XmlUrlResolver());
+                        using (XmlReader reader = XmlReader.Create(new StreamReader(_data), new XmlReaderSettings { CloseInput = true }, _data))
+                        {
+                            xslct.Load(new XPathDocument(reader), settings, new XmlUrlResolver());
+                        }
                         break;
                     case XslModes.XsltCompiledDll:
 #if FEATURE_COMPILED_XSL

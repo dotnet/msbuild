@@ -1,11 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if FEATURE_APPDOMAIN
 using System;
+#endif
 using System.Diagnostics;
 
 using Microsoft.Build.Execution;
 using Microsoft.Build.Logging;
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

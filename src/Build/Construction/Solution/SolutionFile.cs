@@ -7,6 +7,7 @@ using System.Xml;
 using System.IO;
 using System.Text;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -20,6 +21,8 @@ using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
 using System.Collections.ObjectModel;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -114,6 +117,12 @@ namespace Microsoft.Build.Construction
         private Version _currentVisualStudioVersion;
         private int _currentLineNumber;
 
+        // TODO: Unify to NativeMethodsShared.OSUsesCaseSensitive paths
+        // when possible.
+        private static StringComparer _pathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+            ? StringComparer.Ordinal
+            : StringComparer.OrdinalIgnoreCase;
+
         #endregion
 
         #region Constructors
@@ -202,7 +211,12 @@ namespace Microsoft.Build.Construction
             {
                 // Should already be canonicalized to a full path
                 ErrorUtilities.VerifyThrowInternalRooted(value);
-                if (FileUtilities.IsSolutionFilterFilename(value))
+                // To reduce code duplication, this should be
+                //   if (FileUtilities.IsSolutionFilterFilename(value))
+                // But that's in Microsoft.Build.Framework and this codepath
+                // is called from old versions of NuGet that can't resolve
+                // Framework (see https://github.com/dotnet/msbuild/issues/5313).
+                if (value.EndsWith(".slnf", StringComparison.OrdinalIgnoreCase))
                 {
                     ParseSolutionFilter(value);
                 }
@@ -386,7 +400,7 @@ namespace Microsoft.Build.Construction
 
                 SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
 
-                _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                _solutionFilter = new HashSet<string>(_pathComparer);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
                     _solutionFilter.Add(FileUtilities.FixFilePath(project.GetString()));
@@ -485,10 +499,9 @@ namespace Microsoft.Build.Construction
                 SolutionReader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
                 ParseSolution();
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionUtilities.IsIoRelatedException(e))
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(!ExceptionUtilities.IsIoRelatedException(e), new BuildEventFileInfo(_solutionFile), "InvalidProjectFile", e.Message);
-                throw;
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(_solutionFile), "InvalidProjectFile", e.Message);
             }
             finally
             {
@@ -549,7 +562,7 @@ namespace Microsoft.Build.Construction
 
             if (_solutionFilter != null)
             {
-                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, _pathComparer);
                 foreach (ProjectInSolution project in _projectsInOrder)
                 {
                     projectPaths.Add(FileUtilities.FixFilePath(project.RelativePath));
@@ -1216,9 +1229,9 @@ namespace Microsoft.Build.Construction
                 }
                 else if (String.Equals(propertyName, "TargetFrameworkMoniker", StringComparison.OrdinalIgnoreCase))
                 {
-                    //Website project need to back support 3.5 msbuild parser for the Blend (it is not move to .Net4.0 yet.)
-                    //However, 3.5 version of Solution parser can't handle a equal sign in the value.  
-                    //The "=" in targetframeworkMoniker was escaped to "%3D" for Orcas
+                    // Website project need to back support 3.5 msbuild parser for the Blend (it is not move to .Net4.0 yet.)
+                    // However, 3.5 version of Solution parser can't handle a equal sign in the value.  
+                    // The "=" in targetframeworkMoniker was escaped to "%3D" for Orcas
                     string targetFrameworkMoniker = TrimQuotes(propertyValue);
                     proj.TargetFrameworkMoniker = Shared.EscapingUtilities.UnescapeAll(targetFrameworkMoniker);
                 }
@@ -1408,7 +1421,7 @@ namespace Microsoft.Build.Construction
 
                 string fullConfigurationName = configurationNames[0].Trim();
 
-                //Fixing bug 555577: Solution file can have description information, in which case we ignore.
+                // Fixing bug 555577: Solution file can have description information, in which case we ignore.
                 if (String.Equals(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;

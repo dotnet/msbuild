@@ -520,43 +520,57 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Raises the given event to all registered loggers. This method up-cast the events
-        /// extracted from the queue.
+        /// Raises the given event to all registered loggers.
+        /// This method casts the events extracted from the queue to a more specific type.
         /// </summary>
         /// <param name="e"></param>
         internal void RaiseStronglyTypedEvent(BuildEventArgs e)
         {
-            // FXCop may complain that there are unecessary casts here, and there are, but
-            // using "as" and allocating another variable for each event is extremely costly
-            // and is much slower then this approach even with the additional casts
-            if (e is BuildMessageEventArgs)
-                this.RaiseMessageEvent(null, (BuildMessageEventArgs)e);
-            else if (e is TaskStartedEventArgs)
-                this.RaiseTaskStartedEvent(null, (TaskStartedEventArgs)e);
-            else if (e is TaskFinishedEventArgs)
-                this.RaiseTaskFinishedEvent(null, (TaskFinishedEventArgs)e);
-            else if (e is TargetStartedEventArgs)
-                this.RaiseTargetStartedEvent(null, (TargetStartedEventArgs)e);
-            else if (e is TargetFinishedEventArgs)
-                this.RaiseTargetFinishedEvent(null, (TargetFinishedEventArgs)e);
-            else if (e is ProjectStartedEventArgs)
-                this.RaiseProjectStartedEvent(null, (ProjectStartedEventArgs)e);
-            else if (e is ProjectFinishedEventArgs)
-                this.RaiseProjectFinishedEvent(null, (ProjectFinishedEventArgs)e);
-            else if (e is BuildStartedEventArgs)
-                this.RaiseBuildStartedEvent(null, (BuildStartedEventArgs)e);
-            else if (e is BuildFinishedEventArgs)
-                this.RaiseBuildFinishedEvent(null, (BuildFinishedEventArgs)e);
-            else if (e is CustomBuildEventArgs)
-                this.RaiseCustomEvent(null, (CustomBuildEventArgs)e);
-            else if (e is BuildStatusEventArgs)
-                this.RaiseStatusEvent(null, (BuildStatusEventArgs)e);
-            else if (e is BuildWarningEventArgs)
-                this.RaiseWarningEvent(null, (BuildWarningEventArgs)e);
-            else if (e is BuildErrorEventArgs)
-                this.RaiseErrorEvent(null, (BuildErrorEventArgs)e);
-            else
-                ErrorUtilities.VerifyThrow(false, "Unknown event args type.");
+            switch (e)
+            {
+                case BuildMessageEventArgs buildMessageEvent:
+                    RaiseMessageEvent(null, buildMessageEvent);
+                    break;
+                case TaskStartedEventArgs taskStartedEvent:
+                    RaiseTaskStartedEvent(null, taskStartedEvent);
+                    break;
+                case TaskFinishedEventArgs taskFinishedEvent:
+                    RaiseTaskFinishedEvent(null, taskFinishedEvent);
+                    break;
+                case TargetStartedEventArgs targetStartedEvent:
+                    RaiseTargetStartedEvent(null, targetStartedEvent);
+                    break;
+                case TargetFinishedEventArgs targetFinishedEvent:
+                    RaiseTargetFinishedEvent(null, targetFinishedEvent);
+                    break;
+                case ProjectStartedEventArgs projectStartedEvent:
+                    RaiseProjectStartedEvent(null, projectStartedEvent);
+                    break;
+                case ProjectFinishedEventArgs projectFinishedEvent:
+                    RaiseProjectFinishedEvent(null, projectFinishedEvent);
+                    break;
+                case BuildStartedEventArgs buildStartedEvent:
+                    RaiseBuildStartedEvent(null, buildStartedEvent);
+                    break;
+                case BuildFinishedEventArgs buildFinishedEvent:
+                    RaiseBuildFinishedEvent(null, buildFinishedEvent);
+                    break;
+                case CustomBuildEventArgs customBuildEvent:
+                    RaiseCustomEvent(null, customBuildEvent);
+                    break;
+                case BuildStatusEventArgs buildStatusEvent:
+                    RaiseStatusEvent(null, buildStatusEvent);
+                    break;
+                case BuildWarningEventArgs buildWarningEvent:
+                    RaiseWarningEvent(null, buildWarningEvent);
+                    break;
+                case BuildErrorEventArgs buildErrorEvent:
+                    RaiseErrorEvent(null, buildErrorEvent);
+                    break;
+                default:
+                    ErrorUtilities.VerifyThrow(false, "Unknown event args type.");
+                    break;
+            }
         }
 
         /// <summary>

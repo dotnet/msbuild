@@ -12,6 +12,8 @@ using System.Reflection;
 using Microsoft.Build.Framework;
 using System.Collections.Concurrent;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -28,6 +30,16 @@ namespace Microsoft.Build.Tasks
         /// Default delegate to get the gac enumerator.
         /// </summary>
         internal static readonly GetGacEnumerator gacEnumerator = GetGacNativeEnumerator;
+
+        /// <summary>
+        /// Lazy loaded cached root path of the GAC.
+        /// </summary>
+        private static readonly Lazy<string> _gacPath = new(() => GetGacPath());
+
+        /// <summary>
+        /// Gets the root path of the GAC.
+        /// </summary>
+        internal static string GacPath => _gacPath.Value;
 
         /// <summary>
         /// Given a strong name, find its path in the GAC.
@@ -365,16 +377,18 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Return the root path of the GAC
+        /// Return the root path of the GAC.
         /// </summary>
         internal static string GetGacPath()
         {
             int gacPathLength = 0;
-            NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, null, ref gacPathLength);
-            StringBuilder gacPath = new StringBuilder(gacPathLength);
-            NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, gacPath, ref gacPathLength);
-
-            return gacPath.ToString();
+            unsafe
+            {
+                NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, null, ref gacPathLength);
+                char* gacPath = stackalloc char[gacPathLength];
+                NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, gacPath, ref gacPathLength);
+                return new string(gacPath, 0, gacPathLength - 1);
+            }
         }
     }
 }

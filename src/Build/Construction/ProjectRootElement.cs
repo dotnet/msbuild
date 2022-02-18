@@ -23,6 +23,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -43,7 +45,7 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("{FullPath} #Children={Count} DefaultTargets={DefaultTargets} ToolsVersion={ToolsVersion} InitialTargets={InitialTargets} ExplicitlyLoaded={IsExplicitlyLoaded}")]
     public class ProjectRootElement : ProjectElementContainer
     {
-        /// Constants for default (empty) project file.
+        // Constants for default (empty) project file.
         private const string EmptyProjectFileContent = "{0}<Project{1}{2}>\r\n</Project>";
         private const string EmptyProjectFileXmlDeclaration = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
         private const string EmptyProjectFileToolsVersion = " ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\"";
@@ -250,7 +252,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Initialize a ProjectRootElement instance from an existing document.
-        /// Helper constructor for the <see cref="ReloadFrom(string,bool,System.Nullable{bool})"/>> mehtod which needs to check if the document parses
+        /// Helper constructor for the <see cref="ReloadFrom(string,bool,bool?)"/>> mehtod which needs to check if the document parses
         /// </summary>
         /// <remarks>
         /// Do not make public: we do not wish to expose particular XML API's.
@@ -1810,7 +1812,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <remarks>
         /// This is sealed because it is virtual and called in a constructor; by sealing it we
-        /// satisfy FXCop that nobody will override it to do something that would rely on
+        /// satisfy the rule that nobody will override it to do something that would rely on
         /// unconstructed state.
         /// Should be protected+internal.
         /// </remarks>
@@ -2082,13 +2084,8 @@ namespace Microsoft.Build.Construction
                     StreamTimeUtc = null;
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.NotExpectedIoOrXmlException(ex))
             {
-                if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
-                {
-                    throw;
-                }
-
                 BuildEventFileInfo fileInfo = ex is XmlException xmlException
                     ? new BuildEventFileInfo(fullPath, xmlException)
                     : new BuildEventFileInfo(fullPath);

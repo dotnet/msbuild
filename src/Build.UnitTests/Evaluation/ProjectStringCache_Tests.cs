@@ -9,6 +9,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {
     /// <summary>
@@ -42,26 +44,11 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 ProjectStringCache cache = new ProjectStringCache();
                 XmlDocumentWithLocation document1 = new XmlDocumentWithLocation();
                 document1.StringCache = cache;
-#if FEATURE_XML_LOADPATH
                 document1.Load(path);
-#else
-                var xmlReadSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    document1.Load(xmlReader);
-                }
-#endif
 
                 XmlDocumentWithLocation document2 = new XmlDocumentWithLocation();
                 document2.StringCache = cache;
-#if FEATURE_XML_LOADPATH
                 document2.Load(path);
-#else
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    document2.Load(xmlReader);
-                }
-#endif
 
                 XmlNodeList nodes1 = document1.GetElementsByTagName("ItemGroup");
                 XmlNodeList nodes2 = document2.GetElementsByTagName("ItemGroup");
@@ -107,26 +94,11 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 ProjectStringCache cache = new ProjectStringCache();
                 XmlDocumentWithLocation document1 = new XmlDocumentWithLocation();
                 document1.StringCache = cache;
-#if FEATURE_XML_LOADPATH
                 document1.Load(path);
-#else
-                var xmlReadSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    document1.Load(xmlReader);
-                }
-#endif
 
                 XmlDocumentWithLocation document2 = new XmlDocumentWithLocation();
                 document2.StringCache = cache;
-#if FEATURE_XML_LOADPATH
                 document2.Load(path);
-#else
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    document2.Load(xmlReader);
-                }
-#endif
 
                 string outerXml1 = document1.OuterXml;
                 string outerXml2 = document2.OuterXml;
@@ -196,15 +168,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 ProjectRootElement pre1 = ProjectRootElement.Create(collection);
                 pre1.XmlDocument.StringCache = cache;
                 pre1.FullPath = path;
-#if FEATURE_XML_LOADPATH
                 pre1.XmlDocument.Load(path);
-#else
-                var xmlReadSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    pre1.XmlDocument.Load(xmlReader);
-                }
-#endif
 
                 entryCount = cache.Count;
                 Assert.True(entryCount > 0);
@@ -212,14 +176,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 ProjectRootElement pre2 = ProjectRootElement.Create(collection);
                 pre2.XmlDocument.StringCache = cache;
                 pre2.FullPath = path;
-#if FEATURE_XML_LOADPATH
                 pre2.XmlDocument.Load(path);
-#else
-                using (XmlReader xmlReader = XmlReader.Create(path, xmlReadSettings))
-                {
-                    pre2.XmlDocument.Load(xmlReader);
-                }
-#endif
 
                 // Entry count should not have changed
                 Assert.Equal(entryCount, cache.Count);
@@ -284,7 +241,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("1");
+            builder.Append('1');
 
             string return2 = cache.Add(builder.ToString(), document);
 
@@ -318,7 +275,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("1");
+            builder.Append('1');
             XmlDocument document2 = new XmlDocument();
 
             string return2 = cache.Add(builder.ToString(), document2);
@@ -360,7 +317,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("1");
+            builder.Append('1');
             XmlDocument document2 = new XmlDocument();
 
             string return2 = cache.Add(builder.ToString(), document2);
@@ -397,7 +354,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("1");
+            builder.Append('1');
             XmlDocument document3 = new XmlDocument();
 
             string return3 = cache.Add(builder.ToString(), document3);
@@ -432,7 +389,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("2");
+            builder.Append('2');
             string return3 = cache.Add(builder.ToString(), document);
 
             // The new string should be the same as the other one already in the collection.
@@ -466,7 +423,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // Build a new string guaranteed not to be optimized by the compiler into the same instance.
             StringBuilder builder = new StringBuilder();
             builder.Append("Test");
-            builder.Append("2");
+            builder.Append('2');
             XmlDocument document3 = new XmlDocument();
             string return3 = cache.Add(builder.ToString(), document3);
 

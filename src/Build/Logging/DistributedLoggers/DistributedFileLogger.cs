@@ -7,6 +7,8 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -183,7 +185,7 @@ namespace Microsoft.Build.Logging
         {
             get
             {
-                ErrorUtilities.VerifyThrow(false, "Should not be getting verbosity from distributed file logger");
+                ErrorUtilities.ThrowInternalError("Should not be getting verbosity from distributed file logger");
                 return LoggerVerbosity.Detailed;
             }
             set

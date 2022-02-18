@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -13,18 +13,23 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
+#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
+#endif
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
 
 using Microsoft.NET.StringTools;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -111,9 +116,9 @@ namespace Microsoft.Build.Evaluation
     /// Encapsulates the data necessary for expansion.
     /// </summary>
     /// <remarks>
-    /// Requires the caller to explicitly state what they wish to expand at the point of expansion (explicitly does not have a field for ExpanderOptions). 
+    /// Requires the caller to explicitly state what they wish to expand at the point of expansion (explicitly does not have a field for ExpanderOptions).
     /// Callers typically use a single expander in many locations, and this forces the caller to make explicit what they wish to expand at the point of expansion.
-    /// 
+    ///
     /// Requires the caller to have previously provided the necessary material for the expansion requested.
     /// For example, if the caller requests ExpanderOptions.ExpandItems, the Expander will throw if it was not given items.
     /// </remarks>
@@ -302,6 +307,11 @@ namespace Microsoft.Build.Evaluation
         private readonly IFileSystem _fileSystem;
 
         /// <summary>
+        /// Non-null if the expander was constructed for evaluation.
+        /// </summary>
+        internal EvaluationContext EvaluationContext { get; }
+
+        /// <summary>
         /// Creates an expander passing it some properties to use.
         /// Properties may be null.
         /// </summary>
@@ -313,11 +323,33 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Creates an expander passing it some properties to use and the evaluation context.
+        /// Properties may be null.
+        /// </summary>
+        internal Expander(IPropertyProvider<P> properties, EvaluationContext evaluationContext)
+        {
+            _properties = properties;
+            _usedUninitializedProperties = new UsedUninitializedProperties();
+            _fileSystem = evaluationContext.FileSystem;
+            EvaluationContext = evaluationContext;
+        }
+
+        /// <summary>
         /// Creates an expander passing it some properties and items to use.
         /// Either or both may be null.
         /// </summary>
         internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IFileSystem fileSystem)
             : this(properties, fileSystem)
+        {
+            _items = items;
+        }
+
+        /// <summary>
+        /// Creates an expander passing it some properties and items to use, and the evaluation context.
+        /// Either or both may be null.
+        /// </summary>
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, EvaluationContext evaluationContext)
+            : this(properties, evaluationContext)
         {
             _items = items;
         }
@@ -385,8 +417,8 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options.
         /// This is the standard form. Before using the expanded value, it must be unescaped, and this does that for you.
-        /// 
-        /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.        
+        ///
+        /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
         internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
@@ -399,7 +431,7 @@ namespace Microsoft.Build.Evaluation
         /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options.
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
-        /// 
+        ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
         internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
@@ -465,7 +497,7 @@ namespace Microsoft.Build.Evaluation
         /// and produces a list of items of the type for which it was specialized.
         /// If the expression is empty, returns an empty list.
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
-        /// 
+        ///
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
         /// </summary>
@@ -521,25 +553,25 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// This is a specialized method for the use of TargetUpToDateChecker and Evaluator.EvaluateItemXml only.
-        /// 
+        ///
         /// Extracts the items in the given SINGLE item vector.
         /// For example, expands @(Compile->'%(foo)') to a set of items derived from the items in the "Compile" list.
         ///
         /// If there is in fact more than one vector in the expression, throws InvalidProjectFileException.
-        /// 
+        ///
         /// If there are no item expressions in the expression (for example a literal "foo.cpp"), returns null.
         /// If expression expands to no items, returns an empty list.
         /// If item expansion is not allowed by the provided options, returns null.
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
-        /// 
+        ///
         /// If the expression is a transform, any transformations to an expression that evaluates to nothing (i.e., because
-        /// an item has no value for a piece of metadata) are optionally indicated with a null entry in the list. This means 
+        /// an item has no value for a piece of metadata) are optionally indicated with a null entry in the list. This means
         /// that the length of the returned list is always the same as the length of the referenced item list in the input string.
         /// That's important for any correlation the caller wants to do.
-        /// 
+        ///
         /// If expression was a transform, 'isTransformExpression' is true, otherwise false.
         ///
-        /// Item type of the items returned is determined by the IItemFactory passed in; if the IItemFactory does not 
+        /// Item type of the items returned is determined by the IItemFactory passed in; if the IItemFactory does not
         /// have an item type set on it, it will be given the item type of the item vector to use.
         /// </summary>
         /// <typeparam name="T">Type of the items that should be returned.</typeparam>
@@ -1112,7 +1144,7 @@ namespace Microsoft.Build.Evaluation
                 // where we've essentially read up to and copied into the target string.
                 int sourceIndex = 0;
 
-                // Search for "$(" in the expression.  Loop until we don't find it 
+                // Search for "$(" in the expression.  Loop until we don't find it
                 // any more.
                 while (propertyStartIndex != -1)
                 {
@@ -1142,9 +1174,9 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Aha, we found the closing parenthesis.  All the stuff in
                         // between the "$(" and the ")" constitutes the property body.
-                        // Note: Current propertyStartIndex points to the "$", and 
+                        // Note: Current propertyStartIndex points to the "$", and
                         // propertyEndIndex points to the ")".  That's why we have to
-                        // add 2 for the start of the substring, and subtract 2 for 
+                        // add 2 for the start of the substring, and subtract 2 for
                         // the length.
                         string propertyBody;
 
@@ -1174,7 +1206,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         // Compat hack: WebProjects may have an import with a condition like:
-                        //       Condition=" '$(Solutions.VSVersion)' == '8.0'" 
+                        //       Condition=" '$(Solutions.VSVersion)' == '8.0'"
                         // These would have been '' in prior versions of msbuild but would be treated as a possible string function in current versions.
                         // Be compatible by returning an empty string here.
                         else if ((propertyEndIndex - (propertyStartIndex + 2)) == 19 && String.Equals(expression, "$(Solutions.VSVersion)", StringComparison.Ordinal))
@@ -1323,7 +1355,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                // Find the property value in our property collection.  This 
+                // Find the property value in our property collection.  This
                 // will automatically return "" (empty string) if the property
                 // doesn't exist in the collection, and we're not executing a static function
                 if (!String.IsNullOrEmpty(propertyName))
@@ -1457,11 +1489,11 @@ namespace Microsoft.Build.Evaluation
                 else if (property == null)
                 {
                     // We have evaluated a property to null. We now need to see if we need to add it to the list of properties which are used before they have been initialized
-                    // 
-                    // We also do not want to add the property to the list if the environment variable is not set, also we do not want to add the property to the list if we are currently 
+                    //
+                    // We also do not want to add the property to the list if the environment variable is not set, also we do not want to add the property to the list if we are currently
                     // evaluating a condition because a common pattern for msbuild projects is to see if the property evaluates to empty and then set a value as this would cause a considerable number of false positives.   <A Condition="'$(A)' == ''">default</A>
-                    // 
-                    // Another pattern used is where a property concatonates with other values,  <a>$(a);something</a> however we do not want to add the a element to the list because again this would make a number of 
+                    //
+                    // Another pattern used is where a property concatonates with other values,  <a>$(a);something</a> however we do not want to add the a element to the list because again this would make a number of
                     // false positives. Therefore we check to see what element we are currently evaluating and if it is the same as our property we do not add the property to the list.
                     if (usedUninitializedProperties.Warn && usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName != null)
                     {
@@ -1615,13 +1647,8 @@ namespace Microsoft.Build.Evaluation
                             result = String.Empty;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
                     {
-                        if (ExceptionHandling.NotExpectedRegistryException(ex))
-                        {
-                            throw;
-                        }
-
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", ex.Message);
                     }
                 }
@@ -1643,13 +1670,13 @@ namespace Microsoft.Build.Evaluation
         /// Expands item expressions, like @(Compile), possibly with transforms and/or separators.
         ///
         /// Item vectors are composed of a name, an optional transform, and an optional separator i.e.
-        /// 
+        ///
         ///     @(&lt;name&gt;->'&lt;transform&gt;','&lt;separator&gt;')
-        ///     
+        ///
         /// If a separator is not specified it defaults to a semi-colon. The transform expression is also optional, but if
         /// specified, it allows each item in the vector to have its item-spec converted to a different form. The transform
         /// expression can reference any custom metadata defined on the item, as well as the pre-defined item-spec modifiers.
-        /// 
+        ///
         /// NOTE:
         /// 1) white space between &lt;name&gt;, &lt;transform&gt; and &lt;separator&gt; is ignored
         ///    i.e. @(&lt;name&gt;, '&lt;separator&gt;') is valid
@@ -1659,19 +1686,19 @@ namespace Microsoft.Build.Evaluation
         ///    to empty strings
         ///
         /// if @(files) is a vector for the files a.txt and b.txt, then:
-        /// 
+        ///
         ///     "my list: @(files)"                                 expands to string     "my list: a.txt;b.txt"
-        /// 
+        ///
         ///     "my list: @(files,' ')"                             expands to string      "my list: a.txt b.txt"
-        /// 
+        ///
         ///     "my list: @(files, '')"                             expands to string      "my list: a.txtb.txt"
-        /// 
+        ///
         ///     "my list: @(files, '; ')"                           expands to string      "my list: a.txt; b.txt"
-        /// 
+        ///
         ///     "my list: @(files->'%(Filename)')"                  expands to string      "my list: a;b"
-        /// 
+        ///
         ///     "my list: @(files -> 'temp\%(Filename).xml', ' ')   expands to string      "my list: temp\a.xml temp\b.xml"
-        /// 
+        ///
         ///     "my list: @(files->'')                              expands to string      "my list: ;".
         /// </summary>
         /// <remarks>
@@ -1711,23 +1738,23 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Expands any item vector in the expression into items.
-            /// 
+            ///
             /// For example, expands @(Compile->'%(foo)') to a set of items derived from the items in the "Compile" list.
-            /// 
+            ///
             /// If there is no item vector in the expression (for example a literal "foo.cpp"), returns null.
             /// If the item vector expression expands to no items, returns an empty list.
             /// If item expansion is not allowed by the provided options, returns null.
             /// If there is an item vector but concatenated with something else, throws InvalidProjectFileException.
             /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
-            /// 
+            ///
             /// If the expression is a transform, any transformations to an expression that evaluates to nothing (i.e., because
-            /// an item has no value for a piece of metadata) are optionally indicated with a null entry in the list. This means 
+            /// an item has no value for a piece of metadata) are optionally indicated with a null entry in the list. This means
             /// that the length of the returned list is always the same as the length of the referenced item list in the input string.
             /// That's important for any correlation the caller wants to do.
-            /// 
+            ///
             /// If expression was a transform, 'isTransformExpression' is true, otherwise false.
             ///
-            /// Item type of the items returned is determined by the IItemFactory passed in; if the IItemFactory does not 
+            /// Item type of the items returned is determined by the IItemFactory passed in; if the IItemFactory does not
             /// have an item type set on it, it will be given the item type of the item vector to use.
             /// </summary>
             /// <typeparam name="S">Type of the items provided by the item source used for expansion.</typeparam>
@@ -1795,7 +1822,7 @@ namespace Microsoft.Build.Evaluation
                 isTransformExpression = false;
                 bool brokeEarlyNonEmpty;
 
-                // If the incoming factory doesn't have an item type that it can use to 
+                // If the incoming factory doesn't have an item type that it can use to
                 // create items, it's our indication that the caller wants its items to have the type of the
                 // expression being expanded. For example, items from expanding "@(Compile") should
                 // have the item type "Compile".
@@ -1809,7 +1836,7 @@ namespace Microsoft.Build.Evaluation
                 if (expressionCapture.Separator != null)
                 {
                     // Reference contains a separator, for example @(Compile, ';').
-                    // We need to flatten the list into 
+                    // We need to flatten the list into
                     // a scalar and then create a single item. Basically we need this
                     // to be able to convert item lists with user specified separators into properties.
                     string expandedItemVector;
@@ -1874,18 +1901,18 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Expands an expression capture into a list of items
             /// If the capture uses a separator, then all the items are concatenated into one string using that separator.
-            /// 
+            ///
             /// Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.
             /// </summary>
             /// <param name="isTransformExpression"></param>
             /// <param name="itemsFromCapture">
             /// List of items.
-            /// 
+            ///
             /// Item1 represents the item string, escaped
             /// Item2 represents the original item.
-            /// 
+            ///
             /// Item1 differs from Item2's string when it is coming from a transform.
-            /// 
+            ///
             /// </param>
             /// <param name="expander">The expander whose state will be used to expand any transforms.</param>
             /// <param name="expressionCapture">The <see cref="ExpandSingleItemVectorExpressionIntoExpressionCapture"/> representing the structure of an item expression.</param>
@@ -2124,7 +2151,7 @@ namespace Microsoft.Build.Evaluation
                         builder.Append(";");
                     }
                 }
-                
+
                 return false;
             }
 
@@ -2184,7 +2211,7 @@ namespace Microsoft.Build.Evaluation
                             }
                             catch (ArgumentException)
                             {
-                                //  Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
+                                // Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
                                 //  Since MethodInfo.CreateDelegate doesn't have this option, we catch the ArgumentException to preserve the previous behavior
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
                             }
@@ -2216,7 +2243,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             foreach (
                                 var resultantItem in
-                                EngineFileUtilities.Default.GetFileListEscaped(
+                                EngineFileUtilities.GetFileListEscaped(
                                     item.ProjectDirectory,
                                     item.EvaluatedIncludeEscaped,
                                     forceEvaluate: true))
@@ -2268,15 +2295,10 @@ namespace Microsoft.Build.Evaluation
 
                             result = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, item.Key, definingProjectEscaped, functionName);
                         }
-                        catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                        // InvalidOperationException is how GetItemSpecModifier communicates invalid conditions upwards, so
+                        // we do not want to rethrow in that case.
+                        catch (Exception e) when (!ExceptionHandling.NotExpectedException(e) || e is InvalidOperationException)
                         {
-                            // InvalidOperationException is how GetItemSpecModifier communicates invalid conditions upwards, so 
-                            // we do not want to rethrow in that case.  
-                            if (ExceptionHandling.NotExpectedException(e) && !(e is InvalidOperationException))
-                            {
-                                throw;
-                            }
-
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
                         }
 
@@ -2839,7 +2861,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Represents all the components of a transform function, including the ability to execute it. 
+            /// Represents all the components of a transform function, including the ability to execute it.
             /// </summary>
             /// <typeparam name="S">class, IItem.</typeparam>
             internal class TransformFunction<S>
@@ -2986,7 +3008,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Regular expression used to match item metadata references embedded in strings.
             /// For example, %(Compile.DependsOn) or %(DependsOn).
-            /// </summary> 
+            /// </summary>
             internal static readonly Lazy<Regex> ItemMetadataPattern = new Lazy<Regex>(
                 () => new Regex(ItemMetadataSpecification,
                     RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
@@ -3024,17 +3046,17 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.
             /// For example, %(Compile.DependsOn) or %(DependsOn).
-            /// </summary> 
+            /// </summary>
             private const string ItemMetadataSpecification = @"%\(\s* (?<ITEM_SPECIFICATION>(?<ITEM_TYPE>" + ProjectWriter.itemTypeOrMetadataNameSpecification + @")\s*\.\s*)? (?<NAME>" + ProjectWriter.itemTypeOrMetadataNameSpecification + @") \s*\)";
 
             /// <summary>
-            /// description of an item vector with a transform, left hand side. 
-            /// </summary> 
+            /// description of an item vector with a transform, left hand side.
+            /// </summary>
             private const string ItemVectorWithTransformLHS = @"@\(\s*" + ProjectWriter.itemTypeOrMetadataNameSpecification + @"\s*->\s*'[^']*";
 
             /// <summary>
-            /// description of an item vector with a transform, right hand side. 
-            /// </summary> 
+            /// description of an item vector with a transform, right hand side.
+            /// </summary>
             private const string ItemVectorWithTransformRHS = @"[^']*'(\s*,\s*'[^']*')?\s*\)";
 
             /**************************************************************************************************************************
@@ -3363,9 +3385,9 @@ namespace Microsoft.Build.Evaluation
                         // The object that we're about to call methods on may have escaped characters
                         // in it, we want to operate on the unescaped string in the function, just as we
                         // want to pass arguments that are unescaped (see below)
-                        if (objectInstance is string)
+                        if (objectInstance is string objectInstanceString)
                         {
-                            objectInstance = EscapingUtilities.UnescapeAll((string)objectInstance);
+                            objectInstance = EscapingUtilities.UnescapeAll(objectInstanceString);
                         }
                     }
 
@@ -3402,10 +3424,10 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Handle special cases where the object type needs to affect the choice of method
-                    // The default binder and method invoke, often chooses the incorrect Equals and CompareTo and 
+                    // The default binder and method invoke, often chooses the incorrect Equals and CompareTo and
                     // fails the comparison, because what we have on the right is generally a string.
                     // This special casing is to realize that its a comparison that is taking place and handle the
-                    // argument type coercion accordingly; effectively pre-preparing the argument type so 
+                    // argument type coercion accordingly; effectively pre-preparing the argument type so
                     // that it matches the left hand side ready for the default binder’s method invoke.
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
@@ -3475,23 +3497,13 @@ namespace Microsoft.Build.Evaluation
                                 // First use InvokeMember using the standard binder - this will match and coerce as needed
                                 functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
                             }
-                            catch (MissingMethodException ex) // Don't catch and retry on any other exception
+                            // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
+                            // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coersion is possible, so throw.
+                            catch (MissingMethodException ex) when ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                             {
-                                // If we're invoking a method, then there are deeper attempts that
-                                // can be made to invoke the method
-                                if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
-                                {
-                                    // The standard binder failed, so do our best to coerce types into the arguments for the function
-                                    // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true. 
-                                    functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
-                                }
-                                else
-                                {
-                                    // We were asked to get a property or field, and we found that we cannot
-                                    // locate it. Since there is no further argument coersion possible
-                                    // we'll throw right now.
-                                    throw;
-                                }
+                                // The standard binder failed, so do our best to coerce types into the arguments for the function
+                                // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true.
+                                functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
                             }
                         }
                     }
@@ -3499,9 +3511,9 @@ namespace Microsoft.Build.Evaluation
                     // If the result of the function call is a string, then we need to escape the result
                     // so that we maintain the "engine contains escaped data" state.
                     // The exception is that the user is explicitly calling MSBuild::Unescape or MSBuild::Escape
-                    if (functionResult is string && !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) && !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase))
+                    if (functionResult is string functionResultString && !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) && !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
-                        functionResult = EscapingUtilities.Escape((string)functionResult);
+                        functionResult = EscapingUtilities.Escape(functionResultString);
                     }
 
                     // We have nothing left to parse, so we'll return what we have
@@ -3536,13 +3548,8 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Any other exception was thrown by trying to call it
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.NotExpectedFunctionException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedFunctionException(ex))
-                    {
-                        throw;
-                    }
-
                     // If there's a :: in the expression, they were probably trying for a static function
                     // invocation. Give them some more relevant info in that case
                     if (s_invariantCompareInfo.IndexOf(_expression, "::", CompareOptions.OrdinalIgnoreCase) > -1)
@@ -3566,7 +3573,7 @@ namespace Microsoft.Build.Evaluation
             /// bad for debugging experience and has a performance cost.
             /// A typical binding operation with exception can take ~1.500 ms; this call is ~0.050 ms
             /// (rough numbers just for comparison).
-            /// See https://github.com/Microsoft/msbuild/issues/2217.
+            /// See https://github.com/dotnet/msbuild/issues/2217.
             /// </summary>
             /// <param name="returnVal">The value returned from the function call.</param>
             /// <param name="objectInstance">Object that the function is called on.</param>
@@ -3668,6 +3675,14 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(string.LastIndexOfAny), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.LastIndexOfAny(arg0.ToCharArray());
+                            return true;
+                        }
+                    }
                     else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
                     {
                         if (args.Length == 0)
@@ -3748,9 +3763,8 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                else if (objectInstance is string[])
+                else if (objectInstance is string[] stringArray)
                 {
-                    string[] stringArray = (string[])objectInstance;
                     if (string.Equals(_methodMethodName, "GetValue", StringComparison.OrdinalIgnoreCase))
                     {
                         if (TryGetArg(args, out int index))
@@ -4553,7 +4567,7 @@ namespace Microsoft.Build.Evaluation
                 Type receiverType;
                 Tuple<string, Type> cachedTypeInformation;
 
-                // If we don't have a type name, we already know that we won't be able to find a type.  
+                // If we don't have a type name, we already know that we won't be able to find a type.
                 // Go ahead and return here -- otherwise the Type.GetType() calls below will throw.
                 if (string.IsNullOrWhiteSpace(typeName))
                 {
@@ -4775,7 +4789,7 @@ namespace Microsoft.Build.Evaluation
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
 
                 ReadOnlySpan<char> expressionFunctionAsSpan = expressionFunction.AsSpan();
-                
+
                 ReadOnlySpan<char> expressionSubstringAsSpan = argumentStartIndex > -1 ? expressionFunctionAsSpan.Slice(methodStartIndex, argumentStartIndex - methodStartIndex) : ReadOnlySpan<char>.Empty;
 
                 // There are arguments that need to be passed to the function
@@ -4903,7 +4917,7 @@ namespace Microsoft.Build.Evaluation
                             // We'll also allow the user to specify the leaf or full type name on the enum
                             string argument = args[n].ToString().Replace('|', ',').Replace(typeFullName, "").Replace(typeLeafName, "");
 
-                            // Parse the string representation of the argument into the destination enum                                
+                            // Parse the string representation of the argument into the destination enum
                             coercedArguments[n] = Enum.Parse(enumType, argument);
                         }
                         else
@@ -4924,7 +4938,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 catch (OverflowException)
                 {
-                    // https://github.com/Microsoft/msbuild/issues/2882
+                    // https://github.com/dotnet/msbuild/issues/2882
                     // test: PropertyFunctionMathMaxOverflow
                     return null;
                 }
@@ -5133,7 +5147,7 @@ namespace Microsoft.Build.Evaluation
     }
 
     /// <summary>
-    /// This class wraps information about properties which have been used before they are initialized. 
+    /// This class wraps information about properties which have been used before they are initialized.
     /// </summary>
     internal class UsedUninitializedProperties
     {

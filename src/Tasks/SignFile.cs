@@ -10,6 +10,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -36,13 +38,19 @@ namespace Microsoft.Build.Tasks
 
         public string TimestampUrl { get; set; }
 
+        public bool DisallowMansignTimestampFallback { get; set; } = false;
+
         public override bool Execute()
         {
             try
             {
-                SecurityUtilities.SignFile(CertificateThumbprint,
-                TimestampUrl == null ? null : new Uri(TimestampUrl),
-                SigningTarget.ItemSpec, TargetFrameworkVersion, TargetFrameworkIdentifier);
+                SecurityUtilities.SignFile(
+                    CertificateThumbprint,
+                    TimestampUrl == null ? null : new Uri(TimestampUrl),
+                    SigningTarget.ItemSpec, 
+                    TargetFrameworkVersion, 
+                    TargetFrameworkIdentifier,
+                    DisallowMansignTimestampFallback);
                 return true;
             }
             catch (ArgumentException ex) when (ex.ParamName.Equals("certThumbprint"))

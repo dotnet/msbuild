@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
 #if FEATURE_CODETASKFACTORY
@@ -160,7 +162,7 @@ namespace Microsoft.Build.Tasks
         public Type TaskType { get; private set; }
 
         /// <summary>
-        /// Get the type information for all task parameters
+        /// Get the type information for all task parameters.
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
@@ -170,7 +172,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Initialze the task factory
+        /// Initializes the task factory.
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
@@ -306,7 +308,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Create a taskfactory instance which contains the data that needs to be refreshed between task invocations
+        /// Create a taskfactory instance which contains the data that needs to be refreshed between task invocations.
         /// </summary>
         public ITask CreateTask(IBuildEngine loggingHost)
         {
@@ -683,18 +685,24 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
+                    // Framework and Utilities are default references but are often
+                    // specified in the UsingTask anyway; if so just ignore them.
+                    //
+                    // Do this with an explicit upfront check rather than loading the
+                    // assembly and then checking its name, because that can cause
+                    // the loader to have multiple copies of these assemblies as in
+                    // https://github.com/dotnet/msbuild/issues/7108.
+
+                    string name = AssemblyName.GetAssemblyName(assemblyFile).FullName;
+                    if (name == _msbuildFrameworkName ||
+                        name == _msbuildUtilitiesName)
+                    {
+                        return false;
+                    }
+
                     Assembly candidateAssembly = Assembly.UnsafeLoadFrom(assemblyFile);
                     if (candidateAssembly != null)
                     {
-                        string name = candidateAssembly.FullName;
-                        if (name == _msbuildFrameworkName ||
-                            name == _msbuildUtilitiesName)
-                        {
-                            // Framework and Utilities are default references but are often
-                            // specified in the UsingTask anyway; if so just ignore them.
-                            return false;
-                        }
-
                         candidateAssemblyLocation = candidateAssembly.Location;
                         s_knownReferenceAssemblies[candidateAssembly.FullName] = candidateAssembly;
                     }
@@ -807,7 +815,7 @@ namespace Microsoft.Build.Tasks
 
                     // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases 
                     // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists. 
-                    // See: https://github.com/Microsoft/msbuild/issues/328
+                    // See: https://github.com/dotnet/msbuild/issues/328
                     Directory.CreateDirectory(Path.GetTempPath());
 
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);

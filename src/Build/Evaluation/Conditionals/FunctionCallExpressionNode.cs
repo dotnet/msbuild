@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -90,8 +92,7 @@ namespace Microsoft.Build.Evaluation
             // We haven't implemented any other "functions"
             else
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject(
-                    false,
+                ProjectErrorUtilities.ThrowInvalidProject(
                     state.ElementLocation,
                     "UndefinedFunctionCall",
                     state.Condition,

@@ -7,6 +7,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -599,7 +601,7 @@ namespace Microsoft.Build.Shared
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    ErrorUtilities.VerifyThrowInvalidOperation(false, "Shared.InvalidFilespecForTransform", modifier, itemSpec, e.Message);
+                    ErrorUtilities.ThrowInvalidOperation("Shared.InvalidFilespecForTransform", modifier, itemSpec, e.Message);
                 }
 
                 return modifiedItemSpec;

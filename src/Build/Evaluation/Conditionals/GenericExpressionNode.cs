@@ -5,6 +5,8 @@ using System;
 
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -12,12 +14,9 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class GenericExpressionNode
     {
-        internal abstract bool CanBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state);
-        internal abstract bool CanNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state);
-        internal abstract bool CanVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state);
-        internal abstract bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state);
-        internal abstract double NumericEvaluate(ConditionEvaluator.IConditionEvaluationState state);
-        internal abstract Version VersionEvaluate(ConditionEvaluator.IConditionEvaluationState state);
+        internal abstract bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result);
+        internal abstract bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result);
+        internal abstract bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result);
 
         /// <summary>
         /// Returns true if this node evaluates to an empty string,
@@ -56,14 +55,16 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         internal bool Evaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject(
-                CanBoolEvaluate(state),
-                state.ElementLocation,
-                "ConditionNotBooleanDetail",
-                state.Condition,
-                GetExpandedValue(state));
+            if (!TryBoolEvaluate(state, out bool boolValue))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    state.ElementLocation,
+                    "ConditionNotBooleanDetail",
+                    state.Condition,
+                    GetExpandedValue(state));
+            }
 
-            return BoolEvaluate(state);
+            return boolValue;
         }
 
         /// <summary>

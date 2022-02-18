@@ -20,6 +20,8 @@ using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFramework
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -1462,18 +1464,14 @@ namespace Microsoft.Build.Utilities
 
                 var folders = GetFoldersInVSInstalls(minVersion, maxVersion, subFolder);
 
-                if (folders.Count() > 0)
+                if (folders.Any())
                 {
                     foldersString = string.Join(";", folders);
                 }
             }
-            catch(Exception e)
+            catch(Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                // this method will be used in vc props and we don't want to fail project load if it throws for some non critical reason.
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
+                // This method will be used in vc props and we don't want to fail project load if it throws for some non critical reason.
             }
 
             return foldersString;
@@ -1515,7 +1513,7 @@ namespace Microsoft.Build.Utilities
                         }
                     }
 
-                    if(allFilesFound)
+                    if (allFilesFound)
                     {
                         return root;
                     }
@@ -2199,7 +2197,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            return new List<string>();
+            return pathsList ?? new List<string>();
         }
 
         /// <summary>
@@ -2215,7 +2213,7 @@ namespace Microsoft.Build.Utilities
         {
             // Verify the root path is not null throw an ArgumentNullException if the given string parameter is null and ArgumentException if it has zero length.
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkRootPath, nameof(targetFrameworkRootPath));
-            //Verify the framework class passed in is not null. Other than being null the class will ensure it is consistent and the internal state is correct
+            // Verify the framework class passed in is not null. Other than being null the class will ensure it is consistent and the internal state is correct
             ErrorUtilities.VerifyThrowArgumentNull(frameworkName, nameof(frameworkName));
 
             string referenceAssemblyCacheKey = GenerateReferenceAssemblyCacheKey(targetFrameworkRootPath, frameworkName);
@@ -2301,12 +2299,12 @@ namespace Microsoft.Build.Utilities
             StringBuilder displayNameBuilder = new StringBuilder();
 
             displayNameBuilder.Append(frameworkName.Identifier);
-            displayNameBuilder.Append(" ");
+            displayNameBuilder.Append(' ');
             displayNameBuilder.Append('v').Append(frameworkName.Version.ToString());
 
             if (!string.IsNullOrEmpty(frameworkName.Profile))
             {
-                displayNameBuilder.Append(" ");
+                displayNameBuilder.Append(' ');
                 displayNameBuilder.Append(frameworkName.Profile);
             }
 
@@ -2796,7 +2794,7 @@ namespace Microsoft.Build.Utilities
                                 // Make something like SOFTWARE\MICROSOFT\Windows SDKs\Windows\8.0\ExtensionSDKs\XNA
                                 string sdkNameKey = extensionSDKsKey + @"\" + sdkName;
 
-                                //Get all of the version registry keys under the SDK Name Key.
+                                // Get all of the version registry keys under the SDK Name Key.
                                 IEnumerable<string> sdkVersions = getRegistrySubKeyNames(baseKey, sdkNameKey);
 
                                 ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", "Getting subkeys of '{0}'", sdkNameKey);
@@ -3237,11 +3235,8 @@ namespace Microsoft.Build.Utilities
 
                 return pathToReturn;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                    throw;
-
                 ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.CouldNotCreateChain", path, pathToReturn, e.Message);
             }
 
@@ -3404,7 +3399,8 @@ namespace Microsoft.Build.Utilities
             switch (architecture)
             {
                 case DotNetFrameworkArchitecture.Bitness32:
-                    if (ProcessorArchitecture.CurrentProcessArchitecture == ProcessorArchitecture.ARM)
+                    if (ProcessorArchitecture.CurrentProcessArchitecture == ProcessorArchitecture.ARM ||
+                        ProcessorArchitecture.CurrentProcessArchitecture == ProcessorArchitecture.ARM64)
                     {
                         return ProcessorArchitecture.ARM;
                     }
@@ -3415,6 +3411,7 @@ namespace Microsoft.Build.Utilities
                     {
                         NativeMethodsShared.ProcessorArchitectures.X64 => ProcessorArchitecture.AMD64,
                         NativeMethodsShared.ProcessorArchitectures.IA64 => ProcessorArchitecture.IA64,
+                        NativeMethodsShared.ProcessorArchitectures.ARM64 => ProcessorArchitecture.ARM64,
                         // Error, OK, we're trying to get the 64-bit path on a 32-bit machine.
                         // That ... doesn't make sense. 
                         NativeMethodsShared.ProcessorArchitectures.X86 => null,
@@ -3864,9 +3861,9 @@ namespace Microsoft.Build.Utilities
 
             var frameworkVersions = new List<string>();
 
-            //backward compatibility with orcas
-            //In case of orcas .NETFramework v3.0, v3.5 - the version folders are directly under the frameworkReferenceRoot
-            //first check here
+            // backward compatibility with orcas
+            // In case of orcas .NETFramework v3.0, v3.5 - the version folders are directly under the frameworkReferenceRoot
+            // first check here
             if (string.Equals(frameworkIdentifier, FrameworkLocationHelper.dotNetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
             {
                 IList<string> versions = GetFx35AndEarlierVersions(frameworkReferenceRoot);
@@ -3876,8 +3873,8 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            //then look under the extensible multi-targeting layout - even for .NETFramework because future .NETFramework
-            //versions would be at the right place
+            // then look under the extensible multi-targeting layout - even for .NETFramework because future .NETFramework
+            // versions would be at the right place
             string frameworkIdentifierPath = Path.Combine(frameworkReferenceRoot, frameworkIdentifier);
 
             DirectoryInfo dirInfoFxIdentifierPath = new DirectoryInfo(frameworkIdentifierPath);
@@ -3885,8 +3882,8 @@ namespace Microsoft.Build.Utilities
             {
                 foreach (DirectoryInfo folder in dirInfoFxIdentifierPath.GetDirectories())
                 {
-                    //the expected version folder name is of the format v<MajorVersion>.<MinorVersion> e.g. v3.5
-                    //only add if the version folder name is of the right format
+                    // the expected version folder name is of the format v<MajorVersion>.<MinorVersion> e.g. v3.5
+                    // only add if the version folder name is of the right format
                     if (folder.Name.Length >= 4 && folder.Name.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                     {
                         Version ver;
@@ -3898,8 +3895,8 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            //sort in ascending order of the version numbers, this is important as later when we search for assemblies in other methods 
-            //we should be looking in ascending order of the framework version folders on disk
+            // sort in ascending order of the version numbers, this is important as later when we search for assemblies in other methods 
+            // we should be looking in ascending order of the framework version folders on disk
             frameworkVersions.Sort(VersionComparer.Instance);
 
             return frameworkVersions;

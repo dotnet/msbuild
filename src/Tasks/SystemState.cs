@@ -15,6 +15,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -366,19 +368,14 @@ namespace Microsoft.Build.Tasks
             // If the process-wide cache contains an up-to-date FileState, always use it
             if (isProcessFileStateUpToDate)
             {
-                // If a FileState already exists in this instance cache due to deserialization, remove it;
-                // another instance has taken responsibility for serialization, and keeping this would
-                // result in multiple instances serializing the same data to disk
-                if (isCachedInInstance)
+                // For the next build, we may be using a different process. Update the file cache.
+                if (!isInstanceFileStateUpToDate)
                 {
-                    instanceLocalFileStateCache.Remove(path);
+                    instanceLocalFileStateCache[path] = cachedProcessFileState;
                     isDirty = true;
                 }
-
                 return cachedProcessFileState;
             }
-            // If the process-wide FileState is missing or out-of-date, this instance owns serialization;
-            // sync the process-wide cache and signal other instances to avoid data duplication
             if (isInstanceFileStateUpToDate)
             {
                 return s_processWideFileStateCache[path] = cachedInstanceFileState;
@@ -630,7 +627,7 @@ namespace Microsoft.Build.Tasks
 
         private bool FileTimestampIndicatesFileExists(DateTime lastModified)
         {
-            // TODO: Standardize LastWriteTime value for nonexistent files. See https://github.com/Microsoft/msbuild/issues/3699
+            // TODO: Standardize LastWriteTime value for nonexistent files. See https://github.com/dotnet/msbuild/issues/3699
             return lastModified != DateTime.MinValue && lastModified != NativeMethodsShared.MinFileDate;
         }
 

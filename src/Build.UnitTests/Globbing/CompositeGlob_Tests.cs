@@ -8,6 +8,8 @@ using Microsoft.Build.Globbing;
 using Microsoft.Build.Globbing.Extensions;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
     public class CompositeGlobTests
@@ -137,6 +139,38 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             {
                 Assert.Contains(expectedGlob, leafGlobs);
             }
+        }
+
+        [Fact]
+        public void CreateShouldHandleZeroChildren()
+        {
+            IMSBuildGlob composite = CompositeGlob.Create(Enumerable.Empty<IMSBuildGlob>());
+
+            Assert.False(composite.IsMatch(""));
+        }
+
+        [Fact]
+        public void CreateShouldReturnSingleChildUnchanged()
+        {
+            var glob = MSBuildGlob.Parse("");
+
+            IMSBuildGlob composite = CompositeGlob.Create(new[] { glob });
+
+            Assert.Same(glob, composite);
+        }
+
+        [Fact]
+        public void CreateShouldReturnNewCompositeWhenMultipleProvided()
+        {
+            var glob1 = MSBuildGlob.Parse("");
+            var glob2 = MSBuildGlob.Parse("");
+
+            IMSBuildGlob result = CompositeGlob.Create(new[] { glob1, glob2 });
+
+            var composite = Assert.IsType<CompositeGlob>(result);
+            Assert.Same(glob1, composite.Globs.First());
+            Assert.Same(glob2, composite.Globs.Skip(1).First());
+            Assert.Equal(2, composite.Globs.Count());
         }
     }
 }

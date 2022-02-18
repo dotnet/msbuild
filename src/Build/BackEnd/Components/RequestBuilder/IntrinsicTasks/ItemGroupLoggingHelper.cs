@@ -5,12 +5,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -20,12 +23,12 @@ namespace Microsoft.Build.BackEnd
     internal static class ItemGroupLoggingHelper
     {
         /// <summary>
-        /// The default character limit for logging parameters. 10k is somewhat arbitrary, see https://github.com/microsoft/msbuild/issues/4907.
+        /// The default character limit for logging parameters. 10k is somewhat arbitrary, see https://github.com/dotnet/msbuild/issues/4907.
         /// </summary>
         internal static int parameterCharacterLimit = 40_000;
 
         /// <summary>
-        /// The default parameter limit for logging. 200 is somewhat arbitrary, see https://github.com/microsoft/msbuild/pull/5210.
+        /// The default parameter limit for logging. 200 is somewhat arbitrary, see https://github.com/dotnet/msbuild/pull/5210.
         /// </summary>
         internal static int parameterLimit = 200;
 
@@ -41,7 +44,9 @@ namespace Microsoft.Build.BackEnd
         /// to materialize the Message as that's a declaration assembly. We inject the logic
         /// here.
         /// </summary>
+#pragma warning disable CA1810 // Initialize reference type static fields inline
         static ItemGroupLoggingHelper()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
         {
             BuildEventArgs.ResourceStringFormatter = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword;
             TaskParameterEventArgs.MessageGetter = GetTaskParameterText;

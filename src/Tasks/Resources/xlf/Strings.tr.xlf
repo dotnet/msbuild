@@ -1652,8 +1652,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-        <source>Considered "{0}", which existed but didn't have a valid identity. This may not be an assembly.</source>
-        <target state="translated">Mevcut olan ancak geçerli bir kimliği olmayan "{0}" denendi. Bu, bir bütünleştirilmiş kod olmayabilir.</target>
+        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
+        <target state="translated">Mevcut olan ancak geçerli bir .NET derlemesi gibi görünmeyen "{0}" değerlendirildi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">

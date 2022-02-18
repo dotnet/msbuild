@@ -1,14 +1,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using Microsoft.Build.Shared.FileSystem;
 using System.Collections.Immutable;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
-#nullable enable
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -53,22 +51,20 @@ namespace Microsoft.Build.Shared
                 // bare search directory if that fails.
                 : new[] { assemblyName.CultureName, string.Empty })
             {
-                    var candidatePath = Path.Combine(_directory,
-                        cultureSubfolder,
-                        $"{assemblyName.Name}.dll");
+                var candidatePath = Path.Combine(_directory,
+                    cultureSubfolder,
+                    $"{assemblyName.Name}.dll");
 
-                    if (!FileSystems.Default.FileExists(candidatePath))
-                    {
-                        continue;
-                    }
+                if (!FileSystems.Default.FileExists(candidatePath))
+                {
+                    continue;
+                }
 
-                    AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                    if (candidateAssemblyName.Version != assemblyName.Version)
-                    {
-                        continue;
-                    }
-
+                AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                if (candidateAssemblyName.Version >= assemblyName.Version)
+                {
                     return LoadFromAssemblyPath(candidatePath);
+                }
             }
 
             // If the Assembly is provided via a file path, the following rules are used to load the assembly:

@@ -8,11 +8,14 @@ using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -135,8 +138,8 @@ namespace Microsoft.Build.Evaluation
                     }
                     catch (ConfigurationException ex)
                     {
-                        // ConfigurationException is obsolete, but we catch it rather than 
-                        // ConfigurationErrorsException (which is what we throw below) because it is more 
+                        // ConfigurationException is obsolete, but we catch it rather than
+                        // ConfigurationErrorsException (which is what we throw below) because it is more
                         // general and we don't want to miss catching some other derived exception.
                         InvalidToolsetDefinitionException.Throw(ex, "ConfigFileReadError", ElementLocation.Create(ex.Source, ex.Line, 0).LocationString, ex.BareMessage);
                     }
@@ -240,7 +243,7 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                //FIXME: handle ; in path on Unix
+                // FIXME: handle ; in path on Unix
                 var paths = property.Value
                     .Split(s_separatorForExtensionsPathSearchPaths, StringSplitOptions.RemoveEmptyEntries)
                     .Distinct()

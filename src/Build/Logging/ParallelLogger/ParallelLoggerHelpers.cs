@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -38,7 +40,7 @@ namespace Microsoft.Build.BackEnd.Logging
         ///  Adds a new project to the list of project started events which have been fired
         /// </summary>
         internal void AddProjectStartedEvent(ProjectStartedEventArgs e, bool requireTimestamp)
-        {   //Parent event can be null if this is the root project
+        {   // Parent event can be null if this is the root project
             ProjectStartedEventMinimumFields parentEvent = GetProjectStartedEvent(e.ParentProjectBuildEventContext);
             lock (_projectStartedEvents)
             {
@@ -100,7 +102,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // from the engine itself
             if (currentKey != null)
             {
-                //Add the event where the stack should start
+                // Add the event where the stack should start
                 stackTrace.Add(currentKey);
 
                 // Loop through the call tree until the root project started event has been found

@@ -15,6 +15,8 @@ using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
@@ -23,14 +25,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     public class ProjectItem_Tests : IDisposable
     {
         internal const string ItemWithIncludeAndExclude = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='{0}' Exclude='{1}'/>
                         </ItemGroup>
                     </Project>
                 ";
-        internal const string ItemWithIncludeUpdateAndRemove= @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+        internal const string ItemWithIncludeUpdateAndRemove = @"
+                    <Project>
                         <ItemGroup>
                             <i Include='{0}'>
                                <m>contents</m>
@@ -74,7 +76,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void SingleItemWithNoMetadata()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'/>
                         </ItemGroup>
@@ -97,7 +99,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ReadMetadata()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m1>v1</m1>
@@ -127,7 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void GetMetadataObjectsFromDefinition()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i>
                                 <m0>v0</m0>
@@ -164,7 +166,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void GetMetadataValuesFromDefinition()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i>
                                 <m0>v0</m0>
@@ -462,7 +464,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ExcludeWithIncludeVector()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='a;b;c'>
                             </i>
@@ -489,7 +491,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ExcludeVectorWithIncludeVector()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='a;b;c'>
                             </i>
@@ -590,7 +592,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             @"a/b/foo::||bar;a/b/foo::||bar/;a/b/foo::||bar\;a/b\foo::||bar",
             @"a/b/foo::||bar",
             new string[0],
-            new [] { "a/b/foo::||bar/", @"a/b/foo::||bar\", @"a/b\foo::||bar" })]
+            new[] { "a/b/foo::||bar/", @"a/b/foo::||bar\", @"a/b\foo::||bar" })]
         public void IncludeExcludeWithNonPathContents(string projectContents, string includeString, string excludeString, string[] inputFiles, string[] expectedInclude)
         {
             TestIncludeExclude(projectContents, inputFiles, expectedInclude, includeString, excludeString, normalizeSlashes: false);
@@ -757,7 +759,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Action<string, string> runTest = (include, exclude) =>
             {
-                TestIncludeExclude(projectContents, inputFiles, expectedInclude, include, exclude, normalizeSlashes: true, makeExpectedIncludeAbsolute:makeExpectedIncludeAbsolute);
+                TestIncludeExclude(projectContents, inputFiles, expectedInclude, include, exclude, normalizeSlashes: true, makeExpectedIncludeAbsolute: makeExpectedIncludeAbsolute);
             };
 
             var includeWithForwardSlash = Helpers.ToForwardSlash(includeString);
@@ -779,12 +781,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         // exclude matches include; file is next to project file
         [InlineData(ItemWithIncludeAndExclude,
             @"a", // include item
-            @"", //path relative from projectFile. Empty string if current directory
+            @"", // path relative from projectFile. Empty string if current directory
 
-            @"a", //exclude item
-            "", //path relative from projectFile. Empty string if current directory
+            @"a", // exclude item
+            "", // path relative from projectFile. Empty string if current directory
 
-            new[] //files relative to this test's root directory. The project is one level deeper than the root.
+            new[] // files relative to this test's root directory. The project is one level deeper than the root.
             {
                 @"project\a",
             },
@@ -891,7 +893,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     var formattedProject = string.Format(projectContents, include, exclude);
                     File.WriteAllText(projectFile, formattedProject);
 
-                    var expectedInclude = includeSurvivesExclude ? new[] { include } : new string[0];
+                    var expectedInclude = includeSurvivesExclude ? new[] { include } : Array.Empty<string>();
 
                     ObjectModelHelpers.AssertItems(expectedInclude, new Project(projectFile).Items.ToList());
                 }
@@ -907,9 +909,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(
             "../a.cs;b.cs", // include string
             "**/*.cs", // exclude string
-            new[] {"a.cs", "ProjectDir/b.cs"}, // files to create relative to the test root dir
+            new[] { "a.cs", "ProjectDir/b.cs" }, // files to create relative to the test root dir
             "ProjectDir", // relative path from test root to project
-            new[] {"../a.cs"} // expected items
+            new[] { "../a.cs" } // expected items
             )]
         // exclude globbing cone below project level;
         [InlineData(
@@ -917,13 +919,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             "a/**/*.cs",
             new[] { "a.cs", "a/b.cs" },
             "",
-            new[] {"a.cs"}
+            new[] { "a.cs" }
             )]
         // exclude globbing above project level;
         [InlineData(
             "a.cs;../b.cs;../../c.cs",
             "../**/*.cs",
-            new[] { "a/ProjectDir/a.cs", "a/b.cs", "c.cs"},
+            new[] { "a/ProjectDir/a.cs", "a/b.cs", "c.cs" },
             "a/ProjectDir",
             new[] { "../../c.cs" }
             )]
@@ -934,18 +936,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, files,relativePathFromRootToProject);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, files, relativePathFromRootToProject);
                 ObjectModelHelpers.AssertItems(expectedInclude, new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection).Items.ToList());
             }
         }
 
-        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1576")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1576")]
         [InlineData(
             "../**/*.cs", // include string
             "a.cs", // exclude string
-            new[] {"ProjectDir/a.cs", "b.cs"}, // files to create relative to the test root dir
+            new[] { "ProjectDir/a.cs", "b.cs" }, // files to create relative to the test root dir
             "ProjectDir", // relative path from test root to project
-            new[] {"../b.cs"} // expected items
+            new[] { "../b.cs" } // expected items
             )]
         public void ExcludingRelativeItemToCurrentDirectoryShouldWorkWithAboveTheConeIncludes(string includeString, string excludeString, string[] files, string relativePathFromRootToProject, string[] expectedInclude)
         {
@@ -966,7 +968,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void CopyFromWithItemListExpressionClonesMetadata()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                           <i Include='i1'>
                             <m>m1</m>
@@ -1003,7 +1005,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void CopyFromWithItemListExpressionDoesNotCloneDefinitionMetadata()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                           <i>
                             <m>m1</m>
@@ -1054,7 +1056,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void CopyFromWithItemListExpressionClonesDefinitionMetadata_Variation()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                           <i>
                             <m>m1</m>
@@ -1104,7 +1106,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void CopyWithItemDefinition()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                           <i>
                             <l>l1</l>
@@ -1201,7 +1203,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void CopyWithItemDefinition2()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                           <i>
                             <l>l1</l>
@@ -1294,7 +1296,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void MetadataReferringToMetadataAbove()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m1>v1</m1>
@@ -1320,7 +1322,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void BuiltInMetadataExpression()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m>%(Identity)</m>
@@ -1341,7 +1343,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void BuiltInQualifiedMetadataExpression()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m>%(i.Identity)</m>
@@ -1362,7 +1364,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void BuiltInMisqualifiedMetadataExpression()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m>%(j.Identity)</m>
@@ -1383,7 +1385,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void BuiltInMetadataInMetadataCondition()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m Condition=""'%(Identity)'=='i1'"">m1</m>
@@ -1408,7 +1410,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Condition=""'%(Identity)'=='i1'/>
                         </ItemGroup>
@@ -1426,7 +1428,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void BuiltInMetadataTwoItems()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1.cpp;" + (NativeMethodsShared.IsWindows ? @"c:\bar\i2.cpp" : "/bar/i2.cpp") + @"'>
                                 <m>%(Filename).obj</m>
@@ -1448,7 +1450,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void DifferentMetadataItemsFromOtherList()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <h Include='h0'>
                                 <m>m1</m>
@@ -1475,7 +1477,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void DifferentBuiltInMetadataItemsFromOtherList()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <h Include='h0.x'/>
                             <h Include='h1.y'/>
@@ -1500,7 +1502,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void BuiltInMetadataTransformInInclude()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <h Include='h0'/>
                             <h Include='h1'/>
@@ -1525,7 +1527,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void BuiltInMetadataTransformInMetadataValue()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <h Include='h0'/>
                             <h Include='h1'/>
@@ -1550,7 +1552,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void BuiltInMetadataTransformInMetadataValueBareMetadataPresent()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <h Include='h0'/>
                             <h Include='h1'/>
@@ -1575,7 +1577,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void MetadataValueReferringToItems()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <h Include='h0'/>
                             <i Include='i0'/>
@@ -1598,7 +1600,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void MetadataConditionReferringToItems()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <h Include='h0'/>
                             <i Include='i0'/>
@@ -1623,7 +1625,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void MetadataConditionReferringToMetadataOnSameItem()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m0>0</m0>
@@ -1996,7 +1998,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             {
-                var testProject = env.CreateTestProjectWithFiles(projectContents.Cleanup(), new[] {"a.cs"});
+                var testProject = env.CreateTestProjectWithFiles(projectContents.Cleanup(), new[] { "a.cs" });
 
                 var project = new Project(testProject.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, env.CreateProjectCollection().Collection);
 
@@ -2093,7 +2095,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        //  TODO: Should remove tests go in project item tests, project item instance tests, or both?
+        // TODO: Should remove tests go in project item tests, project item instance tests, or both?
         [Fact]
         public void Remove()
         {
@@ -2128,7 +2130,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 );
 
             Assert.Equal(2, items.Count);
-            Assert.Equal(@"a.txt;b.cs", string.Join(";", items.Select(i => i.EvaluatedInclude))); 
+            Assert.Equal(@"a.txt;b.cs", string.Join(";", items.Select(i => i.EvaluatedInclude)));
         }
 
         [Fact]
@@ -2141,7 +2143,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 );
 
             Assert.Equal(2, items.Count);
-            Assert.Equal(@"a;c", string.Join(";", items.Select(i => i.EvaluatedInclude))); 
+            Assert.Equal(@"a;c", string.Join(";", items.Select(i => i.EvaluatedInclude)));
         }
 
         [Theory]
@@ -2176,9 +2178,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// See comment for details: https://github.com/Microsoft/msbuild/issues/1475#issuecomment-275520394
+        /// See comment for details: https://github.com/dotnet/msbuild/issues/1475#issuecomment-275520394
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1616")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1616")]
         public void RemoveWithConditionShouldNotApplyOnItemsIgnoringCondition()
         {
             var projectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2568,10 +2570,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// See comment for details: https://github.com/Microsoft/msbuild/issues/1475#issuecomment-275520394
+        /// See comment for details: https://github.com/dotnet/msbuild/issues/1475#issuecomment-275520394
         /// Conditions on metadata on appear to be respected even for items ignoring condition (don't know why, but that's what the code does).
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1616")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1616")]
         public void UpdateWithConditionShouldNotApplyOnItemsIgnoringCondition()
         {
             string projectContents = @"<i Include='a;b;c;d'>
@@ -3268,7 +3270,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void UpdateShouldBeAbleToContainProperties()
         {
             var content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                            <P>a</P>
                         </PropertyGroup>
@@ -3336,7 +3338,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public static IEnumerable<Object[]> UpdateAndRemoveShouldWorkWithEscapedCharactersTestData
         {
             get
-
             {
                 var expectedMetadata = new[]
                 {
@@ -3423,7 +3424,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void UpdateAndRemoveShouldWorkWithEscapedCharacters(string projectContents, string include, string update, string remove, string[] expectedInclude, Dictionary<string, string>[] expectedMetadata)
         {
             var formattedProjectContents = string.Format(projectContents, include, update, remove);
-            ObjectModelHelpers.AssertItemEvaluationFromProject(formattedProjectContents, new string[0], expectedInclude, expectedMetadata);
+            ObjectModelHelpers.AssertItemEvaluationFromProject(formattedProjectContents, Array.Empty<string>(), expectedInclude, expectedMetadata);
         }
 
         [Fact]
@@ -3452,11 +3453,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     return new Project(p, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, c)
                         .Items
                         .Where(i => i.ItemType.Equals("i"))
-                        .Select(i => (ObjectModelHelpers.TestItem) new ObjectModelHelpers.ProjectItemTestItemAdapter(i))
+                        .Select(i => (ObjectModelHelpers.ITestItem)new ObjectModelHelpers.ProjectItemTestItemAdapter(i))
                         .ToList();
                 },
                 project,
-                inputFiles: new string[0],
+                inputFiles: Array.Empty<string>(),
                 expectedInclude: new[] { "1.cs", "2.js" },
                 expectedMetadataPerItem: null
                 );

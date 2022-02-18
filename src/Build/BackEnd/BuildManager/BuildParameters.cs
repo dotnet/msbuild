@@ -18,9 +18,11 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
-    using Utilities = Internal.Utilities;
+    using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
     /// This class represents all of the settings which must be specified to start a build.
@@ -276,9 +278,7 @@ namespace Microsoft.Build.Execution
             _nodeExeLocation = other._nodeExeLocation;
             NodeId = other.NodeId;
             _onlyLogCriticalEvents = other._onlyLogCriticalEvents;
-#if FEATURE_THREAD_PRIORITY
             BuildThreadPriority = other.BuildThreadPriority;
-#endif
             _toolsetProvider = other._toolsetProvider;
             ToolsetDefinitionLocations = other.ToolsetDefinitionLocations;
             _toolsetProvider = other._toolsetProvider;
@@ -294,6 +294,7 @@ namespace Microsoft.Build.Execution
             _logTaskInputs = other._logTaskInputs;
             _logInitialPropertiesAndItems = other._logInitialPropertiesAndItems;
             WarningsAsErrors = other.WarningsAsErrors == null ? null : new HashSet<string>(other.WarningsAsErrors, StringComparer.OrdinalIgnoreCase);
+            WarningsNotAsErrors = other.WarningsNotAsErrors == null ? null : new HashSet<string>(other.WarningsNotAsErrors, StringComparer.OrdinalIgnoreCase);
             WarningsAsMessages = other.WarningsAsMessages == null ? null : new HashSet<string>(other.WarningsAsMessages, StringComparer.OrdinalIgnoreCase);
             _projectLoadSettings = other._projectLoadSettings;
             _interactive = other._interactive;
@@ -305,13 +306,10 @@ namespace Microsoft.Build.Execution
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
-#if FEATURE_THREAD_PRIORITY
         /// <summary>
         /// Gets or sets the desired thread priority for building.
         /// </summary>
         public ThreadPriority BuildThreadPriority { get; set; } = ThreadPriority.Normal;
-
-#endif
 
         /// <summary>
         /// By default if the number of processes is set to 1 we will use Asynchronous logging. However if we want to use synchronous logging when the number of cpu's is set to 1
@@ -545,6 +543,11 @@ namespace Microsoft.Build.Execution
         /// A list of warnings to treat as errors.  To treat all warnings as errors, set this to an empty <see cref="HashSet{String}"/>.
         /// </summary>
         public ISet<string> WarningsAsErrors { get; set; }
+
+        /// <summary>
+        /// A list of warnings to not treat as errors. Only has any effect if WarningsAsErrors is empty.
+        /// </summary>
+        public ISet<string> WarningsNotAsErrors { get; set; }
 
         /// <summary>
         /// A list of warnings to treat as low importance messages.

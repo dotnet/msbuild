@@ -13,6 +13,8 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using System.Collections.Generic;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>
@@ -265,15 +267,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             catch (ArgumentException)
             {
-                //continue
+                // continue
             }
             catch (FormatException)
             {
-                //continue
+                // continue
             }
             catch (OverflowException)
             {
-                //continue 
+                // continue 
             }
 
             return version;

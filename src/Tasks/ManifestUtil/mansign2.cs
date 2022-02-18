@@ -15,6 +15,8 @@ using System.Runtime.InteropServices;
 
 using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
+#nullable disable
+
 namespace System.Deployment.Internal.CodeSigning
 {
     internal static class Win32
@@ -279,20 +281,6 @@ namespace System.Deployment.Internal.CodeSigning
 #endif
         }
 
-        private static XmlElement FindIdElement(XmlElement context, string idValue)
-        {
-            if (context == null)
-                return null;
-
-            XmlElement idReference = context.SelectSingleNode("//*[@Id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            idReference = context.SelectSingleNode("//*[@id=\"" + idValue + "\"]") as XmlElement;
-            if (idReference != null)
-                return idReference;
-            return context.SelectSingleNode("//*[@ID=\"" + idValue + "\"]") as XmlElement;
-        }
-
         public override XmlElement GetIdElement(XmlDocument document, string idValue)
         {
             // We only care about Id references inside of the KeyInfo section
@@ -318,9 +306,6 @@ namespace System.Deployment.Internal.CodeSigning
         private const string Sha1SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         private const string Sha1DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha1";
 
-        private const string wintrustPolicyFlagsRegPath = "Software\\Microsoft\\Windows\\CurrentVersion\\WinTrust\\Trust Providers\\Software Publishing";
-        private const string wintrustPolicyFlagsRegName = "State";
-
         private SignedCmiManifest2() { }
 
         internal SignedCmiManifest2(XmlDocument manifestDom, bool useSha256)
@@ -334,7 +319,7 @@ namespace System.Deployment.Internal.CodeSigning
             Sign(signer, null);
         }
 
-        internal void Sign(CmiManifestSigner2 signer, string timeStampUrl)
+        internal void Sign(CmiManifestSigner2 signer, string timeStampUrl, bool disallowMansignTimestampFallback = false)
         {
             // Reset signer infos.
             _strongNameSignerInfo = null;
@@ -365,7 +350,7 @@ namespace System.Deployment.Internal.CodeSigning
 
                 // Now create the license DOM, and then sign it.
                 licenseDom = CreateLicenseDom(signer, ExtractPrincipalFromManifest(), ComputeHashFromManifest(_manifestDom, _useSha256));
-                AuthenticodeSignLicenseDom(licenseDom, signer, timeStampUrl, _useSha256);
+                AuthenticodeSignLicenseDom(licenseDom, signer, timeStampUrl, _useSha256, disallowMansignTimestampFallback);
             }
             StrongNameSignManifestDom(_manifestDom, licenseDom, signer, _useSha256);
         }
@@ -512,8 +497,9 @@ namespace System.Deployment.Internal.CodeSigning
 
             byte[] cspPublicKeyBlob;
 
-            if(snKey is RSACryptoServiceProvider){
-                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider((RSACryptoServiceProvider)snKey, useSha256)).ExportCspBlob(false);
+            if (snKey is RSACryptoServiceProvider rsacsp)
+            {
+                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider(rsacsp, useSha256)).ExportCspBlob(false);
                 if (cspPublicKeyBlob == null || cspPublicKeyBlob.Length == 0)
                 {
                     throw new CryptographicException(Win32.NTE_BAD_KEY);
@@ -557,7 +543,7 @@ namespace System.Deployment.Internal.CodeSigning
             return ComputeHashFromManifest(manifestDom, false, useSha256);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Cryptographic.Standard", "CA5354:SHA1CannotBeUsed", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
         private static byte[] ComputeHashFromManifest(XmlDocument manifestDom, bool oldFormat, bool useSha256)
         {
             if (oldFormat)
@@ -690,7 +676,7 @@ namespace System.Deployment.Internal.CodeSigning
             return licenseDom;
         }
 
-        private static void AuthenticodeSignLicenseDom(XmlDocument licenseDom, CmiManifestSigner2 signer, string timeStampUrl, bool useSha256)
+        private static void AuthenticodeSignLicenseDom(XmlDocument licenseDom, CmiManifestSigner2 signer, string timeStampUrl, bool useSha256, bool disallowMansignTimestampFallback)
         {
             // Make sure it is RSA, as this is the only one Fusion will support.
 #if RUNTIME_TYPE_NETCORE
@@ -761,7 +747,7 @@ namespace System.Deployment.Internal.CodeSigning
             // Time stamp it if requested.
             if (!string.IsNullOrEmpty(timeStampUrl))
             {
-                TimestampSignedLicenseDom(licenseDom, timeStampUrl, useSha256);
+                TimestampSignedLicenseDom(licenseDom, timeStampUrl, useSha256, disallowMansignTimestampFallback);
             }
 
             // Wrap it inside a RelData element.
@@ -845,7 +831,7 @@ namespace System.Deployment.Internal.CodeSigning
             return timestamp;
         }
 
-        private static void TimestampSignedLicenseDom(XmlDocument licenseDom, string timeStampUrl, bool useSha256)
+        private static void TimestampSignedLicenseDom(XmlDocument licenseDom, string timeStampUrl, bool useSha256, bool disallowMansignTimestampFallback)
         {
             XmlNamespaceManager nsm = new XmlNamespaceManager(licenseDom.NameTable);
             nsm.AddNamespace("r", LicenseNamespaceUri);
@@ -864,31 +850,38 @@ namespace System.Deployment.Internal.CodeSigning
             // Catch CryptographicException to ensure fallback to old code (non-RFC3161)
             catch (CryptographicException)
             {
-                Win32.CRYPT_DATA_BLOB timestampBlob = new Win32.CRYPT_DATA_BLOB();
-
-                byte[] licenseXml = Encoding.UTF8.GetBytes(licenseDom.OuterXml);
-
-                unsafe
+                if (disallowMansignTimestampFallback)
                 {
-                    fixed (byte* pbLicense = licenseXml)
-                    {
-                        Win32.CRYPT_DATA_BLOB licenseBlob = new Win32.CRYPT_DATA_BLOB();
-                        IntPtr pvLicense = new IntPtr(pbLicense);
-                        licenseBlob.cbData = (uint)licenseXml.Length;
-                        licenseBlob.pbData = pvLicense;
+                    throw;
+                }
+                else
+                {
+                    Win32.CRYPT_DATA_BLOB timestampBlob = new Win32.CRYPT_DATA_BLOB();
 
-                        int hr = Win32.CertTimestampAuthenticodeLicense(ref licenseBlob, timeStampUrl, ref timestampBlob);
-                        if (hr != Win32.S_OK)
+                    byte[] licenseXml = Encoding.UTF8.GetBytes(licenseDom.OuterXml);
+
+                    unsafe
+                    {
+                        fixed (byte* pbLicense = licenseXml)
                         {
-                            throw new CryptographicException(hr);
+                            Win32.CRYPT_DATA_BLOB licenseBlob = new Win32.CRYPT_DATA_BLOB();
+                            IntPtr pvLicense = new IntPtr(pbLicense);
+                            licenseBlob.cbData = (uint)licenseXml.Length;
+                            licenseBlob.pbData = pvLicense;
+
+                            int hr = Win32.CertTimestampAuthenticodeLicense(ref licenseBlob, timeStampUrl, ref timestampBlob);
+                            if (hr != Win32.S_OK)
+                            {
+                                throw new CryptographicException(hr);
+                            }
                         }
                     }
-                }
 
-                byte[] timestampSignature = new byte[timestampBlob.cbData];
-                Marshal.Copy(timestampBlob.pbData, timestampSignature, 0, timestampSignature.Length);
-                Win32.HeapFree(Win32.GetProcessHeap(), 0, timestampBlob.pbData);
-                timestamp = Encoding.UTF8.GetString(timestampSignature);
+                    byte[] timestampSignature = new byte[timestampBlob.cbData];
+                    Marshal.Copy(timestampBlob.pbData, timestampSignature, 0, timestampSignature.Length);
+                    Win32.HeapFree(Win32.GetProcessHeap(), 0, timestampBlob.pbData);
+                    timestamp = Encoding.UTF8.GetString(timestampSignature);
+                }
             }
 
             XmlElement asTimestamp = licenseDom.CreateElement("as", "Timestamp", AuthenticodeNamespaceUri);
@@ -929,9 +922,9 @@ namespace System.Deployment.Internal.CodeSigning
 
             // Setup up XMLDSIG engine.
             ManifestSignedXml2 signedXml = new ManifestSignedXml2(signatureParent);
-            if (signer.StrongNameKey is RSACryptoServiceProvider)
+            if (signer.StrongNameKey is RSACryptoServiceProvider rsacsp)
             {
-                signedXml.SigningKey = GetFixedRSACryptoServiceProvider(signer.StrongNameKey as RSACryptoServiceProvider, useSha256);
+                signedXml.SigningKey = GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
             }
             else
             {

@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -110,12 +112,14 @@ namespace Microsoft.Build.Evaluation
         {
             List<ItemExpressionCapture> subExpressions = null;
 
-            if (expression.IndexOf('@') < 0)
+            int startIndex = expression.IndexOf('@', start, end - start);
+
+            if (startIndex < 0)
             {
                 return null;
             }
 
-            for (int i = start; i < end; i++)
+            for (int i = startIndex; i < end; i++)
             {
                 int restartPoint;
                 int startPoint;

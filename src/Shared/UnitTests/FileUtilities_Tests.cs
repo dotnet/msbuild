@@ -10,6 +10,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class FileUtilities_Tests
@@ -142,7 +144,6 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(@"../", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/"));
                 Assert.Equal(@"../ghi/", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/ghi/"));
                 Assert.Equal(@".", FileUtilities.MakeRelative(@"/abc/def", @"/abc/def/"));
-
             }
         }
 
@@ -332,10 +333,10 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar")); // "test 2"
 
             // Already has a trailing slash to start with.
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/")); //test 3"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\")); //test 4"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\")); //test 5"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); //"test 5"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/")); // test 3"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\")); // test 4"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\")); // test 5"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); // "test 5"
         }
 
         /// <summary>
@@ -428,7 +429,7 @@ namespace Microsoft.Build.UnitTests
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/4363")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/4363")]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>
@@ -527,7 +528,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_LEGACY_GETFULLPATH
-        [Fact(Skip="https://github.com/Microsoft/msbuild/issues/4205")]
+        [Fact(Skip="https://github.com/dotnet/msbuild/issues/4205")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void NormalizePathBadGlobalroot()
         {
@@ -702,7 +703,7 @@ namespace Microsoft.Build.UnitTests
             // Run these tests only when we're not on Windows
             return !NativeMethodsShared.IsWindows ||
             // OR we're on Windows and long paths aren't enabled
-            // https://github.com/Microsoft/msbuild/issues/4241
+            // https://github.com/dotnet/msbuild/issues/4241
                    NativeMethodsShared.IsMaxPathLegacyWindows();
         }
 
@@ -1087,6 +1088,46 @@ namespace Microsoft.Build.UnitTests
             expectedTruncatedPath = expectedTruncatedPath.Replace('/', Path.DirectorySeparatorChar);
 
             FileUtilities.TruncatePathToTrailingSegments(path, trailingSegments).ShouldBe(expectedTruncatedPath);
+        }
+
+        /// <summary>
+        /// Exercises FileUtilities.EnsureSingleQuotes
+        /// </summary>
+        [Theory]
+        [InlineData(null, null)] // Null test
+        [InlineData("", "")] // Empty string test
+        [InlineData(@" ", @"' '")] // One character which is a space
+        [InlineData(@"'", @"'''")] // One character which is a single quote
+        [InlineData(@"""", @"'""'")] // One character which is a double quote
+        [InlineData(@"example", @"'example'")] // Unquoted string
+        [InlineData(@"'example'", @"'example'")] // Single quoted string
+        [InlineData(@"""example""", @"'example'")] // Double quoted string
+        [InlineData(@"'example""", @"''example""'")] // Mixed Quotes - Leading Single
+        [InlineData(@"""example'", @"'""example''")] // Mixed Quotes - Leading Double
+        [InlineData(@"ex""am'ple", @"'ex""am'ple'")] // Interior Quotes
+        public void EnsureSingleQuotesTest(string path, string expectedResult)
+        {
+            FileUtilities.EnsureSingleQuotes(path).ShouldBe(expectedResult);
+        }
+
+        /// <summary>
+        /// Exercises FileUtilities.EnsureDoubleQuotes
+        /// </summary>
+        [Theory]
+        [InlineData(null, null)] // Null test
+        [InlineData("", "")] // Empty string test
+        [InlineData(@" ", @""" """)] // One character which is a space
+        [InlineData(@"'", @"""'""")] // One character which is a single quote
+        [InlineData(@"""", @"""""""")] // One character which is a double quote
+        [InlineData(@"example", @"""example""")] // Unquoted string
+        [InlineData(@"'example'", @"""example""")] // Single quoted string
+        [InlineData(@"""example""", @"""example""")] // Double quoted string
+        [InlineData(@"'example""", @"""'example""""")] // Mixed Quotes - Leading Single
+        [InlineData(@"""example'", @"""""example'""")] // Mixed Quotes - Leading Double
+        [InlineData(@"ex""am'ple", @"""ex""am'ple""")] // Interior Quotes
+        public void EnsureDoubleQuotesTest(string path, string expectedResult)
+        {
+            FileUtilities.EnsureDoubleQuotes(path).ShouldBe(expectedResult);
         }
     }
 }

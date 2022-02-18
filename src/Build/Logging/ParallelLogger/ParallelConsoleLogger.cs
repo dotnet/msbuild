@@ -2,18 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Text;
 using System.Collections;
 using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using Microsoft.Build.Utilities;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -83,7 +83,6 @@ namespace Microsoft.Build.BackEnd.Logging
             // If forceNoAlign is set there is no point getting the console width as there will be no aligning of the text
             if (!_forceNoAlign)
             {
-#if FEATURE_CONSOLE_BUFFERWIDTH
                 if (runningWithCharacterFileType)
                 {
                     // Get the size of the console buffer so messages can be formatted to the console width
@@ -100,11 +99,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
                 else
-#endif
                 {
                     _alignMessages = false;
                 }
             }
+
+            _consoleOutputAligner = new ConsoleOutputAligner(_bufferWidth, _alignMessages);
         }
 
         #endregion
@@ -472,13 +472,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Print out all of the errors under the ProjectEntryPoint / target
                 foreach (BuildEventArgs errorWarningEvent in valuePair.Value)
                 {
-                    if (errorWarningEvent is BuildErrorEventArgs)
+                    if (errorWarningEvent is BuildErrorEventArgs buildErrorEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(buildErrorEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
                     }
-                    else if (errorWarningEvent is BuildWarningEventArgs)
+                    else if (errorWarningEvent is BuildWarningEventArgs buildWarningEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(buildWarningEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
                     }
                 }
                 WriteNewLine();
@@ -1344,41 +1344,48 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 int adjustedPrefixWidth = _prefixWidth + prefixAdjustment;
 
-                // The string may contain new lines, treat each new line as a different string to format and send to the console
-                string[] nonNullMessages = SplitStringOnNewLines(message);
-                for (int i = 0; i < nonNullMessages.Length; i++)
+                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
                 {
-                    string nonNullMessage = nonNullMessages[i];
-                    // Take into account the new line char which will be added to the end or each reformatted string
-                    int bufferWidthMinusNewLine = _bufferWidth - 1;
-
-                    // If the buffer is larger then the prefix information (timestamp and key) then reformat the messages. 
-                    // If there is not enough room just print the message out and let the console do the formatting
-                    bool bufferIsLargerThanPrefix = bufferWidthMinusNewLine > adjustedPrefixWidth;
-                    bool messageAndPrefixTooLargeForBuffer = (nonNullMessage.Length + adjustedPrefixWidth) > bufferWidthMinusNewLine;
-                    if (bufferIsLargerThanPrefix && messageAndPrefixTooLargeForBuffer && _alignMessages)
+                    // The string may contain new lines, treat each new line as a different string to format and send to the console
+                    string[] nonNullMessages = SplitStringOnNewLines(message);
+                    for (int i = 0; i < nonNullMessages.Length; i++)
                     {
-                        // Our message may have embedded tab characters, so expand those to their space
-                        // equivalent so that wrapping works as expected.
-                        nonNullMessage = nonNullMessage.Replace("\t", consoleTab);
+                        string nonNullMessage = nonNullMessages[i];
+                        // Take into account the new line char which will be added to the end or each reformatted string
+                        int bufferWidthMinusNewLine = _bufferWidth - 1;
 
-                        // If the message and the prefix are too large for one line in the console, split the string to fit
-                        int index = 0;
-                        int messageLength = nonNullMessage.Length;
-                        // Loop until all the string has been sent to the console
-                        while (index < messageLength)
+                        // If the buffer is larger then the prefix information (timestamp and key) then reformat the messages. 
+                        // If there is not enough room just print the message out and let the console do the formatting
+                        bool bufferIsLargerThanPrefix = bufferWidthMinusNewLine > adjustedPrefixWidth;
+                        bool messageAndPrefixTooLargeForBuffer = (nonNullMessage.Length + adjustedPrefixWidth) > bufferWidthMinusNewLine;
+                        if (bufferIsLargerThanPrefix && messageAndPrefixTooLargeForBuffer && _alignMessages)
                         {
-                            // Calculate how many chars will fit on the console buffer
-                            int amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
-                            WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), prefixAlreadyWritten && index == 0 && i == 0, adjustedPrefixWidth);
-                            index += amountToCopy;
+                            // Our message may have embedded tab characters, so expand those to their space
+                            // equivalent so that wrapping works as expected.
+                            nonNullMessage = nonNullMessage.Replace("\t", consoleTab);
+
+                            // If the message and the prefix are too large for one line in the console, split the string to fit
+                            int index = 0;
+                            int messageLength = nonNullMessage.Length;
+                            // Loop until all the string has been sent to the console
+                            while (index < messageLength)
+                            {
+                                // Calculate how many chars will fit on the console buffer
+                                int amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
+                                WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), prefixAlreadyWritten && index == 0 && i == 0, adjustedPrefixWidth);
+                                index += amountToCopy;
+                            }
+                        }
+                        else
+                        {
+                            // there is not enough room just print the message out and let the console do the formatting
+                            WriteBasedOnPrefix(nonNullMessage, prefixAlreadyWritten, adjustedPrefixWidth);
                         }
                     }
-                    else
-                    {
-                        //there is not enough room just print the message out and let the console do the formatting
-                        WriteBasedOnPrefix(nonNullMessage, prefixAlreadyWritten, adjustedPrefixWidth);
-                    }
+                }
+                else
+                {
+                    WriteHandler(_consoleOutputAligner.AlignConsoleOutput(message, prefixAlreadyWritten, adjustedPrefixWidth));
                 }
             }
         }
@@ -1679,7 +1686,7 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal void AddEventStarted(string projectTargetNames, BuildEventContext buildEventContext, DateTime eventTimeStamp, IEqualityComparer<BuildEventContext> comparer)
             {
-                //If the projectTargetNames are set then we should be a project started event
+                // If the projectTargetNames are set then we should be a project started event
                 if (!string.IsNullOrEmpty(projectTargetNames))
                 {
                     // Create a new performance counter for the project entry point to calculate how much time and how many calls
@@ -1772,13 +1779,15 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Per-build Members
-        //Holds messages that were going to be shown before the project started event, buffer them until the project started event is shown
+        // Holds messages that were going to be shown before the project started event, buffer them until the project started event is shown
         private Dictionary<BuildEventContext, List<BuildMessageEventArgs>> _deferredMessages;
         private BuildEventManager _buildEventManager;
-        //  Has the build started
+        // Has the build started
         private bool _hasBuildStarted;
         private bool? _showCommandLine;
         private bool _showTimeStamp;
+        private ConsoleOutputAligner _consoleOutputAligner;
+
         #endregion
     }
 }

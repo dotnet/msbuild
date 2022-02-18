@@ -4,13 +4,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -133,9 +134,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(messageResourceName), "Need resource string for error message.");
 
-                string errorCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, messageResourceName, messageArgs);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, messageResourceName, messageArgs);
 
                 LogErrorFromText(buildEventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
             }
@@ -185,8 +184,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 buildEvent.BuildEventContext = buildEventContext;
                 if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
-                    string projectFile;
-                    _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out projectFile);
+                    _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
                     ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
                     buildEvent.ProjectFile = projectFile;
                 }
@@ -231,8 +229,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     buildEvent.BuildEventContext = buildEventContext;
                     if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                     {
-                        string projectFile;
-                        _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out projectFile);
+                        _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
                         ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
                         buildEvent.ProjectFile = projectFile;
                     }
@@ -293,9 +290,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(messageResourceName), "Need resource string for error message.");
 
-                string errorCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, messageResourceName, messageArgs);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, messageResourceName, messageArgs);
 #if DEBUG
                 message += Environment.NewLine + "This is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.";
 #endif
@@ -332,9 +327,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(taskName), "Must specify the name of the task that failed.");
 
-                string warningCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out warningCode, out helpKeyword, "FatalTaskError", taskName);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out string helpKeyword, "FatalTaskError", taskName);
 #if DEBUG
                 message += Environment.NewLine + "This is an unhandled exception from a task -- PLEASE OPEN A BUG AGAINST THE TASK OWNER.";
 #endif
@@ -362,9 +355,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(messageResourceName), "Need resource string for warning message.");
 
-                string warningCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out warningCode, out helpKeyword, messageResourceName, messageArgs);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out string helpKeyword, messageResourceName, messageArgs);
                 LogWarningFromText(buildEventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
             }
         }
@@ -410,8 +401,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 buildEvent.BuildEventContext = buildEventContext;
                 if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
-                    string projectFile;
-                    _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out projectFile);
+                    _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
                     ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
                     buildEvent.ProjectFile = projectFile;
                 }
@@ -483,8 +473,28 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
+            => new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+
+        /// <inheritdoc />
+        public BuildEventContext CreateProjectCacheBuildEventContext(
+            int submissionId,
+            int evaluationId,
+            int projectInstanceId,
+            string projectFile)
         {
-            return new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            lock (_lockObject)
+            {
+                int projectContextId = NextProjectId;
+
+                // In the future if some LogProjectCacheStarted event is created, move this there to align with evaluation and build execution.
+                _projectFileMap[projectContextId] = projectFile;
+
+                // Because the project cache runs in the BuildManager, it makes some sense to associate logging with the in-proc node.
+                // If a invalid node id is used the messages become deferred in the console logger and spit out at the end.
+                int nodeId = Scheduler.InProcNodeId;
+
+                return new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            }
         }
 
         /// <inheritdoc />
@@ -545,35 +555,75 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="nodeBuildEventContext">The event context of the node which is spawning this project.</param>
         /// <param name="submissionId">The id of the submission.</param>
-        /// <param name="projectInstanceId">Id of the project instance which is being started</param>
+        /// <param name="configurationId">The id of the project configuration which is about to start</param>
         /// <param name="parentBuildEventContext">BuildEventContext of the project who is requesting "projectFile" to build</param>
         /// <param name="projectFile">Project file to build</param>
         /// <param name="targetNames">Target names to build</param>
         /// <param name="properties">Initial property list</param>
         /// <param name="items">Initial items list</param>
         /// <param name="evaluationId">EvaluationId of the project instance</param>
+        /// <param name="projectContextId">The project context id</param>
         /// <returns>The build event context for the project.</returns>
         /// <exception cref="InternalErrorException">parentBuildEventContext is null</exception>
         /// <exception cref="InternalErrorException">projectBuildEventContext is null</exception>
-        public BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectInstanceId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items, int evaluationId = BuildEventContext.InvalidEvaluationId)
+        public BuildEventContext LogProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId)
         {
             lock (_lockObject)
             {
                 ErrorUtilities.VerifyThrow(nodeBuildEventContext != null, "Need a nodeBuildEventContext");
-                BuildEventContext projectBuildEventContext = new BuildEventContext(submissionId, nodeBuildEventContext.NodeId, evaluationId, projectInstanceId, NextProjectId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
 
-                // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-                if (_projectFileMap.ContainsKey(projectBuildEventContext.ProjectContextId))
+                if (projectContextId == BuildEventContext.InvalidProjectContextId)
                 {
-                    ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should not already be in the ID-to-file mapping!", projectBuildEventContext.ProjectContextId, projectFile);
+                    projectContextId = NextProjectId;
+
+                    // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
+                    if (_projectFileMap.ContainsKey(projectContextId))
+                    {
+                        ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should not already be in the ID-to-file mapping!", projectContextId, projectFile);
+                    }
+
+                    _projectFileMap[projectContextId] = projectFile;
+                }
+                else
+                {
+                    // A projectContextId was provided, so use it with some sanity checks
+                    if (_projectFileMap.TryGetValue(projectContextId, out string existingProjectFile))
+                    {
+                        if (!projectFile.Equals(existingProjectFile, StringComparison.OrdinalIgnoreCase))
+                        {
+                            ErrorUtilities.ThrowInternalError("ContextID {0} was already in the ID-to-project file mapping but the project file {1} did not match the provided one {2}!", projectContextId, existingProjectFile, projectFile);
+                        }
+                    }
+                    else
+                    {
+                        // Currently, an existing projectContextId can only be provided in the project cache scenario, which runs on the in-proc node.
+                        // If there was a cache miss and the build was scheduled on a worker node, it may not have seen this projectContextId yet.
+                        // So we only need this sanity check for the in-proc node.
+                        if (nodeBuildEventContext.NodeId == Scheduler.InProcNodeId)
+                        {
+                            ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", projectContextId);
+                        }
+
+                        _projectFileMap[projectContextId] = projectFile;
+                    }
                 }
 
-                _projectFileMap[projectBuildEventContext.ProjectContextId] = projectFile;
+                BuildEventContext projectBuildEventContext = new BuildEventContext(submissionId, nodeBuildEventContext.NodeId, evaluationId, configurationId, projectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
 
                 ErrorUtilities.VerifyThrow(parentBuildEventContext != null, "Need a parentBuildEventContext");
 
-                ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectInstanceId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
-                var buildRequestConfiguration = _configCache.Value[projectInstanceId];
+                ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(configurationId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
+                var buildRequestConfiguration = _configCache.Value[configurationId];
 
                 // Always log GlobalProperties on ProjectStarted
                 // See https://github.com/dotnet/msbuild/issues/6341 for details
@@ -581,7 +631,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 var buildEvent = new ProjectStartedEventArgs
                     (
-                        projectInstanceId,
+                        configurationId,
                         message: null,
                         helpKeyword: null,
                         projectFile,

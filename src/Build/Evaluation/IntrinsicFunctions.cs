@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -15,6 +16,8 @@ using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -347,7 +350,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        ///<summary>
+        /// <summary>
         /// Hash the string independent of bitness and target framework.
         /// </summary>
         internal static int StableStringHash(string toHash)

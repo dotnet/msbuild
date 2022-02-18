@@ -11,9 +11,9 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
-using Microsoft.Build.Utilities;
 
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
@@ -21,6 +21,8 @@ using Microsoft.Build.Shared.Debugging;
 #if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
+
+#nullable disable
 
 namespace Microsoft.Build.Internal
 {
@@ -60,7 +62,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Building with administrator privileges
         /// </summary>
-        Administrator = 32
+        Administrator = 32,
+
+        /// <summary>
+        /// Using the .NET Core/.NET 5.0+ runtime
+        /// </summary>
+        NET = 64,
     }
 
     internal readonly struct Handshake
@@ -75,7 +82,7 @@ namespace Microsoft.Build.Internal
 
         internal Handshake(HandshakeOptions nodeType)
         {
-            // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
+            // We currently use 7 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
             // This indicates in the first byte that we are a modern build.
             options = (int)nodeType | (((int)CommunicationsUtilities.handshakeVersion) << 24);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
@@ -213,8 +220,8 @@ namespace Microsoft.Build.Internal
                         // Copy strings out, parsing into pairs and inserting into the table.
                         // The first few environment variable entries start with an '='!
                         // The current working directory of every drive (except for those drives
-                        // you haven't cd'ed into in your DOS window) are stored in the 
-                        // environment block (as =C:=pwd) and the program's exit code is 
+                        // you haven't cd'ed into in your DOS window) are stored in the
+                        // environment block (as =C:=pwd) and the program's exit code is
                         // as well (=ExitCode=00000000)  Skip all that start with =.
                         // Read docs about Environment Blocks on MSDN's CreateProcess page.
 
@@ -228,8 +235,8 @@ namespace Microsoft.Build.Internal
                             int startKey = i;
 
                             // Skip to key
-                            // On some old OS, the environment block can be corrupted. 
-                            // Some lines will not have '=', so we need to check for '\0'. 
+                            // On some old OS, the environment block can be corrupted.
+                            // Some lines will not have '=', so we need to check for '\0'.
                             while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
                             {
                                 i++;
@@ -306,7 +313,7 @@ namespace Microsoft.Build.Internal
                     }
                 }
 
-                // Then, make sure the old ones have their old values. 
+                // Then, make sure the old ones have their old values.
                 foreach (KeyValuePair<string, string> entry in newEnvironment)
                 {
                     Environment.SetEnvironmentVariable(entry.Key, entry.Value);
@@ -458,7 +465,7 @@ namespace Microsoft.Build.Internal
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)
             {
-                int bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bytesToRead - totalBytesRead);
+                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead), CancellationToken.None);
                 if (bytesRead == 0)
                 {
                     return totalBytesRead;
@@ -492,7 +499,23 @@ namespace Microsoft.Build.Internal
                     ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.runtime, out string runtimeVersion), "Should always have an explicit runtime when we call this method.");
                     ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.architecture, out string architecture), "Should always have an explicit architecture when we call this method.");
 
-                    clrVersion = runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ? 4 : 2;
+                    if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
+                    {
+                        clrVersion = 2;
+                    } 
+                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
+                    {
+                        clrVersion = 4;
+                    }
+                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
+                    {
+                        clrVersion = 5;
+                    }
+                    else
+                    {
+                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                    }
+
                     is64Bit = architecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
                 }
             }
@@ -501,10 +524,26 @@ namespace Microsoft.Build.Internal
             {
                 context |= HandshakeOptions.X64;
             }
-            if (clrVersion == 2)
+
+            switch (clrVersion)
             {
-                context |= HandshakeOptions.CLR2;
+                case 0:
+                    // Not a taskhost, runtime must match
+                case 4:
+                    // Default for MSBuild running on .NET Framework 4,
+                    // not represented in handshake
+                    break;
+                case 2:
+                    context |= HandshakeOptions.CLR2;
+                    break;
+                case >= 5:
+                    context |= HandshakeOptions.NET;
+                    break;
+                default:
+                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    break;
             }
+
             if (nodeReuse)
             {
                 context |= HandshakeOptions.NodeReuse;

@@ -1,15 +1,22 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Microsoft.Build.Shared
 {
     internal static class NamedPipeUtil
     {
-        internal static string GetPipeNameOrPath(string pipeName)
+        internal static string GetPipeNameOrPath(int? processId = null)
         {
+            if (processId is null)
+            {
+                processId = Process.GetCurrentProcess().Id;
+            }
+
+            string pipeName = $"MSBuild{processId}";
+
             if (NativeMethodsShared.IsUnixLike)
             {
                 // If we're on a Unix machine then named pipes are implemented using Unix Domain Sockets.

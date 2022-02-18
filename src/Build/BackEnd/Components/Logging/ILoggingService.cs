@@ -12,6 +12,8 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     #region Delegates
@@ -162,6 +164,15 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Set of warnings to not treat as errors. Only has any effect if WarningsAsErrors is non-null but empty.
+        /// </summary>
+        ISet<string> WarningsNotAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
         ISet<string> WarningsAsMessages
@@ -233,6 +244,13 @@ namespace Microsoft.Build.BackEnd.Logging
         void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes);
 
         /// <summary>
+        /// Adds a set of warning codes to not treat as errors for the specified project instance ID.
+        /// </summary>
+        /// <param name="buildEventContext">A <see cref="BuildEventContext"/> to associate with the list of warning codes.</param>
+        /// <param name="codes">The list of warning codes not to treat as errors.</param>
+        void AddWarningsNotAsErrors(BuildEventContext buildEventContext, ISet<string> codes);
+
+        /// <summary>
         /// Determines if the specified submission has logged an errors.
         /// </summary>
         /// <param name="submissionId">The ID of the build submission.  A value of "0" means that an error was logged outside of any build submission.</param>
@@ -240,17 +258,24 @@ namespace Microsoft.Build.BackEnd.Logging
         bool HasBuildSubmissionLoggedErrors(int submissionId);
 
         /// <summary>
-        /// Returns a hashset of warnings to be logged as errors for the specified project instance ID.
+        /// Get the warnings that will be promoted to errors for the specified context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
-        /// <returns>A Hashset containing warning codes that should be treated as errors.</returns>
+        /// <returns>A collection of warning codes that should be treated as errors.</returns>
         ICollection<string> GetWarningsAsErrors(BuildEventContext context);
 
         /// <summary>
-        /// Returns a hashset of warnings to be logged as messages for the specified project instance ID.
+        /// Get the warnings that will not be promoted to error for the specified context.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will not be logged as errors.</param>
+        /// <returns>A collection of warning codes that should not be treated as errors.</returns>
+        ICollection<string> GetWarningsNotAsErrors(BuildEventContext context);
+
+        /// <summary>
+        /// Get the warnings that will be demoted to messages for the specified context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
-        /// <returns>A Hashset containing warning codes that should be treated as messages.</returns>
+        /// <returns>A collection of warning codes that should be treated as messages.</returns>
         ICollection<string> GetWarningsAsMessages(BuildEventContext context);
 
         #region Register
@@ -267,7 +292,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Register an logger which expects all logging events from the system
         /// </summary>
         /// <param name="logger">The logger to register.</param>
-        ///<returns value="bool">True if the central was registered. False if the central logger was already registered</returns>
+        /// <returns value="bool">True if the central was registered. False if the central logger was already registered</returns>
         bool RegisterLogger(ILogger logger);
 
         /// <summary>
@@ -447,6 +472,16 @@ namespace Microsoft.Build.BackEnd.Logging
         BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId);
 
         /// <summary>
+        /// Create a project cache context, by generating a new project context id.
+        /// </summary>
+        /// <param name="submissionId">The submission id</param>
+        /// <param name="evaluationId">The evaluation id</param>
+        /// <param name="projectInstanceId">The project instance id</param>
+        /// <param name="projectFile">Project file being built</param>
+        /// <returns></returns>
+        BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId, string projectFile);
+
+        /// <summary>
         /// Logs that a project evaluation has started
         /// </summary>
         /// <param name="eventContext">The event context to use for logging</param>
@@ -477,15 +512,26 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="nodeBuildEventContext">The logging context of the node which is building this project.</param>
         /// <param name="submissionId">The id of the build submission.</param>
-        /// <param name="projectId">The id of the project instance which is about to start</param>
+        /// <param name="configurationId">The id of the project configuration which is about to start</param>
         /// <param name="parentBuildEventContext">The build context of the parent project which asked this project to build</param>
         /// <param name="projectFile">The project file path of the project about to be built</param>
         /// <param name="targetNames">The entrypoint target names for this project</param>
         /// <param name="properties">The initial properties of the project</param>
         /// <param name="items">The initial items of the project</param>
         /// <param name="evaluationId">EvaluationId of the project instance</param>
+        /// <param name="projectContextId">The project context id</param>
         /// <returns>The BuildEventContext to use for this project.</returns>
-        BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items, int evaluationId = BuildEventContext.InvalidEvaluationId);
+        BuildEventContext LogProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId);
 
         /// <summary>
         /// Log that the project has finished

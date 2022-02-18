@@ -7,7 +7,11 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+#if FEATURE_GAC
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {

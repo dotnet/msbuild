@@ -16,6 +16,8 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     /// <summary>
@@ -88,7 +90,7 @@ namespace Microsoft.Build.Engine.UnitTests
     <CSFile Include='file.cs'/>
 </ItemGroup>")]
 #if MONO
-        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Theory]
 #endif
@@ -124,7 +126,7 @@ namespace Microsoft.Build.Engine.UnitTests
     <CSFile Include='file.cs'/>
 </ItemGroup>")]
 #if MONO
-        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Theory]
 #endif
@@ -142,7 +144,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -179,7 +181,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -213,7 +215,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -257,7 +259,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -299,7 +301,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 var buildRequestData = new BuildRequestData(
                     projectInstance,
-                    new string[]{},
+                    Array.Empty<string>(),
                     projectCollection.HostServices);
 
                 var result = _buildManager.Build(parameters, buildRequestData);

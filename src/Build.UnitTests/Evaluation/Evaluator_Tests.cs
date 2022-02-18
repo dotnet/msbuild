@@ -22,6 +22,8 @@ using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     /// <summary>
@@ -1886,7 +1888,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-                Assert.Equal(6, project.AllEvaluatedItems.Count());
+                Assert.Equal(6, project.AllEvaluatedItems.Count);
                 Assert.Equal("i1", project.AllEvaluatedItems.ElementAt(0).EvaluatedInclude);
                 Assert.Equal(String.Empty, project.AllEvaluatedItems.ElementAt(0).GetMetadataValue("m"));
                 Assert.Equal("j1", project.AllEvaluatedItems.ElementAt(1).EvaluatedInclude);
@@ -1902,12 +1904,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 project.AddItem("i", "i7");
                 project.RemoveItem(project.AllEvaluatedItems.ElementAt(1));
 
-                Assert.Equal(6, project.AllEvaluatedItems.Count());
+                Assert.Equal(6, project.AllEvaluatedItems.Count);
 
                 project.MarkDirty();
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal(7, project.AllEvaluatedItems.Count());
+                Assert.Equal(7, project.AllEvaluatedItems.Count);
             }
             finally
             {
@@ -2002,15 +2004,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            int initial = project.AllEvaluatedProperties.Count();
+            int initial = project.AllEvaluatedProperties.Count;
 
             project.SetProperty("p", "1");
 
-            Assert.Equal(initial, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial, project.AllEvaluatedProperties.Count);
 
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(initial + 1, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial + 1, project.AllEvaluatedProperties.Count);
         }
 
         /// <summary>
@@ -2038,13 +2040,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count);
 
             Assert.Equal("2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(1).EvaluatedValue);
             Assert.Equal("1;2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(3).EvaluatedValue);
 
             // Verify lists are cleared on reevaluation
-            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count);
         }
 
         /// <summary>
@@ -3670,7 +3672,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// based on the default sub-toolset version -- base toolset if Dev10 is installed, or lowest (numerically
         /// sorted) toolset if it's not.
         /// </summary>
-        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/4363")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4363")]
         public void VerifyDefaultSubToolsetPropertiesAreEvaluated()
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -4337,7 +4339,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Test regression reported at https://github.com/Microsoft/msbuild/issues/2228
+        /// Test regression reported at https://github.com/dotnet/msbuild/issues/2228
         /// </summary>
         [Fact]
         public void ThrownInvalidProjectExceptionProperlyHandled()
@@ -4399,7 +4401,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         ///
         /// The first condition is false so the second condition is not evaluated.  But in some cases we double evaluate the condition to log it.  The second evaluation will fail because it evaluates the whole string.
         ///
-        /// https://github.com/Microsoft/msbuild/issues/2259
+        /// https://github.com/dotnet/msbuild/issues/2259
         /// </summary>
         [Theory]
         [InlineData("<Target Name=\"Build\" /><Import Project=\"$(NonExistentProperty)\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" />")]

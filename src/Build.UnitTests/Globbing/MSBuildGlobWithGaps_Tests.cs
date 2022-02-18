@@ -6,12 +6,14 @@ using System.Linq;
 using Microsoft.Build.Globbing;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
     public class MSBuildGlobWithGaps_Tests
     {
         [Fact]
-        public void GlobWithGapsShoulWorkWithNoGaps()
+        public void GlobWithGapsShouldWorkWithNoGaps()
         {
             var glob = new MSBuildGlobWithGaps(MSBuildGlob.Parse("a*"), Enumerable.Empty<IMSBuildGlob>());
 
@@ -19,7 +21,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         }
 
         [Fact]
-        public void GlobWithGapsShoulMatchIfNoGapsMatch()
+        public void GlobWithGapsShouldMatchIfNoGapsMatch()
         {
             var glob = new MSBuildGlobWithGaps(MSBuildGlob.Parse("a*"), MSBuildGlob.Parse("b*"));
 
@@ -27,7 +29,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         }
 
         [Fact]
-        public void GlobWithGapsShoulNotMatchIfGapsMatch()
+        public void GlobWithGapsShouldNotMatchIfGapsMatch()
         {
             var glob = new MSBuildGlobWithGaps(MSBuildGlob.Parse("a*"), MSBuildGlob.Parse("*b"));
 

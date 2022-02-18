@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -121,7 +123,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void Consume(BuildEventArgs buildEvent)
         {
-            ErrorUtilities.VerifyThrow(false, "Do not use this method for the transport sink");
+            ErrorUtilities.ThrowInternalError("Do not use this method for the transport sink");
         }
 
         /// <summary>

@@ -10,6 +10,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>

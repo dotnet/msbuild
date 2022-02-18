@@ -18,6 +18,8 @@ using Shouldly;
 using Xunit;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
@@ -127,6 +129,41 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             var fileSystem = new Helpers.LoggingFileSystem();
             Should.Throw<ArgumentException>(() => EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated, fileSystem));
+        }
+
+        [Fact]
+        public void EvaluationShouldUseDirectoryCache()
+        {
+            var projectFile = _env.CreateFile("1.proj", @"<Project> <ItemGroup Condition=`Exists('1.file')`> <Compile Include='*.cs'/> </ItemGroup> </Project>".Cleanup()).Path;
+
+            var projectCollection = _env.CreateProjectCollection().Collection;
+            var directoryCacheFactory = new Helpers.LoggingDirectoryCacheFactory();
+
+            var project = Project.FromFile(
+                projectFile,
+                new ProjectOptions
+                {
+                    ProjectCollection = projectCollection,
+                    DirectoryCacheFactory = directoryCacheFactory,
+                }
+            );
+
+            directoryCacheFactory.DirectoryCaches.Count.ShouldBe(1);
+            var directoryCache = directoryCacheFactory.DirectoryCaches[0];
+
+            directoryCache.EvaluationId.ShouldBe(project.LastEvaluationId);
+
+            directoryCache.ExistenceChecks.OrderBy(kvp => kvp.Key).ShouldBe(
+                new Dictionary<string, int>
+                {
+                    { _env.DefaultTestDirectory.Path, 1},
+                    { Path.Combine(_env.DefaultTestDirectory.Path, "1.file"), 2 }
+                }.OrderBy(kvp => kvp.Key));
+            directoryCache.Enumerations.ShouldBe(
+                new Dictionary<string, int>
+                {
+                    { _env.DefaultTestDirectory.Path, 1 }
+                });
         }
 
         [Theory]
@@ -605,7 +642,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ContextCachesCommonOutOfProjectCone(itemSpecPathIsRelative: false, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
         }
 
-        [Theory (Skip="https://github.com/Microsoft/msbuild/issues/3889")]
+        [Theory (Skip="https://github.com/dotnet/msbuild/issues/3889")]
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
         // projects should cache glob expansions when the __relative__ glob is shared between projects and points outside of project cone
         public void ContextCachesCommonOutOfProjectConeRelativeGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
@@ -754,6 +791,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         project.GetPropertyValue("p").ShouldBe("val");
                     }
                     else
+                    {
                         switch (policy)
                         {
                             case EvaluationContext.SharingPolicy.Shared:
@@ -765,6 +803,7 @@ namespace Microsoft.Build.UnitTests.Definition
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
                         }
+                    }
                 }
                 );
         }

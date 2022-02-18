@@ -10,12 +10,15 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -38,7 +41,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", new string[0], null);
+                BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
             }
            );
         }
@@ -47,14 +50,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", new string[0], null);
+                BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", Array.Empty<string>(), null);
             }
            );
         }
         [Fact]
         public void TestConstructor1()
         {
-            BuildRequestData config1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
+            BuildRequestData config1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
         }
 
         [Fact]
@@ -62,7 +65,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
+                BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
                 BuildRequestConfiguration config1 = new BuildRequestConfiguration(1, data, "2.0");
                 config1.ShallowCloneWithNewId(0);
             }
@@ -71,14 +74,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructor2PositiveConfigId()
         {
-            BuildRequestData config1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
+            BuildRequestData config1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
             new BuildRequestConfiguration(1, config1, "2.0");
         }
 
         [Fact]
         public void TestConstructor2NegativeConfigId()
         {
-            BuildRequestData config1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
+            BuildRequestData config1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
             new BuildRequestConfiguration(-1, config1, "2.0");
         }
 
@@ -87,7 +90,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", new string[0], null);
+                BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
             }
            );
         }
@@ -97,22 +100,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", new string[0], null);
+                BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", Array.Empty<string>(), null);
             }
            );
         }
         [Fact]
         public void TestWasGeneratedByNode()
         {
-            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(-1, data1, "2.0");
             Assert.True(config1.WasGeneratedByNode);
 
-            BuildRequestData data2 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data2 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config2 = new BuildRequestConfiguration(1, data2, "2.0");
             Assert.False(config2.WasGeneratedByNode);
 
-            BuildRequestData data3 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data3 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config3 = new BuildRequestConfiguration(data3, "2.0");
             Assert.False(config3.WasGeneratedByNode);
         }
@@ -120,15 +123,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestDefaultConfigurationId()
         {
-            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(-1, data1, "2.0");
             Assert.Equal(-1, config1.ConfigurationId);
 
-            BuildRequestData data2 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data2 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config2 = new BuildRequestConfiguration(1, data2, "2.0");
             Assert.Equal(1, config2.ConfigurationId);
 
-            BuildRequestData data3 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data3 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config3 = new BuildRequestConfiguration(0, data3, "2.0");
             Assert.Equal(0, config3.ConfigurationId);
         }
@@ -138,7 +141,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+                BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
                 BuildRequestConfiguration config1 = new BuildRequestConfiguration(-1, data, "2.0");
                 config1.ConfigurationId = -2;
             }
@@ -147,7 +150,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetConfigurationIdGood()
         {
-            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(data, "2.0");
             Assert.Equal(0, config1.ConfigurationId);
             config1.ConfigurationId = 1;
@@ -157,7 +160,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestGetFileName()
         {
-            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(data, "2.0");
             Assert.Equal(config1.ProjectFullPath, Path.GetFullPath("file"));
         }
@@ -165,7 +168,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestGetToolsVersion()
         {
-            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(data1, "2.0");
             Assert.Equal("toolsVersion", config1.ToolsVersion);
         }
@@ -174,7 +177,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestGetProperties()
         {
             Dictionary<string, string> props = new Dictionary<string, string>();
-            BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", props, "toolsVersion", new string[0], null), "2.0");
+            BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", props, "toolsVersion", Array.Empty<string>(), null), "2.0");
 
             Assert.Equal(props.Count, Helpers.MakeList((IEnumerable<ProjectPropertyInstance>)(config1.GlobalProperties)).Count);
         }
@@ -182,7 +185,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSetProjectGood()
         {
-            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
+            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(data1, "2.0");
             Assert.Null(config1.Project);
             Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace' />"))));
@@ -195,7 +198,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestPacketType()
         {
-            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
+            BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(data1, "2.0");
             Assert.Equal(NodePacketType.BuildRequestConfiguration, config1.Type);
         }
@@ -203,11 +206,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestGetHashCode()
         {
-            BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null), "2.0");
-            BuildRequestConfiguration config2 = new BuildRequestConfiguration(new BuildRequestData("File", new Dictionary<string, string>(), "ToolsVersion", new string[0], null), "2.0");
-            BuildRequestConfiguration config3 = new BuildRequestConfiguration(new BuildRequestData("file2", new Dictionary<string, string>(), "toolsVersion", new string[0], null), "2.0");
-            BuildRequestConfiguration config4 = new BuildRequestConfiguration(new BuildRequestData("file2", new Dictionary<string, string>(), "toolsVersion2", new string[0], null), "2.0");
-            BuildRequestConfiguration config5 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion2", new string[0], null), "2.0");
+            BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null), "2.0");
+            BuildRequestConfiguration config2 = new BuildRequestConfiguration(new BuildRequestData("File", new Dictionary<string, string>(), "ToolsVersion", Array.Empty<string>(), null), "2.0");
+            BuildRequestConfiguration config3 = new BuildRequestConfiguration(new BuildRequestData("file2", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null), "2.0");
+            BuildRequestConfiguration config4 = new BuildRequestConfiguration(new BuildRequestData("file2", new Dictionary<string, string>(), "toolsVersion2", Array.Empty<string>(), null), "2.0");
+            BuildRequestConfiguration config5 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion2", Array.Empty<string>(), null), "2.0");
 
             Assert.Equal(config1.GetHashCode(), config2.GetHashCode());
             Assert.NotEqual(config1.GetHashCode(), config3.GetHashCode());
@@ -218,20 +221,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestEquals()
         {
-            BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null), "2.0");
+            BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null), "2.0");
             Assert.Equal(config1, config1);
-            BuildRequestConfiguration config2 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null), "2.0");
+            BuildRequestConfiguration config2 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null), "2.0");
             Assert.Equal(config1, config2);
 
-            BuildRequestConfiguration config3 = new BuildRequestConfiguration(new BuildRequestData("file2", new Dictionary<string, string>(), "toolsVersion", new string[0], null), "2.0");
+            BuildRequestConfiguration config3 = new BuildRequestConfiguration(new BuildRequestData("file2", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null), "2.0");
             Assert.NotEqual(config1, config3);
 
-            BuildRequestConfiguration config4 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion2", new string[0], null), "2.0");
+            BuildRequestConfiguration config4 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion2", Array.Empty<string>(), null), "2.0");
             Assert.NotEqual(config1, config4);
 
             PropertyDictionary<ProjectPropertyInstance> props = new PropertyDictionary<ProjectPropertyInstance>();
             props.Set(ProjectPropertyInstance.Create("prop1", "value1"));
-            BuildRequestData data = new BuildRequestData("file", props.ToDictionary(), "toolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", props.ToDictionary(), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config5 = new BuildRequestConfiguration(data, "2.0");
             Assert.NotEqual(config1, config5);
 
@@ -246,7 +249,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             properties.Set(ProjectPropertyInstance.Create("this", "that"));
             properties.Set(ProjectPropertyInstance.Create("foo", "bar"));
 
-            BuildRequestData data = new BuildRequestData("file", properties.ToDictionary(), "4.0", new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", properties.ToDictionary(), "4.0", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(data, "2.0");
 
             Assert.Equal(NodePacketType.BuildRequestConfiguration, config.Type);
@@ -287,7 +290,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             instance.TranslateEntireState = true;
 
-            BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, new string[] { }, null), "2.0");
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, Array.Empty<string>(), null), "2.0");
             configuration.ConfigurationId = 1;
 
             ((ITranslatable)configuration).Translate(TranslationHelpers.GetWriteTranslator());
@@ -307,7 +310,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestProperties()
         {
-            BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData("path", new Dictionary<string, string>(), "2.0", new string[] { }, null), "2.0");
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData("path", new Dictionary<string, string>(), "2.0", Array.Empty<string>(), null), "2.0");
             Assert.True(configuration.IsCacheable);
             Assert.False(configuration.IsLoaded);
             Assert.False(configuration.IsCached);
@@ -360,7 +363,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new ProjectCollection());
             project.FullPath = "foo";
             ProjectInstance instance = project.CreateProjectInstance();
-            BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, new string[] { }, null), "2.0");
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, Array.Empty<string>(), null), "2.0");
             configuration.ConfigurationId = 1;
 
             string originalValue = Environment.GetEnvironmentVariable("MSBUILDCACHE");
@@ -461,7 +464,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Project project = new Project(XmlReader.Create(new StringReader(projectBody)), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
             project.FullPath = "foo";
             ProjectInstance instance = project.CreateProjectInstance();
-            BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, new string[] { }, null), "2.0");
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, Array.Empty<string>(), null), "2.0");
 
             string originalTmp = Environment.GetEnvironmentVariable("TMP");
             string originalTemp = Environment.GetEnvironmentVariable("TEMP");
@@ -561,7 +564,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var projectInstance = project.CreateProjectInstance();
 
-            var configuration = new BuildRequestConfiguration(new BuildRequestData(projectInstance, new string[] {}), MSBuildConstants.CurrentToolsVersion);
+            var configuration = new BuildRequestConfiguration(new BuildRequestData(projectInstance, Array.Empty<string>()), MSBuildConstants.CurrentToolsVersion);
 
             if (referencePath.Contains("$"))
             {

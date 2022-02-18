@@ -17,6 +17,8 @@ using Xunit.Abstractions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using static Microsoft.Build.UnitTests.Helpers;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph.UnitTests
 {
     public class GraphLoadedFromSolutionTests : IDisposable
@@ -260,7 +262,7 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 yield return new object[]
                 {
-                    new Dictionary<int, int[]> //graph nodes and ProjectReference edges
+                    new Dictionary<int, int[]> // graph nodes and ProjectReference edges
                     {
                         {1, null},
                         {2, null}

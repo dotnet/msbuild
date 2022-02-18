@@ -8,6 +8,8 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Logging
 {
     /// <summary>
@@ -124,7 +126,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/Microsoft/msbuild/issues/282")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/282")]
         public void TestShutDown()
         {
             SendDataDelegate transportDelegate = PacketProcessor;

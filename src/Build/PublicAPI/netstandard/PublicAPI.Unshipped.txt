@@ -1,0 +1,4 @@
+Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.get -> System.Threading.ThreadPriority
+Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.set -> void
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Collections.Generic.ISet<string>
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void

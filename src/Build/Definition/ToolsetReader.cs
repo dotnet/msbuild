@@ -9,12 +9,15 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
 using error = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -421,6 +424,12 @@ namespace Microsoft.Build.Evaluation
                     PropertyDictionary<ProjectPropertyInstance> initialPropertiesClone = new PropertyDictionary<ProjectPropertyInstance>(initialProperties);
 
                     Toolset toolset = ReadToolset(toolsVersion, globalProperties, initialPropertiesClone, accumulateProperties);
+
+                    // Register toolset paths into list of immutable directories
+                    //   example: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
+                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
+                    // example:  C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
+                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
 
                     if (toolset != null)
                     {

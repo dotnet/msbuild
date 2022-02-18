@@ -11,6 +11,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -55,7 +57,7 @@ namespace Microsoft.Build.Execution
         {
             if (itemDefinition.MetadataCount > 0)
             {
-                _metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(itemDefinition.MetadataCount);
+                _metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
             }
 
             foreach (ProjectMetadata originalMetadata in itemDefinition.Metadata)

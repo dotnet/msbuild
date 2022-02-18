@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System.Runtime.Loader;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ValidateAssemblyLoadContext : Task
@@ -20,7 +22,7 @@ namespace Microsoft.Build.UnitTests
             //   if (thisLoadContext is MSBuildLoadContext context)
             // fails here because MSBuildLoadContext (in this test assembly) is from MSBuild.exe via
             // IVT, but the one that actually gets used for task isolation is in Microsoft.Build.dll.
-            // This probably doesn't need to be how it is forever: https://github.com/microsoft/msbuild/issues/5041
+            // This probably doesn't need to be how it is forever: https://github.com/dotnet/msbuild/issues/5041
             if (thisLoadContext.GetType().FullName == typeof(MSBuildLoadContext).FullName)
             {
                 if (!thisLoadContext.Name.EndsWith(typeof(ValidateAssemblyLoadContext).Assembly.GetName().Name + ".dll"))

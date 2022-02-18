@@ -7,12 +7,15 @@ using System.Linq;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -36,7 +39,7 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4247")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -335,7 +338,7 @@ namespace Microsoft.Build.UnitTests
         /// property value and so he can't escape it himself.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/259")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/259")]
 #else
         [Fact]
 #endif
@@ -350,12 +353,13 @@ namespace Microsoft.Build.UnitTests
 
             // Just a normal console application project.
             ObjectModelHelpers.CreateFileInTempProjectDirectory(
-                Path.Combine("bug'533'369", "Sub;Dir", "ConsoleApplication1", "ConsoleApplication1.csproj"), @"
+                Path.Combine("bug'533'369", "Sub;Dir", "ConsoleApplication1", "ConsoleApplication1.csproj"), $@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                   <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                   <PropertyGroup>
                     <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
+                    <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                     <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
                     <OutputType>Exe</OutputType>
                     <AssemblyName>ConsoleApplication1</AssemblyName>

@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -16,8 +18,19 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public abstract class GenerateManifestBase : Task
     {
-        private enum AssemblyType { Unspecified, Managed, Native, Satellite };
-        private enum DependencyType { Install, Prerequisite };
+        private enum AssemblyType
+        {
+            Unspecified,
+            Managed,
+            Native,
+            Satellite,
+        }
+
+        private enum DependencyType
+        {
+            Install,
+            Prerequisite,
+        }
 
         private string _processorArchitecture;
         private int _startTime;
@@ -235,9 +248,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // Fixup for non-ClickOnce case...
-            if (_manifest is ApplicationManifest)
+            if (_manifest is ApplicationManifest applicationManifest)
             {
-                var applicationManifest = _manifest as ApplicationManifest;
                 if (!applicationManifest.IsClickOnceManifest)
                 {
                     // Don't need publicKeyToken attribute for non-ClickOnce case

@@ -4,6 +4,8 @@ using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>
@@ -78,7 +80,7 @@ namespace Microsoft.Build.Internal
             
             // Ignore loadAsReadOnly for now; using XmlReader.Create results in whitespace changes
             // of attribute text, specifically newline removal.
-            // https://github.com/Microsoft/msbuild/issues/4210
+            // https://github.com/dotnet/msbuild/issues/4210
             XmlReader reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
 
             reader.Read();

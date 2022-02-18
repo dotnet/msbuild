@@ -39,6 +39,8 @@ using Microsoft.Build.Internal;
     ==================================================================================================================
 */
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>
@@ -91,8 +93,10 @@ namespace Microsoft.Build.Collections
     {
         // store lower 31 bits of hash code
         private const int Lower31BitMask = 0x7FFFFFFF;
+#if NEVER
         // cutoff point, above which we won't do stackallocs. This corresponds to 100 integers.
         private const int StackAllocThreshold = 100;
+#endif
         // when constructing a hashset from an existing collection, it may contain duplicates, 
         // so this is used as the max acceptable excess ratio of capacity to count. Note that
         // this is only used on the ctor and not to automatically shrink if the hashset has, e.g,
@@ -119,7 +123,7 @@ namespace Microsoft.Build.Collections
         // temporary variable needed during deserialization
         private SerializationInfo _siInfo;
 
-        #region Constructors
+#region Constructors
 
         public RetrievableEntryHashSet(IEqualityComparer<string> comparer)
         {
@@ -202,7 +206,7 @@ namespace Microsoft.Build.Collections
             _siInfo = info;
         }
 
-        #endregion
+#endregion
 
         // Convenience to minimise change to callers used to dictionaries
         public ICollection<string> Keys
@@ -228,7 +232,7 @@ namespace Microsoft.Build.Collections
             get { return this; }
         }
 
-        #region ICollection<T> methods
+#region ICollection<T> methods
 
         // Convenience to minimise change to callers used to dictionaries
         internal T this[string name]
@@ -479,9 +483,9 @@ namespace Microsoft.Build.Collections
             _readOnly = true;
         }
 
-        #endregion
+#endregion
 
-        #region IEnumerable methods
+#region IEnumerable methods
 
         public Enumerator GetEnumerator()
         {
@@ -506,9 +510,9 @@ namespace Microsoft.Build.Collections
             return new Enumerator(this);
         }
 
-        #endregion
+#endregion
 
-        #region ISerializable methods
+#region ISerializable methods
 
         // [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         [SecurityCritical]
@@ -531,9 +535,9 @@ namespace Microsoft.Build.Collections
             }
         }
 
-        #endregion
+#endregion
 
-        #region IDeserializationCallback methods
+#region IDeserializationCallback methods
 
         public virtual void OnDeserialization(Object sender)
         {
@@ -578,9 +582,9 @@ namespace Microsoft.Build.Collections
             _siInfo = null;
         }
 
-        #endregion
+#endregion
 
-        #region HashSet methods
+#region HashSet methods
 
         /// <summary>
         /// Add item to this HashSet. 
@@ -628,7 +632,7 @@ namespace Microsoft.Build.Collections
             }
         }
 
-#if NEVER 
+#if NEVER
                                                                                                                                                         /// <summary>
                                                                                                                                                         /// Takes the intersection of this set with other. Modifies this set.
                                                                                                                                                         /// 
@@ -1150,9 +1154,9 @@ namespace Microsoft.Build.Collections
 #endif
 #endif
 
-        #endregion
+#endregion
 
-        #region Helper methods
+#region Helper methods
 
         /// <summary>
         /// Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
@@ -1721,7 +1725,7 @@ namespace Microsoft.Build.Collections
             return _comparer.GetHashCode(item) & Lower31BitMask;
         }
 
-        #endregion
+#endregion
 
         // used for set checking operations (using enumerables) that rely on counting
         internal struct ElementCount

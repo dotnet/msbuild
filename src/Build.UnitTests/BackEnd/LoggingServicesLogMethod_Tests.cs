@@ -19,6 +19,9 @@ using System.Xml;
 
 using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
 using Xunit;
+using Shouldly;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Logging
 {
@@ -54,6 +57,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test LogBuildevent by logging a number of events with both OnlyLogCriticalEvents On and Off
         /// </summary>
@@ -104,6 +108,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternlErrorException is thrown when an empty MessageResourceName is passed in.
         /// </summary>
@@ -117,6 +122,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a message is logged when all of the parameters are filled out correctly.
         /// </summary>
@@ -154,6 +160,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an exception is thrown when a null Invalid ProjectFile exception is passed in
         /// </summary>
@@ -167,6 +174,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a message is logged when both parameters are good and
         /// the exception has not been logged yet. Verify with and without OnlyLogCriticalEvents.
@@ -215,6 +223,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when fileInfo is null
         /// </summary>
@@ -228,6 +237,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a error message is correctly logged when  the exception is null.
         /// </summary>
@@ -260,6 +270,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when messageResourceName is empty
         /// </summary>
@@ -274,6 +285,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
@@ -334,6 +346,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
@@ -374,6 +387,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException when a null FileInfo is passed in
         /// </summary>
@@ -387,6 +401,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
@@ -400,6 +415,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test LogErrorFromText with a number of different inputs
         /// </summary>
@@ -443,14 +459,14 @@ namespace Microsoft.Build.UnitTests.Logging
             string targetsFile = Path.Combine(testTempPath, "x.targets");
             string projectfileContent =
                 @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='x.targets'/>
                     </Project>
                 ";
 
             string targetsfileContent = @"
-                 <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                   <UsingTask TaskName='RandomTask' AssemblyName='NotARealTaskLocaiton'/>    
+                 <Project DefaultTargets='Build'>
+                   <UsingTask TaskName='RandomTask' AssemblyName='NotARealTaskLocaiton'/>
                    <Target Name='Build'>
                        <RandomTask/>
                    </Target>
@@ -509,6 +525,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when taskName is empty
         /// </summary>
@@ -523,6 +540,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a LogTaskWarningFromException with a null exception and a non null exception
         /// with all of the other fields properly filled out.
@@ -566,6 +584,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an exception is when a empty MessageResourceName is passed in.
         /// </summary>
@@ -579,6 +598,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a message is logged when all of the parameters are filled out
         /// </summary>
@@ -606,6 +626,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null fileInfo is passed in
         /// </summary>
@@ -619,6 +640,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
@@ -632,6 +654,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test LogWarningFromText with a number of different inputs
         /// </summary>
@@ -676,6 +699,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify an InternalErrorException is thrown when a empty messageResource name is passed in
         /// </summary>
@@ -689,6 +713,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify LogComment by testing it with OnlyLogCriticalEvents On and Off when the rest of the fields are
         /// valid inputs.
@@ -729,6 +754,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Verify a message is logged when an empty message is passed in
         /// </summary>
@@ -752,6 +778,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Make sure we can log a comment when everything should be working correctly
         /// </summary>
@@ -792,6 +819,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
@@ -806,30 +834,157 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the case where ProjectFile is good and TargetNames is null.
         /// Expect an event to be logged
         /// </summary>
-        [Fact]
-        public void ProjectStartedEventTests()
+        [Theory]
+        [InlineData("ProjectFile", null)] // Good project File and null target names
+        [InlineData("ProjectFile", "")] // Good project File and empty target names
+        [InlineData(null, null)] // Null project file and null target names
+        [InlineData("", null)] // // Empty project file null target Names
+        [InlineData("", "")] // Empty project File and Empty target Names
+        [InlineData("ProjectFile", "TargetNames")] // Good inputs
+        public void ProjectStartedEventTests(string projectFile, string targetNames)
         {
-            // Good project File and null target names
-            LogProjectStartedTestHelper("ProjectFile", null);
+            string message;
+            if (!String.IsNullOrEmpty(targetNames))
+            {
+                message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithTargetNames", Path.GetFileName(projectFile), targetNames);
+            }
+            else
+            {
+                message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", Path.GetFileName(projectFile));
+            }
 
-            // Good project File and empty target names
-            LogProjectStartedTestHelper("ProjectFile", string.Empty);
+            MockHost componentHost = new MockHost();
+            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1, componentHost);
+            ConfigCache cache = (ConfigCache)componentHost.GetComponent(BuildComponentType.ConfigCache);
 
-            // Null project file and null target names
-            LogProjectStartedTestHelper(null, null);
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
+            BuildRequestConfiguration config = new BuildRequestConfiguration(2, data, "4.0");
+            cache.AddConfiguration(config);
 
-            // Empty project file null target Names
-            LogProjectStartedTestHelper(string.Empty, null);
+            BuildEventContext context = service.LogProjectStarted(s_buildEventContext, 1, 2, s_buildEventContext, projectFile, targetNames, null, null);
+            BuildEventContext parentBuildEventContext = s_buildEventContext;
+            VerifyProjectStartedEventArgs(service, context.ProjectContextId, message, projectFile, targetNames, parentBuildEventContext, context);
 
-            // Empty project File and Empty target Names
-            LogProjectStartedTestHelper(string.Empty, string.Empty);
+            service.ResetProcessedBuildEvent();
+        }
 
-            // TestGoodInputs
-            LogProjectStartedTestHelper("ProjectFile", "TargetNames");
+        /// <summary>
+        /// Expect the returned BuildEventContext to have the provided ProjectContextId
+        /// </summary>
+        [Fact]
+        public void ProjectStartedProvidedProjectContextId()
+        {
+            const int SubmissionId = 1;
+            const int EvaluationId = 2;
+            const int ConfigurationId = 3;
+            const string ProjectFile = "SomeProjectFile";
+
+            MockHost componentHost = new MockHost();
+            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1, componentHost);
+            ConfigCache cache = (ConfigCache)componentHost.GetComponent(BuildComponentType.ConfigCache);
+
+            BuildRequestData data = new BuildRequestData(ProjectFile, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
+            BuildRequestConfiguration config = new BuildRequestConfiguration(ConfigurationId, data, "4.0");
+            cache.AddConfiguration(config);
+
+            BuildEventContext projectCacheBuildEventContext = service.CreateProjectCacheBuildEventContext(SubmissionId, EvaluationId, ConfigurationId, ProjectFile);
+            projectCacheBuildEventContext.NodeId.ShouldBe(Scheduler.InProcNodeId);
+            projectCacheBuildEventContext.ProjectContextId.ShouldNotBe(BuildEventContext.InvalidProjectContextId);
+
+            BuildEventContext nodeBuildEventContext = new BuildEventContext(Scheduler.InProcNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext projectStartedBuildEventContext = service.LogProjectStarted(
+                nodeBuildEventContext,
+                submissionId: SubmissionId,
+                configurationId: ConfigurationId,
+                parentBuildEventContext: BuildEventContext.Invalid,
+                projectFile: ProjectFile,
+                targetNames: "TargetNames",
+                properties: null,
+                items: null,
+                evaluationId: EvaluationId,
+                projectContextId: projectCacheBuildEventContext.ProjectContextId);
+            projectStartedBuildEventContext.ProjectContextId.ShouldBe(projectCacheBuildEventContext.ProjectContextId);
+        }
+
+        /// <summary>
+        /// Expect an exception to be thrown if an unknown project context id is passed in for the in-proc node
+        /// </summary>
+        [Fact]
+        public void ProjectStartedProvidedUnknownProjectContextIdInProcNode()
+        {
+            const int SubmissionId = 1;
+            const int EvaluationId = 2;
+            const int ConfigurationId = 3;
+            const string ProjectFile = "SomeProjectFile";
+            const int ProjectContextId = 123;
+
+            MockHost componentHost = new MockHost();
+            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1, componentHost);
+            ConfigCache cache = (ConfigCache)componentHost.GetComponent(BuildComponentType.ConfigCache);
+
+            BuildRequestData data = new BuildRequestData(ProjectFile, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
+            BuildRequestConfiguration config = new BuildRequestConfiguration(ConfigurationId, data, "4.0");
+            cache.AddConfiguration(config);
+
+            BuildEventContext nodeBuildEventContext = new BuildEventContext(Scheduler.InProcNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                service.LogProjectStarted(
+                    nodeBuildEventContext,
+                    submissionId: SubmissionId,
+                    configurationId: ConfigurationId,
+                    parentBuildEventContext: BuildEventContext.Invalid,
+                    projectFile: ProjectFile,
+                    targetNames: "TargetNames",
+                    properties: null,
+                    items: null,
+                    evaluationId: EvaluationId,
+                    projectContextId: ProjectContextId);
+            });
+        }
+
+        /// <summary>
+        /// Expect an unknown project context id to be accepted on an out-of-proc node.
+        /// </summary>
+        [Fact]
+        public void ProjectStartedProvidedUnknownProjectContextIdOutOfProcNode()
+        {
+            const int SubmissionId = 1;
+            const int EvaluationId = 2;
+            const int ConfigurationId = 3;
+            const string ProjectFile = "SomeProjectFile";
+            const int NodeId = 2;
+            const int ProjectContextId = 123;
+
+            // Ensure we didn't pick the one bad const value
+            NodeId.ShouldNotBe(Scheduler.InProcNodeId);
+
+            MockHost componentHost = new MockHost();
+            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1, componentHost);
+            ConfigCache cache = (ConfigCache)componentHost.GetComponent(BuildComponentType.ConfigCache);
+
+            BuildRequestData data = new BuildRequestData(ProjectFile, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
+            BuildRequestConfiguration config = new BuildRequestConfiguration(ConfigurationId, data, "4.0");
+            cache.AddConfiguration(config);
+
+            BuildEventContext nodeBuildEventContext = new BuildEventContext(NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext projectStartedBuildEventContext = service.LogProjectStarted(
+                nodeBuildEventContext,
+                submissionId: SubmissionId,
+                configurationId: ConfigurationId,
+                parentBuildEventContext: BuildEventContext.Invalid,
+                projectFile: ProjectFile,
+                targetNames: "TargetNames",
+                properties: null,
+                items: null,
+                evaluationId: EvaluationId,
+                projectContextId: ProjectContextId);
+            projectStartedBuildEventContext.ProjectContextId.ShouldBe(ProjectContextId);
         }
 
         #endregion
@@ -849,6 +1004,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the project finished event
         /// </summary>
@@ -874,7 +1030,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void LogBuildStarted()
         {
             ProcessBuildEventHelper service =
-                (ProcessBuildEventHelper) ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
 
             service.LogBuildStarted();
 
@@ -885,18 +1041,18 @@ namespace Microsoft.Build.UnitTests.Logging
                     service.ProcessedBuildEvent.Timestamp);
 
             Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
-            Assert.Equal(buildEvent, (BuildStartedEventArgs) service.ProcessedBuildEvent,
+            Assert.Equal(buildEvent, (BuildStartedEventArgs)service.ProcessedBuildEvent,
                 new EventArgsEqualityComparer<BuildStartedEventArgs>());
         }
 
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/437")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/437")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
         public void LogBuildStartedCriticalOnly()
         {
             ProcessBuildEventHelper service =
-                (ProcessBuildEventHelper) ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.OnlyLogCriticalEvents = true;
             service.LogBuildStarted();
 
@@ -906,7 +1062,7 @@ namespace Microsoft.Build.UnitTests.Logging
                     null /* no help keyword */);
 
             Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
-            Assert.Equal(buildEvent, (BuildStartedEventArgs) service.ProcessedBuildEvent,
+            Assert.Equal(buildEvent, (BuildStartedEventArgs)service.ProcessedBuildEvent,
                 new EventArgsEqualityComparer<BuildStartedEventArgs>());
         }
 
@@ -965,6 +1121,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the case where TaskName
         /// </summary>
@@ -1000,6 +1157,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the case where TaskName is null.
         /// </summary>
@@ -1040,6 +1198,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the target started event with a null target name.
         /// </summary>
@@ -1088,6 +1247,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
            );
         }
+
         /// <summary>
         /// Test the case where TargetName is null.
         /// </summary>
@@ -1284,7 +1444,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             ConfigCache cache = (ConfigCache)componentHost.GetComponent(BuildComponentType.ConfigCache);
 
-            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(2, data, "4.0");
             cache.AddConfiguration(config);
 
@@ -1425,36 +1585,6 @@ namespace Microsoft.Build.UnitTests.Logging
             service.OnlyLogCriticalEvents = true;
             service.LogTargetStarted(s_targetBuildEventContext, targetName, projectFile, projectFileOfTarget, parentTargetName, TargetBuiltReason.BeforeTargets);
             Assert.Null(service.ProcessedBuildEvent);
-        }
-
-        /// <summary>
-        /// Test LogProjectStarted
-        /// </summary>
-        private void LogProjectStartedTestHelper(string projectFile, string targetNames)
-        {
-            string message;
-            if (!String.IsNullOrEmpty(targetNames))
-            {
-                message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithTargetNames", Path.GetFileName(projectFile), targetNames);
-            }
-            else
-            {
-                message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", Path.GetFileName(projectFile));
-            }
-
-            MockHost componentHost = new MockHost();
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1, componentHost);
-            ConfigCache cache = (ConfigCache)componentHost.GetComponent(BuildComponentType.ConfigCache);
-
-            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(2, data, "4.0");
-            cache.AddConfiguration(config);
-
-            BuildEventContext context = service.LogProjectStarted(s_buildEventContext, 1, 2, s_buildEventContext, projectFile, targetNames, null, null);
-            BuildEventContext parentBuildEventContext = s_buildEventContext;
-            VerifyProjectStartedEventArgs(service, context.ProjectContextId, message, projectFile, targetNames, parentBuildEventContext, context);
-
-            service.ResetProcessedBuildEvent();
         }
 
         /// <summary>
@@ -1770,13 +1900,13 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <param name="buildEvent">Build event which was asked to be processed</param>
             internal override void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
             {
-                if (buildEvent is BuildEventArgs)
+                if (buildEvent is BuildEventArgs buildEventArgs)
                 {
-                    _processedBuildEvent = buildEvent as BuildEventArgs;
+                    _processedBuildEvent = buildEventArgs;
                 }
-                else if (buildEvent is KeyValuePair<int, BuildEventArgs>)
+                else if (buildEvent is KeyValuePair<int, BuildEventArgs> kvp)
                 {
-                    _processedBuildEvent = ((KeyValuePair<int, BuildEventArgs>)buildEvent).Value;
+                    _processedBuildEvent = kvp.Value;
                 }
                 else
                 {

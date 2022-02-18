@@ -4,8 +4,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Collections
 {
@@ -19,52 +23,35 @@ namespace Microsoft.Build.Collections
     /// </summary>
     /// <remarks>
     /// The value that this adds over IDictionary&lt;string, T&gt; is:
+    ///     - supports copy on write
     ///     - enforces that key = T.Name
     ///     - default enumerator is over values
     ///     - (marginal) enforces the correct key comparer
-    ///     - potentially makes copy on write possible
     /// 
     /// Really a Dictionary&lt;string, T&gt; where the key (the name) is obtained from IKeyed.Key.
     /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and 
     /// either not expose this collection or expose it through a readonly wrapper.
     ///
-    /// At various places in this class locks are taken on the backing collection.  The reason for this is to allow
-    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will 
-    /// lock the backing collection when it does its deep cloning.  This prevents asynchronous access from corrupting
-    /// the state of the enumeration until the collection has been fully copied.
-    ///
-    /// The use of a CopyOnWriteDictionary does not reduce the concurrency of this collection, because CopyOnWriteDictionary
-    /// offers the same concurrency guarantees (concurrent readers OR single writer) for EACH user of the dictionary.
-    /// 
-    /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back 
-    /// into this dictionary which could cause a deadlock if another thread is also accessing another method in the dictionary.
+    /// This collection is safe for concurrent readers and a single writer.
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
     internal sealed class CopyOnWritePropertyDictionary<T> : IEnumerable<T>, IEquatable<CopyOnWritePropertyDictionary<T>>, IDictionary<string, T>
         where T : class, IKeyed, IValued, IEquatable<T>, IImmutable
     {
+        private static readonly ImmutableDictionary<string, T> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, T>(MSBuildNameIgnoreCaseComparer.Default);
+
         /// <summary>
         /// Backing dictionary
         /// </summary>
-        private readonly CopyOnWriteDictionary<T> _properties;
+        private ImmutableDictionary<string, T> _backing;
 
         /// <summary>
         /// Creates empty dictionary
         /// </summary>
         public CopyOnWritePropertyDictionary()
         {
-            // Tracing.Record("New COWD1");
-            _properties = new CopyOnWriteDictionary<T>(MSBuildNameIgnoreCaseComparer.Default);
-        }
-
-        /// <summary>
-        /// Creates empty dictionary with specified initial capacity
-        /// </summary>
-        public CopyOnWritePropertyDictionary(int capacity)
-        {
-            // Tracing.Record("New COWD2");
-            _properties = new CopyOnWriteDictionary<T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
+            _backing = NameComparerDictionaryPrototype;
         }
 
         /// <summary>
@@ -72,41 +59,18 @@ namespace Microsoft.Build.Collections
         /// </summary>
         private CopyOnWritePropertyDictionary(CopyOnWritePropertyDictionary<T> that)
         {
-            _properties = that._properties.Clone(); // copy on write!
+            _backing = that._backing;
         }
 
         /// <summary>
         /// Accessor for the list of property names
         /// </summary>
-        ICollection<string> IDictionary<string, T>.Keys => PropertyNames;
+        ICollection<string> IDictionary<string, T>.Keys => ((IDictionary<string, T>)_backing).Keys;
 
         /// <summary>
         /// Accessor for the list of properties
         /// </summary>
-        ICollection<T> IDictionary<string, T>.Values
-        {
-            get
-            {
-                lock (_properties)
-                {
-                    return _properties.Values;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Returns the number of properties in the collection
-        /// </summary>
-        int ICollection<KeyValuePair<string, T>>.Count
-        {
-            get
-            {
-                lock (_properties)
-                {
-                    return _properties.Count;
-                }
-            }
-        }
+        ICollection<T> IDictionary<string, T>.Values => ((IDictionary<string, T>)_backing).Values;
 
         /// <summary>
         /// Whether the collection is read-only.
@@ -114,32 +78,9 @@ namespace Microsoft.Build.Collections
         bool ICollection<KeyValuePair<string, T>>.IsReadOnly => false;
 
         /// <summary>
-        /// Returns the number of property in the collection.
+        /// Returns the number of properties in the collection.
         /// </summary>
-        internal int Count
-        {
-            get
-            {
-                lock (_properties)
-                {
-                    return _properties.Count;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Retrieves a collection containing the names of all the properties present in the dictionary.
-        /// </summary>
-        internal ICollection<string> PropertyNames
-        {
-            get
-            {
-                lock (_properties)
-                {
-                    return _properties.Keys;
-                }
-            }
-        }
+        public int Count => _backing.Count;
 
         /// <summary>
         /// Get the property with the specified name, or null if none exists.
@@ -150,34 +91,13 @@ namespace Microsoft.Build.Collections
         /// This better matches the semantics of property, which are considered to have a blank value if they
         /// are not defined.
         /// </remarks>
-        T IDictionary<string, T>.this[string name]
-        {
-            // The backing properties dictionary is locked in the indexor
-            get => this[name];
-            set => this[name] = value;
-        }
-
-        /// <summary>
-        /// Get the property with the specified name, or null if none exists.
-        /// Sets the property with the specified name, overwriting it if already exists.
-        /// </summary>
-        /// <remarks>
-        /// Unlike Dictionary&lt;K,V&gt;[K], the getter returns null instead of throwing if the key does not exist.
-        /// This better matches the semantics of property, which are considered to have a blank value if they
-        /// are not defined.
-        /// </remarks>
-        internal T this[string name]
+        public T this[string name]
         {
             get
             {
                 // We don't want to check for a zero length name here, since that is a valid name
                 // and should return a null instance which will be interpreted as blank
-                T projectProperty;
-                lock (_properties)
-                {
-                    _properties.TryGetValue(name, out projectProperty);
-                }
-
+                _backing.TryGetValue(name, out T projectProperty);
                 return projectProperty;
             }
 
@@ -190,56 +110,29 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Returns an enumerable which clones the properties 
-        /// </summary>
-        /// <returns>Returns a cloning enumerable.</returns>
-        public IEnumerable<T> GetCopyOnReadEnumerable()
-        {
-            return new CopyOnReadEnumerable<T>(this, _properties);
-        }
-
-        /// <summary>
         /// Returns true if a property with the specified name is present in the collection,
         /// otherwise false.
         /// </summary>
-        public bool Contains(string name)
-        {
-            return ((IDictionary<string, T>)this).ContainsKey(name);
-        }
+        public bool Contains(string name) => _backing.ContainsKey(name);
 
         /// <summary>
         /// Empties the collection
         /// </summary>
         public void Clear()
         {
-            lock (_properties)
-            {
-                _properties.Clear();
-            }
+            _backing = _backing.Clear();
         }
 
         /// <summary>
         /// Gets an enumerator over all the properties in the collection
         /// Enumeration is in undefined order
         /// </summary>
-        public IEnumerator<T> GetEnumerator()
-        {
-            lock (_properties)
-            {
-                return _properties.Values.GetEnumerator();
-            }
-        }
+        public IEnumerator<T> GetEnumerator() => _backing.Values.GetEnumerator();
 
         /// <summary>
         /// Get an enumerator over entries
         /// </summary>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            lock (_properties)
-            {
-                return ((IEnumerable)_properties.Values).GetEnumerator();
-            }
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         #region IEquatable<PropertyDictionary<T>> Members
 
@@ -256,25 +149,29 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            if (ReferenceEquals(this, other))
+            // Copy both backing collections to locals 
+            ImmutableDictionary<string, T> thisBacking = _backing;
+            ImmutableDictionary<string, T> thatBacking = other._backing;
+
+            // If the backing collections are the same, we are equal.
+            // Note that with this check, we intentionally avoid the common reference
+            // comparison between 'this' and 'other'.
+            if (ReferenceEquals(thisBacking, thatBacking))
             {
                 return true;
             }
 
-            if (Count != other.Count)
+            if (thisBacking.Count != thatBacking.Count)
             {
                 return false;
             }
 
-            lock (_properties)
+            foreach (T thisProp in thisBacking.Values)
             {
-                foreach (T leftProp in this)
+                if (!thatBacking.TryGetValue(thisProp.Key, out T thatProp) ||
+                    !EqualityComparer<T>.Default.Equals(thisProp, thatProp))
                 {
-                    T rightProp = other[leftProp.Key];
-                    if (rightProp == null || !EqualityComparer<T>.Default.Equals(leftProp, rightProp))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
@@ -290,6 +187,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void IDictionary<string, T>.Add(string key, T value)
         {
+            ErrorUtilities.VerifyThrowInternalNull(value, "Properties can't have null value");
             ErrorUtilities.VerifyThrow(key == value.Key, "Key must match value's key");
             Set(value);
         }
@@ -297,29 +195,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns true if the dictionary contains the key
         /// </summary>
-        bool IDictionary<string, T>.ContainsKey(string key)
-        {
-            return _properties.ContainsKey(key);
-        }
-
-        /// <summary>
-        /// Removes a property
-        /// </summary>
-        bool IDictionary<string, T>.Remove(string key)
-        {
-            // Backing properties are locked in the remove method
-            return Remove(key);
-        }
+        bool IDictionary<string, T>.ContainsKey(string key) => _backing.ContainsKey(key);
 
         /// <summary>
         /// Attempts to retrieve the a property.
         /// </summary>
-        bool IDictionary<string, T>.TryGetValue(string key, out T value)
-        {
-            value = this[key];
-
-            return value != null;
-        }
+        bool IDictionary<string, T>.TryGetValue(string key, out T value) => _backing.TryGetValue(key, out value);
 
         #endregion
 
@@ -334,24 +215,13 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Clears the property collection
-        /// </summary>
-        void ICollection<KeyValuePair<string, T>>.Clear()
-        {
-            Clear();
-        }
-
-        /// <summary>
         /// Checks for a property in the collection
         /// </summary>
         bool ICollection<KeyValuePair<string, T>>.Contains(KeyValuePair<string, T> item)
         {
-            lock (_properties)
+            if (_backing.TryGetValue(item.Key, out T value))
             {
-                if (_properties.TryGetValue(item.Key, out T value))
-                {
-                    return EqualityComparer<T>.Default.Equals(value, item.Value);
-                }
+                return EqualityComparer<T>.Default.Equals(value, item.Value);
             }
 
             return false;
@@ -371,7 +241,7 @@ namespace Microsoft.Build.Collections
         bool ICollection<KeyValuePair<string, T>>.Remove(KeyValuePair<string, T> item)
         {
             ErrorUtilities.VerifyThrow(item.Key == item.Value.Key, "Key must match value's key");
-            return ((IDictionary<string, T>)this).Remove(item.Key);
+            return Remove(item.Key);
         }
 
         #endregion
@@ -383,10 +253,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            lock (_properties)
-            {
-                return _properties.GetEnumerator();
-            }
+            return _backing.GetEnumerator();
         }
 
         #endregion
@@ -395,28 +262,11 @@ namespace Microsoft.Build.Collections
         /// Removes any property with the specified name.
         /// Returns true if the property was in the collection, otherwise false.
         /// </summary>
-        internal bool Remove(string name)
-        {
-            return Remove(name, clearIfEmpty: false);
-        }
-
-        /// <summary>
-        /// Removes any property with the specified name.
-        /// Returns true if the property was in the collection, otherwise false.
-        /// </summary>
-        internal bool Remove(string name, bool clearIfEmpty)
+        public bool Remove(string name)
         {
             ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
-            lock (_properties)
-            {
-                bool result = _properties.Remove(name);
-                if (clearIfEmpty && _properties.Count == 0)
-                {
-                    _properties.Clear();
-                }
-                return result;
-            }
+            return ImmutableInterlocked.TryRemove(ref _backing, name, out _);
         }
 
         /// <summary>
@@ -428,10 +278,7 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectProperty, nameof(projectProperty));
 
-            lock (_properties)
-            {
-                _properties[projectProperty.Key] = projectProperty;
-            }
+            _backing = _backing.SetItem(projectProperty.Key, projectProperty);
         }
 
         /// <summary>
@@ -440,43 +287,15 @@ namespace Microsoft.Build.Collections
         /// <param name="other">An enumerator over the properties to add.</param>
         internal void ImportProperties(IEnumerable<T> other)
         {
-            // Properties are locked in the set method
-            foreach (T property in other)
-            {
-                Set(property);
-            }
-        }
+            _backing = _backing.SetItems(Items());
 
-        /// <summary>
-        /// Removes the specified properties from this dictionary
-        /// </summary>
-        /// <param name="other">An enumerator over the properties to remove.</param>
-        internal void RemoveProperties(IEnumerable<T> other)
-        {
-            // Properties are locked in the remove method
-            foreach (T property in other)
+            IEnumerable<KeyValuePair<string, T>> Items()
             {
-                Remove(property.Key);
-            }
-        }
-
-        /// <summary>
-        /// Helper to convert into a read-only dictionary of string, string.
-        /// </summary>
-        internal IDictionary<string, string> ToDictionary()
-        {
-            Dictionary<string, string> dictionary;
-
-            lock (_properties)
-            {
-                dictionary = new Dictionary<string, string>(_properties.Count, StringComparer.OrdinalIgnoreCase);
-                foreach (T property in this)
+                foreach (T property in other)
                 {
-                    dictionary[property.Key] = property.EscapedValue;
+                    yield return new(property.Key, property);
                 }
             }
-
-            return dictionary;
         }
 
         /// <summary>

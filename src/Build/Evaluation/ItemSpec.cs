@@ -8,6 +8,8 @@ using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -97,7 +99,13 @@ namespace Microsoft.Build.Evaluation
 
             protected override IMSBuildGlob CreateMsBuildGlob()
             {
-                return new CompositeGlob(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
+                if (ReferencedItems.Count == 1)
+                {
+                    // Optimize the common case, avoiding allocation of enumerable/enumerator.
+                    return ReferencedItems[0].ItemAsValueFragment.ToMSBuildGlob();
+                }
+
+                return CompositeGlob.Create(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
             }
 
             private bool InitReferencedItemsIfNecessary()
@@ -164,7 +172,7 @@ namespace Microsoft.Build.Evaluation
 
         private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
         {
-            //  Code corresponds to Evaluator.CreateItemsFromInclude
+            // Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
 
             if (string.IsNullOrEmpty(evaluatedItemspecEscaped))
@@ -215,7 +223,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // The expression is not of the form "@(X)". Treat as string
 
-                        //  Code corresponds to EngineFileUtilities.GetFileList
+                        // Code corresponds to EngineFileUtilities.GetFileList
                         if (!FileMatcher.HasWildcards(splitEscaped))
                         {
                             // No real wildcards means we just return the original string.  Don't even bother
@@ -227,7 +235,7 @@ namespace Microsoft.Build.Evaluation
                         else if (EscapingUtilities.ContainsEscapedWildcards(splitEscaped))
                         {
                             // '*' is an illegal character to have in a filename.
-                            // todo: file-system assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
+                            // todo: file-system assumption on legal path characters: https://github.com/dotnet/msbuild/issues/781
                             // Just return the original string.
                             fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
@@ -253,7 +261,7 @@ namespace Microsoft.Build.Evaluation
         {
             isItemListExpression = false;
 
-            //  Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
+            // Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
             if (expression.Length == 0)
             {
                 return null;
@@ -368,7 +376,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IMSBuildGlob ToMSBuildGlob()
         {
-            return new CompositeGlob(Fragments.Select(f => f.ToMSBuildGlob()));
+            if (Fragments.Count == 1)
+            {
+                // Optimize the common case, avoiding allocation of enumerable/enumerator.
+                return Fragments[0].ToMSBuildGlob();
+            }
+
+            return CompositeGlob.Create(Fragments.Select(f => f.ToMSBuildGlob()));
         }
 
         /// <summary>

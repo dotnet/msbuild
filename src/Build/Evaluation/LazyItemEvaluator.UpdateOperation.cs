@@ -4,9 +4,12 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {

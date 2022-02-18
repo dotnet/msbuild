@@ -8,7 +8,7 @@ Opt-out is a better approach for us because we'd likely get limited feedback whe
 The opt-out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
 
 ## When do they become permanent?
-A wave of features is set to "rotate out" (i.e. become standard functionality) two bands after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionalty when wave 17.0 is introduced.
+A wave of features is set to "rotate out" (i.e. become standard functionality) two bands after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
 
 ## MSBuildDisableFeaturesFromVersion Values & Outcomes
 | `MSBuildDisableFeaturesFromVersion` Value                         | Result        | Receive Warning? |
@@ -27,11 +27,20 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Allow Custom CopyToOutputDirectory Location With TargetPath](https://github.com/dotnet/msbuild/pull/6237)
 - [Allow users that have certain special characters in their username to build successfully when using exec](https://github.com/dotnet/msbuild/pull/6223)
 - [Fail restore operations when an SDK is unresolveable](https://github.com/dotnet/msbuild/pull/6430)
+- [Optimize glob evaluation](https://github.com/dotnet/msbuild/pull/6151)
+
 ### 17.0
 - [Scheduler should honor BuildParameters.DisableInprocNode](https://github.com/dotnet/msbuild/pull/6400)
 - [Don't compile globbing regexes on .NET Framework](https://github.com/dotnet/msbuild/pull/6632)
 - [Default to transitively copying content items](https://github.com/dotnet/msbuild/pull/6622)
+- [Reference assemblies are now no longer placed in the `bin` directory by default](https://github.com/dotnet/msbuild/pull/6560) (reverted [here](https://github.com/dotnet/msbuild/pull/6718) and brought back [here](https://github.com/dotnet/msbuild/pull/7075))
 - [Improve debugging experience: add global switch MSBuildDebugEngine; Inject binary logger from BuildManager; print static graph as .dot file](https://github.com/dotnet/msbuild/pull/6639)
+- [Fix deadlock in BuildManager vs LoggingService](https://github.com/dotnet/msbuild/pull/6837)
+- [Optimize diag level for file logger and console logger](https://github.com/dotnet/msbuild/pull/7026)
+- [Optimized immutable files up to date checks](https://github.com/dotnet/msbuild/pull/6974)
+- [Add Microsoft.IO.Redist for directory enumeration](https://github.com/dotnet/msbuild/pull/6771)
+- [Process-wide caching of ToolsetConfigurationSection](https://github.com/dotnet/msbuild/pull/6832)
+- [Normalize RAR output paths](https://github.com/dotnet/msbuild/pull/6533)
 
 ## Change Waves No Longer In Rotation
 ### 16.8

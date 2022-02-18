@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Shared;
 using System.Diagnostics;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -17,12 +20,17 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            return !LeftChild.BoolEvaluate(state);
-        }
+            if (!LeftChild.TryBoolEvaluate(state, out bool boolValue))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    state.ElementLocation,
+                    "ExpressionDoesNotEvaluateToBoolean",
+                    LeftChild.GetUnexpandedValue(state),
+                    LeftChild.GetExpandedValue(state),
+                    state.Condition);
+            }
 
-        internal override bool CanBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            return LeftChild.CanBoolEvaluate(state);
+            return !boolValue;
         }
 
         /// <summary>

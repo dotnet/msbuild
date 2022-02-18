@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using System;
@@ -12,6 +13,8 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -406,7 +409,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 };
 
-                // Regression test for https://github.com/Microsoft/msbuild/issues/4175
+                // Regression test for https://github.com/dotnet/msbuild/issues/4175
                 yield return new object[]
                 {
                     new GetFilesComplexGlobbingMatchingInfo
@@ -424,7 +427,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 };
 
-                // Regression test for https://github.com/Microsoft/msbuild/issues/6502
+                // Regression test for https://github.com/dotnet/msbuild/issues/6502
                 yield return new object[]
                 {
                     new GetFilesComplexGlobbingMatchingInfo
@@ -1136,7 +1139,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Unc()
         {
-            //Check UNC functionality
+            // Check UNC functionality
             ValidateFileMatch
                 (
                 "\\\\server\\c$\\**\\*.cs",
@@ -1244,13 +1247,20 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // Nothing's too long for Unix
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
-        public void IllegalTooLongPath()
+        public void IllegalTooLongPathOptOutWave17_0()
         {
-            string longString = new string('X', 500) + "*"; // need a wildcard to do anything
-            string[] result = FileMatcher.Default.GetFiles(@"c:\", longString);
+            using (var env = TestEnvironment.Create())
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_0.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-            Assert.Equal(longString, result[0]); // Does not throw
+                string longString = new string('X', 500) + "*"; // need a wildcard to do anything
+                string[] result = FileMatcher.Default.GetFiles(@"c:\", longString);
 
+                Assert.Equal(longString, result[0]); // Does not throw
+                ChangeWaves.ResetStateForTests();
+            }
             // Not checking that GetFileSpecMatchInfo returns the illegal-path flag,
             // not certain that won't break something; this fix is merely to avoid a crash.
         }
@@ -1283,7 +1293,7 @@ namespace Microsoft.Build.UnitTests
             string workingPath = _env.CreateFolder().Path;
             string workingPathSubfolder = Path.Combine(workingPath, "SubDir");
             string offendingPattern = Path.Combine(workingPath, @"*\..\bar");
-            string[] files = new string[0];
+            string[] files = Array.Empty<string>();
 
             Directory.CreateDirectory(workingPath);
             Directory.CreateDirectory(workingPathSubfolder);
@@ -1349,11 +1359,11 @@ namespace Microsoft.Build.UnitTests
                     Array.Sort(files);
                     Assert.Equal(new []{"a.cs", "b.cs", "c.cs"}, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> {"a.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs", "c.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> {"a.cs", "c.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs" }, files);
                 }
@@ -1413,7 +1423,7 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [InlineData(
-            @"src/**/*.cs", //  Include Pattern
+            @"src/**/*.cs", // Include Pattern
             new string[] //  Matching files
             {
                 @"src/a.cs",
@@ -1421,7 +1431,7 @@ namespace Microsoft.Build.UnitTests
             }
             )]
         [InlineData(
-            @"src/test/**/*.cs", //  Include Pattern
+            @"src/test/**/*.cs", // Include Pattern
             new string[] //  Matching files
             {
                 @"src/test/a.cs",
@@ -1429,7 +1439,7 @@ namespace Microsoft.Build.UnitTests
             }
             )]
         [InlineData(
-            @"src/test/**/a/b/**/*.cs", //  Include Pattern
+            @"src/test/**/a/b/**/*.cs", // Include Pattern
             new string[] //  Matching files
             {
                 @"src/test/dir\a\b\a.cs",
@@ -1443,18 +1453,18 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [InlineData(
-            @"**\*.cs", //  Include Pattern
+            @"**\*.cs", // Include Pattern
             new[] //  Exclude patterns
             {
                 @"bin\**"
             },
-            new string[] //  Matching files
+            new string[] // Matching files
             {
             },
-            new string[] //  Non matching files
+            new string[] // Non matching files
             {
             },
-            new[] //  Non matching files that shouldn't be touched
+            new[] // Non matching files that shouldn't be touched
             {
                 @"bin\foo.cs",
                 @"bin\bar\foo.cs",
@@ -1462,21 +1472,21 @@ namespace Microsoft.Build.UnitTests
             }
             )]
         [InlineData(
-            @"**\*.cs", //  Include Pattern
+            @"**\*.cs", // Include Pattern
             new[] //  Exclude patterns
             {
                 @"bin\**"
             },
-            new[] //  Matching files
+            new[] // Matching files
             {
                 "a.cs",
                 @"b\b.cs",
             },
-            new[] //  Non matching files
+            new[] // Non matching files
             {
                 @"b\b.txt"
             },
-            new[] //  Non matching files that shouldn't be touched
+            new[] // Non matching files that shouldn't be touched
             {
                 @"bin\foo.cs",
                 @"bin\bar\foo.cs",
@@ -1492,26 +1502,24 @@ namespace Microsoft.Build.UnitTests
         public void ExcludeSpecificFiles()
         {
             MatchDriverWithDifferentSlashes(
-                @"**\*.cs",     //  Include Pattern
+                @"**\*.cs",     // Include Pattern
                 new[]    //  Exclude patterns
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new[]    //  Matching files
+                new[]    // Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new[]    //  Non matching files
+                new[]    // Non matching files
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new string[]    //  Non matching files that shouldn't be touched
-                {
-                }
+                Array.Empty<string>()    // Non matching files that shouldn't be touched
             );
         }
 
@@ -1519,27 +1527,27 @@ namespace Microsoft.Build.UnitTests
         public void ExcludePatternAndSpecificFiles()
         {
             MatchDriverWithDifferentSlashes(
-                @"**\*.cs",     //  Include Pattern
+                @"**\*.cs",     // Include Pattern
                 new[]    //  Exclude patterns
                 {
                     @"bin\**",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new[]    //  Matching files
+                new[]    // Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new[]    //  Non matching files
+                new[]    // Non matching files
                 {
                     @"foo.txt",
                     @"Foo\foo.txt",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new[]    //  Non matching files that shouldn't be touched
+                new[]    // Non matching files that shouldn't be touched
                 {
                     @"bin\foo.cs",
                     @"bin\bar\foo.cs",

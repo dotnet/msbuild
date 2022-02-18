@@ -7,6 +7,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     public sealed class WarningsAsMessagesAndErrorsTests
@@ -32,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// https://github.com/dotnet/msbuild/issues/2667
         /// </summary>
         [Fact]
         public void TreatWarningsAsErrorsWhenBuildingSameProjectMultipleTimes()
@@ -126,7 +128,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// https://github.com/dotnet/msbuild/issues/2667
         /// </summary>
         [Fact]
         public void TreatWarningsAsMessagesWhenBuildingSameProjectMultipleTimes()
@@ -417,6 +419,9 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+        /// <summary>
+        /// Test that a task that returns false without logging anything reports MSB4181 as a warning.
+        /// </summary>
         [Fact]
         public void TaskReturnsFailureButDoesNotLogError_ContinueOnError_WarnAndContinue()
         {
@@ -436,6 +441,31 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.WarningCount.ShouldBe(1);
 
                 logger.AssertLogContains("MSB4181");
+            }
+        }
+
+        /// <summary>
+        /// Test that a task that returns false after logging an error->warning does NOT also log MSB4181
+        /// </summary>
+        [Fact]
+        public void TaskReturnsFailureAndLogsError_ContinueOnError_WarnAndContinue()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""false"" ErrorCode=""MSB1234"" ContinueOnError=""WarnAndContinue""/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+
+                // The only warning should be the error->warning logged by the task.
+                logger.WarningCount.ShouldBe(1);
+                logger.AssertLogContains("MSB1234");
             }
         }
 

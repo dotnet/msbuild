@@ -14,6 +14,8 @@ using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using Microsoft.Build.BackEnd.Components.Caching;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -309,13 +311,8 @@ namespace Microsoft.Build.BackEnd
                     _buildRequestEngine.CleanupForBuild();
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
-                if (ExceptionHandling.IsCriticalException(ex))
-                {
-                    throw;
-                }
-
                 // If we had some issue shutting down, don't reuse the node because we may be in some weird state.
                 if (_shutdownReason == NodeEngineShutdownReason.BuildCompleteReuse)
                 {

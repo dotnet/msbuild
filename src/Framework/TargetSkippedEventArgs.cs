@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -157,35 +159,29 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
+                    RawMessage = SkipReason switch
                     {
-                        if (RawMessage == null)
-                        {
-                            RawMessage = SkipReason switch
-                            {
-                                TargetSkipReason.PreviouslyBuiltSuccessfully or TargetSkipReason.PreviouslyBuiltUnsuccessfully =>
-                                    FormatResourceStringIgnoreCodeAndKeyword(
-                                        OriginallySucceeded
-                                        ? "TargetAlreadyCompleteSuccess"
-                                        : "TargetAlreadyCompleteFailure",
-                                        TargetName),
+                        TargetSkipReason.PreviouslyBuiltSuccessfully or TargetSkipReason.PreviouslyBuiltUnsuccessfully =>
+                            FormatResourceStringIgnoreCodeAndKeyword(
+                                OriginallySucceeded
+                                ? "TargetAlreadyCompleteSuccess"
+                                : "TargetAlreadyCompleteFailure",
+                                TargetName),
 
-                                TargetSkipReason.ConditionWasFalse =>
-                                    FormatResourceStringIgnoreCodeAndKeyword(
-                                        "TargetSkippedFalseCondition",
-                                        TargetName,
-                                        Condition,
-                                        EvaluatedCondition),
+                        TargetSkipReason.ConditionWasFalse =>
+                            FormatResourceStringIgnoreCodeAndKeyword(
+                                "TargetSkippedFalseCondition",
+                                TargetName,
+                                Condition,
+                                EvaluatedCondition),
 
-                                TargetSkipReason.OutputsUpToDate =>
-                                    FormatResourceStringIgnoreCodeAndKeyword(
-                                        "SkipTargetBecauseOutputsUpToDate",
-                                        TargetName),
+                        TargetSkipReason.OutputsUpToDate =>
+                            FormatResourceStringIgnoreCodeAndKeyword(
+                                "SkipTargetBecauseOutputsUpToDate",
+                                TargetName),
 
-                                _ => SkipReason.ToString()
-                            };
-                        }
-                    }
+                        _ => SkipReason.ToString()
+                    };
                 }
 
                 return RawMessage;

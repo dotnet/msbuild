@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
-    
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
 
@@ -49,10 +48,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-
     <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs">
       <!-- Extension methods -->
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -114,12 +109,14 @@
       <Link>TaskParameter_Tests.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
-    <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs">
+      <Link>Collections\CopyOnWriteDictionary_Tests.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
       <Link>TestData\GlobbingTestData.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\ImmutableDictionary_Tests.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full' and '$(MonoBuild)' != 'true'">
-      <Link>ImmutableDictionary_Tests.cs</Link>
+      <Link>Collections\ImmutableDictionary_Tests.cs</Link>
     </Compile>
 
     <None Include="..\Shared\UnitTests\App.config">

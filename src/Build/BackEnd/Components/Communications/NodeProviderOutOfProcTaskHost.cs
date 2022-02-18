@@ -10,6 +10,8 @@ using System.Threading;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -372,7 +374,9 @@ namespace Microsoft.Build.BackEnd
 
                     if (s_msbuildName == null)
                     {
-                        s_msbuildName = "MSBuild.exe";
+                        s_msbuildName = (hostContext & HandshakeOptions.NET) == HandshakeOptions.NET
+                            ? "MSBuild.dll"
+                            : "MSBuild.exe";
                     }
                 }
 
@@ -453,9 +457,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
-            NodeContext context;
             bool nodeCreationSucceeded;
-            if (!_nodeContexts.TryGetValue(hostContext, out context))
+            if (!_nodeContexts.ContainsKey(hostContext))
             {
                 nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration);
             }
@@ -467,7 +470,7 @@ namespace Microsoft.Build.BackEnd
 
             if (nodeCreationSucceeded)
             {
-                context = _nodeContexts[hostContext];
+                NodeContext context = _nodeContexts[hostContext];
                 _nodeIdToPacketFactory[(int)hostContext] = factory;
                 _nodeIdToPacketHandler[(int)hostContext] = handler;
 
@@ -498,7 +501,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
-            if (AvailableNodes == 0)
+            if (AvailableNodes <= 0)
             {
                 ErrorUtilities.ThrowInternalError("All allowable nodes already created ({0}).", _nodeContexts.Count);
                 return false;

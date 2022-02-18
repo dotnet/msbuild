@@ -17,7 +17,8 @@ using Xunit.Abstractions;
 
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -202,7 +203,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="extension">Extensions of the file (defaults to '.tmp')</param>
         public TransientTestFile CreateFile(string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(extension, createFile:true, expectedAsOutput:false));
+            return WithTransientTestState(new TransientTestFile(extension, createFile: true, expectedAsOutput: false));
         }
 
         public TransientTestFile CreateFile(string fileName, string contents = "")
@@ -387,7 +388,7 @@ namespace Microsoft.Build.UnitTests
         {
             var currentValue = _accessorFunc();
 
-            //  Something like the following might be preferrable, but the assertion method truncates the values leaving us without
+            // Something like the following might be preferrable, but the assertion method truncates the values leaving us without
             //  useful information.  So use Assert.True instead
             //  Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
 
@@ -415,7 +416,7 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var key in subset.Keys)
                 {
-                    // workaround for https://github.com/Microsoft/msbuild/pull/3866
+                    // workaround for https://github.com/dotnet/msbuild/pull/3866
                     // if the initial environment had empty keys, then MSBuild will accidentally remove them via Environment.SetEnvironmentVariable
                     if (operation != "removed" || !string.IsNullOrEmpty((string) subset[key]))
                     {

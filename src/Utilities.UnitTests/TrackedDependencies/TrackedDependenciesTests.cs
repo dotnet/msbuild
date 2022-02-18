@@ -16,6 +16,8 @@ using Xunit;
 
 #if FEATURE_FILE_TRACKER
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.TrackedDependencies
 {
     public sealed class TrackedDependenciesTests
@@ -165,7 +167,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     new ITaskItem[] {new TaskItem("Debug\\link.4567.write.1.tlog\\")},
                     Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.4567.write.1.tlog\\").ToUpperInvariant()
                 },
-                {new ITaskItem[0] { }, ""},
+                {Array.Empty<ITaskItem>(), ""},
                 {
                     new ITaskItem[3]
                     {
@@ -531,7 +533,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         {
             Console.WriteLine("Test: ReadTLogWithDuplicateInRoot");
 
-            //Prepare files
+            // Prepare files
             DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
             DependencyTestHelper.WriteAll("TestFiles\\foo.cpp", "");
             DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");

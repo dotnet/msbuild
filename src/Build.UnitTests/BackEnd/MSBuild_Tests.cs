@@ -14,6 +14,8 @@ using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class MSBuildTask_Tests : IDisposable
@@ -36,7 +38,7 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4247")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -372,12 +374,13 @@ namespace Microsoft.Build.UnitTests
 
             // Just a normal console application project.
             ObjectModelHelpers.CreateFileInTempProjectDirectory(
-                @"bug'533'369\Sub;Dir\ConsoleApplication1\ConsoleApplication1.csproj", @"
+                @"bug'533'369\Sub;Dir\ConsoleApplication1\ConsoleApplication1.csproj", $@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                   <PropertyGroup>
                     <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                     <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                    <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                     <OutputType>Exe</OutputType>
                     <AssemblyName>ConsoleApplication1</AssemblyName>
                   </PropertyGroup>

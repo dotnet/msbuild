@@ -5,6 +5,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Xml.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

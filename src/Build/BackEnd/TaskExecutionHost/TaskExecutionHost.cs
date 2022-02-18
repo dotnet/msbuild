@@ -12,7 +12,6 @@ using System.Runtime.Remoting;
 #endif
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
@@ -21,10 +20,11 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -160,7 +160,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Finalizer
+        /// Finalizes an instance of the <see cref="TaskExecutionHost"/> class.
         /// </summary>
         ~TaskExecutionHost()
         {
@@ -343,13 +343,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     success = SetTaskParameter(parameter.Key, parameter.Value.Item1, parameter.Value.Item2, requiredParameters.ContainsKey(parameter.Key), out taskParameterSet);
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
                 {
-                    if (ExceptionHandling.NotExpectedReflectionException(e))
-                    {
-                        throw;
-                    }
-
                     // Reflection related exception
                     _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskParametersError", _taskName, e.Message);
 
@@ -442,9 +437,8 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject
+                    ProjectErrorUtilities.ThrowInvalidProject
                     (
-                        false,
                         parameterLocation,
                         "UnsupportedTaskParameterTypeError",
                         parameter.PropertyType.FullName,
@@ -482,9 +476,8 @@ namespace Microsoft.Build.BackEnd
 
                 // We do not recover from a task exception while getting outputs,
                 // so do not merely set gatheredGeneratedOutputsSuccessfully = false; here
-                ProjectErrorUtilities.VerifyThrowInvalidProject
+                ProjectErrorUtilities.ThrowInvalidProject
                 (
-                    false,
                     parameterLocation,
                     "FailedToRetrieveTaskOutputs",
                     _taskName,
@@ -492,17 +485,10 @@ namespace Microsoft.Build.BackEnd
                     e.InnerException?.Message
                 );
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                // Catching Exception, but rethrowing unless it's a well-known exception.
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
-                ProjectErrorUtilities.VerifyThrowInvalidProject
+                ProjectErrorUtilities.ThrowInvalidProject
                 (
-                    false,
                     parameterLocation,
                     "FailedToRetrieveTaskOutputs",
                     _taskName,
@@ -644,36 +630,24 @@ namespace Microsoft.Build.BackEnd
                 {
                     cancellableTask.Cancel();
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     try
                     {
                         _taskLoggingContext.LogFatalTaskError(e, new BuildEventFileInfo(_taskLocation), ((ProjectTaskInstance)_taskLoggingContext.Task).Name);
                     }
-                    catch (InternalErrorException)
+
+                    // If this fails it could be due to the task logging context no longer being valid due to a race condition where the task completes while we
+                    // are in this method.  In that case we simply ignore the exception and carry on since we can't log anything anyhow.
+                    catch (InternalErrorException) when (!_taskLoggingContext.IsValid)
                     {
-                        // If this fails it could be due to the task logging context no longer being valid due to a race condition where the task completes while we
-                        // are in this method.  In that case we simply ignore the exception and carry on since we can't log anything anyhow.
-                        if (_taskLoggingContext.IsValid)
-                        {
-                            throw;
-                        }
                     }
                 }
             }
 
             // Let the task finish now.  If cancellation worked, hopefully it finishes sooner than it would have otherwise.
             // If the task builder crashed, this could have already been disposed
-#if FEATURE_HANDLE_SAFEWAITHANDLE
             if (!_taskExecutionIdle.SafeWaitHandle.IsClosed)
-#else
-            if (!_taskExecutionIdle.GetSafeWaitHandle().IsClosed)
-#endif
             {
                 // Kick off a task to log the message so that we don't block the calling thread.
                 Task.Run(async delegate
@@ -1000,13 +974,8 @@ namespace Microsoft.Build.BackEnd
                     Environment.NewLine + e.InnerException
                 );
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 // Reflection related exception
                 _taskLoggingContext.LogError
                 (
@@ -1183,11 +1152,9 @@ namespace Microsoft.Build.BackEnd
                         {
                             // We only allow a single item to be passed into a parameter of ITaskItem.
 
-                            // Some of the computation (expansion) here is expensive, so don't make the above
-                            // "if" statement directly part of the first param to VerifyThrowInvalidProject.
-                            ProjectErrorUtilities.VerifyThrowInvalidProject
+                            // Some of the computation (expansion) here is expensive, so don't switch to VerifyThrowInvalidProject.
+                            ProjectErrorUtilities.ThrowInvalidProject
                                 (
-                                false,
                                 parameterLocation,
                                 "CannotPassMultipleItemsIntoScalarParameter",
                                 _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation),
@@ -1375,17 +1342,6 @@ namespace Microsoft.Build.BackEnd
                 _taskFactoryWrapper.SetPropertyValue(TaskInstance, parameter, parameterValue);
                 success = true;
             }
-            catch (LoggerException)
-            {
-                // if a logger has failed, abort immediately
-                // Polite logger failure
-                throw;
-            }
-            catch (InternalLoggerException)
-            {
-                // Logger threw arbitrary exception
-                throw;
-            }
             catch (TargetInvocationException e)
             {
                 // handle any exception thrown by the task's setter itself
@@ -1401,14 +1357,10 @@ namespace Microsoft.Build.BackEnd
                     new BuildEventFileInfo(_taskLocation),
                     _taskName);
             }
-            catch (Exception e)
+            // If a logger has failed, abort immediately. This is the polite LoggerException.
+            // InternalLoggerException is an arbitrary logger exception.
+            catch (Exception e) when (e is not LoggerException && e is not InternalLoggerException && !ExceptionHandling.NotExpectedReflectionException(e))
             {
-                // Catching Exception, but rethrowing unless it's a well-known exception.
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 _taskLoggingContext.LogFatalTaskError
                 (
                     e,
@@ -1620,13 +1572,8 @@ namespace Microsoft.Build.BackEnd
             {
                 requiredParameters = _taskFactoryWrapper.GetNamesOfPropertiesWithRequiredAttribute;
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 // Reflection related exception
                 _targetLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "AttributeTypeLoadError", _taskName, e.Message);
 
@@ -1646,14 +1593,10 @@ namespace Microsoft.Build.BackEnd
             {
                 _taskLoggingContext.LogWarningFromText(null, warningCode, helpKeyword, new BuildEventFileInfo(_taskLocation), message);
             }
-            catch (InternalErrorException) // BUGBUG, should never catch this
+            catch (InternalErrorException) when (!_taskLoggingContext.IsValid)
             {
                 // We can get an exception from this when we encounter a race between a task finishing and a cancel occurring.  In this situation
                 // if the task logging context is no longer valid, we choose to eat the exception because we can't log the message anyway.
-                if (_taskLoggingContext.IsValid)
-                {
-                    throw;
-                }
             }
         }
     }

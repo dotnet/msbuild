@@ -4,6 +4,8 @@
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -29,12 +31,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
-        /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         /// <param name="host">The component host.</param>
         /// <param name="enableReuse">Whether this node may be reused for a later build.</param>
         /// <param name="lowPriority">Whether this node is low priority.</param>
         internal NodeEndpointOutOfProc(
-            string pipeName, 
             IBuildComponentHost host,
             bool enableReuse,
             bool lowPriority)
@@ -44,7 +44,7 @@ namespace Microsoft.Build.BackEnd
             _enableReuse = enableReuse;
             _lowPriority = lowPriority;
 
-            InternalConstruct(pipeName);
+            InternalConstruct();
         }
 
         #endregion

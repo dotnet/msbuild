@@ -3,6 +3,8 @@
 
 using System.Runtime.CompilerServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -13,8 +15,8 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class FileUtilitiesRegex
     {
-        private static readonly char _backSlash = '\\';
-        private static readonly char _forwardSlash = '/';
+        private const char _backSlash = '\\';
+        private const char _forwardSlash = '/';
 
         /// <summary>
         /// Indicates whether the specified string follows the pattern drive pattern (for example "C:", "D:").
@@ -77,7 +79,7 @@ namespace Microsoft.Build.Shared
         /// <returns>true if comprises UNC pattern.</returns>
         internal static bool IsUncPattern(string pattern)
         {
-            //Return value == pattern.length means:
+            // Return value == pattern.length means:
             //  meets minimum unc requirements
             //  pattern does not end in a '/' or '\'
             //  if a subfolder were found the value returned would be length up to that subfolder, therefore no subfolder exists
@@ -91,7 +93,7 @@ namespace Microsoft.Build.Shared
         /// <returns>true if starts with UNC pattern.</returns>
         internal static bool StartsWithUncPattern(string pattern)
         {
-            //Any non -1 value returned means there was a match, therefore is begins with the pattern.
+            // Any non -1 value returned means there was a match, therefore is begins with the pattern.
             return StartsWithUncPatternMatchLength(pattern) != -1;
         }
 
@@ -112,17 +114,17 @@ namespace Microsoft.Build.Shared
 
             for (int i = 2; i < pattern.Length; i++)
             {
-                //Real UNC paths should only contain backslashes. However, the previous
+                // Real UNC paths should only contain backslashes. However, the previous
                 // regex pattern accepted both so functionality will be retained.
                 if (pattern[i] == _backSlash ||
                     pattern[i] == _forwardSlash)
                 {
                     if (prevCharWasSlash)
                     {
-                        //We get here in the case of an extra slash.
+                        // We get here in the case of an extra slash.
                         return -1;
                     }
-                    else if(hasShare)
+                    else if (hasShare)
                     {
                         return i;
                     }
@@ -136,9 +138,9 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            if(!hasShare)
+            if (!hasShare)
             {
-                //no subfolder means no unc pattern. string is something like "\\abc" in this case
+                // no subfolder means no unc pattern. string is something like "\\abc" in this case
                 return -1;
             }
 

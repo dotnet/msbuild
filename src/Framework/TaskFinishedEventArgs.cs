@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -144,13 +146,7 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
-                    {
-                        if (RawMessage == null)
-                        {
-                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword(Succeeded ? "TaskFinishedSuccess" : "TaskFinishedFailure", TaskName);
-                        }
-                    }
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword(Succeeded ? "TaskFinishedSuccess" : "TaskFinishedFailure", TaskName);
                 }
 
                 return RawMessage;

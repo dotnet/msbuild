@@ -13,6 +13,8 @@ using System.IO;
 using System.Threading;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 {
     [Trait("Category", "mono-osx-failing")]
@@ -2353,8 +2355,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
 
         [Fact]
-        //FIXME: mono: looks for csc.exe
-        // https://github.com/Microsoft/msbuild/issues/677
+        // FIXME: mono: looks for csc.exe
+        // https://github.com/dotnet/msbuild/issues/677
         [Trait("Category", "mono-osx-failing")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
@@ -2369,14 +2371,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // -------------------------------------------------------------------------------
             ObjectModelHelpers.DeleteTempProjectDirectory();
 
-            ObjectModelHelpers.CreateFileInTempProjectDirectory("lib1.csproj", @"
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("lib1.csproj", $@"
 
-                    <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                    <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                         <PropertyGroup>
                             <ProjectType>Local</ProjectType>
                             <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                             <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
                             <AssemblyName>lib1</AssemblyName>
+                            <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                             <OutputType>Library</OutputType>
                             <RootNamespace>lib1</RootNamespace>
                         </PropertyGroup>
@@ -2530,8 +2533,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// absolute path).  The fix was to use Assembly.LoadFrom instead.
         /// </summary>
         [Fact]
-        //FIXME: mono: looks for csc.exe
-        // https://github.com/Microsoft/msbuild/issues/677
+        // FIXME: mono: looks for csc.exe
+        // https://github.com/dotnet/msbuild/issues/677
         [Trait("Category", "mono-osx-failing")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
@@ -2546,13 +2549,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // -------------------------------------------------------------------------------
             ObjectModelHelpers.DeleteTempProjectDirectory();
 
-            ObjectModelHelpers.CreateFileInTempProjectDirectory("ClassLibrary20.csproj", @"
-
-                    <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("ClassLibrary20.csproj", $@"
+                    <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                         <PropertyGroup>
                             <ProjectType>Local</ProjectType>
                             <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                             <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                            <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                             <AssemblyName>ClassLibrary20</AssemblyName>
                             <OutputType>Library</OutputType>
                             <RootNamespace>lib1</RootNamespace>

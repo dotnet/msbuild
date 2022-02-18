@@ -17,10 +17,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
+#endif
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -568,13 +572,8 @@ namespace Microsoft.Build.Evaluation
                             s_dev10IsInstalled = false;
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.NotExpectedRegistryException(e))
                     {
-                        if (ExceptionHandling.NotExpectedRegistryException(e))
-                        {
-                            throw;
-                        }
-
                         // if it's a registry exception, just shrug, eat it, and move on with life on the assumption that whatever
                         // went wrong, it's pretty clear that Dev10 probably isn't installed.
                         s_dev10IsInstalled = false;
@@ -920,6 +919,17 @@ namespace Microsoft.Build.Evaluation
                     reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
                     reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
 
+                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
+#if RUNTIME_TYPE_NETCORE
+                        "Core",
+#elif MONO
+                        NativeMethodsShared.IsMono ? "Mono" : "Full");
+#else
+                        "Full",
+#endif
+                        mayBeReserved: true));
+
+
                     // Add one for the subtoolset version property -- it may or may not be set depending on whether it has already been set by the
                     // environment or global properties, but it's better to create a dictionary that's one too big than one that's one too small.
                     int count = _environmentProperties.Count + reservedProperties.Count + Properties.Values.Count + _globalProperties.Count + 1;
@@ -1087,7 +1097,7 @@ namespace Microsoft.Build.Evaluation
                 catch (XmlException e)
                 {
                     // handle XML errors in the default tasks file
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, new BuildEventFileInfo(defaultTasksFile, e), taskFileError, e.Message);
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(defaultTasksFile, e), taskFileError, e.Message);
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {

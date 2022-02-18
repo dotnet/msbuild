@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -52,13 +54,13 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
+        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;
             this.fileExists = fileExists;
             this.getRuntimeVersion = getRuntimeVersion;
-            this.targetedRuntimeVersion = targetedRuntimeVesion;
+            this.targetedRuntimeVersion = targetedRuntimeVersion;
             this.targetProcessorArchitecture = targetedProcessorArchitecture;
             this.compareProcessorArchitecture = compareProcessorArchitecture;
         }
@@ -213,6 +215,14 @@ namespace Microsoft.Build.Tasks
                     // Still it happened once, with an older version of the CLR. 
 
                     // ...falling through and relying on the targetAssemblyName==null behavior below...
+                }
+                catch (BadImageFormatException)
+                {
+                    // As above, this is weird: there's a valid reference to an assembly with a file on disk
+                    // that isn't a valid .NET assembly. Might be the result of mid-build corruption, but
+                    // could just be a name collision on one of the possible resolution paths.
+
+                    // as above, fall through.
                 }
 
                 if (searchLocation != null)

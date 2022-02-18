@@ -1,0 +1,29 @@
+<Project>
+
+  <!-- Packages in this file have versions updated periodically by Dependabot.
+       Versions managed by Darc/Maestro should be in ..\Packages.props. -->
+
+  <!--
+    Make sure to update the binding redirects (in src\MSBuild\app.config and src\MSBuild\app.amd64.config) for any changes to
+    the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
+     -->
+  <ItemGroup>
+    <PackageReference Update="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Update="LargeAddressAware" Version="1.0.5" />
+    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
+    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" />
+    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.0.4496" PrivateAssets="All" />
+    <PackageReference Update="PdbGit" Version="3.0.41" />
+    <PackageReference Update="Shouldly" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
+    <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.3" />
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" PrivateAssets="all"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+  </ItemGroup>
+
+</Project>

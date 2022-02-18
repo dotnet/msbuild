@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -21,11 +21,12 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
+    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard' and '$(DotNetBuildFromSource)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
   </ItemGroup>
 
@@ -57,9 +58,6 @@
     </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>Shared\BuildEnvironmentHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <Link>Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>Shared\CanonicalError.cs</Link>
@@ -103,9 +101,6 @@
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>Shared\IConstrainedEqualityComparer.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\InternalErrorException.cs">
-      <Link>Shared\InternalErrorException.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\IKeyed.cs">
       <Link>Shared\IKeyed.cs</Link>
     </Compile>
@@ -114,12 +109,6 @@
     </Compile>
     <Compile Include="..\Shared\Modifiers.cs">
       <Link>Shared\Modifiers.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\NativeMethodsShared.cs">
-      <Link>Shared\NativeMethodsShared.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyUtilities.cs">
-      <Link>Shared\AssemblyUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>Shared\InprocTrackingNativeMethods.cs</Link>
@@ -142,12 +131,6 @@
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>Shared\ResourceUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ReuseableStringBuilder.cs">
-      <Link>Shared\ReuseableStringBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\StringBuilderCache.cs">
-      <Link>Shared\StringBuilderCache.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>Shared\TaskLoggingHelper.cs</Link>
     </Compile>
@@ -162,12 +145,6 @@
     </Compile>
     <Compile Include="..\Shared\ToolsetElement.cs">
       <Link>Shared\ToolsetElement.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
-      <Link>Shared\VisualStudioLocationHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Traits.cs">
-      <Link>Shared\Traits.cs</Link>
     </Compile>
   </ItemGroup>
 

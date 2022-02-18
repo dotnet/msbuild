@@ -6,7 +6,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
-using Microsoft.Build.Internal;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
@@ -17,6 +17,8 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -40,22 +42,22 @@ namespace Microsoft.Build.Evaluation
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
-        protected IFileSystem FileSystem { get; }
+        protected EvaluationContext EvaluationContext { get; }
 
-        protected EngineFileUtilities EngineFileUtilities { get; }
+        protected IFileSystem FileSystem => EvaluationContext.FileSystem;
+        protected FileMatcher FileMatcher => EvaluationContext.FileMatcher;
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
-            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext.FileSystem);
+            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext);
             _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext.FileSystem);
+            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
 
-            FileSystem = evaluationContext.FileSystem;
-            EngineFileUtilities = evaluationContext.EngineFileUtilities;
+            EvaluationContext = evaluationContext;
         }
 
         private ImmutableList<I> GetItems(string itemType)
@@ -278,13 +280,13 @@ namespace Microsoft.Build.Evaluation
                 // Cache results only on the LazyItemOperations whose results are required by an external caller (via GetItems). This means:
                 //   - Callers of GetItems who have announced ahead of time that they would reference an operation (via MarkAsReferenced())
                 // This includes: item references (Include="@(foo)") and metadata conditions (Condition="@(foo->Count()) == 0")
-                // Without ahead of time notifications more computation is done than needed when the results of a future operation are requested 
+                // Without ahead of time notifications more computation is done than needed when the results of a future operation are requested
                 // The future operation is part of another item list referencing this one (making this operation part of the tail).
                 // The future operation will compute this list but since no ahead of time notifications have been made by callers, it won't cache the
                 // intermediary operations that would be requested by those callers.
                 //   - Callers of GetItems that cannot announce ahead of time. This includes item referencing conditions on
                 // Item Groups and Item Elements. However, those conditions are performed eagerly outside of the LazyItemEvaluator, so they will run before
-                // any item referencing operations from inside the LazyItemEvaluator. This 
+                // any item referencing operations from inside the LazyItemEvaluator. This
                 //
                 // If the head of this LazyItemList is uncached, then the tail may contain cached and un-cached nodes.
                 // In this case we have to compute the head plus the part of the tail up to the first cached operation.
@@ -303,7 +305,7 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // tell the cache that this operation's result is needed by an external caller
-                    // this is required for callers that cannot tell the item list ahead of time that 
+                    // this is required for callers that cannot tell the item list ahead of time that
                     // they would be using an operation
                     MarkAsReferenced();
 
@@ -341,7 +343,7 @@ namespace Microsoft.Build.Evaluation
                         break;
                     }
 
-                    //  If this is a remove operation, then add any globs that will be removed
+                    // If this is a remove operation, then add any globs that will be removed
                     //  to a list of globs to ignore in previous operations
                     if (currentList._memoizedOperation.Operation is RemoveOperation removeOperation)
                     {
@@ -369,7 +371,7 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
                 bool addedToBatch = false;
 
-                //  Walk back down the stack of item lists applying operations
+                // Walk back down the stack of item lists applying operations
                 while (itemListStack.Count > 0)
                 {
                     var currentList = itemListStack.Pop();
@@ -422,7 +424,7 @@ namespace Microsoft.Build.Evaluation
                         ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
                     }
 
-                    //  If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
+                    // If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
                     //  modified entry off the stack of globs to ignore
                     if (currentList._memoizedOperation.Operation is RemoveOperation)
                     {
@@ -558,12 +560,12 @@ namespace Microsoft.Build.Evaluation
             // Process include
             ProcessItemSpec(rootDirectory, itemElement.Include, itemElement.IncludeLocation, operationBuilder);
 
-            //  Code corresponds to Evaluator.EvaluateItemElement
+            // Code corresponds to Evaluator.EvaluateItemElement
 
             // Process exclude (STEP 4: Evaluate, split, expand and subtract any Exclude)
             if (itemElement.Exclude.Length > 0)
             {
-                //  Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
+                // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
                 //  if so we need to add the right item reference
                 string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandProperties, itemElement.ExcludeLocation);
 
@@ -636,7 +638,7 @@ namespace Microsoft.Build.Evaluation
         {
             // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
             // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
-            // See: https://github.com/Microsoft/msbuild/issues/3460
+            // See: https://github.com/dotnet/msbuild/issues/3460
             const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
 
             // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and

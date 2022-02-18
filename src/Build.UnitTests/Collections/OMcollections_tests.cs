@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using System;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using System.Collections;
 using System.Linq;
 using Microsoft.Build.Execution;
@@ -14,6 +15,8 @@ using Shouldly;
 using ObjectModel = System.Collections.ObjectModel;
 using Xunit;
 using Microsoft.Build.BackEnd;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {

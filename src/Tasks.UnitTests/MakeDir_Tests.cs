@@ -9,6 +9,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class MakeDir_Tests
@@ -71,7 +73,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 FileStream fs = File.Create(file);
-                fs.Dispose(); //we're gonna try to delete it
+                fs.Dispose(); // we're gonna try to delete it
 
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();
@@ -182,7 +184,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 FileStream fs = File.Create(file);
-                fs.Dispose(); //we're gonna try to delete it
+                fs.Dispose(); // we're gonna try to delete it
 
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();

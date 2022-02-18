@@ -5,23 +5,38 @@
 ## EventSource in MSBuild
 EventSource is primarily used to profile code. For MSBuild specifically, a major goal is to reduce the time it takes to run, as measured (among other metrics) by the Regression Prevention System (RPS), i.e., running specific scenarios. To find which code segments were likely candidates for improvement, EventSources were added around a mix of code segments. Larger segments that encompass several steps within a build occur nearly every time MSBuild is run and take a long time. They generally run relatively few times. Smaller methods with well-defined purposes may occur numerous times. Profiling both types of events provides both broad strokes to identify large code segments that underperform and, more specifically, which parts of them. Profiled functions include:
 
-* MSBuildExe: Executes MSBuild from the command line.
-* Build: Sets up a BuildManager to receive build requests.
-* BuildProject: Builds a project file.
-* RequestThreadProc: A function to requesting a new builder thread.
-* LoadDocument: Loads an XMLDocumentWithLocation from a path.
-* RarRemoveReferencesMarkedForExclusion: Removes blacklisted references from the reference table, putting primary and dependency references in invalid file lists.
-* RarComputeClosure: Resolves references from, for example, properties to explicit values. Used in resolving assembly references (RAR).
-* EvaluateCondition: Checks whether a condition is true and removes false conditionals.
-* Parse: Parses an XML document into a ProjectRootElement.
-* Evaluate: Evaluates a project, running several other parts of MSBuild in the process.
-* GenerateResourceOverall: Uses resource APIs to transform resource files into strongly-typed resource classes.
-* ExpandGlob: Identifies a list of files that correspond to an item, potentially with a wildcard.
-* ApplyLazyItemOperations: Collects a set of items, mutates them in a specified way, and saves the results in a lazy way.
-* RarOverall: Initiates the process of resolving assembly references (RAR).
-* Save: Saves a project to the file system if dirty, creating directories as necessary.
-* Target: Executes a target.
-* RarLogResults: Logs the results from having resolved assembly references (RAR).
+| Event | Description |
+| ------| ------------|
+| ApplyLazyItemOperations | Collects a set of items, mutates them in a specified way, and saves the results in a lazy way. |
+| Build | Sets up a BuildManager to receive build requests. |
+| BuildProject | Builds a project file. |
+| CachedSdkResolverServiceResolveSdk | The caching SDK resolver service is resolving an SDK. |
+| CopyUpToDate | Checks whether the Copy task needs to execute. |
+| Evaluate | Evaluates a project, running several other parts of MSBuild in the process. |
+| EvaluateCondition | Checks whether a condition is true and removes false conditionals. |
+| ExecuteTask | Executes a task. |
+| ExecuteTaskReacquire | Requests to reacquire the node, often after the task has completed other work. |
+| ExecuteTaskYield | Requests to yield the node, often while the task completes other work. |
+| ExpandGlob | Identifies a list of files that correspond to an item, potentially with a wildcard. |
+| GenerateResourceOverall | Uses resource APIs to transform resource files into strongly-typed resource classes. |
+| LoadDocument | Loads an XMLDocumentWithLocation from a path.
+| MSBuildExe | Executes MSBuild from the command line. |
+| PacketReadSize | Reports the size of a packet sent between nodes. Note that this does not include time information. |
+| Parse | Parses an XML document into a ProjectRootElement. |
+| ProjectGraphConstruction | Constructs a dependency graph among projects. |
+| RarComputeClosure | Resolves references from, for example, properties to explicit values. Used in resolving assembly references (RAR). |
+| RarLogResults | Logs the results from having resolved assembly references (RAR). |
+| RarOverall | Initiates the process of resolving assembly references (RAR). |
+| RarRemoveReferencesMarkedForExclusion | Removes blacklisted references from the reference table, putting primary and dependency references in invalid file lists. |
+| RequestThreadProc | A function to requesting a new builder thread. |
+| ReusableStringBuilderFactory | Uses and resizes (if necessary) of ReusableStringBuilders. |
+| ReusableStringBuilderFactoryUnbalanced | Identifies improper usage from multiple threads or buggy code: multiple Gets were called without a Relase. |
+| Save | Saves a project to the file system if dirty, creating directories as necessary. |
+| SdkResolverResolveSdk | A single SDK resolver is called. |
+| SdkResolverServiceInitialize | Initializes SDK resolvers. |
+| Target | Executes a target. |
+| TargetUpToDate | Checks whether a particular target needs to run or is up-to-date. |
+| WriteLinesToFile | Checks whether the WriteLinesToFile task needs to execute. |
 
 One can run MSBuild with eventing using the following command:
 

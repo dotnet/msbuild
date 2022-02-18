@@ -7,12 +7,13 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public sealed class TaskHostFactory_Tests
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/5158")]
         [Trait("Category", "mono-osx-failing")]
         public void TaskNodesDieAfterBuild()
         {
@@ -28,7 +29,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     </Target>
 </Project>";
                 TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
-                ProjectInstance projectInstance = new ProjectInstance(project.Path);
+                ProjectInstance projectInstance = new(project.Path);
                 projectInstance.Build().ShouldBeTrue();
                 string processId = projectInstance.GetPropertyValue("PID");
                 string.IsNullOrEmpty(processId).ShouldBeFalse();

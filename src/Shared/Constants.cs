@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -35,6 +37,11 @@ namespace Microsoft.Build.Shared
         /// Name of the property that indicates a list of warnings to treat as errors.
         /// </summary>
         internal const string WarningsAsErrors = "MSBuildWarningsAsErrors";
+
+        /// <summary>
+        /// Name of the property that indicates a list of warnings to not treat as errors.
+        /// </summary>
+        internal const string WarningsNotAsErrors = "MSBuildWarningsNotAsErrors";
 
         /// <summary>
         /// Name of the property that indicates the list of warnings to treat as messages.
@@ -76,6 +83,16 @@ namespace Microsoft.Build.Shared
         /// Symbol used in ProjectReferenceTarget items to represent default targets
         /// </summary>
         internal const string DefaultTargetsMarker = ".default";
+
+        /// <summary>
+        /// Framework version against which our test projects should be built.
+        /// </summary>
+        /// <remarks>
+        /// The targeting pack for this version of .NET Framework must be installed
+        /// on any machine that wants to run tests successfully, so this can be
+        /// periodically updated.
+        /// </remarks>
+        internal const string StandardTestTargetFrameworkVersion = "v4.8";
 
         /// <summary>
         /// Symbol used in ProjectReferenceTarget items to represent targets specified on the ProjectReference item

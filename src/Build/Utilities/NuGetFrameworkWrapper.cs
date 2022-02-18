@@ -4,7 +4,11 @@
 using System;
 using System.IO;
 using System.Reflection;
+
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -38,7 +42,7 @@ namespace Microsoft.Build.Evaluation
                 var NuGetFrameworkDefaultCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.DefaultCompatibilityProvider");
                 ParseMethod = NuGetFramework.GetMethod("Parse", new Type[] { typeof(string) });
                 IsCompatibleMethod = NuGetFrameworkCompatibilityProvider.GetMethod("IsCompatible");
-                DefaultCompatibilityProvider = NuGetFrameworkDefaultCompatibilityProvider.GetMethod("get_Instance").Invoke(null, new object[] { });
+                DefaultCompatibilityProvider = NuGetFrameworkDefaultCompatibilityProvider.GetMethod("get_Instance").Invoke(null, Array.Empty<object>());
                 FrameworkProperty = NuGetFramework.GetProperty("Framework");
                 VersionProperty = NuGetFramework.GetProperty("Version");
                 PlatformProperty = NuGetFramework.GetProperty("Platform");
@@ -84,7 +88,7 @@ namespace Microsoft.Build.Evaluation
 
         private string GetNonZeroVersionParts(Version version, int minVersionPartCount)
         {
-            var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3: 4;
+            var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3 : 4;
             return version.ToString(Math.Max(nonZeroVersionParts, minVersionPartCount));
         }
     }

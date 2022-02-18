@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.Runtime.Serialization;
 using System.IO;
 using System.Text;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -24,9 +25,9 @@ namespace Microsoft.Build.Framework
     public abstract class BuildEventArgs : EventArgs
     {
         /// <summary>
-        /// Message
+        /// Message. Volatile because it may be updated lock-free after construction.
         /// </summary>
-        private string message;
+        private volatile string message;
 
         /// <summary>
         /// Help keyword
@@ -144,8 +145,17 @@ namespace Microsoft.Build.Framework
         /// </summary>
         protected internal string RawMessage
         {
-            get => message;
+            get => FormattedMessage;
             set => message = value;
+        }
+
+        /// <summary>
+        /// Like <see cref="RawMessage"/> but returns a formatted message string if available.
+        /// Used for serialization.
+        /// </summary>
+        private protected virtual string FormattedMessage
+        {
+            get => message;
         }
 
         /// <summary>
@@ -172,14 +182,24 @@ namespace Microsoft.Build.Framework
         /// Serializes to a stream through a binary writer
         /// </summary>
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into</param>
-        internal virtual void WriteToStream(BinaryWriter writer)
+        /// <param name="messageToWrite">The message to write to the stream.</param>
+        private protected void WriteToStreamWithExplicitMessage(BinaryWriter writer, string messageToWrite)
         {
-            writer.WriteOptionalString(message);
+            writer.WriteOptionalString(messageToWrite);
             writer.WriteOptionalString(helpKeyword);
             writer.WriteOptionalString(senderName);
             writer.WriteTimestamp(timestamp);
             writer.Write(threadId);
             writer.WriteOptionalBuildEventContext(buildEventContext);
+        }
+
+        /// <summary>
+        /// Serializes to a stream through a binary writer
+        /// </summary>
+        /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into</param>
+        internal virtual void WriteToStream(BinaryWriter writer)
+        {
+            WriteToStreamWithExplicitMessage(writer, RawMessage);
         }
 
         /// <summary>
@@ -270,14 +290,14 @@ namespace Microsoft.Build.Framework
         {
             var sb = new StringBuilder();
             sb.Append(resourceName);
-            sb.Append("(");
+            sb.Append('(');
 
             bool notFirst = false;
             foreach (var argument in arguments)
             {
                 if (notFirst)
                 {
-                    sb.Append(",");
+                    sb.Append(',');
                 }
                 else
                 {
@@ -287,7 +307,7 @@ namespace Microsoft.Build.Framework
                 sb.Append(argument);
             }
 
-            sb.Append(")");
+            sb.Append(')');
             return sb.ToString();
         };
 

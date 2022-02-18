@@ -8,6 +8,8 @@ using System.Globalization;
 
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -91,6 +93,7 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<string, string> _globalParameters;
 
         private ICollection<string> _warningsAsErrors;
+        private ICollection<string> _warningsNotAsErrors;
 
         private ICollection<string> _warningsAsMessages;
 
@@ -114,6 +117,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskParameters">Parameters to apply to the task.</param>
         /// <param name="globalParameters">global properties for the current project.</param>
         /// <param name="warningsAsErrors">Warning codes to be treated as errors for the current project.</param>
+        /// <param name="warningsNotAsErrors">Warning codes not to be treated as errors for the current project.</param>
         /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
 #else
         /// <summary>
@@ -134,6 +138,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskParameters">Parameters to apply to the task.</param>
         /// <param name="globalParameters">global properties for the current project.</param>
         /// <param name="warningsAsErrors">Warning codes to be logged as errors for the current project.</param>
+        /// <param name="warningsNotAsErrors">Warning codes not to be treated as errors for the current project.</param>
         /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
 #endif
         public TaskHostConfiguration
@@ -156,6 +161,7 @@ namespace Microsoft.Build.BackEnd
                 IDictionary<string, object> taskParameters,
                 Dictionary<string, string> globalParameters,
                 ICollection<string> warningsAsErrors,
+                ICollection<string> warningsNotAsErrors,
                 ICollection<string> warningsAsMessages
             )
         {
@@ -188,6 +194,7 @@ namespace Microsoft.Build.BackEnd
             _taskLocation = taskLocation;
             _isTaskInputLoggingEnabled = isTaskInputLoggingEnabled;
             _warningsAsErrors = warningsAsErrors;
+            _warningsNotAsErrors = warningsNotAsErrors;
             _warningsAsMessages = warningsAsMessages;
 
             if (taskParameters != null)
@@ -382,6 +389,15 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        public ICollection<string> WarningsNotAsErrors
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                return _warningsNotAsErrors;
+            }
+        }
+
         public ICollection<string> WarningsAsMessages
         {
             [DebuggerStepThrough]
@@ -415,6 +431,13 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _continueOnError);
             translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
             translator.Translate(collection: ref _warningsAsErrors,
+                                 objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
+#if CLR2COMPATIBILITY
+                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+#else
+                                 collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+#endif
+            translator.Translate(collection: ref _warningsNotAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
 #if CLR2COMPATIBILITY
                                  collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));

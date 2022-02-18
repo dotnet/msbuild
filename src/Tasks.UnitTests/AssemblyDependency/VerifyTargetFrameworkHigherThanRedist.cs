@@ -6,6 +6,8 @@ using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>
@@ -153,8 +155,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
-            //e.AssertLogContains("Microsoft.Build.dll");
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
+            // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Empty(t2.ResolvedFiles);
 
             ResolveAssemblyReference t3 = new ResolveAssemblyReference();
@@ -165,7 +167,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Single(t1.ResolvedFiles);
         }
@@ -292,19 +294,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario"
             e.AssertLogContains("DependsOnMSBuild12");
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Empty(t2.ResolvedFiles);
 
             ResolveAssemblyReference t3 = new ResolveAssemblyReference();
-            //t2.TargetFrameworkVersion is null
+            // t2.TargetFrameworkVersion is null
 
             ExecuteRAROnItemsAndRedist(t3, e, items, redistString, false);
 
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario"
             e.AssertLogContains("DependsOnMSBuild12");
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Empty(t3.ResolvedFiles);
         }

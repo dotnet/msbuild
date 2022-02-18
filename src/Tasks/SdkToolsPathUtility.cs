@@ -7,6 +7,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -58,9 +60,9 @@ namespace Microsoft.Build.Tasks
                     {
                         // There may not be an arm directory so we will fall back to the x86 tool location
                         // but if there is then we should try and use it.
-                        ProcessorArchitecture.ARM => Path.Combine(sdkToolsPath, "arm"),
+                        ProcessorArchitecture.ARM   => Path.Combine(sdkToolsPath, "arm"),
                         ProcessorArchitecture.AMD64 => Path.Combine(sdkToolsPath, "x64"),
-                        ProcessorArchitecture.IA64 => Path.Combine(sdkToolsPath, "ia64"),
+                        ProcessorArchitecture.IA64  => Path.Combine(sdkToolsPath, "ia64"),
                         _ => sdkToolsPath,
                     };
                     pathToTool = Path.Combine(processorSpecificToolDirectory, toolName);
