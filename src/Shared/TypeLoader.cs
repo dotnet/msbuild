@@ -290,7 +290,7 @@ namespace Microsoft.Build.Shared
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
                 // Only one thread should be doing operations on this instance of the object at a time.
-                MetadataLoadContext metadataLoadContext = new(new PathAssemblyResolver(new string[] {"abc"}));
+                MetadataLoadContext metadataLoadContext = new(new PathAssemblyResolver(new string[] { Assembly.GetExecutingAssembly().Location, typeof(object).Assembly.Location }));
 
                 Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
                 {
