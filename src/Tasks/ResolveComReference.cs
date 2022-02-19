@@ -187,7 +187,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
+            Log.LogErrorWithCodeFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
             return false;
         }
 
