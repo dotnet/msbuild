@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 var u = new Uri(path);
                 if (String.Equals(u.Host, localHost, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Unfortunatly Uri.Host is read-only, so we need to reconstruct it manually...
+                    // Unfortunately Uri.Host is read-only, so we need to reconstruct it manually...
                     int i = path.IndexOf(localHost, StringComparison.OrdinalIgnoreCase);
                     return i >= 0 ? path.Substring(0, i) + Environment.MachineName.ToLowerInvariant() + path.Substring(i + localHost.Length) : path;
                 }
