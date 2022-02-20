@@ -49,7 +49,9 @@ namespace Microsoft.DotNet.Cli
             "--output",
             "--no-build",
             "--no-restore",
-            "--interactive"
+            "--interactive",
+            "--testSessionId",
+            "--artifacts-processing-mode"
         };
 
         /// <summary>

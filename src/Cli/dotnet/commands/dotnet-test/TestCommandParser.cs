@@ -64,7 +64,9 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> DiagOption = new ForwardedOption<string>(new string[] { "-d", "--diag" }, LocalizableStrings.CmdPathTologFileDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdPathToLogFile
-        }.ForwardAsSingle(o => $"-property:VSTestDiag={SurroundWithDoubleQuotes(CommandDirectoryContext.GetFullPath(o))}");
+        }
+        // Temporarily we don't escape the diag path, issue https://github.com/dotnet/sdk/issues/23970
+        .ForwardAsSingle(o => $"-property:VSTestDiag={CommandDirectoryContext.GetFullPath(o)}");
 
         public static readonly Option<bool> NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.CmdNoBuildDescription)
             .ForwardAs("-property:VSTestNoBuild=true");

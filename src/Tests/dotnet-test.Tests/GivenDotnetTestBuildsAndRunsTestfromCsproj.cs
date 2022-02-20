@@ -728,7 +728,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
         [Theory]
         [InlineData("--output")]
-        [InlineData("--diag")]
+        // Temporarily we don't escape the diag path, issue https://github.com/dotnet/sdk/issues/23970
+        // [InlineData("--diag")]
         [InlineData("--results-directory")]
         public void EnsureOutputPathEscaped(string flag)
         {
