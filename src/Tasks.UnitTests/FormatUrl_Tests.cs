@@ -68,13 +68,14 @@ namespace Microsoft.Build.UnitTests
         /// The URL to format is white space.
         /// </summary>
         [Fact]
-        public void WhitespaceTest()
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void WhitespaceTestOnUnix()
         {
             var t = new FormatUrl();
             t.BuildEngine = new MockEngine(_out);
 
             t.InputUrl = " ";
-            // From the documentation, Path.GetFullPath(" ") should throw an ArgumentException but it doesn't.
+            // From the documentation, Path.GetFullPath(" ") should throw an ArgumentException but it doesn't on macOS and Linux.
             // If the behavior of Path.GetFullPath(string) changes, this unit test will need to be updated.
             var expected = new Uri(Path.GetFullPath(t.InputUrl)).AbsoluteUri;
 
