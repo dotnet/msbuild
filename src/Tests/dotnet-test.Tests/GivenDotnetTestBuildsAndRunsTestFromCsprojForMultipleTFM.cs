@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
         [WindowsOnlyFact]
-        public void ItCreatesTwoCoverageFilesForMultiTargetedProject()
+        public void ItCreatesMergedCoverageFileForMultiTargetedProject()
         {
             // Copy XunitMulti project in output directory of project dotnet-test.Tests
             string testAppName = "XunitMulti";
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify
             DirectoryInfo d = new DirectoryInfo(resultsDirectory);
             FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
-            Assert.Equal(2, coverageFileInfos.Length);
+            Assert.Single(coverageFileInfos);
         }
 
         [Fact]

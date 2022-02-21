@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         public FeatureFlag()
         {
-            FeatureFlags.Add(ARTIFACTS_POSTPROCESSING, false);
+            FeatureFlags.Add(ARTIFACTS_POSTPROCESSING, true);
         }
 
         // Added for artifact porst-processing, it enable/disable the post processing.
