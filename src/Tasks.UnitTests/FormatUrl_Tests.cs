@@ -89,6 +89,21 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// The URL to format is white space.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void WhitespaceTestOnWindows()
+        {
+            var t = new FormatUrl();
+            t.BuildEngine = new MockEngine(_out);
+
+            t.InputUrl = " ";
+            // Path.GetFullPath(" ") should throw an ArgumentException.
+            Assert.Throws<ArgumentException>(() => t.Execute());
+        }
+
+        /// <summary>
         /// The URL to format is a UNC.
         /// </summary>
         [Fact]
