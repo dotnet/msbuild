@@ -582,6 +582,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 _loggingService,
                 BuildEventContext.Invalid,
                 BuildEventFileInfo.Empty);
+            bool shouldInitiateShutdownState = _serviceState != ProjectCacheServiceState.ShutdownStarted && _serviceState != ProjectCacheServiceState.ShutdownFinished;
+
+            if (!shouldInitiateShutdownState)
+            {
+                return;
+            }
 
             try
             {
