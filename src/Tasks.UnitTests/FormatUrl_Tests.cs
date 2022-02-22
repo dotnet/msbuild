@@ -3,15 +3,11 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
-
-#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -106,8 +102,7 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = new MockEngine(_out);
 
             t.InputUrl = " ";
-            // Path.GetFullPath(" ") should throw an ArgumentException.
-            Assert.Throws<ArgumentException>(() => t.Execute());
+            Should.Throw<ArgumentException>(() => t.Execute());
         }
 
         /// <summary>
