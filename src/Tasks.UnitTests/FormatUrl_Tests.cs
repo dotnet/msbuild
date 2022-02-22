@@ -3,14 +3,10 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-
-#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -33,15 +29,8 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = new MockEngine(_out);
 
             t.InputUrl = null;
-            var expected = string.Empty;
-
-            Assert.True(t.Execute()); // "success"
-#if DEBUG
-            _out.WriteLine("InputUrl " + ((null == t.InputUrl) ? "is null." : $"= '{t.InputUrl}'."));
-            _out.WriteLine("expected " + ((null == expected) ? "is null." : $"= '{expected}'."));
-            _out.WriteLine("OutputUrl " + ((null == t.OutputUrl) ? "is null." : $"= '{t.OutputUrl}'."));
-#endif
-            Assert.Equal(expected, t.OutputUrl);
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(string.Empty);
         }
 
         /// <summary>
@@ -53,19 +42,16 @@ namespace Microsoft.Build.UnitTests
             var t = new FormatUrl();
             t.BuildEngine = new MockEngine(_out);
 
-            var expected = t.InputUrl = string.Empty;
-
-            Assert.True(t.Execute()); // "success"
-#if DEBUG
-            _out.WriteLine("InputUrl " + ((null == t.InputUrl) ? "is null." : $"= '{t.InputUrl}'."));
-            _out.WriteLine("expected " + ((null == expected) ? "is null." : $"= '{expected}'."));
-            _out.WriteLine("OutputUrl " + ((null == t.OutputUrl) ? "is null." : $"= '{t.OutputUrl}'."));
-#endif
-            Assert.Equal(expected, t.OutputUrl);
+            t.InputUrl = string.Empty;
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(t.InputUrl);
         }
 
         /// <summary>
         /// The URL to format is white space.
+        /// FormatUrl depends on Path.GetFullPath.
+        /// From the documentation, Path.GetFullPath(" ") should throw an ArgumentException, but it doesn't on macOS and Linux
+        /// where whitespace characters are valid characters for filenames.
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
@@ -75,17 +61,8 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = new MockEngine(_out);
 
             t.InputUrl = " ";
-            // From the documentation, Path.GetFullPath(" ") should throw an ArgumentException but it doesn't on macOS and Linux.
-            // If the behavior of Path.GetFullPath(string) changes, this unit test will need to be updated.
-            var expected = new Uri(Path.GetFullPath(t.InputUrl)).AbsoluteUri;
-
-            Assert.True(t.Execute()); // "success"
-#if DEBUG
-            _out.WriteLine("InputUrl " + ((null == t.InputUrl) ? "is null." : $"= '{t.InputUrl}'."));
-            _out.WriteLine("expected " + ((null == expected) ? "is null." : $"= '{expected}'."));
-            _out.WriteLine("OutputUrl " + ((null == t.OutputUrl) ? "is null." : $"= '{t.OutputUrl}'."));
-#endif
-            Assert.Equal(expected, t.OutputUrl);
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(new Uri(Path.Combine(Environment.CurrentDirectory, t.InputUrl)).AbsoluteUri);
         }
 
         /// <summary>
@@ -99,8 +76,7 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = new MockEngine(_out);
 
             t.InputUrl = " ";
-            // Path.GetFullPath(" ") should throw an ArgumentException.
-            Assert.Throws<ArgumentException>(() => t.Execute());
+            Should.Throw<ArgumentException>(() => t.Execute());
         }
 
         /// <summary>
@@ -113,19 +89,13 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = new MockEngine(_out);
 
             t.InputUrl = @"\\server\filename.ext";
-            var expected = new Uri(t.InputUrl).AbsoluteUri;
-
-            Assert.True(t.Execute()); // "success"
-#if DEBUG
-            _out.WriteLine("InputUrl " + ((null == t.InputUrl) ? "is null." : $"= '{t.InputUrl}'."));
-            _out.WriteLine("expected " + ((null == expected) ? "is null." : $"= '{expected}'."));
-            _out.WriteLine("OutputUrl " + ((null == t.OutputUrl) ? "is null." : $"= '{t.OutputUrl}'."));
-#endif
-            Assert.Equal(expected, t.OutputUrl);
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(@"file://server/filename.ext");
         }
 
         /// <summary>
         /// The URL to format is a local file path.
+        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem. 
         /// </summary>
         [Fact]
         public void LocalPathTest()
@@ -134,15 +104,8 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = new MockEngine(_out);
 
             t.InputUrl = Environment.CurrentDirectory;
-            var expected = new Uri(t.InputUrl).AbsoluteUri;
-
-            Assert.True(t.Execute()); // "success"
-#if DEBUG
-            _out.WriteLine("InputUrl " + ((null == t.InputUrl) ? "is null." : $"= '{t.InputUrl}'."));
-            _out.WriteLine("expected " + ((null == expected) ? "is null." : $"= '{expected}'."));
-            _out.WriteLine("OutputUrl " + ((null == t.OutputUrl) ? "is null." : $"= '{t.OutputUrl}'."));
-#endif
-            Assert.Equal(expected, t.OutputUrl);
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(new Uri(t.InputUrl).AbsoluteUri);
         }
 
         /// <summary>
@@ -155,18 +118,10 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = new MockEngine(_out);
 
             var uriBuilder = new UriBuilder(Uri.UriSchemeHttps, "localhost") { Path = "Example/Path" };
-
             t.InputUrl = uriBuilder.ToString();
+            t.Execute().ShouldBeTrue();
             uriBuilder.Host = Environment.MachineName.ToLowerInvariant();
-            var expected = uriBuilder.ToString();
-
-            Assert.True(t.Execute()); // "success"
-#if DEBUG
-            _out.WriteLine("InputUrl " + ((null == t.InputUrl) ? "is null." : $"= '{t.InputUrl}'."));
-            _out.WriteLine("expected " + ((null == expected) ? "is null." : $"= '{expected}'."));
-            _out.WriteLine("OutputUrl " + ((null == t.OutputUrl) ? "is null." : $"= '{t.OutputUrl}'."));
-#endif
-            Assert.Equal(expected, t.OutputUrl);
+            t.OutputUrl.ShouldBe(uriBuilder.ToString());
         }
 
         /// <summary>
@@ -178,17 +133,9 @@ namespace Microsoft.Build.UnitTests
             var t = new FormatUrl();
             t.BuildEngine = new MockEngine(_out);
 
-            var uriBuilder = new UriBuilder(Uri.UriSchemeHttps, "example.com") { Path = "Example/Path" };
-
-            var expected = t.InputUrl = uriBuilder.ToString();
-
-            Assert.True(t.Execute()); // "success"
-#if DEBUG
-            _out.WriteLine("InputUrl " + ((null == t.InputUrl) ? "is null." : $"= '{t.InputUrl}'."));
-            _out.WriteLine("expected " + ((null == expected) ? "is null." : $"= '{expected}'."));
-            _out.WriteLine("OutputUrl " + ((null == t.OutputUrl) ? "is null." : $"= '{t.OutputUrl}'."));
-#endif
-            Assert.Equal(expected, t.OutputUrl);
+            t.InputUrl = @"https://example.com/Example/Path";
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(t.InputUrl);
         }
 
         /// <summary>
@@ -200,18 +147,9 @@ namespace Microsoft.Build.UnitTests
             var t = new FormatUrl();
             t.BuildEngine = new MockEngine(_out);
 
-            var uriBuilder = new UriBuilder(Uri.UriSchemeHttps, "example.com") { Path = "Example/../Path" };
-
-            t.InputUrl = uriBuilder.ToString();
-            var expected = uriBuilder.Uri.AbsoluteUri;
-
-            Assert.True(t.Execute()); // "success"
-#if DEBUG
-            _out.WriteLine("InputUrl " + ((null == t.InputUrl) ? "is null." : $"= '{t.InputUrl}'."));
-            _out.WriteLine("expected " + ((null == expected) ? "is null." : $"= '{expected}'."));
-            _out.WriteLine("OutputUrl " + ((null == t.OutputUrl) ? "is null." : $"= '{t.OutputUrl}'."));
-#endif
-            Assert.Equal(expected, t.OutputUrl);
+            t.InputUrl = @"https://example.com/Example/../Path";
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(@"https://example.com/Path");
         }
     }
 }
