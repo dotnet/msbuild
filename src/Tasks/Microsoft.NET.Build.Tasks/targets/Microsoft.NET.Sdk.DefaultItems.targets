@@ -36,9 +36,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- WARNING: This pattern is there to ignore folders such as .git and .vs, but it will also match items included with a
          relative path outside the project folder (for example "..\Shared\Shared.cs").  So be sure only to apply it to items
-         that are in the project folder. -->
-    <DefaultExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
-
+         that are in the project folder. Support both DefaultItemExcludesInProjectFolder and DefaultExcludesInProjectFolder
+         properties because of a naming mistake. -->
+    <DefaultExcludesInProjectFolder>$(DefaultExcludesInProjectFolder);$(DefaultItemExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
   </PropertyGroup>
 
   <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.
