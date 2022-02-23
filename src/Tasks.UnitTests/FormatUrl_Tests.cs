@@ -117,11 +117,9 @@ namespace Microsoft.Build.UnitTests
             var t = new FormatUrl();
             t.BuildEngine = new MockEngine(_out);
 
-            var uriBuilder = new UriBuilder(Uri.UriSchemeHttps, "localhost") { Path = "Example/Path" };
-            t.InputUrl = uriBuilder.ToString();
+            t.InputUrl = @"https://localhost/Example/Path";
             t.Execute().ShouldBeTrue();
-            uriBuilder.Host = Environment.MachineName.ToLowerInvariant();
-            t.OutputUrl.ShouldBe(uriBuilder.ToString());
+            t.OutputUrl.ShouldBe(@"https://" + Environment.MachineName.ToLowerInvariant() + "/Example/Path");
         }
 
         /// <summary>
