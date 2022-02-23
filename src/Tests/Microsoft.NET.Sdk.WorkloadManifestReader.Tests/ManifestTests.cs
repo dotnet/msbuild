@@ -203,7 +203,7 @@ namespace ManifestReaderTests
             };
 
             var inconsistentManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, fakeRootPath));
-            Assert.StartsWith("Workload manifest dependency 'DDD' version '39.0.0' is lower than version '30.0.0' required by manifest 'BBB'", inconsistentManifestEx.Message);
+            Assert.StartsWith("Workload manifest dependency 'DDD' version '30.0.0' is lower than version '39.0.0' required by manifest 'BBB'", inconsistentManifestEx.Message);
         }
 
         [Fact]
