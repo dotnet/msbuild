@@ -57,7 +57,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
       </trans-unit>
       <trans-unit id="EnvironmentVariableAsSwitch">
         <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: variável de ambiente indefinida passada como comutador.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This error is shown when a user passes in an environment variable (including from a response file)
@@ -271,14 +271,14 @@ isoladamente.
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="new">
+        <target state="translated">
       -warnNotAsError[:code[;code2]]
-                     List of warning codes to treats not treat as errors.
-                     Use a semicolon or a comma to separate
-                     multiple warning codes. Has no effect if the -warnaserror
-                     switch is not set.
+                     Lista de códigos de aviso para tratar e não tratar como erros.
+                     Use ponto e vírgula ou vírgula para separar
+                     vários códigos de aviso. Não tem efeito se o -warnaserror
+                     interruptor não está definido.
 
-                     Example:
+                     Examplo:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -1243,7 +1243,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="MissingWarnNotAsErrorParameterError">
         <source>MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: especifique um ou mais códigos de aviso ao usar a opção -warnNotAsError.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
@@ -1260,7 +1260,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
-        <target state="new">MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</target>
+        <target state="translated">MSBUILD : error MSB1062: A opção -warnnotaserror não pode ser especificada, a menos que a opção -warnaserror também seja especificada e deixada em branco.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
@@ -1328,7 +1328,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="ResponseFileSwitchFromLocation">
         <source>'{0}' came from '{1}'</source>
-        <target state="new">'{0}' came from '{1}'</target>
+        <target state="translated">'{0}' proveniente de '{1}'</target>
         <note>
       These are response file switches with the location of the response file on disk.
     </note>
@@ -1364,9 +1364,9 @@ isoladamente.
         <source>{0}
     Full command line: '{1}'
   Switches appended by response files:{2}</source>
-        <target state="new">{0}
-    Full command line: '{1}'
-  Switches appended by response files:{2}</target>
+        <target state="translated">{0}
+    Linha de comando completa: '{1}'
+  Comutadores acrescentados por arquivos de resposta:{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">
