@@ -280,7 +280,7 @@ namespace Microsoft.Build.CommandLine
         /// Also, the strings are not localized.
         /// Before execution, this is called with initialize only, causing counters to get called with NextValue() to
         /// initialize them.
-        /// </comments>         
+        /// </comments>
         private static void DumpCounters(bool initializeOnly)
         {
             Process currentProcess = Process.GetCurrentProcess();
@@ -305,7 +305,7 @@ namespace Microsoft.Build.CommandLine
             // Generally, the instance names, such as "msbuild" and "msbuild#2" are non deterministic; we want this process.
             // Don't use the "ID Process" counter out of the "Process" category, as it doesn't use the same naming scheme
             // as the .NET counters. However, the "Process ID" counter out of the ".NET CLR Memory" category apparently uses
-            // the same scheme as the other .NET categories.            
+            // the same scheme as the other .NET categories.
             string currentInstance = null;
             PerformanceCounterCategory processCategory = new PerformanceCounterCategory("Process");
             foreach (string instance in processCategory.GetInstanceNames())
@@ -334,7 +334,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_PERFORMANCE_COUNTERS
         /// <summary>
         /// Dumps all counters in the category
-        /// </summary>        
+        /// </summary>
         private static void DumpAllInCategory(string currentInstance, PerformanceCounterCategory category, bool initializeOnly)
         {
             if (category.CategoryName.IndexOf("remoting", StringComparison.OrdinalIgnoreCase) != -1) // not interesting
@@ -371,7 +371,7 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Dumps one counter
-        /// </summary>          
+        /// </summary>
         private static void DumpCounter(PerformanceCounter counter, bool initializeOnly)
         {
             try
@@ -386,7 +386,7 @@ namespace Microsoft.Build.CommandLine
                 if (!initializeOnly)
                 {
                     string friendlyCounterType = GetFriendlyCounterType(counter.CounterType, counter.CounterName);
-                    
+
                     // At least some (such as % in GC; maybe all) "%" counters are already multiplied by 100. So we don't do that here.
 
                     // Show decimal places if meaningful
@@ -404,7 +404,7 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Gets a friendly representation of the counter units
-        /// </summary>        
+        /// </summary>
         private static string GetFriendlyCounterType(PerformanceCounterType type, string name)
         {
             if (name.IndexOf("bytes", StringComparison.OrdinalIgnoreCase) != -1)
@@ -623,7 +623,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     if (preprocessWriter != null && !BuildEnvironmentHelper.Instance.RunningTests)
                     {
-                        // Indicate to the engine that it can NOT toss extraneous file content: we want to 
+                        // Indicate to the engine that it can NOT toss extraneous file content: we want to
                         // see that in preprocessing/debugging
                         Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
                     }
@@ -876,7 +876,7 @@ namespace Microsoft.Build.CommandLine
             // The OS takes a lock in
             // kernel32.dll!_SetConsoleCtrlHandler, so if a task
             // waits for that lock somehow before quitting, it would hang
-            // because we're in it here. One way a task can end up here is 
+            // because we're in it here. One way a task can end up here is
             // by calling Microsoft.Win32.SystemEvents.Initialize.
             // So do our work asynchronously so we can return immediately.
             // We're already on a threadpool thread anyway.
@@ -1083,7 +1083,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
 #if FEATURE_XML_SCHEMA_VALIDATION
-                // If the user has requested that the schema be validated, do that here. 
+                // If the user has requested that the schema be validated, do that here.
                 if (needToValidateProject && !FileUtilities.IsSolutionFilename(projectFile))
                 {
                     Microsoft.Build.Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.CommandLine
                     ProjectSchemaValidationHandler.VerifyProjectSchema(projectFile, schemaFile, toolset.ToolsPath);
 
                     // If there are schema validation errors, an InitializationException is thrown, so if we get here,
-                    // we can safely assume that the project successfully validated. 
+                    // we can safely assume that the project successfully validated.
                     projectCollection.UnloadProject(project);
                 }
 #endif
@@ -1166,7 +1166,7 @@ namespace Microsoft.Build.CommandLine
                     {
                         parameters.MemoryUseLimit = Convert.ToInt32(memoryUseLimit, CultureInfo.InvariantCulture);
 
-                        // The following ensures that when we divide the use by node count to get the per-limit amount, we always end up with a 
+                        // The following ensures that when we divide the use by node count to get the per-limit amount, we always end up with a
                         // positive value - otherwise setting it too low will result in a zero, which will enable only the default cache behavior
                         // which is not what is intended by using this environment variable.
                         if (parameters.MemoryUseLimit < parameters.MaxNodeCount)
@@ -1182,7 +1182,7 @@ namespace Microsoft.Build.CommandLine
                     IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
-                        var commandLineString = 
+                        var commandLineString =
 #if FEATURE_GET_COMMANDLINE
                             commandLine;
 #else
@@ -1280,7 +1280,7 @@ namespace Microsoft.Build.CommandLine
                             }
                             else
                             {
-                                // After throwing again below the stack will be reset. Make certain we log everything we 
+                                // After throwing again below the stack will be reset. Make certain we log everything we
                                 // can now
                                 Console.WriteLine(AssemblyResources.GetString("FatalError"));
 #if DEBUG
@@ -1611,7 +1611,7 @@ namespace Microsoft.Build.CommandLine
 
                         // Special case: for the switches "/m" (or "/maxCpuCount") and "/bl" (or "/binarylogger") we wish to pretend we saw a default argument
                         // This allows a subsequent /m:n on the command line to override it.
-                        // We could create a new kind of switch with optional parameters, but it's a great deal of churn for this single case. 
+                        // We could create a new kind of switch with optional parameters, but it's a great deal of churn for this single case.
                         // Note that if no "/m" or "/maxCpuCount" switch -- either with or without parameters -- is present, then we still default to 1 cpu
                         // for backwards compatibility.
                         if (string.IsNullOrEmpty(switchParameters))
@@ -2884,7 +2884,7 @@ namespace Microsoft.Build.CommandLine
         private static readonly char[] s_propertyValueSeparator = MSBuildConstants.EqualsChar;
 
         /// <summary>
-        /// This is a set of wildcard chars which can cause a file extension to be invalid 
+        /// This is a set of wildcard chars which can cause a file extension to be invalid
         /// </summary>
         private static readonly char[] s_wildcards = MSBuildConstants.WildcardChars;
 
@@ -2898,7 +2898,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (parameters.Length > 0)
             {
-                // We don't do any validation on the value of the ToolsVersion here, since we don't 
+                // We don't do any validation on the value of the ToolsVersion here, since we don't
                 // know what a valid value looks like.  The engine will take care of this later.
                 return parameters[parameters.Length - 1];
             }
@@ -2990,7 +2990,7 @@ namespace Microsoft.Build.CommandLine
         /// Parameters for a particular logger may be passed in fragments that we have to aggregate: for example,
         ///   /flp:foo=bar;baz=biz /flp:boz=bez becomes "foo=bar;baz=biz;boz=bez"
         /// We are going to aggregate the LoggerParameters into one LoggerParameters string
-        /// to do this we must first trim off the ; from the start and the end of the strings as 
+        /// to do this we must first trim off the ; from the start and the end of the strings as
         /// this would interfere with the use of string.Join by possibly having ;; at the beginning or end of a
         /// logger parameter
         /// </summary>
@@ -3022,7 +3022,7 @@ namespace Microsoft.Build.CommandLine
 
                 string fileParameters = "SHOWPROJECTFILE=TRUE;";
                 // Use a default log file name of "msbuild.log", "msbuild1.log", "msbuild2.log", etc; put this first on the parameter
-                // list so that any supplied log file parameter will override it 
+                // list so that any supplied log file parameter will override it
                 if (i == 0)
                 {
                     fileParameters += "logfile=msbuild.log;";
@@ -3100,7 +3100,7 @@ namespace Microsoft.Build.CommandLine
             // the console logger is always active, unless specifically disabled
             if (!noConsoleLogger)
             {
-                // A central logger will be created for single proc and multiproc 
+                // A central logger will be created for single proc and multiproc
                 ConsoleLogger logger = new ConsoleLogger(verbosity);
                 string consoleParameters = "SHOWPROJECTFILE=TRUE;";
 
@@ -3132,7 +3132,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Returns a DistributedLoggerRecord containing this logger and a ConfigurableForwardingLogger. 
+        /// Returns a DistributedLoggerRecord containing this logger and a ConfigurableForwardingLogger.
         /// Looks at the logger's parameters for any verbosity parameter in order to make sure it is setting up the ConfigurableForwardingLogger
         /// with the verbosity level that the logger will actually use.
         /// </summary>
@@ -3147,6 +3147,11 @@ namespace Microsoft.Build.CommandLine
             {
                 effectiveVerbosity = ProcessVerbositySwitch(verbosityValue);
             }
+
+            // Ensure that the forwarding logger is passed evaluation-finished
+            // and project-started events unless the user has specified individual
+            // events of interest.
+            loggerParameters += ";FORWARDPROJECTCONTEXTEVENTS";
 
             // Gets the currently loaded assembly in which the specified class is defined
             Assembly engineAssembly = typeof(ProjectCollection).GetTypeInfo().Assembly;
@@ -3272,7 +3277,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <remarks>
         /// Internal for unit testing only
-        /// </remarks> 
+        /// </remarks>
         /// <param name="value"></param>
         /// <returns>The logger verbosity level.</returns>
         internal static LoggerVerbosity ProcessVerbositySwitch(string value)
@@ -3615,7 +3620,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Given an invalid ToolsVersion string and the collection of valid toolsets, 
+        /// Given an invalid ToolsVersion string and the collection of valid toolsets,
         /// throws an InitializationException with the appropriate message.
         /// </summary>
         private static void ThrowInvalidToolsVersionInitializationException(IEnumerable<Toolset> toolsets, string toolsVersion)

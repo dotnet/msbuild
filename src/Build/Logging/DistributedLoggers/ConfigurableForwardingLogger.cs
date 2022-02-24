@@ -114,11 +114,20 @@ namespace Microsoft.Build.Logging
                     }
                 }
                 // Setting events to forward on the commandline will override the verbosity and other switches such as
-                // showPerfSummand and ShowSummary
+                // showPerfSummary and ShowSummary
                 if (_forwardingSetFromParameters)
                 {
                     _showPerfSummary = false;
                     _showSummary = true;
+                }
+
+                if (_forwardProjectContext)
+                {
+                    // We can't know whether the project items needed to find ForwardProjectContextDescription
+                    // will be set on ProjectStarted or ProjectEvaluationFinished because we don't know
+                    // all of the other loggers that will be attached. So turn both on.
+                    _forwardingTable[ProjectStartedEventDescription] = 1;
+                    _forwardingTable[ProjectEvaluationFinishedEventDescription] = 1;
                 }
             }
         }
@@ -150,6 +159,10 @@ namespace Microsoft.Build.Logging
             else if (String.Equals(parameterName, ShowCommandLineDescription, StringComparison.OrdinalIgnoreCase))
             {
                 _showCommandLine = true;
+            }
+            else if (string.Equals(parameterName, ForwardProjectContextDescription, StringComparison.OrdinalIgnoreCase))
+            {
+                _forwardProjectContext = true;
             }
         }
 
@@ -545,6 +558,7 @@ namespace Microsoft.Build.Logging
         private const string PerformanceSummaryDescription = "PERFORMANCESUMMARY";
         private const string NoSummaryDescription = "NOSUMMARY";
         private const string ShowCommandLineDescription = "SHOWCOMMANDLINE";
+        private const string ForwardProjectContextDescription = "FORWARDPROJECTCONTEXTEVENTS";
 
         #region Per-build Members
 
@@ -565,6 +579,12 @@ namespace Microsoft.Build.Logging
         /// if this is false the events to forward are based on verbosity else verbosity settings will be ignored
         /// </summary>
         private bool _forwardingSetFromParameters;
+
+        /// <summary>
+        /// Indicates if the events to forward should include project context events, if not
+        /// overridden by individual-event forwarding in <see cref="_forwardingSetFromParameters"/>.
+        /// </summary>
+        private bool _forwardProjectContext = false;
 
         /// <summary>
         /// Console logger should show error and warning summary at the end of build?
