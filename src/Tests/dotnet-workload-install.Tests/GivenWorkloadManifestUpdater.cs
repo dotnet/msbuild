@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             (var manifestUpdater, var nugetDownloader, _) = GetTestUpdater();
 
             manifestUpdater.UpdateAdvertisingManifestsAsync(true).Wait();
-            nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(GetExpectedDownloadedPackages("6.0.100"));
+            nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(GetExpectedDownloadedPackages());
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             (var manifestUpdater, var nugetDownloader, var sentinalPath) = GetTestUpdater();
 
             manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
-            nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(GetExpectedDownloadedPackages("6.0.100"));
+            nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(GetExpectedDownloadedPackages());
             File.Exists(sentinalPath).Should().BeTrue();
         }
 
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
 
-            nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(GetExpectedDownloadedPackages("6.0.100"));
+            nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(GetExpectedDownloadedPackages());
             File.Exists(sentinalPath).Should().BeTrue();
             File.GetLastAccessTime(sentinalPath).Should().BeAfter(createTime);
         }
@@ -342,6 +342,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void TestSideBySideUpdateChecks()
         {
+            // this test checks that different version bands don't interfere with each other's update check timers
             var testDir = _testAssetsManager.CreateTestDirectory().Path;
 
             (var updater1, var downloader1, var sentinalPath1) = GetTestUpdater(testDir: testDir, featureBand: "6.0.100");
@@ -364,12 +365,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             downloader2.DownloadCallParams.Clear();
             updater2.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
-            var updateTime1 = DateTime.Now;
+            // var updateTime1 = DateTime.Now;
             downloader2.DownloadCallParams.Should().BeEmpty();
-            File.GetLastAccessTime(sentinalPath2).Should().BeBefore(updateTime1);
+            File.GetLastAccessTime(sentinalPath2).Should().BeCloseTo(updateTime2);
         }
 
-        private List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)> GetExpectedDownloadedPackages(string sdkFeatureBand)
+        private List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)> GetExpectedDownloadedPackages(string sdkFeatureBand = "6.0.100")
         {
             var expectedDownloadedPackages = _installedManifests
                 .Select(id => ((PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation))(new PackageId($"{id}.manifest-{sdkFeatureBand}"), null, null, null)).ToList();

@@ -456,7 +456,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private bool BackgroundUpdatesAreDisabled() =>
             bool.TryParse(_getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE), out var disableEnvVar) && disableEnvVar;
 
-        private string GetAdvertisingManifestSentinalPath(SdkFeatureBand featureBand) => Path.Combine(_userProfileDir, ".workloadAdvertisingManifestSentinal" + featureBand.ToString());
+        private string GetAdvertisingManifestSentinalPath(SdkFeatureBand featureBand) => Path.Combine(_userProfileDir, $".workloadAdvertisingManifestSentinal{featureBand}");
 
         private string GetAdvertisingWorkloadsFilePath() => GetAdvertisingWorkloadsFilePath(_userProfileDir);
 
