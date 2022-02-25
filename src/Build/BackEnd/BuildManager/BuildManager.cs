@@ -2981,7 +2981,7 @@ namespace Microsoft.Build.Execution
                         loggerClassName: typeof(ConfigurableForwardingLogger).FullName,
                         loggerAssemblyName: typeof(ConfigurableForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
                         loggerAssemblyFile: null,
-                        loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT",
+                        loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT;FORWARDPROJECTCONTEXTEVENTS",
                         verbosity: LoggerVerbosity.Quiet);
 
                     ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(new NullLogger(), forwardingLoggerDescription) };

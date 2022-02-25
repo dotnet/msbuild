@@ -19,6 +19,7 @@ using Shouldly;
 using System.IO.Compression;
 using System.Reflection;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Logging;
 
 #nullable disable
 
@@ -1991,8 +1992,8 @@ namespace Microsoft.Build.UnitTests
                            1,
                            loggers
                        );
-            loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
-            distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
+            loggers.ShouldBeEmpty("Expected no central loggers to be attached");
+            distributedLoggerRecords.ShouldBeEmpty("Expected no distributed loggers to be attached");
 
             MSBuildApp.ProcessConsoleLoggerSwitch
                        (
@@ -2003,8 +2004,12 @@ namespace Microsoft.Build.UnitTests
                            1,
                            loggers
                        );
-            loggers.Count.ShouldBe(1); // "Expected a central loggers to be attached"
-            loggers[0].Parameters.ShouldBe("EnableMPLogging;SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameters passed in"
+            loggers.ShouldHaveSingleItem("Expected a central logger to be attached");
+            loggers[0].ShouldBeOfType<ConsoleLogger>();
+            loggers[0].Parameters.ShouldBe(
+                "EnableMPLogging;SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter",
+                "Expected parameter in logger to match parameters passed in",
+                StringCompareShould.IgnoreCase);
 
             MSBuildApp.ProcessConsoleLoggerSwitch
                        (
@@ -2015,11 +2020,18 @@ namespace Microsoft.Build.UnitTests
                           2,
                           loggers
                       );
-            loggers.Count.ShouldBe(1); // "Expected a central loggers to be attached"
-            distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
+            loggers.ShouldHaveSingleItem("Expected a central logger to be attached");
+            distributedLoggerRecords.ShouldHaveSingleItem("Expected a distributed logger to be attached");
             DistributedLoggerRecord distributedLogger = distributedLoggerRecords[0];
-            distributedLogger.CentralLogger.Parameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameters passed in"
-            distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
+            distributedLogger.CentralLogger.ShouldBeOfType<ConsoleLogger>();
+            distributedLogger.CentralLogger.Parameters.ShouldBe(
+                "SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter",
+                "Expected parameter in logger to match parameters passed in",
+                StringCompareShould.IgnoreCase);
+            distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe(
+                "SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter;FORWARDPROJECTCONTEXTEVENTS",
+                "Expected parameter in logger to match parameter passed in + FORWARDPROJECTCONTEXTEVENTS",
+                StringCompareShould.IgnoreCase);
         }
         #endregion
 

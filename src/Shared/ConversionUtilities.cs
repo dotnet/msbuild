@@ -94,7 +94,7 @@ namespace Microsoft.Build.Shared
         /// Returns true if the string represents a valid MSBuild boolean true value,
         /// such as "on", "!false", "yes"
         /// </summary>
-        private static bool ValidBooleanTrue(string parameterValue)
+        internal static bool ValidBooleanTrue(string parameterValue)
         {
             return String.Equals(parameterValue, "true", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "on", StringComparison.OrdinalIgnoreCase) ||
