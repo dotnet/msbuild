@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 UpdatedAdManifestPackagesExistAsync().GetAwaiter().GetResult())
             {
                 await UpdateAdvertisingManifestsAsync(false);
-                var sentinalPath = GetAdvertisingManifestSentinalPath();
+                var sentinalPath = GetAdvertisingManifestSentinalPath(_sdkFeatureBand);
                 if (File.Exists(sentinalPath))
                 {
                     File.SetLastAccessTime(sentinalPath, DateTime.Now);
@@ -389,7 +389,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private bool AdManifestSentinalIsDueForUpdate()
         {
-            var sentinalPath = GetAdvertisingManifestSentinalPath();
+            var sentinalPath = GetAdvertisingManifestSentinalPath(_sdkFeatureBand);
             int updateIntervalHours;
             if (!int.TryParse(_getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS), out updateIntervalHours))
             {
@@ -456,7 +456,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private bool BackgroundUpdatesAreDisabled() =>
             bool.TryParse(_getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE), out var disableEnvVar) && disableEnvVar;
 
-        private string GetAdvertisingManifestSentinalPath() => Path.Combine(_userProfileDir, ".workloadAdvertisingManifestSentinal");
+        private string GetAdvertisingManifestSentinalPath(SdkFeatureBand featureBand) => Path.Combine(_userProfileDir, ".workloadAdvertisingManifestSentinal" + featureBand.ToString());
 
         private string GetAdvertisingWorkloadsFilePath() => GetAdvertisingWorkloadsFilePath(_userProfileDir);
 
