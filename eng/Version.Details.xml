@@ -66,13 +66,13 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>c24d9a9c91c5d04b7b4de71f1a9f33ac35e09663</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.1.0">
+    <Dependency Name="Microsoft.Build" Version="17.1.1">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>ae57d105c6094d8d59fe42f557ad0dcb46ec285e</Sha>
+      <Sha>a02f73656613e752c73ff442cdd72540f4b09f57</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.1.0-preview-22076-09">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.1.1-preview-22124-06">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>ae57d105c6094d8d59fe42f557ad0dcb46ec285e</Sha>
+      <Sha>a02f73656613e752c73ff442cdd72540f4b09f57</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.1-beta.22057.4">
       <Uri>https://github.com/dotnet/fsharp</Uri>
@@ -133,14 +133,14 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>d3c6439b04452047cb62fc645ce341a034bdb5be</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.200-1.22122.2">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.200-1.22124.2">
       <Uri>https://github.com/dotnet/linker</Uri>
-      <Sha>4a231cedcaf6b93b04d07e5f7670e88e5fa937fe</Sha>
+      <Sha>e9cfb5413a6a7a7b5bfc3b9a73671be2b18642cf</Sha>
       <SourceBuild RepoName="linker" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="6.0.200-1.22122.2">
+    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="6.0.200-1.22124.2">
       <Uri>https://github.com/dotnet/linker</Uri>
-      <Sha>4a231cedcaf6b93b04d07e5f7670e88e5fa937fe</Sha>
+      <Sha>e9cfb5413a6a7a7b5bfc3b9a73671be2b18642cf</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="6.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
