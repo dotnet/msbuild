@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
-        <target state="new">MSB4275: Attempted to create multiple overrides of the same task: {0}</target>
+        <target state="translated">MSB4275: Podjęto próbę utworzenia wielu zastąpień tego samego zadania: {0}</target>
         <note>{StrBegin="MSB4275: "}</note>
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
@@ -226,7 +226,7 @@
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
-        <target state="new">Created an override using task: {0} at {1}</target>
+        <target state="translated">Utworzono zastąpienie przy użyciu zadania: {0} o {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheBeginBuild">
