@@ -1291,6 +1291,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <data name="MSBVersion" UESanitized="true" Visibility="Public">
     <value>MSBuild version = "{0}"</value>
   </data>
+  <data name="MSBuildDebugPath" Visibility="Public">
+    <value>MSBuild logs and debug information will be at "{0}"</value>
+  </data>
+  <data name="SwitchErrorWithArguments" Visibility="Public">
+    <value>{0}
+    Full command line: '{1}'
+  Switches appended by response files:{2}</value>
+  </data>
+  <data name="ResponseFileSwitchFromLocation" Visibility="Public">
+    <value>'{0}' came from '{1}'</value>
+    <comment>
+      These are response file switches with the location of the response file on disk.
+    </comment>
+  </data>
+  <data name="NotWarnAsErrorWithoutWarnAsError" Visibility="Public">
+    <value>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</comment>
+  </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 

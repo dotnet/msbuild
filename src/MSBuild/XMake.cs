@@ -34,6 +34,7 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
+using Microsoft.Build.Shared.Debugging;
 
 #nullable disable
 
@@ -1349,7 +1350,12 @@ namespace Microsoft.Build.CommandLine
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "MSBVersion",
                         ProjectCollection.DisplayVersion),
-                    MessageImportance.Low)
+                    MessageImportance.Low),
+                new BuildManager.DeferredBuildMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "MSBuildDebugPath",
+                        DebugUtils.DebugPath),
+                    DebugUtils.DebugPathMessageImportance),
             };
         }
 
