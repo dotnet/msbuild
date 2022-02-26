@@ -94,11 +94,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// The URL to format is a local file path.
+        /// The URL to format is a local absolute file path.
         /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem. 
         /// </summary>
         [Fact]
-        public void LocalPathTest()
+        public void LocalAbsolutePathTest()
         {
             var t = new FormatUrl();
             t.BuildEngine = new MockEngine(_out);
@@ -106,6 +106,51 @@ namespace Microsoft.Build.UnitTests
             t.InputUrl = Environment.CurrentDirectory;
             t.Execute().ShouldBeTrue();
             t.OutputUrl.ShouldBe(new Uri(t.InputUrl).AbsoluteUri);
+        }
+
+        /// <summary>
+        /// The URL to format is a local relative file path.
+        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem. 
+        /// </summary>
+        [Fact]
+        public void LocalRelativePathTest()
+        {
+            var t = new FormatUrl();
+            t.BuildEngine = new MockEngine(_out);
+
+            t.InputUrl = @".";
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(new Uri(Environment.CurrentDirectory).AbsoluteUri);
+        }
+
+        /// <summary>
+        /// The URL to format is a *nix-style (macOS, Linux) local absolute file path.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void LocalUnixAbsolutePathTest()
+        {
+            var t = new FormatUrl();
+            t.BuildEngine = new MockEngine(_out);
+
+            t.InputUrl = @"/usr/local/share";
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(@"file:///usr/local/share");
+        }
+
+        /// <summary>
+        /// The URL to format is a Windows-style local absolute file path.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void LocalWindowsAbsolutePathTest()
+        {
+            var t = new FormatUrl();
+            t.BuildEngine = new MockEngine(_out);
+
+            t.InputUrl = @"c:\folder\filename.ext";
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(@"file:///c:/folder/filename.ext");
         }
 
         /// <summary>
@@ -137,7 +182,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// The URL to format is a URL.
+        /// The URL to format is a URL with a 'parent' element (..) in the path.
         /// </summary>
         [Fact]
         public void UrlParentPathTest()
