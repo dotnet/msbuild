@@ -31,6 +31,7 @@ namespace Microsoft.Build.Shared
         internal const string update = "Update";
         internal const string matchOnMetadata = "MatchOnMetadata";
         internal const string matchOnMetadataOptions = "MatchOnMetadataOptions";
+        internal const string overrideUsingTask = "Override";
         internal const string keepMetadata = "KeepMetadata";
         internal const string removeMetadata = "RemoveMetadata";
         internal const string keepDuplicates = "KeepDuplicates";

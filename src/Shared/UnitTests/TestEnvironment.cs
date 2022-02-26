@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests
         public TransientTempPath CreateNewTempPathWithSubfolder(string subfolder)
         {
             var folder = CreateFolder(null, true, subfolder);
-            return SetTempPath(folder.Path, true);
+            return WithTransientTestState(SetTempPath(folder.Path, true));
         }
 
         /// <summary>
@@ -191,10 +191,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public TransientTempPath SetTempPath(string tempPath, bool deleteTempDirectory = false)
         {
-            var transientTempPath = new TransientTempPath(tempPath, deleteTempDirectory);
-            _variants.Add(transientTempPath);
-
-            return transientTempPath;
+            return WithTransientTestState(new TransientTempPath(tempPath, deleteTempDirectory));
         }
 
         /// <summary>

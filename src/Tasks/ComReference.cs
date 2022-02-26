@@ -406,22 +406,33 @@ namespace Microsoft.Build.Tasks
 
         private static string GetModuleFileName(IntPtr handle)
         {
-            bool success = false;
-            var buffer = new StringBuilder();
+            char[] buffer = null;
 
             // Try increased buffer sizes if on longpath-enabled Windows
-            for (int bufferSize = NativeMethodsShared.MAX_PATH; !success && bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
+            for (int bufferSize = NativeMethodsShared.MAX_PATH; bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
             {
-                buffer.EnsureCapacity(bufferSize);
+                buffer = System.Buffers.ArrayPool<char>.Shared.Rent(bufferSize);
+                try
+                {
+                    var handleRef = new System.Runtime.InteropServices.HandleRef(buffer, handle);
+                    int pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, bufferSize);
 
-                var handleRef = new System.Runtime.InteropServices.HandleRef(buffer, handle);
-                int pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, buffer.Capacity);
+                    bool isBufferTooSmall = (uint)Marshal.GetLastWin32Error() == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER;
+                    if (pathLength != 0 && !isBufferTooSmall)
+                    {
+                        return new string(buffer, 0, pathLength);
+                    }
+                }
+                finally
+                {
+                    System.Buffers.ArrayPool<char>.Shared.Return(buffer);
+                }
 
-                bool isBufferTooSmall = ((uint)Marshal.GetLastWin32Error() == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
-                success = pathLength != 0 && !isBufferTooSmall;
+                // Double check that the buffer is not insanely big
+                ErrorUtilities.VerifyThrow(bufferSize <= int.MaxValue / 2, "Buffer size approaching int.MaxValue");
             }
 
-            return success ? buffer.ToString() : string.Empty;
+            return string.Empty;
         }
 
         /// <summary>

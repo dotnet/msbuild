@@ -20,6 +20,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 #nullable disable
 
@@ -74,17 +75,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private readonly ElementLocation _elementLocation = ElementLocation.Create("c:\\project.proj", 0, 0);
 
+        private readonly ITestOutputHelper _output;
+
         /// <summary>
         /// Setup some logging services so we can see what is going on.
         /// </summary>
-        public TaskRegistry_Tests()
+        public TaskRegistry_Tests(ITestOutputHelper output)
         {
             _testTaskLocation = typeof(TaskRegistry_Tests).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
 
             _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             _targetLoggingContext = new TargetLoggingContext(_loggingService, _loggerContext);
 
-            _loggingService.RegisterLogger(new MockLogger());
+            _output = output;
+            _loggingService.RegisterLogger(new MockLogger(_output));
         }
 
         #region UsingTaskTests
@@ -622,6 +626,96 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     shouldBeRetrieved: false,
                     shouldBeRetrievedFromCache: true
                 );
+        }
+
+        [Theory]
+        [InlineData("x64","true","x86","", "x64")] // x64 wins
+        [InlineData("x64", "false", "x86", "true", "x86")] // x86 wins
+        public void OverriddenTask_AlwaysWins(string firstArch, string firstOverride, string secondArch, string secondOverride, string expectedArch)
+        {
+            Assert.NotNull(_testTaskLocation); // "Need a test task to run this test"
+
+            List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+            ProjectRootElement project = ProjectRootElement.Create();
+
+            ProjectUsingTaskElement element = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
+            element.Architecture = firstArch;
+            element.Override = firstOverride;
+            elementList.Add(element);
+
+            ProjectUsingTaskElement secondElement = project.AddUsingTask(TestTaskName, _testTaskLocation, null);
+            secondElement.Architecture = secondArch;
+            secondElement.Override = secondOverride;
+            elementList.Add(secondElement);
+
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+
+            // no parameters
+            RetrieveAndValidateRegisteredTaskRecord
+                (
+                    registry,
+                    exactMatchRequired: false,
+                    runtime: null,
+                    architecture: null,
+                    shouldBeRetrieved: true,
+                    shouldBeRetrievedFromCache: false,
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    expectedArchitecture: expectedArch
+                );
+
+            // no parameters, fuzzy match
+            RetrieveAndValidateRegisteredTaskRecord
+                (
+                    registry,
+                    exactMatchRequired: false,
+                    runtime: null,
+                    architecture: null,
+                    shouldBeRetrieved: true,
+                    shouldBeRetrievedFromCache: false,
+                    expectedRuntime: XMakeAttributes.MSBuildRuntimeValues.any,
+                    expectedArchitecture: expectedArch
+                );
+        }
+
+        [Fact]
+        public void OverriddenTask_MultipleOverridesCauseMSB4275()
+        {
+            string proj =
+                $"<Project>" +
+                    $"<Target Name='Bar'/>" +
+                    $"<UsingTask TaskName='Foo' AssemblyFile='$(Outdir)task.dll' Override='true' Architecture='x64' />" +
+                    $"<UsingTask TaskName='Foo' AssemblyFile='$(Outdir)task2.dll' Override='true' Architecture='x86'/>" +
+                $"</Project>";
+
+            MockLogger logger = new MockLogger(_output);
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var testProject = env.CreateTestProjectWithFiles(ObjectModelHelpers.CleanupFileContents(proj));
+
+                using (var buildManager = new BuildManager())
+                {
+                    BuildParameters parameters = new BuildParameters()
+                    {
+                        Loggers = new[] { logger }
+                    };
+
+                    var request = new BuildRequestData(
+                        testProject.ProjectFile,
+                        new Dictionary<string, string>(),
+                        MSBuildConstants.CurrentToolsVersion,
+                        Array.Empty<string>(),
+                        null);
+
+                    var result = buildManager.Build(
+                        parameters,
+                        request);
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                    // We should see MSB4275: Multiple usingtask overrides with the same name
+                    logger.ErrorCount.ShouldBe(1);
+                    logger.AssertLogContains("MSB4275");
+                }
+            }
         }
 
         /// <summary>
