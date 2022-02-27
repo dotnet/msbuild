@@ -48,6 +48,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// No InputUrl value is provided. InputUrl is not a required parameter for the task.
+        /// </summary>
+        [Fact]
+        public void NoInputTest()
+        {
+            var t = new FormatUrl();
+            t.BuildEngine = new MockEngine(_out);
+
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(string.Empty);
+        }
+
+        /// <summary>
         /// The URL to format is white space.
         /// FormatUrl depends on Path.GetFullPath.
         /// From the documentation, Path.GetFullPath(" ") should throw an ArgumentException, but it doesn't on macOS and Linux
