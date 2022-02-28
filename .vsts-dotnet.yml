@@ -125,7 +125,7 @@ stages:
       displayName: Build
       condition: succeeded()
 
-    # Required by Arcade
+    # Required by Microsoft policy
     - template: eng\common\templates\steps\generate-sbom.yml
 
     # Publish OptProf configuration files
