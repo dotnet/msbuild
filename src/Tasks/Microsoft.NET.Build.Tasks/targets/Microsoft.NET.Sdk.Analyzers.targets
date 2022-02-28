@@ -92,7 +92,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.NET.ILLink.Analyzers.props"
-          Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'" />
+          Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'" />
 
   <Import Project="$(MSBuildThisFileDirectory)..\codestyle\cs\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.targets"
           Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'" />
@@ -115,7 +115,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <!-- ILLinker Analyzers -->
-  <ItemGroup Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'">
+  <ItemGroup Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'">
     <Analyzer
       Include="$(MSBuildThisFileDirectory)..\analyzers\ILLink.*.dll"
       IsImplicitlyDefined="true" />
