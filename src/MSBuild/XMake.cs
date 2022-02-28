@@ -1367,7 +1367,7 @@ namespace Microsoft.Build.CommandLine
                     MessageImportance.Low),
             };
 
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine")))
+            if (Traits.Instance.DebugEngine)
             {
                 messages.Add(
                     new BuildManager.DeferredBuildMessage(
