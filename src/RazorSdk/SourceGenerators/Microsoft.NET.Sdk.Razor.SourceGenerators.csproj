@@ -11,8 +11,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Use a pinned version of the compiler unless building from source. This avoids issues where the source generator is unable to launch in VS because the compiler versions is older than the one in the SDK. -->
+    <RSG_MicrosoftCodeAnalysisCSharpPackageVersion Condition="'$(DotNetBuildFromSource)' != 'true'">$(MicrosoftCodeAnalysisCSharpAnalyzerPinnedVersionPackageVersion)</RSG_MicrosoftCodeAnalysisCSharpPackageVersion>
+    <RSG_MicrosoftCodeAnalysisCSharpPackageVersion Condition="'$(DotNetBuildFromSource)' == 'true'">$(MicrosoftCodeAnalysisCSharpPackageVersion)</RSG_MicrosoftCodeAnalysisCSharpPackageVersion>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RSG_MicrosoftCodeAnalysisCSharpPackageVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="$(MicrosoftAspNetCoreRazorSourceGeneratorToolingInternalPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>
 
