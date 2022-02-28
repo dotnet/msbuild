@@ -26,15 +26,11 @@ namespace Microsoft.Build.Shared.Debugging
             string environmentDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
             string debugDirectory = environmentDebugPath;
 
-            DebugPathMessageImportance = MessageImportance.Low;
-
             if (Traits.Instance.DebugEngine)
             {
-                DebugPathMessageImportance = MessageImportance.High;
                 if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory))
                 {
                     // Debug directory is writable; no need for fallbacks
-                    DebugPathMessageImportance = MessageImportance.Low;
                 }
                 else if (FileUtilities.CanWriteToDirectory(Directory.GetCurrentDirectory()))
                 {
@@ -101,8 +97,6 @@ namespace Microsoft.Build.Shared.Debugging
         public static readonly bool ShouldDebugCurrentProcess = CurrentProcessMatchesDebugName();
 
         public static string DebugPath { get; }
-
-        internal static MessageImportance DebugPathMessageImportance { get; }
 
         public static string FindNextAvailableDebugFilePath(string fileName)
         {

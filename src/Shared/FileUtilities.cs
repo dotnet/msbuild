@@ -173,8 +173,8 @@ namespace Microsoft.Build.Shared
         {
             try
             {
-                string testFilePath = Path.Combine(directory, "textFile.txt");
-                File.WriteAllText(testFilePath, "Successfully wrote to file.");
+                string testFilePath = Path.Combine(directory, $"MSBuild_{Guid.NewGuid().ToString("N")}_testFile.txt");
+                File.WriteAllText(testFilePath, $"MSBuild process {Process.GetCurrentProcess().Id} successfully wrote to file.");
                 File.Delete(testFilePath);
                 return true;
             }

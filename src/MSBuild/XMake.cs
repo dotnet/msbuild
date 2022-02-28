@@ -1338,7 +1338,7 @@ namespace Microsoft.Build.CommandLine
 
         private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
-            return new[]
+            List<BuildManager.DeferredBuildMessage> messages = new()
             {
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -1365,12 +1365,19 @@ namespace Microsoft.Build.CommandLine
                         "MSBVersion",
                         ProjectCollection.DisplayVersion),
                     MessageImportance.Low),
-                new BuildManager.DeferredBuildMessage(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+            };
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine")))
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "MSBuildDebugPath",
                         DebugUtils.DebugPath),
-                    DebugUtils.DebugPathMessageImportance),
-            };
+                        MessageImportance.High));
+            }
+
+            return messages;
         }
 
         private static (BuildResultCode result, Exception exception) ExecuteBuild(BuildManager buildManager, BuildRequestData request)
