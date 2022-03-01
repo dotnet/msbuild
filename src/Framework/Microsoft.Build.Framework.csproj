@@ -15,7 +15,7 @@
       an imported package. This suppression should be removed if/when the project is migrated to enable nullable
       reference types.
     -->
-    <NoWarn>$(NoWarn);CS8632</NoWarn>
+    <NoWarn>$(NoWarn),CS8632</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
