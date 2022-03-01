@@ -72,6 +72,13 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
+        public void TelemetryCommonPropertiesShouldReturnIsCIDetection()
+        {
+            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingCache());
+            unitUnderTest.GetTelemetryCommonProperties()["Continuous Integration"].Should().BeOneOf("True", "False");
+        }
+
+        [Fact]
         public void TelemetryCommonPropertiesShouldContainKernelVersion()
         {
             var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingCache());
