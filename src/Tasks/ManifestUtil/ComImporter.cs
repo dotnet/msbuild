@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Resources;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 #if RUNTIME_TYPE_NETCORE
 using System.Runtime.InteropServices.ComTypes;
 #endif
+using System.Runtime.Versioning;
 
 #nullable disable
 

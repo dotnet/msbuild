@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Xml;
 
 using Microsoft.Build.Framework;
@@ -17,6 +18,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates an application manifest for ClickOnce projects.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public sealed class GenerateApplicationManifest : GenerateManifestBase
     {
         private enum _ManifestType
@@ -229,7 +231,7 @@ namespace Microsoft.Build.Tasks
                         name = Path.GetFileName(item.ItemSpec);
                     }
                     FileReference file = AddFileFromItem(item);
-                    if (NativeMethodsShared.IsWindows && !file.ImportComComponent(item.ItemSpec, manifest.OutputMessages, name))
+                    if (!file.ImportComComponent(item.ItemSpec, manifest.OutputMessages, name))
                     {
                         success = false;
                     }
@@ -396,7 +398,7 @@ namespace Microsoft.Build.Tasks
             }
             else if (String.IsNullOrEmpty(manifest.Publisher))
             {
-                string org = NativeMethodsShared.IsWindows ? Util.GetRegisteredOrganization() : string.Empty;
+                string org = Util.GetRegisteredOrganization();
                 if (!String.IsNullOrEmpty(org))
                 {
                     manifest.Publisher = org;

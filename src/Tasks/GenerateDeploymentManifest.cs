@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+using System.Runtime.Versioning;
 
 #nullable disable
 
@@ -13,6 +14,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates a deploy manifest for ClickOnce projects.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public sealed class GenerateDeploymentManifest : GenerateManifestBase
     {
         private bool? _createDesktopShortcut;
@@ -141,7 +143,7 @@ namespace Microsoft.Build.Tasks
             }
             else if (String.IsNullOrEmpty(manifest.Publisher))
             {
-                string org = NativeMethodsShared.IsWindows ? Util.GetRegisteredOrganization() : string.Empty;
+                string org = Util.GetRegisteredOrganization();
 
                 manifest.Publisher = !String.IsNullOrEmpty(org) ? org : manifest.Product;
             }
