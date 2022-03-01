@@ -306,12 +306,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld", identifier: commandName)
                 .WithSource()
                 .Restore(Log);
-
+            var sdkFeatureBand = new SdkFeatureBand(TestContext.Current.ToolsetUnderTest.SdkVersion);
             // Write fake updates file
             Directory.CreateDirectory(Path.Combine(testInstance.Path, ".dotnet"));
-            File.WriteAllText(Path.Combine(testInstance.Path, ".dotnet", ".workloadAdvertisingUpdates"), @"[""maui""]");
+            File.WriteAllText(Path.Combine(testInstance.Path, ".dotnet", $".workloadAdvertisingUpdates{sdkFeatureBand}"), @"[""maui""]");
             // Don't check for updates again and overwrite our existing updates file
-            var sdkFeatureBand = new SdkFeatureBand(TestContext.Current.ToolsetUnderTest.SdkVersion);
             File.WriteAllText(Path.Combine(testInstance.Path, ".dotnet", ".workloadAdvertisingManifestSentinal" + sdkFeatureBand.ToString()), string.Empty);
 
             var command = new DotnetCommand(Log);
@@ -336,6 +335,37 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                     .Should()
                     .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.WorkloadUpdatesAvailable);
             }
+
+        }
+
+        [Fact]
+        public void WorkloadUpdatesForDifferentBandAreNotAdvertised()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
+                .WithSource()
+                .Restore(Log);
+            var sdkFeatureBand = new SdkFeatureBand(TestContext.Current.ToolsetUnderTest.SdkVersion);
+            // Write fake updates file
+            Directory.CreateDirectory(Path.Combine(testInstance.Path, ".dotnet"));
+            File.WriteAllText(Path.Combine(testInstance.Path, ".dotnet", $".workloadAdvertisingUpdates6.0.100"), @"[""maui""]");
+            // Don't check for updates again and overwrite our existing updates file
+            File.WriteAllText(Path.Combine(testInstance.Path, ".dotnet", ".workloadAdvertisingManifestSentinal" + sdkFeatureBand.ToString()), string.Empty);
+
+            var command = new DotnetCommand(Log);
+            var commandResult = command
+                .WithEnvironmentVariable("DOTNET_CLI_HOME", testInstance.Path)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("build");
+
+            commandResult
+                .Should()
+                .Pass();
+
+            commandResult
+                .Should()
+                .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.WorkloadUpdatesAvailable);
+          
+            
 
         }
 
@@ -369,6 +399,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             downloader2.DownloadCallParams.Should().BeEmpty();
             File.GetLastAccessTime(sentinalPath2).Should().BeCloseTo(updateTime2);
         }
+
+       
 
         private List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)> GetExpectedDownloadedPackages(string sdkFeatureBand = "6.0.100")
         {
