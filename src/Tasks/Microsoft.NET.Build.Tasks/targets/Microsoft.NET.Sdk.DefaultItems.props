@@ -28,15 +28,24 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableWebSdkImplicitPackageVersions>false</EnableWebSdkImplicitPackageVersions>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <_ImageGlobs>**/*.png;**/*.bmp;**/*.jpg;**/*.dds;**/*.tif;**/*.tga;**/*.gif</_ImageGlobs>
+  </PropertyGroup>
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' ">
     <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
     <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
+    <!-- WindowsAppSdk is a NuGet delivered Windows SDK. Include only if the package is installed. -->
+    <Content Include="$(_ImageGlobs)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultContentItems)' != 'false' And '$(WindowsAppSdkFoundation)' == 'true' " />
+    <PRIResource Include="**/*.resw" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultPRIResourceItems)' != 'false' And '$(WindowsAppSdkFoundation)' == 'true' "/>
   </ItemGroup>
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultNoneItems)' == 'true' ">
     <None Include="**/*" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
     <None Remove="**/*$(DefaultLanguageSourceExtension)" />
     <None Remove="**/*.resx" />
+    <!-- WindowsAppSdk is a NuGet delivered Windows SDK. Remove only if the package is installed. -->
+    <None Remove="$(_ImageGlobs)" Condition=" '$(WindowsAppSdkFoundation)' == 'true' "/>
+    <None Remove="**/*.resw" Condition=" '$(WindowsAppSdkFoundation)' == 'true' "/>
   </ItemGroup>
 
   <!-- Automatically reference NETStandard.Library or Microsoft.NETCore.App package if targeting the corresponding target framework.
