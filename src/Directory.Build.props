@@ -97,11 +97,11 @@
   <Target Name="ShipRefAssembliesToNuGetPackage" BeforeTargets="Pack" Condition="$(IsInnerBuild) == true">
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(TargetRefPath);@(FinalDocFile)">
-          <PackagePath>ref/$(TargetFramework)</PackagePath>
+          <PackagePath>ref\$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
       <!-- ns2.0 builds use `BuiltProjectOutputGroupOutput` for output ref assemblies -->
       <TfmSpecificPackageFile Include="@(BuiltProjectOutputGroupOutput)" Condition="'$(TargetFramework)' == 'netstandard2.0'">
-          <PackagePath>ref/$(TargetFramework)</PackagePath>
+          <PackagePath>ref\$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>
