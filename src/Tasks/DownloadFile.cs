@@ -148,7 +148,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (HttpRequestException e)
                     {
-#if RUNTIME_TYPE_NETCORE
+#if NET6_0_OR_GREATER
                         // MSBuild History: CustomHttpRequestException was created as a wrapper over HttpRequestException
                         // so it could include the StatusCode. As of net5.0, the statuscode is now in HttpRequestException.
                         throw new HttpRequestException(e.Message, e.InnerException, response.StatusCode);
@@ -186,7 +186,7 @@ namespace Microsoft.Build.Tasks
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 
                             using (Stream responseStream = await response.Content.ReadAsStreamAsync(
-#if RUNTIME_TYPE_NETCORE
+#if NET6_0_OR_GREATER
                             cancellationToken
 #endif
                             ).ConfigureAwait(false))
@@ -241,7 +241,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-#if RUNTIME_TYPE_NETCORE
+#if NET6_0_OR_GREATER
                 // net5.0 included StatusCode in the HttpRequestException.
                 switch (httpRequestException.StatusCode)
                 {
@@ -310,7 +310,7 @@ namespace Microsoft.Build.Tasks
             return !String.IsNullOrWhiteSpace(filename);
         }
 
-#if !RUNTIME_TYPE_NETCORE
+#if !NET6_0_OR_GREATER
         /// <summary>
         /// Represents a wrapper around the <see cref="HttpRequestException"/> that also contains the <see cref="HttpStatusCode"/>.
         /// DEPRECATED as of net5.0, which included the StatusCode in the HttpRequestException class.
