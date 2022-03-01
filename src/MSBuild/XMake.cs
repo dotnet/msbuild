@@ -2595,16 +2595,27 @@ namespace Microsoft.Build.CommandLine
             {
                 Exception nodeException = null;
                 NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
+
+                string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
+                bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
+                try
+                {
+                    if (lowpriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                    {
+                        Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+                    }
+                }
+                // We avoid increasing priority because that causes failures on mac/linux, but there is no good way to
+                // verify that a particular priority is lower than "BelowNormal." If the error appears, ignore it and
+                // leave priority where it was.
+                catch (Win32Exception) { }
+
                 // normal OOP node case
                 if (nodeModeNumber == 1)
                 {
-                    OutOfProcNode node = new OutOfProcNode();
-
                     // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
-                    bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
-
+                    OutOfProcNode node = new OutOfProcNode();
                     shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
                     FileUtilities.ClearCacheDirectory();
