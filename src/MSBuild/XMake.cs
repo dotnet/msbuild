@@ -2597,7 +2597,7 @@ namespace Microsoft.Build.CommandLine
                 NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
 
                 string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
-                bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
+                bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true", StringComparison.OrdinalIgnoreCase);
                 try
                 {
                     if (lowpriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
