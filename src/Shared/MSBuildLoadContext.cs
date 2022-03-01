@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+
+using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Reflection;
@@ -15,6 +18,8 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class MSBuildLoadContext : AssemblyLoadContext
     {
+        private AssemblyDependencyResolver _resolver;
+
         private readonly string _directory;
 
         internal static readonly ImmutableHashSet<string> WellKnownAssemblyNames =
@@ -31,6 +36,8 @@ namespace Microsoft.Build.Shared
             : base($"MSBuild plugin {assemblyPath}")
         {
             _directory = Directory.GetParent(assemblyPath)!.FullName;
+
+            _resolver = new AssemblyDependencyResolver(assemblyPath);
         }
 
         protected override Assembly? Load(AssemblyName assemblyName)
@@ -41,6 +48,19 @@ namespace Microsoft.Build.Shared
                 // and unify to the current version.
                 return null;
             }
+
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_2))
+            {
+                // respect plugin.dll.json with the AssemblyDependencyResolver
+                string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+                if (assemblyPath != null)
+                {
+                    return LoadFromAssemblyPath(assemblyPath);
+                }
+            }
+
+            // Fall back to the older MSBuild-on-Core behavior to continue to support
+            // plugins that don't ship a .deps.json
 
             foreach (var cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
                 // If no culture is specified, attempt to load directly from
@@ -83,6 +103,20 @@ namespace Microsoft.Build.Shared
             }
 
             return null;
+        }
+
+        protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+        {
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_2))
+            {
+                string? libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+                if (libraryPath != null)
+                {
+                    return LoadUnmanagedDllFromPath(libraryPath);
+                }
+            }
+
+            return base.LoadUnmanagedDll(unmanagedDllName);
         }
     }
 }
