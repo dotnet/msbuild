@@ -1,3 +1,25 @@
+Microsoft.Build.Tasks.BuildUri
+Microsoft.Build.Tasks.BuildUri.BuildUri() -> void
+Microsoft.Build.Tasks.BuildUri.InputUri.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.BuildUri.InputUri.set -> void
+Microsoft.Build.Tasks.BuildUri.OutputUri.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.BuildUri.UriFragment.get -> string
+Microsoft.Build.Tasks.BuildUri.UriFragment.set -> void
+Microsoft.Build.Tasks.BuildUri.UriHost.get -> string
+Microsoft.Build.Tasks.BuildUri.UriHost.set -> void
+Microsoft.Build.Tasks.BuildUri.UriPassword.get -> string
+Microsoft.Build.Tasks.BuildUri.UriPassword.set -> void
+Microsoft.Build.Tasks.BuildUri.UriPath.get -> string
+Microsoft.Build.Tasks.BuildUri.UriPath.set -> void
+Microsoft.Build.Tasks.BuildUri.UriPort.get -> int
+Microsoft.Build.Tasks.BuildUri.UriPort.set -> void
+Microsoft.Build.Tasks.BuildUri.UriQuery.get -> string
+Microsoft.Build.Tasks.BuildUri.UriQuery.set -> void
+Microsoft.Build.Tasks.BuildUri.UriScheme.get -> string
+Microsoft.Build.Tasks.BuildUri.UriScheme.set -> void
+Microsoft.Build.Tasks.BuildUri.UriUserName.get -> string
+Microsoft.Build.Tasks.BuildUri.UriUserName.set -> void
 Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.get -> bool
 Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.set -> void
+override Microsoft.Build.Tasks.BuildUri.Execute() -> bool
 static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier, bool disallowMansignTimestampFallback) -> void
