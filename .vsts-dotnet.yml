@@ -125,6 +125,9 @@ stages:
       displayName: Build
       condition: succeeded()
 
+    # Required by Microsoft policy
+    - template: eng\common\templates\steps\generate-sbom.yml
+
     # Publish OptProf configuration files
     - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
       inputs:
