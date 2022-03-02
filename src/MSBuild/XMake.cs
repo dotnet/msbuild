@@ -2065,11 +2065,10 @@ namespace Microsoft.Build.CommandLine
             }
 
 
-            // Honor the low priority flag, we place our selves below normal priority and let sub processes inherit
-            // that priority. Idle priority would prevent the build from proceeding as the user does normal actions.
-            // This switch is processed early because if the main node sets this switch after initialization, it
-            // remains normal priority (as intended for Visual Studio). This ensures that child processes still
-            // switch to low priority as intended.
+            // Idle priority would prevent the build from proceeding as the user does normal actions.
+            // This switch is processed early to capture both the command line case (main node should
+            // also be low priority) and the Visual Studio case in which the main node starts and stays
+            // at normal priority (not through XMake.cs) but worker nodes still need to honor this switch.
             if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.LowPriority))
             {
                 lowPriority = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority], defaultValue: true, resourceName: "InvalidLowPriorityValue");

@@ -179,7 +179,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The last BuildParameters used for building.
         /// </summary>
-        private BuildParameters _previousBuildParameters = null;
+        private bool? _previousLowPriority = null;
 
         /// <summary>
         /// Mapping of unnamed project instances to the file names assigned to them.
@@ -416,15 +416,15 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-            if (_previousBuildParameters != null)
+            if (_previousLowPriority != null)
             {
-                if (parameters.LowPriority != _previousBuildParameters.LowPriority)
+                if (parameters.LowPriority != _previousLowPriority)
                 {
                     _nodeManager?.ShutdownConnectedNodes(parameters.EnableNodeReuse);
                }
             }
 
-            _previousBuildParameters = parameters;
+            _previousLowPriority = parameters.LowPriority;
 
             lock (_syncLock)
             {
