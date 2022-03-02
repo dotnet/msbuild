@@ -18,4 +18,5 @@ internal class ParseResultCommandHandler : ICommandHandler
     }
 
     public Task<int> InvokeAsync(InvocationContext context) => Task.FromResult(_action(context.ParseResult));
+    public int Invoke(InvocationContext context) => _action(context.ParseResult);
 }
