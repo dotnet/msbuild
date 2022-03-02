@@ -32,7 +32,7 @@ Server requires to introduce new packet types for IPC.
 | CommandLine              | String                      | The MSBuild command line with arguments for build |
 | StartupDirectory         | String                      | The startup directory path |
 | BuildProcessEnvironment  | Dictionary<String, String>  | Environment variables for current build |
-| Culture                  | CultrueInfo                 | The culture value for current build |
+| Culture                  | CultureInfo                 | The culture value for current build |
 | UICulture                | CultrueInfo                 | The UI culture value for current build |
 
 `EntryNodeConsoleWrite` contains information for console output.
