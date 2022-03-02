@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
@@ -16,6 +17,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates a bootstrapper for ClickOnce deployment projects.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public sealed class GenerateLauncher : TaskExtension
     {
         private const string LAUNCHER_EXE = "Launcher.exe";
@@ -39,7 +41,13 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            if (LauncherPath == null && NativeMethodsShared.IsWindows)
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateLauncher));
+                return false;
+            }
+
+            if (LauncherPath == null)
             {
                 // Launcher lives next to ClickOnce bootstrapper.
                 // GetDefaultPath obtains the root ClickOnce boostrapper path.
@@ -57,17 +65,17 @@ namespace Microsoft.Build.Tasks
 
             var launcherBuilder = new LauncherBuilder(LauncherPath);
             string entryPointFileName = Path.GetFileName(EntryPoint.ItemSpec);
-            //
+
             // If the EntryPoint specified is apphost.exe or singlefilehost.exe, we need to replace the EntryPoint
             // with the AssemblyName instead since apphost.exe/singlefilehost.exe is an intermediate file for
             // for final published {assemblyname}.exe.
-            //
             if ((entryPointFileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) || 
                 entryPointFileName.Equals(Constants.SingleFileHostExe, StringComparison.InvariantCultureIgnoreCase)) &&
-                !String.IsNullOrEmpty(AssemblyName))
+                !string.IsNullOrEmpty(AssemblyName))
             {
                 entryPointFileName = AssemblyName;
             }
+
             BuildResults results = launcherBuilder.Build(entryPointFileName, OutputPath);
 
             BuildMessage[] messages = results.Messages;

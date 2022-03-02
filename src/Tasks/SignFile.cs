@@ -4,6 +4,7 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -19,6 +20,7 @@ namespace Microsoft.Build.Tasks
     /// provided and optionally uses a timestamp if a URL is provided.
     /// It can sign ClickOnce manifests as well as exe's.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public sealed class SignFile : Task
     {
         public SignFile()
