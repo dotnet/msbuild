@@ -146,13 +146,15 @@ namespace Microsoft.Build.Tasks
                     {
                         response.EnsureSuccessStatusCode();
                     }
+#if NET6_0_OR_GREATER
+                    catch (HttpRequestException)
+                    {
+                        throw;
+#else
                     catch (HttpRequestException e)
                     {
-#if NET6_0_OR_GREATER
                         // MSBuild History: CustomHttpRequestException was created as a wrapper over HttpRequestException
                         // so it could include the StatusCode. As of net5.0, the statuscode is now in HttpRequestException.
-                        throw new HttpRequestException(e.Message, e.InnerException, response.StatusCode);
-#else
                         throw new CustomHttpRequestException(e.Message, e.InnerException, response.StatusCode);
 #endif
                     }
