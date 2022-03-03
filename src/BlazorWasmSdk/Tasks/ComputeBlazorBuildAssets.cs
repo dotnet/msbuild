@@ -282,6 +282,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 ".ts" when fromMonoPackage && fileName == "dotnet.d" => "dotnet type definition is not used by Blazor",
                 ".js" when assetType == "native" && fileName != "dotnet" => $"{fileName}{extension} is not used by Blazor",
                 ".pdb" when !copySymbols => "copying symbols is disabled",
+                ".symbols" when fromMonoPackage => "extension .symbols is not required.",
                 _ => null
             };
 

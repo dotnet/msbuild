@@ -20,7 +20,9 @@ foreach($line in ([System.IO.File]::ReadLines($testsProjectCannotRunOnHelixListP
     foreach ($testProject in $allTests)
     {
         if ($testProject.FullName.Contains($line.Trim())) {
-            $passInArgs = @("-test") + $args + @("-projects", $testProject.FullName)
+            $baseName = $testProject.BaseName
+
+            $passInArgs = @("-test") + $args + @("-projects", $testProject.FullName, "/bl:$buildSourcesDirectory\artifacts\log\$configuration\$baseName.binlog")
             $anyError = $false
             try {
                 Invoke-Expression "& $buildshScriptPath $passInArgs"
