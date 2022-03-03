@@ -8,14 +8,6 @@
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is a common assembly used by other MSBuild assemblies.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
-
-    <!--
-      Ignore warnings for nullable annotations in code that doesn't use '#nullable'. Microsoft.CodeAnalysis.Collections
-      source assumes nullable reference types is enabled, so this warning is reported but cannot be fixed in code from
-      an imported package. This suppression should be removed if/when the project is migrated to enable nullable
-      reference types.
-    -->
-    <NoWarn>$(NoWarn),CS8632</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
