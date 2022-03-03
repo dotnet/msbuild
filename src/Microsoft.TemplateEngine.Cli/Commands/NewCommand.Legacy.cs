@@ -82,15 +82,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (optionResult != null)
             {
                 List<string> wrongTokens = new List<string>();
-                if (!string.IsNullOrWhiteSpace(optionResult.Token.Value))
+                if (optionResult.Token is { } && !string.IsNullOrWhiteSpace(optionResult.Token.Value))
                 {
                     wrongTokens.Add($"'{optionResult.Token.Value}'");
                 }
                 foreach (var token in optionResult.Tokens)
                 {
-                    if (!string.IsNullOrWhiteSpace(token.Value))
+                    if (token is { } t && !string.IsNullOrWhiteSpace(t.Value))
                     {
-                        wrongTokens.Add($"'{token.Value}'");
+                        wrongTokens.Add($"'{t.Value}'");
                     }
                 }
                 //Unrecognized command or argument(s): {0}

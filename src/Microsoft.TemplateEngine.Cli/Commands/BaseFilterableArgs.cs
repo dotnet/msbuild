@@ -46,7 +46,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         /// <returns>Token or null when token cannot be evaluated.</returns>
         internal string? GetFilterToken(FilterOptionDefinition filter)
         {
-            return _filters[filter].Token.Value;
+            return _filters[filter].Token?.Value;
         }
 
         private static IReadOnlyDictionary<FilterOptionDefinition, OptionResult> ParseFilters(IFilterableCommand filterableCommand, ParseResult parseResult)

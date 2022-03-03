@@ -248,7 +248,7 @@ namespace Microsoft.TemplateEngine.Cli
                             argumentResult.ErrorMessage = string.Format(
                                 LocalizableStrings.ParseTemplateOption_Error_InvalidDefaultValue,
                                 parameter.DefaultValue,
-                                or.Token.Value,
+                                or.Token?.Value,
                                 typeof(T).Name);
 
                             //https://github.com/dotnet/command-line-api/blob/5eca6545a0196124cc1a66d8bd43db8945f1f1b7/src/System.CommandLine/Argument%7BT%7D.cs#L99-L113
@@ -256,7 +256,7 @@ namespace Microsoft.TemplateEngine.Cli
                             return default!;
                         }
                         //Default value for argument missing for option: '{0}'.
-                        argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.Token.Value);
+                        argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.Token?.Value);
                         return default!;
                     }
                     if (parameter.DefaultIfOptionWithoutValue != null)
@@ -270,12 +270,12 @@ namespace Microsoft.TemplateEngine.Cli
                         argumentResult.ErrorMessage = string.Format(
                             LocalizableStrings.ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue,
                             parameter.DefaultIfOptionWithoutValue,
-                            or.Token.Value,
+                            or.Token?.Value,
                             typeof(T).Name);
                         return default!;
                     }
                     //Required argument missing for option: '{0}'.
-                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.Token.Value);
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.Token?.Value);
                     return default!;
                 }
                 else if (argumentResult.Tokens.Count == 1)
@@ -289,14 +289,14 @@ namespace Microsoft.TemplateEngine.Cli
                     argumentResult.ErrorMessage = string.Format(
                         LocalizableStrings.ParseTemplateOption_Error_InvalidArgument,
                         argumentResult.Tokens[0].Value,
-                        or.Token.Value,
+                        or.Token?.Value,
                         typeof(T).Name);
                     return default!;
                 }
                 else
                 {
                     //Using more than 1 argument is not allowed for '{0}', used: {1}.
-                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.Token.Value, argumentResult.Tokens.Count);
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.Token?.Value, argumentResult.Tokens.Count);
                     return default!;
                 }
             };

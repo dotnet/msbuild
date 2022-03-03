@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             return new TemplateOptionResult(
                     option,
-                    optionResult.Token.Value ?? string.Empty,
+                    optionResult.Token?.Value ?? string.Empty,
                     optionResult.GetValueOrDefault<string>());
         }
     }

@@ -181,9 +181,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             string baseInputParameters = $"'{args.ShortName}'";
             foreach (var option in new[] { languageOption, typeOption, baselineOption })
             {
-                if (result.FindResultFor(option) is { } optionResult)
+                if (result.FindResultFor(option) is { } optionResult && optionResult.Token is { } token)
                 {
-                    baseInputParameters = baseInputParameters + $", {optionResult.Token.Value}='{optionResult.GetValueOrDefault<string>()}'";
+                    baseInputParameters = baseInputParameters + $", {token.Value}='{optionResult.GetValueOrDefault<string>()}'";
                 }
             }
 
@@ -195,10 +195,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     new { Option = baselineOption, Condition = matchInfos.All(mi => !mi.IsBaselineMatch), AllowedValues = (IReadOnlyList<string?>)templateGroup.Baselines },
                 })
             {
-                if (option.Condition && result.FindResultFor(option.Option) is { } optionResult)
+                if (option.Condition && result.FindResultFor(option.Option) is { } optionResult && optionResult.Token is { } token)
                 {
                     string allowedValues = string.Join(", ", option.AllowedValues.Select(l => $"'{l}'").OrderBy(l => l, StringComparer.OrdinalIgnoreCase));
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplateOptions_Error_AllowedValuesForOptionList, optionResult.Token.Value, allowedValues));
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplateOptions_Error_AllowedValuesForOptionList, token.Value, allowedValues));
                 }
             }
 

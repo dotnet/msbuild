@@ -140,6 +140,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
+        public int Invoke(InvocationContext context) => InvokeAsync(context).GetAwaiter().GetResult();
+
         public override IEnumerable<CompletionItem> GetCompletions(CompletionContext context)
         {
             if (context.ParseResult == null)

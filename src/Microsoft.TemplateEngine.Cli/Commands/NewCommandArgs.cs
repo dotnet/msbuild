@@ -24,7 +24,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         continue;
                     }
 
-                    tokensToEvaluate.Add(o.Token);
+                    if (o.Token is { } token) { tokensToEvaluate.Add(token); }
                     tokensToEvaluate.AddRange(o.Tokens);
                 }
                 else

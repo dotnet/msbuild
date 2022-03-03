@@ -113,13 +113,13 @@ namespace Microsoft.TemplateEngine.Cli
                             argumentResult.ErrorMessage = string.Format(
                                 LocalizableStrings.ParseChoiceTemplateOption_Error_InvalidDefaultValue,
                                 parameter.DefaultValue,
-                                or.Token.Value,
+                                or.Token?.Value,
                                 "choice",
                                 error);
                             return string.Empty;
                         }
                         //Default value for argument missing for option: '{0}'.
-                        argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.Token.Value);
+                        argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.Token?.Value);
                         return string.Empty;
                     }
                     if (parameter.DefaultIfOptionWithoutValue != null)
@@ -132,13 +132,13 @@ namespace Microsoft.TemplateEngine.Cli
                         argumentResult.ErrorMessage = string.Format(
                             LocalizableStrings.ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue,
                             parameter.DefaultIfOptionWithoutValue,
-                            or.Token.Value,
+                            or.Token?.Value,
                             "choice",
                             error);
                         return string.Empty;
                     }
                     //Required argument missing for option: '{0}'.
-                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.Token.Value);
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.Token?.Value);
                     return string.Empty;
                 }
                 else if (argumentResult.Tokens.Count == 1)
@@ -151,7 +151,7 @@ namespace Microsoft.TemplateEngine.Cli
                     argumentResult.ErrorMessage = string.Format(
                         LocalizableStrings.ParseChoiceTemplateOption_Error_InvalidArgument,
                         argumentResult.Tokens[0].Value,
-                        or.Token.Value,
+                        or.Token?.Value,
                         "choice",
                         error);
                     return string.Empty;
@@ -159,7 +159,7 @@ namespace Microsoft.TemplateEngine.Cli
                 else
                 {
                     //Using more than 1 argument is not allowed for '{0}', used: {1}.
-                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.Token.Value, argumentResult.Tokens.Count);
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.Token?.Value, argumentResult.Tokens.Count);
                     return string.Empty;
                 }
             };
