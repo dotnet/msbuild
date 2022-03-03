@@ -5,6 +5,8 @@ using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Xunit;
 
 namespace Microsoft.DotNet.Tests.ParserTests
@@ -12,35 +14,35 @@ namespace Microsoft.DotNet.Tests.ParserTests
     public class VSTestArgumentConverterTests
     {
         [Theory]
-        [MemberData(nameof(DataSource.ArgTestCases), MemberType = typeof(DataSource))]
+        [MemberData(nameof(DataSource.GetArguments), MemberType = typeof(DataSource))]
         public void ConvertArgsShouldConvertValidArgsIntoVSTestParsableArgs(string input, string expectedString)
         {
             string[] args = input.Split(' ');
             string[] expectedArgs = expectedString.Split(' ');
 
             // Act
-            var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
+            List<string> convertedArgs = new VSTestArgumentConverter().Convert(args, out List<string> ignoredArgs);
 
             convertedArgs.Should().BeEquivalentTo(expectedArgs);
             ignoredArgs.Should().BeEmpty();
         }
 
         [Theory]
-        [MemberData(nameof(DataSource.VerbosityTestCases), MemberType = typeof(DataSource))]
+        [MemberData(nameof(DataSource.GetVerbosityArguments), MemberType = typeof(DataSource))]
         public void ConvertArgshouldConvertsVerbosityArgsIntoVSTestParsableArgs(string input, string expectedString)
         {
             string[] args = input.Split(' ');
             string[] expectedArgs = expectedString.Split(' ');
 
             // Act
-            var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
+            List<string> convertedArgs = new VSTestArgumentConverter().Convert(args, out List<string> ignoredArgs);
 
             convertedArgs.Should().BeEquivalentTo(expectedArgs);
             ignoredArgs.Should().BeEmpty();
         }
 
         [Theory]
-        [MemberData(nameof(DataSource.IgnoredArgTestCases), MemberType = typeof(DataSource))]
+        [MemberData(nameof(DataSource.GetIgnoredArguments), MemberType = typeof(DataSource))]
         public void ConvertArgsShouldIgnoreKnownArgsWhileConvertingArgsIntoVSTestParsableArgs(string input, string expectedArgString, string expIgnoredArgString)
         {
             string[] args = input.Split(' ');
@@ -48,10 +50,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
             string[] expIgnoredArgs = expIgnoredArgString.Split(' ');
 
             // Act
-            var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
+            List<string> convertedArgs = new VSTestArgumentConverter().Convert(args, out List<string> ignoredArgs);
 
             convertedArgs.Should().BeEquivalentTo(expectedArgs);
-            Assert.Equal(expIgnoredArgs, ignoredArgs);
+            ignoredArgs.Select(x => x.ToUpperInvariant()).Should().BeEquivalentTo(expIgnoredArgs.Select(x => x.ToUpperInvariant()));
         }
 
         [Fact]
@@ -67,77 +69,194 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
         public static class DataSource
         {
-            public static IEnumerable<object[]> ArgTestCases { get; } = new List<object[]>
+            private static readonly ImmutableArray<string> s_supportedPathKind
+                = ImmutableArray.Create(
+                    // Dll
+                    "SomeProject.dll",
+                    // Exe
+                    "SomeProject.exe"
+                // Do not return <PROJECT> | <SOLUTION> | <DIRECTORY> | <EMPTY> cases because they
+                // won't be handled by the VSTestArgumentConverter.
+                );
+
+            private static readonly ImmutableArray<(string option, string vstestEquivalent)> s_supportedOptions
+                = ImmutableArray.Create(
+                    (@"--test-adapter-path c:\adapterpath\temp", @"--testadapterpath:c:\adapterpath\temp"),
+                    (@"-a x86", "--platform:x86"),
+                    ("--arch x86", "--platform:x86"),
+                    ("--blame", "--blame"),
+                    ("--blame-crash", "--blame:CollectDump"),
+                    ("--blame-crash-dump-type full", "--blame:CollectDump;DumpType=full"),
+                    ("--blame-crash-collect-always", "--blame:CollectDump;CollectAlways=true"),
+                    ("--blame-hang", "--blame:CollectHangDump"),
+                    ("--blame-hang-dump-type full", "--blame:CollectHangDump;DumpType=full"),
+                    ("--blame-hang-timeout 10min", "--blame:CollectHangDump;TestTimeout=10min"),
+                    ("--collect coverage", "--collect:coverage"),
+                    (@"-d c:\temp\log.txt", @"--diag:c:\temp\log.txt"),
+                    (@"--diag c:\temp\log.txt", @"--diag:c:\temp\log.txt"),
+                    ("-f net451", "--framework:net451"),
+                    ("--framework net451", "--framework:net451"),
+                    ("--filter accceptance", "--testcasefilter:accceptance"),
+                    ("-l trx", "--logger:trx"),
+                    ("--logger trx", "--logger:trx"),
+                    ("--nologo", "--nologo"),
+                    ("--os linux", "--os:linux"),
+                    (@"--results-directory c:\temp\", @"--resultsdirectory:c:\temp\"),
+                    ("-s test.settings", "--settings:test.settings"),
+                    ("--settings test.settings", "--settings:test.settings"),
+                    ("-t", "--listtests"),
+                    ("--list-tests", "--listtests")
+                );
+
+            private static readonly ImmutableDictionary<string, string> s_verbosityLevelMapping
+                = new Dictionary<string, string>()
+                {
+                    ["q"] = "quiet",
+                    ["m"] = "minimal",
+                    ["n"] = "normal",
+                    ["d"] = "detailed",
+                    ["diag"] = "diagnostic"
+                }.ToImmutableDictionary();
+
+            private static readonly ImmutableArray<string> s_ignoredOptions
+                = ImmutableArray.Create(
+                    "-c Debug",
+                    "--configuration Debug",
+                    "-r win10-x64",
+                    "--runtime win10-x64",
+                    @"-o c:\temp2",
+                    @"--output c:\temp2",
+                    "--no-build",
+                    "--no-restore",
+                    "--interactive",
+                    "--testSessionCorrelationId SomeId",
+                    "--artifactsProcessingMode-collect"
+                );
+
+            private static readonly ImmutableArray<(string option, string vstestEquivalent)> s_specificOptionCombinations
+                = ImmutableArray.Create(
+                    // Blame combinations
+                    (@"--blame --blame-crash-dump-type full --blame-crash-collect-always", @"--blame:CollectDump;CollectAlways=true;DumpType=full"),
+                    (@"--blame-hang-dump-type full", @"--blame:CollectHangDump;DumpType=full"),
+                    (@"--blame-hang-timeout 10min", @"--blame:CollectHangDump;TestTimeout=10min"),
+                    (@"--blame --blame-hang-dump-type full --blame-hang-timeout 10min", @"--blame:CollectHangDump;DumpType=full;TestTimeout=10min"),
+                    (@"--blame --blame-hang-dump-type full --blame-hang-timeout 10min --blame-crash-dump-type mini --blame-crash-collect-always", @"--blame:CollectDump;CollectAlways=true;DumpType=mini;CollectHangDump;DumpType=full;TestTimeout=10min"),
+                    // using the legacy --blame syntax when we provide the parameter that are already in vstest.console format still work
+                    (@"--blame CollectDump;DumpType=full", @"--blame:CollectDump;DumpType=full"),
+                    (@"--blame:CollectDump;DumpType=full", @"--blame:CollectDump;DumpType=full"),
+                    // Non-blame combinations
+                    (@"-s testsettings -t -f net451 -d log.txt --results-directory c:\temp\", @"--settings:testsettings --listtests --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\"),
+                    (@"-s:testsettings -t -f:net451 -d:log.txt --results-directory:c:\temp\", @"--settings:testsettings --listtests --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\"),
+                    (@"--settings testsettings -t --test-adapter-path c:\path --framework net451 --diag log.txt --results-directory c:\temp\", @"--settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\")
+                );
+
+            public static IEnumerable<object[] /* input, expectedString */> GetArguments()
             {
-                new object[] { @"-h", "--help" },
-                new object[] { @"sometest.dll --arch x86" , @"sometest.dll --platform:x86"},
-                new object[] { @"sometest.dll -s test.settings", @"sometest.dll --settings:test.settings" },
-                new object[] { @"sometest.dll -a x86", @"sometest.dll --platform:x86" },
-                new object[] { @"sometest.dll -t", @"sometest.dll --listtests" },
-                new object[] { @"sometest.dll --list-tests", @"sometest.dll --listtests" },
-                new object[] { @"sometest.dll --filter", @"sometest.dll --testcasefilter" },
-                new object[] { @"sometest.dll -l trx", @"sometest.dll --logger:trx" },
-                new object[] { @"sometest.dll --test-adapter-path c:\adapterpath\temp", @"sometest.dll --testadapterpath:c:\adapterpath\temp" },
-                new object[] { @"sometest.dll -f net451", @"sometest.dll --framework:net451" },
-                new object[] { @"sometest.dll -d c:\temp\log.txt", @"sometest.dll --diag:c:\temp\log.txt" },
-                new object[] { @"sometest.dll --results-directory c:\temp\", @"sometest.dll --resultsdirectory:c:\temp\" },
-                new object[] { @"sometest.dll -s testsettings -t -f net451 -d log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
-                new object[] { @"sometest.dll -s:testsettings -t -f:net451 -d:log.txt --results-directory:c:\temp\", @"sometest.dll --settings:testsettings --listtests --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
-                new object[] { @"sometest.dll --settings testsettings -t --test-adapter-path c:\path --framework net451 --diag log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
-                new object[] { @"sometest.dll --blame", @"sometest.dll --blame" },
-                new object[] { @"sometest.dll --blame-crash", @"sometest.dll --blame:CollectDump" },
-                new object[] { @"sometest.dll --blame-crash-dump-type full", @"sometest.dll --blame:CollectDump;DumpType=full" },
-                new object[] { @"sometest.dll --blame-crash-collect-always", @"sometest.dll --blame:CollectDump;CollectAlways=true" },
-                new object[] { @"sometest.dll --blame --blame-crash-dump-type full --blame-crash-collect-always", @"sometest.dll --blame:CollectDump;CollectAlways=true;DumpType=full" },
-                new object[] { @"sometest.dll --blame-hang", @"sometest.dll --blame:CollectHangDump" },
-                new object[] { @"sometest.dll --blame-hang-dump-type full", @"sometest.dll --blame:CollectHangDump;DumpType=full" },
-                new object[] { @"sometest.dll --blame-hang-timeout 10min", @"sometest.dll --blame:CollectHangDump;TestTimeout=10min" },
-                new object[] { @"sometest.dll --blame --blame-hang-dump-type full --blame-hang-timeout 10min", @"sometest.dll --blame:CollectHangDump;DumpType=full;TestTimeout=10min" },
-                new object[] { @"sometest.dll --blame --blame-hang-dump-type full --blame-hang-timeout 10min --blame-crash-dump-type mini --blame-crash-collect-always", @"sometest.dll --blame:CollectDump;CollectAlways=true;DumpType=mini;CollectHangDump;DumpType=full;TestTimeout=10min" },
-                // using the legacy --blame syntax when we provide the parameter that are already in vstest.console format still works
-                new object[] { @"sometest.dll --blame CollectDump;DumpType=full", @"sometest.dll --blame:CollectDump;DumpType=full" },
-                new object[] { @"sometest.dll --blame:CollectDump;DumpType=full", @"sometest.dll --blame:CollectDump;DumpType=full" },
+                yield return new[] { @"-h", "--help" };
 
+                // Returns the various combination of path and options
+                foreach ((string option, string vstestEquivalent) in s_supportedOptions)
+                {
+                    foreach (string pathKind in s_supportedPathKind)
+                    {
+                        string pathKindPrefix = pathKind + " ";
+                        string pathKindSuffix = " " + pathKind;
+                        yield return new[] { pathKindPrefix + option, pathKindPrefix + vstestEquivalent };
+                        yield return new[] { option + pathKindSuffix, vstestEquivalent + pathKindSuffix };
 
-
-            };
-
-            public static IEnumerable<object[]> VerbosityTestCases { get; } = new List<object[]>
-            {
-                new object[] { "sometest.dll -v q", "sometest.dll --logger:console;verbosity=quiet" },
-                new object[] { "sometest.dll -v m", "sometest.dll --logger:console;verbosity=minimal" },
-                new object[] { "sometest.dll -v n", "sometest.dll --logger:console;verbosity=normal" },
-                new object[] { "sometest.dll -v d", "sometest.dll --logger:console;verbosity=detailed" },
-                new object[] { "sometest.dll -v diag", "sometest.dll --logger:console;verbosity=diagnostic" },
-
-                new object[] { "sometest.dll --verbosity q", "sometest.dll --logger:console;verbosity=quiet" },
-                new object[] { "sometest.dll -v:q", "sometest.dll --logger:console;verbosity=quiet" },
-                new object[] { "sometest.dll --verbosity:q", "sometest.dll --logger:console;verbosity=quiet" },
-            };
-
-            public static IEnumerable<object[]> IgnoredArgTestCases { get; } = new List<object[]>
-            {
-                new object[] { "sometest.dll -c Debug", "sometest.dll", "-c Debug" },
-                new object[] { "sometest.dll --configuration Debug", "sometest.dll", "--configuration Debug" },
-                new object[] { "sometest.dll --runtime win10-x64", "sometest.dll", "--runtime win10-x64" },
-                new object[] { "sometest.dll -o c:\temp2", "sometest.dll", "-o c:\temp2" },
-                new object[] { "sometest.dll --output c:\temp2", "sometest.dll", "--output c:\temp2" },
-                new object[] { "sometest.dll --interactive", "sometest.dll", "--interactive" },
-                new object[] { "sometest.dll --no-build", "sometest.dll", "--no-build" },
-                new object[] { "sometest.dll --no-restore", "sometest.dll", "--no-restore" },
-
-                new object[] {
-                    @"sometest.dll -s testsettings -t -f net451 -d log.txt --configuration Debug --output C:\foo --runtime win10-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
-                    @"sometest.dll --settings:testsettings --listtests --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\",
-                    @"--configuration Debug --output C:\foo --runtime win10-x64 --no-build --no-restore --interactive"
-                },
-                new object[] {
-                    @"sometest.dll --settings testsettings --list-tests -f net451 --diag log.txt --collect coverage --blame --configuration Debug --output C:\foo --runtime win10-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
-                    @"sometest.dll --settings:testsettings --listtests --framework:net451 --diag:log.txt --collect:coverage --blame --resultsdirectory:c:\temp\",
-                    @"--configuration Debug --output C:\foo --runtime win10-x64 --no-build --no-restore --interactive"
+                        // It's also possible to call the option with a colon as separator rather than with space
+                        // e.g., "--diag:log.txt" instead of "--diag log.txt"
+                        string[] optionAndArg = option.Split(' ');
+                        if (optionAndArg.Length == 2)
+                        {
+                            var optionWithColon = optionAndArg[0] + ":" + optionAndArg[1];
+                            yield return new[] { pathKindPrefix + optionWithColon, pathKindPrefix + vstestEquivalent };
+                            yield return new[] { optionWithColon + pathKindSuffix, vstestEquivalent + pathKindSuffix };
+                        }
+                    }
                 }
-            };
-        }
 
+                // Returns specific combinations to test
+                foreach ((string option, string vstestEquivalent) in s_specificOptionCombinations)
+                {
+                    foreach (string pathKind in s_supportedPathKind)
+                    {
+                        string pathKindPrefix = pathKind + " ";
+                        string pathKindSuffix = " " + pathKind;
+                        yield return new[] { pathKindPrefix + option, pathKindPrefix + vstestEquivalent };
+                        yield return new[] { option + pathKindSuffix, vstestEquivalent + pathKindSuffix };
+                    }
+                }
+            }
+
+            public static IEnumerable<object[] /* input, expectedString */> GetVerbosityArguments()
+            {
+                foreach ((string levelShort, string levelLong) in s_verbosityLevelMapping)
+                {
+                    foreach (string pathKind in s_supportedPathKind)
+                    {
+                        string pathKindPrefix = pathKind + " ";
+                        string pathKindSuffix = " " + pathKind;
+                        string vstestEquivalent = $"--logger:console;verbosity={levelLong}";
+
+                        foreach (string argument in new[] { "-v", "--verbosity" })
+                        {
+                            foreach (string separator in new[] { " ", ":" })
+                            {
+                                yield return new[] { pathKindPrefix + argument + separator + levelShort, pathKindPrefix + vstestEquivalent };
+                                yield return new[] { pathKindPrefix + argument + separator + levelLong, pathKindPrefix + vstestEquivalent };
+                                yield return new[] { argument + separator + levelShort + pathKindSuffix, vstestEquivalent + pathKindSuffix };
+                                yield return new[] { argument + separator + levelLong + pathKindSuffix, vstestEquivalent + pathKindSuffix };
+                            }
+                        }
+                    }
+                }
+            }
+
+            public static IEnumerable<object[] /* input, expectedString, expectedIgnoredString */> GetIgnoredArguments()
+            {
+                // Returns the various combination of path and options
+                foreach (string ignoredOption in s_ignoredOptions)
+                {
+                    foreach (string pathKind in s_supportedPathKind)
+                    {
+                        string pathKindPrefix = pathKind + " ";
+                        string pathKindSuffix = " " + pathKind;
+                        yield return new[] { pathKindPrefix + ignoredOption, pathKind, ignoredOption };
+                        yield return new[] { ignoredOption + pathKindSuffix, pathKind, ignoredOption };
+
+                        // It's also possible to call the option with a colon as separator rather than with space
+                        // e.g., "--diag:log.txt" instead of "--diag log.txt"
+                        string[] optionAndArg = ignoredOption.Split(' ');
+                        if (optionAndArg.Length == 2)
+                        {
+                            var optionWithColon = optionAndArg[0] + ":" + optionAndArg[1];
+                            yield return new[] { pathKindPrefix + optionWithColon, pathKind, optionWithColon };
+                            yield return new[] { optionWithColon + pathKindSuffix, pathKind, optionWithColon };
+                        }
+                    }
+                }
+
+                // Returns a combination of args and ignored args
+                foreach ((string combinationOption, string vstestEquivalent) in s_specificOptionCombinations)
+                {
+                    foreach (string pathKind in s_supportedPathKind)
+                    {
+                        string pathKindPrefix = pathKind + " ";
+                        string pathKindSuffix = " " + pathKind;
+                        string ignoredOptions = string.Join(" ", s_ignoredOptions);
+
+                        yield return new[] { pathKindPrefix + ignoredOptions + " " + combinationOption, pathKindPrefix + vstestEquivalent, ignoredOptions };
+                        yield return new[] { pathKindPrefix + combinationOption + " " + ignoredOptions, pathKindPrefix + vstestEquivalent, ignoredOptions };
+
+                        yield return new[] { ignoredOptions + " " + combinationOption + pathKindSuffix, vstestEquivalent + pathKindSuffix, ignoredOptions };
+                        yield return new[] { combinationOption + " " + ignoredOptions + pathKindSuffix, vstestEquivalent + pathKindSuffix, ignoredOptions };
+
+                        yield return new[] { ignoredOptions + " " + pathKindPrefix + combinationOption, pathKindPrefix + vstestEquivalent, ignoredOptions };
+                        yield return new[] { combinationOption + " " + pathKindPrefix + ignoredOptions, pathKindPrefix + vstestEquivalent, ignoredOptions };
+                    }
+                }
+            }
+        }
     }
 }
