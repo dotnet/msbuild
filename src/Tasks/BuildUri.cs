@@ -83,7 +83,8 @@ namespace Microsoft.Build.Tasks
                 // The Scheme property setter throws an ArgumentException for an invalid scheme.
                 builder.Scheme = UriScheme;
                 // If a scheme has been provided and a port has not, use the default port for the scheme.
-                if (UriPort == UseDefaultPortForScheme)
+                // (This is for the case where the UriBuilder was constructed with an ItemSpec. The port will have been set for the scheme used in the ItemSpec.)
+                if (UriPort == UseDefaultPortForScheme && builder.Port != UseDefaultPortForScheme)
                 {
                     builder.Port = UseDefaultPortForScheme;
                 }
