@@ -187,7 +187,7 @@ jobs:
 - job: CoreOnMac
   displayName: "macOS Core"
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-latest'
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
