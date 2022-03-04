@@ -57,7 +57,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="EnvironmentVariableAsSwitch">
         <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: Nedefinovaná proměnná prostředí předaná jako přepínač.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This error is shown when a user passes in an environment variable (including from a response file)
@@ -270,14 +270,14 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="new">
+        <target state="translated">
       -warnNotAsError[:code[;code2]]
-                     List of warning codes to treats not treat as errors.
-                     Use a semicolon or a comma to separate
-                     multiple warning codes. Has no effect if the -warnaserror
-                     switch is not set.
+                     Seznam kódů upozornění, které se nemají považovat za chyby.
+                     Pomocí středníku nebo čárky oddělte
+                     více kódů upozornění. Nemá žádný vliv, pokud přepínač -warnaserror
+                     není nastavený.
 
-                     Example:
+                     Příklad:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -1250,7 +1250,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="MissingWarnNotAsErrorParameterError">
         <source>MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: Při použití přepínače -warnNotAsError zadejte jeden nebo více kódů upozornění.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
@@ -1267,7 +1267,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
-        <target state="new">MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</target>
+        <target state="translated">MSBUILD : error MSB1062: Přepínač -warnnotaserror nelze zadat, pokud není zadán také přepínač -warnaserror a není prázdný.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
@@ -1335,7 +1335,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       </trans-unit>
       <trans-unit id="ResponseFileSwitchFromLocation">
         <source>'{0}' came from '{1}'</source>
-        <target state="new">'{0}' came from '{1}'</target>
+        <target state="translated">{0} přišla z {1}</target>
         <note>
       These are response file switches with the location of the response file on disk.
     </note>
@@ -1371,9 +1371,9 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
         <source>{0}
     Full command line: '{1}'
   Switches appended by response files:{2}</source>
-        <target state="new">{0}
-    Full command line: '{1}'
-  Switches appended by response files:{2}</target>
+        <target state="translated">{0}
+    Úplný příkazový řádek:{1}
+  Přepínače připojené pomocí souborů odpovědí:{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">

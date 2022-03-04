@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
-        <target state="new">MSB4275: Attempted to create multiple overrides of the same task: {0}</target>
+        <target state="translated">MSB4275: 已嘗試建立相同工作的多個覆寫: {0}</target>
         <note>{StrBegin="MSB4275: "}</note>
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
@@ -226,7 +226,7 @@
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
-        <target state="new">Created an override using task: {0} at {1}</target>
+        <target state="translated">已使用下列工作建立覆寫: 於 {1} 的 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheBeginBuild">
@@ -432,7 +432,7 @@
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
     {0}</source>
-        <target state="new">This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+        <target state="translated">這是 MSBuild 中未處理的例外狀況 -- 請針對現有的問題附議，或在 https://aka.ms/msbuild/unhandled 提交新的問題。
     {0}</target>
         <note />
       </trans-unit>
