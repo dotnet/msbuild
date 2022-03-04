@@ -34,6 +34,7 @@ using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
 using Microsoft.NET.StringTools;
+using System.ComponentModel;
 
 #nullable disable
 
@@ -409,6 +410,15 @@ namespace Microsoft.Build.Execution
             _deferredBuildMessages = null;
         }
 
+        private void UpdatePriority(Process p, ProcessPriorityClass priority)
+        {
+            try
+            {
+                p.PriorityClass = priority;
+            }
+            catch (Win32Exception) { }
+        }
+
         /// <summary>
         /// Prepares the BuildManager to receive build requests.
         /// </summary>
@@ -420,7 +430,24 @@ namespace Microsoft.Build.Execution
             {
                 if (parameters.LowPriority != _previousLowPriority)
                 {
-                    _nodeManager?.ShutdownConnectedNodes(parameters.EnableNodeReuse);
+                    ProcessPriorityClass priority = parameters.LowPriority ? ProcessPriorityClass.BelowNormal : ProcessPriorityClass.Normal;
+                    IEnumerable<Process> processes = _nodeManager?.GetProcesses();
+                    if (processes is not null)
+                    {
+                        foreach (Process p in processes)
+                        {
+                            UpdatePriority(p, priority);
+                        }
+                    }
+
+                    processes = _taskHostNodeManager?.GetProcesses();
+                    if (processes is not null)
+                    {
+                        foreach (Process p in processes)
+                        {
+                            UpdatePriority(p, priority);
+                        }
+                    }
                }
             }
 

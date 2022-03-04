@@ -8,7 +8,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Utilities;
+using System.Linq;
 
 #nullable disable
 
@@ -201,6 +201,11 @@ namespace Microsoft.Build.BackEnd
             {
                 _nodeContexts.Remove(nodeId);
             }
+        }
+
+        public IEnumerable<Process> GetProcesses()
+        {
+            return _nodeContexts.Values.Select(context => context.Process);
         }
     }
 }

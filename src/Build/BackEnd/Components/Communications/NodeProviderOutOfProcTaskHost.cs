@@ -9,6 +9,7 @@ using System.Threading;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
+using System.Linq;
 
 #nullable disable
 
@@ -571,6 +572,11 @@ namespace Microsoft.Build.BackEnd
                     _noNodesActiveEvent.Set();
                 }
             }
+        }
+
+        public IEnumerable<Process> GetProcesses()
+        {
+            return _nodeContexts.Values.Select(context => context.Process);
         }
     }
 }

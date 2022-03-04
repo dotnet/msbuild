@@ -3,6 +3,10 @@
 
 #nullable disable
 
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -83,6 +87,8 @@ namespace Microsoft.Build.BackEnd
         /// Shuts down all of the managed nodes.  This call will not return until all nodes are shut down.
         /// </summary>
         void ShutdownAllNodes();
+
+        IEnumerable<Process> GetProcesses();
         #endregion
     }
 }

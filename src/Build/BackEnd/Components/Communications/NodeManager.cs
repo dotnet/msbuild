@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using System.Diagnostics;
+using System.Linq;
 
 #nullable disable
 
@@ -346,6 +348,11 @@ namespace Microsoft.Build.BackEnd
 
             _nodeIdToProvider.Add(nodeId, nodeProvider);
             return nodeId;
+        }
+
+        public IEnumerable<Process> GetProcesses()
+        {
+            return _outOfProcNodeProvider.GetProcesses();
         }
     }
 }

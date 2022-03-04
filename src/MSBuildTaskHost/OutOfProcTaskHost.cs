@@ -68,7 +68,7 @@ namespace Microsoft.Build.CommandLine
         [MTAThread]
         public static int Main()
         {
-            int exitCode = (Execute() == ExitType.Success ? 0 : 1);
+            int exitCode = Execute() == ExitType.Success ? 0 : 1;
             return exitCode;
         }
 
