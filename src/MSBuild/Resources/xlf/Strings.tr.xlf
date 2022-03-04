@@ -57,7 +57,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="EnvironmentVariableAsSwitch">
         <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: Tanımlanmamış ortam değişkeni anahtar olarak geçirildi.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This error is shown when a user passes in an environment variable (including from a response file)
@@ -270,14 +270,14 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="new">
-      -warnNotAsError[:code[;code2]]
-                     List of warning codes to treats not treat as errors.
-                     Use a semicolon or a comma to separate
-                     multiple warning codes. Has no effect if the -warnaserror
-                     switch is not set.
+        <target state="translated">
+-warnNotAsError[:code[;code2]]
+                     Hata olarak kabul edilmeyen uyarı kodlarının listesi.
+                     Ayırmak için noktalı virgül veya virgül kullanın
+                    çoklu uyarı kodları -warnaserror ise hiçbir etkisi yoktur
+                     anahtarı ayarlanmadı.
 
-                     Example:
+Örnek:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -1246,7 +1246,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="MissingWarnNotAsErrorParameterError">
         <source>MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: -warnNotAsError anahtarını kullanırken bir veya daha fazla uyarı kodu belirtin.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
@@ -1263,7 +1263,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
-        <target state="new">MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</target>
+        <target state="translated">MSBUILD : error MSB1062: -warnnotaserror anahtarı, -warnaserror anahtarı da belirtilmedikçe ve boş bırakılmadıkça belirtilemez.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
@@ -1331,7 +1331,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="ResponseFileSwitchFromLocation">
         <source>'{0}' came from '{1}'</source>
-        <target state="new">'{0}' came from '{1}'</target>
+        <target state="translated">'{0}', '{1}' kaynağından geldi</target>
         <note>
       These are response file switches with the location of the response file on disk.
     </note>
@@ -1367,9 +1367,9 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <source>{0}
     Full command line: '{1}'
   Switches appended by response files:{2}</source>
-        <target state="new">{0}
-    Full command line: '{1}'
-  Switches appended by response files:{2}</target>
+        <target state="translated">{0}
+    Tam komut satırı: '{1}'
+  Yanıt dosyaları tarafından eklenen anahtarlar:{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">
