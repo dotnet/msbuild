@@ -5,6 +5,7 @@ using System.IO;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -68,6 +69,49 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal(2, items.Count);
             Assert.Equal("i1", items[0].Include);
             Assert.Equal("i2", items[1].Include);
+        }
+
+        [Fact]
+        public void DeepCopyFromItemGroupWithMetadata()
+        {
+            string content = @"
+                    <Project>
+                        <ItemGroup>
+                            <i Include='i1'>
+                              <M>metadataValue</M>
+                            </i>
+                            <i Include='i2'>
+                              <M>
+                                <Some>
+                                    <Xml With='Nesting' />
+                                </Some>
+                              </M>
+                            </i>
+                        </ItemGroup>
+                    </Project>
+                ";
+
+            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            ProjectItemGroupElement group = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
+
+            ProjectRootElement newProject = ProjectRootElement.Create();
+            ProjectItemGroupElement newItemGroup = project.AddItemGroup();
+
+            newItemGroup.DeepCopyFrom(group);
+
+            var items = Helpers.MakeList(newItemGroup.Items);
+
+            items.Count.ShouldBe(2);
+
+            items[0].Include.ShouldBe("i1");
+            ProjectMetadataElement metadataElement = items[0].Metadata.ShouldHaveSingleItem();
+            metadataElement.Name.ShouldBe("M");
+            metadataElement.Value.ShouldBe("metadataValue");
+
+            items[1].Include.ShouldBe("i2");
+            metadataElement = items[1].Metadata.ShouldHaveSingleItem();
+            metadataElement.Name.ShouldBe("M");
+            metadataElement.Value.ShouldBe("<Some><Xml With=\"Nesting\" /></Some>");
         }
 
         /// <summary>
