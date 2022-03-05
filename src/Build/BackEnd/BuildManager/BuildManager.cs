@@ -430,23 +430,31 @@ namespace Microsoft.Build.Execution
             {
                 if (parameters.LowPriority != _previousLowPriority)
                 {
-                    ProcessPriorityClass priority = parameters.LowPriority ? ProcessPriorityClass.BelowNormal : ProcessPriorityClass.Normal;
-                    IEnumerable<Process> processes = _nodeManager?.GetProcesses();
-                    if (processes is not null)
+                    if (NativeMethodsShared.IsWindows || parameters.LowPriority)
                     {
-                        foreach (Process p in processes)
+                        ProcessPriorityClass priority = parameters.LowPriority ? ProcessPriorityClass.BelowNormal : ProcessPriorityClass.Normal;
+                        IEnumerable<Process> processes = _nodeManager?.GetProcesses();
+                        if (processes is not null)
                         {
-                            UpdatePriority(p, priority);
+                            foreach (Process p in processes)
+                            {
+                                UpdatePriority(p, priority);
+                            }
+                        }
+
+                        processes = _taskHostNodeManager?.GetProcesses();
+                        if (processes is not null)
+                        {
+                            foreach (Process p in processes)
+                            {
+                                UpdatePriority(p, priority);
+                            }
                         }
                     }
-
-                    processes = _taskHostNodeManager?.GetProcesses();
-                    if (processes is not null)
+                    else
                     {
-                        foreach (Process p in processes)
-                        {
-                            UpdatePriority(p, priority);
-                        }
+                        _nodeManager?.ShutdownAllNodes();
+                        _taskHostNodeManager?.ShutdownAllNodes();
                     }
                }
             }
