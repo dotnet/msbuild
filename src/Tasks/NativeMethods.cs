@@ -3,9 +3,12 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using Microsoft.Build.Shared.FileSystem;
+
+#if FEATURE_COM_INTEROP
 using System.Text;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Collections;
@@ -13,7 +16,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Shared.FileSystem;
+#endif
 
 #nullable disable
 
@@ -522,7 +525,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class NativeMethods
     {
-        #region Constants
+#region Constants
 
         internal static readonly IntPtr NullPtr = IntPtr.Zero;
         internal static readonly IntPtr InvalidIntPtr = new IntPtr(-1);
@@ -627,9 +630,9 @@ namespace Microsoft.Build.Tasks
             MOVEFILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
         }
 
-        #endregion
+#endregion
 
-        #region NT header stuff
+#region NT header stuff
 
         internal const uint IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b;
         internal const uint IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b;
@@ -780,9 +783,9 @@ namespace Microsoft.Build.Tasks
             internal IntPtr pbData;
         }
 
-        #endregion
+#endregion
 
-        #region PInvoke
+#region PInvoke
         private const string Crypt32DLL = "crypt32.dll";
         private const string Advapi32DLL = "advapi32.dll";
 #if !RUNTIME_TYPE_NETCORE

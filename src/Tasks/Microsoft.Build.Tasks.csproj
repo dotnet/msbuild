@@ -956,8 +956,10 @@
     <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj"/>
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj"/>
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
   <ItemGroup>
@@ -966,6 +968,15 @@
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
+
+  <!-- Mimics AddRefAssemblies from MSBuild.csproj -->
+  <Target Name="AddRefAssemblies" 
+          DependsOnTargets="ResolveAssemblyReferences"
+          BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <Content Include="@(NetstandardRefAssemblies)" CopyToOutputDirectory="PreserveNewest" Link="ref\%(Filename)%(Extension)"/>
+    </ItemGroup>
+  </Target>
 
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
   <ItemGroup>
