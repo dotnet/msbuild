@@ -172,11 +172,16 @@ namespace Microsoft.DotNet.Tests
             new object[] { new Dictionary<string, string> { { "CIRCLECI", "true"} }, true },
 
             new object[] { new Dictionary<string, string> { { "CODEBUILD_BUILD_ID", "hi" }, { "AWS_REGION", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "CODEBUILD_BUILD_ID", "hi" } }, false },
             new object[] { new Dictionary<string, string> { { "BUILD_ID", "hi" }, { "BUILD_URL", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "BUILD_ID", "hi" } }, false },
             new object[] { new Dictionary<string, string> { { "BUILD_ID", "hi" }, { "PROJECT_ID", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "BUILD_ID", "hi" } }, false },
 
             new object[] { new Dictionary<string, string> { { "TEAMCITY_VERSION", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "TEAMCITY_VERSION", "" } }, false },
             new object[] { new Dictionary<string, string> { { "JB_SPACE_API_URL", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "JB_SPACE_API_URL", "" } }, false },
 
             new object[] { new Dictionary<string, string> { { "SomethingElse", "hi" } }, false },
         };
