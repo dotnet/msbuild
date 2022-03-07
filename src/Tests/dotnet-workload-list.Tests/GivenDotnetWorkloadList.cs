@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             command.Execute();
 
             // Expected number of lines for table headers
-            _reporter.Lines.Count.Should().Be(OperatingSystem.IsWindows() ? 8 : 6);
+            _reporter.Lines.Count.Should().Be(6);
         }
 
         [Fact]
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
         }
 
         [Fact]
-        public void GivenNoWorkloadsAreInstalledListIsNotEmpty()
+        public void GivenWorkloadsAreInstalledListIsNotEmpty()
         {
             _reporter.Clear();
             var expectedWorkloads = new List<WorkloadId>() { new WorkloadId("mock-workload-1"), new WorkloadId("mock-workload-2"), new WorkloadId("mock-workload-3") };
@@ -70,12 +70,12 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
 
             foreach (var workload in expectedWorkloads)
             {
-                _reporter.Lines.Select(line => line.Trim()).Should().Contain(workload.ToString());
+                _reporter.Lines.Select(line => line.Trim()).Should().Contain($"{workload}             SDK 6.0.100");
             }
         }
 
         [Fact]
-        public void GivenNoWorkloadsAreInstalledMachineReadableListIsNotEmpty()
+        public void GivenWorkloadsAreInstalledMachineReadableListIsNotEmpty()
         {
             _reporter.Clear();
             var expectedWorkloads = new List<WorkloadId>() { new WorkloadId("mock-workload-1"), new WorkloadId("mock-workload-2"), new WorkloadId("mock-workload-3") };

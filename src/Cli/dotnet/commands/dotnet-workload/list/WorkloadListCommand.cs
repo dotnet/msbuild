@@ -36,6 +36,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly VerbosityOptions _verbosity;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
+        private readonly IWorkloadResolver _workloadResolver;
 
         public WorkloadListCommand(
             ParseResult result,
@@ -80,14 +81,14 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger),
                                           verboseLogger: nullLogger,
                                           restoreActionConfig: _parseResult.ToRestoreActionConfig());
-            workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
 
             _workloadRecordRepo = workloadRecordRepo ??
-                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity, _userProfileDir,
+                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, _workloadResolver, _verbosity, _userProfileDir,
                 elevationRequired: false).GetWorkloadInstallationRecordRepository();
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
-                workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath, _workloadRecordRepo);
+                _workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath, _workloadRecordRepo);
         }
 
         public override int Execute()
@@ -116,17 +117,20 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             }
             else
             {
+                InstalledWorkloadsCollection installedWorkloads = new(installedList, $"SDK {_currentSdkFeatureBand}");
+
                 if (OperatingSystem.IsWindows())
                 {
-                    _reporter.WriteLine();
-                    _reporter.WriteLine(LocalizableStrings.WorkloadListHeader);
+                    VisualStudioWorkloads.GetInstalledWorkloads(_workloadResolver, _currentSdkFeatureBand, installedWorkloads);
                 }
+                
                 _reporter.WriteLine();
 
-                PrintableTable<WorkloadId> table = new();
-                table.AddColumn(LocalizableStrings.WorkloadIdColumn, workloadId => workloadId.ToString());
+                PrintableTable<KeyValuePair<string, string>> table = new();
+                table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
+                table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
 
-                table.PrintRows(installedList, l => _reporter.WriteLine(l));
+                table.PrintRows(installedWorkloads.AsEnumerable(), l => _reporter.WriteLine(l));
 
                 _reporter.WriteLine();
                 _reporter.WriteLine(LocalizableStrings.WorkloadListFooter);

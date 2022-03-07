@@ -20,7 +20,7 @@ using System.Text.Json;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal class NetSdkManagedInstaller : IWorkloadPackInstaller
+    internal class FileBasedInstaller : IWorkloadPackInstaller
     {
         private readonly IReporter _reporter;
         private readonly string _workloadMetadataDir;
@@ -31,13 +31,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly IWorkloadResolver _workloadResolver;
         private readonly SdkFeatureBand _sdkFeatureBand;
-        private readonly NetSdkManagedInstallationRecordRepository _installationRecordRepository;
+        private readonly FileBasedInstallationRecordRepository _installationRecordRepository;
         private readonly PackageSourceLocation _packageSourceLocation;
         private readonly RestoreActionConfig _restoreActionConfig;
 
         public int ExitCode => 0;
 
-        public NetSdkManagedInstaller(IReporter reporter,
+        public FileBasedInstaller(IReporter reporter,
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver,
             string userProfileDir,
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;
             _workloadResolver = workloadResolver;
-            _installationRecordRepository = new NetSdkManagedInstallationRecordRepository(_workloadMetadataDir);
+            _installationRecordRepository = new FileBasedInstallationRecordRepository(_workloadMetadataDir);
             _packageSourceLocation = packageSourceLocation;
         }
 
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public IWorkloadInstaller GetWorkloadInstaller()
         {
-            throw new Exception("NetSdkManagedInstaller is not a workload installer.");
+            throw new Exception($"{nameof(FileBasedInstaller)} is not a workload installer.");
         }
 
         public IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository()

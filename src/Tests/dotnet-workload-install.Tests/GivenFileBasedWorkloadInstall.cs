@@ -23,12 +23,12 @@ using System.Text.Json;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
-    public class GivenNetSdkManagedWorkloadInstall : SdkTest
+    public class GivenFileBasedWorkloadInstall : SdkTest
     {
         private readonly BufferedReporter _reporter;
         private readonly string _manifestPath;
 
-        public GivenNetSdkManagedWorkloadInstall(ITestOutputHelper log) : base(log)
+        public GivenFileBasedWorkloadInstall(ITestOutputHelper log) : base(log)
         {
             _reporter = new BufferedReporter();
             _manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
@@ -428,7 +428,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             exceptionThrown.Message.Should().Contain(cachePath);
         }
 
-        private (string, NetSdkManagedInstaller, INuGetPackageDownloader) GetTestInstaller([CallerMemberName] string testName = "", bool failingInstaller = false, string identifier = "", bool manifestDownload = false,
+        private (string, FileBasedInstaller, INuGetPackageDownloader) GetTestInstaller([CallerMemberName] string testName = "", bool failingInstaller = false, string identifier = "", bool manifestDownload = false,
             PackageSourceLocation packageSourceLocation = null)
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName, identifier: identifier).Path;
@@ -436,7 +436,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             INuGetPackageDownloader nugetInstaller = failingInstaller ? new FailingNuGetPackageDownloader(testDirectory) :  new MockNuGetPackageDownloader(dotnetRoot, manifestDownload);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var sdkFeatureBand = new SdkFeatureBand("6.0.100");
-            return (dotnetRoot, new NetSdkManagedInstaller(_reporter, sdkFeatureBand, workloadResolver, userProfileDir: testDirectory, nugetInstaller, dotnetRoot, packageSourceLocation: packageSourceLocation), nugetInstaller);
+            return (dotnetRoot, new FileBasedInstaller(_reporter, sdkFeatureBand, workloadResolver, userProfileDir: testDirectory, nugetInstaller, dotnetRoot, packageSourceLocation: packageSourceLocation), nugetInstaller);
         }
     }
 }
