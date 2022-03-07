@@ -262,6 +262,8 @@ stages:
           BARBuildId: ${{ parameters.BARBuildId }}
           PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
 
+      - task: NuGetAuthenticate@0
+
       - task: PowerShell@2
         displayName: Publish Using Darc
         inputs:
