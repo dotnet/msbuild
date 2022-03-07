@@ -52,12 +52,13 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private const string LibcRelease = "Libc Release";
         private const string LibcVersion = "Libc Version";
 
+        private const string CI = "Continuous Integration";
+
         private const string TelemetryProfileEnvironmentVariable = "DOTNET_CLI_TELEMETRY_PROFILE";
         private const string CannotFindMacAddress = "Unknown";
 
         private const string MachineIdCacheKey = "MachineId";
         private const string IsDockerContainerCacheKey = "IsDockerContainer";
-        private const string CI = "Continuous Integration";
 
         public Dictionary<string, string> GetTelemetryCommonProperties()
         {
@@ -71,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 {ProductVersion, Product.Version},
                 {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
                 {DockerContainer, _userLevelCacheWriter.RunWithCache(IsDockerContainerCacheKey, () => _dockerContainerDetector.IsDockerContainer().ToString("G") )},
-                {CI, _ciEnvironmentDetector.IsCIEnvironment().ToString("G") },
+                {CI, _ciEnvironmentDetector.IsCIEnvironment().ToString() },
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
                 {MachineIdOld, _userLevelCacheWriter.RunWithCache(MachineIdCacheKey, GetMachineId)},
                 // we don't want to recalcuate a new id for every new SDK version. Reuse the same path accross versions.

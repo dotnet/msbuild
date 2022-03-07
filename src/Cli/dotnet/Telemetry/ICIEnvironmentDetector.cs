@@ -5,6 +5,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
 {
     internal interface ICIEnvironmentDetector
     {
-        IsCIEnvironment IsCIEnvironment();
+        bool IsCIEnvironment();
     }
 }
