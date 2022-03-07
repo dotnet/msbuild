@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
 {
     internal class CIEnvironmentDetectorForTelemetry : ICIEnvironmentDetector
     {
-        // variables that will hold boolean values only
+        // Systems that provide boolean values only, so we can simply parse and check for true
         private static readonly string[] _booleanVariables = new string[] {
             // Azure Pipelines - https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables#system-variables-devops-services
             "TF_BUILD",
@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             "CIRCLECI",
         };
 
+        // Systems where every variable must be present and not-null before returning true
         private static readonly string[][] _allNotNullVariables = new string[][] {
             // AWS CodeBuild - https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
             new string[]{ "CODEBUILD_BUILD_ID", "AWS_REGION" },
@@ -35,6 +36,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             new string[]{ "BUILD_ID", "PROJECT_ID" }
         };
 
+        // Systems where the variable must be present and not-null
         private static readonly string[] _ifNonNullVariables = new string[] {
             // TeamCity - https://www.jetbrains.com/help/teamcity/predefined-build-parameters.html#Predefined+Server+Build+Parameters
             "TEAMCITY_VERSION",
@@ -62,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
             foreach (var variable in _ifNonNullVariables)
             {
-                if (Environment.GetEnvironmentVariable(variable) is {} v)
+                if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(variable)))
                 {
                     return true;
                 }
