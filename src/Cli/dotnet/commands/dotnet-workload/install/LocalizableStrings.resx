@@ -321,4 +321,7 @@
   <data name="DownloadToCacheOptionArgumentName" xml:space="preserve">
     <value>DIRECTORY</value>
   </data>
+  <data name="CannotCombineSkipManifestAndRollback" xml:space="preserve">
+    <value>Cannnot use --skip-manifest-update and --from-rollback-file together</value>
+  </data>
 </root>

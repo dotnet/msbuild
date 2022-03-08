@@ -17,6 +17,11 @@
         <target state="translated">パッケージ {0} バージョン {1} がオフラインキャッシュ {2} に存在しません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannnot use --skip-manifest-update and --from-rollback-file together</source>
+        <target state="new">Cannnot use --skip-manifest-update and --from-rollback-file together</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">ワークロード パック {0} バージョン {1} をアンインストールしています...</target>

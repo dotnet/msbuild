@@ -51,6 +51,21 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .HaveStdErrContaining(String.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotRecognized, "fake"));
         }
 
+        [Fact]
+        public void ItErrorUsingSkipManifestAndRollback()
+        {
+            var command = new DotnetCommand(Log);
+            command
+                .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
+                .WithEnvironmentVariable("PATH", "fake")
+                .Execute("workload", "install", "maui", "--skip-manifest-update", "--from-rollback-file", "foo.txt")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(Workloads.Workload.Install.LocalizableStrings.CannotCombineSkipManifestAndRollback);
+        }
+
+
         [Theory]
         [InlineData(true, "6.0.100")]
         [InlineData(true, "6.0.101")]

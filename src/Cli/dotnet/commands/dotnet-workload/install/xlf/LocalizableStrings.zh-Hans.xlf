@@ -17,6 +17,11 @@
         <target state="translated">脱机缓存 {0} 中不存在程序包 {1} 版本 {2}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannnot use --skip-manifest-update and --from-rollback-file together</source>
+        <target state="new">Cannnot use --skip-manifest-update and --from-rollback-file together</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">正在卸载工作负载包 {0} 版本 {1}…</target>

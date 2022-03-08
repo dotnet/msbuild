@@ -17,6 +17,11 @@
         <target state="translated">O pacote {0} versão {1} não existe no cache offline {2}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannnot use --skip-manifest-update and --from-rollback-file together</source>
+        <target state="new">Cannnot use --skip-manifest-update and --from-rollback-file together</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">Desinstalando pacote de carga de trabalho {0} versão {1}...</target>

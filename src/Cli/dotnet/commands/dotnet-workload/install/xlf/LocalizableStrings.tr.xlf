@@ -17,6 +17,11 @@
         <target state="translated">{0} paketi sürüm {1}, çevrimdışı {2} önbelleğinde yok.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannnot use --skip-manifest-update and --from-rollback-file together</source>
+        <target state="new">Cannnot use --skip-manifest-update and --from-rollback-file together</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">{0} iş yükü paketi sürüm {1} kaldırılıyor...</target>
