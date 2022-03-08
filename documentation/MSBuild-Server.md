@@ -27,13 +27,13 @@ Server requires to introduce new packet types for IPC.
 
 `EntryNodeCommand` contains all of the information necessary for a server to run a build.
 
-| Property name            | Type                        | Description |
+| Property name            | Type                         | Description |
 |---|---|---|
-| CommandLine              | String                      | The MSBuild command line with arguments for build |
-| StartupDirectory         | String                      | The startup directory path |
-| BuildProcessEnvironment  | Dictionary<String, String>  | Environment variables for current build |
-| Culture                  | CultureInfo                 | The culture value for current build |
-| UICulture                | CultureInfo                 | The UI culture value for current build |
+| CommandLine              | String                       | The MSBuild command line with arguments for build |
+| StartupDirectory         | String                       | The startup directory path |
+| BuildProcessEnvironment  | IDictionary<String, String>  | Environment variables for current build |
+| Culture                  | CultureInfo                  | The culture value for current build |
+| UICulture                | CultureInfo                  | The UI culture value for current build |
 
 `EntryNodeConsoleWrite` contains information for console output.
 
