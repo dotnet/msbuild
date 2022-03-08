@@ -394,43 +394,26 @@ namespace Microsoft.Build.Construction
             }
             else
             {
-                AppendAttributesAndChildren(XmlElement, element.XmlElement);
+                // Copy over the attributes from the template element.
+                foreach (XmlAttribute attribute in element.XmlElement.Attributes)
+                {
+                    if (ShouldCloneXmlAttribute(attribute))
+                    {
+                        XmlElement.SetAttribute(attribute.LocalName, attribute.NamespaceURI, attribute.Value);
+                    }
+                }
+
+                // If this element has pure text content, copy that over.
+                if (element.XmlElement.ChildNodes.Count == 1 && element.XmlElement.FirstChild.NodeType == XmlNodeType.Text)
+                {
+                    XmlElement.AppendChild(XmlElement.OwnerDocument.CreateTextNode(element.XmlElement.FirstChild.Value));
+                }
 
                 _expressedAsAttribute = element._expressedAsAttribute;
             }
 
             MarkDirty("CopyFrom", null);
             ClearAttributeCache();
-        }
-
-        private void AppendAttributesAndChildren(XmlNode appendTo, XmlNode appendFrom)
-        {
-            // Copy over the attributes from the template element.
-            if (appendFrom.Attributes is not null)
-            {
-                foreach (XmlAttribute attribute in appendFrom.Attributes)
-                {
-                    if (ShouldCloneXmlAttribute(attribute))
-                    {
-                        XmlAttribute attr = appendTo.OwnerDocument.CreateAttribute(attribute.LocalName, attribute.NamespaceURI);
-                        attr.Value = attribute.Value;
-                        appendTo.Attributes.Append(attr);
-                    }
-                }
-            }
-
-            // If this element has pure text content, copy that over.
-            if (appendFrom.ChildNodes.Count == 1 && appendFrom.FirstChild.NodeType == XmlNodeType.Text)
-            {
-                appendTo.AppendChild(appendTo.OwnerDocument.CreateTextNode(appendFrom.FirstChild.Value));
-            }
-
-            foreach (XmlNode child in appendFrom.ChildNodes)
-            {
-                XmlNode childClone = XmlElement.OwnerDocument.CreateNode(child.NodeType, child.Prefix, child.Name, child.NamespaceURI);
-                AppendAttributesAndChildren(childClone, child);
-                appendTo.AppendChild(childClone);
-            }
         }
 
         /// <summary>
