@@ -19,7 +19,7 @@ The server node uses same IPC approach as current worker nodes - named pipes. Th
 
 There might be multiple server processes started with different architecture, associated user, MSBuild version and another options. To quickly identify the appropriate one, server uses convention that includes these options in the name of the pipe. Name has format `MSBuildServer-{hash}` where `{hash}` is a SHA256 hashed value identifying these options.
 
-Handshake is a procedure ensuring that client is connecting to a compatible server instance. 
+Handshake is a procedure ensuring that client is connecting to a compatible server instance. It uses same logic and security guarantees as current connection between entry node and worker nodes. Hash in the pipe name is basically hash of the handshake object.
 
 ### Packets for client-server communication
 
@@ -39,9 +39,7 @@ Server requires to introduce new packet types for IPC.
 
 | Property name            | Type          | Description |
 |---|---|---|
-| Text                     | String        | The text that is written to output stream |
-| Foreground               | ConsoleColor  | The foreground color of the text |
-| Background               | ConsoleColor  | The background color for the text |
+| Text                     | String        | The text that is written to the output stream. It includes ANSI escape codes for formatting. |
 | OutputType               | Byte          | Identification of the output stream (1 = standard output, 2 = error output) |
 
 `EntryNodeResponse` informs about finished build.
