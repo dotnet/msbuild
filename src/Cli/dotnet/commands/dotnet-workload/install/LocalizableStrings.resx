@@ -322,6 +322,6 @@
     <value>DIRECTORY</value>
   </data>
   <data name="CannotCombineSkipManifestAndRollback" xml:space="preserve">
-    <value>Cannnot use --skip-manifest-update and --from-rollback-file together</value>
+    <value>Cannot use the {0} and {1} options together</value>
   </data>
 </root>

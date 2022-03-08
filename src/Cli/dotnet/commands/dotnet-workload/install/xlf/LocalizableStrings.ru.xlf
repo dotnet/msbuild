@@ -18,8 +18,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotCombineSkipManifestAndRollback">
-        <source>Cannnot use --skip-manifest-update and --from-rollback-file together</source>
-        <target state="new">Cannnot use --skip-manifest-update and --from-rollback-file together</target>
+        <source>Cannot use the {0} and {1} options together</source>
+        <target state="new">Cannot use the {0} and {1} options together</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
