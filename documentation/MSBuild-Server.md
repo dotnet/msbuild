@@ -49,4 +49,6 @@ Server requires to introduce new packet types for IPC.
 | ExitCode                 | Int32         | The exit code of the build |
 | ExitType                 | String        | The exit type of the build |
 
+`EntryNodeCancel` cancels the current build.
 
+This type is intentionally empty and properties for build cancelation could be added in future.
