@@ -4,6 +4,7 @@
 using FluentAssertions;
 using Xunit;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Configurer;
@@ -69,6 +70,13 @@ namespace Microsoft.DotNet.Tests
         {
             var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingCache());
             unitUnderTest.GetTelemetryCommonProperties()["Output Redirected"].Should().BeOneOf("True", "False");
+        }
+
+        [Fact]
+        public void TelemetryCommonPropertiesShouldReturnIsCIDetection()
+        {
+            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingCache());
+            unitUnderTest.GetTelemetryCommonProperties()["Continuous Integration"].Should().BeOneOf("True", "False");
         }
 
         [Fact]
@@ -139,6 +147,44 @@ namespace Microsoft.DotNet.Tests
                 unitUnderTest.GetTelemetryCommonProperties()["Libc Version"].Should().NotBeEmpty();
             }
         }
+
+        [Theory]
+        [MemberData(nameof(CITelemetryTestCases))]
+        public void CanDetectCIStatusForEnvVars(Dictionary<string, string> envVars, bool expected) {
+            try {
+                foreach (var (key, value) in envVars) {
+                    Environment.SetEnvironmentVariable(key, value);
+                }
+                new CIEnvironmentDetectorForTelemetry().IsCIEnvironment().Should().Be(expected);
+            } finally {
+                foreach (var (key, value) in envVars) {
+                    Environment.SetEnvironmentVariable(key, null);
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> CITelemetryTestCases => new List<object[]>{
+            new object[] { new Dictionary<string, string> { { "TF_BUILD", "true" } }, true },
+            new object[] { new Dictionary<string, string> { { "GITHUB_ACTIONS", "true" } }, true },
+            new object[] { new Dictionary<string, string> { { "APPVEYOR", "true"} }, true },
+            new object[] { new Dictionary<string, string> { { "CI", "true"} }, true },
+            new object[] { new Dictionary<string, string> { { "TRAVIS", "true"} }, true },
+            new object[] { new Dictionary<string, string> { { "CIRCLECI", "true"} }, true },
+
+            new object[] { new Dictionary<string, string> { { "CODEBUILD_BUILD_ID", "hi" }, { "AWS_REGION", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "CODEBUILD_BUILD_ID", "hi" } }, false },
+            new object[] { new Dictionary<string, string> { { "BUILD_ID", "hi" }, { "BUILD_URL", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "BUILD_ID", "hi" } }, false },
+            new object[] { new Dictionary<string, string> { { "BUILD_ID", "hi" }, { "PROJECT_ID", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "BUILD_ID", "hi" } }, false },
+
+            new object[] { new Dictionary<string, string> { { "TEAMCITY_VERSION", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "TEAMCITY_VERSION", "" } }, false },
+            new object[] { new Dictionary<string, string> { { "JB_SPACE_API_URL", "hi" } }, true },
+            new object[] { new Dictionary<string, string> { { "JB_SPACE_API_URL", "" } }, false },
+
+            new object[] { new Dictionary<string, string> { { "SomethingElse", "hi" } }, false },
+        };
 
         private class NothingCache : IUserLevelCacheWriter
         {
