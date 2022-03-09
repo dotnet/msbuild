@@ -149,6 +149,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             else if (_skipManifestUpdate && usedRollback)
             {
                 throw new GracefulException(string.Format(LocalizableStrings.CannotCombineSkipManifestAndRollback, 
+                    WorkloadInstallCommandParser.SkipManifestUpdateOption.Name, WorkloadInstallCommandParser.FromRollbackFileOption.Name,
                     WorkloadInstallCommandParser.SkipManifestUpdateOption.Name, WorkloadInstallCommandParser.FromRollbackFileOption.Name), isUserError: true);
             }
             else

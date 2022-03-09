@@ -322,6 +322,6 @@
     <value>DIRECTORY</value>
   </data>
   <data name="CannotCombineSkipManifestAndRollback" xml:space="preserve">
-    <value>Cannot use the {0} and {1} options together</value>
+    <value>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</value>
   </data>
 </root>
