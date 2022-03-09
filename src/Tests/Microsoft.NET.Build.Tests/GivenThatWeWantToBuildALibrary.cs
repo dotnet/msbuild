@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tests
             buildCommand
                 .Execute()
                 .Should()
-                .Fail();
+                .Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
 
