@@ -146,7 +146,11 @@ namespace Microsoft.NET.TestFramework
             if (!allowCopyIfPresent && Directory.Exists(directoryPath))
             {
                 //Arcade test retry reuses the machine so the directory might already be present in CI
-                Directory.Delete(directoryPath,true);
+                directoryPath = directoryPath+"_1";
+                if (Directory.Exists(directoryPath))
+                {
+                    throw new Exception($"Test dir {directoryPath} already exists");
+                }
             }
 #endif
 
