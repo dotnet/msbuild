@@ -22,7 +22,6 @@ namespace Microsoft.NET.Restore.Tests
         }
 
         [Theory]
-        [InlineData("3.5")]
         [InlineData("4.7.1")]
         [InlineData("4.7.2")]
         [InlineData("4.5.2")]

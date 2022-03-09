@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
         {
             switch ((targetFramework, isExe))
             {
-                case ("net45", true):
+                case ("net472", true):
                     var files = new[]
                         {
                             "HelloWorld.exe",
