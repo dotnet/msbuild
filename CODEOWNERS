@@ -12,23 +12,23 @@
 /src/Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests/ @vijayrkn
 
 # Area-AspNetCore
-/src/BlazorWasmSdk/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.Tests/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Assets/TestProjects/BlazorHosted/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Assets/TestProjects/BlazorHostedRID/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Assets/TestProjects/BlazorWasmMinimal/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Assets/TestProjects/BlazorWasmWithLibrary/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/RazorSdk/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests/ @pranavkm, @mkArtakMSFT, @TanayParikh, @javiercn
-/src/Tests/Microsoft.NET.Sdk.Razor.Tests/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Tests/Microsoft.NET.Sdk.Razor.Tool.Tests/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Assets/TestPackages/PackageLibraryDirectDependency/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Assets/TestPackages/PackageLibraryTransitiveDependency/ @captainsafia, @pranavkm, @mkArtakMSFT
-/src/src/Assets/TestProjects/Razor*/ @captainsafia, @pranavkm, @mkArtakMSFT
+/src/BlazorWasmSdk/ @captainsafia @mkArtakMSFT @TanayParikh @javiercn
+/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.Tests/ @captainsafia @mkArtakMSFT
+/src/Assets/TestProjects/BlazorHosted/ @captainsafia @mkArtakMSFT
+/src/Assets/TestProjects/BlazorHostedRID/ @captainsafia @mkArtakMSFT
+/src/Assets/TestProjects/BlazorWasmMinimal/ @captainsafia @mkArtakMSFT
+/src/Assets/TestProjects/BlazorWasmWithLibrary/ @captainsafia @mkArtakMSFT
+/src/RazorSdk/ @captainsafia @mkArtakMSFT
+/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests/ @mkArtakMSFT @TanayParikh @javiercn
+/src/Tests/Microsoft.NET.Sdk.Razor.Tests/ @captainsafia @mkArtakMSFT
+/src/Tests/Microsoft.NET.Sdk.Razor.Tool.Tests/ @captainsafia @mkArtakMSFT
+/src/Assets/TestPackages/PackageLibraryDirectDependency/ @captainsafia @mkArtakMSFT
+/src/Assets/TestPackages/PackageLibraryTransitiveDependency/ @captainsafia @mkArtakMSFT
+/src/src/Assets/TestProjects/Razor*/ @captainsafia @mkArtakMSFT
 
 # Area-Format
-/src/Cli/dotnet/commands/dotnet-format @jmarolf, @JoeRobich
-/src/Tests/dotnet-format.Tests @jmarolf, @JoeRobich
+/src/Cli/dotnet/commands/dotnet-format @jmarolf @JoeRobich
+/src/Tests/dotnet-format.Tests @jmarolf @JoeRobich
 
 # Area-NuGet
 /src/Cli/dotnet/commands/dotnet-add/dotnet-add-package @dotnet/nuget-team
@@ -62,13 +62,13 @@
 /src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ClickOnce.targets @sujitnayak
 
 # Area-Watch
-/src/Assets/TestProjects/Watch*/     @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Tests/dotnet-watch.Tests/       @captainsafia, @pranavkm, @mkArtakMSFT
-/src/Tests/Microsoft.AspNetCore.Watch.BrowserRefresh.Tests/       @captainsafia, @pranavkm, @mkArtakMSFT
-/src/BuiltInTools/   @captainsafia, @pranavkm, @mkArtakMSFT
+/src/Assets/TestProjects/Watch*/     @captainsafia @mkArtakMSFT
+/src/Tests/dotnet-watch.Tests/       @captainsafia @mkArtakMSFT
+/src/Tests/Microsoft.AspNetCore.Watch.BrowserRefresh.Tests/       @captainsafia @mkArtakMSFT
+/src/BuiltInTools/   @captainsafia @mkArtakMSFT
 
 # Compatibility tools owned by runtime team
 # Area-Compatibility
-/src/Compatibility/ @Anipik, @safern, @ericstj
-/src/Tests/Microsoft.DotNet.ApiCompatibility.Tests/ @Anipik, @safern, @ericstj
-/src/Tests/Microsoft.DotNet.PackageValidation.Tests/ @Anipik, @safern, @ericstj
+/src/Compatibility/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+/src/Tests/Microsoft.DotNet.ApiCompatibility.Tests/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+/src/Tests/Microsoft.DotNet.PackageValidation.Tests/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
