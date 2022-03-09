@@ -241,7 +241,7 @@ class Program
             };
 
             consoleApp.ReferencedProjects.Add(projectionProject);
-            consoleApp.PackageReferences.Add(new TestPackageReference("Microsoft.VCRTForwarders.140", "1.0.6"));
+            consoleApp.PackageReferences.Add(new TestPackageReference("Microsoft.VCRTForwarders.140", "1.0.7"));
 
             //  Workaround for PrivateAssets
             consoleApp.PackageReferences.Add(new TestPackageReference("Microsoft.Windows.CsWinRT", "1.2.3"));
