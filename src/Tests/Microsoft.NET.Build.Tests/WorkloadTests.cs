@@ -269,7 +269,7 @@ namespace Microsoft.NET.Build.Tests
                 .BeEquivalentTo("android");
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/installer/issues/13361")]
         [InlineData("net6.0-android;net6.0-ios", "net6.0-android;net6.0-ios", "android;android-aot")]
         [InlineData("net6.0", "net6.0;net6.0-android;net6.0-ios", "macos;android-aot")]
         [InlineData("net6.0;net6.0-ios", "net6.0;net6.0-android", "macos;android-aot")]

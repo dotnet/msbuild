@@ -46,12 +46,12 @@
       "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\[[CustomPackageVersion]]\\build\\net6.0\\blazor.webassembly.js"
     },
     {
-      "Identity": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.0-rc.2.21452.2.[[hash]].js",
+      "Identity": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.2.[[hash]].js",
       "SourceId": "BlazorWasmHosted60.Client",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
       "BasePath": "/",
-      "RelativePath": "_framework/dotnet.6.0.0-rc.2.21452.2.[[hash]].js",
+      "RelativePath": "_framework/dotnet.6.0.2.[[hash]].js",
       "AssetKind": "Publish",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -60,7 +60,7 @@
       "AssetTraitValue": "native",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.0-rc.2.21452.2.[[hash]].js"
+      "OriginalItemSpec": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.2.[[hash]].js"
     },
     {
       "Identity": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.timezones.blat",
@@ -233,21 +233,21 @@
       "OriginalItemSpec": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazor.webassembly.js"
     },
     {
-      "Identity": "${ProjectRoot}\\Client\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.6.0.0-rc.2.21452.2.[[hash]].js.gz]]",
+      "Identity": "${ProjectRoot}\\Client\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.6.0.2.[[hash]].js.gz]]",
       "SourceId": "BlazorWasmHosted60.Client",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
       "BasePath": "/",
-      "RelativePath": "_framework/dotnet.6.0.0-rc.2.21452.2.[[hash]].js.gz",
+      "RelativePath": "_framework/dotnet.6.0.2.[[hash]].js.gz",
       "AssetKind": "Publish",
       "AssetMode": "All",
       "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.0-rc.2.21452.2.[[hash]].js",
+      "RelatedAsset": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.2.[[hash]].js",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\Client\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.6.0.0-rc.2.21452.2.[[hash]].js.gz]]"
+      "OriginalItemSpec": "${ProjectRoot}\\Client\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.6.0.2.[[hash]].js.gz]]"
     },
     {
       "Identity": "${ProjectRoot}\\Client\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.wasm.gz]]",
@@ -1270,21 +1270,21 @@
       "OriginalItemSpec": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazor.webassembly.js"
     },
     {
-      "Identity": "${ProjectRoot}\\Client\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.6.0.0-rc.2.21452.2.[[hash]].js.br]]",
+      "Identity": "${ProjectRoot}\\Client\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.6.0.2.[[hash]].js.br]]",
       "SourceId": "BlazorWasmHosted60.Client",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
       "BasePath": "/",
-      "RelativePath": "_framework/dotnet.6.0.0-rc.2.21452.2.[[hash]].js.br",
+      "RelativePath": "_framework/dotnet.6.0.2.[[hash]].js.br",
       "AssetKind": "Publish",
       "AssetMode": "All",
       "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.0-rc.2.21452.2.[[hash]].js",
+      "RelatedAsset": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.2.[[hash]].js",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "br",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.0-rc.2.21452.2.[[hash]].js"
+      "OriginalItemSpec": "${ProjectRoot}\\Client\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.6.0.2.[[hash]].js"
     },
     {
       "Identity": "${ProjectRoot}\\Client\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.timezones.blat.br]]",

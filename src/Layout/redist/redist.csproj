@@ -30,7 +30,6 @@
     <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(MicrosoftTestPlatformBuildPackageVersion)" />
     <PackageReference Condition=" '$(DotNetBuildFromSource)' != 'true' " Include="NuGet.Localization" Version="$(NuGetLocalizationPackageVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
-    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
