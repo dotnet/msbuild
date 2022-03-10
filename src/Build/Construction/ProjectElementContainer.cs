@@ -343,17 +343,20 @@ namespace Microsoft.Build.Construction
             }
 
             RemoveAllChildren();
-            CopyFrom(element);
+            CopyFrom(element, true);
 
-            foreach (ProjectElement child in element.Children)
+            if (Link is not null)
             {
-                if (child is ProjectElementContainer childContainer)
+                foreach (ProjectElement child in element.Children)
                 {
-                    childContainer.DeepClone(ContainingProject, this);
-                }
-                else
-                {
-                    AppendChild(child.Clone(ContainingProject));
+                    if (child is ProjectElementContainer childContainer)
+                    {
+                        childContainer.DeepClone(ContainingProject, this);
+                    }
+                    else
+                    {
+                        AppendChild(child.Clone(ContainingProject));
+                    }
                 }
             }
         }
@@ -396,9 +399,7 @@ namespace Microsoft.Build.Construction
         /// <returns>The cloned element.</returns>
         protected internal virtual ProjectElementContainer DeepClone(ProjectRootElement factory, ProjectElementContainer parent)
         {
-            var clone = (ProjectElementContainer)Clone(factory);
-            parent?.AppendChild(clone);
-
+            ProjectElementContainer clone = (ProjectElementContainer)Clone(factory, parent);
             foreach (ProjectElement child in Children)
             {
                 if (child is ProjectElementContainer childContainer)
@@ -407,7 +408,7 @@ namespace Microsoft.Build.Construction
                 }
                 else
                 {
-                    clone.AppendChild(child.Clone(clone.ContainingProject));
+                    clone.AppendChild(child.Clone(clone.ContainingProject, deepCopy: true));
                 }
             }
 

@@ -86,12 +86,12 @@ namespace Microsoft.Build.ObjectModelRemoting
         public abstract ElementLocation Location { get; }
 
         /// <summary>
-        /// Supports <see cref="ProjectElement.CopyFrom"/>.
+        /// Supports <see cref="ProjectElement.CopyFrom(ProjectElement)"/>.
         /// </summary>
         public abstract IReadOnlyCollection<XmlAttributeLink> Attributes { get; }
 
         /// <summary>
-        /// Supports <see cref="ProjectElement.CopyFrom"/>.
+        /// Supports <see cref="ProjectElement.CopyFrom(ProjectElement)"/>.
         /// return raw xml content of the element if it has exactly 1 text child
         /// </summary>
         public abstract string PureText { get; }
@@ -112,7 +112,7 @@ namespace Microsoft.Build.ObjectModelRemoting
         public abstract void SetOrRemoveAttribute(string name, string value, bool clearAttributeCache, string reason, string param);
 
         /// <summary>
-        /// Facilitate remoting to remote <see cref="ProjectElement.CopyFrom"/>.
+        /// Facilitate remoting to remote <see cref="ProjectElement.CopyFrom(ProjectElement)"/>.
         /// </summary>
         public abstract void CopyFrom(ProjectElement element);
 

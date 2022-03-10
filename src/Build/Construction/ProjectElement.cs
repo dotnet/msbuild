@@ -344,11 +344,17 @@ namespace Microsoft.Build.Construction
             return Clone(ContainingProject);
         }
 
+        public virtual void CopyFrom(ProjectElement element)
+        {
+            CopyFrom(element, false);
+        }
+
         /// <summary>
         /// Applies properties from the specified type to this instance.
         /// </summary>
         /// <param name="element">The element to act as a template to copy from.</param>
-        public virtual void CopyFrom(ProjectElement element)
+        /// <param name="deepCopy"></param>
+        internal virtual void CopyFrom(ProjectElement element, bool deepCopy)
         {
             ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
             ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), nameof(element));
@@ -394,26 +400,100 @@ namespace Microsoft.Build.Construction
             }
             else
             {
-                // Copy over the attributes from the template element.
-                foreach (XmlAttribute attribute in element.XmlElement.Attributes)
-                {
-                    if (ShouldCloneXmlAttribute(attribute))
-                    {
-                        XmlElement.SetAttribute(attribute.LocalName, attribute.NamespaceURI, attribute.Value);
-                    }
-                }
-
-                // If this element has pure text content, copy that over.
-                if (element.XmlElement.ChildNodes.Count == 1 && element.XmlElement.FirstChild.NodeType == XmlNodeType.Text)
-                {
-                    XmlElement.AppendChild(XmlElement.OwnerDocument.CreateTextNode(element.XmlElement.FirstChild.Value));
-                }
+                AppendAttributesAndChildren(element, deepCopy);
 
                 _expressedAsAttribute = element._expressedAsAttribute;
             }
 
             MarkDirty("CopyFrom", null);
             ClearAttributeCache();
+        }
+
+        private void AppendAttributesAndChildren(ProjectElement appendFrom, bool deepCopy)
+        {
+            XmlElement.RemoveAll();
+            if (appendFrom.XmlElement.Attributes is not null)
+            {
+                foreach (XmlAttribute attribute in appendFrom.XmlElement.Attributes)
+                {
+                    if (ShouldCloneXmlAttribute(attribute))
+                    {
+                        SetOrRemoveAttribute(attribute.LocalName, attribute.Value);
+                    }
+                }
+            }
+
+            if (deepCopy && appendFrom is ProjectElementContainer containerFrom && this is ProjectElementContainer containerTo && this.Parent is not null)
+            {
+                foreach (ProjectElement child in containerFrom.Children)
+                {
+                    if (child is ProjectElementContainer childContainer)
+                    {
+                        childContainer.DeepClone(ContainingProject, containerTo);
+                    }
+                    else
+                    {
+                        containerTo.AppendChild(child.Clone(ContainingProject));
+                    }
+                }
+            }
+            else if (deepCopy)
+            {
+                foreach (XmlNode childNode in appendFrom.XmlElement.ChildNodes)
+                {
+                    if (childNode.NodeType == XmlNodeType.Text)
+                    {
+                        XmlElement.AppendChild(XmlElement.OwnerDocument.CreateTextNode(childNode.Value));
+                    }
+                    else if (childNode.NodeType == XmlNodeType.Element)
+                    {
+                        XmlNode childClone = XmlElement.OwnerDocument.CreateNode(childNode.NodeType, childNode.Prefix, childNode.Name, childNode.NamespaceURI);
+                        XmlElement.AppendChild(childClone);
+                        AppendAttributesAndChildren(childClone, childNode);
+                    }
+                }
+            }
+            else
+            {
+                if (appendFrom.XmlElement.ChildNodes.Count == 1 && appendFrom.XmlElement.FirstChild.NodeType == XmlNodeType.Text)
+                {
+                    XmlElement.AppendChild(XmlElement.OwnerDocument.CreateTextNode(appendFrom.XmlElement.FirstChild.Value));
+                }
+            }
+        }
+
+        private void AppendAttributesAndChildren(XmlNode appendTo, XmlNode appendFrom)
+        {
+            // Remove all the current attributes and textual content.
+            appendTo.RemoveAll();
+
+            if (appendFrom.Attributes is not null)
+            {
+                foreach (XmlAttribute attribute in appendFrom.Attributes)
+                {
+                    if (ShouldCloneXmlAttribute(attribute))
+                    {
+                        XmlAttribute attr = appendTo.OwnerDocument.CreateAttribute(attribute.LocalName, attribute.NamespaceURI);
+                        attr.Value = attribute.Value;
+                        appendTo.Attributes.Append(attr);
+                    }
+                }
+            }
+
+            foreach (XmlNode child in appendFrom.ChildNodes)
+            {
+                // If this element has pure text content, copy that over.
+                if (child.NodeType == XmlNodeType.Text)
+                {
+                    appendTo.AppendChild(appendTo.OwnerDocument.CreateTextNode(child.Value));
+                }
+                else if (child.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement newChild = appendTo.OwnerDocument.CreateElement(child.Prefix, child.Name, child.NamespaceURI);
+                    appendTo.AppendChild(newChild);
+                    AppendAttributesAndChildren(newChild, child);
+                }
+            }
         }
 
         /// <summary>
@@ -500,16 +580,19 @@ namespace Microsoft.Build.Construction
         /// Returns a shallow clone of this project element.
         /// </summary>
         /// <param name="factory">The factory to use for creating the new instance.</param>
+        /// <param name="parent"></param>
+        /// <param name="deepCopy"></param>
         /// <returns>The cloned element.</returns>
-        protected internal virtual ProjectElement Clone(ProjectRootElement factory)
+        protected internal virtual ProjectElement Clone(ProjectRootElement factory, ProjectElementContainer parent = null, bool deepCopy = false)
         {
             var clone = CreateNewInstance(factory);
+            parent?.AppendChild(clone);
             if (!clone.GetType().IsEquivalentTo(GetType()))
             {
                 ErrorUtilities.ThrowInternalError("{0}.Clone() returned an instance of type {1}.", GetType().Name, clone.GetType().Name);
             }
 
-            clone.CopyFrom(this);
+            clone.CopyFrom(this, deepCopy);
             return clone;
         }
 

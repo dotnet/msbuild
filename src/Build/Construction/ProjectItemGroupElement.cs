@@ -158,6 +158,15 @@ namespace Microsoft.Build.Construction
             _definitelyAreNoChildrenWithWildcards = false;
         }
 
+        /// <inheritdoc />
+        internal override void CopyFrom(ProjectElement element, bool deepCopy)
+        {
+            base.CopyFrom(element, deepCopy);
+
+            // clear out caching fields.
+            _definitelyAreNoChildrenWithWildcards = false;
+        }
+
         /// <summary>
         /// Creates an unparented ProjectItemGroupElement, wrapping an unparented XmlElement.
         /// Caller should then ensure the element is added to the XmlDocument in the appropriate location.
