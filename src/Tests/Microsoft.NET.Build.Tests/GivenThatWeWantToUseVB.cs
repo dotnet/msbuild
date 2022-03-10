@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("net45", true)]
+        [InlineData("net472", true)]
         [InlineData("netstandard2.0", false)]
         [InlineData("netcoreapp2.1", true)]
         [InlineData("netcoreapp3.0", true)]
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
         {
             switch ((targetFramework, isExe))
             {
-                case ("net45", true):
+                case ("net472", true):
                     var files = new[]
                         {
                             "HelloWorld.exe",

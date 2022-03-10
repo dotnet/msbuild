@@ -23,8 +23,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.0" DisplayName=".NET Core 3.0" Alias="netcoreapp3.0" />
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.1" DisplayName=".NET Core 3.1" Alias="netcoreapp3.1" />
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v5.0" DisplayName=".NET 5.0" Alias="net5.0" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v6.0" DisplayName=".NET 6.0" Alias="net6.0"
-                                            Condition="$([MSBuild]::VersionGreaterThanOrEquals($(MSBuildVersion), '17.0'))"/>
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v6.0" DisplayName=".NET 6.0" Alias="net6.0" />
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v7.0" DisplayName=".NET 7.0" Alias="net7.0" />
     </ItemGroup>
 
