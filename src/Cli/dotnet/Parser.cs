@@ -129,22 +129,22 @@ namespace Microsoft.DotNet.Cli
 
             if (exception is Utils.GracefulException)
             {
-                context.Console.Error.WriteLine(CommandContext.IsVerbose()
+                Reporter.Error.WriteLine(CommandContext.IsVerbose()
                     ? exception.ToString().Red().Bold()
                     : exception.Message.Red().Bold());
                 
             }
             else if (exception is CommandParsingException)
             {
-                context.Console.Error.WriteLine(CommandContext.IsVerbose()
+                Reporter.Error.WriteLine(CommandContext.IsVerbose()
                     ? exception.ToString().Red().Bold()
                     : exception.Message.Red().Bold());
                 context.ParseResult.ShowHelp();
             }
             else
             {
-                context.Console.Error.Write("Unhandled exception: ".Red().Bold());
-                context.Console.Error.WriteLine(exception.ToString().Red().Bold());
+                Reporter.Error.Write("Unhandled exception: ".Red().Bold());
+                Reporter.Error.WriteLine(exception.ToString().Red().Bold());
             }    
             context.ExitCode = 1;
         }
