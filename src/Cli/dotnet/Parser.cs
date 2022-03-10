@@ -118,7 +118,6 @@ namespace Microsoft.DotNet.Cli
             .UseSuggestDirective()
             .DisablePosixBinding()
             .EnableLegacyDoubleDashBehavior()
-            .UseParseErrorReporting()
             .Build();
 
         private static void ExceptionHandler(Exception exception, InvocationContext context)
