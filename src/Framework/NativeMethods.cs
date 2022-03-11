@@ -9,7 +9,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 
@@ -22,10 +21,9 @@ using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 #nullable disable
 
 namespace Microsoft.Build.Framework;
-
 internal static class NativeMethods
 {
-#region Constants
+    #region Constants
 
     internal const uint ERROR_INSUFFICIENT_BUFFER = 0x8007007A;
     internal const uint STARTUP_LOADER_SAFEMODE = 0x10;
@@ -72,9 +70,9 @@ internal static class NativeMethods
     internal const uint WAIT_OBJECT_0 = 0x00000000;
     internal const uint WAIT_TIMEOUT = 0x00000102;
 
-#endregion
+    #endregion
 
-#region Enums
+    #region Enums
 
     private enum PROCESSINFOCLASS : int
     {
@@ -199,9 +197,9 @@ internal static class NativeMethods
         Unknown
     }
 
-#endregion
+    #endregion
 
-#region Structs
+    #region Structs
 
     /// <summary>
     /// Structure that contain information about the system on which we are running
@@ -569,9 +567,9 @@ internal static class NativeMethods
         return -1;
     }
 
-#endregion
+    #endregion
 
-#region Member data
+    #region Member data
 
     internal static bool HasMaxPath => MaxPath == MAX_PATH;
 
@@ -710,10 +708,10 @@ internal static class NativeMethods
 #if !CLR2COMPATIBILITY
     private static bool? _isWindows;
 #endif
+
     /// <summary>
     /// Gets a flag indicating if we are running under some version of Windows
     /// </summary>
-    [SupportedOSPlatformGuard("windows")]
     internal static bool IsWindows
     {
 #if CLR2COMPATIBILITY
@@ -868,9 +866,9 @@ internal static class NativeMethods
     /// </summary>
     internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.ProcessorArchitectureTypeNative;
 
-#endregion
+    #endregion
 
-#region Wrapper methods
+    #region Wrapper methods
 
     /// <summary>
     /// Really truly non pumping wait.
@@ -1452,9 +1450,9 @@ internal static class NativeMethods
         }
     }
 
-#endregion
+    #endregion
 
-#region PInvoke
+    #region PInvoke
 
     /// <summary>
     /// Gets the current OEM code page which is used by console apps
@@ -1587,9 +1585,9 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", SetLastError = true)]
     internal static extern bool SetThreadErrorMode(int newMode, out int oldMode);
 
-#endregion
+    #endregion
 
-#region Extensions
+    #region Extensions
 
     /// <summary>
     /// Waits while pumping APC messages.  This is important if the waiting thread is an STA thread which is potentially
@@ -1632,9 +1630,9 @@ internal static class NativeMethods
         return returnValue == 0;
     }
 
-#endregion
+    #endregion
 
-#region helper methods
+    #region helper methods
 
     internal static bool DirectoryExists(string fullPath)
     {
@@ -1677,6 +1675,6 @@ internal static class NativeMethods
         return GetFileAttributesEx(path, 0, ref data);
     }
 
-#endregion
+    #endregion
 
 }

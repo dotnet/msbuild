@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Framework;
+#endif
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
@@ -20,7 +22,6 @@ using System.IO;
 using System.Reflection;
 #endif
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -31,6 +32,9 @@ using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
+#if !RUNTIME_TYPE_NETCORE
+using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+#endif
 
 #nullable disable
 
@@ -139,15 +143,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static PermissionSet GetNamedPermissionSet(string targetZone, string targetFrameworkMoniker)
         {
-            FrameworkName fn;
+            FrameworkNameVersioning fn;
 
             if (!string.IsNullOrEmpty(targetFrameworkMoniker))
             {
-                fn = new FrameworkName(targetFrameworkMoniker);
+                fn = new FrameworkNameVersioning(targetFrameworkMoniker);
             }
             else
             {
-                fn = new FrameworkName(".NETFramework", s_dotNet40Version);
+                fn = new FrameworkNameVersioning(".NETFramework", s_dotNet40Version);
             }
 
             int majorVersion = fn.Version.Major;
@@ -166,7 +170,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        private static XmlElement GetXmlElement(string targetZone, FrameworkName fn)
+        private static XmlElement GetXmlElement(string targetZone, FrameworkNameVersioning fn)
         {
             IList<string> paths = ToolLocationHelper.GetPathToReferenceAssemblies(fn);
 
@@ -491,7 +495,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="certThumbprint">Hexadecimal string that contains the SHA-1 hash of the certificate.</param>
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
-        [SupportedOSPlatform("windows")]
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path)
         {
             SignFile(certThumbprint, timestampUrl, path, null, null);
@@ -504,7 +507,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
-        [SupportedOSPlatform("windows")]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -521,7 +523,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
-        [SupportedOSPlatform("windows")]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -540,7 +541,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
         /// <param name="disallowMansignTimestampFallback">Disallow fallback to legacy timestamping when RFC3161 timestamping fails during manifest signing</param>
-        [SupportedOSPlatform("windows")]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -599,7 +599,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <remarks>This function is only for signing a manifest, not a PE file.</remarks>
-        [SupportedOSPlatform("windows")]
         public static void SignFile(string certPath, SecureString certPassword, Uri timestampUrl, string path)
         {
             X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
@@ -624,7 +623,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <remarks>This function can only sign a PE file if the X509Certificate2 parameter represents a certificate in the
         /// current user's personal certificate store.</remarks>
-        [SupportedOSPlatform("windows")]
         public static void SignFile(X509Certificate2 cert, Uri timestampUrl, string path)
         {
             // setup resources
@@ -632,7 +630,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             SignFileInternal(cert, timestampUrl, path, true, resources);
         }
 
-        [SupportedOSPlatform("windows")]
         private static void SignFileInternal(X509Certificate2 cert,
                                             Uri timestampUrl,
                                             string path,
@@ -842,7 +839,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     toolPath = Path.Combine(pathToDotNetFrameworkSdk, "bin", ToolName);
                 }
             }
-            if (NativeMethodsShared.IsWindows && (toolPath == null || !FileSystems.Default.FileExists(toolPath)))
+            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
             {
                 toolPath = GetVersionIndependentToolPath(ToolName);
             }
@@ -896,7 +893,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return false;
         }
 
-        [SupportedOSPlatform("windows")]
         private static string GetVersionIndependentToolPath(string toolName)
         {
             const string versionIndependentToolKeyName = @"Software\Microsoft\ClickOnce\SignTool";

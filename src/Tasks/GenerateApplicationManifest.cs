@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Runtime.Versioning;
 using System.Xml;
 
 using Microsoft.Build.Framework;
@@ -18,7 +17,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates an application manifest for ClickOnce projects.
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public sealed class GenerateApplicationManifest : GenerateManifestBase
     {
         private enum _ManifestType
@@ -108,16 +106,6 @@ namespace Microsoft.Build.Tasks
                 return _useApplicationTrust;
             }
             set => _useApplicationTrust = value;
-        }
-
-        public override bool Execute()
-        {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateApplicationManifest));
-                return false;
-            }
-            return base.Execute();
         }
 
         protected override Type GetObjectType()

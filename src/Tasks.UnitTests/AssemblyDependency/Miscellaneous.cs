@@ -14,6 +14,7 @@ using Xunit;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit.Abstractions;
 using Shouldly;
+using System.Text;
 
 #nullable disable
 

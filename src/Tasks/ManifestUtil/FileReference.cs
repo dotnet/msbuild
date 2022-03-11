@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -45,7 +44,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public ComClass[] ComClasses => _comClasses;
 
-        [SupportedOSPlatform("windows")]
         internal bool ImportComComponent(string path, OutputMessageCollection outputMessages, string outputDisplayName)
         {
             var importer = new ComImporter(path, outputMessages, outputDisplayName);
@@ -105,7 +103,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public TypeLib[] TypeLibs => _typeLibs;
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -143,7 +141,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _writeableType = value;
         }
 
-#endregion
+        #endregion
     }
 
     [ComVisible(false)]
@@ -183,7 +181,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string TlbId => _tlbid;
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -230,7 +228,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _tlbid = value;
         }
 
-#endregion
+        #endregion
     }
 
     [ComVisible(false)]
@@ -295,7 +293,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Version => _version;
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -342,7 +340,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _version = value;
         }
 
-#endregion
+        #endregion
     }
 
     [ComVisible(false)]
@@ -382,7 +380,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -402,7 +400,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _versioned = value;
         }
 
-#endregion
+        #endregion
     }
 
     [ComVisible(false)]
@@ -429,7 +427,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string TlbId => _tlbid;
 
-#region " XmlSerializer "
+        #region " XmlSerializer "
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -476,6 +474,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _tlbid = value;
         }
 
-#endregion
+        #endregion
     }
 }

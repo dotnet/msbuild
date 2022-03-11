@@ -211,13 +211,6 @@
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
-    <!-- Manually download this library for RoslynCodeTaskFactory.
-           See target AddRefAssemblies below. -->
-    <ItemGroup>
-      <PackageDownload Include="netstandard.library">
-        <Version>[2.0.3]</Version>
-      </PackageDownload>
-    </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- File for Assemblies we depend on -->
     <Reference Include="System" />
