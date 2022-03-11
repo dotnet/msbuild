@@ -3,8 +3,11 @@
 
 using System.IO;
 using System.Collections.Generic;
+using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
@@ -17,6 +20,16 @@ namespace Microsoft.Build.UnitTests
 {
     sealed public class CreateItem_Tests
     {
+        internal const string CreateItemWithInclude = @"
+            <Project>
+                <Target Name='TestTarget' Returns='@(Text)'>
+                    <CreateItem Include='{0}'>
+                        <Output TaskParameter='Include' ItemName='Text'/>
+                    </CreateItem>
+                </Target>
+            </Project>
+            ";
+
         private readonly ITestOutputHelper _testOutput;
 
         public CreateItem_Tests(ITestOutputHelper output)
@@ -261,8 +274,173 @@ namespace Microsoft.Build.UnitTests
             Assert.True(success);
             Assert.Equal("SomeOverwriteValue", t.Include[0].GetMetadata("MyMetaData"));
         }
+
+        /// <summary>
+        /// Logs error when encountering wildcard drive enumeration during task item creation.
+        /// </summary>
+        [Theory]
+        [InlineData(@"/**")]
+        [InlineData(@"/**/*.cs")]
+        [InlineData(@"/**/*/*.cs")]
+        public void WildcardDriveEnumerationTaskItemLogsError(string itemSpec)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "1");
+
+                try
+                {
+                    MockEngine engine = new MockEngine();
+                    CreateItem t = new CreateItem()
+                    {
+                        BuildEngine = engine,
+                        Include = new ITaskItem[] { new TaskItem(itemSpec) },
+                    };
+
+                    t.Execute().ShouldBeFalse();
+                    engine.Errors.ShouldBe(1);
+                    engine.AssertLogContains("MSB5029");
+                }
+                finally
+                {
+                    ChangeWaves.ResetStateForTests();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Logs warning when encountering wildcard drive enumeration during task item creation on Windows platform.
+        /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(@"z:\**")]
+        [InlineData(@"z:\**\*.log")]
+        [InlineData(@"z:\\\\**\*.log")]
+        public void LogWindowsWarningUponCreateItemExecution(string itemSpec)
+        {
+            VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(itemSpec);
+        }
+
+        /// <summary>
+        /// Logs warning when encountering wildcard drive enumeration during task item creation on Unix platform.
+        /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        [InlineData(@"\**")]
+        [InlineData(@"\**\*.log")]
+        public void LogUnixWarningUponCreateItemExecution(string itemSpec)
+        {
+            VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(itemSpec);
+        }
+
+        private static void VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(string itemSpec)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
+
+                try
+                {
+                    MockEngine engine = new MockEngine();
+                    CreateItem t = new CreateItem()
+                    {
+                        BuildEngine = engine,
+                        Include = new ITaskItem[] { new TaskItem(itemSpec) },
+                    };
+
+                    t.Execute().ShouldBeTrue();
+                    engine.Warnings.ShouldBe(1);
+                    engine.AssertLogContains("MSB5029");
+                }
+                finally
+                {
+                    ChangeWaves.ResetStateForTests();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Throws exception when encountering wildcard drive enumeration during CreateItem task execution.
+        /// </summary>
+        [Theory]
+        [InlineData(
+            CreateItemWithInclude,
+            @"\**")]
+
+        [InlineData(
+            CreateItemWithInclude,
+            @"\**\*.txt")]
+
+        [InlineData(
+            CreateItemWithInclude,
+            @"$(empty)\**\*.cs")]
+        public void ThrowExceptionUponItemCreationWithDriveEnumeration(string content, string include)
+        {
+            content = string.Format(content, include);
+            Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
+                content,
+                "1",
+                "TestTarget",
+                Helpers.ExpectedBuildResult.FailWithError,
+                _testOutput);
+        }
+
+        /// <summary>
+        /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Windows platform.
+        /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(
+            CreateItemWithInclude,
+            @"z:\**")]
+
+        [InlineData(
+            CreateItemWithInclude,
+            @"z:\**\*.txt")]
+
+        [InlineData(
+            CreateItemWithInclude,
+            @"z:$(empty)\**\*.cs")]
+        public void LogWindowsWarningUponItemCreationWithDriveEnumeration(string content, string include)
+        {
+            content = string.Format(content, include);
+            Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
+                content,
+                "0",
+                "TestTarget",
+                Helpers.ExpectedBuildResult.SucceedWithWarning,
+                _testOutput);
+        }
+
+        /// <summary>
+        /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Unix platform.
+        /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        [InlineData(
+            CreateItemWithInclude,
+            @"\**")]
+
+        [InlineData(
+            CreateItemWithInclude,
+            @"\**\*.txt")]
+
+        [InlineData(
+            CreateItemWithInclude,
+            @"$(empty)\**\*.cs")]
+        public void LogUnixWarningUponItemCreationWithDriveEnumeration(string content, string include)
+        {
+            content = string.Format(content, include);
+            Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
+                    content,
+                    "0",
+                    "TestTarget",
+                    Helpers.ExpectedBuildResult.SucceedWithWarning,
+                    _testOutput);
+        }
     }
 }
-
-
-
