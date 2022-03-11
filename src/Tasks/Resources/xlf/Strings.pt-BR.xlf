@@ -516,7 +516,7 @@
       </trans-unit>
       <trans-unit id="General.TaskRequiresWindows">
         <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
-        <target state="new">MSB3096: Task "{0}" is only supported when building on Windows.</target>
+        <target state="translated">MSB3096: A tarefa "{0}" só é suportada quando compilada no Windows.</target>
         <note>{StrBegin="MSB3096: "}</note>
       </trans-unit>
       <trans-unit id="General.UndefineProperties">
