@@ -77,6 +77,19 @@
     </ItemGroup>
   </Target>
 
+    <Target Name="RemoveMSBuildRef" AfterTargets="ResolvePackageAssets">
+      <!-- MSBuild.dll is now in the ref folder of the Microsoft.Build.Runtime NuGet package.
+             This counter-intuitively was stopping it from being written to the deps.json file.
+             (This may have been because there wasn't a corresponding implementation in the lib
+             folder).
+             
+             This target works around that by removing the item that is generated from the
+             ref assembly in the NuGet package. -->
+      <ItemGroup>
+        <ResolvedCompileFileDefinitions Remove="@(ResolvedCompileFileDefinitions)" Condition="'%(FileName)' == 'MSBuild'" />
+      </ItemGroup>
+    </Target>
+
   <Target Name="_ResolvePublishFSharpNuGetPackages"
        AfterTargets="CoreCompile">
 
