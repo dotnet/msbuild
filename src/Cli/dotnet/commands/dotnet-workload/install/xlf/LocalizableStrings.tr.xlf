@@ -17,6 +17,11 @@
         <target state="translated">{0} paketi sürüm {1}, çevrimdışı {2} önbelleğinde yok.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="new">Checking for updated workload manifests.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">{0} iş yükü paketi sürüm {1} kaldırılıyor...</target>

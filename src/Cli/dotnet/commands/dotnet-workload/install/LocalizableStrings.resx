@@ -321,4 +321,7 @@
   <data name="DownloadToCacheOptionArgumentName" xml:space="preserve">
     <value>DIRECTORY</value>
   </data>
+  <data name="CheckForUpdatedWorkloadManifests" xml:space="preserve">
+    <value>Checking for updated workload manifests.</value>
+  </data>
 </root>
