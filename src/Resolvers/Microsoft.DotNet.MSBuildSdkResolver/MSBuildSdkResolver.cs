@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             if (msbuildSdksDir == null)
             {
                 dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable);
-                string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
+                string globalJsonStartDir = GetGlobalJsonStartDir(context);
                 var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetRoot);
 
                 if (resolverResult.ResolvedSdkDirectory == null)
@@ -194,6 +194,32 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         private static SdkResult Failure(SdkResultFactory factory, string format, params object[] args)
         {
             return factory.IndicateFailure(new[] { string.Format(format, args) });
+        }
+
+        /// <summary>
+        /// Gets the starting path to search for global.json.
+        /// </summary>
+        /// <param name="context">A <see cref="SdkResolverContext" /> that specifies where the current project is located.</param>
+        /// <returns>The full path to a starting directory to use when searching for a global.json.</returns>
+        private static string GetGlobalJsonStartDir(SdkResolverContext context)
+        {
+            // Evaluating in-memory projects with MSBuild means that they won't have a solution or project path.
+            // Default to using the current directory as a best effort to finding a global.json.  This could result in
+            // using the wrong one but without a starting directory, SDK resolution won't work at all.  In most cases, a
+            // global.json won't be found and the default SDK will be used.
+
+            string startDir = Environment.CurrentDirectory;
+
+            if (!string.IsNullOrWhiteSpace(context.SolutionFilePath))
+            {
+                startDir = Path.GetDirectoryName(context.SolutionFilePath);
+            }
+            else if(!string.IsNullOrWhiteSpace(context.ProjectFilePath))
+            {
+                startDir = Path.GetDirectoryName(context.ProjectFilePath);
+            }
+
+            return startDir;
         }
 
         private static string GetMinimumVSDefinedSDKVersion()
