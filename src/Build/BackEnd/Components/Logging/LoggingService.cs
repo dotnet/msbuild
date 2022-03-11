@@ -167,12 +167,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// The next project ID to assign when a project evaluation started event is received.
         /// </summary>
-        private int _nextEvaluationId = 1;
+        private int _nextEvaluationId;
 
         /// <summary>
         /// The next project ID to assign when a project started event is received.
         /// </summary>
-        private int _nextProjectId = 1;
+        private int _nextProjectId;
 
         /// <summary>
         /// The next target ID to assign when a target started event is received.
@@ -372,11 +372,9 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextEvaluationId += MaxCPUCount + 2 /* We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)*/;
-                    return _nextEvaluationId;
-                }
+                // We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)
+                Interlocked.Add(ref _nextEvaluationId, MaxCPUCount + 2);
+                return _nextEvaluationId;
             }
         }
 
@@ -388,11 +386,9 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextProjectId += MaxCPUCount + 2 /* We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)*/;
-                    return _nextProjectId;
-                }
+                // We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)
+                Interlocked.Add(ref _nextProjectId, MaxCPUCount + 2);
+                return _nextProjectId;
             }
         }
 
@@ -404,11 +400,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextTargetId++;
-                    return _nextTargetId;
-                }
+                Interlocked.Increment(ref _nextTargetId);
+                return _nextTargetId;
             }
         }
 
@@ -420,11 +413,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextTaskId++;
-                    return _nextTaskId;
-                }
+                Interlocked.Increment(ref _nextTaskId);
+                return _nextTaskId;
             }
         }
 
