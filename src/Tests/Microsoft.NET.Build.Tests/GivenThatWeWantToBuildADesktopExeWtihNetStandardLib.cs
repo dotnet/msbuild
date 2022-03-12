@@ -253,7 +253,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And
-                .NotHaveStdOutContaining("warning")
+                .NotHaveStdOutContaining("duplicate")
                 .And
                 .HaveStdOutContainingIgnoreCase(successMessage);
 
