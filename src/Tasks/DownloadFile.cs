@@ -146,11 +146,17 @@ namespace Microsoft.Build.Tasks
                     {
                         response.EnsureSuccessStatusCode();
                     }
+#if NET6_0_OR_GREATER
+                    catch (HttpRequestException)
+                    {
+                        throw;
+#else
                     catch (HttpRequestException e)
                     {
-                        // HttpRequestException does not have the status code so its wrapped and thrown here so that later on we can determine
-                        // if a retry is possible based on the status code
+                        // MSBuild History: CustomHttpRequestException was created as a wrapper over HttpRequestException
+                        // so it could include the StatusCode. As of net5.0, the statuscode is now in HttpRequestException.
                         throw new CustomHttpRequestException(e.Message, e.InnerException, response.StatusCode);
+#endif
                     }
 
                     if (!TryGetFileName(response, out string filename))
@@ -181,7 +187,11 @@ namespace Microsoft.Build.Tasks
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 
-                            using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                            using (Stream responseStream = await response.Content.ReadAsStreamAsync(
+#if NET6_0_OR_GREATER
+                            cancellationToken
+#endif
+                            ).ConfigureAwait(false))
                             {
                                 await responseStream.CopyToAsync(target, 1024, cancellationToken).ConfigureAwait(false);
                             }
@@ -220,20 +230,34 @@ namespace Microsoft.Build.Tasks
             }
 
             // Some HttpRequestException have an inner exception that has the real error
-            if (actualException is HttpRequestException httpRequestException && httpRequestException.InnerException != null)
+            if (actualException is HttpRequestException httpRequestException)
             {
-                actualException = httpRequestException.InnerException;
-
-                // An IOException inside of a HttpRequestException means that something went wrong while downloading
-                if (actualException is IOException)
+                if (httpRequestException.InnerException != null)
                 {
-                    return true;
+                    actualException = httpRequestException.InnerException;
+
+                    // An IOException inside of a HttpRequestException means that something went wrong while downloading
+                    if (actualException is IOException)
+                    {
+                        return true;
+                    }
+                }
+
+#if NET6_0_OR_GREATER
+                // net5.0 included StatusCode in the HttpRequestException.
+                switch (httpRequestException.StatusCode)
+                {
+                    case HttpStatusCode.InternalServerError:
+                    case HttpStatusCode.RequestTimeout:
+                        return true;
                 }
             }
+#else
+            }
 
+            // framework workaround for HttpRequestException not containing StatusCode
             if (actualException is CustomHttpRequestException customHttpRequestException)
             {
-                // A wrapped CustomHttpRequestException has the status code from the error
                 switch (customHttpRequestException.StatusCode)
                 {
                     case HttpStatusCode.InternalServerError:
@@ -241,6 +265,7 @@ namespace Microsoft.Build.Tasks
                         return true;
                 }
             }
+#endif
 
             if (actualException is WebException webException)
             {
@@ -287,8 +312,10 @@ namespace Microsoft.Build.Tasks
             return !String.IsNullOrWhiteSpace(filename);
         }
 
+#if !NET6_0_OR_GREATER
         /// <summary>
         /// Represents a wrapper around the <see cref="HttpRequestException"/> that also contains the <see cref="HttpStatusCode"/>.
+        /// DEPRECATED as of net5.0, which included the StatusCode in the HttpRequestException class.
         /// </summary>
         private sealed class CustomHttpRequestException : HttpRequestException
         {
@@ -300,6 +327,7 @@ namespace Microsoft.Build.Tasks
 
             public HttpStatusCode StatusCode { get; }
         }
+#endif
 
         private bool ShouldSkip(HttpResponseMessage response, FileInfo destinationFile)
         {
