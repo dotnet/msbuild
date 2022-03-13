@@ -57,7 +57,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="EnvironmentVariableAsSwitch">
         <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: Niezdefiniowana zmienna środowiskowa przekazana jako przełącznik.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This error is shown when a user passes in an environment variable (including from a response file)
@@ -277,11 +277,11 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="new">
-      -warnNotAsError[:code[;code2]]
-                     List of warning codes to treats not treat as errors.
-                     Use a semicolon or a comma to separate
-                     multiple warning codes. Has no effect if the -warnaserror
+        <target state="translated">
+ -warnNotAsError[:code[;code2]]
+ Lista kodów ostrzeżeń, które mają być traktowane jako błędy. 
+ Rozdziel średnik lub przecinek
+ wiele kodów ostrzeżeń. Nie ma żadnego efektu, jeśli przełącznik -warnaserror
                      switch is not set.
 
                      Example:
@@ -1256,7 +1256,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="MissingWarnNotAsErrorParameterError">
         <source>MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: Określ co najmniej jeden kod ostrzeżenia podczas korzystania z przełącznika –warnNotAsError.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
@@ -1273,7 +1273,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
-        <target state="new">MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</target>
+        <target state="translated">MSBUILD : error MSB1062: Nie można określić przełącznika –warnnotaserror, chyba że przełącznik –warnaserror również jest określony i pozostanie pusty.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
@@ -1341,7 +1341,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="ResponseFileSwitchFromLocation">
         <source>'{0}' came from '{1}'</source>
-        <target state="new">'{0}' came from '{1}'</target>
+        <target state="translated">Element „{0}“ pochodzi z „{1}“</target>
         <note>
       These are response file switches with the location of the response file on disk.
     </note>
@@ -1377,9 +1377,9 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
         <source>{0}
     Full command line: '{1}'
   Switches appended by response files:{2}</source>
-        <target state="new">{0}
-    Full command line: '{1}'
-  Switches appended by response files:{2}</target>
+        <target state="translated">{0}
+ Pełny wiersz polecenia: „{1}“
+ Przełączniki dołączane przez pliki odpowiedzi: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">

@@ -57,7 +57,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       </trans-unit>
       <trans-unit id="EnvironmentVariableAsSwitch">
         <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: variabile di ambiente non definita passata come opzione.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This error is shown when a user passes in an environment variable (including from a response file)
@@ -277,14 +277,14 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="new">
+        <target state="translated">
       -warnNotAsError[:code[;code2]]
-                     List of warning codes to treats not treat as errors.
-                     Use a semicolon or a comma to separate
-                     multiple warning codes. Has no effect if the -warnaserror
-                     switch is not set.
+                     Elenco di codici di avviso da non considerare come errori.
+                     Usare un punto e virgola o una virgola per separare
+                     più codici di avviso. Non ha alcun effetto se l’opzione -warnaserror
+                     non è impostata.
 
-                     Example:
+Esempio:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -1264,7 +1264,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       </trans-unit>
       <trans-unit id="MissingWarnNotAsErrorParameterError">
         <source>MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</source>
-        <target state="new">MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</target>
+        <target state="translated">MSBUILD : error MSB1060: specificare uno o più codici di avviso quando si usa l'opzione -warnNotAsError.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1060: "}
       UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
@@ -1281,7 +1281,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
-        <target state="new">MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</target>
+        <target state="translated">MSBUILD : error MSB1062: non è possibile specificare l'opzione -warnnotaserror a meno che non venga specificata e lasciata vuota anche l'opzione -warnaserror.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
@@ -1349,7 +1349,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       </trans-unit>
       <trans-unit id="ResponseFileSwitchFromLocation">
         <source>'{0}' came from '{1}'</source>
-        <target state="new">'{0}' came from '{1}'</target>
+        <target state="translated">'{0}' proviene da '{1}'</target>
         <note>
       These are response file switches with the location of the response file on disk.
     </note>
@@ -1385,9 +1385,9 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
         <source>{0}
     Full command line: '{1}'
   Switches appended by response files:{2}</source>
-        <target state="new">{0}
-    Full command line: '{1}'
-  Switches appended by response files:{2}</target>
+        <target state="translated">{0}
+    Riga di comando completa: '{1}'
+  Opzioni accodate da file di risposta:{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">
