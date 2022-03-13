@@ -48,7 +48,7 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        files = FileMatcher.Default.GetFiles(null, item.ItemSpec);
+                        files = FileMatcher.Default.GetFiles(null, item.ItemSpec).FileList;
                     }
 
                     foreach (string file in files)
