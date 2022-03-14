@@ -711,8 +711,8 @@ The following are names of parameters or literal values and should not be transl
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
-        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</source>
-        <target state="translated">NETSDK1094: Die Leistungsoptimierung ist für Assemblys nicht möglich: Es wurde kein gültiges Runtimepaket gefunden. Legen Sie die PublishReadyToRun-Eigenschaft auf FALSE fest, oder verwenden Sie bei der Veröffentlichung eine unterstützte Runtime-ID.</target>
+        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
+        <target state="needs-review-translation">NETSDK1094: Die Leistungsoptimierung ist für Assemblys nicht möglich: Es wurde kein gültiges Runtimepaket gefunden. Legen Sie die PublishReadyToRun-Eigenschaft auf FALSE fest, oder verwenden Sie bei der Veröffentlichung eine unterstützte Runtime-ID.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">
