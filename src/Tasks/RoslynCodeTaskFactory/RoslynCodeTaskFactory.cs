@@ -17,6 +17,9 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Shared.FileSystem;
+#if !NETFRAMEWORK
+using System.Runtime.Loader;
+#endif
 
 #nullable disable
 
@@ -539,7 +542,14 @@ namespace Microsoft.Build.Tasks
                 if (FileSystems.Default.FileExists(reference))
                 {
                     // The path could be relative like ..\Assembly.dll so we need to get the full path
-                    resolvedAssemblyReferences.Add(Path.GetFullPath(reference));
+                    string fullPath = Path.GetFullPath(reference);
+                    string directory = Path.GetDirectoryName(fullPath);
+                    resolvedAssemblyReferences.Add(fullPath);
+#if NETFRAMEWORK
+                    AppDomain.CurrentDomain.AssemblyResolve += (_, eventArgs) => TryLoadAssembly(directory, new AssemblyName(eventArgs.Name).Name);
+#else
+                    AssemblyLoadContext.Default.Resolving += (_, assemblyName) => TryLoadAssembly(directory, assemblyName.Name);
+#endif
                     continue;
                 }
 
@@ -573,6 +583,12 @@ namespace Microsoft.Build.Tasks
             items = hasInvalidReference ? null : resolvedAssemblyReferences.Select(i => (ITaskItem)new TaskItem(i)).ToArray();
 
             return !hasInvalidReference;
+
+            static Assembly TryLoadAssembly(string directory, string name)
+            {
+                string path = Path.Combine(directory, name + ".dll");
+                return File.Exists(path) ? Assembly.LoadFrom(path) : null;
+            }
         }
 
         private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null)
