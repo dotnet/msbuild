@@ -164,6 +164,7 @@ stages:
         publishUsingPipelines: true
         dependsOn:
           - Windows_NT
+          - Source_Build_Managed
         pool:
           name: NetCore1ESPool-Internal
           demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
