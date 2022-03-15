@@ -25,8 +25,8 @@
           RelativePath="FSharp.Core.xml"
           TargetPath="FSharpCore.xml" />
         <FilesToCopyFromFSharpCompilerPackage Include="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/$(FSharpCorePath)/FSharp.Core.*.nupkg" SubDir="library-packs\"/>
-        <FilesToCopyFromFSharpCompilerPackage Include="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/$(FSharpCorePath)/Microsoft.FSharp.NetSdk.props" SubDir="" />
-        <FilesToCopyFromFSharpCompilerPackage Include="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/any/any/*" Exclude="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/any/any/Microsoft.FSharp.NetSdk.props" SubDir="" />
+        <FilesToCopyFromFSharpCompilerPackage Include="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/$(FSharpCorePath)/Microsoft.FSharp.Core.NetSdk.props" SubDir="" />
+        <FilesToCopyFromFSharpCompilerPackage Include="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/any/any/*" Exclude="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/any/any/Microsoft.FSharp.Core.NetSdk.props" SubDir="" />
     </ItemGroup>
     <ItemGroup>
         <ResolvedFileToPublish
