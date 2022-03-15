@@ -18,3 +18,4 @@ Other documentation for workloads is in this repo:
 - [.NET SDK Installer Finalizer](workload-finalizer.md)
 - [Workload description localization](https://github.com/dotnet/sdk/pull/21189)
 - [Grouping multiple packs into one MSI](https://github.com/dotnet/sdk/issues/21741)
+- [Handling workload assets across major .NET versions](cross-version-workloads.md)
