@@ -7,7 +7,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
+using System.IO;
+#endif
 using Shouldly;
 using Xunit;
 
@@ -18,6 +24,69 @@ namespace Microsoft.Build.Tasks.UnitTests
     public class RoslynCodeTaskFactory_Tests
     {
         private const string TaskName = "MyInlineTask";
+
+        [Fact]
+        [SkipOnPlatform(TestPlatforms.AnyUnix, ".NETFramework 4.0 isn't on unix machines.")]
+        public void InlineTaskWithAssembly()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                TransientTestFile assemblyProj = env.CreateFile(folder, "5106.csproj", @$"
+                    <Project DefaultTargets=""Build"">
+                        <PropertyGroup>
+                            <OutputType>Library</OutputType>
+                        </PropertyGroup>
+                        <ItemGroup>
+                            <Reference Include=""System""/>
+                            <Compile Include=""Class1.cs""/>
+                        </ItemGroup>
+                        <Import Project=""$(MSBuildBinPath)\Microsoft.CSharp.targets"" />
+                    </Project>
+");
+                TransientTestFile csFile = env.CreateFile(folder, "Class1.cs", @"
+using System;
+
+namespace _5106 {
+    public class Class1 {
+        public static string ToPrint() {
+            return ""Hello!"";
+        }
+    }
+}
+");
+                string output = RunnerUtilities.ExecMSBuild(assemblyProj.Path + $" /p:OutDir={Path.Combine(folder.Path, "subFolder")} /restore", out bool success);
+                success.ShouldBeTrue(output);
+
+                TransientTestFile inlineTask = env.CreateFile(folder, "5106.proj", @$"
+<Project>
+
+  <UsingTask TaskName=""MyInlineTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <Task>
+      <Reference Include=""{Path.Combine(folder.Path, "subFolder", "5106.dll")}"" />
+      <Reference Include=""netstandard"" />
+      <Using Namespace=""System"" />
+      <Using Namespace=""System.IO"" />
+      <Using Namespace=""_5106"" />
+      <Code Type=""Fragment"" Language=""cs"" >
+<![CDATA[
+Log.LogError(Class1.ToPrint());
+]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+<Target Name=""ToRun"">
+  <MyInlineTask/>
+</Target>
+
+</Project>
+");
+                output = RunnerUtilities.ExecMSBuild(inlineTask.Path, out success);
+                success.ShouldBeTrue();
+                output.ShouldContain("Hello!");
+            }
+        }
 
         [Fact]
         public void RoslynCodeTaskFactory_ReuseCompilation()
