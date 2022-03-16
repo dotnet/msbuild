@@ -121,7 +121,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     if (!_manifests.TryAdd(readableManifest.ManifestId, manifest))
                     {
                         var existingManifest = _manifests[readableManifest.ManifestId];
-                        throw new WorkloadManifestCompositionException(Strings.DuplicateManifestID, manifestProvider.GetType().FullName, readableManifest.ManifestId, readableManifest.ManifestPath, existingManifest.InformationalPath);
+                        throw new WorkloadManifestCompositionException(Strings.DuplicateManifestID, manifestProvider.GetType().FullName, readableManifest.ManifestId, readableManifest.ManifestPath, existingManifest.ManifestPath);
                     }
                 }
             }
@@ -144,12 +144,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         {
                             if (FXVersion.Compare(dependency.Value, resolvedDependency.ParsedVersion) > 0)
                             {
-                                throw new WorkloadManifestCompositionException(Strings.ManifestDependencyVersionTooLow, dependency.Key, resolvedDependency.Version, dependency.Value, manifest.Id, manifest.InformationalPath);
+                                throw new WorkloadManifestCompositionException(Strings.ManifestDependencyVersionTooLow, dependency.Key, resolvedDependency.Version, dependency.Value, manifest.Id, manifest.ManifestPath);
                             }
                         }
                         else
                         {
-                            throw new WorkloadManifestCompositionException(Strings.ManifestDependencyMissing, dependency.Key, manifest.Id, manifest.InformationalPath);
+                            throw new WorkloadManifestCompositionException(Strings.ManifestDependencyMissing, dependency.Key, manifest.Id, manifest.ManifestPath);
                     }
                     }
                 }
@@ -165,7 +165,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         if (!_workloads.TryAdd(workload.Key, ((WorkloadDefinition)workload.Value, manifest)))
                         {
                             WorkloadManifest conflictingManifest = _workloads[workload.Key].manifest;
-                            throw new WorkloadManifestCompositionException(Strings.ConflictingWorkloadDefinition, workload.Key, manifest.Id, manifest.InformationalPath, conflictingManifest.Id, conflictingManifest.InformationalPath);
+                            throw new WorkloadManifestCompositionException(Strings.ConflictingWorkloadDefinition, workload.Key, manifest.Id, manifest.ManifestPath, conflictingManifest.Id, conflictingManifest.ManifestPath);
                         }
                     }
                 }
@@ -175,7 +175,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     if (!_packs.TryAdd(pack.Key, (pack.Value, manifest)))
                     {
                         WorkloadManifest conflictingManifest = _packs[pack.Key].manifest;
-                        throw new WorkloadManifestCompositionException(Strings.ConflictingWorkloadPack, pack.Key, manifest.Id, manifest.InformationalPath, conflictingManifest.Id, conflictingManifest.InformationalPath);
+                        throw new WorkloadManifestCompositionException(Strings.ConflictingWorkloadPack, pack.Key, manifest.Id, manifest.ManifestPath, conflictingManifest.Id, conflictingManifest.ManifestPath);
                     }
                 }
             }
@@ -196,7 +196,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         if (!_workloads.TryAdd(redirect.Id, replacement))
                         {
                             WorkloadManifest conflictingManifest = _workloads[redirect.Id].manifest;
-                            throw new WorkloadManifestCompositionException(Strings.ConflictingWorkloadDefinition, redirect.Id, manifest.Id, manifest.InformationalPath, conflictingManifest.Id, conflictingManifest.InformationalPath);
+                            throw new WorkloadManifestCompositionException(Strings.ConflictingWorkloadDefinition, redirect.Id, manifest.Id, manifest.ManifestPath, conflictingManifest.Id, conflictingManifest.ManifestPath);
                         }
                         return true;
                     }
@@ -209,12 +209,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     var unresolved = unresolvedRedirects.Select(ur => redirects[ur]).Where(ur => !redirects.ContainsKey(ur.redirect.ReplaceWith)).FirstOrDefault();
                     if (unresolved is (WorkloadRedirect redirect, WorkloadManifest manifest))
                     {
-                        throw new WorkloadManifestCompositionException(Strings.UnresolvedWorkloadRedirect, redirect.ReplaceWith, redirect.Id, manifest.Id, manifest.InformationalPath);
+                        throw new WorkloadManifestCompositionException(Strings.UnresolvedWorkloadRedirect, redirect.ReplaceWith, redirect.Id, manifest.Id, manifest.ManifestPath);
                     }
                     else
                     {
                         var cyclic = redirects[unresolvedRedirects.First()];
-                        throw new WorkloadManifestCompositionException(Strings.CyclicWorkloadRedirect, cyclic.redirect.Id, cyclic.manifest.Id, cyclic.manifest.InformationalPath);
+                        throw new WorkloadManifestCompositionException(Strings.CyclicWorkloadRedirect, cyclic.redirect.Id, cyclic.manifest.Id, cyclic.manifest.ManifestPath);
                     }
                 }
             }
@@ -417,7 +417,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                     if (_workloads.TryGetValue(baseWorkloadId) is not (WorkloadDefinition baseWorkload, WorkloadManifest baseWorkloadManifest))
                     {
-                        throw new WorkloadManifestCompositionException(Strings.MissingBaseWorkload, baseWorkloadId, workload.Id, manifest.Id, manifest.InformationalPath);
+                        throw new WorkloadManifestCompositionException(Strings.MissingBaseWorkload, baseWorkloadId, workload.Id, manifest.Id, manifest.ManifestPath);
                     }
 
                     // the workload's ID may not match the value we looked up if it's a redirect

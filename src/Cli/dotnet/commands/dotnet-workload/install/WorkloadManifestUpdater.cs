@@ -371,7 +371,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
             {
-                var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource);
+                var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource, manifestPath);
                 return (new ManifestVersion(manifest.Version), manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
             }
         }
