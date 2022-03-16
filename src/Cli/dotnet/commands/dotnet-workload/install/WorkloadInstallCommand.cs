@@ -240,10 +240,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                         workloadPackToInstall = GetPacksToInstall(workloadIds);
 
-                        foreach (var packId in workloadPackToInstall)
-                        {
-                            installer.InstallWorkloadPack(packId, sdkFeatureBand, offlineCache);
-                        }
+                        installer.InstallWorkloadPacks(workloadPackToInstall, sdkFeatureBand, offlineCache);
 
                         var recordRepo = _workloadInstaller.GetWorkloadInstallationRecordRepository();
                         newWorkloadInstallRecords = workloadIds.Except(recordRepo.GetInstalledWorkloads(sdkFeatureBand));

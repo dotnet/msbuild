@@ -198,10 +198,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
                         workloadPackToUpdate = GetUpdatablePacks(installer);
 
-                        foreach (var packId in workloadPackToUpdate)
-                        {
-                            installer.InstallWorkloadPack(packId, sdkFeatureBand, offlineCache);
-                        }
+                        installer.InstallWorkloadPacks(workloadPackToUpdate, sdkFeatureBand, offlineCache);
+
                     },
                     rollback: () => {
                         try
