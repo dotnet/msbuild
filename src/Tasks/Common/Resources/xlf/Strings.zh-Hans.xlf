@@ -747,7 +747,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
-        <target state="translated">NETSDK1179: 使用“--runtime”时，必需选择“--自包含”或“--非自包含”选项。</target>
+        <target state="translated">NETSDK1179: 使用“--runtime”时，必需选择“--self-contained”或“--no-self-contained”选项。</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
