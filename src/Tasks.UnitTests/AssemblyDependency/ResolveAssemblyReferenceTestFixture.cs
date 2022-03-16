@@ -2903,7 +2903,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(false, $"New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
-#pragma warning restore CA1416
 
         /// <summary>
         /// Delegate for System.IO.File.GetLastWriteTime

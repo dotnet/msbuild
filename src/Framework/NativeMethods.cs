@@ -633,7 +633,6 @@ internal static class NativeMethods
             return fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1;
         }
     }
-#pragma warning restore CA1416
 
     /// <summary>
     /// Cached value for IsUnixLike (this method is called frequently during evaluation).
