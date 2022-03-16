@@ -34,11 +34,11 @@ namespace ManifestReaderTests
             }
         }
 
-        public IEnumerable<(string manifestId, string informationalPath, Func<Stream> openManifestStream, Func<Stream> openLocalizationStream)> GetManifests()
+        public IEnumerable<ReadableWorkloadManifest> GetManifests()
             {
                 foreach ((var id, var path) in _manifests)
                 {
-                    yield return (
+                    yield return new(
                         id,
                         path,
                         () => File.OpenRead(path),

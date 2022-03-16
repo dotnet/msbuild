@@ -112,16 +112,16 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private void LoadManifestsFromProvider(IWorkloadManifestProvider manifestProvider)
         {
-            foreach ((string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream) in manifestProvider.GetManifests())
+            foreach (var readableManifest in manifestProvider.GetManifests())
             {
-                using (Stream manifestStream = openManifestStream())
-                using (Stream? localizationStream = openLocalizationStream())
+                using (Stream manifestStream = readableManifest.OpenManifestStream())
+                using (Stream? localizationStream = readableManifest.OpenLocalizationStream())
                 {
-                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream, localizationStream, informationalPath);
-                    if (!_manifests.TryAdd(manifestId, manifest))
+                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(readableManifest.ManifestId, manifestStream, localizationStream, readableManifest.ManifestPath);
+                    if (!_manifests.TryAdd(readableManifest.ManifestId, manifest))
                     {
-                        var existingManifest = _manifests[manifestId];
-                        throw new WorkloadManifestCompositionException(Strings.DuplicateManifestID, manifestProvider.GetType().FullName, manifestId, informationalPath, existingManifest.InformationalPath);
+                        var existingManifest = _manifests[readableManifest.ManifestId];
+                        throw new WorkloadManifestCompositionException(Strings.DuplicateManifestID, manifestProvider.GetType().FullName, readableManifest.ManifestId, readableManifest.ManifestPath, existingManifest.InformationalPath);
                     }
                 }
             }
