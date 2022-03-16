@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
@@ -35,6 +36,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientTestFile assemblyProj = env.CreateFile(folder, "5106.csproj", @$"
                     <Project DefaultTargets=""Build"">
                         <PropertyGroup>
+                            <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                             <OutputType>Library</OutputType>
                         </PropertyGroup>
                         <ItemGroup>
