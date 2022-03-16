@@ -1104,19 +1104,21 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
-            testProject.AdditionalProperties["WarningsNotAsErrors"] = "IL2075;IL2026;IL2046";
+            testProject.AdditionalProperties["WarningsNotAsErrors"] = "IL2026;IL2046;IL2075";
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
-                                    "/p:TreatWarningsAsErrors=true")
+                                    "/p:TreatWarningsAsErrors=true", "/p:EnableTrimAnalyzer=false")
                 .Should().Fail()
-                // This warning is produced by both the analyzer and the linker. Don't make it an error for the test.
                 .And.HaveStdOutContaining("warning IL2026")
-                // This warning is produced by both the analyzer and the linker. Don't make it an error for the test.
                 .And.HaveStdOutContaining("warning IL2046")
+                .And.HaveStdOutContaining("warning IL2075")
                 .And.HaveStdOutContaining("error IL2043")
-                .And.HaveStdOutContaining("warning IL2075");
+                .And.NotHaveStdOutContaining("error IL2026")
+                .And.NotHaveStdOutContaining("error IL2046")
+                .And.NotHaveStdOutContaining("error IL2075")
+                .And.NotHaveStdOutContaining("warning IL2043");
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
@@ -1183,15 +1185,14 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
-                                    "/p:TreatWarningsAsErrors=true", "/p:ILLinkTreatWarningsAsErrors=false", "/p:NoWarn=IL2026%3BIL2046")
+                                    "/p:TreatWarningsAsErrors=true", "/p:ILLinkTreatWarningsAsErrors=false", "/p:EnableTrimAnalyzer=false")
                 .Should().Pass()
-                // This warning is produced by both the analyzer and the linker. Ignore it for this test.
-                .And.NotHaveStdOutContaining("warning IL2026")
+                .And.HaveStdOutContaining("warning IL2026")
+                .And.HaveStdOutContaining("warning IL2046")
+                .And.HaveStdOutContaining("warning IL2075")
                 .And.NotHaveStdOutContaining("error IL2026")
-                // This warning is produced by both the analyzer and the linker. Ignore it for this test.
-                .And.NotHaveStdOutContaining("warning IL2046")
                 .And.NotHaveStdOutContaining("error IL2046")
-                .And.HaveStdOutContaining("warning IL2075");
+                .And.NotHaveStdOutContaining("error IL2075");
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
