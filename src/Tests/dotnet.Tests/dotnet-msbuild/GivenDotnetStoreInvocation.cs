@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var msbuildPath = "<msbuildpath>";
             string[] args = new string[] { optionName, "<project>" };
             StoreCommand.FromArgs(args, msbuildPath)
-                .GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}");
+                .GetArgumentsToMSBuild().Should().Contain($"{ExpectedPrefix}");
         }
 
         [Theory]
