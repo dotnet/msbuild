@@ -127,7 +127,6 @@ namespace Microsoft.Build.Graph
         private void AddEdgesFromProjectReferenceItems(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
         {
             Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>> transitiveReferenceCache = new(allParsedProjects.Count);
-            HashSet<ProjectGraphNode> emptyHashSet = new(0);
 
             foreach (var parsedProject in allParsedProjects)
             {
