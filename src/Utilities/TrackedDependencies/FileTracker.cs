@@ -20,39 +20,49 @@ using Microsoft.Build.Shared.FileSystem;
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
-    /// Enumeration to express the type of executable being wrapped by Tracker.exe
+    /// Enumeration to express the type of executable being wrapped by Tracker.exe.
     /// </summary>
     public enum ExecutableType
     {
         /// <summary>
-        /// 32-bit native executable
+        /// 32-bit native executable.
         /// </summary>
         Native32Bit = 0,
 
         /// <summary>
-        /// 64-bit native executable 
+        /// 64-bit native executable.
         /// </summary>
         Native64Bit = 1,
 
         /// <summary>
-        /// A managed executable without a specified bitness
+        /// A managed executable without a specified bitness.
         /// </summary>
         ManagedIL = 2,
 
         /// <summary>
-        /// A managed executable specifically marked as 32-bit
+        /// A managed executable specifically marked as 32-bit.
         /// </summary>
         Managed32Bit = 3,
 
         /// <summary>
-        /// A managed executable specifically marked as 64-bit
+        /// A managed executable specifically marked as 64-bit.
         /// </summary>
         Managed64Bit = 4,
 
         /// <summary>
         /// Use the same bitness as the currently running executable. 
         /// </summary>
-        SameAsCurrentProcess = 5
+        SameAsCurrentProcess = 5,
+
+        /// <summary>
+        /// 64-bit native ARM64 executable.
+        /// </summary>
+        NativeARM64 = 6,
+
+        /// <summary>
+        /// 64-bit managed ARM64 executable.
+        /// </summary>
+        ManagedARM64 = 7
     }
 
     /// <summary>
