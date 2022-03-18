@@ -5,3 +5,8 @@ Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.get -> System.Thre
 Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.set -> void
 Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Collections.Generic.ISet<string>
 Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void
+Microsoft.Build.Execution.OutOfProcEntryNode
+Microsoft.Build.Execution.OutOfProcEntryNode.OutOfProcEntryNode(System.Func<string, (int exitCode, string exitType)> buildFunction) -> void
+Microsoft.Build.Execution.OutOfProcEntryNode.Run(bool enableReuse, bool lowPriority, out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
+Microsoft.Build.Execution.OutOfProcEntryNode.Run(bool enableReuse, out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
+Microsoft.Build.Execution.OutOfProcEntryNode.Run(out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason

@@ -3,3 +3,8 @@ Microsoft.Build.Construction.ProjectUsingTaskElement.Override.set -> void
 Microsoft.Build.Construction.ProjectUsingTaskElement.OverrideLocation.get -> Microsoft.Build.Construction.ElementLocation
 Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Collections.Generic.ISet<string>
 Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void
+Microsoft.Build.Execution.OutOfProcEntryNode
+Microsoft.Build.Execution.OutOfProcEntryNode.OutOfProcEntryNode(System.Func<string, (int exitCode, string exitType)> buildFunction) -> void
+Microsoft.Build.Execution.OutOfProcEntryNode.Run(bool enableReuse, bool lowPriority, out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
+Microsoft.Build.Execution.OutOfProcEntryNode.Run(bool enableReuse, out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
+Microsoft.Build.Execution.OutOfProcEntryNode.Run(out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason

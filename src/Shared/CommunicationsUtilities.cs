@@ -70,7 +70,24 @@ namespace Microsoft.Build.Internal
         NET = 64,
     }
 
-    internal readonly struct Handshake
+    internal interface IHandshake
+    {
+        int[] RetrieveHandshakeComponents();
+
+        /// <summary>
+        /// Get string key representing all handshake values. It does not need to be human readable.
+        /// </summary>
+        string GetKey();
+
+        /// <summary>
+        /// Some handshakes uses very 1st byte to encode version of handshake in it,
+        /// so if it does not match it can reject it early based on very first byte.
+        /// Null means that no such encoding is used
+        /// </summary>
+        byte? ExpectedVersionInFirstByte { get; }
+    }
+
+    internal readonly struct Handshake : IHandshake
     {
         readonly int options;
         readonly int salt;
@@ -104,7 +121,7 @@ namespace Microsoft.Build.Internal
             return String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
         }
 
-        internal int[] RetrieveHandshakeComponents()
+        public int[] RetrieveHandshakeComponents()
         {
             return new int[]
             {
@@ -117,6 +134,10 @@ namespace Microsoft.Build.Internal
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId)
             };
         }
+
+        public string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
+
+        public byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
     }
 
     /// <summary>

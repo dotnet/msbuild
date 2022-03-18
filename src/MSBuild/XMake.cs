@@ -2614,6 +2614,46 @@ namespace Microsoft.Build.CommandLine
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException);
                 }
+                else if (nodeModeNumber == 8)
+                {
+                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
+                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                    string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
+                    bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
+
+                    // Since build function has to reuse code from *this* class and OutOfProcEntryNode is in different assembly
+                    // we have to pass down xmake build invocation to avoid circular dependency
+                    Func<string, (int exitCode, string exitType)> buildFunction = (commandLine) =>
+                    {
+                        int exitCode;
+                        ExitType exitType;
+
+                        if (!s_initialized)
+                        {
+                            exitType = ExitType.InitializationError;
+                        }
+                        else
+                        {
+                            exitType = Execute(
+#if FEATURE_GET_COMMANDLINE
+                                    commandLine
+#else
+                                    QuotingUtilities.SplitUnquoted(commandLine).ToArray()
+#endif
+                                );
+                            exitCode = exitType == ExitType.Success ? 0 : 1;
+                        }
+                        exitCode = exitType == ExitType.Success ? 0 : 1;
+
+                        return (exitCode, exitType.ToString());
+                    };
+
+                    OutOfProcEntryNode node = new(buildFunction);
+
+                    shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
+
+                    FileUtilities.ClearCacheDirectory();
+                }
                 else
                 {
                     CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());

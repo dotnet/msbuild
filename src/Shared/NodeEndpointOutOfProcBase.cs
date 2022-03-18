@@ -185,7 +185,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
-        internal void InternalConstruct()
+        internal void InternalConstruct(string pipeName = null)
         {
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
@@ -194,7 +194,7 @@ namespace Microsoft.Build.BackEnd
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
 
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath();
+            pipeName ??= NamedPipeUtil.GetPipeNameOrPath();
 
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             if (!NativeMethodsShared.IsMono)
@@ -245,7 +245,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the host handshake for this node endpoint
         /// </summary>
-        protected abstract Handshake GetHandshake();
+        protected abstract IHandshake GetHandshake();
 
         /// <summary>
         /// Updates the current link status if it has changed and notifies any registered delegates.
@@ -373,7 +373,7 @@ namespace Microsoft.Build.BackEnd
                     // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
                     // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
                     // Once the handshake is complete, both sides can be assured the other is ready to accept data.
-                    Handshake handshake = GetHandshake();
+                    IHandshake handshake = GetHandshake();
                     try
                     {
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();

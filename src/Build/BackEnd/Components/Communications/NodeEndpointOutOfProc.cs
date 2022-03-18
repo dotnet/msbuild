@@ -52,7 +52,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the host handshake for this node endpoint
         /// </summary>
-        protected override Handshake GetHandshake()
+        protected override IHandshake GetHandshake()
         {
             return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, is64Bit: EnvironmentUtilities.Is64BitProcess, nodeReuse: _enableReuse, lowPriority: _lowPriority));
         }

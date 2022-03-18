@@ -189,6 +189,24 @@ namespace Microsoft.Build.BackEnd
         /// Message sent back to a node informing it about the resource that were granted by the scheduler.
         /// </summary>
         ResourceResponse,
+
+        /// <summary>
+        /// Command in form of MSBuild command line for entry node - MSBuild Server.
+        /// Keep this enum value constant intact as this is part of contract with dotnet CLI
+        /// </summary>
+        EntryNodeCommand = 0xF0,
+
+        /// <summary>
+        /// Response from Entry node command
+        /// Keep this enum value constant intact as this is part of contract with dotnet CLI
+        /// </summary>
+        EntryNodeResponse = 0xF1,
+
+        /// <summary>
+        /// Info about server console activity. 
+        /// Keep this enum value constant intact as this is part of contract with dotnet CLI
+        /// </summary>
+        EntryNodeConsole = 0xF2,
     }
     #endregion
 
