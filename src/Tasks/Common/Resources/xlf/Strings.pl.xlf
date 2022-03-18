@@ -909,9 +909,9 @@ Może być konieczne skompilowanie projektu w innym systemie operacyjnym lub arc
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
-        <target state="translated">NETSDK1147: aby zbudować ten projekt, muszą być zainstalowane następujące pakiety robocze: {0}
-Aby zainstalować te pakiety robocze, uruchom następujące polecenie: {1}</target>
+To install these workloads, run the following command: dotnet workload restore</source>
+        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: dotnet workload restore</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

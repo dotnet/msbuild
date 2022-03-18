@@ -909,9 +909,9 @@ Projeyi başka bir işletim sisteminde veya mimaride oluşturmanız veya .NET SD
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
-        <target state="translated">NETSDK1147: Bu projeyi oluşturmak için şu iş yüklerinin yüklenmesi gerekiyor: {0}
-Bu iş yüklerini yüklemek için şu komutu çalıştırın: {1}</target>
+To install these workloads, run the following command: dotnet workload restore</source>
+        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: dotnet workload restore</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

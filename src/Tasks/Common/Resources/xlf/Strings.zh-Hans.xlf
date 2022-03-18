@@ -909,9 +909,9 @@ You may need to build the project on another operating system or architecture, o
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
-        <target state="translated">NETSDK1147: 要构建此项目，必须安装以下工作负载: {0}
- 要安装这些工作负载，请运行以下命令: {1}</target>
+To install these workloads, run the following command: dotnet workload restore</source>
+        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: dotnet workload restore</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

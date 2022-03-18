@@ -909,9 +909,9 @@ Talvez você precise compilar o projeto em outro sistema operacional ou arquitet
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
-        <target state="translated">NETSDK1147: para construir este projeto, as seguintes cargas de trabalho devem ser instaladas: {0}
-Para instalar essas cargas de trabalho, execute o seguinte comando: {1}</target>
+To install these workloads, run the following command: dotnet workload restore</source>
+        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: dotnet workload restore</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

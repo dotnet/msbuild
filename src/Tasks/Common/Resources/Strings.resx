@@ -692,7 +692,7 @@ The following are names of parameters or literal values and should not be transl
   </data>
   <data name="WorkloadNotInstalled" xml:space="preserve">
     <value>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</value>
+To install these workloads, run the following command: dotnet workload restore</value>
     <comment>{StrBegin="NETSDK1147: "}</comment>
   </data>
   <data name="WindowsSDKVersionConflicts" xml:space="preserve">
