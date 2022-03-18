@@ -20,7 +20,9 @@ namespace Microsoft.DotNet.Cli
         ///<remarks>
         /// This is accomplished by finding a set of tokens that should be valid and appending a help token
         /// to that list, then re-parsing the list of tokens. This is not ideal - either we should have a direct way
-        /// of invoking help for a ParseResult.
+        /// of invoking help for a ParseResult, or we should eliminate this custom, ad-hoc help invocation by moving
+        /// more situations that want to show help into Parsing Errors (which trigger help in the default System.CommandLine pipeline)
+        /// or custom Invocation Middleware, so we can more easily create our version of a HelpResult type.
         ///</remarks>
         public static void ShowHelp(this ParseResult parseResult)
         {
