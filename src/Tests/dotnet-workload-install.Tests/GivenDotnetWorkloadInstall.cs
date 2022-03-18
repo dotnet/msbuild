@@ -420,6 +420,20 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.GetFiles(installRecordPath).Count().Should().Be(2);
         }
 
+        [Theory]
+        [InlineData("--verbosity:minimal")]
+        [InlineData("--verbosity:normal")]
+        public void HideManifestUpdatesWhenVerbosityIsMinimalOrNormal(string verbosityFlag)
+        {
+            var command = new DotnetCommand(Log);
+            command
+                .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
+                .WithEnvironmentVariable("PATH", "fake")
+                .Execute("workload", "install", verbosityFlag, "android")
+                .Should()
+                .HaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests);
+        }
+
         private string AppendForUserLocal(string identifier, bool userLocal)
         {
             if (!userLocal)
