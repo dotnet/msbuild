@@ -462,7 +462,7 @@ EndGlobal
                 .Execute($"sln", solutionName, "add", "p.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindSolutionOrDirectory, solutionName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory()));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -478,9 +478,8 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .Execute($"sln", "InvalidSolution.sln", "add", projectToAdd);
             cmd.Should().Fail();
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
-            //cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
-            //cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
@@ -497,9 +496,8 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .Execute($"sln", "add", projectToAdd);
             cmd.Should().Fail();
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionPath, LocalizableStrings.FileHeaderMissingError));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
-            //cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionPath, LocalizableStrings.FileHeaderMissingError));
-            //cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
@@ -514,10 +512,8 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .Execute(@"sln", "App.sln", "add");
             cmd.Should().Fail();
+            cmd.StdErr.Should().Be(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
-            //cmd.StdErr.Should().Be(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
-
-            //cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
