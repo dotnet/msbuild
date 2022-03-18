@@ -127,7 +127,6 @@ namespace Microsoft.Build.Graph
         private void AddEdgesFromProjectReferenceItems(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
         {
             Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>> transitiveReferenceCache = new(allParsedProjects.Count);
-            HashSet<ProjectGraphNode> traversedReferences = new();
             HashSet<ProjectGraphNode> emptyHashSet = new(0);
 
             foreach (var parsedProject in allParsedProjects)
@@ -147,7 +146,7 @@ namespace Microsoft.Build.Graph
                     // Add transitive references only if the project requires it.
                     if (requiresTransitiveProjectReferences)
                     {
-                        foreach (var transitiveProjectReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration], traversedReferences))
+                        foreach (var transitiveProjectReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
                         {
                             currentNode.AddProjectReference(
                                 transitiveProjectReference,
@@ -164,30 +163,31 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            HashSet<ProjectGraphNode> GetTransitiveProjectReferencesExcludingSelf(ParsedProject parsedProject, HashSet<ProjectGraphNode> traversedReferences)
+            HashSet<ProjectGraphNode> GetTransitiveProjectReferencesExcludingSelf(ParsedProject parsedProject)
             {
                 if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> transitiveReferences))
                 {
                     return transitiveReferences;
                 }
 
-                // If the node was not already in the cache but has been traversed already, then we're in a cycle. Just return an empty set in that case.
-                // This makes transitive references incorrect in the case of a cycle, but direct dependencies are always added so a cycle will still be detected and an exception will still be thrown.
-                if (!traversedReferences.Add(parsedProject.GraphNode))
-                {
-                    return emptyHashSet;
-                }
-
                 transitiveReferences = new();
+
+                // Add the results to the cache early, even though it'll be incomplete until the loop below finishes. This helps handle cycles by not allowing them to recurse infinitely.
+                // Note that this makes transitive references incomplete in the case of a cycle, but direct dependencies are always added so a cycle will still be detected and an exception will still be thrown.
+                transitiveReferenceCache[parsedProject.GraphNode] = transitiveReferences;
 
                 foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
                 {
                     ParsedProject reference = allParsedProjects[referenceInfo.ReferenceConfiguration];
                     transitiveReferences.Add(reference.GraphNode);
-                    transitiveReferences.UnionWith(GetTransitiveProjectReferencesExcludingSelf(reference, traversedReferences));
+
+                    // Perf note: avoiding UnionWith to avoid boxing the HashSet enumerator.
+                    foreach (ProjectGraphNode transitiveReference in GetTransitiveProjectReferencesExcludingSelf(reference))
+                    {
+                        transitiveReferences.Add(transitiveReference);
+                    }
                 }
 
-                transitiveReferenceCache[parsedProject.GraphNode] = transitiveReferences;
                 return transitiveReferences;
             }
         }
