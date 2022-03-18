@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.VSTest
             var args = new List<string>();
             args.AddRange(GetArgs(parseResult));
 
-            if (FeatureFlag.Default.IsEnabled(FeatureFlag.ARTIFACTS_POSTPROCESSING))
+            if (!FeatureFlag.Instance.IsSet(FeatureFlag.DISABLE_ARTIFACTS_POSTPROCESSING))
             {
                 // Add artifacts processing mode and test session id for the artifact post-processing
                 args.Add("--artifactsProcessingMode-collect");
@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.VSTest
             int exitCode = vsTestforwardingApp.Execute();
 
             // We run post processing also if execution is failed for possible partial successful result to post process.
-            exitCode |= TestCommand.RunArtifactPostProcessingIfNeeded(testSessionCorrelationId, parseResult, FeatureFlag.Default);
+            exitCode |= TestCommand.RunArtifactPostProcessingIfNeeded(testSessionCorrelationId, parseResult, FeatureFlag.Instance);
 
             return exitCode;
         }

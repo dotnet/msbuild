@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             CommandResult result = new DotnetTestCommand(Log)
                                     .WithWorkingDirectory(testInstance.Path)
-                                    .WithEnvironmentVariable(FeatureFlag.ARTIFACTS_POSTPROCESSING, "1")
+                                    .WithEnvironmentVariable(FeatureFlag.DISABLE_ARTIFACTS_POSTPROCESSING, "0")
                                     .Execute(
                                         "--configuration", "release",
                                         "--collect", "SampleDataCollector",
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             CommandResult result = new DotnetTestCommand(Log)
                                     .WithWorkingDirectory(testInstance.Path)
-                                    .WithEnvironmentVariable(FeatureFlag.ARTIFACTS_POSTPROCESSING, "1")
+                                    .WithEnvironmentVariable(FeatureFlag.DISABLE_ARTIFACTS_POSTPROCESSING, "0")
                                     .WithEnvironmentVariable("DOTNET_CLI_VSTEST_TRACE", "1")
                                     .Execute(
                                     Directory.GetFiles(testInstance.Path, "test1.dll", SearchOption.AllDirectories).SingleOrDefault(x => x.Contains("publish")),
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             CommandResult result = new DotnetVSTestCommand(Log)
                                     .WithWorkingDirectory(testInstance.Path)
-                                    .WithEnvironmentVariable(FeatureFlag.ARTIFACTS_POSTPROCESSING, "1")
+                                    .WithEnvironmentVariable(FeatureFlag.DISABLE_ARTIFACTS_POSTPROCESSING, "0")
                                     .Execute(
                                         Directory.GetFiles(testInstance.Path, "test1.dll", SearchOption.AllDirectories).SingleOrDefault(x => x.Contains("publish")),
                                         Directory.GetFiles(testInstance.Path, "test2.dll", SearchOption.AllDirectories).SingleOrDefault(x => x.Contains("publish")),

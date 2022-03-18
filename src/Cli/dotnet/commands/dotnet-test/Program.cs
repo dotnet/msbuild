@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Test
         {
             parseResult.HandleDebugSwitch();
 
-            FeatureFlag.Default.PrintFlagFeatureState();
+            FeatureFlag.Instance.PrintFlagFeatureState();
 
             // We use also current process id for the correlation id for possible future usage in case we need to know the parent process
             // from the VSTest side.
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Test
                 int exitCode = FromParseResult(parseResult, settings, testSessionCorrelationId).Execute();
 
                 // We run post processing also if execution is failed for possible partial successful result to post process.
-                exitCode |= RunArtifactPostProcessingIfNeeded(testSessionCorrelationId, parseResult, FeatureFlag.Default);
+                exitCode |= RunArtifactPostProcessingIfNeeded(testSessionCorrelationId, parseResult, FeatureFlag.Instance);
 
                 return exitCode;
             }
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Tools.Test
             // one more time, there is no extra hop via msbuild
             convertedArgs.AddRange(settings);
 
-            if (FeatureFlag.Default.IsEnabled(FeatureFlag.ARTIFACTS_POSTPROCESSING))
+            if (!FeatureFlag.Instance.IsSet(FeatureFlag.DISABLE_ARTIFACTS_POSTPROCESSING))
             {
                 // Add artifacts processing mode and test session id for the artifact post-processing
                 convertedArgs.Add("--artifactsProcessingMode-collect");
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Tools.Test
             int exitCode = new VSTestForwardingApp(convertedArgs).Execute();
 
             // We run post processing also if execution is failed for possible partial successful result to post process.
-            exitCode |= RunArtifactPostProcessingIfNeeded(testSessionCorrelationId, parseResult, FeatureFlag.Default);
+            exitCode |= RunArtifactPostProcessingIfNeeded(testSessionCorrelationId, parseResult, FeatureFlag.Instance);
 
             return exitCode;
         }
@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.Tools.Test
                 }
             }
 
-            if (FeatureFlag.Default.IsEnabled(FeatureFlag.ARTIFACTS_POSTPROCESSING))
+            if (!FeatureFlag.Instance.IsSet(FeatureFlag.DISABLE_ARTIFACTS_POSTPROCESSING))
             {
                 // Add artifacts processing mode and test session id for the artifact post-processing
                 msbuildArgs.Add("-property:VSTestArtifactsProcessingMode=collect");
@@ -171,9 +171,9 @@ namespace Microsoft.DotNet.Tools.Test
             return testCommand;
         }
 
-        internal static int RunArtifactPostProcessingIfNeeded(string testSessionCorrelationId, ParseResult parseResult, FeatureFlag featureFlag)
+        internal static int RunArtifactPostProcessingIfNeeded(string testSessionCorrelationId, ParseResult parseResult, FeatureFlag disableFeatureFlag)
         {
-            if (!featureFlag.IsEnabled(FeatureFlag.ARTIFACTS_POSTPROCESSING))
+            if (disableFeatureFlag.IsSet(FeatureFlag.DISABLE_ARTIFACTS_POSTPROCESSING))
             {
                 return 0;
             }

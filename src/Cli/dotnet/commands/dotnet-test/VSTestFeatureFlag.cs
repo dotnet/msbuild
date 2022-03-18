@@ -2,44 +2,38 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.Test
 {
-    // !!! FEATURES MUST BE KEPT IN SYNC WITH https://github.com/microsoft/vstest/blob/main/src/Microsoft.TestPlatform.CoreUtilities/FeatureFlag/FeatureFlag.cs !!!
+    // !!! USED FEATURE NAMES MUST BE KEPT IN SYNC WITH https://github.com/microsoft/vstest/blob/main/src/Microsoft.TestPlatform.CoreUtilities/FeatureFlag/FeatureFlag.cs !!!
     internal class FeatureFlag
     {
-        private const string Prefix = "VSTEST_FEATURE_";
+        private readonly ConcurrentDictionary<string, bool> _cache = new();
 
-        public Dictionary<string, bool> FeatureFlags { get; } = new();
+        public static FeatureFlag Instance { get; } = new FeatureFlag();
 
-        public static FeatureFlag Default { get; } = new FeatureFlag();
+        private FeatureFlag() { }
 
-        public FeatureFlag()
-        {
-            FeatureFlags.Add(ARTIFACTS_POSTPROCESSING, true);
-        }
+        private const string VSTEST_ = nameof(VSTEST_);
 
-        // Added for artifact porst-processing, it enable/disable the post processing.
-        // Added in 17.2-preview 7.0-preview
-        public const string ARTIFACTS_POSTPROCESSING = Prefix + "ARTIFACTS_POSTPROCESSING";
-
-        // For now we're checking env var.
-        // We could add it also to some section inside the runsettings.
-        public bool IsEnabled(string featureName) =>
-            int.TryParse(Environment.GetEnvironmentVariable(featureName), out int enabled)
-                ? enabled == 1
-                : FeatureFlags.TryGetValue(featureName, out bool isEnabled) && isEnabled;
+        // Only check the env variable once, when it is not set or is set to 0, consider it unset. When it is anything else, consider it set.
+        public bool IsSet(string featureFlag) => _cache.GetOrAdd(featureFlag, f => (Environment.GetEnvironmentVariable(f)?.Trim() ?? "0") != "0");
 
         public void PrintFlagFeatureState()
         {
             if (VSTestTrace.TraceEnabled)
             {
-                foreach (KeyValuePair<string, bool> flag in FeatureFlags)
+                foreach (KeyValuePair<string, bool> flag in _cache)
                 {
-                    VSTestTrace.SafeWriteTrace(() => $"Feature {flag.Key}: {IsEnabled(flag.Key)}");
+                    VSTestTrace.SafeWriteTrace(() => $"Feature {flag.Key}: {IsSet(flag.Key)}");
                 }
             }
         }
+
+        // Added in TP 17.2-preview, .NET 7.0-preview, disables additional artifact post-processing,
+        // such as combining code coverage files into one file.
+        public const string DISABLE_ARTIFACTS_POSTPROCESSING = VSTEST_ + nameof(DISABLE_ARTIFACTS_POSTPROCESSING);
     }
 }
