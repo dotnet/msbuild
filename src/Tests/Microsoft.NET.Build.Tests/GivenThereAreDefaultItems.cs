@@ -466,7 +466,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
  
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void Compile_items_can_be_explicitly_specified_while_default_EmbeddedResource_items_are_used()
         {
             Action<XDocument> projectChanges = project =>

@@ -837,7 +837,7 @@ EndGlobal
                 SearchOption.AllDirectories);
             appReleaseDirectory.Count().Should().Be(1, $"App {reasonString}");
             Directory.EnumerateFiles(appReleaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
-                .Count().Should().Be(2, $"App {reasonString}");
+                .Count().Should().Be(1, $"App {reasonString}");
 
             var libReleaseDirectory = Directory.EnumerateDirectories(
                 Path.Combine(projectDirectory, "Lib", "bin"),
