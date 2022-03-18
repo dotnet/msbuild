@@ -431,7 +431,23 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .WithEnvironmentVariable("PATH", "fake")
                 .Execute("workload", "install", verbosityFlag, "android")
                 .Should()
-                .HaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests);
+                .HaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests)
+                .And
+                .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.AdManifestUpdated);
+        }
+
+        [Theory]
+        [InlineData("--verbosity:detailed")]
+        [InlineData("--verbosity:diagnostic")]
+        public void ShowManifestUpdatesWhenVerbosityIsDetailedOrDiagnostic(string verbosityFlag)
+        {
+            var command = new DotnetCommand(Log);
+            command
+                .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
+                .WithEnvironmentVariable("PATH", "fake")
+                .Execute("workload", "install", verbosityFlag, "android")
+                .Should()
+                .HaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.AdManifestUpdated);
         }
 
         private string AppendForUserLocal(string identifier, bool userLocal)

@@ -44,8 +44,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IWorkloadInstallationRecordRepository workloadRecordRepo,
             PackageSourceLocation packageSourceLocation = null,
             Func<string, string> getEnvironmentVariable = null,
-            bool displayManifestUpdates = true
-            )
+            bool displayManifestUpdates = true)
         {
             _reporter = reporter;
             _workloadResolver = workloadResolver;
