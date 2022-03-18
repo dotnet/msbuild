@@ -29,22 +29,22 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <_ImageGlobs>**/*.png;**/*.bmp;**/*.jpg;**/*.dds;**/*.tif;**/*.tga;**/*.gif</_ImageGlobs>
+    <__WindowsAppSdkDefaultImageIncludes>**/*.png;**/*.bmp;**/*.jpg;**/*.dds;**/*.tif;**/*.tga;**/*.gif</__WindowsAppSdkDefaultImageIncludes>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' ">
     <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
     <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
-    <!-- WindowsAppSdk is a NuGet delivered Windows SDK. Include only if the package is installed. -->
-    <Content Include="$(_ImageGlobs)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultContentItems)' != 'false' And '$(WindowsAppSdkFoundation)' == 'true' " />
+    <!-- Microsoft.WindowsAppSDK is a NuGet delivered SDK. Include only if the package is installed (WindowsAppSdkFoundation is set by the Microsoft.WindowsAppSDK NuGet package). -->
+    <Content Include="$(__WindowsAppSdkDefaultImageIncludes)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultContentItems)' != 'false' And '$(WindowsAppSdkFoundation)' == 'true' " />
     <PRIResource Include="**/*.resw" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultPRIResourceItems)' != 'false' And '$(WindowsAppSdkFoundation)' == 'true' "/>
   </ItemGroup>
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultNoneItems)' == 'true' ">
     <None Include="**/*" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
     <None Remove="**/*$(DefaultLanguageSourceExtension)" />
     <None Remove="**/*.resx" />
-    <!-- WindowsAppSdk is a NuGet delivered Windows SDK. Remove only if the package is installed. -->
-    <None Remove="$(_ImageGlobs)" Condition=" '$(WindowsAppSdkFoundation)' == 'true' "/>
+    <!-- Microsoft.WindowsAppSDK is a NuGet delivered SDK. Remove only if the package is installed (WindowsAppSdkFoundation is set by the Microsoft.WindowsAppSDK NuGet package). -->
+    <None Remove="$(__WindowsAppSdkDefaultImageIncludes)" Condition=" '$(WindowsAppSdkFoundation)' == 'true' "/>
     <None Remove="**/*.resw" Condition=" '$(WindowsAppSdkFoundation)' == 'true' "/>
   </ItemGroup>
 
