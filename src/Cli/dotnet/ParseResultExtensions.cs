@@ -13,9 +13,20 @@ namespace Microsoft.DotNet.Cli
 {
     public static class ParseResultExtensions
     {
+        ///<summary>
+        /// Finds the command of the parse result and invokes help for that command.
+        /// If no command is specified, invokes help for the application.
+        ///<summary>
+        ///<remarks>
+        /// This is accomplished by finding a set of tokens that should be valid and appending a help token
+        /// to that list, then re-parsing the list of tokens. This is not ideal - either we should have a direct way
+        /// of invoking help for a ParseResult.
+        ///</remarks>
         public static void ShowHelp(this ParseResult parseResult)
         {
-            Parser.Instance.Parse(parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray()).Invoke();
+            var tokenList = parseResult.Tokens.TakeWhile(t => t.Type == TokenType.Command).Select(t => t.Value).ToList(); // this can be empty when there's no leading command token
+            tokenList.Add("-h");
+            Parser.Instance.Parse(tokenList).Invoke();
         }
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
