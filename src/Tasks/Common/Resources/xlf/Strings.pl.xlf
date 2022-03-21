@@ -912,7 +912,7 @@ Może być konieczne skompilowanie projektu w innym systemie operacyjnym lub arc
 To install these workloads, run the following command: dotnet workload restore</source>
         <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
 To install these workloads, run the following command: dotnet workload restore</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>
