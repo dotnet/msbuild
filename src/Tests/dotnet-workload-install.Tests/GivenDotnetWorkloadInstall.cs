@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             command
                 .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
                 .WithEnvironmentVariable("PATH", "fake")
-                .Execute("workload", "install", "maui", "--skip-manifest-update", "--from-rollback-file", "foo.txt")
+                .Execute("workload", "install", "wasm-tools", "--skip-manifest-update", "--from-rollback-file", "foo.txt")
                 .Should()
                 .Fail()
                 .And
