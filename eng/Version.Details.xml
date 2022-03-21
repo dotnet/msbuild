@@ -227,17 +227,17 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
       <Sha>1dcf7acfacf0fe154adcc23270cb0da11ff44ace</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="6.0.3-1.22157.1">
+    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="6.0.3-1.22171.2">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>e0e1067f9c114498820588c4af6b1ab79b622f0d</Sha>
+      <Sha>aa7a8a3409113cb34d5b711c42b5df099206fd5e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="6.0.3-1.22157.1">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="6.0.3-1.22171.2">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>e0e1067f9c114498820588c4af6b1ab79b622f0d</Sha>
+      <Sha>aa7a8a3409113cb34d5b711c42b5df099206fd5e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="6.0.3-1.22157.1">
+    <Dependency Name="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="6.0.3-1.22171.2">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>e0e1067f9c114498820588c4af6b1ab79b622f0d</Sha>
+      <Sha>aa7a8a3409113cb34d5b711c42b5df099206fd5e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.2">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
