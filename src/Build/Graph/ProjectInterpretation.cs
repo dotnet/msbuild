@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -19,6 +21,7 @@ namespace Microsoft.Build.Graph
 {
     internal sealed class ProjectInterpretation
     {
+        private const string EnableDynamicPlatformResolutionMetadataName  = "EnableDynamicPlatformResolution";
         private const string FullPathMetadataName = "FullPath";
         private const string ToolsVersionMetadataName = "ToolsVersion";
         private const string SetConfigurationMetadataName = "SetConfiguration";
@@ -227,6 +230,13 @@ namespace Microsoft.Build.Graph
             // The properties on the project reference supersede the ones from the MSBuild task instead of appending.
             if (newProperties.Count == 0)
             {
+                // This mimics the _GetProjectReferenceTargetFrameworkProperties task in order to properly reflect what the build graph looks like in
+                // a traversal in which EnableDynamicPlatformResolution is turned on
+                if (ConversionUtilities.ValidBooleanTrue(projectReference.Project.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)) && String.IsNullOrEmpty(projectReference.GetMetadataValue(SetPlatformMetadataName)))
+                {
+                    var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectReference);    
+                    projectReference.SetMetadata("SetPlatform", $"Platform={SelectedPlatform}");
+                }
                 // TODO: Mimic AssignProjectConfiguration's behavior for determining the values for these.
                 var setConfigurationString = projectReference.GetMetadataValue(SetConfigurationMetadataName);
                 var setPlatformString = projectReference.GetMetadataValue(SetPlatformMetadataName);
@@ -239,7 +249,6 @@ namespace Microsoft.Build.Graph
                         $"{setConfigurationString};{setPlatformString};{setTargetFrameworkString}").ToImmutableDictionary();
                 }
             }
-
             return new GlobalPropertyPartsForMSBuildTask(newProperties, defaultParts.AdditionalProperties, newUndefineProperties);
         }
 
