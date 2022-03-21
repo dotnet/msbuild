@@ -1148,7 +1148,8 @@ namespace Microsoft.Build.Evaluation
             }
 
 #if RUNTIME_TYPE_NETCORE
-            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Core");
+            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
+                !Traits.Instance.ForceEvaluateAsFullFramework ? "Core" : "Full");
 #elif MONO
             SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
                                                         NativeMethodsShared.IsMono ? "Mono" : "Full");
