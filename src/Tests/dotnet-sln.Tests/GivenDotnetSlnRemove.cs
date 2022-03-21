@@ -623,7 +623,7 @@ EndGlobal
                 Path.Combine(projectDirectory, "App", "bin"),
                 "Release",
                 SearchOption.AllDirectories);
-            releaseDirectory.Count().Should().Be(1, $"App {reasonString}");
+            releaseDirectory.Count().Should().Be(2, $"App {reasonString}");
             Directory.EnumerateFiles(releaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
                 .Count().Should().Be(1, $"App {reasonString}");
         }

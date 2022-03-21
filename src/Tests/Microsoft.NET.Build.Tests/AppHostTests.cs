@@ -51,7 +51,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [RequiresMSBuildVersionTheory("17.1.0.60101")]]
+        [RequiresMSBuildVersionTheory("17.1.0.60101")]
         [InlineData("netcoreapp3.1")]
         [InlineData("net5.0")]
         [InlineData("net6.0")]
