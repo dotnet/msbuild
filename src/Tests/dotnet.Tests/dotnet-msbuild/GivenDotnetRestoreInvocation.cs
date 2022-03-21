@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
-                Telemetry.Telemetry.CurrentSessionId = null;
+                Telemetry.Telemetry.DisableForTests();
 
                 expectedAdditionalArgs =
                     (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")

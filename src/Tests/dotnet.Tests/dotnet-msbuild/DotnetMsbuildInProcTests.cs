@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         private string[] GetArgsForMSBuild(Func<bool> sentinelExists, out Telemetry.Telemetry telemetry)
         {
 
-            Telemetry.Telemetry.CurrentSessionId = null; // reset static session id modified by telemetry constructor
+            Telemetry.Telemetry.DisableForTests(); // reset static session id modified by telemetry constructor
             telemetry = new Telemetry.Telemetry(new MockFirstTimeUseNoticeSentinel(sentinelExists));
 
             MSBuildForwardingApp msBuildForwardingApp = new MSBuildForwardingApp(Enumerable.Empty<string>());
