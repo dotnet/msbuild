@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Fact]
-         public void GivenWorkloadManifestUpdateItCanUpdateAdvertisingManifests()
+        public void GivenWorkloadManifestUpdateItCanUpdateAdvertisingManifests()
         {
             (var manifestUpdater, var nugetDownloader, _) = GetTestUpdater();
 
