@@ -106,6 +106,11 @@ namespace Microsoft.Build.Tasks
         private TaskLoggingHelper _log;
 
         /// <summary>
+        /// Stores functions that were added to the current app domain. Should be removed once we're finished.
+        /// </summary>
+        private List<ResolveEventHandler> functionsAddedToAppDomain = new();
+
+        /// <summary>
         /// Stores the parameters parsed in the &lt;UsingTask /&gt;.
         /// </summary>
         private TaskPropertyInfo[] _parameters;
@@ -126,6 +131,10 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="ITaskFactory.CleanupTask(ITask)"/>
         public void CleanupTask(ITask task)
         {
+            foreach (ResolveEventHandler del in functionsAddedToAppDomain)
+            {
+                AppDomain.CurrentDomain.AssemblyResolve -= del;
+            }
         }
 
         /// <inheritdoc cref="ITaskFactory.CreateTask(IBuildEngine)"/>
@@ -518,7 +527,7 @@ namespace Microsoft.Build.Tasks
         /// Perhaps in the future this could be more powerful by using NuGet to resolve assemblies but we think
         /// that is too complicated for a simple in-line task.  If users have more complex requirements, they
         /// can compile their own task library.</remarks>
-        internal static bool TryResolveAssemblyReferences(TaskLoggingHelper log, RoslynCodeTaskFactoryTaskInfo taskInfo, out ITaskItem[] items)
+        internal bool TryResolveAssemblyReferences(TaskLoggingHelper log, RoslynCodeTaskFactoryTaskInfo taskInfo, out ITaskItem[] items)
         {
             // Store the list of resolved assemblies because a user can specify a short name or a full path
             ISet<string> resolvedAssemblyReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -545,11 +554,9 @@ namespace Microsoft.Build.Tasks
                     string fullPath = Path.GetFullPath(reference);
                     string directory = Path.GetDirectoryName(fullPath);
                     resolvedAssemblyReferences.Add(fullPath);
-#if NETFRAMEWORK
-                    AppDomain.CurrentDomain.AssemblyResolve += (_, eventArgs) => TryLoadAssembly(directory, new AssemblyName(eventArgs.Name).Name);
-#else
-                    AssemblyLoadContext.Default.Resolving += (_, assemblyName) => TryLoadAssembly(directory, assemblyName.Name);
-#endif
+                    ResolveEventHandler delegateToAdd = (_, eventArgs) => TryLoadAssembly(directory, new AssemblyName(eventArgs.Name).Name);
+                    AppDomain.CurrentDomain.AssemblyResolve += delegateToAdd;
+                    functionsAddedToAppDomain.Add(delegateToAdd);
                     continue;
                 }
 
