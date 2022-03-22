@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 var msbuildPath = "<msbuildpath>";
                 StoreCommand.FromArgs(args, msbuildPath)
-                    .GetArgumentsToMSBuild().Should().Contain($"{ExpectedPrefix}{expectedAdditionalArgs}");
+                    .GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
         }
 
