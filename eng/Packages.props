@@ -14,10 +14,8 @@
     <PackageReference Update="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
     <PackageReference Update="Microsoft.IO.Redist" Version="6.0.0" />
     <PackageReference Update="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" />
-    <PackageReference Update="Microsoft.Win32.Registry" Version="4.3.0" />
     <PackageReference Update="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
-    <PackageReference Update="System.CodeDom" Version="4.4.0" />
     <PackageReference Update="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Update="System.Configuration.ConfigurationManager" Version="4.7.0" />
     <PackageReference Update="System.Net.Http" Version="4.3.4" />
@@ -25,8 +23,6 @@
     <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
     <PackageReference Update="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
     <PackageReference Update="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
-    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="4.7.0" />
-    <PackageReference Update="System.Security.Cryptography.Xml" Version="4.7.0" />
     <PackageReference Update="System.Security.Permissions" Version="4.7.0" />
     <PackageReference Update="System.Security.Principal.Windows" Version="4.7.0" />
     <PackageReference Update="System.Text.Encoding.CodePages" Version="4.0.1" />
