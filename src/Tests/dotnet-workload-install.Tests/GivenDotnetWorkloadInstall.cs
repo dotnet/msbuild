@@ -420,6 +420,21 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.GetFiles(installRecordPath).Count().Should().Be(2);
         }
 
+        [Fact]
+        public void HideManifestUpdateCheckWhenVerbosityIsQuiet()
+        {
+            var command = new DotnetCommand(Log);
+            command
+                .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
+                .WithEnvironmentVariable("PATH", "fake")
+                .Execute("workload", "install", "--verbosity:quiet", "android")
+                .Should()
+                .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests)
+                .And
+                .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.AdManifestUpdated);
+        }
+
+
         [Theory]
         [InlineData("--verbosity:minimal")]
         [InlineData("--verbosity:normal")]
@@ -441,13 +456,22 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [InlineData("--verbosity:diagnostic")]
         public void ShowManifestUpdatesWhenVerbosityIsDetailedOrDiagnostic(string verbosityFlag)
         {
-            var command = new DotnetCommand(Log);
-            command
-                .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
-                .WithEnvironmentVariable("PATH", "fake")
-                .Execute("workload", "install", verbosityFlag, "android")
-                .Should()
-                .HaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.AdManifestUpdated);
+            var parseResult =
+               Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", verbosityFlag, "xamarin-android" });
+            var manifestsToUpdate =
+                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
+                    Workloads)[]
+                    {
+                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
+                            null),
+                    };
+            (_, var installManager, var installer, _, _, _) =
+                GetTestInstallers(parseResult, true, "6.0.300", manifestUpdates: manifestsToUpdate);
+
+            installManager.InstallWorkloads(new List<WorkloadId>(), false); // Don't actually do any installs, just update manifests
+
+            string.Join(" ", _reporter.Lines).Should().Contain(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests);
+            string.Join(" ", _reporter.Lines).Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests, "mock-manifest"));
         }
 
         private string AppendForUserLocal(string identifier, bool userLocal)
