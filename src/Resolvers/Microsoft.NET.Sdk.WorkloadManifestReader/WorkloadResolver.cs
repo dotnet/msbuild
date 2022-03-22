@@ -683,7 +683,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             (_manifests.TryGetValue(manifestId, out WorkloadManifest? value)? value : null)?.Version
             ?? throw new Exception($"Manifest with id {manifestId} does not exist.");
 
-        public IEnumerable<WorkloadManifestInfo> GetInstalledManifests() => _manifests.Select(m => new WorkloadManifestInfo(m.Value.Id, m.Value.Version));
+        public IEnumerable<WorkloadManifestInfo> GetInstalledManifests() => _manifests.Select(m => new WorkloadManifestInfo(m.Value.Id, m.Value.Version, Path.GetDirectoryName(m.Value.ManifestPath)!));
     }
 
     static class DictionaryExtensions

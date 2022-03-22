@@ -12,13 +12,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public class WorkloadManifestInfo
     {
-        public WorkloadManifestInfo(string id, string version)
+        public WorkloadManifestInfo(string id, string version, string manifestDirectory)
         {
             Id = id;
             Version = version;
+            ManifestDirectory = manifestDirectory;
         }
 
         public string Id { get; }
         public string Version { get; }
+        public string ManifestDirectory { get; }
     }
 }
