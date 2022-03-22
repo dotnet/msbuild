@@ -10,11 +10,6 @@ namespace Microsoft.Build.BackEnd
 {
     internal class EntryNodeHandshake : IHandshake
     {
-        /// <summary>
-        /// The version of the handshake. This should be updated each time the handshake is altered.
-        /// </summary>
-        readonly int _version = 0x101;
-
         readonly int _options;
         readonly int _salt;
         readonly int _fileVersionMajor;
@@ -26,7 +21,7 @@ namespace Microsoft.Build.BackEnd
         {
             // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
             // This indicates in the first byte that we are a modern build.
-            _options = (int)nodeType;
+            _options = (int)nodeType | (CommunicationsUtilities.handshakeVersion << 24);
             string? handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
             var msBuildFile = new FileInfo(msBuildLocation);
             var msBuildDirectory = msBuildFile.DirectoryName;
@@ -60,7 +55,6 @@ namespace Microsoft.Build.BackEnd
         {
             return new int[]
             {
-                AvoidEndOfHandshakeSignal(_version),
                 AvoidEndOfHandshakeSignal(_options),
                 AvoidEndOfHandshakeSignal(_salt),
                 AvoidEndOfHandshakeSignal(_fileVersionMajor),
@@ -72,7 +66,7 @@ namespace Microsoft.Build.BackEnd
 
         public string GetKey()
         {
-            return $"{_version} {_options} {_salt} {_fileVersionMajor} {_fileVersionMinor} {_fileVersionBuild} {_fileVersionRevision}"
+            return $"{_options} {_salt} {_fileVersionMajor} {_fileVersionMinor} {_fileVersionBuild} {_fileVersionRevision}"
                 .ToString(CultureInfo.InvariantCulture);
         }
 
