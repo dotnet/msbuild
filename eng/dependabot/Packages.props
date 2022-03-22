@@ -19,7 +19,7 @@
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.3" />
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" PrivateAssets="all"/>
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.406" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup>
