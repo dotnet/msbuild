@@ -8,7 +8,7 @@
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
-    <MicroBuildPluginsSwixBuildVersion>1.0.672</MicroBuildPluginsSwixBuildVersion>
+    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
     <MonoBuild Condition="'$(Configuration)' == 'Debug-MONO' or '$(Configuration)' == 'Release-MONO'">true</MonoBuild>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
