@@ -372,7 +372,6 @@ namespace Microsoft.Build.BackEnd
         )
         {
             // todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
-
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(keepMetadata != null && removeMetadata != null), originalItem.KeepMetadataLocation, "KeepAndRemoveMetadataMutuallyExclusive");
             List<ProjectItemInstance> items = new List<ProjectItemInstance>();
 
@@ -433,7 +432,11 @@ namespace Microsoft.Build.BackEnd
                     string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(
                         Project.Directory,
                         includeSplit,
-                        excludes);
+                        excludes,
+                        loggingMechanism: LoggingContext,
+                        includeLocation: originalItem.IncludeLocation,
+                        excludeLocation: originalItem.ExcludeLocation,
+                        disableExcludeDriveEnumerationWarning: true);
 
                     foreach (string includeSplitFile in includeSplitFiles)
                     {
@@ -454,7 +457,11 @@ namespace Microsoft.Build.BackEnd
 
             foreach (string excludeSplit in excludes)
             {
-                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
+                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
+                    Project.Directory,
+                    excludeSplit,
+                    loggingMechanism: LoggingContext,
+                    excludeLocation: originalItem.ExcludeLocation);
 
                 foreach (string excludeSplitFile in excludeSplitFiles)
                 {
@@ -539,7 +546,12 @@ namespace Microsoft.Build.BackEnd
                 // Don't unescape wildcards just yet - if there were any escaped, the caller wants to treat them
                 // as literals. Everything else is safe to unescape at this point, since we're only matching
                 // against the file system.
-                string[] fileList = EngineFileUtilities.GetFileListEscaped(Project.Directory, piece);
+                string[] fileList = EngineFileUtilities.GetFileListEscaped(
+                    Project.Directory,
+                    piece,
+                    loggingMechanism: LoggingContext,
+                    includeLocation: specificationLocation,
+                    excludeLocation: specificationLocation);
 
                 foreach (string file in fileList)
                 {

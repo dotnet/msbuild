@@ -3477,7 +3477,15 @@ namespace Microsoft.Build.Evaluation
 
                 var itemFactory = new ProjectItemFactory(Owner, renamedItemElement);
 
-                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, renamedItemElement, itemFactory, renamedItemElement.Include, _data.Expander);
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                    DirectoryPath,
+                    renamedItemElement,
+                    itemFactory,
+                    renamedItemElement.Include,
+                    _data.Expander,
+                    LoggingService,
+                    FullPath,
+                    s_buildEventContext);
 
                 if (items.Count != 1)
                 {
@@ -3537,7 +3545,15 @@ namespace Microsoft.Build.Evaluation
             {
                 var itemFactory = new ProjectItemFactory(Owner, itemElement);
 
-                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, itemElement, itemFactory, unevaluatedInclude, _data.Expander);
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                    DirectoryPath,
+                    itemElement,
+                    itemFactory,
+                    unevaluatedInclude,
+                    _data.Expander,
+                    LoggingService,
+                    FullPath,
+                    s_buildEventContext);
 
                 foreach (ProjectItem item in items)
                 {

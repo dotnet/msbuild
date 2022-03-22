@@ -399,8 +399,19 @@ namespace Microsoft.Build.BackEnd
             // If this is an Intrinsic task, it gets handled in a special fashion.
             if (_taskNode == null)
             {
-                ExecuteIntrinsicTask(bucket);
-                taskResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
+                try
+                {
+                    ExecuteIntrinsicTask(bucket);
+                    taskResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
+                }
+                catch (InvalidProjectFileException e)
+                {
+                    // Make sure the Invalid Project error gets logged *before* TaskFinished.  Otherwise,
+                    // the log is confusing.
+                    _targetLoggingContext.LogInvalidProjectFileError(e);
+                    _continueOnError = ContinueOnError.ErrorAndStop;
+                    taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, e);
+                }
             }
             else
             {
@@ -461,6 +472,7 @@ namespace Microsoft.Build.BackEnd
                             // the log is confusing.
                             taskLoggingContext.LogInvalidProjectFileError(e);
                             _continueOnError = ContinueOnError.ErrorAndStop;
+                            taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, e);
                         }
                         finally
                         {
