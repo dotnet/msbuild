@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 #nullable disable
@@ -24,6 +25,11 @@ namespace Microsoft.Build.Framework
         /// Whether the build succeeded
         /// </summary>
         private bool succeeded;
+
+        /// <summary>
+        /// Environment variable-derived properties
+        /// </summary>
+        private IDictionary<string, string> environmentVariables;
 
         /// <summary>
         /// Default constructor
@@ -65,7 +71,7 @@ namespace Microsoft.Build.Framework
             bool succeeded,
             DateTime eventTimestamp
         )
-            : this(message, helpKeyword, succeeded, eventTimestamp, null)
+            : this(message, helpKeyword, succeeded, eventTimestamp, messageArgs: null)
         {
             // do nothing
         }
@@ -89,6 +95,30 @@ namespace Microsoft.Build.Framework
             : base(message, helpKeyword, "MSBuild", eventTimestamp, messageArgs)
         {
             this.succeeded = succeeded;
+        }
+
+        /// <summary>
+        /// Constructor which allows environment variable-derived properties to be set
+        /// </summary>
+        /// <param name="message">text message</param>
+        /// <param name="helpKeyword">help keyword </param>
+        /// <param name="succeeded">True indicates a successful build</param>
+        /// <param name="eventTimestamp">Timestamp when the event was created</param>
+        /// <param name="environmentVariables">Properties derived from environment variables</param>
+        /// <param name="messageArgs">message arguments</param>
+        public BuildFinishedEventArgs
+        (
+            string message,
+            string helpKeyword,
+            bool succeeded,
+            DateTime eventTimestamp,
+            IDictionary<string, string> environmentVariables,
+            params object[] messageArgs
+        )
+            : base(message, helpKeyword, "MSBuild", eventTimestamp, messageArgs)
+        {
+            this.succeeded = succeeded;
+            this.environmentVariables = environmentVariables;
         }
 
 
@@ -123,6 +153,17 @@ namespace Microsoft.Build.Framework
             get
             {
                 return succeeded;
+            }
+        }
+
+        /// <summary>
+        /// Gets all environment variables read when trying to evaluate properties along with their values.
+        /// </summary>
+        public IDictionary<string, string> EnvironmentVariables
+        {
+            get
+            {
+                return environmentVariables;
             }
         }
     }
