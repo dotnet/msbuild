@@ -4,12 +4,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks.Dataflow;
+using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -239,14 +238,25 @@ namespace Microsoft.Build.BackEnd.Logging
         #region LoggingThread Data
 
         /// <summary>
-        /// The data flow buffer for logging events.
+        /// Queue for asynchronous event processing.
         /// </summary>
-        private BufferBlock<object> _loggingQueue;
-
+        private ConcurrentQueue<object> _eventQueue;
         /// <summary>
-        /// The data flow processor for logging events.
+        /// Auto reset event raised when message is consumed from queue.
         /// </summary>
-        private ActionBlock<object> _loggingQueueProcessor;
+        private AutoResetEvent _dequeueEvent;
+        /// <summary>
+        /// Auto reset event raised when message is added into queue.
+        /// </summary>
+        private AutoResetEvent _enqueueEvent;
+        /// <summary>
+        /// CTS for stopping logging event processing.
+        /// </summary>
+        private CancellationTokenSource _loggingEventProcessingCancellation;
+        /// <summary>
+        /// Task which pump/process messages from <see cref="_eventQueue"/>
+        /// </summary>
+        private Task _loggingEventProcessingPump;
 
         /// <summary>
         /// The queue size above which the queue will close to messages from remote nodes.
@@ -301,7 +311,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (_logMode == LoggerMode.Asynchronous)
             {
-                CreateLoggingEventQueue();
+                StartLoggingEventProcessing();
             }
 
             // Ensure the static constructor of ItemGroupLoggingHelper runs.
@@ -681,28 +691,6 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Return whether or not the LoggingQueue has any events left in it
-        /// </summary>
-        public bool LoggingQueueHasEvents
-        {
-            get
-            {
-                lock (_lockObject)
-                {
-                    if (_loggingQueue != null)
-                    {
-                        return _loggingQueue.Count > 0;
-                    }
-                    else
-                    {
-                        ErrorUtilities.ThrowInternalError("loggingQueue is null");
-                        return false;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Return an array which contains the logger type names
         /// this can be used to display which loggers are registered on the node
         /// </summary>
@@ -851,7 +839,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         // 2. Terminate the logging event queue
                         if (_logMode == LoggerMode.Asynchronous)
                         {
-                            TerminateLoggingEventQueue();
+                            TerminateLoggingEventProcessing();
                         }
                     }
 
@@ -875,12 +863,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // sink for the central loggers.
                     _centralForwardingLoggerSinkId = -1;
 
-                    // Clean up anything related to the asynchronous logging
-                    if (_logMode == LoggerMode.Asynchronous)
-                    {
-                        _loggingQueue = null;
-                        _loggingQueueProcessor = null;
-                    }
+                    CleanLoggingEventProcessing();
 
                     _loggers = new List<ILogger>();
                     _loggerDescriptions = null;
@@ -914,7 +897,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
-            ProcessLoggingEvent(loggingPacket.NodeBuildEvent, allowThrottling: true);
+            ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
         }
 
         /// <summary>
@@ -1192,20 +1175,23 @@ namespace Microsoft.Build.BackEnd.Logging
         /// In Synchronous mode the event should be routed to the correct sink or logger right away
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
-        /// <param name="allowThrottling"><code>true</code> to allow throttling, otherwise <code>false</code>.</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        internal virtual void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
+        internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
             {
-                // If the queue is at capacity, this call will block - the task returned by SendAsync only completes 
-                // when the message is actually consumed or rejected (permanently) by the buffer.
-                var task = _loggingQueue.SendAsync(buildEvent);
-                if (allowThrottling)
+                // Block until queue is not full.
+                while (_eventQueue.Count >= _queueCapacity)
                 {
-                    task.Wait();
+                    // Block and wait for dequeue event.
+                    // Because _dequeueEvent is AutoReset and we have two places where we wait for it,
+                    //   we have that 100ms max wait time there to eliminate race conditions caused by the other WaitOne.
+                    _dequeueEvent.WaitOne(100);
                 }
+
+                _eventQueue.Enqueue(buildEvent);
+                _enqueueEvent.Set();
             }
             else
             {
@@ -1217,40 +1203,18 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Wait for the logging messages in the logging queue to be completly processed.
+        /// Wait for the logging messages in the logging queue to be completely processed.
         /// This is required because for Logging build finished or when the component is to shutdown
         /// we need to make sure we process all of the events before the build finished event is raised
         /// and we need to make sure we process all of the logging events before we shutdown the component.
         /// </summary>
-        internal void WaitForThreadToProcessEvents()
+        internal void WaitForLoggingToProcessEvents()
         {
-            // This method may be called in the shutdown submission callback, this callback may be called after the logging service has 
-            // shutdown and nulled out the events we were going to wait on.
-            if (_logMode == LoggerMode.Asynchronous && _loggingQueue != null)
+            while (!_eventQueue.IsEmpty)
             {
-                BufferBlock<object> loggingQueue = null;
-                ActionBlock<object> loggingQueueProcessor = null;
-
-                lock (_lockObject)
-                {
-                    loggingQueue = _loggingQueue;
-                    loggingQueueProcessor = _loggingQueueProcessor;
-
-                    // Replaces _loggingQueue and _loggingQueueProcessor with new one, this will assure that
-                    // no further messages could possibly be trying to be added into queue we are about to drain
-                    CreateLoggingEventQueue();
-                }
-
-                // Drain queue.
-                // This shall not be locked to avoid possible deadlock caused by
-                // event handlers to reenter 'this' instance while trying to log something.
-                if (loggingQueue != null)
-                {
-                    Debug.Assert(!Monitor.IsEntered(_lockObject));
-
-                    loggingQueue.Complete();
-                    loggingQueueProcessor.Completion.Wait();
-                }
+                // Because _dequeueEvent is AutoReset and we have two places where we wait for it,
+                //   we have 100ms max wait time there to eliminate race conditions caused by the other WaitOne.
+                _dequeueEvent.WaitOne(100);
             }
         }
 
@@ -1295,55 +1259,67 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Create a logging thread to process the logging queue
+        /// Create a logging thread to process the logging queue.
         /// </summary>
-        private void CreateLoggingEventQueue()
+        private void StartLoggingEventProcessing()
         {
-            // We are creating a two-node dataflow graph here.  The first node is a buffer, which will hold up to the number of
-            // logging events we have specified as the queueCapacity.  The second node is the processor which will actually process each message.
-            // When the capacity of the buffer is reached, further attempts to send messages to it will block.
-            // The reason we can't just set the BoundedCapacity on the processing block is that ActionBlock has some weird behavior
-            // when the queue capacity is reached.  Specifically, it will block new messages from being processed until it has
-            // entirely drained its input queue, as opposed to letting new ones in as old ones are processed.  This is logged as 
-            // a perf bug (305575) against Dataflow.  If they choose to fix it, we can eliminate the buffer node from the graph.
-            var dataBlockOptions = new DataflowBlockOptions
-            {
-                BoundedCapacity = Convert.ToInt32(_queueCapacity)
-            };
+            _eventQueue = new ConcurrentQueue<object>();
+            _dequeueEvent = new AutoResetEvent(false);
+            _enqueueEvent = new AutoResetEvent(false);
+            _loggingEventProcessingCancellation = new CancellationTokenSource();
 
-            var loggingQueue = new BufferBlock<object>(dataBlockOptions);
+            _loggingEventProcessingPump = new Task(() =>
+                {
+                    var completeAdding = _loggingEventProcessingCancellation.Token;
 
-            var executionDataBlockOptions = new ExecutionDataflowBlockOptions
-            {
-                BoundedCapacity = 1
-            };
+                    do
+                    {
+                        if (_eventQueue.TryDequeue(out object ev))
+                        {
+                            LoggingEventProcessor(ev);
+                            _dequeueEvent.Set();
+                        }
+                        else
+                        {
+                            // Wait for next event, or finish.
+                            if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                                WaitHandle.WaitAny(new[] { completeAdding.WaitHandle, _enqueueEvent });
+                        }
+                    } while (!completeAdding.IsCancellationRequested || !_eventQueue.IsEmpty);
 
-            var loggingQueueProcessor = new ActionBlock<object>(loggingEvent => LoggingEventProcessor(loggingEvent), executionDataBlockOptions);
-
-            var dataLinkOptions = new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            };
-
-            loggingQueue.LinkTo(loggingQueueProcessor, dataLinkOptions);
-
-            lock (_lockObject)
-            {
-                _loggingQueue = loggingQueue;
-                _loggingQueueProcessor = loggingQueueProcessor;
-            }
+                    CleanLoggingEventProcessing();
+                },
+                TaskCreationOptions.LongRunning);
+            
+            _loggingEventProcessingPump.Start();
         }
 
         /// <summary>
-        /// Wait for the logginQueue to empty and then terminate the logging thread
+        /// Clean resources used for logging event processing queue.
         /// </summary>
-        private void TerminateLoggingEventQueue()
+        private void CleanLoggingEventProcessing()
         {
-            // Dont accept any more items from other threads.
-            _loggingQueue.Complete();
+            _loggingEventProcessingCancellation?.Cancel();
+            _dequeueEvent?.Dispose();
+            _enqueueEvent?.Dispose();
+            _loggingEventProcessingCancellation?.Dispose();
 
-            // Wait for completion
-            _loggingQueueProcessor.Completion.Wait();
+            _eventQueue = null;
+            _dequeueEvent = null;
+            _enqueueEvent = null;
+            _loggingEventProcessingCancellation = null;
+            _loggingEventProcessingPump = null;
+        }
+
+        /// <summary>
+        /// Create a logging thread to process the logging queue
+        /// </summary>
+        private void TerminateLoggingEventProcessing()
+        {
+            // Capture pump task in local variable as cancelling event processing is nulling _loggingEventProcessingPump.
+            var pumpTask = _loggingEventProcessingPump;
+            _loggingEventProcessingCancellation.Cancel();
+            pumpTask.Wait();
         }
 
         /// <summary>

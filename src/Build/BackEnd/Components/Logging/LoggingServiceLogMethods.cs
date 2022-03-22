@@ -443,7 +443,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // Make sure we process this event before going any further
-            WaitForThreadToProcessEvents();
+            WaitForLoggingToProcessEvents();
         }
 
         /// <summary>
@@ -468,7 +468,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // Make sure we process this event before going any further
-            WaitForThreadToProcessEvents();
+            WaitForLoggingToProcessEvents();
         }
 
         /// <inheritdoc />
