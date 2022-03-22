@@ -102,7 +102,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// The mapping of build request configuration ids to project file names.
         /// </summary>
-        private Dictionary<int, string> _projectFileMap;
+        private ConcurrentDictionary<int, string> _projectFileMap;
 
         /// <summary>
         /// The current state of the logging service
@@ -286,7 +286,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="nodeId">The node identifier.</param>
         protected LoggingService(LoggerMode loggerMode, int nodeId)
         {
-            _projectFileMap = new Dictionary<int, string>();
+            _projectFileMap = new ConcurrentDictionary<int, string>();
             _logMode = loggerMode;
             _loggers = new List<ILogger>();
             _loggerDescriptions = new List<LoggerDescription>();
@@ -1123,45 +1123,42 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         public void LogBuildEvent(BuildEventArgs buildEvent)
         {
-            lock (_lockObject)
+            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+
+            BuildWarningEventArgs warningEvent = null;
+            BuildErrorEventArgs errorEvent = null;
+            BuildMessageEventArgs messageEvent = null;
+
+            if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
-                ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+                warningEvent.ProjectFile = GetAndVerifyProjectFileFromContext(warningEvent.BuildEventContext);
+            }
+            else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null && errorEvent.BuildEventContext != null && errorEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            {
+                errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent.BuildEventContext);
+            }
+            else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            {
+                messageEvent.ProjectFile = GetAndVerifyProjectFileFromContext(messageEvent.BuildEventContext);
+            }
 
-                BuildWarningEventArgs warningEvent = null;
-                BuildErrorEventArgs errorEvent = null;
-                BuildMessageEventArgs messageEvent = null;
-
-                if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            if (OnlyLogCriticalEvents)
+            {
+                // Only log certain events if OnlyLogCriticalEvents is true
+                if (
+                    (warningEvent != null)
+                    || (errorEvent != null)
+                    || (buildEvent is CustomBuildEventArgs)
+                    || (buildEvent is CriticalBuildMessageEventArgs)
+                   )
                 {
-                    warningEvent.ProjectFile = GetAndVerifyProjectFileFromContext(warningEvent.BuildEventContext);
-                }
-                else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null && errorEvent.BuildEventContext != null && errorEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
-                {
-                    errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent.BuildEventContext);
-                }
-                else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
-                {
-                    messageEvent.ProjectFile = GetAndVerifyProjectFileFromContext(messageEvent.BuildEventContext);
-                }
-
-                if (OnlyLogCriticalEvents)
-                {
-                    // Only log certain events if OnlyLogCriticalEvents is true
-                    if (
-                        (warningEvent != null)
-                        || (errorEvent != null)
-                        || (buildEvent is CustomBuildEventArgs)
-                        || (buildEvent is CriticalBuildMessageEventArgs)
-                       )
-                    {
-                        ProcessLoggingEvent(buildEvent);
-                    }
-                }
-                else
-                {
-                    // Log all events if OnlyLogCriticalEvents is false
                     ProcessLoggingEvent(buildEvent);
                 }
+            }
+            else
+            {
+                // Log all events if OnlyLogCriticalEvents is false
+                ProcessLoggingEvent(buildEvent);
             }
         }
 
