@@ -320,12 +320,12 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 Reporter reporter = args.Force ? Reporter.Output : Reporter.Error;
 
+                reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_OverrideNotice);
                 reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_PackageIsAvailable);
                 foreach (var request in invalidTemplatePackages)
                 {
                     reporter.WriteLine($"{request.PackageInfo.Id}::{request.PackageInfo.Version}".Indent());
                 }
-                reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_OverrideNotice);
                 reporter.WriteLine();
 
                 if (!args.Force)

@@ -154,8 +154,8 @@ If command is specified without the argument, it lists all the template packages
         <note />
       </trans-unit>
       <trans-unit id="Option_Install_Force">
-        <source>Allows to install the template package even if the same package is already available from different sources.</source>
-        <target state="new">Allows to install the template package even if the same package is already available from different sources.</target>
+        <source>Allows installing template packages from the specified sources even if they would override a template package from another source.</source>
+        <target state="new">Allows installing template packages from the specified sources even if they would override a template package from another source.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Interactive">

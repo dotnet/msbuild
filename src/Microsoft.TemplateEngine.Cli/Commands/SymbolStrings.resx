@@ -208,7 +208,7 @@ If command is specified without the argument, it lists all the template packages
     <value>If specified, the settings will be not preserved on file system.</value>
   </data>
   <data name="Option_Install_Force" xml:space="preserve">
-    <value>Allows to install the template package even if the same package is already available from different sources.</value>
+    <value>Allows installing template packages from the specified sources even if they would override a template package from another source.</value>
   </data>
   <data name="Option_Interactive" xml:space="preserve">
     <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>

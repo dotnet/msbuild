@@ -1537,7 +1537,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Installing the template packages will override the available template packages..
+        ///   Looks up a localized string similar to Installing the template package(s) will override the available template package(s)..
         /// </summary>
         internal static string TemplatePackageCoordinator_Install_Info_OverrideNotice {
             get {
@@ -1546,7 +1546,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The following template packages are already available:.
+        ///   Looks up a localized string similar to The following template package(s) are already available:.
         /// </summary>
         internal static string TemplatePackageCoordinator_Install_Info_PackageIsAvailable {
             get {
@@ -1564,7 +1564,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To install these template packages anyway, apply &apos;{0}&apos; option:.
+        ///   Looks up a localized string similar to To install the template package(s) anyway, apply &apos;{0}&apos; option:.
         /// </summary>
         internal static string TemplatePackageCoordinator_Install_Info_UseForceToOverride {
             get {

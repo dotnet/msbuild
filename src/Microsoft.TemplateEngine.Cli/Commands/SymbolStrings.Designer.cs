@@ -325,7 +325,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Allows to install the template package even if the same package is already available from different sources..
+        ///   Looks up a localized string similar to Allows installing template packages from the specified sources even if they would override a template package from another source..
         /// </summary>
         internal static string Option_Install_Force {
             get {

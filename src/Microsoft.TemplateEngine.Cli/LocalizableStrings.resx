@@ -775,14 +775,14 @@ The header is followed by the list of parameters and their errors (might be seve
     <comment>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</comment>
   </data>
   <data name="TemplatePackageCoordinator_Install_Info_OverrideNotice" xml:space="preserve">
-    <value>Installing the template packages will override the available template packages.</value>
+    <value>Installing the template package(s) will override the available template package(s).</value>
   </data>
   <data name="TemplatePackageCoordinator_Install_Info_PackageIsAvailable" xml:space="preserve">
-    <value>The following template packages are already available:</value>
+    <value>The following template package(s) are already available:</value>
     <comment>Followed by list of packages that are available</comment>
   </data>
   <data name="TemplatePackageCoordinator_Install_Info_UseForceToOverride" xml:space="preserve">
-    <value>To install these template packages anyway, apply '{0}' option:</value>
+    <value>To install the template package(s) anyway, apply '{0}' option:</value>
     <comment>{0} is option to use (--force). Followed by command to use to install the packages.</comment>
   </data>
 </root>
