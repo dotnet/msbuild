@@ -93,6 +93,11 @@ namespace Microsoft.Build.Framework
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
         /// <summary>
+        /// Log all environment variables whether or not they are used in a build in the binary log.
+        /// </summary>
+        public readonly bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"));
+
+        /// <summary>
         /// Log property tracking information.
         /// </summary>
         public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
