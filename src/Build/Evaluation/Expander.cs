@@ -1470,7 +1470,7 @@ namespace Microsoft.Build.Evaluation
             private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
             {
                 T property = properties.GetProperty(propertyName, startIndex, endIndex);
-                if (!string.IsNullOrEmpty(property.EvaluatedValue))
+                if (!string.IsNullOrEmpty(property?.EvaluatedValue))
                 {
                     EnvironmentUtilities.EnvironmentVariablesUsedAsProperties[property.Name] = property.EvaluatedValue;
                 }
