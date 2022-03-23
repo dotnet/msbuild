@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Shared.FileSystem;
+using System.Reflection;
 
 #nullable disable
 
@@ -319,9 +320,10 @@ namespace Microsoft.Build.Shared
 
         private static string GetVsRootFromMSBuildAssembly(string msBuildAssembly)
         {
+            string directory = Path.GetDirectoryName(msBuildAssembly);
             return FileUtilities.GetFolderAbove(msBuildAssembly,
-                Path.GetDirectoryName(msBuildAssembly)
-                  .EndsWith(@"\amd64", StringComparison.OrdinalIgnoreCase)
+                directory.EndsWith(@"\amd64", StringComparison.OrdinalIgnoreCase) ||
+                directory.EndsWith(@"\arm64", StringComparison.OrdinalIgnoreCase)
                     ? 5
                     : 4);
         }
@@ -333,7 +335,8 @@ namespace Microsoft.Build.Shared
                 "MSBuild",
                 CurrentToolsVersion,
                 "Bin",
-                IntPtr.Size == 8 ? "amd64" : string.Empty,
+                NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.X64 ? "amd64" :
+                NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.ARM64 ? "arm64" : string.Empty,
                 "MSBuild.exe");
         }
 
@@ -530,6 +533,7 @@ namespace Microsoft.Build.Shared
 
             // Check to see if our current folder is 'amd64'
             bool runningInAmd64 = string.Equals(currentToolsDirectory.Name, "amd64", StringComparison.OrdinalIgnoreCase);
+            bool runningInARM64 = string.Equals(currentToolsDirectory.Name, "arm64", StringComparison.OrdinalIgnoreCase);
 
             var msBuildExeName = currentMSBuildExeFile.Name;
             var folderAbove = currentToolsDirectory.Parent?.FullName;
@@ -538,23 +542,30 @@ namespace Microsoft.Build.Shared
             {
                 // Calculate potential paths to other architecture MSBuild.exe
                 var potentialAmd64FromX86 = FileUtilities.CombinePaths(CurrentMSBuildToolsDirectory, "amd64", msBuildExeName);
+                var potentialARM64FromX86 = FileUtilities.CombinePaths(CurrentMSBuildToolsDirectory, "arm64", msBuildExeName);
                 var potentialX86FromAmd64 = Path.Combine(folderAbove, msBuildExeName);
 
                 // Check for existence of an MSBuild file. Note this is not necessary in a VS installation where we always want to
                 // assume the correct layout.
                 var existsCheck = mode == BuildEnvironmentMode.VisualStudio ? new Func<string, bool>(_ => true) : File.Exists;
 
-                // Running in amd64 folder and the X86 path is valid
-                if (runningInAmd64 && existsCheck(potentialX86FromAmd64))
+                if ((runningInARM64 || runningInAmd64) && existsCheck(potentialX86FromAmd64))
                 {
                     MSBuildToolsDirectory32 = folderAbove;
                     MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
                 }
-                // Not running in amd64 folder and the amd64 path is valid
-                else if (!runningInAmd64 && existsCheck(potentialAmd64FromX86))
+                else if (!runningInAmd64 && !runningInARM64)
                 {
                     MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
-                    MSBuildToolsDirectory64 = Path.Combine(CurrentMSBuildToolsDirectory, "amd64");
+
+                    if (existsCheck(potentialARM64FromX86) && NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.ARM64)
+                    {
+                        MSBuildToolsDirectory64 = Path.Combine(CurrentMSBuildToolsDirectory, "arm64");
+                    }
+                    else if (existsCheck(potentialAmd64FromX86))
+                    {
+                        MSBuildToolsDirectory64 = Path.Combine(CurrentMSBuildToolsDirectory, "amd64");
+                    }
                 }
             }
 

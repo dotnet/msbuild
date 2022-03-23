@@ -7,6 +7,9 @@ namespace Microsoft.Build.Eventing
     /// <summary>
     /// This captures information of how various key methods of building with MSBuild ran.
     /// </summary>
+    /// <remarks>
+    /// Changes to existing event method signatures will not be reflected unless you update the <see cref="EventAttribute.Version" /> property or assign a new event ID.
+    /// </remarks>
     [EventSource(Name = "Microsoft-Build")]
     internal sealed class MSBuildEventSource : EventSource
     {
@@ -501,10 +504,10 @@ namespace Microsoft.Build.Eventing
             WriteEvent(66, sdkName, solutionPath, projectPath);
         }
 
-        [Event(67, Keywords = Keywords.All)]
-        public void CachedSdkResolverServiceResolveSdkStop(string sdkName, string solutionPath, string projectPath, bool success)
+        [Event(67, Keywords = Keywords.All, Version = 2)]
+        public void CachedSdkResolverServiceResolveSdkStop(string sdkName, string solutionPath, string projectPath, bool success, bool wasResultCached)
         {
-            WriteEvent(67, sdkName, solutionPath, projectPath, success);
+            WriteEvent(67, sdkName, solutionPath, projectPath, success, wasResultCached);
         }
 
         /// <remarks>
@@ -582,6 +585,18 @@ namespace Microsoft.Build.Eventing
         public void ProjectCacheEndBuildStop(string pluginTypeName)
         {
             WriteEvent(78, pluginTypeName);
+        }
+
+        [Event(79, Keywords = Keywords.All)]
+        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(int submissionId, string sdkName, string solutionPath, string projectPath)
+        {
+            WriteEvent(79, submissionId, sdkName, solutionPath, projectPath);
+        }
+
+        [Event(80, Keywords = Keywords.All)]
+        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(int submissionId, string sdkName, string solutionPath, string projectPath, bool success, bool wasResultCached)
+        {
+            WriteEvent(80, submissionId, sdkName, solutionPath, projectPath, success, wasResultCached);
         }
 
         #endregion
