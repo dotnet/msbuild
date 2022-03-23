@@ -909,10 +909,10 @@ Sie müssen das Projekt möglicherweise unter einem anderen Betriebssystem oder 
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
-        <target state="translated">NETSDK1147: Um dieses Projekt zu erstellen, müssen die folgenden Workloads installiert sein: {0}
-Führen Sie zum Installieren dieser Workloads den folgenden Befehl aus: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+To install these workloads, run the following command: dotnet workload restore</source>
+        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: dotnet workload restore</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

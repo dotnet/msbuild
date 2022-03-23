@@ -101,18 +101,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public async Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync()
         {
             if (!BackgroundUpdatesAreDisabled() &&
-                AdManifestSentinalIsDueForUpdate() &&
+                AdManifestSentinelIsDueForUpdate() &&
                 UpdatedAdManifestPackagesExistAsync().GetAwaiter().GetResult())
             {
                 await UpdateAdvertisingManifestsAsync(false);
-                var sentinalPath = GetAdvertisingManifestSentinalPath();
-                if (File.Exists(sentinalPath))
+                var sentinelPath = GetAdvertisingManifestSentinelPath(_sdkFeatureBand);
+                if (File.Exists(sentinelPath))
                 {
-                    File.SetLastAccessTime(sentinalPath, DateTime.Now);
+                    File.SetLastAccessTime(sentinelPath, DateTime.Now);
                 }
                 else
                 {
-                    File.Create(sentinalPath).Close();
+                    File.Create(sentinelPath).Close();
                 }
             }
         }
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             var installedWorkloads = _workloadRecordRepo.GetInstalledWorkloads(_sdkFeatureBand);
             var updatableWorkloads = GetUpdatableWorkloadsToAdvertise(installedWorkloads);
-            var filePath = GetAdvertisingWorkloadsFilePath();
+            var filePath = GetAdvertisingWorkloadsFilePath(_sdkFeatureBand);
             var jsonContent = JsonSerializer.Serialize(updatableWorkloads.Select(workload => workload.ToString()).ToArray());
             if (Directory.Exists(Path.GetDirectoryName(filePath)))
             {
@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public void DeleteUpdatableWorkloadsFile()
         {
-            var filePath = GetAdvertisingWorkloadsFilePath();
+            var filePath = GetAdvertisingWorkloadsFilePath(_sdkFeatureBand);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -144,7 +144,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             try
             {
                 var backgroundUpdatesDisabled = bool.TryParse(Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE), out var disableEnvVar) && disableEnvVar;
-                var adUpdatesFile = GetAdvertisingWorkloadsFilePath(CliFolderPathCalculator.DotnetUserProfileFolderPath);
+                SdkFeatureBand featureBand = new SdkFeatureBand(Product.Version);
+                var adUpdatesFile = GetAdvertisingWorkloadsFilePath(CliFolderPathCalculator.DotnetUserProfileFolderPath, featureBand);
                 if (!backgroundUpdatesDisabled && File.Exists(adUpdatesFile))
                 {
                     var updatableWorkloads = JsonSerializer.Deserialize<string[]>(File.ReadAllText(adUpdatesFile));
@@ -376,7 +377,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
             {
-                var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource);
+                var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource, manifestPath);
                 return (new ManifestVersion(manifest.Version), manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
             }
         }
@@ -393,18 +394,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return new ManifestVersion(manifest.Version);
         }
 
-        private bool AdManifestSentinalIsDueForUpdate()
+        private bool AdManifestSentinelIsDueForUpdate()
         {
-            var sentinalPath = GetAdvertisingManifestSentinalPath();
+            var sentinelPath = GetAdvertisingManifestSentinelPath(_sdkFeatureBand);
             int updateIntervalHours;
             if (!int.TryParse(_getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS), out updateIntervalHours))
             {
                 updateIntervalHours = 24;
             }
 
-            if (File.Exists(sentinalPath))
+            if (File.Exists(sentinelPath))
             {
-                var lastAccessTime = File.GetLastAccessTime(sentinalPath);
+                var lastAccessTime = File.GetLastAccessTime(sentinelPath);
                 if (lastAccessTime.AddHours(updateIntervalHours) > DateTime.Now)
                 {
                     return false;
@@ -462,11 +463,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private bool BackgroundUpdatesAreDisabled() =>
             bool.TryParse(_getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE), out var disableEnvVar) && disableEnvVar;
 
-        private string GetAdvertisingManifestSentinalPath() => Path.Combine(_userProfileDir, ".workloadAdvertisingManifestSentinal");
+        private string GetAdvertisingManifestSentinelPath(SdkFeatureBand featureBand) => Path.Combine(_userProfileDir, $".workloadAdvertisingManifestSentinel{featureBand}");
 
-        private string GetAdvertisingWorkloadsFilePath() => GetAdvertisingWorkloadsFilePath(_userProfileDir);
+        private string GetAdvertisingWorkloadsFilePath(SdkFeatureBand featureBand) => GetAdvertisingWorkloadsFilePath(_userProfileDir, featureBand);
 
-        private static string GetAdvertisingWorkloadsFilePath(string userProfileDir) => Path.Combine(userProfileDir, ".workloadAdvertisingUpdates");
+        private static string GetAdvertisingWorkloadsFilePath(string userProfileDir, SdkFeatureBand featureBand) => Path.Combine(userProfileDir, $".workloadAdvertisingUpdates{featureBand}");
 
         private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
             Path.Combine(_userProfileDir, "sdk-advertising", featureBand.ToString(), manifestId.ToString());

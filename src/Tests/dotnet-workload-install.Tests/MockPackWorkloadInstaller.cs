@@ -38,19 +38,22 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             FailingGarbageCollection = failingGarbageCollection;
         }
 
-        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
-            InstalledPacks = InstalledPacks.Append(packInfo).ToList();
-            CachePath = offlineCache?.Value;
-            if (packInfo.Id.ToString().Equals(FailingPack))
+            foreach (var packInfo in packInfos)
             {
-                throw new Exception($"Failing pack: {packInfo.Id}");
+                InstalledPacks = InstalledPacks.Append(packInfo).ToList();
+                CachePath = offlineCache?.Value;
+                if (packInfo.Id.ToString().Equals(FailingPack))
+                {
+                    throw new Exception($"Failing pack: {packInfo.Id}");
+                }
             }
         }
 
         public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
-            InstallWorkloadPack(packInfo, sdkFeatureBand, offlineCache);
+            InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, offlineCache);
         }
 
         public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)

@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal interface IWorkloadPackInstaller : IInstaller
     {
-        void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
+        void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
         void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
