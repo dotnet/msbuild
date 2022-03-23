@@ -124,6 +124,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public override int Execute()
         {
+            bool usedRollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
             if (_printDownloadLinkOnly)
             {
                 _reporter.WriteLine(string.Format(LocalizableStrings.ResolvingPackageUrls, string.Join(", ", _workloadIds)));
@@ -144,6 +145,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     _workloadInstaller.Shutdown();
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e, isUserError: false);
                 }
+            }
+            else if (_skipManifestUpdate && usedRollback)
+            {
+                throw new GracefulException(string.Format(LocalizableStrings.CannotCombineSkipManifestAndRollback, 
+                    WorkloadInstallCommandParser.SkipManifestUpdateOption.Name, WorkloadInstallCommandParser.FromRollbackFileOption.Name,
+                    WorkloadInstallCommandParser.SkipManifestUpdateOption.Name, WorkloadInstallCommandParser.FromRollbackFileOption.Name), isUserError: true);
             }
             else
             {

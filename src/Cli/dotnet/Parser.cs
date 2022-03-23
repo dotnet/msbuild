@@ -12,12 +12,14 @@ using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Format;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
+using Command = System.CommandLine.Command;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -127,18 +129,23 @@ namespace Microsoft.DotNet.Cli
 
             if (exception is Utils.GracefulException)
             {
-                context.Console.Error.WriteLine(exception.Message);
+                Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                    ? exception.ToString().Red().Bold()
+                    : exception.Message.Red().Bold());
+                
             }
             else if (exception is CommandParsingException)
             {
-                context.Console.Error.WriteLine(exception.Message);
+                Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                    ? exception.ToString().Red().Bold()
+                    : exception.Message.Red().Bold());
+                context.ParseResult.ShowHelp();
             }
             else
             {
-                context.Console.Error.Write("Unhandled exception: ");
-                context.Console.Error.WriteLine(exception.ToString());
-            }
-            context.ParseResult.ShowHelp();
+                Reporter.Error.Write("Unhandled exception: ".Red().Bold());
+                Reporter.Error.WriteLine(exception.ToString().Red().Bold());
+            }    
             context.ExitCode = 1;
         }
 
