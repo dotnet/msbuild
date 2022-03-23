@@ -76,6 +76,11 @@ namespace Microsoft.DotNet.Cli.Telemetry
             CurrentSessionId = null;
         }
 
+        internal static void EnableForTests()
+        {
+            DisabledForTests = false;
+        }
+
         private bool PermissionExists(IFirstTimeUseNoticeSentinel sentinel)
         {
             if (sentinel == null)

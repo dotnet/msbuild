@@ -12,6 +12,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class DotnetMsbuildInProcTests : SdkTest
     {
         public DotnetMsbuildInProcTests(ITestOutputHelper log) : base(log)
