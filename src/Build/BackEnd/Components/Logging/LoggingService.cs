@@ -246,6 +246,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private AutoResetEvent _dequeueEvent;
         /// <summary>
+        /// Auto reset event raised when queue become empty.
+        /// </summary>
+        private AutoResetEvent _emptyQueueEvent;
+        /// <summary>
         /// Auto reset event raised when message is added into queue.
         /// </summary>
         private AutoResetEvent _enqueueEvent;
@@ -1182,9 +1186,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 while (_eventQueue.Count >= _queueCapacity)
                 {
                     // Block and wait for dequeue event.
-                    // Because _dequeueEvent is AutoReset and we have two places where we wait for it,
-                    //   we have that 100ms max wait time there to eliminate race conditions caused by the other WaitOne.
-                    _dequeueEvent.WaitOne(100);
+                    _dequeueEvent.WaitOne();
                 }
 
                 _eventQueue.Enqueue(buildEvent);
@@ -1207,11 +1209,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WaitForLoggingToProcessEvents()
         {
-            while (!_eventQueue.IsEmpty)
+            while (_eventQueue != null && !_eventQueue.IsEmpty)
             {
-                // Because _dequeueEvent is AutoReset and we have two places where we wait for it,
-                //   we have 100ms max wait time there to eliminate race conditions caused by the other WaitOne.
-                _dequeueEvent.WaitOne(100);
+                _emptyQueueEvent.WaitOne();
             }
         }
 
@@ -1262,6 +1262,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             _eventQueue = new ConcurrentQueue<object>();
             _dequeueEvent = new AutoResetEvent(false);
+            _emptyQueueEvent = new AutoResetEvent(false);
             _enqueueEvent = new AutoResetEvent(false);
             _loggingEventProcessingCancellation = new CancellationTokenSource();
 
@@ -1278,13 +1279,15 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                         else
                         {
+                            _emptyQueueEvent.Set();
+
                             // Wait for next event, or finish.
                             if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
                                 WaitHandle.WaitAny(new[] { completeAdding.WaitHandle, _enqueueEvent });
                         }
-                    } while (!completeAdding.IsCancellationRequested || !_eventQueue.IsEmpty);
+                    } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-                    CleanLoggingEventProcessing();
+                    _emptyQueueEvent.Set();
                 },
                 TaskCreationOptions.LongRunning);
             
@@ -1299,11 +1302,13 @@ namespace Microsoft.Build.BackEnd.Logging
             _loggingEventProcessingCancellation?.Cancel();
             _dequeueEvent?.Dispose();
             _enqueueEvent?.Dispose();
+            _emptyQueueEvent?.Dispose();
             _loggingEventProcessingCancellation?.Dispose();
 
             _eventQueue = null;
             _dequeueEvent = null;
             _enqueueEvent = null;
+            _emptyQueueEvent = null;
             _loggingEventProcessingCancellation = null;
             _loggingEventProcessingPump = null;
         }
