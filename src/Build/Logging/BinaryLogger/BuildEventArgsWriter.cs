@@ -253,7 +253,7 @@ Build
             }
             else
             {
-                Write(new Dictionary<string, string>(0));
+                Write(0);
             }
         }
 
