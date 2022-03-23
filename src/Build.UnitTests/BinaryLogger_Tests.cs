@@ -124,6 +124,10 @@ namespace Microsoft.Build.UnitTests
             var serialActual = serialFromPlaybackText.ToString();
             var parallelExpected = parallelFromBuildText.ToString();
             var parallelActual = parallelFromPlaybackText.ToString();
+            serialExpected = serialExpected.Substring(serialExpected.IndexOf("Project"));
+            serialActual = serialActual.Substring(serialActual.IndexOf("Project"));
+            parallelExpected = parallelExpected.Substring(parallelExpected.IndexOf("Project"));
+            parallelActual = parallelActual.Substring(parallelActual.IndexOf("Project"));
 
             serialActual.ShouldContainWithoutWhitespace(serialExpected);
             parallelActual.ShouldContainWithoutWhitespace(parallelExpected);

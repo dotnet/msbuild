@@ -38,13 +38,8 @@ namespace Microsoft.Build.UnitTests
 
             args = new BuildStartedEventArgs(
                 "M",
-                null,
-                new Dictionary<string, string>
-                {
-                    { "SampleName", "SampleValue" }
-                });
+                null);
             Roundtrip(args,
-                e => TranslationHelpers.ToString(e.BuildEnvironment),
                 e => e.HelpKeyword,
                 e => e.ThreadId.ToString(),
                 e => e.SenderName);
