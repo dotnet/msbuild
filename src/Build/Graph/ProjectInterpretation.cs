@@ -237,16 +237,8 @@ namespace Microsoft.Build.Graph
                 // a traversal in which EnableDynamicPlatformResolution is turned on
                 if (ConversionUtilities.ValidBooleanTrue(projectReference.Project.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)) && String.IsNullOrEmpty(projectReference.GetMetadataValue(SetPlatformMetadataName)))
                 {
-
                     var referencedProject = new Project(projectReference.EvaluatedInclude);
-                    var projectReferencePlatformMetadata = referencedProject.GetPropertyValue(PlatformsMetadataName);
-                    var projectReferenceLookupTableMetadata = referencedProject.GetPropertyValue(PlatformLookupTableMetadataName);
-                    var currentProjectPlatformMetadata = projectReference.Project.GetPropertyValue(PlatformMetadataName);
-                    var currentPlatformLookupTableMetadata = projectReference.Project.GetPropertyValue(PlatformLookupTableMetadataName);
-                    var projectPath = projectReference.EvaluatedInclude;
-
-
-                    var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectReferencePlatformMetadata, projectReferenceLookupTableMetadata, currentProjectPlatformMetadata, currentPlatformLookupTableMetadata, projectPath);    
+                    var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(referencedProject.GetPropertyValue(PlatformsMetadataName), referencedProject.GetPropertyValue(PlatformLookupTableMetadataName), projectReference.Project.GetPropertyValue(PlatformMetadataName), projectReference.Project.GetPropertyValue(PlatformLookupTableMetadataName), projectReference.EvaluatedInclude);    
                     projectReference.SetMetadata("SetPlatform", $"Platform={SelectedPlatform}");
                 }
                 // TODO: Mimic AssignProjectConfiguration's behavior for determining the values for these.
