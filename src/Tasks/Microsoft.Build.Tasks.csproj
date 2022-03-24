@@ -968,7 +968,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
-    <ProjectReference Include="..\Build\Microsoft.Build.csproj" SetTargetFramework="TargetFramework=net472" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj"/>
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj"/>
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
