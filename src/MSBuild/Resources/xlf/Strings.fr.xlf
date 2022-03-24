@@ -1168,6 +1168,11 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <target state="translated">Version de MSBuild = "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildDebugPath">
+        <source>MSBuild logs and debug information will be at "{0}"</source>
+        <target state="new">MSBuild logs and debug information will be at "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
         <target state="translated">MSBUILD : error MSB1007: Spécifiez un journal.</target>
