@@ -100,7 +100,7 @@
       <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
 
-      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.dll" />
+      <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.tlb" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.pdb" />
@@ -173,6 +173,8 @@
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(FreshlyBuiltProjects)"
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')" />
 
   </Target>
 
