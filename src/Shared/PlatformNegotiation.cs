@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Shared
@@ -19,21 +17,9 @@ namespace Microsoft.Build.Shared
     /// </summary>
     static internal class PlatformNegotiation
     {
-        private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
-        private const string PlatformMetadataName = "Platform";
-        private const string PlatformsMetadataName = "Platforms";
-        internal static string? GetNearestPlatform(ProjectItemInstance projectReference, TaskLoggingHelper? Log = null)
+
+        internal static string? GetNearestPlatform(String projectReferencePlatformMetadata, String projectReferenceLookupTableMetadata, String currentProjectPlatformMetadata, String currentPlatformLookupTableMetadata, String projectPath, TaskLoggingHelper? Log = null)
         {
-
-            var referencedProject = new Project(projectReference.EvaluatedInclude);
-            var projectReferencePlatformMetadata = referencedProject.GetPropertyValue(PlatformsMetadataName);
-            var projectReferenceLookupTableMetadata = referencedProject.GetPropertyValue(PlatformLookupTableMetadataName);
-            var currentProjectPlatformMetadata = projectReference.Project.GetPropertyValue(PlatformMetadataName);
-            var currentPlatformLookupTableMetadata = projectReference.Project.GetPropertyValue(PlatformLookupTableMetadataName);
-            var projectPath = projectReference.EvaluatedInclude;
-
-
-
 
             Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(currentPlatformLookupTableMetadata, Log);
 
@@ -89,10 +75,6 @@ namespace Microsoft.Build.Shared
             return buildProjectReferenceAs;
         }
 
-        internal static void test(ProjectItemInstance stringTable)
-        {
-            Console.Write("hello");
-        }
 
         internal static Dictionary<string, string>? ExtractLookupTable(string stringTable, TaskLoggingHelper? Log = null)
         {

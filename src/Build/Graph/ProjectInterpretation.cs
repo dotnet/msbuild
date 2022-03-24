@@ -21,6 +21,9 @@ namespace Microsoft.Build.Graph
 {
     internal sealed class ProjectInterpretation
     {
+        private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
+        private const string PlatformMetadataName = "Platform";
+        private const string PlatformsMetadataName = "Platforms";
         private const string EnableDynamicPlatformResolutionMetadataName  = "EnableDynamicPlatformResolution";
         private const string FullPathMetadataName = "FullPath";
         private const string ToolsVersionMetadataName = "ToolsVersion";
@@ -234,7 +237,16 @@ namespace Microsoft.Build.Graph
                 // a traversal in which EnableDynamicPlatformResolution is turned on
                 if (ConversionUtilities.ValidBooleanTrue(projectReference.Project.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)) && String.IsNullOrEmpty(projectReference.GetMetadataValue(SetPlatformMetadataName)))
                 {
-                    var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectReference);    
+
+                    var referencedProject = new Project(projectReference.EvaluatedInclude);
+                    var projectReferencePlatformMetadata = referencedProject.GetPropertyValue(PlatformsMetadataName);
+                    var projectReferenceLookupTableMetadata = referencedProject.GetPropertyValue(PlatformLookupTableMetadataName);
+                    var currentProjectPlatformMetadata = projectReference.Project.GetPropertyValue(PlatformMetadataName);
+                    var currentPlatformLookupTableMetadata = projectReference.Project.GetPropertyValue(PlatformLookupTableMetadataName);
+                    var projectPath = projectReference.EvaluatedInclude;
+
+
+                    var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectReferencePlatformMetadata, projectReferenceLookupTableMetadata, currentProjectPlatformMetadata, currentPlatformLookupTableMetadata, projectPath);    
                     projectReference.SetMetadata("SetPlatform", $"Platform={SelectedPlatform}");
                 }
                 // TODO: Mimic AssignProjectConfiguration's behavior for determining the values for these.
