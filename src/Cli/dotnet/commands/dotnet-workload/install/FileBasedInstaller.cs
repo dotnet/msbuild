@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return _installationRecordRepository;
         }
 
-        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
             foreach (var packInfo in packInfos)
             {
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var tempFilesToDelete = new List<string>();
                 try
                 {
-                    TransactionalAction.Run(
+                    transactionContext.Run(
                         action: () =>
                         {
                             if (!PackIsInstalled(packInfo))
@@ -150,14 +150,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             try
                             {
                                 _reporter.WriteLine(string.Format(LocalizableStrings.RollingBackPackInstall, packInfo.Id));
-                                RollBackWorkloadPackInstall(packInfo, sdkFeatureBand, offlineCache);
+                                DeletePackInstallationRecord(packInfo, sdkFeatureBand);
+                                if (!PackHasInstallRecords(packInfo))
+                                {
+                                    DeletePack(packInfo);
+                                }
                             }
                             catch (Exception e)
                             {
-                            // Don't hide the original error if roll back fails
-                            _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, e.Message));
+                                // Don't hide the original error if roll back fails
+                                _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, e.Message));
                             }
-                        });
+                        });                    
                 }
                 finally
                 {
@@ -180,18 +184,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
-            InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, offlineCache);
-        }
-
-        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
-        {
-            DeletePackInstallationRecord(packInfo, sdkFeatureBand);
-            if (!PackHasInstallRecords(packInfo))
-            {
-                DeletePack(packInfo);
-            }
+            InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, transactionContext, offlineCache);
         }
 
         public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null, bool isRollback = false)
@@ -207,38 +202,38 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             try
             {
                 TransactionalAction.Run(
-                   action: () =>
-                   {
-                       if (offlineCache == null || !offlineCache.HasValue)
-                       {
-                           packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId),
-                               new NuGetVersion(manifestVersion.ToString()), _packageSourceLocation).GetAwaiter().GetResult();
-                       }
-                       else
-                       {
-                           packagePath = Path.Combine(offlineCache.Value.Value, $"{WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId)}.{manifestVersion}.nupkg");
-                           if (!File.Exists(packagePath))
-                           {
-                               throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), manifestVersion, offlineCache));
-                           }
-                       }
-                       tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-extracted");
-                       Directory.CreateDirectory(tempExtractionDir);
-                       var manifestFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
+                    action: () =>
+                    {
+                        if (offlineCache == null || !offlineCache.HasValue)
+                        {
+                            packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId),
+                                new NuGetVersion(manifestVersion.ToString()), _packageSourceLocation).GetAwaiter().GetResult();
+                        }
+                        else
+                        {
+                            packagePath = Path.Combine(offlineCache.Value.Value, $"{WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId)}.{manifestVersion}.nupkg");
+                            if (!File.Exists(packagePath))
+                            {
+                                throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), manifestVersion, offlineCache));
+                            }
+                        }
+                        tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-extracted");
+                        Directory.CreateDirectory(tempExtractionDir);
+                        var manifestFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
 
-                       if (Directory.Exists(manifestPath) && Directory.GetFileSystemEntries(manifestPath).Any())
-                       {
-                           // Backup existing manifest data for roll back purposes
-                           tempBackupDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-backup");
-                           if (Directory.Exists(tempBackupDir))
-                           {
-                               Directory.Delete(tempBackupDir, true);
-                           }
-                           FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(manifestPath, tempBackupDir));
-                       }
-                       Directory.CreateDirectory(Path.GetDirectoryName(manifestPath));
-                       FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(tempExtractionDir, "data"), manifestPath));
-                   },
+                        if (Directory.Exists(manifestPath) && Directory.GetFileSystemEntries(manifestPath).Any())
+                        {
+                            // Backup existing manifest data for roll back purposes
+                            tempBackupDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-backup");
+                            if (Directory.Exists(tempBackupDir))
+                            {
+                                Directory.Delete(tempBackupDir, true);
+                            }
+                            FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(manifestPath, tempBackupDir));
+                        }
+                        Directory.CreateDirectory(Path.GetDirectoryName(manifestPath));
+                        FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(tempExtractionDir, "data"), manifestPath));
+                    },
                     rollback: () =>
                     {
                         if (!string.IsNullOrEmpty(tempBackupDir) && Directory.Exists(tempBackupDir))
@@ -276,7 +271,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format(LocalizableStrings.FailedToInstallWorkloadManifest, manifestId, manifestVersion, e.Message));
+                throw new Exception(string.Format(LocalizableStrings.FailedToInstallWorkloadManifest, manifestId, manifestVersion, e.Message), e);
             }
         }
 

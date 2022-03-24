@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
 
                 foreach (var packId in packsToInstall)
                 {
-                    installer.RepairWorkloadPack(packId, sdkFeatureBand);
+                    installer.RepairWorkloadPack(packId, sdkFeatureBand, new NullTransactionContext());
                 }
             }
             else

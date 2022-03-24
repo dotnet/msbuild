@@ -242,8 +242,19 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 IEnumerable<PackInfo> workloadPackToInstall = new List<PackInfo>();
                 IEnumerable<WorkloadId> newWorkloadInstallRecords = new List<WorkloadId>();
 
-                TransactionalAction.Run(
-                    action: () =>
+                var transaction = new CliTransaction();
+
+                transaction.RollbackStarted = () =>
+                {
+                    _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+                };
+                // Don't hide the original error if roll back fails, but do log the rollback failure
+                transaction.RollbackFailed = ex =>
+                {
+                    _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
+                };
+
+                transaction.Run(context =>
                     {
                         bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
 
@@ -256,7 +267,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                         workloadPackToInstall = GetPacksToInstall(workloadIds);
 
-                        installer.InstallWorkloadPacks(workloadPackToInstall, sdkFeatureBand, offlineCache);
+                        installer.InstallWorkloadPacks(workloadPackToInstall, sdkFeatureBand, context, offlineCache);
 
                         var recordRepo = _workloadInstaller.GetWorkloadInstallationRecordRepository();
                         newWorkloadInstallRecords = workloadIds.Except(recordRepo.GetInstalledWorkloads(sdkFeatureBand));
@@ -267,30 +278,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     },
                     rollback: () =>
                     {
-                        try
+                        foreach (var manifest in manifestsToUpdate)
                         {
-                            _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
-
-                            foreach (var manifest in manifestsToUpdate)
-                            {
                                 _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, manifest.existingFeatureBand, offlineCache: null, isRollback: true);
-                            }
-
-                            foreach (var packId in workloadPackToInstall)
-                            {
-                                installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
-                            }
-
-                            foreach (var workloadId in newWorkloadInstallRecords)
-                            {
-                                _workloadInstaller.GetWorkloadInstallationRecordRepository()
-                                    .DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
-                            }
                         }
-                        catch (Exception e)
+
+                        //  InstallWorkloadPacks implementation should already be using transaction and rolling back if needed
+
+                        foreach (var workloadId in newWorkloadInstallRecords)
                         {
-                            // Don't hide the original error if roll back fails
-                            _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, e.Message));
+                            _workloadInstaller.GetWorkloadInstallationRecordRepository()
+                                .DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
                         }
                     });
             }

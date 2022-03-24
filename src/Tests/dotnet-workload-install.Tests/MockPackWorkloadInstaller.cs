@@ -38,8 +38,16 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             FailingGarbageCollection = failingGarbageCollection;
         }
 
-        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
+            transactionContext.AddRollbackAction(() =>
+            {
+                if (FailingRollback)
+                {
+                    throw new Exception("Rollback failure");
+                }
+            });
+
             foreach (var packInfo in packInfos)
             {
                 InstalledPacks = InstalledPacks.Append(packInfo).ToList();
@@ -51,18 +59,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             }
         }
 
-        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, ITransactionContext context, DirectoryPath? offlineCache = null)
         {
-            InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, offlineCache);
-        }
-
-        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
-        {
-            if (FailingRollback)
-            {
-                throw new Exception("Rollback failure");
-            }
-            RolledBackPacks.Add(packInfo);
+            InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, context, offlineCache);
         }
 
         public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)

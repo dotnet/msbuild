@@ -24,7 +24,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     [SupportedOSPlatform("windows")]
-    internal class NetSdkMsiInstallerClient : MsiInstallerBase, IWorkloadPackInstaller
+    internal partial class NetSdkMsiInstallerClient : MsiInstallerBase, IWorkloadPackInstaller
     {
         private INuGetPackageDownloader _nugetPackageDownloader;
 
@@ -334,7 +334,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
             try
             {
@@ -360,47 +360,52 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
             ReportPendingReboot();
 
-            foreach (var packInfo in packInfos)
+            var msisToInstall = GetMsisToInstall(packInfos);
+
+            foreach (var msiToInstall in msisToInstall)
             {
-                try
+                transactionContext.Run(action: () =>
                 {
-                    // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
-                    string msiPackageId = GetMsiPackageId(packInfo);
+                    try
+                    {
+                        // Retrieve the payload from the MSI package cache.
+                        MsiPayload msi = GetCachedMsiPayload(msiToInstall.NuGetPackageId, msiToInstall.NuGetPackageVersion, offlineCache);
+                        VerifyPackage(msi);
+                        DetectState state = DetectPackage(msi, out Version installedVersion);
+                        InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out _);
+                        ExecutePackage(msi, plannedAction);
 
-                    // Retrieve the payload from the MSI package cache.
-                    MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
-                    VerifyPackage(msi);
-                    DetectState state = DetectPackage(msi, out Version installedVersion);
-                    InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out _);
-                    ExecutePackage(msi, plannedAction);
-
-                    // Update the reference count against the MSI.
-                    UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
-                }
-                catch (Exception e)
+                        // Update the reference count against the MSI.
+                        UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
+                    }
+                    catch (Exception e)
+                    {
+                        LogException(e);
+                        throw;
+                    }
+                },
+                rollback: () =>
                 {
-                    LogException(e);
-                    RollBackWorkloadPackInstall(packInfo, sdkFeatureBand, offlineCache);
-                }
+                    RollBackMsiInstall(msiToInstall);
+                });
+                
             }
+    
         }
 
-        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        void RollBackMsiInstall(AcquirableMsi msiToRollback, DirectoryPath? offlineCache = null)
         {
             try
             {
                 ReportPendingReboot();
-                Log?.LogMessage($"Rolling back workload pack installation for {packInfo.ResolvedPackageId}.");
-
-                // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
-                string msiPackageId = GetMsiPackageId(packInfo);
+                Log?.LogMessage($"Rolling back workload pack installation for {msiToRollback.NuGetPackageId}.");
 
                 // Retrieve the payload from the MSI package cache.
-                MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
+                MsiPayload msi = GetCachedMsiPayload(msiToRollback.NuGetPackageId, msiToRollback.NuGetPackageVersion, offlineCache);
                 VerifyPackage(msi);
 
                 // Check the provider key first in case we were installed and we only need to remove
@@ -634,7 +639,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// </summary>
         /// <param name="packInfo">The pack information used to generate the package ID.</param>
         /// <returns>The ID of the NuGet package containing the MSI corresponding to the pack.</returns>
-        private string GetMsiPackageId(PackInfo packInfo)
+        private static string GetMsiPackageId(PackInfo packInfo)
         {
             return $"{packInfo.ResolvedPackageId}.Msi.{HostArchitecture}";
         }

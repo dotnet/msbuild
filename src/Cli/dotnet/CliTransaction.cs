@@ -1,0 +1,100 @@
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Microsoft.DotNet.Cli
+{
+    internal interface ITransactionContext
+    {
+        public void AddRollbackAction(Action action);
+    }
+
+    internal class CliTransaction
+    {
+        //  Delegate called when rollback starts, mainly in order to print a log message
+        public Action RollbackStarted { get; set; }
+
+        //  Delegate called when rollback fails.  If set, exception will be passed to the delegate, but not rethrown
+        public Action<Exception> RollbackFailed { get; set; }
+
+
+        public void Run(Action<ITransactionContext> action, Action rollback)
+        {
+            Run(context =>
+            {
+                context.AddRollbackAction(rollback);
+
+                action(context);
+            });
+        }
+
+        public void Run(Action<ITransactionContext> action)
+        {
+            TransactionContext transactionContext = new();
+            try
+            {
+                action(transactionContext);
+            }
+            catch (Exception)
+            {
+                //  Roll back transaction
+                RollbackStarted?.Invoke();
+
+                transactionContext.RollbackActions.Reverse();
+                foreach (var rollbackAction in transactionContext.RollbackActions)
+                {
+                    try
+                    {
+                        rollbackAction();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (RollbackFailed != null)
+                        {
+                            RollbackFailed(ex);
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+
+                throw;
+            }
+        }
+
+        class TransactionContext : ITransactionContext
+        {
+            public List<Action> RollbackActions { get; set; } = new List<Action>();
+            public void AddRollbackAction(Action action)
+            {
+                RollbackActions.Add(action);
+            }
+        }
+    }
+
+    //  Transaction context to use when there is no transaction
+    internal class NullTransactionContext : ITransactionContext
+    {
+        public void AddRollbackAction(Action action)
+        {
+
+        }
+    }
+
+    static class CliTransactionExtensions
+    {
+        public static void Run(this ITransactionContext context, Action action, Action rollback)
+        {
+            context.AddRollbackAction(rollback);
+            action();
+        }
+    }
+}
