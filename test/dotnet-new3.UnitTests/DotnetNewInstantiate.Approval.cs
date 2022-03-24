@@ -307,5 +307,33 @@ namespace Dotnet_new3.IntegrationTests
             });
         }
 
+        [Fact]
+        public Task CanShowError_OnTemplatesWithSameShortName()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string templateLocation = Helpers.InstallTestTemplate("Invalid/SameShortName", _log, home, workingDirectory);
+
+            var commandResult = new DotnetNewCommand(_log, "sameshortname")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut();
+
+            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+            .AddScrubber(output =>
+            {
+                //removes the delimiter line as we don't know the length of last columns containing paths above
+                output.ScrubTableHeaderDelimiter();
+                //removes the spaces after "Package" column header as we don't know the amount of spaces after it (depends on the paths above)
+                output.ScrubByRegex("Package *", "Package");
+                output = output.Replace(templateLocation, "%TEMPLATE LOCATION%");
+            });
+        }
+
     }
 }
