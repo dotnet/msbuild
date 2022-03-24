@@ -97,8 +97,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                  WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand,
                                      _workloadResolver, _verbosity, _userProfileDir, _nugetPackageDownloader, _dotnetPath, _tempDirPath,
                                      _packageSourceLocation, restoreActionConfig, elevationRequired: !_printDownloadLinkOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
+            bool displayManifestUpdates = false;
+            if (_verbosity.VerbosityIsDetailedOrDiagnostic())
+            {
+                displayManifestUpdates = true;
+            }
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath, 
-                _workloadInstaller.GetWorkloadInstallationRecordRepository(), _packageSourceLocation);
+                _workloadInstaller.GetWorkloadInstallationRecordRepository(), _packageSourceLocation, displayManifestUpdates: displayManifestUpdates);
 
             ValidateWorkloadIdsInput();
         }
@@ -180,6 +185,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestsToUpdate = new List<(ManifestId, ManifestVersion, ManifestVersion)>();
             if (!skipManifestUpdate)
             {
+                if (_verbosity != VerbosityOptions.quiet && _verbosity != VerbosityOptions.q)
+                {
+                    _reporter.WriteLine(LocalizableStrings.CheckForUpdatedWorkloadManifests);
+                }
                 // Update currently installed workloads
                 var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(_sdkFeatureBand);
                 var previouslyInstalledWorkloads = installedWorkloads.Intersect(workloadIds);

@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly PackageSourceLocation _packageSourceLocation;
         Func<string, string> _getEnvironmentVariable;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
+        private readonly bool _displayManifestUpdates;
 
         public WorkloadManifestUpdater(IReporter reporter,
             IWorkloadResolver workloadResolver,
@@ -42,7 +43,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string tempDirPath,
             IWorkloadInstallationRecordRepository workloadRecordRepo,
             PackageSourceLocation packageSourceLocation = null,
-            Func<string, string> getEnvironmentVariable = null)
+            Func<string, string> getEnvironmentVariable = null,
+            bool displayManifestUpdates = true)
         {
             _reporter = reporter;
             _workloadResolver = workloadResolver;
@@ -53,6 +55,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _packageSourceLocation = packageSourceLocation;
             _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
             _workloadRecordRepo = workloadRecordRepo;
+            _displayManifestUpdates = displayManifestUpdates;
         }
 
         private static WorkloadManifestUpdater GetInstance(string userProfileDir)
@@ -327,7 +330,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
                 FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(extractionPath, "data"), adManifestPath));
 
-                _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
+                if (_displayManifestUpdates)
+                {
+                    _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
+                }
 
             }
             catch (Exception e)

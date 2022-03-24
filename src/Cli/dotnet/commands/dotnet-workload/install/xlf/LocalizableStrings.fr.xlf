@@ -22,6 +22,11 @@
         <target state="new">Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="new">Checking for updated workload manifests.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">Désinstallation du pack de charge de travail {0} version {1}...</target>
