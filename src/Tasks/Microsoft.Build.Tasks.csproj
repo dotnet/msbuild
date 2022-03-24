@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -971,6 +971,7 @@
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj"/>
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj"/>
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
   <ItemGroup>
