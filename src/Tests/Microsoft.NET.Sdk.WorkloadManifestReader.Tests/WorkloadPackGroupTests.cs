@@ -16,9 +16,9 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
 {
-    public class WorkloadPackBundleTests : SdkTest
+    public class WorkloadPackGroupTests : SdkTest
     {
-        public WorkloadPackBundleTests(ITestOutputHelper log) : base(log)
+        public WorkloadPackGroupTests(ITestOutputHelper log) : base(log)
         {
         }
 
@@ -67,13 +67,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
         }
 
         [Fact]
-        public void TestGetPackBundles()
+        public void TestGetPackGroups()
         {
-            var packBundles = GetPackBundles();
-            foreach (var bundle in packBundles)
+            var packGroups = GetPackGroups();
+            foreach (var group in packGroups)
             {
-                Log.WriteLine(bundle.Workload.Id);
-                foreach (var pack in bundle.Packs)
+                Log.WriteLine(group.Workload.Id);
+                foreach (var pack in group.Packs)
                 {
                     if (pack.Id != pack.ResolvedPackageId)
                     {
@@ -84,10 +84,22 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
                         Log.WriteLine($"\t{pack.Id}\t{pack.Version}");
                     }
                 }
-                foreach (var unavailablePack in bundle.UnavailablePacks)
+                foreach (var unavailablePack in group.UnavailablePacks)
                 {
                     Log.WriteLine($"\tUnavailable: {unavailablePack}");
                 }
+            }
+        }
+
+        [Fact]
+        public void TestGetManifestFeatureBands()
+        {
+            var manifestProvider = CreateManifestProvider();
+            var workloadResolver = WorkloadResolver.CreateForTests(manifestProvider, TestContext.Current.ToolsetUnderTest.DotNetRoot);
+
+            foreach (var manifestInfo in workloadResolver.GetInstalledManifests())
+            {
+                Log.WriteLine(manifestInfo.Id + ": " + manifestInfo.ManifestFeatureBand);
             }
         }
 
@@ -144,9 +156,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
             return ret;
         }
 
-        List<WorkloadPackBundle> GetPackBundles()
+        List<WorkloadPackGroup> GetPackGroups()
         {
-            List<WorkloadPackBundle> bundles = new List<WorkloadPackBundle>();
+            List<WorkloadPackGroup> groups = new();
 
             var manifestProvider = CreateManifestProvider();
             var manifests = GetManifests(manifestProvider);
@@ -174,27 +186,63 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
                             packInfos.Add(packInfo);
                         }
                     }
-                    WorkloadPackBundle bundle = new WorkloadPackBundle(workload, packInfos, unavailablePacks);
-                    bundles.Add(bundle);
+                    WorkloadPackGroup group = new WorkloadPackGroup(workload, manifest.Version, packInfos, unavailablePacks);
+                    groups.Add(group);
                 }
             }
             
 
-            return bundles;
+            return groups;
         }
 
-        class WorkloadPackBundle
+        WorkloadPackGroupJson ConvertGroupToJson(WorkloadPackGroup group)
+        {
+            var groupJson = new WorkloadPackGroupJson();
+
+            groupJson.GroupPackageId = group.Workload.Id + ".Packs";
+            groupJson.GroupPackageVersion = group.WorkloadManifestVersion;
+
+            foreach (var pack in group.Packs)
+            {
+                groupJson.Packs.Add(new WorkloadPackJson()
+                {
+                    PackId = pack.Id,
+                    PackVersion = pack.Version,
+                });
+            }
+
+            return groupJson;
+        }
+
+        class WorkloadPackGroup
         {
             public WorkloadDefinition Workload { get; }
+            public string WorkloadManifestVersion { get; }
             public List<WorkloadResolver.PackInfo> Packs { get; }
             public List<WorkloadPackId> UnavailablePacks { get; }
 
-            public WorkloadPackBundle(WorkloadDefinition workload, List<WorkloadResolver.PackInfo> packs, List<WorkloadPackId> unavailablePacks)
+            public WorkloadPackGroup(WorkloadDefinition workload, string workloadManifestVersion, List<WorkloadResolver.PackInfo> packs, List<WorkloadPackId> unavailablePacks)
             {
                 Workload = workload;
+                WorkloadManifestVersion = workloadManifestVersion;
                 Packs = packs;
                 UnavailablePacks = unavailablePacks;
             }
+        }
+
+        class WorkloadPackGroupJson
+        {
+            public string? GroupPackageId { get;set; }
+            public string? GroupPackageVersion { get; set; }
+
+            public List<WorkloadPackJson> Packs { get; set; } = new List<WorkloadPackJson>();
+        }
+
+        class WorkloadPackJson
+        {
+            public string? PackId { get; set; }
+
+            public string? PackVersion { get; set; }
         }
     }
 }
