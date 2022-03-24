@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
             
             var manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?
-                _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion)) :
+                _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion, featureBand)) :
                 _workloadManifestUpdater.CalculateManifestRollbacks(_fromRollbackDefinition);
 
             UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private void UpdateWorkloadsWithInstallRecord(
             IEnumerable<WorkloadId> workloadIds,
             SdkFeatureBand sdkFeatureBand,
-            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate,
+            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion, SdkFeatureBand sdkFeatureBand)> manifestsToUpdate,
             DirectoryPath? offlineCache = null)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))

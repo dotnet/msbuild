@@ -166,16 +166,19 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             ManifestId manifestId,
             ManifestVersion existingVersion,
             ManifestVersion newVersion,
-            Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
+            Dictionary<WorkloadId, WorkloadDefinition> Workloads,
+            SdkFeatureBand newFeatureBand)>
+            CalculateManifestUpdates()
         {
             var manifestUpdates =
                 new List<(ManifestId, ManifestVersion, ManifestVersion,
-                    Dictionary<WorkloadId, WorkloadDefinition> Workloads)>();
+                    Dictionary<WorkloadId, WorkloadDefinition> Workloads, SdkFeatureBand newFeatureBand)>();
             var currentManifestIds = GetInstalledManifestIds();
             foreach (var manifestId in currentManifestIds)
             {
                 var currentManifestVersion = GetInstalledManifestVersion(manifestId);
                 var advertisingManifestVersionAndWorkloads = GetAdvertisingManifestVersionAndWorkloads(manifestId);
+                SdkFeatureBand newFeatureBand = new SdkFeatureBand(Product.Version);
                 if (advertisingManifestVersionAndWorkloads == null)
                 {
                     continue;
@@ -186,7 +189,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     manifestUpdates.Add((manifestId, currentManifestVersion,
                         advertisingManifestVersionAndWorkloads.Value.ManifestVersion,
-                        advertisingManifestVersionAndWorkloads.Value.Workloads));
+                        advertisingManifestVersionAndWorkloads.Value.Workloads,
+                        newFeatureBand));
                 }
             }
 
@@ -207,7 +211,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
+        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
         {
             var currentManifestIds = GetInstalledManifestIds();
             var manifestRollbacks = ParseRollbackDefinitionFile(rollbackDefinitionFilePath);

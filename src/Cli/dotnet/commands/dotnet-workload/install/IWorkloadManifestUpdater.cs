@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
@@ -18,9 +19,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             ManifestId manifestId, 
             ManifestVersion existingVersion, 
             ManifestVersion newVersion,
-            Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates();
+            Dictionary<WorkloadId, WorkloadDefinition> Workloads,
+            SdkFeatureBand newFeatureBand)> CalculateManifestUpdates();
 
-        IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)>
+        IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)>
             CalculateManifestRollbacks(string rollbackDefinitionFilePath);
 
         Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath);
