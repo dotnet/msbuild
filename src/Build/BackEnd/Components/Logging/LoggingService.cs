@@ -387,8 +387,7 @@ namespace Microsoft.Build.BackEnd.Logging
             get
             {
                 // We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)
-                Interlocked.Add(ref _nextEvaluationId, MaxCPUCount + 2);
-                return _nextEvaluationId;
+                return Interlocked.Add(ref _nextEvaluationId, MaxCPUCount + 2);
             }
         }
 
@@ -401,8 +400,7 @@ namespace Microsoft.Build.BackEnd.Logging
             get
             {
                 // We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)
-                Interlocked.Add(ref _nextProjectId, MaxCPUCount + 2);
-                return _nextProjectId;
+                return Interlocked.Add(ref _nextProjectId, MaxCPUCount + 2);
             }
         }
 
@@ -414,8 +412,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                Interlocked.Increment(ref _nextTargetId);
-                return _nextTargetId;
+                return Interlocked.Increment(ref _nextTargetId);
             }
         }
 
@@ -427,8 +424,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                Interlocked.Increment(ref _nextTaskId);
-                return _nextTaskId;
+                return Interlocked.Increment(ref _nextTaskId);
             }
         }
 
