@@ -76,8 +76,8 @@ Mezi možné příčiny patří toto:
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET SDK (reflecting any global.json):</source>
-        <target state="translated">Sada .NET SDK (s ohledem na libovolný soubor global.json):</target>
+        <source>.NET SDK:</source>
+        <target state="needs-review-translation">Sada .NET SDK (s ohledem na libovolný soubor global.json):</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
