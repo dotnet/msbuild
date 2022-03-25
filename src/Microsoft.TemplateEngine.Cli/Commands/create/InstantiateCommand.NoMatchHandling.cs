@@ -171,7 +171,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 languageOption,
                 typeOption,
                 baselineOption,
-                new Argument("rem-args")
+                new Argument<string[]>("rem-args")
                 {
                     Arity = new ArgumentArity(0, 999)
                 }
