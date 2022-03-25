@@ -67,9 +67,9 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp1.1;net45", true, "netstandard1.4", true, false, false)]
         [InlineData("netcoreapp1.1;net46", true, "net45;netstandard1.6", true, true, true)]
         [InlineData("netcoreapp1.1;net45", true, "net46;netstandard1.6", true, false, false)]
-        [InlineData("v4.5", false, "netstandard1.6", true, true, false)]
-        [InlineData("v4.6.1", false, "netstandard1.6;net461", true, true, true)]
-        [InlineData("v4.5", false, "netstandard1.6;net461", true, true, false)]
+        [InlineData("v4.5.2", false, "netstandard1.6", true, true, false)]
+        [InlineData("v4.7.2", false, "netstandard1.6;net472", true, true, true)]
+        [InlineData("v4.5.2", false, "netstandard1.6;net472", true, true, false)]
         public void It_checks_for_valid_references(string referencerTarget, bool referencerIsSdkProject,
             string dependencyTarget, bool dependencyIsSdkProject,
             bool restoreSucceeds, bool buildSucceeds)
