@@ -34,6 +34,7 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
+using Microsoft.Build.Shared.Debugging;
 
 #nullable disable
 
@@ -1337,7 +1338,7 @@ namespace Microsoft.Build.CommandLine
 
         private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
-            return new[]
+            List<BuildManager.DeferredBuildMessage> messages = new()
             {
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -1363,8 +1364,20 @@ namespace Microsoft.Build.CommandLine
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "MSBVersion",
                         ProjectCollection.DisplayVersion),
-                    MessageImportance.Low)
+                    MessageImportance.Low),
             };
+
+            if (Traits.Instance.DebugEngine)
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "MSBuildDebugPath",
+                        DebugUtils.DebugPath),
+                        MessageImportance.High));
+            }
+
+            return messages;
         }
 
         private static (BuildResultCode result, Exception exception) ExecuteBuild(BuildManager buildManager, BuildRequestData request)

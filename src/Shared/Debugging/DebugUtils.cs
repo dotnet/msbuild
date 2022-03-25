@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Security;
 using System.Text.RegularExpressions;
 
 #nullable disable
@@ -22,12 +23,23 @@ namespace Microsoft.Build.Shared.Debugging
 
         static DebugUtils()
         {
-            string environmentDebugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
-            var debugDirectory = environmentDebugPath;
+            string environmentDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
+            string debugDirectory = environmentDebugPath;
 
             if (Traits.Instance.DebugEngine)
             {
-                debugDirectory ??= Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
+                if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory))
+                {
+                    // Debug directory is writable; no need for fallbacks
+                }
+                else if (FileUtilities.CanWriteToDirectory(Directory.GetCurrentDirectory()))
+                {
+                    debugDirectory = Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
+                }
+                else
+                {
+                    debugDirectory = Path.Combine(Path.GetTempPath(), "MSBuild_Logs");
+                }
 
                 // Out of proc nodes do not know the startup directory so set the environment variable for them.
                 if (string.IsNullOrWhiteSpace(environmentDebugPath))
