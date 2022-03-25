@@ -910,8 +910,8 @@ You may need to build the project on another operating system or architecture, o
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
 To install these workloads, run the following command: dotnet workload restore</source>
-        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: dotnet workload restore</target>
+        <target state="translated">NETSDK1147: 이 프로젝트를 빌드하려면 다음 워크로드를 설치해야 합니다. {0}
+ 이러한 워크로드를 설치하려면 dotnet workload restore 명령을 실행합니다.</target>
         <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
