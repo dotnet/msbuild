@@ -260,7 +260,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Task which pump/process messages from <see cref="_eventQueue"/>
         /// </summary>
-        private Task _loggingEventProcessingPump;
+        private Thread _loggingEventProcessingThread;
 
         /// <summary>
         /// The queue size above which the queue will close to messages from remote nodes.
@@ -1262,33 +1262,34 @@ namespace Microsoft.Build.BackEnd.Logging
             _enqueueEvent = new AutoResetEvent(false);
             _loggingEventProcessingCancellation = new CancellationTokenSource();
 
-            _loggingEventProcessingPump = new Task(() =>
+            _loggingEventProcessingThread = new Thread(LoggingEventProc);
+            _loggingEventProcessingThread.Name = $"MSBuild LoggingService events queue pump: {this.GetHashCode()}";
+            _loggingEventProcessingThread.Start();
+
+            void LoggingEventProc()
+            {
+                var completeAdding = _loggingEventProcessingCancellation.Token;
+
+                do
                 {
-                    var completeAdding = _loggingEventProcessingCancellation.Token;
-
-                    do
+                    if (_eventQueue.TryDequeue(out object ev))
                     {
-                        if (_eventQueue.TryDequeue(out object ev))
-                        {
-                            LoggingEventProcessor(ev);
-                            _dequeueEvent.Set();
-                        }
-                        else
-                        {
-                            _emptyQueueEvent.Set();
+                        LoggingEventProcessor(ev);
+                        _dequeueEvent.Set();
+                    }
+                    else
+                    {
+                        _emptyQueueEvent.Set();
 
-                            // Wait for next event, or finish.
-                            if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
-                                WaitHandle.WaitAny(new[] { completeAdding.WaitHandle, _enqueueEvent });
-                        }
-                    } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+                        // Wait for next event, or finish.
+                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty) WaitHandle.WaitAny(new[] { completeAdding.WaitHandle, _enqueueEvent });
+                    }
+                } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-                    _emptyQueueEvent.Set();
-                },
-                TaskCreationOptions.LongRunning);
-            
-            _loggingEventProcessingPump.Start();
+                _emptyQueueEvent.Set();
+            }
         }
+
 
         /// <summary>
         /// Clean resources used for logging event processing queue.
@@ -1306,7 +1307,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _enqueueEvent = null;
             _emptyQueueEvent = null;
             _loggingEventProcessingCancellation = null;
-            _loggingEventProcessingPump = null;
+            _loggingEventProcessingThread = null;
         }
 
         /// <summary>
@@ -1315,9 +1316,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private void TerminateLoggingEventProcessing()
         {
             // Capture pump task in local variable as cancelling event processing is nulling _loggingEventProcessingPump.
-            var pumpTask = _loggingEventProcessingPump;
+            var pumpTask = _loggingEventProcessingThread;
             _loggingEventProcessingCancellation.Cancel();
-            pumpTask.Wait();
+            pumpTask.Join();
         }
 
         /// <summary>
