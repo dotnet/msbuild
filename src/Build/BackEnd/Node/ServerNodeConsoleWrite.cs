@@ -2,25 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 
 namespace Microsoft.Build.BackEnd
 {
-    internal class EntryNodeConsoleWrite : INodePacket
+    internal class ServerNodeConsoleWrite : INodePacket
     {
         public string Text { get; }
-
-        public ConsoleColor Foreground { get; }
-
-        public ConsoleColor Background { get; }
 
         /// <summary>
         /// 1 = stdout, 2 = stderr
         /// </summary>
         public byte OutputType { get; }
 
-        public EntryNodeConsoleWrite(string text, byte outputType)
+        public ServerNodeConsoleWrite(string text, byte outputType)
         {
             Text = text;
             OutputType = outputType;
@@ -30,9 +24,8 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Packet type.
-        /// This has to be in sync with Microsoft.Build.BackEnd.NodePacketType.EntryNodeInfo
         /// </summary>
-        public NodePacketType Type => NodePacketType.EntryNodeConsole;
+        public NodePacketType Type => NodePacketType.ServerNodeConsole;
 
         #endregion
 
@@ -43,8 +36,6 @@ namespace Microsoft.Build.BackEnd
                 var bw = translator.Writer;
 
                 bw.Write(Text);
-                bw.Write((int)Foreground);
-                bw.Write((int)Background);
                 bw.Write(OutputType);
             }
             else

@@ -10,14 +10,13 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
-using System.Diagnostics;
 
 namespace Microsoft.Build.Execution
 {
     /// <summary>
-    /// This class represents an implementation of INode for out-of-proc entry nodes aka MSBuild server 
+    /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server 
     /// </summary>
-    public class OutOfProcEntryNode : INode, INodePacketFactory, INodePacketHandler
+    public class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         private readonly Func<string, (int exitCode, string exitType)> _buildFunction;
 
@@ -63,7 +62,7 @@ namespace Microsoft.Build.Execution
 
         private string _serverBusyMutexName = default!;
 
-        public OutOfProcEntryNode(Func<string, (int exitCode, string exitType)> buildFunction)
+        public OutOfProcServerNode(Func<string, (int exitCode, string exitType)> buildFunction)
         {
             _buildFunction = buildFunction;
             new Dictionary<string, string>();
@@ -74,7 +73,7 @@ namespace Microsoft.Build.Execution
             _shutdownEvent = new ManualResetEvent(false);
             _packetFactory = new NodePacketFactory();
 
-            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.EntryNodeCommand, EntryNodeCommand.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ServerNodeBuilCommand, ServerNodeBuildCommand.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
         }
 
@@ -113,10 +112,8 @@ namespace Microsoft.Build.Execution
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out Exception? shutdownException)
         {
-            Debugger.Launch();
-            // Console.WriteLine("Run called at {0}", DateTime.Now);
             string msBuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-            var handshake = new EntryNodeHandshake(
+            var handshake = new ServerNodeHandshake(
                 CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: enableReuse, lowPriority: lowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess),
                 msBuildLocation);
 
@@ -130,12 +127,11 @@ namespace Microsoft.Build.Execution
             using var serverRunningMutex = ServerNamedMutex.OpenOrCreateMutex(serverRunningMutexName, out bool mutexCreatedNew);
             if (!mutexCreatedNew)
             {
-                Debugger.Launch();
                 shutdownException = new InvalidOperationException("MSBuild server is already running!");
                 return NodeEngineShutdownReason.Error;
             }
 
-            _nodeEndpoint = new EntryNodeEndpointOutOfProc(pipeName, handshake);
+            _nodeEndpoint = new ServerNodeEndpointOutOfProc(pipeName, handshake);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
@@ -233,7 +229,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Perform necessary actions to shut down the node.
         /// </summary>
-        // TODO: it is too complicated, for simple role of entry node it needs to be simplified
+        // TODO: it is too complicated, for simple role of server node it needs to be simplified
         private NodeEngineShutdownReason HandleShutdown(out Exception? exception)
         {
             CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
@@ -294,8 +290,8 @@ namespace Microsoft.Build.Execution
         {
             switch (packet.Type)
             {
-                case NodePacketType.EntryNodeCommand:
-                    HandleEntryNodeCommand((EntryNodeCommand)packet);
+                case NodePacketType.ServerNodeBuilCommand:
+                    HandleServerNodeBuildCommand((ServerNodeBuildCommand)packet);
                     break;
                 case NodePacketType.NodeBuildComplete:
                     HandleNodeBuildComplete((NodeBuildComplete)packet);
@@ -303,7 +299,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private void HandleEntryNodeCommand(EntryNodeCommand command)
+        private void HandleServerNodeBuildCommand(ServerNodeBuildCommand command)
         {
             using var serverBusyMutex = ServerNamedMutex.OpenOrCreateMutex(name: _serverBusyMutexName, createdNew: out var holdsMutex);
             if (!holdsMutex)
@@ -325,13 +321,13 @@ namespace Microsoft.Build.Execution
             var oldOut = Console.Out;
             var oldErr = Console.Error;
 
-            using var outWriter = new RedirectConsoleWriter((text, foreground, background) =>
+            using var outWriter = new RedirectConsoleWriter(text =>
             {
-                SendPacket(new EntryNodeConsoleWrite(text, 1));
+                SendPacket(new ServerNodeConsoleWrite(text, 1));
             });
-            using var errWriter = new RedirectConsoleWriter((text, foreground, background) =>
+            using var errWriter = new RedirectConsoleWriter(text =>
             {
-                SendPacket(new EntryNodeConsoleWrite(text, 2));
+                SendPacket(new ServerNodeConsoleWrite(text, 2));
             });
 
             Console.SetOut(outWriter);
@@ -348,7 +344,7 @@ namespace Microsoft.Build.Execution
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
-            var response = new EntryNodeResponse(exitCode, exitType);
+            var response = new ServerNodeResponse(exitCode, exitType);
             SendPacket(response);
 
             _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
@@ -360,25 +356,12 @@ namespace Microsoft.Build.Execution
         {
             private readonly string _newLineString;
 
-            private readonly Action<string, ConsoleColor, ConsoleColor> _writeCallback;
-            private ConsoleColor _lastBackgroundColor;
-            private ConsoleColor _lastForegroundColor;
+            private readonly Action<string> _writeCallback;
 
-            public RedirectConsoleWriter(Action<string, ConsoleColor, ConsoleColor> writeCallback)
+            public RedirectConsoleWriter(Action<string> writeCallback)
             {
                 _newLineString = new String(CoreNewLine);
                 _writeCallback = writeCallback;
-
-                _lastBackgroundColor = Console.BackgroundColor;
-                _lastForegroundColor = Console.ForegroundColor;
-            }
-
-            private void FlushIfColorChanged()
-            {
-                if (Console.ForegroundColor != _lastForegroundColor || Console.BackgroundColor != _lastBackgroundColor)
-                {
-                    Flush();
-                }
             }
 
             private void MaybeFlushCaptured(bool force)
@@ -404,24 +387,19 @@ namespace Microsoft.Build.Execution
                 var sb = GetStringBuilder();
                 var captured = sb.ToString();
                 sb.Clear();
-                _writeCallback(captured, _lastForegroundColor, _lastBackgroundColor);
-
-                _lastForegroundColor = Console.ForegroundColor;
-                _lastBackgroundColor = Console.BackgroundColor;
+                _writeCallback(captured);
 
                 base.Flush();
             }
 
             public override void Write(char value)
             {
-                FlushIfColorChanged();
                 base.Write(value);
                 MaybeFlushCaptured(false);
             }
 
             public override void Write(char[] buffer, int index, int count)
             {
-                FlushIfColorChanged();
                 base.Write(buffer, index, count);
                 MaybeFlushCaptured(buffer.SequenceEqual(CoreNewLine));
             }
@@ -433,7 +411,6 @@ namespace Microsoft.Build.Execution
                     return;
                 }
 
-                FlushIfColorChanged();
                 base.Write(value);
                 MaybeFlushCaptured(value.Contains(_newLineString));
             }

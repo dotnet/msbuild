@@ -8,7 +8,7 @@ using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.BackEnd
 {
-    internal class EntryNodeHandshake : IHandshake
+    internal class ServerNodeHandshake : IHandshake
     {
         readonly int _options;
         readonly int _salt;
@@ -17,7 +17,7 @@ namespace Microsoft.Build.BackEnd
         readonly int _fileVersionBuild;
         readonly int _fileVersionRevision;
 
-        internal EntryNodeHandshake(HandshakeOptions nodeType, string msBuildLocation)
+        internal ServerNodeHandshake(HandshakeOptions nodeType, string msBuildLocation)
         {
             // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
             // This indicates in the first byte that we are a modern build.

@@ -9,11 +9,11 @@ using System.Globalization;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// EntryNodeCommand contains all of the information necessary for a entry node to run a command line.
+    /// Contains all of the information necessary for a entry node to run a command line.
     /// </summary>
-    internal class EntryNodeCommand : INodePacket
+    internal class ServerNodeBuildCommand : INodePacket
     {
-        public EntryNodeCommand(string commandLine, string startupDirectory, Dictionary<string, string> buildProcessEnvironment, CultureInfo culture, CultureInfo uiCulture)
+        public ServerNodeBuildCommand(string commandLine, string startupDirectory, Dictionary<string, string> buildProcessEnvironment, CultureInfo culture, CultureInfo uiCulture)
         {
             CommandLine = commandLine;
             StartupDirectory = startupDirectory;
@@ -25,7 +25,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Private constructor for deserialization
         /// </summary>
-        private EntryNodeCommand()
+        private ServerNodeBuildCommand()
         {
         }
 
@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves the packet type.
         /// </summary>
-        public NodePacketType Type => NodePacketType.EntryNodeCommand;
+        public NodePacketType Type => NodePacketType.ServerNodeBuilCommand;
 
         #endregion
 
@@ -99,7 +99,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static INodePacket FactoryForDeserialization(ITranslator translator)
         {
-            EntryNodeCommand command = new();
+            ServerNodeBuildCommand command = new();
             command.Translate(translator);
 
             return command;

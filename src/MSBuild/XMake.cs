@@ -2621,7 +2621,7 @@ namespace Microsoft.Build.CommandLine
                     string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
                     bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
 
-                    // Since build function has to reuse code from *this* class and OutOfProcEntryNode is in different assembly
+                    // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
                     // we have to pass down xmake build invocation to avoid circular dependency
                     Func<string, (int exitCode, string exitType)> buildFunction = (commandLine) =>
                     {
@@ -2648,7 +2648,9 @@ namespace Microsoft.Build.CommandLine
                         return (exitCode, exitType.ToString());
                     };
 
-                    OutOfProcEntryNode node = new(buildFunction);
+                    // commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters]
+
+                    OutOfProcServerNode node = new(buildFunction);
 
                     shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 

@@ -191,22 +191,22 @@ namespace Microsoft.Build.BackEnd
         ResourceResponse,
 
         /// <summary>
-        /// Command in form of MSBuild command line for entry node - MSBuild Server.
+        /// Command in form of MSBuild command line for server node - MSBuild Server.
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
-        EntryNodeCommand = 0xF0,
+        ServerNodeBuilCommand = 0xF0,
 
         /// <summary>
-        /// Response from Entry node command
+        /// Response from server node command
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
-        EntryNodeResponse = 0xF1,
+        ServerNodeResponse = 0xF1,
 
         /// <summary>
         /// Info about server console activity. 
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
-        EntryNodeConsole = 0xF2,
+        ServerNodeConsole = 0xF2,
     }
     #endregion
 

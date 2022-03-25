@@ -9,7 +9,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
     /// </summary>
-    internal class EntryNodeEndpointOutOfProc : NodeEndpointOutOfProcBase
+    internal class ServerNodeEndpointOutOfProc : NodeEndpointOutOfProcBase
     {
         #region Private Data
 
@@ -24,7 +24,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         /// <param name="handshake"></param>
-        internal EntryNodeEndpointOutOfProc(
+        internal ServerNodeEndpointOutOfProc(
             string pipeName,
             IHandshake handshake)
         {
