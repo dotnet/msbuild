@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CannotCombineSkipManifestAndRollback">
         <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
-        <target state="new">Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</target>
+        <target state="translated">Impossible d’utiliser les options {0} et {1} ensemble. Si vous installez à partir d’un fichier de restauration, supprimez {0}. Sinon, supprimez {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CheckForUpdatedWorkloadManifests">

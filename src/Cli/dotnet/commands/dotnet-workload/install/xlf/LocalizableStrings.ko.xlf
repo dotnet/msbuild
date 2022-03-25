@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CannotCombineSkipManifestAndRollback">
         <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
-        <target state="new">Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</target>
+        <target state="translated">{0} 및 {1} 옵션을 함께 사용할 수 없습니다. 롤백 파일에서 설치하는 경우 {0}을(를) 제거합니다. 그렇지 않으면 {1}을(를) 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CheckForUpdatedWorkloadManifests">
