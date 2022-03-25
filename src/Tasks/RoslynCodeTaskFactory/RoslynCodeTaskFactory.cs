@@ -17,9 +17,6 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Shared.FileSystem;
-#if !NETFRAMEWORK
-using System.Runtime.Loader;
-#endif
 
 #nullable disable
 
