@@ -53,6 +53,32 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching("   dotnet-new3 new3 install Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+");
         }
 
+        [Fact]
+        public void ReportsErrorOnUpdateCheckOfLocalPackage()
+        {
+            string nugetName = "TestNupkgInstallTemplate";
+            string nugetVersion = "0.0.1";
+            string nugetFullName = $"{nugetName}::{nugetVersion}";
+            string nugetFileName = $"{nugetName}.{nugetVersion}.nupkg";
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            var home = TestUtils.CreateTemporaryFolder("Home");
+
+            Helpers.InstallNuGetTemplate(
+                TestUtils.GetTestNugetLocation(nugetFileName),
+                _log,
+                home,
+                workingDirectory);
+
+            new DotnetNewCommand(_log, "--update-check")
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut()
+                .And.HaveStdErr($"Failed to check update for {nugetFullName}: the package is not available in configured NuGet feeds.");
+        }
+
         [Theory]
         [InlineData("--update-check")]
         [InlineData("update --check-only")]

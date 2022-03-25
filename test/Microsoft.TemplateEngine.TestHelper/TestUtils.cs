@@ -18,9 +18,35 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public static string GetTestTemplateLocation(string templateName)
         {
-            string codebase = typeof(TestUtils).GetTypeInfo().Assembly.Location;
-            string dir = Path.GetDirectoryName(codebase);
-            string templateLocation = Path.Combine(dir, "..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates", templateName);
+            return GetTestArtifactLocation(Path.Combine("test_templates", templateName));
+        }
+
+        public static string GetTestNugetLocation(string templateName = "TestNupkgInstallTemplateV2.0.0.2.nupkg")
+        {
+            string artifactsDir = GetTestArtifactLocation("nupkg_templates");
+            string nupkgPath = Path.Combine(artifactsDir, templateName);
+
+            if (!File.Exists(nupkgPath))
+            {
+                throw new FileNotFoundException($"{nupkgPath} does not exist");
+            }
+
+            return Path.GetFullPath(nupkgPath);
+        }
+
+        public static string CodeBaseRoot
+        {
+            get
+            {
+                string codebase = typeof(TestUtils).GetTypeInfo().Assembly.Location;
+                string codeBaseRoot = new FileInfo(codebase).Directory.Parent.Parent.Parent.Parent.Parent.FullName;
+                return codeBaseRoot;
+            }
+        }   
+
+        private static string GetTestArtifactLocation(string artifactLocation)
+        {
+            string templateLocation = Path.Combine(CodeBaseRoot, "test", "Microsoft.TemplateEngine.TestTemplates", artifactLocation);
 
             if (!Directory.Exists(templateLocation))
             {
@@ -31,9 +57,6 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public static string GetPackagesLocation()
         {
-            string codebase = typeof(TestUtils).GetTypeInfo().Assembly.Location;
-            string dir = Path.GetDirectoryName(codebase);
-
 #if DEBUG
             string configuration = "Debug";
 #elif RELEASE
@@ -42,7 +65,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             throw new NotSupportedException("The configuration is not supported");
 #endif
 
-            string packagesLocation = Path.Combine(dir, "..", "..", "..", "..", "..", "artifacts", "packages", configuration, "Shipping");
+            string packagesLocation = Path.Combine(CodeBaseRoot, "artifacts", "packages", configuration, "Shipping");
 
             if (!Directory.Exists(packagesLocation))
             {

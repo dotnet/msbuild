@@ -27,8 +27,7 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public string PackTestTemplatesNuGetPackage()
         {
-            string dir = Path.GetDirectoryName(typeof(PackageManager).GetTypeInfo().Assembly.Location) ?? string.Empty;
-            string projectToPack = Path.Combine(dir, "..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "Microsoft.TemplateEngine.TestTemplates.csproj");
+            string projectToPack = Path.Combine(TestUtils.CodeBaseRoot, "test", "Microsoft.TemplateEngine.TestTemplates", "Microsoft.TemplateEngine.TestTemplates.csproj");
             return PackNuGetPackage(projectToPack);
         }
 

@@ -319,5 +319,31 @@ namespace Dotnet_new3.IntegrationTests
             Assert.Equal($"{string.Format(expectedCommandFormat, "bar")}{expectedEol}bar{expectedEol}", File.ReadAllText(testFile));
         }
 
+        [Fact]
+        public void DoesNotReportErrorOnDefaultUpdateCheckOfLocalPackageDuringInstantiation()
+        {
+            string nugetName = "TestNupkgInstallTemplate";
+            string nugetVersion = "0.0.1";
+            string nugetFullName = $"{nugetName}::{nugetVersion}";
+            string nugetFileName = $"{nugetName}.{nugetVersion}.nupkg";
+            string templateName = "nupkginstall";
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            var home = TestUtils.CreateTemporaryFolder("Home");
+
+            Helpers.InstallNuGetTemplate(
+                TestUtils.GetTestNugetLocation(nugetFileName),
+                _log,
+                home,
+                workingDirectory);
+
+            new DotnetNewCommand(_log, templateName, "--dry-run")
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("File actions would have been taken:");
+        }
     }
 }
