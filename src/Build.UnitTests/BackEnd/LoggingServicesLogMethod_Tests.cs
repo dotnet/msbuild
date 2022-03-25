@@ -1099,6 +1099,7 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Asynchronous, 1);
             service.LogBuildFinished(true);
+            service.ShutdownComponent();
         }
 
         #endregion
