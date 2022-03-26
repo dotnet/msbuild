@@ -583,6 +583,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             else
             {
                 logger.ErrorCount.ShouldBe(0);
+                logger.WarningCount.ShouldBe(1);
             }
         }
 
