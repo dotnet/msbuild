@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Cli
 
             command.AddOption(new Option<bool>("--version"));
             command.AddOption(new Option<string>(new string[] { "-v", "--verbosity" }));
-            command.AddArgument(new Argument() { IsHidden = true });
 
             command.AddCommand(GetDeleteCommand());
             command.AddCommand(GetLocalsCommand());
