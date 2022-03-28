@@ -23,7 +23,6 @@ namespace Microsoft.DotNet.Compatibility
         [Required]
         public string RoslynAssembliesPath { get; set; }
 
-        [Required]
         public string AssemblyName { get; set; }
 
         public string RuntimeGraph { get; set; }

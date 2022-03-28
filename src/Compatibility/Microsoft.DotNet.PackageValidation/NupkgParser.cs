@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.PackageValidation
                 packageDependencies.Add(item.TargetFramework, item.Packages);
             }
 
-            return new Package(packageId, version, packageReader.GetFiles()?.Where(t => t.EndsWith(assemblyName + ".dll")), packageDependencies, runtimeGraph);
+            return new Package(packageId, version, packageReader.GetFiles()?.Where(t => t.EndsWith((assemblyName ?? packageId) + ".dll")), packageDependencies, runtimeGraph);
         }
     }
 }
