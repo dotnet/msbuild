@@ -2609,6 +2609,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 "DisplayVersion is semver2 while MSBuildVersion is Major.Minor.Build but should be a prefix match");
         }
 
+        /// <summary>
+        /// Assert MSBuildStartTime property
+        /// </summary>
+        [Fact]
+        public void MSBuildStartTimeNotNull()
+        {
+            Project project = new Project();
+            string msBuildStartTimeValue = project.GetPropertyValue("MSBuildStartTime");
+            Assert.NotNull(msBuildStartTimeValue);
+            Assert.True(DateTime.TryParse(msBuildStartTimeValue, null, System.Globalization.DateTimeStyles.RoundtripKind, out var _));
+
+            string msBuildProjectStartTimeValue = project.GetPropertyValue("MSBuildProjectStartTime");
+            Assert.NotNull(msBuildProjectStartTimeValue);
+            Assert.True(DateTime.TryParse(msBuildProjectStartTimeValue, null, System.Globalization.DateTimeStyles.RoundtripKind, out var _));
+        }
 
         /// <summary>
         /// Test standard reserved properties

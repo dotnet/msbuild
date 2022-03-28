@@ -1129,7 +1129,7 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath);
             SetBuiltInProperty(ReservedPropertyNames.binPath, _data.Toolset.ToolsPath);
             SetBuiltInProperty(ReservedPropertyNames.startupDirectory, startupDirectory);
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.startTime, BuildParameters.StartTime));
+            SetBuiltInProperty(ReservedPropertyNames.startTime, BuildParameters.StartTime);
             SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture));
             SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32);
             SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
@@ -1753,7 +1753,7 @@ namespace Microsoft.Build.Evaluation
 
                     _evaluationLoggingContext.LogBuildEvent(eventArgs);
                 }
-                
+
                 return;
             }
 

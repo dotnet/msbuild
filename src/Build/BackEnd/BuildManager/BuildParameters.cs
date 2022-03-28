@@ -65,6 +65,11 @@ namespace Microsoft.Build.Execution
         private static string s_startupDirectory = NativeMethodsShared.GetCurrentDirectory();
 
         /// <summary>
+        /// The start time.
+        /// </summary>
+        private static System.DateTime s_startTime = System.DateTime.Now;
+
+        /// <summary>
         /// Indicates whether we should warn when a property is uninitialized when it is used.
         /// </summary>
         private static bool? s_warnOnUninitializedProperty;
@@ -632,6 +637,11 @@ namespace Microsoft.Build.Execution
         /// Gets the startup directory.
         /// </summary>
         internal static string StartupDirectory => s_startupDirectory;
+
+        /// <summary>
+        /// Gets or sets the start time.
+        /// </summary>
+        internal static string StartTime => BuildParameters.s_startTime.ToString("o");
 
         /// <summary>
         /// Indicates whether the build plan is enabled or not.
