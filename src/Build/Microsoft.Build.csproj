@@ -148,7 +148,6 @@
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\Communications\ServerNodeEndpointOutOfProc.cs" />
-    <Compile Include="BackEnd\Components\Communications\ServerNodeHandshake.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
