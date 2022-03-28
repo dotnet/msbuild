@@ -26,6 +26,9 @@ Template options:
   --no-restore                                   If specified, skips the automatic restore of the project on create.
                                                  Type: bool
                                                  Default: false
+  --use-program-main                             Whether to generate an explicit Program class and Main method instead of top-level statements.
+                                                 Type: bool
+                                                 Default: false
 
 To see help for other template languages (F#, VB), use --language option:
    dotnet-new3 new3 console -h --language F#

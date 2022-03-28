@@ -89,6 +89,17 @@ Default: false
     Detail: Specifies the template type to instantiate.
   },
   {
+    Label: --use-program-main,
+    Kind: Keyword,
+    SortText: --use-program-main,
+    InsertText: --use-program-main,
+    Detail:
+Whether to generate an explicit Program class and Main method instead of top-level statements.
+Type: bool
+Default: false
+
+  },
+  {
     Label: -?,
     Kind: Keyword,
     SortText: -?,

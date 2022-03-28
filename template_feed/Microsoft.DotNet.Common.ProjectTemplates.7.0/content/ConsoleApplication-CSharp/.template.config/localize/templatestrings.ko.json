@@ -12,6 +12,8 @@
   "symbols/langVersion/displayName": "언어 버전",
   "symbols/skipRestore/description": "지정된 경우, 프로젝트 생성 시 자동 복원을 건너뜁니다.",
   "symbols/skipRestore/displayName": "복원 건너뛰기",
+  "symbols/UseProgramMain/description": "Whether to generate an explicit Program class and Main method instead of top-level statements.",
+  "symbols/UseProgramMain/displayName": "Do not use top-level statements",
   "postActions/restore/description": "이 프로젝트에 필요한 NuGet 패키지를 복원합니다.",
   "postActions/restore/manualInstructions/default/text": "'dotnet restore' 실행",
   "postActions/open-file/description": "편집기에서 Program.cs를 엽니다"

@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Application console",
   "description": "Projet de création d'une application en ligne de commande pouvant s'exécuter sur .NET sur Windows, Linux et macOS",
@@ -12,6 +12,8 @@
   "symbols/langVersion/displayName": "Version du langage",
   "symbols/skipRestore/description": "S’il est spécifié, ignore la restauration automatique du projet lors de la création.",
   "symbols/skipRestore/displayName": "Ignorer la restauration",
+  "symbols/UseProgramMain/description": "Whether to generate an explicit Program class and Main method instead of top-level statements.",
+  "symbols/UseProgramMain/displayName": "Do not use top-level statements",
   "postActions/restore/description": "Restaurez les packages NuGet requis par ce projet.",
   "postActions/restore/manualInstructions/default/text": "Exécuter « dotnet restore »",
   "postActions/open-file/description": "Ouvre Program.cs dans l’éditeur"

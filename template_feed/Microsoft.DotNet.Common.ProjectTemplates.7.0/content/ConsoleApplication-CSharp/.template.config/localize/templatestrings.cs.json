@@ -12,6 +12,8 @@
   "symbols/langVersion/displayName": "Verze jazyka",
   "symbols/skipRestore/description": "Pokud se tato možnost zadá, přeskočí automatické obnovení projektu při vytvoření.",
   "symbols/skipRestore/displayName": "Přeskočit obnovení",
+  "symbols/UseProgramMain/description": "Whether to generate an explicit Program class and Main method instead of top-level statements.",
+  "symbols/UseProgramMain/displayName": "Do not use top-level statements",
   "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",
   "postActions/restore/manualInstructions/default/text": "Spustit dotnet restore",
   "postActions/open-file/description": "Otevře Program.cs v editoru."

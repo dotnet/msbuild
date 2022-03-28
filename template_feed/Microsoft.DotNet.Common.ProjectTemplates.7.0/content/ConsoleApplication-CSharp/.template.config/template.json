@@ -61,6 +61,13 @@
       "defaultValue": "false",
       "displayName": "Skip restore"
     },
+    "UseProgramMain": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Whether to generate an explicit Program class and Main method instead of top-level statements.",
+      "displayName": "Do not use top-level statements"
+    },
     "csharp10orLater": {
       "type": "generated",
       "generator": "regexMatch",
@@ -98,7 +105,11 @@
     },
     "csharpFeature_TopLevelProgram": {
       "type": "computed",
-      "value": "csharp9orLater == \"true\""
+      "value": "(csharp9orLater == \"true\" && UseProgramMain != \"true\")"
+    },
+    "csharpFeature_FileScopedNamespaces": {
+      "type": "computed",
+      "value": "csharp10orLater == \"true\""
     }
   },
   "primaryOutputs": [

@@ -16,6 +16,10 @@
     "langVersion": {
       "longName": "langVersion",
       "shortName": ""
+    },
+    "UseProgramMain": {
+      "longName": "use-program-main",
+      "shortName": ""
     }
   },
   "usageExamples": [

@@ -263,7 +263,7 @@ Restore succeeded\.",
             "5.0.200",
             "--roll-forward",
             "major")]
-        public void GlobalJsonTests( string expectedContent, params string[] parameters)
+        public void GlobalJsonTests(string expectedContent, params string[] parameters)
         {
             string workingDir = TestUtils.CreateTemporaryFolder();
 
@@ -396,6 +396,97 @@ Restore succeeded\.",
                 Assert.DoesNotContain("// See https://aka.ms/new-console-template for more information", programFileContent);
                 Assert.Contains(unexpectedTopLevelContent, programFileContent);
             }
+        }
+
+        [Theory]
+        [InlineData("10.0")]
+        [InlineData("10")]
+        [InlineData("preview")]
+        [InlineData("latest")]
+        [InlineData("default")]
+        [InlineData("latestMajor")]
+        [InlineData(null)]
+        public void TopLevelProgramSupport_WhenFlagIsEnabled(string? langVersion)
+        {
+            string workingDir = TestUtils.CreateTemporaryFolder();
+
+            List<string> args = new List<string>() { "console", "-o", "MyProject", "--use-program-main" };
+            if (!string.IsNullOrEmpty(langVersion))
+            {
+                args.Add("--langVersion");
+                args.Add(langVersion);
+            }
+
+            new DotnetNewCommand(_log, args.ToArray())
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            var buildResult = new DotnetCommand(_log, "build", "MyProject")
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should().ExitWith(0).And.NotHaveStdErr();
+
+            string programFileContent = File.ReadAllText(Path.Combine(workingDir, "MyProject", "Program.cs"));
+            string expectedTopLevelContent =
+@"namespace MyProject;
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine(""Hello, World!"");
+    }
+}
+";
+            Assert.DoesNotContain("// See https://aka.ms/new-console-template for more information", programFileContent);
+            Assert.Contains(expectedTopLevelContent, programFileContent);
+        }
+
+        [Theory]
+        [InlineData("9.0")]
+        [InlineData("9")]
+        public void TopLevelProgramSupport_WhenFlagIsEnabled_NoFileScopedNamespaces(string? langVersion)
+        {
+            string workingDir = TestUtils.CreateTemporaryFolder();
+
+            List<string> args = new List<string>() { "console", "-o", "MyProject", "--use-program-main" };
+            if (!string.IsNullOrEmpty(langVersion))
+            {
+                args.Add("--langVersion");
+                args.Add(langVersion);
+            }
+
+            new DotnetNewCommand(_log, args.ToArray())
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            var buildResult = new DotnetCommand(_log, "build", "MyProject")
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should().ExitWith(0).And.NotHaveStdErr();
+
+            string programFileContent = File.ReadAllText(Path.Combine(workingDir, "MyProject", "Program.cs"));
+            string expectedTopLevelContent =
+@"namespace MyProject
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine(""Hello, World!"");
+        }
+    }
+}
+";
+            Assert.DoesNotContain("// See https://aka.ms/new-console-template for more information", programFileContent);
+            Assert.Contains(expectedTopLevelContent, programFileContent);
         }
 
         /// <summary>

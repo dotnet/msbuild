@@ -12,6 +12,8 @@
   "symbols/langVersion/displayName": "Versione del linguaggio",
   "symbols/skipRestore/description": "Se specificato, ignora il ripristino automatico del progetto durante la creazione.",
   "symbols/skipRestore/displayName": "Salta ripristino",
+  "symbols/UseProgramMain/description": "Whether to generate an explicit Program class and Main method instead of top-level statements.",
+  "symbols/UseProgramMain/displayName": "Do not use top-level statements",
   "postActions/restore/description": "Ripristina i pacchetti NuGet richiesti da questo progetto.",
   "postActions/restore/manualInstructions/default/text": "Esegui 'dotnet restore'",
   "postActions/open-file/description": "Apre Program.cs nell'editor"
