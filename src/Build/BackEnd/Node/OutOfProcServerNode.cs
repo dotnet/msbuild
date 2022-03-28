@@ -458,18 +458,10 @@ namespace Microsoft.Build.Execution
 
             public static bool WasOpen(string mutexName)
             {
-                try
-                {
-                    // we can't use TryOpenExisting as it is not supported in net3.5
-                    using var m = Mutex.OpenExisting(mutexName);
-                    return true;
-                }
-                catch
-                {
-                    // In the case an exception occurred trying to open the Mutex then 
-                    // the assumption is that it's not open.
-                    return false;
-                }
+                bool result = Mutex.TryOpenExisting(mutexName, out Mutex mutex);
+                mutex.Dispose();
+
+                return result;
             }
 
             public bool TryLock(int timeoutMs)
