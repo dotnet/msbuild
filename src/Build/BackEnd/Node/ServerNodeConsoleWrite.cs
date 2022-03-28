@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Build.BackEnd
 {
-    internal class ServerNodeConsoleWrite : INodePacket
+    internal sealed class ServerNodeConsoleWrite : INodePacket
     {
         public string Text { get; }
 

@@ -142,7 +142,7 @@ namespace Microsoft.Build.Internal
         public byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
     }
 
-    internal class ServerNodeHandshake : IHandshake
+    internal sealed class ServerNodeHandshake : IHandshake
     {
         readonly int _options;
         readonly int _salt;

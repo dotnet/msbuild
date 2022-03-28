@@ -9,7 +9,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
     /// </summary>
-    internal class ServerNodeEndpointOutOfProc : NodeEndpointOutOfProcBase
+    internal sealed class ServerNodeEndpointOutOfProc : NodeEndpointOutOfProcBase
     {
         #region Private Data
 

@@ -11,7 +11,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// Contains all of the information necessary for a entry node to run a command line.
     /// </summary>
-    internal class ServerNodeBuildCommand : INodePacket
+    internal sealed class ServerNodeBuildCommand : INodePacket
     {
         public ServerNodeBuildCommand(string commandLine, string startupDirectory, Dictionary<string, string> buildProcessEnvironment, CultureInfo culture, CultureInfo uiCulture)
         {
@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves the packet type.
         /// </summary>
-        public NodePacketType Type => NodePacketType.ServerNodeBuilCommand;
+        public NodePacketType Type => NodePacketType.ServerNodeBuildCommand;
 
         #endregion
 

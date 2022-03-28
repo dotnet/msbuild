@@ -153,7 +153,7 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildCommand.cs" />
     <Compile Include="BackEnd\Node\ServerNodeConsoleWrite.cs" />
-    <Compile Include="BackEnd\Node\ServerNodeResponse.cs" />
+    <Compile Include="BackEnd\Node\ServerNodeBuildResult.cs" />
     <Compile Include="BackEnd\Node\OutOfProcServerNode.cs" />
     <Compile Include="Utilities\ImmutableCollectionsExtensions.cs" />
     <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />

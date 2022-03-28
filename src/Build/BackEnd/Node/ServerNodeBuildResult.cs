@@ -6,9 +6,9 @@ using System;
 
 namespace Microsoft.Build.BackEnd
 {
-    internal class ServerNodeResponse : INodePacket
+    internal sealed class ServerNodeBuildResult : INodePacket
     {
-        public ServerNodeResponse(int exitCode, string exitType)
+        public ServerNodeBuildResult(int exitCode, string exitType)
         {
             ExitCode = exitCode;
             ExitType = exitType;
@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd
         /// Packet type.
         /// This has to be in sync with Microsoft.Build.BackEnd.NodePacketType.ServerNodeBuildCommand
         /// </summary>
-        public NodePacketType Type => NodePacketType.ServerNodeResponse;
+        public NodePacketType Type => NodePacketType.ServerNodeBuildResult;
 
         #endregion
 

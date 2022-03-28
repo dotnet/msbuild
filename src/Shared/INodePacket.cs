@@ -194,13 +194,13 @@ namespace Microsoft.Build.BackEnd
         /// Command in form of MSBuild command line for server node - MSBuild Server.
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
-        ServerNodeBuilCommand = 0xF0,
+        ServerNodeBuildCommand = 0xF0,
 
         /// <summary>
         /// Response from server node command
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
-        ServerNodeResponse = 0xF1,
+        ServerNodeBuildResult = 0xF1,
 
         /// <summary>
         /// Info about server console activity. 

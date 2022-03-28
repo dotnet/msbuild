@@ -16,7 +16,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server 
     /// </summary>
-    public class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
+    public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         private readonly Func<string, (int exitCode, string exitType)> _buildFunction;
 
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Execution
             _shutdownEvent = new ManualResetEvent(false);
             _packetFactory = new NodePacketFactory();
 
-            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ServerNodeBuilCommand, ServerNodeBuildCommand.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ServerNodeBuildCommand, ServerNodeBuildCommand.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
         }
 
@@ -290,7 +290,7 @@ namespace Microsoft.Build.Execution
         {
             switch (packet.Type)
             {
-                case NodePacketType.ServerNodeBuilCommand:
+                case NodePacketType.ServerNodeBuildCommand:
                     HandleServerNodeBuildCommand((ServerNodeBuildCommand)packet);
                     break;
                 case NodePacketType.NodeBuildComplete:
@@ -337,14 +337,12 @@ namespace Microsoft.Build.Execution
 
             Console.SetOut(oldOut);
             Console.SetError(oldErr);
-            outWriter.Dispose();
-            errWriter.Dispose();
 
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
-            var response = new ServerNodeResponse(exitCode, exitType);
+            var response = new ServerNodeBuildResult(exitCode, exitType);
             SendPacket(response);
 
             _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
@@ -352,7 +350,7 @@ namespace Microsoft.Build.Execution
         }
 
         // TODO: unit tests
-        internal class RedirectConsoleWriter : StringWriter
+        internal sealed class RedirectConsoleWriter : StringWriter
         {
             private readonly string _newLineString;
 
