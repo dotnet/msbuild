@@ -98,6 +98,8 @@ namespace Microsoft.Build.Execution
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IValued.EscapedValue => _escapedValue;
 
+        bool IProperty.IsEnvironmentProperty { get; set; }
+
         #region IEquatable<ProjectPropertyInstance> Members
 
         /// <summary>
@@ -182,9 +184,9 @@ namespace Microsoft.Build.Execution
         /// This flags should ONLY be set by the evaluator or by cloning; after the ProjectInstance is created, they must be illegal.
         /// If name is invalid or reserved, throws ArgumentException.
         /// </summary>
-        internal static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, bool isImmutable)
+        internal static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, bool isImmutable, bool isEnvironmentProperty = false)
         {
-            return Create(name, escapedValue, mayBeReserved, null, isImmutable);
+            return Create(name, escapedValue, mayBeReserved, null, isImmutable, isEnvironmentProperty);
         }
 
         /// <summary>
@@ -212,7 +214,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectPropertyInstance Create(ProjectPropertyInstance that)
         {
-            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: that.IsImmutable);
+            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: that.IsImmutable, ((IProperty)that).IsEnvironmentProperty);
         }
 
         /// <summary>
@@ -221,7 +223,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectPropertyInstance Create(ProjectPropertyInstance that, bool isImmutable)
         {
-            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: isImmutable);
+            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: isImmutable, ((IProperty)that).IsEnvironmentProperty);
         }
 
         /// <summary>
@@ -278,7 +280,7 @@ namespace Microsoft.Build.Execution
         /// as it should never be needed for any subsequent messages, and is just extra bulk.
         /// Inherits mutability from project if any.
         /// </summary>
-        private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, ElementLocation location, bool isImmutable)
+        private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, ElementLocation location, bool isImmutable, bool isEnvironmentProperty = false)
         {
             // Does not check immutability as this is only called during build (which is already protected) or evaluation
             ErrorUtilities.VerifyThrowArgumentNull(escapedValue, nameof(escapedValue));
@@ -295,11 +297,9 @@ namespace Microsoft.Build.Execution
                 XmlUtilities.VerifyThrowProjectValidElementName(name, location);
             }
 
-            if (isImmutable)
-            {
-                return new ProjectPropertyInstanceImmutable(name, escapedValue);
-            }
-            return new ProjectPropertyInstance(name, escapedValue);
+            ProjectPropertyInstance instance = isImmutable ? new ProjectPropertyInstanceImmutable(name, escapedValue) : new ProjectPropertyInstance(name, escapedValue);
+            ((IProperty)instance).IsEnvironmentProperty = isEnvironmentProperty;
+            return instance;
         }
 
         /// <summary>

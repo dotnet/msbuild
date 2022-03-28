@@ -204,6 +204,8 @@ namespace Microsoft.Build.Evaluation
             get => EvaluatedValueEscapedInternal;
         }
 
+        bool IProperty.IsEnvironmentProperty { get => IsEnvironmentProperty; set => throw new NotImplementedException(); }
+
         #region IEquatable<ProjectProperty> Members
 
         /// <summary>
