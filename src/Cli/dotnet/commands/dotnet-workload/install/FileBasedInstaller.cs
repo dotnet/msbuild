@@ -189,56 +189,57 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, transactionContext, offlineCache);
         }
 
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null, bool isRollback = false)
+        public void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache = null, bool isRollback = false)
         {
             string packagePath = null;
             string tempExtractionDir = null;
             string tempBackupDir = null;
-            string rootInstallDir = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString()) ? _userProfileDir : _dotnetDir;
-            var manifestPath = Path.Combine(rootInstallDir, "sdk-manifests", sdkFeatureBand.ToString(), manifestId.ToString());
+            string rootInstallDir = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, _sdkFeatureBand.ToString()) ? _userProfileDir : _dotnetDir;
+            var newManifestPath = Path.Combine(rootInstallDir, "sdk-manifests", manifestUpdate.NewFeatureBand, manifestUpdate.ManifestId.ToString());
 
-            _reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloadManifest, manifestId, manifestVersion));
+            _reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloadManifest, manifestUpdate.ManifestId, manifestUpdate.NewVersion));
 
             try
             {
                 TransactionalAction.Run(
                     action: () =>
                     {
+                        var newManifestPackageId = WorkloadManifestUpdater.GetManifestPackageId(new SdkFeatureBand(manifestUpdate.NewFeatureBand), manifestUpdate.ManifestId);
                         if (offlineCache == null || !offlineCache.HasValue)
                         {
-                            packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId),
-                                new NuGetVersion(manifestVersion.ToString()), _packageSourceLocation).GetAwaiter().GetResult();
+                            packagePath = _nugetPackageDownloader.DownloadPackageAsync(newManifestPackageId,
+                                new NuGetVersion(manifestUpdate.NewVersion.ToString()), _packageSourceLocation).GetAwaiter().GetResult();
                         }
                         else
                         {
-                            packagePath = Path.Combine(offlineCache.Value.Value, $"{WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId)}.{manifestVersion}.nupkg");
+                            packagePath = Path.Combine(offlineCache.Value.Value, $"{newManifestPackageId}.{manifestUpdate.NewVersion}.nupkg");
                             if (!File.Exists(packagePath))
                             {
-                                throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), manifestVersion, offlineCache));
+                                throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, newManifestPackageId, manifestUpdate.NewVersion, offlineCache));
                             }
                         }
-                        tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-extracted");
+                        tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{newManifestPackageId}-{manifestUpdate.NewVersion}-extracted");
                         Directory.CreateDirectory(tempExtractionDir);
                         var manifestFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
 
-                        if (Directory.Exists(manifestPath) && Directory.GetFileSystemEntries(manifestPath).Any())
+                        if (Directory.Exists(newManifestPath) && Directory.GetFileSystemEntries(newManifestPath).Any())
                         {
                             // Backup existing manifest data for roll back purposes
-                            tempBackupDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-backup");
+                            tempBackupDir = Path.Combine(_tempPackagesDir.Value, $"{manifestUpdate.ManifestId}-{manifestUpdate.ExistingVersion}-backup");
                             if (Directory.Exists(tempBackupDir))
                             {
                                 Directory.Delete(tempBackupDir, true);
                             }
-                            FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(manifestPath, tempBackupDir));
+                            FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(newManifestPath, tempBackupDir));
                         }
-                        Directory.CreateDirectory(Path.GetDirectoryName(manifestPath));
-                        FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(tempExtractionDir, "data"), manifestPath));
+                        Directory.CreateDirectory(Path.GetDirectoryName(newManifestPath));
+                        FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(tempExtractionDir, "data"), newManifestPath));
                     },
                     rollback: () =>
                     {
                         if (!string.IsNullOrEmpty(tempBackupDir) && Directory.Exists(tempBackupDir))
                         {
-                            FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(tempBackupDir, manifestPath));
+                            FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(tempBackupDir, newManifestPath));
                         }
                     });
 
@@ -271,7 +272,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format(LocalizableStrings.FailedToInstallWorkloadManifest, manifestId, manifestVersion, e.Message), e);
+                throw new Exception(string.Format(LocalizableStrings.FailedToInstallWorkloadManifest, manifestUpdate.ManifestId, manifestUpdate.NewVersion, e.Message), e);
             }
         }
 

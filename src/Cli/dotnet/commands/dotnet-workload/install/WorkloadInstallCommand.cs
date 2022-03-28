@@ -182,7 +182,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             _reporter.WriteLine();
 
-            var manifestsToUpdate = Enumerable.Empty<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)>();
+            var manifestsToUpdate = Enumerable.Empty<ManifestVersionUpdate> ();
             if (!skipManifestUpdate)
             {
                 if (_verbosity != VerbosityOptions.quiet && _verbosity != VerbosityOptions.q)
@@ -200,7 +200,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                 _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
                 manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?
-                    _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.existingFeatureBand, m.newVersion, m.newFeatureBand)) :
+                    _workloadManifestUpdater.CalculateManifestUpdates().Select(m => m.manifestUpdate) :
                     _workloadManifestUpdater.CalculateManifestRollbacks(_fromRollbackDefinition);
             }
 
@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private void InstallWorkloadsWithInstallRecord(
             IEnumerable<WorkloadId> workloadIds,
             SdkFeatureBand sdkFeatureBand,
-            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)> manifestsToUpdate,
+            IEnumerable<ManifestVersionUpdate> manifestsToUpdate,
             DirectoryPath? offlineCache)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
@@ -258,9 +258,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     {
                         bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
 
-                        foreach (var manifest in manifestsToUpdate)
+                        foreach (var manifestUpdate in manifestsToUpdate)
                         {
-                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, manifest.newFeatureBand, offlineCache, rollback);
+                            _workloadInstaller.InstallWorkloadManifest(manifestUpdate, offlineCache, rollback);
                         }
 
                         _workloadResolver.RefreshWorkloadManifests();
@@ -278,9 +278,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     },
                     rollback: () =>
                     {
-                        foreach (var manifest in manifestsToUpdate)
+                        foreach (var manifestUpdate in manifestsToUpdate)
                         {
-                                _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, manifest.existingFeatureBand, offlineCache: null, isRollback: true);
+                            var manifestUpdateRollback = new ManifestVersionUpdate(manifestUpdate.ManifestId, manifestUpdate.NewVersion, manifestUpdate.NewFeatureBand, manifestUpdate.ExistingVersion, manifestUpdate.ExistingFeatureBand);
+                            _workloadInstaller.InstallWorkloadManifest(manifestUpdateRollback, offlineCache: null, isRollback: true);
                         }
 
                         //  InstallWorkloadPacks implementation should already be using transaction and rolling back if needed

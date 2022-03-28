@@ -351,14 +351,10 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-rollback-file", "rollback.json" });
       
             var manifestsToUpdate =
-                new (ManifestId manifestId,
-                ManifestVersion existingVersion,
-                SdkFeatureBand existingFeatureBand,
-                ManifestVersion newVersion,
-                SdkFeatureBand newFeatureBand,
+                new (ManifestVersionUpdate manifestUpdate,
                 Dictionary<WorkloadId, WorkloadDefinition> Workloads)[]
                     {
-                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new SdkFeatureBand(existingSdkFeatureBand), new ManifestVersion("2.0.0"), new SdkFeatureBand(newSdkFeatureBand),
+                        (new ManifestVersionUpdate(new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), existingSdkFeatureBand, new ManifestVersion("2.0.0"), newSdkFeatureBand),
                             null),
                     };
 
@@ -366,9 +362,9 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 
             updateCommand.UpdateWorkloads();
 
-            packInstaller.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].manifestId);
-            packInstaller.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].newVersion);
-            packInstaller.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand(newSdkFeatureBand));
+            packInstaller.InstalledManifests[0].manifestUpdate.ManifestId.Should().Be(manifestsToUpdate[0].manifestUpdate.ManifestId);
+            packInstaller.InstalledManifests[0].manifestUpdate.NewVersion.Should().Be(manifestsToUpdate[0].manifestUpdate.NewVersion);
+            packInstaller.InstalledManifests[0].manifestUpdate.NewFeatureBand.Should().Be(manifestsToUpdate[0].manifestUpdate.NewFeatureBand);
             packInstaller.InstalledManifests[0].offlineCache.Should().Be(null);
         }
 
@@ -378,18 +374,14 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-rollback-file", "rollback.json" });
 
             var manifestsToUpdate =
-                new (ManifestId manifestId,
-                ManifestVersion existingVersion,
-                SdkFeatureBand existingFeatureBand,
-                ManifestVersion newVersion,
-                SdkFeatureBand newFeatureBand,
+                new (ManifestVersionUpdate manifestUpdate,
                 Dictionary<WorkloadId, WorkloadDefinition> Workloads)[]
                     {
-                        (new ManifestId("mock-manifest-1"), new ManifestVersion("1.0.0"), new SdkFeatureBand("6.0.300"), new ManifestVersion("2.0.0"), new SdkFeatureBand("6.0.100"),
+                        (new ManifestVersionUpdate(new ManifestId("mock-manifest-1"), new ManifestVersion("1.0.0"), "6.0.300", new ManifestVersion("2.0.0"), "6.0.100"),
                             null),
-                        (new ManifestId("mock-manifest-2"), new ManifestVersion("1.0.0"), new SdkFeatureBand("6.0.100"), new ManifestVersion("2.0.0"), new SdkFeatureBand("6.0.300"),
+                        (new ManifestVersionUpdate(new ManifestId("mock-manifest-2"), new ManifestVersion("1.0.0"), "6.0.100", new ManifestVersion("2.0.0"), "6.0.300"),
                             null),
-                        (new ManifestId("mock-manifest-3"), new ManifestVersion("1.0.0"), new SdkFeatureBand("5.0.100"), new ManifestVersion("2.0.0"), new SdkFeatureBand("6.0.100"),
+                        (new ManifestVersionUpdate(new ManifestId("mock-manifest-3"), new ManifestVersion("1.0.0"), "5.0.100", new ManifestVersion("2.0.0"), "6.0.100"),
                             null),
                     };
 
@@ -397,11 +389,11 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 
             updateCommand.UpdateWorkloads();
 
-            packInstaller.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].manifestId);
-            packInstaller.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].newVersion);
-            packInstaller.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.100"));
-            packInstaller.InstalledManifests[1].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.300"));
-            packInstaller.InstalledManifests[2].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.100"));
+            packInstaller.InstalledManifests[0].manifestUpdate.ManifestId.Should().Be(manifestsToUpdate[0].manifestUpdate.ManifestId);
+            packInstaller.InstalledManifests[0].manifestUpdate.NewVersion.Should().Be(manifestsToUpdate[0].manifestUpdate.NewVersion);
+            packInstaller.InstalledManifests[0].manifestUpdate.NewFeatureBand.Should().Be("6.0.100");
+            packInstaller.InstalledManifests[1].manifestUpdate.NewFeatureBand.Should().Be("6.0.300");
+            packInstaller.InstalledManifests[2].manifestUpdate.NewFeatureBand.Should().Be("6.0.100");
             packInstaller.InstalledManifests[0].offlineCache.Should().Be(null);
         }
 
@@ -410,12 +402,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             [CallerMemberName] string testName = "",
             string failingWorkload = null,
             string failingPack = null,
-            IEnumerable<(ManifestId manifestId,
-                ManifestVersion existingVersion,
-                SdkFeatureBand existingFeatureBand,
-                ManifestVersion newVersion,
-                SdkFeatureBand newFeatureBand,
-                Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
+            IEnumerable<(ManifestVersionUpdate manifestUpdate, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
             IList<WorkloadId> installedWorkloads = null,
             bool includeInstalledPacks = false,
             string sdkVersion = "6.0.100",

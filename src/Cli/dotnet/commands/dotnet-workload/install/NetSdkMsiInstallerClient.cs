@@ -249,7 +249,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public IWorkloadInstaller GetWorkloadInstaller() => throw new InvalidOperationException($"{GetType()} is not a workload installer.");
 
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null, bool isRollback = false)
+        public void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache = null, bool isRollback = false)
         {
             try
             {
@@ -258,13 +258,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 // Rolling back a manifest update after a successful install is essentially a downgrade, which is blocked so we have to
                 // treat it as a special case and is different from the install failing and rolling that back, though depending where the install
                 // failed, it may have removed the old product already.
-                Log?.LogMessage($"Installing manifest: Id: {manifestId}, version: {manifestVersion}, feature band: {sdkFeatureBand}, rollback: {isRollback}.");
+                Log?.LogMessage($"Installing manifest: Id: {manifestUpdate.ManifestId}, version: {manifestUpdate.NewVersion}, feature band: {manifestUpdate.NewFeatureBand}, rollback: {isRollback}.");
 
                 // Resolve the package ID for the manifest payload package
-                string msiPackageId = WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId, InstallType.Msi).ToString();
-                string msiPackageVersion = $"{manifestVersion}";
+                string msiPackageId = WorkloadManifestUpdater.GetManifestPackageId(new SdkFeatureBand(manifestUpdate.NewFeatureBand), manifestUpdate.ManifestId, InstallType.Msi).ToString();
+                string msiPackageVersion = $"{manifestUpdate.NewVersion}";
 
-                Log?.LogMessage($"Resolving {manifestId} ({manifestVersion}) to {msiPackageId} ({msiPackageVersion}).");
+                Log?.LogMessage($"Resolving {manifestUpdate.ManifestId} ({manifestUpdate.NewVersion}) to {msiPackageId} ({msiPackageVersion}).");
 
                 // Retrieve the payload from the MSI package cache.
                 MsiPayload msi = GetCachedMsiPayload(msiPackageId, msiPackageVersion, offlineCache);

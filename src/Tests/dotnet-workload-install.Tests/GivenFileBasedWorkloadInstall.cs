@@ -361,7 +361,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var manifestId = new ManifestId("test-manifest-1");
             var manifestVersion = new ManifestVersion("5.0.0");
 
-            installer.InstallWorkloadManifest(manifestId, manifestVersion, featureBand);
+            var manifestUpdate = new ManifestVersionUpdate(manifestId, null, null, manifestVersion, featureBand.ToString());
+
+            installer.InstallWorkloadManifest(manifestUpdate);
 
             var mockNugetInstaller = nugetDownloader as MockNuGetPackageDownloader;
             mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);

@@ -18,26 +18,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public int CalculateManifestUpdatesCallCount = 0;
         public int DownloadManifestPackagesCallCount = 0;
         public int ExtractManifestPackagesToTempDirCallCount = 0;
-        private IEnumerable<(ManifestId manifestId,
-            ManifestVersion existingVersion,
-            SdkFeatureBand existingFeatureBand,
-            ManifestVersion newVersion,
-            SdkFeatureBand newFeatureBand,
+        private IEnumerable<(ManifestVersionUpdate manifestUpdate,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads)> _manifestUpdates;
         private string _tempDirManifestPath;
 
-        public MockWorkloadManifestUpdater(IEnumerable<(ManifestId manifestId,
-            ManifestVersion existingVersion,
-            SdkFeatureBand existingFeatureBand,
-            ManifestVersion newVersion,
-            SdkFeatureBand newFeatureBand,
+        public MockWorkloadManifestUpdater(IEnumerable<(ManifestVersionUpdate manifestUpdate,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null, string tempDirManifestPath = null)
         {
-            _manifestUpdates = manifestUpdates ?? new List<(ManifestId manifestId,
-                ManifestVersion existingVersion,
-                SdkFeatureBand existingFeatureBand,
-                ManifestVersion newVersion,
-                SdkFeatureBand newFeatureBand,
+            _manifestUpdates = manifestUpdates ?? new List<(ManifestVersionUpdate manifestUpdate,
                 Dictionary<WorkloadId, WorkloadDefinition> Workloads)>();
             _tempDirManifestPath = tempDirManifestPath;
         }
@@ -49,11 +37,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         public IEnumerable<(
-            ManifestId manifestId,
-            ManifestVersion existingVersion,
-            SdkFeatureBand existingFeatureBand,
-            ManifestVersion newVersion,
-            SdkFeatureBand newFeatureBand,
+            ManifestVersionUpdate manifestUpdate,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
         {
             CalculateManifestUpdatesCallCount++;
@@ -82,9 +66,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return new string[] { "mock-manifest-url" };
         }
 
-        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
+        public IEnumerable<ManifestVersionUpdate> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
         {
-            return _manifestUpdates.Select(t => (t.manifestId, t.existingVersion, t.existingFeatureBand, t.newVersion, t.newFeatureBand));
+            return _manifestUpdates.Select(t => t.manifestUpdate);
         }
 
         public Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync() => throw new System.NotImplementedException();
