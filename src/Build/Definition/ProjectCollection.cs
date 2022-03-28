@@ -449,7 +449,11 @@ namespace Microsoft.Build.Evaluation
                     var local = new ProjectCollection(null, null, null, ToolsetDefinitionLocations.Default,
                         maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: false);
 
-                    Interlocked.CompareExchange(ref s_globalProjectCollection, local, null);
+                    if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
+                    {
+                        // Other thread had beat us to it, lets dispose this project collection
+                        local.Dispose();
+                    }
                 }
 
                 return s_globalProjectCollection;
