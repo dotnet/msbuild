@@ -505,39 +505,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             string.Join(" ", _reporter.Lines).Should().Contain(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests);
             string.Join(" ", _reporter.Lines).Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests, "mock-manifest"));
         }
-
-        [Theory]
-        [InlineData(true, "6.0.100")]
-        [InlineData(true, "6.0.101")]
-        [InlineData(true, "6.0.102-preview1")]
-        [InlineData(false, "6.0.100")]
-        public void UpdateWorkloadVersionsWithRollbackFileAndDifferentFeatureBands(bool userLocal, string sdkVersion)
-        {
-            // TODO: update this test
-            var parseResult =
-                Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android" });
-            var manifestsToUpdate =
-                new (ManifestId manifestId,
-                ManifestVersion existingVersion,
-                SdkFeatureBand existingFeatureBand,
-                ManifestVersion newVersion,
-                SdkFeatureBand newFeatureBand,
-                Dictionary<WorkloadId, WorkloadDefinition> Workloads)[]
-                    {
-                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new SdkFeatureBand(sdkVersion), new ManifestVersion("2.0.0"), new SdkFeatureBand(sdkVersion),
-                            null),
-                    };
-            (_, var installManager, var installer, _, _, _) =
-                GetTestInstallers(parseResult, userLocal, sdkVersion, manifestUpdates: manifestsToUpdate);
-
-            installManager.InstallWorkloads(new List<WorkloadId>(), false); // Don't actually do any installs, just update manifests
-
-            installer.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].manifestId);
-            installer.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].newVersion);
-            installer.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.100"));
-            installer.InstalledManifests[0].offlineCache.Should().Be(null);
-        }
-
+                
         private string AppendForUserLocal(string identifier, bool userLocal)
         {
             if (!userLocal)

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
@@ -81,8 +82,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return new string[] { "mock-manifest-url" };
         }
 
+        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
+        {
+            return _manifestUpdates.Select(t => (t.manifestId, t.existingVersion, t.existingFeatureBand, t.newVersion, t.newFeatureBand));
+        }
+
         public Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync() => throw new System.NotImplementedException();
-        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)> CalculateManifestRollbacks(string rollbackDefinitionFilePath) => throw new System.NotImplementedException();
         public IEnumerable<WorkloadId> GetUpdatableWorkloadsToAdvertise(IEnumerable<WorkloadId> installedWorkloads) => throw new System.NotImplementedException();
         public void DeleteUpdatableWorkloadsFile() { }
     }

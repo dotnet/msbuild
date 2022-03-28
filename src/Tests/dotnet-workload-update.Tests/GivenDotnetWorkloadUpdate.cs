@@ -338,6 +338,50 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             string.Join("", _reporter.Lines).Should().Contain("SampleManifest");
         }
 
+        [Theory]
+        [InlineData("6.0.200", "6.0.200")]
+        [InlineData("6.0.200", "6.0.100")]
+        [InlineData("6.0.100", "6.0.200")]
+        [InlineData("5.0.100", "6.0.100")]
+        [InlineData("6.0.100", "5.0.100")]
+        [InlineData("5.0.100", "5.0.100")]
+        [InlineData("6.0.300", "5.0.100")]
+        public void ApplyRollbackAcrossFeatureBand(string existingSdkFeatureBand, string newSdkFeatureBand)
+        {
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-rollback-file", "rollback.json" });
+            //var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            ////  Current SDK version: 6.0.300
+            ////  Current manifest feature bands: 6.0.200, 6.0.300
+            ////  New manifest feature bands: 6.0.200, 6.0.300
+            
+            //// Add:  multiple manifests (maybe?) --> separate test
+            //// upgrades, downgrades (SdkFeatureBand)
+            //// different relationships to SDK version (probably not from future but from previous or from current)
+
+            //var manifestProvider = new MockManifestProvider()
+
+            var manifestsToUpdate =
+                new (ManifestId manifestId,
+                ManifestVersion existingVersion,
+                SdkFeatureBand existingFeatureBand,
+                ManifestVersion newVersion,
+                SdkFeatureBand newFeatureBand,
+                Dictionary<WorkloadId, WorkloadDefinition> Workloads)[]
+                    {
+                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new SdkFeatureBand(existingSdkFeatureBand), new ManifestVersion("2.0.0"), new SdkFeatureBand(newSdkFeatureBand),
+                            null),
+                    };
+
+            (_, var updateCommand, var packInstaller, var workloadResolver, var workloadManifestUpdater, var nuGetPackageDownloader) = GetTestInstallers(parseResult, manifestUpdates: manifestsToUpdate, sdkVersion: "6.0.300");
+
+            updateCommand.UpdateWorkloads();
+
+            packInstaller.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].manifestId);
+            packInstaller.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].newVersion);
+            packInstaller.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand(newSdkFeatureBand));
+            packInstaller.InstalledManifests[0].offlineCache.Should().Be(null);
+        }
+
         internal (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
             ParseResult parseResult,
             [CallerMemberName] string testName = "",
@@ -350,7 +394,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 SdkFeatureBand newFeatureBand,
                 Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
             IList<WorkloadId> installedWorkloads = null,
-            bool includeInstalledPacks = false)
+            bool includeInstalledPacks = false,
+            string sdkVersion = "6.0.100")
         {
             _reporter.Clear();
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName).Path;
@@ -374,7 +419,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 workloadManifestUpdater: manifestUpdater,
                 dotnetDir: dotnetRoot,
                 userProfileDir: testDirectory,
-                version: "6.0.100");
+                version: sdkVersion);
 
             return (testDirectory, installManager, installer, workloadResolver, manifestUpdater, nugetDownloader);
         }
