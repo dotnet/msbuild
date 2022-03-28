@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CheckForUpdatedWorkloadManifests">
         <source>Checking for updated workload manifests.</source>
-        <target state="new">Checking for updated workload manifests.</target>
+        <target state="translated">업데이트된 워크로드 매니페스트를 확인하는 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">

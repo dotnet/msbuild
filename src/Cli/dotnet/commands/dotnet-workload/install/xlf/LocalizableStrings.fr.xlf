@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CheckForUpdatedWorkloadManifests">
         <source>Checking for updated workload manifests.</source>
-        <target state="new">Checking for updated workload manifests.</target>
+        <target state="translated">Recherche de manifestes de charge de travail mis à jour</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
