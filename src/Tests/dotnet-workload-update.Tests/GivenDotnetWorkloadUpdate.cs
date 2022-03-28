@@ -343,7 +343,12 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             [CallerMemberName] string testName = "",
             string failingWorkload = null,
             string failingPack = null,
-            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
+            IEnumerable<(ManifestId manifestId,
+                ManifestVersion existingVersion,
+                SdkFeatureBand existingFeatureBand,
+                ManifestVersion newVersion,
+                SdkFeatureBand newFeatureBand,
+                Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
             IList<WorkloadId> installedWorkloads = null,
             bool includeInstalledPacks = false)
         {
