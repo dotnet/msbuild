@@ -12,6 +12,7 @@ using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 using NuGet.Credentials;
+using NuGet.Versioning;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -35,24 +36,29 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         /// <summary>
-        /// Checks if there is an update for the package containing the <paramref name="template"/>.
+        /// Checks if there is an update for the package containing the template to execute.
         /// </summary>
-        /// <param name="template">template to check the update for.</param>
+        /// <param name="args">template command arguments.</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Task for checking the update or null when check for update is not possible.</returns>
-        internal async Task<CheckUpdateResult?> CheckUpdateForTemplate(ITemplateInfo template, CancellationToken cancellationToken = default)
+        internal async Task<CheckUpdateResult?> CheckUpdateForTemplate(TemplateCommandArgs args, CancellationToken cancellationToken = default)
         {
-            _ = template ?? throw new ArgumentNullException(nameof(template));
             cancellationToken.ThrowIfCancellationRequested();
+
+            //if update check is disabled - do nothing
+            if (args.NoUpdateCheck)
+            {
+                return null;
+            }
 
             ITemplatePackage templatePackage;
             try
             {
-                templatePackage = await _templatePackageManager.GetTemplatePackageAsync(template, cancellationToken).ConfigureAwait(false);
+                templatePackage = await _templatePackageManager.GetTemplatePackageAsync(args.Template, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception)
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Error_PackageForTemplateNotFound, template.Identity));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Error_PackageForTemplateNotFound, args.Template.Identity));
                 return null;
             }
 
@@ -63,6 +69,60 @@ namespace Microsoft.TemplateEngine.Cli
             }
             InitializeNuGetCredentialService(interactive: false);
             return (await managedTemplatePackage.ManagedProvider.GetLatestVersionsAsync(new[] { managedTemplatePackage }, cancellationToken).ConfigureAwait(false)).Single();
+        }
+
+        internal async Task<(string Id, string Version, string Provider)> ValidateBuiltInPackageAvailabilityAsync(
+            ITemplateInfo template,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            ITemplatePackage templatePackage;
+            try
+            {
+                templatePackage = await _templatePackageManager.GetTemplatePackageAsync(template, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Error_PackageForTemplateNotFound, template.Identity));
+                return default;
+            }
+
+            if (!(templatePackage is IManagedTemplatePackage managedTemplatePackage))
+            {
+                //update is not supported - built-in or optional workload source
+                return default;
+            }
+
+            IReadOnlyList<ITemplatePackage> templatePackages = await _templatePackageManager.GetTemplatePackagesAsync(force: false, cancellationToken).ConfigureAwait(false);
+
+            IEnumerable<(string Id, string Version, string Provider)> unmanagedTemplatePackages = templatePackages
+                .Where(tp => tp is not IManagedTemplatePackage)
+                .Select(tp => new
+                            {
+                                Info = NuGetUtils.GetNuGetPackageInfo(_engineEnvironmentSettings, tp.MountPointUri),
+                                Package = tp
+                            })
+                .Where(i => i.Info != default)
+                .Select(i => (i.Info.Id, i.Info.Version, i.Package.Provider.Factory.DisplayName));
+
+            var matchingTemplatePackage = unmanagedTemplatePackages.FirstOrDefault(package => string.Equals(managedTemplatePackage.Identifier, package.Id, StringComparison.OrdinalIgnoreCase));
+            if (matchingTemplatePackage == default)
+            {
+                return default;
+            }
+
+            NuGetVersion managedPackageVersion;
+            NuGetVersion unmanagedPackageVersion;
+
+            if (NuGetVersion.TryParse(managedTemplatePackage.Version, out managedPackageVersion) && NuGetVersion.TryParse(matchingTemplatePackage.Version, out unmanagedPackageVersion))
+            {
+                if (unmanagedPackageVersion >= managedPackageVersion)
+                {
+                    return matchingTemplatePackage;
+                }
+            }
+            return default;
         }
 
         internal void DisplayUpdateCheckResult(CheckUpdateResult versionCheckResult, ICommandArgs args)
@@ -82,12 +142,29 @@ namespace Microsoft.TemplateEngine.Cli
                             .For<NewCommand>(args.ParseResult)
                             .WithSubcommand<InstallCommand>()
                             .WithArgument(InstallCommand.NameArgument, $"{versionCheckResult.TemplatePackage.Identifier}::{versionCheckResult.LatestVersion}"));
+                    Reporter.Output.WriteLine();
                 }
             }
             else
             {
                 HandleUpdateCheckErrors(versionCheckResult, ignoreLocalPackageNotFound: true);
+                Reporter.Error.WriteLine();
             }
+        }
+
+        internal void DisplayBuiltInPackagesCheckResult(string packageId, string version, string provider, ICommandArgs args)
+        {
+            Reporter.Output.WriteLine(
+                string.Format(
+                    LocalizableStrings.TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable,
+                    $"{packageId}::{version}",
+                    provider));
+            Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage);
+            Reporter.Output.WriteCommand(
+                Example
+                 .For<NewCommand>(args.ParseResult)
+                 .WithSubcommand<UninstallCommand>()
+                 .WithArgument(UninstallCommand.NameArgument, packageId));
         }
 
         /// <summary>

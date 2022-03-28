@@ -1483,6 +1483,24 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An update for template package &apos;{0}&apos; is available in the &apos;{1}&apos; provider..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To use built-in template package, uninstall manually installed template package using:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find the template package containing template &apos;{0}&apos;.
         /// </summary>
         internal static string TemplatePackageCoordinator_Error_PackageForTemplateNotFound {

@@ -154,27 +154,35 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal async Task<NewCommandStatus> InvokeAsync(ParseResult parseResult, ITelemetryLogger telemetryLogger, CancellationToken cancellationToken)
         {
             TemplateCommandArgs args = new TemplateCommandArgs(this, _instantiateCommand, parseResult);
-
             TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, telemetryLogger, () => Console.ReadLine() ?? string.Empty, _instantiateCommand.Callbacks);
-            if (!args.NoUpdateCheck)
-            {
-                TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(telemetryLogger, _environmentSettings, _templatePackageManager);
-                Task<CheckUpdateResult?> checkForUpdateTask = packageCoordinator.CheckUpdateForTemplate(args.Template, cancellationToken);
-                Task<NewCommandStatus> instantiateTask = invoker.InvokeTemplateAsync(args, cancellationToken);
-                await Task.WhenAll(checkForUpdateTask, instantiateTask).ConfigureAwait(false);
+            TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(telemetryLogger, _environmentSettings, _templatePackageManager);
 
-                if (checkForUpdateTask?.Result != null)
-                {
-                    // print if there is update for this template
-                    packageCoordinator.DisplayUpdateCheckResult(checkForUpdateTask.Result, args);
-                }
-                // return creation result
-                return instantiateTask.Result;
-            }
-            else
+            Task<NewCommandStatus> instantiateTask = invoker.InvokeTemplateAsync(args, cancellationToken);
+            Task<(string Id, string Version, string Provider)> builtInPackageCheck = packageCoordinator.ValidateBuiltInPackageAvailabilityAsync(args.Template, cancellationToken);
+            Task<CheckUpdateResult?> checkForUpdateTask = packageCoordinator.CheckUpdateForTemplate(args, cancellationToken);
+
+            Task[] tasksToWait = new Task[] { instantiateTask, builtInPackageCheck, checkForUpdateTask };
+
+            await Task.WhenAll(tasksToWait).ConfigureAwait(false);
+            Reporter.Output.WriteLine();
+
+            if (checkForUpdateTask.Result != null)
             {
-                return await invoker.InvokeTemplateAsync(args, cancellationToken).ConfigureAwait(false);
+                // print if there is update for the template package containing the template
+                packageCoordinator.DisplayUpdateCheckResult(checkForUpdateTask.Result, args);
             }
+
+            if (builtInPackageCheck.Result != default)
+            {
+                // print if there is same or newer built-in package
+                packageCoordinator.DisplayBuiltInPackagesCheckResult(
+                    builtInPackageCheck.Result.Id,
+                    builtInPackageCheck.Result.Version,
+                    builtInPackageCheck.Result.Provider,
+                    args);
+            }
+
+            return instantiateTask.Result;
         }
 
         private bool HasRunScriptPostActionDefined(CliTemplateInfo template)
