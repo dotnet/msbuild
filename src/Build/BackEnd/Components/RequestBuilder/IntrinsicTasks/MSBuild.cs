@@ -28,6 +28,11 @@ namespace Microsoft.Build.BackEnd
         private enum SkipNonexistentProjectsBehavior
         {
             /// <summary>
+            /// Default when unset by user.
+            /// </summary>
+            Undefined,
+
+            /// <summary>
             /// Skip the project if there is no file on disk.
             /// </summary>
             Skip,
@@ -49,7 +54,7 @@ namespace Microsoft.Build.BackEnd
         private readonly List<ITaskItem> _targetOutputs = new List<ITaskItem>();
 
         // Whether to skip project files that don't exist on disk. By default we error for such projects.
-        private SkipNonexistentProjectsBehavior _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Error;
+        private SkipNonexistentProjectsBehavior _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Undefined;
 
         private TaskLoggingHelper _logHelper;
 
@@ -164,6 +169,9 @@ namespace Microsoft.Build.BackEnd
             {
                 switch (_skipNonexistentProjects)
                 {
+                    case SkipNonexistentProjectsBehavior.Undefined:
+                        return "Undefined";
+
                     case SkipNonexistentProjectsBehavior.Build:
                         return "Build";
 
@@ -184,15 +192,9 @@ namespace Microsoft.Build.BackEnd
 
             set
             {
-                if (String.Equals("Build", value, StringComparison.OrdinalIgnoreCase))
+                if (TryParseSkipNonexistentProjects(value, out SkipNonexistentProjectsBehavior behavior))
                 {
-                    _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Build;
-                }
-                else
-                {
-                    ErrorUtilities.VerifyThrowArgument(ConversionUtilities.CanConvertStringToBool(value), "MSBuild.InvalidSkipNonexistentProjectValue");
-                    bool originalSkipValue = ConversionUtilities.ConvertStringToBool(value);
-                    _skipNonexistentProjects = originalSkipValue ? SkipNonexistentProjectsBehavior.Skip : SkipNonexistentProjectsBehavior.Error;
+                    _skipNonexistentProjects = behavior;
                 }
             }
         }
@@ -324,7 +326,21 @@ namespace Microsoft.Build.BackEnd
                     break;
                 }
 
-                if (FileSystems.Default.FileExists(projectPath) || (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Build))
+                // Try to get the behavior from metadata if it is undefined.
+                var skipNonexistPropjects = _skipNonexistentProjects;
+                if (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Undefined)
+                {
+                    if (TryParseSkipNonexistentProjects(project.GetMetadata("SkipNonexistentProjects"), out SkipNonexistentProjectsBehavior behavior))
+                    {
+                        skipNonexistPropjects = behavior;
+                    }
+                    else
+                    {
+                        skipNonexistPropjects = SkipNonexistentProjectsBehavior.Error;
+                    }
+                }
+
+                if (FileSystems.Default.FileExists(projectPath) || (skipNonexistPropjects == SkipNonexistentProjectsBehavior.Build))
                 {
                     if (FileUtilities.IsVCProjFilename(projectPath))
                     {
@@ -365,13 +381,13 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    if (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Skip)
+                    if (skipNonexistPropjects == SkipNonexistentProjectsBehavior.Skip)
                     {
                         Log.LogMessageFromResources(MessageImportance.High, "MSBuild.ProjectFileNotFoundMessage", project.ItemSpec);
                     }
                     else
                     {
-                        ErrorUtilities.VerifyThrow(_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", _skipNonexistentProjects);
+                        ErrorUtilities.VerifyThrow(skipNonexistPropjects == SkipNonexistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", skipNonexistPropjects);
                         Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", project.ItemSpec);
                         success = false;
                     }
@@ -712,6 +728,27 @@ namespace Microsoft.Build.BackEnd
             }
 
             return success;
+        }
+
+        private bool TryParseSkipNonexistentProjects(string value, out SkipNonexistentProjectsBehavior behavior)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                behavior = SkipNonexistentProjectsBehavior.Error;
+                return false;
+            }
+            else if (String.Equals("Build", value, StringComparison.OrdinalIgnoreCase))
+            {
+                behavior = SkipNonexistentProjectsBehavior.Build;
+            }
+            else
+            {
+                ErrorUtilities.VerifyThrowArgument(ConversionUtilities.CanConvertStringToBool(value), "MSBuild.InvalidSkipNonexistentProjectValue");
+                bool originalSkipValue = ConversionUtilities.ConvertStringToBool(value);
+                behavior = originalSkipValue ? SkipNonexistentProjectsBehavior.Skip : SkipNonexistentProjectsBehavior.Error;
+            }
+
+            return true;
         }
 
         #endregion

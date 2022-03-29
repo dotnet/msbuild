@@ -290,6 +290,51 @@ namespace Microsoft.Build.UnitTests
             Assert.DoesNotContain("MSB3202", logger.FullLog); // project file not found error
         }
 
+
+        /// <summary>
+        /// </summary>
+        [Fact]
+        public void SkipNonexistentProjectsAsMetadataBuildingInParallel()
+        {
+            ObjectModelHelpers.DeleteTempProjectDirectory();
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(
+                "SkipNonexistentProjectsMain.csproj",
+                @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                    <Target Name=`t` >
+                        <ItemGroup>
+                            <ProjectReference Include=`this_project_does_not_exist.csproj` >
+                                <SkipNonexistentProjects>true</SkipNonexistentProjects>
+                            </ProjectReference>
+                            <ProjectReference Include=`foo.csproj` >
+                                <SkipNonexistentProjects>false</SkipNonexistentProjects>
+                            </ProjectReference>
+                        </ItemGroup>
+                        <MSBuild Projects=`@(ProjectReference)` BuildInParallel=`true` />
+                    </Target>
+                </Project>
+                ");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(
+                "foo.csproj",
+                @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                    <Target Name=`t` >
+                        <Message Text=`Hello from foo.csproj`/>
+                    </Target>
+                </Project>
+                ");
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(@"SkipNonexistentProjectsMain.csproj", logger);
+
+            logger.AssertLogContains("Hello from foo.csproj");
+            string message = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFoundMessage"), "this_project_does_not_exist.csproj");
+            string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist.csproj");
+            Assert.Equal(0, logger.WarningCount);
+            Assert.Equal(0, logger.ErrorCount);
+            Assert.Contains(message, logger.FullLog); // for the missing project
+            Assert.DoesNotContain(error, logger.FullLog);
+        }
+
         [Fact]
         public void LogErrorWhenBuildingVCProj()
         {
