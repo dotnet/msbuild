@@ -1,4 +1,4 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "NuGet-Konfig.",
   "description": "Eine Datei zum Konfigurieren der Speicherorte, in denen NuGet nach Paketen suchen wird",

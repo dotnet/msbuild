@@ -94,18 +94,18 @@ aggiunto    : {0}
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
         <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">Impossibile assegnare l'alias di opzione long per il parametro '{0}'. Tentativo: '{1}'; '{2}'.</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon">
         <source>Parameter name '{0}' contains colon, which is forbidden.</source>
-        <target state="new">Parameter name '{0}' contains colon, which is forbidden.</target>
+        <target state="translated">Il nome del parametro '{0}' contiene due punti, che non è consentito.</target>
         <note>{0} is parameter name, has no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_ShortAlias">
         <source>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">Impossibile assegnare l'alias di opzione short per il parametro '{0}'. Tentativo: '{1}'; '{2}'.</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
@@ -225,7 +225,7 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
-        <target state="needs-review-translation">Disinstallare i modelli o i pacchetti per mantenere un solo modello dall'elenco.</target>
+        <target state="translated">Disinstallare i pacchetti di modelli contenenti i modelli per mantenere un solo modello dall'elenco o aggiungere le opzioni del modello che differenziano il modello da eseguire.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
@@ -300,7 +300,7 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
-        <target state="needs-review-translation">Per cercare modelli, specificare il nome parziale del modello oppure usare uno dei filtri supportati: {0}.</target>
+        <target state="translated">Per cercare modelli, specificare il nome parziale del modello oppure usare uno dei filtri supportati: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -390,12 +390,12 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongArgumentValue">
         <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
-        <target state="new">Argument(s) {0} are not recognized. Must be one of: {1}.</target>
+        <target state="translated">L'argomento {0} non è riconosciuto. Deve essere uno dei seguenti: {1}</target>
         <note>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</note>
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongTokens">
         <source>Unrecognized command or argument(s): {0}.</source>
-        <target state="new">Unrecognized command or argument(s): {0}.</target>
+        <target state="translated">Il comando o l'argomento {0} non è stato riconosciuto.</target>
         <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
       </trans-unit>
       <trans-unit id="ConfiguredValue">
@@ -447,7 +447,7 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       </trans-unit>
       <trans-unit id="Exception_InvalidTemplateParameters_MessageHeader">
         <source>Template {0} ({1}) is malformed. The following template parameters are invalid:</source>
-        <target state="new">Template {0} ({1}) is malformed. The following template parameters are invalid:</target>
+        <target state="translated">Il formato della {0} modello ({1}) non è valido. I parametri del modello seguenti non sono validi:</target>
         <note>{0} is template identity, {1} is template short name.
 The header is followed by the list of parameters and their errors (might be several for one parameter).</note>
       </trans-unit>
@@ -500,12 +500,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
         <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from cache.</target>
+        <target state="translated">Non è stato possibile caricare i dati dell'host dell'interfaccia della riga di comando di .NET per il modello {0} dalla cache.</target>
         <note>{0} - template short name</note>
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToReadFromFile">
         <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
+        <target state="translated">Non è stato possibile caricare i dati dell'host dell'interfaccia della riga di comando di .NET per il modello {0} da {1}. I dati dell'host verranno ignorati.</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
@@ -580,7 +580,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
-        <target state="new">No templates installed.</target>
+        <target state="translated">Nessun modello installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
@@ -605,18 +605,18 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue">
         <source>value '{0}' is not allowed, allowed values are: {1}</source>
-        <target state="new">value '{0}' is not allowed, allowed values are: {1}</target>
+        <target state="translated">valore '{0}' non consentito. I valori consentiti sono: {1}</target>
         <note>the error message is part of other sentence, no punctuation is needed
 {0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined">
         <source>no choices are defined for parameter</source>
-        <target state="new">no choices are defined for parameter</target>
+        <target state="translated">nessuna scelta definita per il parametro</target>
         <note>the error message is part of other sentence, no punctuation is needed</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">Non è possibile analizzare l'argomento '{0}' per l'opzione '{1}' come tipo previsto '{2}': {3}.</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -624,7 +624,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">Non è possibile analizzare il valore predefinito se l'opzione senza valore '{0}' per l'opzione '{1}' come tipo previsto '{2}': {3}.</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -632,7 +632,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">Non è possibile analizzare il valore predefinito '{0}' per l'opzione '{1}' come tipo previsto '{2}': {3}.</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -640,19 +640,19 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">Non è possibile analizzare l'argomento '{0}' per l'opzione '{1}' come tipo previsto '{2}'.</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidCount">
         <source>Using more than 1 argument is not allowed for '{0}', used: {1}.</source>
-        <target state="new">Using more than 1 argument is not allowed for '{0}', used: {1}.</target>
+        <target state="translated">L'utilizzo di più di 1 argomento non è consentito per '{0}'. Utilizzato: {1}.</target>
         <note>{0} - option name, {1} - count of arguments used</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">Non è possibile analizzare il valore predefinito se l'opzione senza valore '{0}' per l'opzione '{1}' come tipo previsto '{2}'.</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -660,7 +660,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</target>
+        <target state="translated">Non è possibile analizzare il valore predefinito '{0}' per l'opzione '{1}' come tipo previsto '{2}'.</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -668,12 +668,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue">
         <source>Required argument missing for option: '{0}'.</source>
-        <target state="new">Required argument missing for option: '{0}'.</target>
+        <target state="translated">Manca l'argomento obbligatorio per l'opzione: {0}</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultValue">
         <source>Default value for argument missing for option: '{0}'.</source>
-        <target state="new">Default value for argument missing for option: '{0}'.</target>
+        <target state="translated">Valore predefinito per l'argomento mancante per l'opzione: '{0}'.</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
@@ -823,7 +823,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
         <source>Allowed values for '{0}' option are: {1}.</source>
-        <target state="new">Allowed values for '{0}' option are: {1}.</target>
+        <target state="translated">I valori consentiti per '{0}' opzione sono: {1}.</target>
         <note>0} - option name (as --language)
 {1} - comma separated, escaped in quotes list of allowed values</note>
       </trans-unit>
@@ -869,12 +869,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
         <source>Installing the template package(s) will override the available template package(s).</source>
-        <target state="new">Installing the template package(s) will override the available template package(s).</target>
+        <target state="translated">L'installazione dei pacchetti di modelli sostituirà i pacchetti di modelli disponibili.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackageIsAvailable">
         <source>The following template package(s) are already available:</source>
-        <target state="new">The following template package(s) are already available:</target>
+        <target state="translated">I pacchetti di modelli seguenti sono già disponibili:</target>
         <note>Followed by list of packages that are available</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
@@ -884,7 +884,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_UseForceToOverride">
         <source>To install the template package(s) anyway, apply '{0}' option:</source>
-        <target state="new">To install the template package(s) anyway, apply '{0}' option:</target>
+        <target state="translated">Per installare comunque i pacchetti di modelli, applicare '{0}' opzione:</target>
         <note>{0} is option to use (--force). Followed by command to use to install the packages.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
@@ -1049,7 +1049,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">Questo modello contiene tecnologie provenienti da entità diverse da Microsoft, vedere {0} per i dettagli.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">

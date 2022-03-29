@@ -1,7 +1,7 @@
-{
-  "author": "Microsoft",
-  "name": "EditorConfig file",
-  "description": "Creates an .editorconfig file for configuring code style preferences.",
-  "symbols/Empty/displayName": "Empty",
-  "symbols/Empty/description": "Creates empty .editorconfig instead of the defaults for .NET."
+﻿{
+  "author": "Майкрософт",
+  "name": "Файл EditorConfig",
+  "description": "Создание файла .editorconfig для настройки параметров стиля кода.",
+  "symbols/Empty/displayName": "Пусто",
+  "symbols/Empty/description": "Создание пустого .editorconfig вместо значений умолчанию для .NET."
 }

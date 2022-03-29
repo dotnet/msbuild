@@ -1,7 +1,7 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "類別庫",
-  "description": "專案，用於建立以 .NET Standard 或 .NET Core 為目標的類別庫",
+  "description": "專案，用於建立以 .NET 或 .NET Standard 為目標的類別庫",
   "symbols/TargetFrameworkOverride/description": "覆寫目標 Framework",
   "symbols/TargetFrameworkOverride/displayName": "目標 Framework 覆寫",
   "symbols/Framework/description": "專案的目標 Framework。",

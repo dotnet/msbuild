@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Console App",
-  "description": "Progetto per la creazione di un'applicazione da riga di comando eseguibile in .NET Core in Windows, Linux e macOS",
+  "name": "App console",
+  "description": "Progetto per la creazione di un'applicazione da riga di comando eseguibile in .NET in Windows, Linux e macOS",
   "symbols/TargetFrameworkOverride/description": "Ignora il framework di destinazione",
   "symbols/TargetFrameworkOverride/displayName": "Override del framework di destinazione",
   "symbols/Framework/description": "Il framework di destinazione per il progetto.",
-  "symbols/Framework/choices/net7.0/description": "Net7.0 di destinazione",
+  "symbols/Framework/choices/net7.0/description": "Destinazione net7.0",
   "symbols/Framework/choices/net7.0/displayName": ".NET 7.0",
   "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "Se specificato, ignora il ripristino automatico del progetto durante la creazione.",

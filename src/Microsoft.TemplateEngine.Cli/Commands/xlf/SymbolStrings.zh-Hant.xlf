@@ -58,7 +58,7 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
       </trans-unit>
       <trans-unit id="Command_List_Description">
         <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
-        <target state="new">Lists templates containing the specified template name. If no name is specified, lists all templates.</target>
+        <target state="translated">列出包含指定範本名稱的範本。如果未指定名稱，請列出所有範本。</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_New_Description">
@@ -73,7 +73,7 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
       </trans-unit>
       <trans-unit id="Command_Search_Description">
         <source>Searches for the templates on NuGet.org.</source>
-        <target state="new">Searches for the templates on NuGet.org.</target>
+        <target state="translated">搜尋範本 NuGet.org。</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Uninstall_Argument_Package">
@@ -100,7 +100,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
-        <target state="new">Specifies a NuGet source to use during install.</target>
+        <target state="translated">指定安裝期間使用的 NuGet 來源。</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">
@@ -160,7 +160,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Option_Interactive">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">允許命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_LanguageFilter">
@@ -170,7 +170,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Option_Output">
         <source>Location to place the generated output.</source>
-        <target state="new">Location to place the generated output.</target>
+        <target state="translated">放置產生輸出的位置。</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_PackageFilter">
@@ -185,7 +185,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Option_TypeFilter">
         <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
+        <target state="translated">根據可用的類型篩選範本。預先定義的值為 "project" 和 "item"。</target>
         <note>project and item should not be translated</note>
       </trans-unit>
       <trans-unit id="TemplateCommand_Option_AllowScripts">
@@ -200,12 +200,12 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="TemplateCommand_Option_DryRun">
         <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <target state="translated">顯示如果執行所給予的命令列會導致範本建立，會發生什麼情況的摘要。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCommand_Option_Force">
         <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <target state="translated">強制產生內容，即使內容會變更現有的檔案。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCommand_Option_Language">
@@ -215,12 +215,12 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="TemplateCommand_Option_Name">
         <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <target state="translated">要建立的輸出名稱。如果未指定名稱，則使用輸出目錄的名稱。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCommand_Option_NoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
-        <target state="new">Disables checking for the template package updates when instantiating a template.</target>
+        <target state="translated">停用在具現化範本時檢查範本套件更新。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCommand_Option_Type">

@@ -94,18 +94,18 @@
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
         <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">无法为参数“{0}”分配长选项别名，已尝试:“{1}”、“{2}”。</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon">
         <source>Parameter name '{0}' contains colon, which is forbidden.</source>
-        <target state="new">Parameter name '{0}' contains colon, which is forbidden.</target>
+        <target state="translated">参数名称“{0}”包含禁止使用的冒号。</target>
         <note>{0} is parameter name, has no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_ShortAlias">
         <source>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">无法为参数“{0}”分配短选项别名，已尝试:“{1}”、“{2}”。</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
@@ -225,7 +225,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
-        <target state="needs-review-translation">卸载模板或程序包以仅保留列表中的一个模板。</target>
+        <target state="translated">卸载包含模板的模板包，以便仅从列表中保留一个模板，或添加区分要运行的模板的模板选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
@@ -300,7 +300,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
-        <target state="needs-review-translation">若要搜索模板，请指定部分模板名称或使用一个受支持的筛选器: {0}。</target>
+        <target state="translated">若要搜索模板，请指定部分模板名称或使用一个受支持的筛选器: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -390,12 +390,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongArgumentValue">
         <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
-        <target state="new">Argument(s) {0} are not recognized. Must be one of: {1}.</target>
+        <target state="translated">未识别参数 {0}。必须为一个: {1}。</target>
         <note>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</note>
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongTokens">
         <source>Unrecognized command or argument(s): {0}.</source>
-        <target state="new">Unrecognized command or argument(s): {0}.</target>
+        <target state="translated">未识别命令或参数: {0}。</target>
         <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
       </trans-unit>
       <trans-unit id="ConfiguredValue">
@@ -447,7 +447,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Exception_InvalidTemplateParameters_MessageHeader">
         <source>Template {0} ({1}) is malformed. The following template parameters are invalid:</source>
-        <target state="new">Template {0} ({1}) is malformed. The following template parameters are invalid:</target>
+        <target state="translated">模板 {0} ({1}) 格式不正确。以下模板参数无效:</target>
         <note>{0} is template identity, {1} is template short name.
 The header is followed by the list of parameters and their errors (might be several for one parameter).</note>
       </trans-unit>
@@ -500,12 +500,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
         <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from cache.</target>
+        <target state="translated">无法从缓存加载模板 {0} 的 dotnet CLI 主机数据。</target>
         <note>{0} - template short name</note>
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToReadFromFile">
         <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
+        <target state="translated">无法从 {1} 加载模板 {0} 的 dotnet CLI 主机数据。将忽略主机数据。</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
@@ -540,7 +540,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InvalidSyntax">
         <source>Invalid command syntax: use '{0}' instead.</source>
-        <target state="translated">命令语法无效: 请改用 "{0}"。</target>
+        <target state="translated">命令语法无效: 请改用 “{0}”。</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
@@ -580,7 +580,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
-        <target state="new">No templates installed.</target>
+        <target state="translated">未安装模板。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
@@ -605,18 +605,18 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue">
         <source>value '{0}' is not allowed, allowed values are: {1}</source>
-        <target state="new">value '{0}' is not allowed, allowed values are: {1}</target>
+        <target state="translated">不允许使用值“{0}”，允许的值有: {1}</target>
         <note>the error message is part of other sentence, no punctuation is needed
 {0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined">
         <source>no choices are defined for parameter</source>
-        <target state="new">no choices are defined for parameter</target>
+        <target state="translated">没有为参数定义选项</target>
         <note>the error message is part of other sentence, no punctuation is needed</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">无法按预期类型“{2}”分析选项“{1}”的参数“{0}”: {3}。</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -624,7 +624,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">如果选项“{1}”没有值“{0}”，则无法按预期类型“{2}”分析默认值: {3}。</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -632,7 +632,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">无法按预期类型“{2}”分析选项“{1}”的默认值“{0}”: {3}。</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -640,19 +640,19 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">无法按预期类型“{2}”分析选项“{1}”的参数“{0}”。</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidCount">
         <source>Using more than 1 argument is not allowed for '{0}', used: {1}.</source>
-        <target state="new">Using more than 1 argument is not allowed for '{0}', used: {1}.</target>
+        <target state="translated">不允许对“{0}”使用超过 1 个参数，已使用: {1}。</target>
         <note>{0} - option name, {1} - count of arguments used</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">如果选项“{1}”没有值“{0}”，则无法按预期类型“{2}”分析默认值。</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -660,7 +660,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</target>
+        <target state="translated">无法按预期类型“{2}”分析选项“{1}”的默认值“{0}”。</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -668,12 +668,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue">
         <source>Required argument missing for option: '{0}'.</source>
-        <target state="new">Required argument missing for option: '{0}'.</target>
+        <target state="translated">选项缺少所需参数:“{0}”。</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultValue">
         <source>Default value for argument missing for option: '{0}'.</source>
-        <target state="new">Default value for argument missing for option: '{0}'.</target>
+        <target state="translated">选项缺少参数的默认值:“{0}”。</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
@@ -823,7 +823,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
         <source>Allowed values for '{0}' option are: {1}.</source>
-        <target state="new">Allowed values for '{0}' option are: {1}.</target>
+        <target state="translated">“{0}”选项允许的值有: {1}。</target>
         <note>0} - option name (as --language)
 {1} - comma separated, escaped in quotes list of allowed values</note>
       </trans-unit>
@@ -869,12 +869,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
         <source>Installing the template package(s) will override the available template package(s).</source>
-        <target state="new">Installing the template package(s) will override the available template package(s).</target>
+        <target state="translated">安装模板包将替代可用的模板包。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackageIsAvailable">
         <source>The following template package(s) are already available:</source>
-        <target state="new">The following template package(s) are already available:</target>
+        <target state="translated">以下模板包已可用:</target>
         <note>Followed by list of packages that are available</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
@@ -884,7 +884,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_UseForceToOverride">
         <source>To install the template package(s) anyway, apply '{0}' option:</source>
-        <target state="new">To install the template package(s) anyway, apply '{0}' option:</target>
+        <target state="translated">若仍要安装模板包，请应用“{0}”选项:</target>
         <note>{0} is option to use (--force). Followed by command to use to install the packages.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
@@ -1049,7 +1049,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">此模板包含除 Microsoft 以外其他方的技术，请参阅 {0} 以获取详细信息。</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">

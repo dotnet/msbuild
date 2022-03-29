@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Console App",
-  "description": "Projekt pro vytvoření aplikace příkazového řádku, která běží na platformě .NET Core v systémech Windows, Linux a macOS",
+  "name": "Konzolová aplikace",
+  "description": "Projekt pro vytvoření aplikace příkazového řádku, která běží na platformě .NET v systémech Windows, Linux a macOS",
   "symbols/TargetFrameworkOverride/description": "Přepíše cílovou architekturu.",
   "symbols/TargetFrameworkOverride/displayName": "Přepsání cílové architektury",
   "symbols/Framework/description": "Cílová architektura pro projekt",
-  "symbols/Framework/choices/net7.0/description": "Cílit na net7.0",
+  "symbols/Framework/choices/net7.0/description": "Cílový net7.0",
   "symbols/Framework/choices/net7.0/displayName": ".NET 7.0",
   "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "Pokud se tato možnost zadá, přeskočí automatické obnovení projektu při vytvoření.",

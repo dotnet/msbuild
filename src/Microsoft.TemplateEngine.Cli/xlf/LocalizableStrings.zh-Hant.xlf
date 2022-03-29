@@ -225,7 +225,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
-        <target state="needs-review-translation">解除安裝範本或套件，只保留清單中的一個範本。</target>
+        <target state="new">Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
@@ -300,7 +300,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
-        <target state="needs-review-translation">若要搜尋範本，請指定部分範本名稱或使用其中一個支援的篩選: {0}。</target>
+        <target state="new">To search for templates, specify partial template name or use one of the supported filters: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -500,12 +500,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
         <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from cache.</target>
+        <target state="translated">無法從快取載入範本 {0} 的 dotnet CLI 主機資料。</target>
         <note>{0} - template short name</note>
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToReadFromFile">
         <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
+        <target state="translated">無法從 {1} 載入範本 {0} 的 dotnet CLI 主機資料。將略過主機資料。</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
@@ -1049,7 +1049,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">此範本包含 Microsoft 其他協力廠商的技術，請參閱 {0} 取得詳細資訊。</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">

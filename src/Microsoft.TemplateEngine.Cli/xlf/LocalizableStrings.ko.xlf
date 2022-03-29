@@ -94,18 +94,18 @@
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
         <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">'{0}' 매개 변수에 긴 옵션 별칭을 할당하지 못했습니다. 시도됨: '{1}'; '{2}'.</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon">
         <source>Parameter name '{0}' contains colon, which is forbidden.</source>
-        <target state="new">Parameter name '{0}' contains colon, which is forbidden.</target>
+        <target state="translated">매개 변수 이름 '{0}'에 사용할 수 없는 콜론이 포함되어 있습니다.</target>
         <note>{0} is parameter name, has no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_ShortAlias">
         <source>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">'{0}' 매개 변수에 짧은 옵션 별칭을 할당하지 못했습니다. 시도됨: '{1}'; '{2}'.</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
@@ -225,7 +225,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
-        <target state="needs-review-translation">목록에서 하나의 템플릿만 유지하려면 템플릿 또는 패키지를 제거합니다.</target>
+        <target state="translated">템플릿이 포함된 템플릿 패키지를 제거하여 목록에서 템플릿을 하나만 유지하거나 실행할 템플릿을 구분하는 템플릿 옵션을 추가합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
@@ -300,7 +300,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
-        <target state="needs-review-translation">템플릿을 검색하려면 부분 템플릿 이름을 지정하거나 지원되는 필터({0}) 중 하나를 사용하세요.</target>
+        <target state="translated">템플릿을 검색하려면 부분 템플릿 이름을 지정하거나 지원되는 필터({0}) 중 하나를 사용하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -390,12 +390,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongArgumentValue">
         <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
-        <target state="new">Argument(s) {0} are not recognized. Must be one of: {1}.</target>
+        <target state="translated">{0} 인수를 인식할 수 없습니다. {1} 중 하나여야 합니다.</target>
         <note>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</note>
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongTokens">
         <source>Unrecognized command or argument(s): {0}.</source>
-        <target state="new">Unrecognized command or argument(s): {0}.</target>
+        <target state="translated">인식할 수 없는 명령 또는 인수: {0}.</target>
         <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
       </trans-unit>
       <trans-unit id="ConfiguredValue">
@@ -447,7 +447,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Exception_InvalidTemplateParameters_MessageHeader">
         <source>Template {0} ({1}) is malformed. The following template parameters are invalid:</source>
-        <target state="new">Template {0} ({1}) is malformed. The following template parameters are invalid:</target>
+        <target state="translated">템플릿 {0}({1})의 형식이 잘못되었습니다. 다음 템플릿 매개 변수는 잘못되었습니다.</target>
         <note>{0} is template identity, {1} is template short name.
 The header is followed by the list of parameters and their errors (might be several for one parameter).</note>
       </trans-unit>
@@ -500,12 +500,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
         <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from cache.</target>
+        <target state="translated">캐시에서 템플릿 {0}에 대한 dotnet CLI 호스트 데이터를 로드하지 못했습니다.</target>
         <note>{0} - template short name</note>
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToReadFromFile">
         <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
+        <target state="translated">{1}에서 템플릿 {0}에 대한 dotnet CLI 호스트 데이터를 로드하지 못했습니다. 호스트 데이터는 무시됩니다.</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
@@ -580,7 +580,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
-        <target state="new">No templates installed.</target>
+        <target state="translated">템플릿이 설치되어 있지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
@@ -605,18 +605,18 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue">
         <source>value '{0}' is not allowed, allowed values are: {1}</source>
-        <target state="new">value '{0}' is not allowed, allowed values are: {1}</target>
+        <target state="translated">'{0}' 값은 허용되지 않습니다. 허용되는 값: {1}</target>
         <note>the error message is part of other sentence, no punctuation is needed
 {0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined">
         <source>no choices are defined for parameter</source>
-        <target state="new">no choices are defined for parameter</target>
+        <target state="translated">매개 변수에 대해 선택 항목이 정의되지 않았습니다.</target>
         <note>the error message is part of other sentence, no punctuation is needed</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">옵션 '{1}'의 인수 '{0}'을(를) 예상 유형 '{2}'(으)로 구문 분석할 수 없습니다. {3}.</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -624,7 +624,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">옵션 '{1}'에 대해 값 '{0}'이 없는 옵션은 예상 유형 '{2}'(으)로 기본값을 구분 분석할 수 없습니다. {3}.</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -632,7 +632,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">옵션 '{1}'의 기본값 '{0}'을 예상 유형 '{2}'으로 구문 분석할 수 없습니다. {3}.</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -640,19 +640,19 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">옵션 '{1}'의 인수 '{0}'을(를) 예상 유형 '{2}'(으)로 구문 분석할 수 없습니다.</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidCount">
         <source>Using more than 1 argument is not allowed for '{0}', used: {1}.</source>
-        <target state="new">Using more than 1 argument is not allowed for '{0}', used: {1}.</target>
+        <target state="translated">'{0}'에 대해 둘 이상의 인수를 사용할 수 없습니다. 사용됨: {1}.</target>
         <note>{0} - option name, {1} - count of arguments used</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">옵션 '{1}'에 대해 값 '{0}'이 없는 옵션은 예상 유형 '{2}'(으)로 기본값을 구분 분석할 수 없습니다.</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -660,7 +660,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</target>
+        <target state="translated">옵션 '{1}'의 기본값 '{0}'을 예상 유형 {2}'으로 구문 분석할 수 없습니다.</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -668,12 +668,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue">
         <source>Required argument missing for option: '{0}'.</source>
-        <target state="new">Required argument missing for option: '{0}'.</target>
+        <target state="translated">'{0}' 옵션에 필요한 인수가 없습니다.</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultValue">
         <source>Default value for argument missing for option: '{0}'.</source>
-        <target state="new">Default value for argument missing for option: '{0}'.</target>
+        <target state="translated">'{0}' 옵션에 대한 인수의 기본값이 없습니다.</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
@@ -823,7 +823,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
         <source>Allowed values for '{0}' option are: {1}.</source>
-        <target state="new">Allowed values for '{0}' option are: {1}.</target>
+        <target state="translated">'{0}' 옵션에 허용되는 값: {1}.</target>
         <note>0} - option name (as --language)
 {1} - comma separated, escaped in quotes list of allowed values</note>
       </trans-unit>
@@ -869,12 +869,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
         <source>Installing the template package(s) will override the available template package(s).</source>
-        <target state="new">Installing the template package(s) will override the available template package(s).</target>
+        <target state="translated">템플릿 패키지를 설치하면 사용 가능한 템플릿 패키지가 재정의됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackageIsAvailable">
         <source>The following template package(s) are already available:</source>
-        <target state="new">The following template package(s) are already available:</target>
+        <target state="translated">다음 템플릿 패키지를 이미 사용할 수 있습니다.</target>
         <note>Followed by list of packages that are available</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
@@ -884,7 +884,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_UseForceToOverride">
         <source>To install the template package(s) anyway, apply '{0}' option:</source>
-        <target state="new">To install the template package(s) anyway, apply '{0}' option:</target>
+        <target state="translated">템플릿 패키지를 설치하려면 '{0}' 옵션을 적용합니다.</target>
         <note>{0} is option to use (--force). Followed by command to use to install the packages.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
@@ -1049,7 +1049,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">이 템플릿에는 Microsoft 이외의 타사 기술이 포함되어 있습니다. 자세한 내용은{0}를 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">

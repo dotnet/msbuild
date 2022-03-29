@@ -1,4 +1,4 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "NuGet Config",
   "description": "NuGet がパッケージが検索する場所を構成するためのファイル",

@@ -94,18 +94,18 @@
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
         <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">Parametre '{0}' için uzun seçenek diğer adı atanamadı, şunlar denendi: '{1}'; '{2}'.</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon">
         <source>Parameter name '{0}' contains colon, which is forbidden.</source>
-        <target state="new">Parameter name '{0}' contains colon, which is forbidden.</target>
+        <target state="translated">Parametre adı '{0}' iki nokta üst üste içeriyor; buna izin verilmez.</target>
         <note>{0} is parameter name, has no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_ShortAlias">
         <source>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">Parametre '{0}' için kısa seçenek diğer adı atanamadı, şunlar denendi: '{1}'; '{2}'.</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
@@ -225,7 +225,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
-        <target state="needs-review-translation">Şablonları veya paketleri kaldırarak listede yalnızca bir şablon tutun.</target>
+        <target state="translated">Listedeki tek bir şablonu tutmak veya çalıştırılacak şablonu değiştiren şablon seçeneklerini eklemek için şablonları içeren şablon paketlerini kaldırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
@@ -300,7 +300,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
-        <target state="needs-review-translation">Şablonları aramak için kısmi şablon adını belirtin veya desteklenen filtrelerden birini kullanın: {0}.</target>
+        <target state="translated">Şablonları aramak için kısmi şablon adını belirtin veya desteklenen filtrelerden birini kullanın: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -390,12 +390,12 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongArgumentValue">
         <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
-        <target state="new">Argument(s) {0} are not recognized. Must be one of: {1}.</target>
+        <target state="translated">Bağımsız değişken {0} tanınmıyor. Şunlardan biri olmalı: {1}</target>
         <note>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</note>
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongTokens">
         <source>Unrecognized command or argument(s): {0}.</source>
-        <target state="new">Unrecognized command or argument(s): {0}.</target>
+        <target state="translated">Tanınmayan komut veya bağımsız değişken: {0}</target>
         <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
       </trans-unit>
       <trans-unit id="ConfiguredValue">
@@ -447,7 +447,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="Exception_InvalidTemplateParameters_MessageHeader">
         <source>Template {0} ({1}) is malformed. The following template parameters are invalid:</source>
-        <target state="new">Template {0} ({1}) is malformed. The following template parameters are invalid:</target>
+        <target state="translated">Şablon {0} ({1}) hatalı biçimlendirilmiş. Aşağıdaki şablon parametreleri geçersiz:</target>
         <note>{0} is template identity, {1} is template short name.
 The header is followed by the list of parameters and their errors (might be several for one parameter).</note>
       </trans-unit>
@@ -500,12 +500,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
         <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from cache.</target>
+        <target state="translated">{0} şablonu için dotnet CLI konak verileri önbellekten yüklenemedi.</target>
         <note>{0} - template short name</note>
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToReadFromFile">
         <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
+        <target state="translated">{0} şablonu için dotnet CLI konak verileri {1} konumundan yüklenemedi. Konak verileri yoksayılacak.</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
@@ -580,7 +580,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
-        <target state="new">No templates installed.</target>
+        <target state="translated">Yüklü şablon yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
@@ -605,18 +605,18 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue">
         <source>value '{0}' is not allowed, allowed values are: {1}</source>
-        <target state="new">value '{0}' is not allowed, allowed values are: {1}</target>
+        <target state="translated">'{0}' değerine izin verilmiyor, izin verilen değerler: {1}</target>
         <note>the error message is part of other sentence, no punctuation is needed
 {0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined">
         <source>no choices are defined for parameter</source>
-        <target state="new">no choices are defined for parameter</target>
+        <target state="translated">parametre için seçenek tanımlanmadı</target>
         <note>the error message is part of other sentence, no punctuation is needed</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">Beklenen tür '{2}' olarak seçenek '{1}' için bağımsız değişken '{0}' ayrıştırılamadı: {3}.</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -624,7 +624,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">Beklenen tür '{2}' olarak seçenek '{1}' için değer '{0}' belirtilmeden varsayılan eğer seçeneği ayrıştırılamıyor: {3}.</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -632,7 +632,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">Beklenen tür '{2}' olarak seçenek '{1}' için varsayılan değer '{0}' ayrıştırılamıyor: {3}.</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -640,19 +640,19 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">Beklenen tür '{2}' olarak seçenek '{1}' için bağımsız değişken '{0}' ayrıştırılamadı.</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidCount">
         <source>Using more than 1 argument is not allowed for '{0}', used: {1}.</source>
-        <target state="new">Using more than 1 argument is not allowed for '{0}', used: {1}.</target>
+        <target state="translated">'{0}' için 1'den fazla bağımsız değişken kullanımına izin verilmiyor, kullanılanlar: {1}.</target>
         <note>{0} - option name, {1} - count of arguments used</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">Beklenen tür '{2}' olarak seçenek '{1}' için değer '{0}' belirtilmeden varsayılan eğer seçeneği ayrıştırılamıyor.</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -660,7 +660,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</target>
+        <target state="translated">Beklenen tür '{2}' olarak seçenek '{1}' için varsayılan değer '{0}' ayrıştırılamıyor.</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -668,12 +668,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue">
         <source>Required argument missing for option: '{0}'.</source>
-        <target state="new">Required argument missing for option: '{0}'.</target>
+        <target state="translated">Seçenek için gerekli bağımsız değişken eksik: '{0}'</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultValue">
         <source>Default value for argument missing for option: '{0}'.</source>
-        <target state="new">Default value for argument missing for option: '{0}'.</target>
+        <target state="translated">Seçenek için bağımsız değişkenin varsayılan değeri eksik: '{0}'.</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
@@ -823,7 +823,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
         <source>Allowed values for '{0}' option are: {1}.</source>
-        <target state="new">Allowed values for '{0}' option are: {1}.</target>
+        <target state="translated">'{0}' seçeneği için izin verilen değerler: {1}.</target>
         <note>0} - option name (as --language)
 {1} - comma separated, escaped in quotes list of allowed values</note>
       </trans-unit>
@@ -869,12 +869,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
         <source>Installing the template package(s) will override the available template package(s).</source>
-        <target state="new">Installing the template package(s) will override the available template package(s).</target>
+        <target state="translated">Şablon paketlerinin yüklenmesi kullanılabilir şablon paketlerini geçersiz kılar.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackageIsAvailable">
         <source>The following template package(s) are already available:</source>
-        <target state="new">The following template package(s) are already available:</target>
+        <target state="translated">Aşağıdaki şablon paketleri zaten kullanılabilir:</target>
         <note>Followed by list of packages that are available</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
@@ -884,7 +884,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_UseForceToOverride">
         <source>To install the template package(s) anyway, apply '{0}' option:</source>
-        <target state="new">To install the template package(s) anyway, apply '{0}' option:</target>
+        <target state="translated">Şablon paketlerini yine de yüklemek için '{0}' seçeneğini uygula:</target>
         <note>{0} is option to use (--force). Followed by command to use to install the packages.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
@@ -1049,7 +1049,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">Bu şablon Microsoft dışındaki tarafların teknolojilerini içeriyor. Ayrıntılar için {0} sayfasına bakın.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">

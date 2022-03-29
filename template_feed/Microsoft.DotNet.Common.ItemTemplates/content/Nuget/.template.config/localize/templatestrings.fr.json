@@ -1,4 +1,4 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Configuration NuGet",
   "description": "Un fichier permettant de configurer les emplacements où NuGet recherche des packages",

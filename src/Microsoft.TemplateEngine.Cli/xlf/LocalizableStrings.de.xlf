@@ -40,17 +40,17 @@
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRef">
         <source>Adding a package reference. Running dotnet add {0} package {1}</source>
-        <target state="translated">Ein Paketverweis wird hinzugefügt. "dotnet add {0} package {1}" wird ausgeführt</target>
+        <target state="translated">Ein Paketverweis wird hinzugefügt. \"dotnet add {0} package {1}\" wird ausgeführt</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRefWithVersion">
         <source>Adding a package reference. Running dotnet add {0} package {1} --version {2}</source>
-        <target state="translated">Ein Paketverweis wird hinzugefügt. "dotnet add {0} package {1} --version {2}" wird ausgeführt</target>
+        <target state="translated">Ein Paketverweis wird hinzugefügt. \"dotnet add {0} package {1} --version {2}\" wird ausgeführt</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddProjectRef">
         <source>Adding a project reference. Running dotnet add {0} reference {1}</source>
-        <target state="translated">Ein Projektverweis wird hinzugefügt. "dotnet add {0} reference {1}" wird ausgeführt</target>
+        <target state="translated">Ein Projektverweis wird hinzugefügt. \"dotnet add {0} reference {1}\" wird ausgeführt</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionFailed">
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="AddRefPostActionFrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="translated">Der Framework-Verweis "{0}" konnte dem Projekt nicht automatisch hinzugefügt werden. Bearbeiten Sie die Projektdatei manuell, um sie hinzuzufügen.</target>
+        <target state="translated">Der Framework-Verweis \"{0}\" konnte dem Projekt nicht automatisch hinzugefügt werden. Bearbeiten Sie die Projektdatei manuell, um sie hinzuzufügen.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionMisconfigured">
@@ -94,24 +94,24 @@
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
         <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">Fehler beim Zuweisen eines long-Optionsalias für den Parameter “{0}”. Versucht: “{1}”; “{2}”.</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon">
         <source>Parameter name '{0}' contains colon, which is forbidden.</source>
-        <target state="new">Parameter name '{0}' contains colon, which is forbidden.</target>
+        <target state="translated">Der Parametername “{0}” enthält einen Doppelpunkt. Dies ist unzulässig.</target>
         <note>{0} is parameter name, has no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_ShortAlias">
         <source>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
-        <target state="new">Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</target>
+        <target state="translated">Fehler beim Zuweisen eines short-Optionsalias für den Parameter “{0}”. Versucht: “{1}”; “{2}”.</target>
         <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
 {0}, {1}, {2} should have no whitespaces.</note>
       </trans-unit>
       <trans-unit id="AliasCannotBeShortName">
         <source>Alias '{0}' is a template short name, and therefore cannot be aliased.</source>
-        <target state="translated">Der Alias "{0}" ist ein Kurzname für die Vorlage und kann daher nicht als Alias verwendet werden.</target>
+        <target state="translated">Der Alias \"{0}\" ist ein Kurzname für die Vorlage und kann daher nicht als Alias verwendet werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCommandAfterExpansion">
@@ -123,7 +123,7 @@
       </trans-unit>
       <trans-unit id="AliasCreated">
         <source>Successfully created alias named '{0}' with value '{1}'</source>
-        <target state="translated">Der Alias mit dem Namen "{0}" wurde mit dem Wert "{1}" erfolgreich erstellt.</target>
+        <target state="translated">Der Alias mit dem Namen \"{0}\" wurde mit dem Wert \"{1}\" erfolgreich erstellt.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCycleError">
@@ -158,12 +158,12 @@
       </trans-unit>
       <trans-unit id="AliasRemoveNonExistentFailed">
         <source>Unable to remove alias '{0}'. It did not exist.</source>
-        <target state="translated">Der Alias "{0}" kann nicht entfernt werden. Es war nicht vorhanden.</target>
+        <target state="translated">Der Alias \"{0}\" kann nicht entfernt werden. Es war nicht vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoved">
         <source>Successfully removed alias named '{0}' whose value was '{1}'.</source>
-        <target state="translated">Der Alias mit dem Namen "{0}", dessen Wert "{1}" war, wurde erfolgreich entfernt.</target>
+        <target state="translated">Der Alias mit dem Namen \"{0}\", dessen Wert \"{1}\" war, wurde erfolgreich entfernt.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowAllAliasesHeader">
@@ -174,13 +174,13 @@
       <trans-unit id="AliasShowErrorUnknownAlias">
         <source>Unknown alias name '{0}'.
 Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
-        <target state="translated">Unbekannter Aliasname "{0}".
-Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuzeigen.</target>
+        <target state="translated">Unbekannter Aliasname \"{0}\".
+Führen Sie \"dotnet {1}--show-aliases\" ohne Argumente aus, um alle Aliase anzuzeigen.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasUpdated">
         <source>Successfully updated alias named '{0}' to value '{1}'.</source>
-        <target state="translated">Der Alias mit dem Namen "{0}" wurde erfolgreich auf den Wert "{1}" aktualisiert.</target>
+        <target state="translated">Der Alias mit dem Namen \"{0}\" wurde erfolgreich auf den Wert \"{1}\" aktualisiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValue">
@@ -210,7 +210,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="AmbiguousParameterDetail">
         <source>The value '{1}' is ambiguous for option {0}.</source>
-        <target state="translated">Der Wert "{1}" ist für die Option "{0}" mehrdeutig.</target>
+        <target state="translated">Der Wert \"{1}\" ist für die Option \"{0}\" mehrdeutig.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -225,12 +225,12 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
-        <target state="needs-review-translation">Deinstallieren Sie die Vorlagen oder Pakete, um nur eine Vorlage aus der Liste zu behalten.</target>
+        <target state="translated">Deinstallieren Sie die Vorlagenpakete, die die Vorlagen enthalten, um nur eine Vorlage aus der Liste zu behalten, oder fügen Sie die Vorlagenoptionen hinzu, damit die auszuführende Vorlage unterschieden werden kann.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
         <source>The package {0} is not correct, uninstall it and report the issue to the package author.</source>
-        <target state="translated">Das Paket "{0}" ist falsch, deinstallieren Sie es, und melden Sie das Problem dem Paketautor.</target>
+        <target state="translated">Das Paket \"{0}\" ist falsch, deinstallieren Sie es, und melden Sie das Problem dem Paketautor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgsFileNotFound">
@@ -240,7 +240,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="ArgsFileWrongFormat">
         <source>Extra args file {0} is not formatted properly.</source>
-        <target state="translated">Die zusätzliche Argumentdateidatei "{0}" ist nicht ordnungsgemäß formatiert.</target>
+        <target state="translated">Die zusätzliche Argumentdateidatei \"{0}\" ist nicht ordnungsgemäß formatiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="Assembly">
@@ -275,7 +275,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
         <source>Template '{0}' was not found.</source>
-        <target state="translated">Vorlage "{0}" wurde nicht gefunden.</target>
+        <target state="translated">Vorlage \"{0}\" wurde nicht gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
@@ -300,7 +300,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
-        <target state="needs-review-translation">Um nach Vorlagen zu suchen, geben Sie einen partiellen Vorlagennamen an, oder verwenden Sie einen der unterstützten Filter: {0}.</target>
+        <target state="translated">Um nach Vorlagen zu suchen, geben Sie einen Vorlagennamen teilweise an, oder verwenden Sie einen der unterstützten Filter: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -390,12 +390,12 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongArgumentValue">
         <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
-        <target state="new">Argument(s) {0} are not recognized. Must be one of: {1}.</target>
+        <target state="translated">Das oder die Argumente {0} wurden nicht erkannt. Folgendes ist erforderlich: {1}.</target>
         <note>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</note>
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongTokens">
         <source>Unrecognized command or argument(s): {0}.</source>
-        <target state="new">Unrecognized command or argument(s): {0}.</target>
+        <target state="translated">Befehl oder Argument(e) nicht erkannt:{0}.</target>
         <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
       </trans-unit>
       <trans-unit id="ConfiguredValue">
@@ -447,7 +447,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="Exception_InvalidTemplateParameters_MessageHeader">
         <source>Template {0} ({1}) is malformed. The following template parameters are invalid:</source>
-        <target state="new">Template {0} ({1}) is malformed. The following template parameters are invalid:</target>
+        <target state="translated">Die Vorlage {0} ({1}) ist nicht wohlgeformt. Die folgenden Vorlagenparameter sind ungültig:</target>
         <note>{0} is template identity, {1} is template short name.
 The header is followed by the list of parameters and their errors (might be several for one parameter).</note>
       </trans-unit>
@@ -500,12 +500,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
         <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from cache.</target>
+        <target state="translated">Fehler beim Laden der dotnet CLI-Hostdaten für vorlagenbasierte {0} aus dem Cache.</target>
         <note>{0} - template short name</note>
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToReadFromFile">
         <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
-        <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
+        <target state="translated">Fehler beim Laden der dotnet CLI-Hostdaten für vorlagenbasierte {0} aus {1}. Die Hostdaten werden ignoriert.</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
@@ -520,17 +520,17 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InvalidParameterDefault">
         <source>The default value '{1}' is not a valid value for {0}.</source>
-        <target state="translated">Der Standardwert "{1}" ist kein gültiger Wert für {0}.</target>
+        <target state="translated">Der Standardwert \"{1}\" ist kein gültiger Wert für {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDetail">
         <source>'{1}' is not a valid value for {0}.</source>
-        <target state="translated">"{1}" ist kein gültiger Wert für {0}.</target>
+        <target state="translated">\"{1}\" ist kein gültiger Wert für {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterNameDetail">
         <source>'{0}' is not a valid option</source>
-        <target state="translated">"{0}" ist keine gültige Option</target>
+        <target state="translated">\"{0}\" ist keine gültige Option</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
@@ -540,7 +540,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InvalidSyntax">
         <source>Invalid command syntax: use '{0}' instead.</source>
-        <target state="translated">Ungültige Befehlssyntax: Verwenden Sie stattdessen "{0}".</target>
+        <target state="translated">Ungültige Befehlssyntax: Verwenden Sie stattdessen \"{0}\".</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
@@ -550,12 +550,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="translated">Die obligatorische Option "{0}" ist für die Vorlage "{1}" nicht vorhanden.</target>
+        <target state="translated">Die obligatorische Option \"{0}\" ist für die Vorlage \"{1}\" nicht vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">
         <source>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</source>
-        <target state="translated">Der angegebene Vorlageninhalt wurde nicht gefunden, der Vorlagencache ist möglicherweise beschädigt. Führen Sie "dotnet {0} --debug:reinit" aus, um das Problem zu beheben.</target>
+        <target state="translated">Der angegebene Vorlageninhalt wurde nicht gefunden, der Vorlagencache ist möglicherweise beschädigt. Führen Sie \"dotnet {0} --debug:reinit\" aus, um das Problem zu beheben.</target>
         <note />
       </trans-unit>
       <trans-unit id="MountPointFactories">
@@ -580,12 +580,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
-        <target state="new">No templates installed.</target>
+        <target state="translated">Keine Vorlagen installiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
-        <target state="translated">Keine Vorlagen gefunden, die "{0}" entsprechen.</target>
+        <target state="translated">Keine Vorlagen gefunden, die \"{0}\" entsprechen.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -605,18 +605,18 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue">
         <source>value '{0}' is not allowed, allowed values are: {1}</source>
-        <target state="new">value '{0}' is not allowed, allowed values are: {1}</target>
+        <target state="translated">Der Wert “{0}” ist nicht zulässig. Zulässige Werte sind: {1}.</target>
         <note>the error message is part of other sentence, no punctuation is needed
 {0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined">
         <source>no choices are defined for parameter</source>
-        <target state="new">no choices are defined for parameter</target>
+        <target state="translated">Für den Parameter sind keine Optionen definiert.</target>
         <note>the error message is part of other sentence, no punctuation is needed</note>
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">Das Argument “{0}” für die Option “{1}'”kann nicht wie erwartet geparst werden, da folgender Typ erwartet wurde: “{2}”: {3}.</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -624,7 +624,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">Der Standard kann nicht geparst werden, wenn die Option ohne Wert “{0}” für die Option “{1}” ist, da folgender Typ erwartet wurde: “{2}”: {3}.</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -632,7 +632,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</target>
+        <target state="translated">Der Standardwert “{0}” kann für die Option “{1}” nicht geparst werden, da folgender Typ erwartet wurde: “{2}”: {3}.</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -640,19 +640,19 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidArgument">
         <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">Das Argument “{0}” für die Option “{1}'”kann nicht wie erwartet geparst werden, da folgender Typ erwartet wurde: “{2}”.</target>
         <note>{0} - value that is given by used for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidCount">
         <source>Using more than 1 argument is not allowed for '{0}', used: {1}.</source>
-        <target state="new">Using more than 1 argument is not allowed for '{0}', used: {1}.</target>
+        <target state="translated">Die Verwendung von mehr als einem Argument ist für “{0}” nicht zulässig. Verwendet: {1}.</target>
         <note>{0} - option name, {1} - count of arguments used</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue">
         <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</source>
-        <target state="new">Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</target>
+        <target state="translated">Der Standard kann nicht geparst werden, wenn die Option ohne Wert “{0}” für die Option “{1}” ist, da folgender Typ erwartet wurde: “{2}”.</target>
         <note>{0} - default value for option {1} in case no argument is given
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -660,7 +660,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_InvalidDefaultValue">
         <source>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</source>
-        <target state="new">Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</target>
+        <target state="translated">Der Standardwert “{0}” kann für die Option “{1}” nich geparst werden, da folgender Typ erwartet wurde: “{2}”.</target>
         <note>{0} - default value for option {1}
 {1} - option name
 {2} - type of the value (string, choice, etc).
@@ -668,12 +668,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue">
         <source>Required argument missing for option: '{0}'.</source>
-        <target state="new">Required argument missing for option: '{0}'.</target>
+        <target state="translated">Ein erforderliches Argument fehlt für die Option: “{0}”.</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="ParseTemplateOption_Error_MissingDefaultValue">
         <source>Default value for argument missing for option: '{0}'.</source>
-        <target state="new">Default value for argument missing for option: '{0}'.</target>
+        <target state="translated">Der Standardwert für das Argument fehlt für die Option: “{0}”.</target>
         <note>{0} - option name</note>
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
@@ -703,7 +703,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_RunScriptNotAllowed">
         <source>Execution of 'Run script' post action is not allowed.</source>
-        <target state="translated">Die Ausführung der nachfolgenden Aktion "Skript ausführen" ist nicht zulässig.</target>
+        <target state="translated">Die Ausführung der nachfolgenden Aktion \"Skript ausführen\" ist nicht zulässig.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
@@ -733,7 +733,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
-        <target state="translated">Fehler beim Ausführen des Befehls: das Argument "Ausführbare Datei" fehlt in der Konfiguration der nachfolgenden Aktion.</target>
+        <target state="translated">Fehler beim Ausführen des Befehls: das Argument \"Ausführbare Datei\" fehlt in der Konfiguration der nachfolgenden Aktion.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
@@ -763,12 +763,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
-        <target state="translated">Befehl "{0}" wird ausgeführt...</target>
+        <target state="translated">Befehl \"{0}\" wird ausgeführt...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningDotnetRestoreOn">
         <source>Running 'dotnet restore' on {0}...</source>
-        <target state="translated">"dotnet restore" wird auf {0} ausgeführt...</target>
+        <target state="translated">\"dotnet restore\" wird auf {0} ausgeführt...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
@@ -778,7 +778,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="SettingsReadError">
         <source>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</source>
-        <target state="translated">Fehler beim Lesen der installierten Konfiguration, die Datei ist möglicherweise beschädigt. Wenn dieses Problem weiterhin besteht, versuchen Sie dies mit dem Flag "--debug:reinit" zurückzusetzen.</target>
+        <target state="translated">Fehler beim Lesen der installierten Konfiguration, die Datei ist möglicherweise beschädigt. Wenn dieses Problem weiterhin besteht, versuchen Sie dies mit dem Flag \"--debug:reinit\" zurückzusetzen.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsAllTemplates">
@@ -793,7 +793,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
         <source>The '{0}' command creates a .NET project based on a template.</source>
-        <target state="translated">Mit dem Befehl "{0}" wird ein NET-Projekt basierend auf einer Vorlage erstellt.</target>
+        <target state="translated">Mit dem Befehl \"{0}\" wird ein NET-Projekt basierend auf einer Vorlage erstellt.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint">
@@ -823,7 +823,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
         <source>Allowed values for '{0}' option are: {1}.</source>
-        <target state="new">Allowed values for '{0}' option are: {1}.</target>
+        <target state="translated">Die zulässigen Werte für die Option“{0}” sind: {1}.</target>
         <note>0} - option name (as --language)
 {1} - comma separated, escaped in quotes list of allowed values</note>
       </trans-unit>
@@ -839,7 +839,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
-        <target state="translated">Das Vorlagenpaket mit der Vorlage "{0}" wurde nicht gefunden.</target>
+        <target state="translated">Das Vorlagenpaket mit der Vorlage \"{0}\" wurde nicht gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageNameContainsTemplates">
@@ -849,12 +849,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageNotFound">
         <source>The template package '{0}' is not found.</source>
-        <target state="translated">Das Vorlagenpaket "{0}" wurde nicht gefunden.</target>
+        <target state="translated">Das Vorlagenpaket \"{0}\" wurde nicht gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_TemplateIncludedToPackages">
         <source>The template '{0}' is included to the packages:</source>
-        <target state="translated">Die Vorlage "{0}" ist in die Pakete enthalten:</target>
+        <target state="translated">Die Vorlage \"{0}\" ist in die Pakete enthalten:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall">
@@ -864,17 +864,17 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_SameInstallRequests">
         <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
-        <target state="translated">Der Befehl versucht, das Vorlagenpaket "{0}" zweimal zu installieren, überprüfen Sie die Argumente, und versuchen Sie es noch mal.</target>
+        <target state="translated">Der Befehl versucht, das Vorlagenpaket \"{0}\" zweimal zu installieren, überprüfen Sie die Argumente, und versuchen Sie es noch mal.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
         <source>Installing the template package(s) will override the available template package(s).</source>
-        <target state="new">Installing the template package(s) will override the available template package(s).</target>
+        <target state="translated">Durch die Installation des oder der Vorlagenpakete werden das oder die verfügbaren Vorlagenpakete überschrieben.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackageIsAvailable">
         <source>The following template package(s) are already available:</source>
-        <target state="new">The following template package(s) are already available:</target>
+        <target state="translated">Das oder die folgenden Vorlagenpakete sind bereits verfügbar:</target>
         <note>Followed by list of packages that are available</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
@@ -884,7 +884,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_UseForceToOverride">
         <source>To install the template package(s) anyway, apply '{0}' option:</source>
-        <target state="new">To install the template package(s) anyway, apply '{0}' option:</target>
+        <target state="translated">Um das oder die Vorlagenpakete trotzdem zu installieren, wenden Sie die Option “{0}” an:</target>
         <note>{0} is option to use (--force). Followed by command to use to install the packages.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
@@ -959,7 +959,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailable">
         <source>An update for template package '{0}' is available.</source>
-        <target state="translated">Ein Update für das Vorlagenpaket "{0}" ist verfügbar.</target>
+        <target state="translated">Ein Update für das Vorlagenpaket \"{0}\" ist verfügbar.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages">
@@ -979,37 +979,37 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">
         <source>{0} is already installed.</source>
-        <target state="translated">"{0}" ist bereits installiert.</target>
+        <target state="translated">\"{0}\" ist bereits installiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_DownloadFailed">
         <source>{0} could not be installed, download failed.</source>
-        <target state="translated">"{0}" konnte nicht installiert werden: Fehler beim Download.</target>
+        <target state="translated">\"{0}\" konnte nicht installiert werden: Fehler beim Download.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_GenericError">
         <source>{0} could not be installed.</source>
-        <target state="translated">"{0}" konnte nicht installiert werden.</target>
+        <target state="translated">\"{0}\" konnte nicht installiert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds">
         <source>{0} could not be installed, no NuGet feeds are configured or they are invalid.</source>
-        <target state="translated">"{0}" konnte nicht installiert werden: Es sind keine NuGet-Feeds konfiguriert, oder die Feeds sind ungültig.</target>
+        <target state="translated">\"{0}\" konnte nicht installiert werden: Es sind keine NuGet-Feeds konfiguriert, oder die Feeds sind ungültig.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidPackage">
         <source>Failed to install {0}, failed to uninstall previous version of the template package.</source>
-        <target state="translated">Fehler beim Installieren von "{0}": Die vorherige Version des Vorlagenpakets konnte nicht deinstalliert werden.</target>
+        <target state="translated">Fehler beim Installieren von \"{0}\": Die vorherige Version des Vorlagenpakets konnte nicht deinstalliert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_PackageNotFound">
         <source>{0} could not be installed, the package does not exist.</source>
-        <target state="translated">"{0}" konnte nicht installiert werden, das Paket ist nicht vorhanden.</target>
+        <target state="translated">\"{0}\" konnte nicht installiert werden, das Paket ist nicht vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UninstallFailed">
         <source>Failed to install {0}, the template package is invalid.</source>
-        <target state="translated">Fehler beim Installieren von "{0}": Das Vorlagenpaket ist ungültig.</target>
+        <target state="translated">Fehler beim Installieren von \"{0}\": Das Vorlagenpaket ist ungültig.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest">
@@ -1024,7 +1024,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package">
         <source>No templates were found in the package {0}.</source>
-        <target state="translated">Im Pakt "{0}" wurden keine Vorlagen gefunden.</target>
+        <target state="translated">Im Pakt \"{0}\" wurden keine Vorlagen gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateResolver_Warning_FailedToReparseTemplate">
@@ -1049,7 +1049,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">Diese Vorlage enthält Technologien von anderen Anbietern als Microsoft, siehe {0} für Details.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">
