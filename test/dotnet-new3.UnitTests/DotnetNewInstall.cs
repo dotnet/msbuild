@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.NET.TestFramework.Assertions;
@@ -79,8 +81,14 @@ namespace Dotnet_new3.IntegrationTests
                     .And.NotHaveStdOutContaining("web");
             }
 
-            Assert.True(command1.StdOut.Equals(command2.StdOut));
-            Assert.True(command1.StdOut.Equals(command3.StdOut));
+            // Install command are expected to output the requested version literaly as they got it on input,
+            //  but otherwise the outputs are expected to be equal 
+            string command3Out = command3.StdOut.Replace(
+                "Microsoft.DotNet.Common.ProjectTemplates.5.0::*",
+                "Microsoft.DotNet.Common.ProjectTemplates.5.0");
+
+            Assert.Equal(command1.StdOut, command2.StdOut);
+            Assert.Equal(command1.StdOut, command3Out);
         }
 
         [Theory]
@@ -102,6 +110,47 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining($"Success: Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0 installed the following templates:")
                 .And.HaveStdOutContaining("web")
                 .And.HaveStdOutContaining("blazorwasm");
+        }
+
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("install")]
+        public void CanInstallRemoteNuGetPackageWithVersionWildcard(string commandName)
+        {
+            var command1 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.*")
+                .WithCustomHive()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            var command2 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.*")
+                .WithCustomHive()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            foreach (var commandResult in new[] { command1, command2 })
+            {
+                commandResult.Should()
+                    .ExitWith(0)
+                    .And
+                    .NotHaveStdErr()
+                    .And.NotHaveStdOutContaining("Determining projects to restore...")
+                    .And.HaveStdOutContaining("The following template packages will be installed:")
+                    .And.HaveStdOutMatching($"Success: Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::5\\.0([\\d\\.a-z-])+ installed the following templates:")
+                    .And.HaveStdOutContaining("console")
+                    .And.NotHaveStdOutContaining("web");
+            }
+
+            // Install command are expected to output the requested version literaly as they got it on input,
+            //  but otherwise the outputs are expected to be equal 
+            string command1Out = command1.StdOut.Replace(
+                "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.*",
+                "Microsoft.DotNet.Common.ProjectTemplates.5.0");
+
+            string command2Out = command2.StdOut.Replace(
+                "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.*",
+                "Microsoft.DotNet.Common.ProjectTemplates.5.0");
+
+            Assert.Equal(command1Out, command2Out);
         }
 
         [Fact]

@@ -202,12 +202,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 string[] splitByColons = installArg.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
                 string identifier = splitByColons[0];
-                string? version = null;
-                //'*' is placeholder for the latest version
-                if (splitByColons.Length > 1 && splitByColons[1] != "*")
-                {
-                    version = splitByColons[1];
-                }
+                string? version = splitByColons.Length > 1 ? splitByColons[1] : null;
                 foreach (string expandedIdentifier in InstallRequestPathResolution.ExpandMaskedPath(identifier, _engineEnvironmentSettings))
                 {
                     installRequests.Add(new InstallRequest(expandedIdentifier, version, details: details));
