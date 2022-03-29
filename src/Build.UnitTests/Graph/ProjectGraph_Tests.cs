@@ -76,6 +76,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                                                                 <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
                                                                                                 <Platform>x86</Platform>
                                                                                                 <Platforms>x86</Platforms>
+                                                                                                <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
                                                                                             </PropertyGroup>
                                                                                             <ItemGroup>
                                                                                                 <ProjectReference Include=""$(MSBuildThisFileDirectory)2.proj"" >
@@ -84,6 +85,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 var file = env.CreateFile("2.proj", @"
                                 <Project>
                                 <PropertyGroup>
+                                    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
                                     <Platforms>AnyCPU</Platforms>
                                 </PropertyGroup>
                                 </Project>");
