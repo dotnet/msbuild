@@ -22,6 +22,10 @@ namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder
     {
+        private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
+        private const string PlatformMetadataName = "Platform";
+        private const string PlatformsMetadataName = "Platforms";
+        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
         internal const string SolutionItemReference = "_SolutionReference";
         
         /// <summary>
@@ -510,9 +514,32 @@ namespace Microsoft.Build.Graph
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
+
+
             var graphNode = new ProjectGraphNode(projectInstance);
+            if(globalProperties.ContainsKey(EnableDynamicPlatformResolutionMetadataName)){
+                
+                var Platforms = projectInstance.GetProperty("Platforms");
+                var Platform = projectInstance.GetProperty("Platform");
+                var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), globalProperties[PlatformMetadataName], "", projectInstance.FullPath);
+
+
+                if (SelectedPlatform != null)
+                {
+                    // configurationMetadata.GlobalProperties.GetProperty("platform").EvaluatedValue = SelectedPlatform;
+                    globalProperties["platform"] = SelectedPlatform;
+                }
+
+                var projectInstancePlatform = _projectInstanceFactory(
+                    configurationMetadata.ProjectFullPath,
+                    globalProperties,
+                    _projectCollection);
+
+                graphNode = new ProjectGraphNode(projectInstancePlatform);
+            }
 
             var referenceInfos = ParseReferences(graphNode);
+
 
             return new ParsedProject(configurationMetadata, graphNode, referenceInfos);
         }

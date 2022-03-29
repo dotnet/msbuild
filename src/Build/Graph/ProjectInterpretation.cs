@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -21,10 +23,7 @@ namespace Microsoft.Build.Graph
 {
     internal sealed class ProjectInterpretation
     {
-        private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
-        private const string PlatformMetadataName = "Platform";
-        private const string PlatformsMetadataName = "Platforms";
-        private const string EnableDynamicPlatformResolutionMetadataName  = "EnableDynamicPlatformResolution";
+        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
         private const string FullPathMetadataName = "FullPath";
         private const string ToolsVersionMetadataName = "ToolsVersion";
         private const string SetConfigurationMetadataName = "SetConfiguration";
@@ -69,7 +68,6 @@ namespace Microsoft.Build.Graph
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
-
             switch (GetProjectType(requesterInstance))
             {
                 case ProjectType.OuterBuild:
@@ -100,6 +98,10 @@ namespace Microsoft.Build.Graph
                             requesterInstance.FullPath));
                 }
 
+                if (requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName) == "true")
+                {
+                    requesterInstance.GlobalPropertiesDictionary.Set(requesterInstance.GetProperty(EnableDynamicPlatformResolutionMetadataName));
+                }
                 var projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
 
                 var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReferenceItem, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
@@ -235,12 +237,6 @@ namespace Microsoft.Build.Graph
             {
                 // This mimics the _GetProjectReferenceTargetFrameworkProperties task in order to properly reflect what the build graph looks like in
                 // a traversal in which EnableDynamicPlatformResolution is turned on
-                if (ConversionUtilities.ValidBooleanTrue(projectReference.Project.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)) && String.IsNullOrEmpty(projectReference.GetMetadataValue(SetPlatformMetadataName)))
-                {
-                    var referencedProject = new Project(projectReference.EvaluatedInclude);
-                    var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(referencedProject.GetPropertyValue(PlatformsMetadataName), referencedProject.GetPropertyValue(PlatformLookupTableMetadataName), projectReference.Project.GetPropertyValue(PlatformMetadataName), projectReference.Project.GetPropertyValue(PlatformLookupTableMetadataName), projectReference.EvaluatedInclude);    
-                    projectReference.SetMetadata("SetPlatform", $"Platform={SelectedPlatform}");
-                }
                 // TODO: Mimic AssignProjectConfiguration's behavior for determining the values for these.
                 var setConfigurationString = projectReference.GetMetadataValue(SetConfigurationMetadataName);
                 var setPlatformString = projectReference.GetMetadataValue(SetPlatformMetadataName);
