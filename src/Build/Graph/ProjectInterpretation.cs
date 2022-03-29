@@ -23,7 +23,6 @@ namespace Microsoft.Build.Graph
 {
     internal sealed class ProjectInterpretation
     {
-        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
         private const string FullPathMetadataName = "FullPath";
         private const string ToolsVersionMetadataName = "ToolsVersion";
         private const string SetConfigurationMetadataName = "SetConfiguration";
@@ -98,10 +97,6 @@ namespace Microsoft.Build.Graph
                             requesterInstance.FullPath));
                 }
 
-                if (requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName) == "true")
-                {
-                    requesterInstance.GlobalPropertiesDictionary.Set(requesterInstance.GetProperty(EnableDynamicPlatformResolutionMetadataName));
-                }
                 var projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
 
                 var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReferenceItem, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
