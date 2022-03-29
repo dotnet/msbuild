@@ -362,7 +362,7 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields();
             var succeeded = ReadBoolean();
-            var environmentProperties = ReadStringDictionary();
+            var environmentProperties = fileFormatVersion >= 15 ? ReadStringDictionary() : null;
 
             var e = new BuildFinishedEventArgs(
                 fields.Message,

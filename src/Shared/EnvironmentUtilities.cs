@@ -4,8 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-
-#nullable disable
+using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Shared
 {
@@ -16,6 +15,6 @@ namespace Microsoft.Build.Shared
         public static bool Is64BitOperatingSystem =>
             Environment.Is64BitOperatingSystem;
 
-        public static Dictionary<string, string> EnvironmentVariablesUsedAsProperties { get; } = new();
+        public static Dictionary<string, string> EnvironmentVariablesUsedAsProperties { get; } = new(MSBuildNameIgnoreCaseComparer.Default);
     }
 }

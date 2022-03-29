@@ -1470,10 +1470,6 @@ namespace Microsoft.Build.Evaluation
             private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
             {
                 T property = properties.GetProperty(propertyName, startIndex, endIndex);
-                if (!string.IsNullOrEmpty(property?.EvaluatedValue) && property.IsEnvironmentProperty)
-                {
-                    EnvironmentUtilities.EnvironmentVariablesUsedAsProperties[property.Name] = property.EvaluatedValue;
-                }
 
                 object propertyValue;
 
@@ -1517,6 +1513,10 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     propertyValue = property.EvaluatedValueEscaped;
+                    if (!string.IsNullOrEmpty(property.EvaluatedValueEscaped) && property.IsEnvironmentProperty)
+                    {
+                        EnvironmentUtilities.EnvironmentVariablesUsedAsProperties[property.Name] = property.EvaluatedValueEscaped;
+                    }
                 }
 
                 return propertyValue;

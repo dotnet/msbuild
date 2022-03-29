@@ -159,12 +159,6 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets all environment variables read when trying to evaluate properties along with their values.
         /// </summary>
-        public IDictionary<string, string> EnvironmentVariables
-        {
-            get
-            {
-                return environmentVariables;
-            }
-        }
+        public IDictionary<string, string> EnvironmentVariables => environmentVariables;
     }
 }
