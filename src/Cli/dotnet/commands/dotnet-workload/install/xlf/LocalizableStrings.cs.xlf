@@ -217,6 +217,11 @@
         <target state="translated">Přeskočit aktualizaci manifestů úlohy</target>
         <note />
       </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="new">Skip signature verification of workload packages and installers.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
         <source>Manifest packages were not found. Skipping manifest update...</source>
         <target state="translated">Balíčky manifestu se nepovedlo najít. Aktualizace manifestu bude přeskočena...</target>
