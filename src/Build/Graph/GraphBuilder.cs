@@ -525,30 +525,25 @@ namespace Microsoft.Build.Graph
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
+            ProjectGraphNode graphNode;
 
-            var projectInstance = _projectInstanceFactory(
-                configurationMetadata.ProjectFullPath,
-                globalProperties,
-                _projectCollection);
+            if (enableDynamicPlatformResolution){
 
-            if (projectInstance == null)
-            {
-                throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
-            }
+                var projectInstance = _projectInstanceFactory(
+                    configurationMetadata.ProjectFullPath,
+                    null,
+                    _projectCollection);
 
+                if (projectInstance == null)
+                {
+                    throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
+                }
 
-
-            var graphNode = new ProjectGraphNode(projectInstance);
-            if(enableDynamicPlatformResolution){
-                
-                var Platforms = projectInstance.GetProperty("Platforms");
-                var Platform = projectInstance.GetProperty("Platform");
                 var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), globalProperties[PlatformMetadataName], "", projectInstance.FullPath);
 
 
-                if (SelectedPlatform != null)
+                if (!string.IsNullOrEmpty(SelectedPlatform))
                 {
-                    // configurationMetadata.GlobalProperties.GetProperty("platform").EvaluatedValue = SelectedPlatform;
                     globalProperties["platform"] = SelectedPlatform;
                 }
 
@@ -558,6 +553,20 @@ namespace Microsoft.Build.Graph
                     _projectCollection);
 
                 graphNode = new ProjectGraphNode(projectInstance);
+            }
+            else
+            {
+                var projectInstance = _projectInstanceFactory(
+                    configurationMetadata.ProjectFullPath,
+                    globalProperties,
+                    _projectCollection);
+
+                if (projectInstance == null)
+                {
+                    throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
+                }
+
+               graphNode = new ProjectGraphNode(projectInstance);
             }
             
             var referenceInfos = ParseReferences(graphNode, ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)));
