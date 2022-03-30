@@ -447,7 +447,7 @@ namespace Microsoft.Build.Evaluation
                     // Take care to ensure that there is never more than one value observed
                     // from this property even in the case of race conditions while lazily initializing.
                     var local = new ProjectCollection(null, null, null, ToolsetDefinitionLocations.Default,
-                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: false);
+                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true);
 
                     if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
                     {
