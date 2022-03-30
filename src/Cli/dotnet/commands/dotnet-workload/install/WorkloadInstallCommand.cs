@@ -254,13 +254,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
                 };
 
-                transaction.Run(context =>
+                transaction.Run(
+                    action: context =>
                     {
                         bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
 
                         foreach (var manifestUpdate in manifestsToUpdate)
                         {
-                            _workloadInstaller.InstallWorkloadManifest(manifestUpdate, offlineCache, rollback);
+                            _workloadInstaller.InstallWorkloadManifest(manifestUpdate, context, offlineCache, rollback);
                         }
 
                         _workloadResolver.RefreshWorkloadManifests();
@@ -278,13 +279,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     },
                     rollback: () =>
                     {
-                        foreach (var manifestUpdate in manifestsToUpdate)
-                        {
-                            var manifestUpdateRollback = new ManifestVersionUpdate(manifestUpdate.ManifestId, manifestUpdate.NewVersion, manifestUpdate.NewFeatureBand, manifestUpdate.ExistingVersion, manifestUpdate.ExistingFeatureBand);
-                            _workloadInstaller.InstallWorkloadManifest(manifestUpdateRollback, offlineCache: null, isRollback: true);
-                        }
-
-                        //  InstallWorkloadPacks implementation should already be using transaction and rolling back if needed
+                        //  InstallWorkloadManifest and InstallWorkloadPacks already handle rolling back their actions, so here we only
+                        //  need to delete the installation records
 
                         foreach (var workloadId in newWorkloadInstallRecords)
                         {

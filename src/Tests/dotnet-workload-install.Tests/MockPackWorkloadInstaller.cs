@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return InstallationRecordRepository;
         }
 
-        public void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache = null, bool isRollback = false)
+        public void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false)
         {
             InstalledManifests.Add((manifestUpdate, offlineCache));
         }

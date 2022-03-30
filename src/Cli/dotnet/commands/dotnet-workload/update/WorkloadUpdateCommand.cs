@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
                         foreach (var manifestUpdate in manifestsToUpdate)
                         {
-                            _workloadInstaller.InstallWorkloadManifest(manifestUpdate, offlineCache, rollback);
+                            _workloadInstaller.InstallWorkloadManifest(manifestUpdate, context, offlineCache, rollback);
                         }
 
                         _workloadResolver.RefreshWorkloadManifests();
@@ -211,16 +211,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                         workloadPackToUpdate = GetUpdatablePacks(installer);
 
                         installer.InstallWorkloadPacks(workloadPackToUpdate, sdkFeatureBand, context, offlineCache);
-
                     },
                     rollback: () => {
-                        foreach (var manifestUpdate in manifestsToUpdate)
-                        {
-                            var manifestUpdateRollback = new ManifestVersionUpdate(manifestUpdate.ManifestId, manifestUpdate.NewVersion, manifestUpdate.NewFeatureBand, manifestUpdate.ExistingVersion, manifestUpdate.ExistingFeatureBand);
-                            _workloadInstaller.InstallWorkloadManifest(manifestUpdateRollback, offlineCache: null, isRollback: true);
-                        }
-
-                        //  InstallWorkloadPacks implementation should already be using transaction and rolling back if needed
+                        //  Nothing to roll back at this level, InstallWorkloadManifest and InstallWorkloadPacks handle the transaction rollback
                     });
             }
             else

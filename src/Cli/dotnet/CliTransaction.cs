@@ -13,6 +13,9 @@ namespace Microsoft.DotNet.Cli
     internal interface ITransactionContext
     {
         public void AddRollbackAction(Action action);
+
+        //  Add an action which will be run at the end of the transaction, whether it succeeds or not (after any rollback actions, if applicable)
+        public void AddCleanupAction(Action action);
     }
 
     internal class CliTransaction
@@ -68,14 +71,30 @@ namespace Microsoft.DotNet.Cli
 
                 throw;
             }
+            finally
+            {
+                foreach (var cleanupAction in transactionContext.CleanupActions)
+                {
+                    cleanupAction();
+                }
+            }
         }
 
         class TransactionContext : ITransactionContext
         {
             public List<Action> RollbackActions { get; set; } = new List<Action>();
+
+            //  Actions which will be run either when the transaction completes successfully, or after rollback actions have been run
+            public List<Action> CleanupActions { get; set; } = new List<Action>();
+
             public void AddRollbackAction(Action action)
             {
                 RollbackActions.Add(action);
+            }
+
+            public void AddCleanupAction(Action action)
+            {
+                CleanupActions.Add(action);
             }
         }
     }
@@ -83,6 +102,11 @@ namespace Microsoft.DotNet.Cli
     //  Transaction context to use when there is no transaction
     internal class NullTransactionContext : ITransactionContext
     {
+        public void AddCleanupAction(Action action)
+        {
+
+        }
+
         public void AddRollbackAction(Action action)
         {
 
@@ -91,9 +115,16 @@ namespace Microsoft.DotNet.Cli
 
     static class CliTransactionExtensions
     {
-        public static void Run(this ITransactionContext context, Action action, Action rollback)
+        public static void Run(this ITransactionContext context, Action action, Action rollback = null, Action cleanup = null)
         {
-            context.AddRollbackAction(rollback);
+            if (rollback != null)
+            {
+                context.AddRollbackAction(rollback);
+            }
+            if (cleanup != null)
+            {
+                context.AddCleanupAction(cleanup);
+            }
             action();
         }
     }

@@ -363,7 +363,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             var manifestUpdate = new ManifestVersionUpdate(manifestId, null, null, manifestVersion, featureBand.ToString());
 
-            installer.InstallWorkloadManifest(manifestUpdate);
+            installer.InstallWorkloadManifest(manifestUpdate, new NullTransactionContext());
 
             var mockNugetInstaller = nugetDownloader as MockNuGetPackageDownloader;
             mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);

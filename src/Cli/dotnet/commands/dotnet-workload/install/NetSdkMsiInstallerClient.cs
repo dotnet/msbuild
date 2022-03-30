@@ -249,89 +249,102 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public IWorkloadInstaller GetWorkloadInstaller() => throw new InvalidOperationException($"{GetType()} is not a workload installer.");
 
-        public void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache = null, bool isRollback = false)
+        public void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false)
         {
             try
             {
-                ReportPendingReboot();
-
-                // Rolling back a manifest update after a successful install is essentially a downgrade, which is blocked so we have to
-                // treat it as a special case and is different from the install failing and rolling that back, though depending where the install
-                // failed, it may have removed the old product already.
-                Log?.LogMessage($"Installing manifest: Id: {manifestUpdate.ManifestId}, version: {manifestUpdate.NewVersion}, feature band: {manifestUpdate.NewFeatureBand}, rollback: {isRollback}.");
-
-                // Resolve the package ID for the manifest payload package
-                string msiPackageId = WorkloadManifestUpdater.GetManifestPackageId(new SdkFeatureBand(manifestUpdate.NewFeatureBand), manifestUpdate.ManifestId, InstallType.Msi).ToString();
-                string msiPackageVersion = $"{manifestUpdate.NewVersion}";
-
-                Log?.LogMessage($"Resolving {manifestUpdate.ManifestId} ({manifestUpdate.NewVersion}) to {msiPackageId} ({msiPackageVersion}).");
-
-                // Retrieve the payload from the MSI package cache.
-                MsiPayload msi = GetCachedMsiPayload(msiPackageId, msiPackageVersion, offlineCache);
-                VerifyPackage(msi);
-                DetectState state = DetectPackage(msi.ProductCode, out Version installedVersion);
-                InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out IEnumerable<string> relatedProducts);
-
-                // If we've detected a downgrade, it's possible we might be doing a rollback after the manifests were updated,
-                // but another error occurred. In this case we need to try and uninstall the upgrade and then install the lower
-                // version of the MSI. The downgrade can also be a deliberate rollback.
-                if (plannedAction == InstallAction.Downgrade && isRollback && state == DetectState.Absent)
-                {
-                    Log?.LogMessage($"Rolling back manifest update.");
-
-                    // The provider keys for manifest packages are stable across feature bands so we retain dependents during upgrades.
-                    DependencyProvider depProvider = new DependencyProvider(msi.Manifest.ProviderKeyName);
-
-                    // Try and remove the SDK dependency, but ignore any remaining dependencies since
-                    // we want to force the removal of the old version. The remaining dependencies and the provider
-                    // key won't be removed.
-                    UpdateDependent(InstallRequestType.RemoveDependent, msi.Manifest.ProviderKeyName, _dependent);
-
-                    // Since we don't have records for manifests, we need to try and retrieve the ProductCode of
-                    // the newer MSI that's installed that we want to remove using its dependency provider.
-                    string productCode = depProvider.ProductCode;
-
-                    if (string.IsNullOrWhiteSpace(productCode))
+                transactionContext.Run(
+                    action: () =>
                     {
-                        // We don't know the MSI package that wrote this provider key, so if the ProductCode is missing
-                        // we can't do anything else.
-                        Log?.LogMessage($"Failed to retrieve the ProductCode for provider: {depProvider.ProviderKeyName}.");
-                        return;
-                    }
-
-                    Log?.LogMessage($"Found ProductCode {productCode} registered against provider, {depProvider.ProviderKeyName}.");
-
-                    // This is a best effort. If for some reason the manifest installers were fixed, for example, manually
-                    // adding additional upgrade paths to work around previous faulty authoring, we may have multiple related
-                    // products. The best we can do is to check for at least one match and remove it and then try the rollback.
-                    if (!relatedProducts.Contains(productCode, StringComparer.OrdinalIgnoreCase))
+                        InstallWorkloadManifestImplementation(manifestUpdate, offlineCache, isRollback);
+                    },
+                    rollback: () =>
                     {
-                        Log?.LogMessage($"Cannot rollback manifest. ProductCode does not match any detected related products.");
-                        return;
-                    }
-
-                    string logFile = GetMsiLogName(productCode, InstallAction.Uninstall);
-                    uint error = UninstallMsi(productCode, logFile, ignoreDependencies: true);
-
-                    ExitOnError(error, "Failed to uninstall manifest package.");
-
-                    // Detect the package again and fall through to the original execution. If that fails, then there's nothing
-                    // we could have done.
-                    Log?.LogMessage("Replanning manifest package.");
-                    state = DetectPackage(msi, out Version _);
-                    plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out IEnumerable<string> _);
-                }
-
-                ExecutePackage(msi, plannedAction);
-
-                // Update the reference count against the MSI.
-                UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
+                        InstallWorkloadManifestImplementation(manifestUpdate.Reverse(), offlineCache: null, isRollback: true);
+                    });
             }
             catch (Exception e)
             {
                 LogException(e);
                 throw;
             }
+        }
+
+        void InstallWorkloadManifestImplementation(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache = null, bool isRollback = false)
+        {
+            ReportPendingReboot();
+
+            // Rolling back a manifest update after a successful install is essentially a downgrade, which is blocked so we have to
+            // treat it as a special case and is different from the install failing and rolling that back, though depending where the install
+            // failed, it may have removed the old product already.
+            Log?.LogMessage($"Installing manifest: Id: {manifestUpdate.ManifestId}, version: {manifestUpdate.NewVersion}, feature band: {manifestUpdate.NewFeatureBand}, rollback: {isRollback}.");
+
+            // Resolve the package ID for the manifest payload package
+            string msiPackageId = WorkloadManifestUpdater.GetManifestPackageId(new SdkFeatureBand(manifestUpdate.NewFeatureBand), manifestUpdate.ManifestId, InstallType.Msi).ToString();
+            string msiPackageVersion = $"{manifestUpdate.NewVersion}";
+
+            Log?.LogMessage($"Resolving {manifestUpdate.ManifestId} ({manifestUpdate.NewVersion}) to {msiPackageId} ({msiPackageVersion}).");
+
+            // Retrieve the payload from the MSI package cache.
+            MsiPayload msi = GetCachedMsiPayload(msiPackageId, msiPackageVersion, offlineCache);
+            VerifyPackage(msi);
+            DetectState state = DetectPackage(msi.ProductCode, out Version installedVersion);
+            InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out IEnumerable<string> relatedProducts);
+
+            // If we've detected a downgrade, it's possible we might be doing a rollback after the manifests were updated,
+            // but another error occurred. In this case we need to try and uninstall the upgrade and then install the lower
+            // version of the MSI. The downgrade can also be a deliberate rollback.
+            if (plannedAction == InstallAction.Downgrade && isRollback && state == DetectState.Absent)
+            {
+                Log?.LogMessage($"Rolling back manifest update.");
+
+                // The provider keys for manifest packages are stable across feature bands so we retain dependents during upgrades.
+                DependencyProvider depProvider = new DependencyProvider(msi.Manifest.ProviderKeyName);
+
+                // Try and remove the SDK dependency, but ignore any remaining dependencies since
+                // we want to force the removal of the old version. The remaining dependencies and the provider
+                // key won't be removed.
+                UpdateDependent(InstallRequestType.RemoveDependent, msi.Manifest.ProviderKeyName, _dependent);
+
+                // Since we don't have records for manifests, we need to try and retrieve the ProductCode of
+                // the newer MSI that's installed that we want to remove using its dependency provider.
+                string productCode = depProvider.ProductCode;
+
+                if (string.IsNullOrWhiteSpace(productCode))
+                {
+                    // We don't know the MSI package that wrote this provider key, so if the ProductCode is missing
+                    // we can't do anything else.
+                    Log?.LogMessage($"Failed to retrieve the ProductCode for provider: {depProvider.ProviderKeyName}.");
+                    return;
+                }
+
+                Log?.LogMessage($"Found ProductCode {productCode} registered against provider, {depProvider.ProviderKeyName}.");
+
+                // This is a best effort. If for some reason the manifest installers were fixed, for example, manually
+                // adding additional upgrade paths to work around previous faulty authoring, we may have multiple related
+                // products. The best we can do is to check for at least one match and remove it and then try the rollback.
+                if (!relatedProducts.Contains(productCode, StringComparer.OrdinalIgnoreCase))
+                {
+                    Log?.LogMessage($"Cannot rollback manifest. ProductCode does not match any detected related products.");
+                    return;
+                }
+
+                string logFile = GetMsiLogName(productCode, InstallAction.Uninstall);
+                uint error = UninstallMsi(productCode, logFile, ignoreDependencies: true);
+
+                ExitOnError(error, "Failed to uninstall manifest package.");
+
+                // Detect the package again and fall through to the original execution. If that fails, then there's nothing
+                // we could have done.
+                Log?.LogMessage("Replanning manifest package.");
+                state = DetectPackage(msi, out Version _);
+                plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out IEnumerable<string> _);
+            }
+
+            ExecutePackage(msi, plannedAction);
+
+            // Update the reference count against the MSI.
+            UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
         }
 
         public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
@@ -552,7 +565,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     : InstallAction.None;
             }
 
-            // At this point we know the MSI is absent so there are only three outcomes when executing the package:
+            // If we know the MSI is absent, there are only three outcomes when executing the package:
             //   1. We'll just do a clean install if we don't find related products so we're either brand new or SxS.
             //   2. We'll perform a major upgrade.
             //   3. We'll trigger a downgrade and likely an error since most MSIs detect and block downgrades.
