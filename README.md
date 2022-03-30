@@ -14,7 +14,7 @@ The current development branch is `main`. Changes in `main` will go into a futur
 
 We have forked for MSBuild 17.2 in the branch [`vs17.2`](https://github.com/Microsoft/msbuild/tree/vs17.2). Changes to that branch need special approval.
 
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.1)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.1)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.2)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.2)
 
 17.0 builds from the branch [`vs17.0`](https://github.com/Microsoft/msbuild/tree/vs17.0). Only high-priority bugfixes will be considered for servicing 17.0.
 
