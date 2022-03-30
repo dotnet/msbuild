@@ -3,8 +3,10 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -94,7 +96,16 @@ namespace Microsoft.Build.Evaluation
         string IProperty.EvaluatedValueEscaped
         {
             [DebuggerStepThrough]
-            get => EvaluatedValueEscapedInternal;
+            get
+            {
+                if ((this as IProperty).IsEnvironmentProperty && this is ProjectPropertyNotXmlBacked notXmlBacked && notXmlBacked.loggingContext is not null)
+                {
+                    EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal);
+                    notXmlBacked.loggingContext.LogBuildEvent(args);
+                }
+
+                return EvaluatedValueEscapedInternal;
+            }
         }
 
         /// <summary>
@@ -239,9 +250,9 @@ namespace Microsoft.Build.Evaluation
         /// This is ONLY to be used by the Evaluator (and Project.SetGlobalProperty) and ONLY for Global, Environment, and Built-in properties.
         /// All other properties originate in XML, and should have a backing XML object.
         /// </summary>
-        internal static ProjectProperty Create(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+        internal static ProjectProperty Create(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext = null)
         {
-            return new ProjectPropertyNotXmlBacked(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
+            return new ProjectPropertyNotXmlBacked(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext);
         }
 
         /// <summary>
@@ -496,6 +507,7 @@ namespace Microsoft.Build.Evaluation
             /// Name of the property.
             /// </summary>
             private readonly string _name;
+            internal LoggingContext loggingContext;
 
             /// <summary>
             /// Creates a property without backing XML.
@@ -503,7 +515,7 @@ namespace Microsoft.Build.Evaluation
             /// This is ONLY to be used by the Evaluator (and Project.SetGlobalProperty) and ONLY for Global, Environment, and Built-in properties.
             /// All other properties originate in XML, and should have a backing XML object.
             /// </summary>
-            internal ProjectPropertyNotXmlBacked(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+            internal ProjectPropertyNotXmlBacked(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext)
                 : base(project, evaluatedValueEscaped)
             {
                 ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
@@ -512,6 +524,7 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.VerifyThrowArgument(mayBeReserved || !ReservedPropertyNames.IsReservedProperty(name), "OM_ReservedName", name);
 
                 _name = name;
+                this.loggingContext = loggingContext;
             }
 
             /// <summary>

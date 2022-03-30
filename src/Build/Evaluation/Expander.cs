@@ -1513,10 +1513,6 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     propertyValue = property.EvaluatedValueEscaped;
-                    if (!string.IsNullOrEmpty(property.EvaluatedValueEscaped) && property.IsEnvironmentProperty)
-                    {
-                        EnvironmentUtilities.EnvironmentVariablesUsedAsProperties[property.Name] = property.EvaluatedValueEscaped;
-                    }
                 }
 
                 return propertyValue;

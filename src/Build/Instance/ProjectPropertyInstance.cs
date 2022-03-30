@@ -10,6 +10,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.BackEnd;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -40,6 +42,8 @@ namespace Microsoft.Build.Execution
             _name = name;
             _escapedValue = escapedValue;
         }
+
+        internal LoggingContext loggingContext;
 
         /// <summary>
         /// Name of the property
@@ -84,8 +88,20 @@ namespace Microsoft.Build.Execution
         /// Setter assumes caller has protected global properties, if necessary.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IProperty.EvaluatedValueEscaped => _escapedValue;
+        string IProperty.EvaluatedValueEscaped
+        {
+            get
+            {
+                if ((this as IProperty).IsEnvironmentProperty && loggingContext is not null)
+                {
+                    EnvironmentVariableReadEventArgs args = new(Name, _escapedValue);
+                    loggingContext.LogBuildEvent(args);
+                    loggingContext = null;
+                }
 
+                return _escapedValue;
+            }
+        }
         /// <summary>
         /// Implementation of IKeyed exposing the property name
         /// </summary>
@@ -184,9 +200,9 @@ namespace Microsoft.Build.Execution
         /// This flags should ONLY be set by the evaluator or by cloning; after the ProjectInstance is created, they must be illegal.
         /// If name is invalid or reserved, throws ArgumentException.
         /// </summary>
-        internal static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, bool isImmutable, bool isEnvironmentProperty = false)
+        internal static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, bool isImmutable, bool isEnvironmentProperty = false, LoggingContext loggingContext = null)
         {
-            return Create(name, escapedValue, mayBeReserved, null, isImmutable, isEnvironmentProperty);
+            return Create(name, escapedValue, mayBeReserved, null, isImmutable, isEnvironmentProperty, loggingContext);
         }
 
         /// <summary>
@@ -280,7 +296,7 @@ namespace Microsoft.Build.Execution
         /// as it should never be needed for any subsequent messages, and is just extra bulk.
         /// Inherits mutability from project if any.
         /// </summary>
-        private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, ElementLocation location, bool isImmutable, bool isEnvironmentProperty = false)
+        private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, ElementLocation location, bool isImmutable, bool isEnvironmentProperty = false, LoggingContext loggingContext = null)
         {
             // Does not check immutability as this is only called during build (which is already protected) or evaluation
             ErrorUtilities.VerifyThrowArgumentNull(escapedValue, nameof(escapedValue));
@@ -299,6 +315,7 @@ namespace Microsoft.Build.Execution
 
             ProjectPropertyInstance instance = isImmutable ? new ProjectPropertyInstanceImmutable(name, escapedValue) : new ProjectPropertyInstance(name, escapedValue);
             ((IProperty)instance).IsEnvironmentProperty = isEnvironmentProperty;
+            instance.loggingContext = loggingContext;
             return instance;
         }
 
