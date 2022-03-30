@@ -26,6 +26,10 @@ namespace Microsoft.DotNet.Cli
         //  Delegate called when rollback fails.  If set, exception will be passed to the delegate, but not rethrown
         public Action<Exception> RollbackFailed { get; set; }
 
+        public static void RunNew(Action<ITransactionContext> action)
+        {
+            new CliTransaction().Run(action);
+        }
 
         public void Run(Action<ITransactionContext> action, Action rollback)
         {
@@ -96,20 +100,6 @@ namespace Microsoft.DotNet.Cli
             {
                 CleanupActions.Add(action);
             }
-        }
-    }
-
-    //  Transaction context to use when there is no transaction
-    internal class NullTransactionContext : ITransactionContext
-    {
-        public void AddCleanupAction(Action action)
-        {
-
-        }
-
-        public void AddRollbackAction(Action action)
-        {
-
         }
     }
 
