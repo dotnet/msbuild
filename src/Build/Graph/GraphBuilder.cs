@@ -499,15 +499,16 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private ParsedProject ParseProject(ConfigurationMetadata configurationMetadata, Boolean enableDynamicPlatformResolution)
+        private ParsedProject ParseProject(ConfigurationMetadata configurationMetadata, bool enableDynamicPlatformResolution)
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
             ProjectGraphNode graphNode;
+            ProjectInstance projectInstance;
 
             if (enableDynamicPlatformResolution){
 
-                var projectInstance = _projectInstanceFactory(
+                projectInstance = _projectInstanceFactory(
                     configurationMetadata.ProjectFullPath,
                     null,
                     _projectCollection);
@@ -534,7 +535,7 @@ namespace Microsoft.Build.Graph
             }
             else
             {
-                var projectInstance = _projectInstanceFactory(
+                projectInstance = _projectInstanceFactory(
                     configurationMetadata.ProjectFullPath,
                     globalProperties,
                     _projectCollection);
@@ -574,12 +575,12 @@ namespace Microsoft.Build.Graph
             return _graphWorkSet.CompletedWork;
         }
 
-        private void SubmitProjectForParsing(ConfigurationMetadata projectToEvaluate, Boolean enableDynamicPlatformResolution)
+        private void SubmitProjectForParsing(ConfigurationMetadata projectToEvaluate, bool enableDynamicPlatformResolution)
         {
             _graphWorkSet.AddWork(projectToEvaluate, () => ParseProject(projectToEvaluate, enableDynamicPlatformResolution));
         }
 
-        private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject, Boolean enableDynamicPlatformResolution)
+        private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject, bool enableDynamicPlatformResolution)
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
