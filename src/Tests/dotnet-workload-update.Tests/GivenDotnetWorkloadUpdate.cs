@@ -365,6 +365,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             packInstaller.InstalledManifests[0].manifestUpdate.ManifestId.Should().Be(manifestsToUpdate[0].manifestUpdate.ManifestId);
             packInstaller.InstalledManifests[0].manifestUpdate.NewVersion.Should().Be(manifestsToUpdate[0].manifestUpdate.NewVersion);
             packInstaller.InstalledManifests[0].manifestUpdate.NewFeatureBand.Should().Be(manifestsToUpdate[0].manifestUpdate.NewFeatureBand);
+            packInstaller.InstalledManifests[0].manifestUpdate.ExistingVersion.Should().Be(manifestsToUpdate[0].manifestUpdate.ExistingVersion);
+            packInstaller.InstalledManifests[0].manifestUpdate.ExistingFeatureBand.Should().Be(manifestsToUpdate[0].manifestUpdate.ExistingFeatureBand);
             packInstaller.InstalledManifests[0].offlineCache.Should().Be(null);
         }
 
@@ -394,6 +396,9 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             packInstaller.InstalledManifests[0].manifestUpdate.NewFeatureBand.Should().Be("6.0.100");
             packInstaller.InstalledManifests[1].manifestUpdate.NewFeatureBand.Should().Be("6.0.300");
             packInstaller.InstalledManifests[2].manifestUpdate.NewFeatureBand.Should().Be("6.0.100");
+            packInstaller.InstalledManifests[0].manifestUpdate.ExistingFeatureBand.Should().Be("6.0.300");
+            packInstaller.InstalledManifests[1].manifestUpdate.ExistingFeatureBand.Should().Be("6.0.100");
+            packInstaller.InstalledManifests[2].manifestUpdate.ExistingFeatureBand.Should().Be("5.0.100");
             packInstaller.InstalledManifests[0].offlineCache.Should().Be(null);
         }
 

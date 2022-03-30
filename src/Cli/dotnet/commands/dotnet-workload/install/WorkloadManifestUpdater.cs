@@ -384,8 +384,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource, manifestPath);
 
-                //  TODO: figure out how to differentiate between the feature band an advertising manifest is branded as and the feature band of the SDK
-                //  it's advertised to
                 return (new ManifestVersion(manifest.Version), _sdkFeatureBand, manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
             }
         }
