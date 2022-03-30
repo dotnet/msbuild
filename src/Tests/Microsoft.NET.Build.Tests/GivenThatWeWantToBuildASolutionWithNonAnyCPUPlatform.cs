@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(testAsset, "x64SolutionBuild.sln");
             buildCommand
-                .Execute()
+                .Execute("/p:ProduceReferenceAssembly=false")
                 .Should()
                 .Pass();
 
@@ -37,7 +37,6 @@ namespace Microsoft.NET.Build.Tests
                     "x64SolutionBuild.deps.json",
                     "x64SolutionBuild.dll",
                     "x64SolutionBuild.pdb",
-                    "ref/x64SolutionBuild.dll",
                     $"x64SolutionBuild{EnvironmentInfo.ExecutableExtension}"
                 });
         }
