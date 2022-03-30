@@ -936,7 +936,7 @@ namespace FrameworkReferenceTest
             var testProject = new TestProject()
             {
                 Name = "TransitiveFrameworkRef",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true
             };
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Authentication.JwtBearer", "5.0.0"));

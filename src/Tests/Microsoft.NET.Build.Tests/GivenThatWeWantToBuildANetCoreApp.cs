@@ -876,7 +876,7 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "MainProject",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -891,7 +891,7 @@ class Program
                 .Should()
                 .Pass();
 
-            var outputPath = buildCommand.GetOutputDirectory(targetFramework: "net5.0").FullName;
+            var outputPath = buildCommand.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework).FullName;
             if (produceOnlyReferenceAssembly == true)
             {
                 var refPath = Path.Combine(outputPath, "ref");
