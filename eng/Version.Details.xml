@@ -121,13 +121,13 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
       <Sha>c911002ab43b7b989ed67090f2a48d9073d5118d</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.2.0-preview.2.123">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.2.0-preview.3.131">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>8bda466765accefccf516850745ad30dceeab381</Sha>
+      <Sha>bc4b41f3ca294ccc8aedc8af5159c215943e1ed2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.NuGetSdkResolver" Version="6.2.0-preview.2.123">
+    <Dependency Name="Microsoft.Build.NuGetSdkResolver" Version="6.2.0-preview.3.131">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>8bda466765accefccf516850745ad30dceeab381</Sha>
+      <Sha>bc4b41f3ca294ccc8aedc8af5159c215943e1ed2</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.2.0-release-20220209-04">
       <Uri>https://github.com/microsoft/vstest</Uri>
