@@ -24,7 +24,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Update
 {
-    internal class WorkloadUpdateCommand : CommandBase
+    internal class WorkloadUpdateCommand : WorkloadCommandBase
     {
         private readonly bool _printDownloadLinkOnly;
         private readonly string _fromCacheOption;
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             var restoreActionConfig = _parseResult.ToRestoreActionConfig();
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter,
-                sdkFeatureBand, _workloadResolver, _verbosity, _userProfileDir, nugetPackageDownloader,
+                sdkFeatureBand, _workloadResolver, _verbosity, _userProfileDir, VerifySignatures, nugetPackageDownloader,
                 dotnetDir, _tempDirPath, packageSourceLocation: _packageSourceLocation, restoreActionConfig,
                 elevationRequired: !_printDownloadLinkOnly && !_printRollbackDefinitionOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else if (_printRollbackDefinitionOnly)
             {
-                var manifests = _workloadResolver.GetInstalledManifests().ToDictionary(m => m.Id, m => m.Version, StringComparer.OrdinalIgnoreCase);
+                var manifests = _workloadResolver.GetInstalledManifests().ToDictionary(m => m.Id, m => m.Version + "/" + m.ManifestFeatureBand, StringComparer.OrdinalIgnoreCase);
 
                 _reporter.WriteLine("==workloadRollbackDefinitionJsonOutputStart==");
                 _reporter.WriteLine(JsonSerializer.Serialize(manifests));
@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
             
             var manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?
-                _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion)) :
+                _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.existingFeatureBand, m.newVersion, m.newFeatureBand)) :
                 _workloadManifestUpdater.CalculateManifestRollbacks(_fromRollbackDefinition);
 
             UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private void UpdateWorkloadsWithInstallRecord(
             IEnumerable<WorkloadId> workloadIds,
             SdkFeatureBand sdkFeatureBand,
-            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate,
+            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)> manifestsToUpdate,
             DirectoryPath? offlineCache = null)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
@@ -191,17 +191,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
                         foreach (var manifest in manifestsToUpdate)
                         {
-                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand, offlineCache, rollback);
+                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, manifest.newFeatureBand, offlineCache, rollback);
                         }
 
                         _workloadResolver.RefreshWorkloadManifests();
 
                         workloadPackToUpdate = GetUpdatablePacks(installer);
 
-                        foreach (var packId in workloadPackToUpdate)
-                        {
-                            installer.InstallWorkloadPack(packId, sdkFeatureBand, offlineCache);
-                        }
+                        installer.InstallWorkloadPacks(workloadPackToUpdate, sdkFeatureBand, offlineCache);
+
                     },
                     rollback: () => {
                         try

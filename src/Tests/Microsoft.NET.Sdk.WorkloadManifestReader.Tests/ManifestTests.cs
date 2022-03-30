@@ -37,7 +37,7 @@ namespace ManifestReaderTests
         {
             using (FileStream fsSource = new FileStream(ManifestPath, FileMode.Open, FileAccess.Read))
             {
-                var result = WorkloadManifestReader.ReadWorkloadManifest("Sample", fsSource);
+                var result = WorkloadManifestReader.ReadWorkloadManifest("Sample", fsSource, ManifestPath);
                 result.Version.Should().Be("5.0.0-preview1");
                 var xamAndroidId = new WorkloadPackId("Xamarin.Android.Sdk");
 
@@ -209,9 +209,10 @@ namespace ManifestReaderTests
         [Fact]
         public void WillNotLoadManifestWithNullAlias()
         {
-            using FileStream fsSource = new FileStream(GetSampleManifestPath("NullAliasError.json"), FileMode.Open, FileAccess.Read);
+            var manifestPath = GetSampleManifestPath("NullAliasError.json");
+            using FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read);
 
-            var ex = Assert.Throws<WorkloadManifestFormatException>(() => WorkloadManifestReader.ReadWorkloadManifest("NullAliasError", fsSource));
+            var ex = Assert.Throws<WorkloadManifestFormatException>(() => WorkloadManifestReader.ReadWorkloadManifest("NullAliasError", fsSource, manifestPath));
             Assert.Contains("Expected string value at offset", ex.Message);
         }
 

@@ -92,25 +92,5 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             commandOutput = commandResult.StdOut + Environment.NewLine + commandResult.StdErr;
             return commandResult.ExitCode == 0;
         }
-
-        public bool IsExecutableIsFirstPartySignedWithoutValidation(FilePath executable)
-        {
-            var environmentProvider = new EnvironmentProvider();
-            var forceCheck = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_CLI_TEST_FORCE_SIGN_CHECK", false);
-            if (forceCheck)
-            {
-                return true;
-            }
-
-            try
-            {
-                X509Certificate signedFile = X509Certificate2.CreateFromSignedFile(executable.Value);
-                return signedFile.Subject.Contains("O=Microsoft Corporation", StringComparison.OrdinalIgnoreCase);
-            }
-            catch (CryptographicException)
-            {
-                return false;
-            }
-        }
     }
 }

@@ -42,12 +42,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public NetSdkMsiInstallerClient(InstallElevationContextBase elevationContext,
             ISetupLogger logger,
+            bool verifySignatures,
             IWorkloadResolver workloadResolver,
             SdkFeatureBand sdkFeatureBand,
             INuGetPackageDownloader nugetPackageDownloader = null,
             VerbosityOptions verbosity = VerbosityOptions.normal,
             PackageSourceLocation packageSourceLocation = null,
-            IReporter reporter = null) : base(elevationContext, logger, reporter)
+            IReporter reporter = null) : base(elevationContext, logger, verifySignatures, reporter)
         {
             _packageSourceLocation = packageSourceLocation;
             _nugetPackageDownloader = nugetPackageDownloader;
@@ -64,6 +65,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             Log?.LogMessage($"{nameof(ProcessorArchitecture)}: {ProcessorArchitecture}");
             Log?.LogMessage($"{nameof(HostArchitecture)}: {HostArchitecture}");
             Log?.LogMessage($"{nameof(SdkDirectory)}: {SdkDirectory}");
+            Log?.LogMessage($"{nameof(VerifySignatures)}: {VerifySignatures}");
             Log?.LogMessage($"SDK feature band: {_sdkFeatureBand}");
 
             if (IsElevated)
@@ -360,29 +362,32 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
-            try
+            ReportPendingReboot();
+
+            foreach (var packInfo in packInfos)
             {
-                ReportPendingReboot();
+                try
+                {
+                    // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
+                    string msiPackageId = GetMsiPackageId(packInfo);
 
-                // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
-                string msiPackageId = GetMsiPackageId(packInfo);
+                    // Retrieve the payload from the MSI package cache.
+                    MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
+                    VerifyPackage(msi);
+                    DetectState state = DetectPackage(msi, out Version installedVersion);
+                    InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out _);
+                    ExecutePackage(msi, plannedAction);
 
-                // Retrieve the payload from the MSI package cache.
-                MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
-                VerifyPackage(msi);
-                DetectState state = DetectPackage(msi, out Version installedVersion);
-                InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out _);
-                ExecutePackage(msi, plannedAction);
-
-                // Update the reference count against the MSI.
-                UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
-            }
-            catch (Exception e)
-            {
-                LogException(e);
-                RollBackWorkloadPackInstall(packInfo, sdkFeatureBand, offlineCache);
+                    // Update the reference count against the MSI.
+                    UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
+                }
+                catch (Exception e)
+                {
+                    LogException(e);
+                    RollBackWorkloadPackInstall(packInfo, sdkFeatureBand, offlineCache);
+                }
             }
         }
 
@@ -825,6 +830,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// <param name="packageSourceLocation"></param>
         /// <returns></returns>
         public static NetSdkMsiInstallerClient Create(
+            bool verifySignatures,
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader = null,
@@ -846,7 +852,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     new NullLogger(), restoreActionConfig: restoreActionConfig);
             }
 
-            return new NetSdkMsiInstallerClient(elevationContext, logger, workloadResolver, sdkFeatureBand, nugetPackageDownloader,
+            return new NetSdkMsiInstallerClient(elevationContext, logger, verifySignatures, workloadResolver, sdkFeatureBand, nugetPackageDownloader,
                 verbosity, packageSourceLocation, reporter);
         }
 

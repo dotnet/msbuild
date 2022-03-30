@@ -147,16 +147,16 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var testDir = _testAssetsManager.CreateTestDirectory().Path;
             var featureBand = "6.0.100";
             var dotnetRoot = Path.Combine(testDir, "dotnet");
-            var expectedManifestUpdates = new (ManifestId, ManifestVersion, ManifestVersion)[] {
-                (new ManifestId("test-manifest-1"), new ManifestVersion("5.0.0"), new ManifestVersion("4.0.0")),
-                (new ManifestId("test-manifest-2"), new ManifestVersion("3.0.0"), new ManifestVersion("2.0.0")) };
+            var expectedManifestUpdates = new (ManifestId,  ManifestVersion, SdkFeatureBand, ManifestVersion, SdkFeatureBand)[] {
+                (new ManifestId("test-manifest-1"), new ManifestVersion("5.0.0"), new SdkFeatureBand("6.0.100"), new ManifestVersion("4.0.0"), new SdkFeatureBand("6.0.100")),
+                (new ManifestId("test-manifest-2"), new ManifestVersion("3.0.0"), new SdkFeatureBand("6.0.100"), new ManifestVersion("2.0.0"), new SdkFeatureBand("6.0.100")) };
 
             // Write mock manifests
             var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", featureBand);
             var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", featureBand);
             Directory.CreateDirectory(installedManifestDir);
             Directory.CreateDirectory(adManifestDir);
-            foreach ((var manifestId, var existingVersion, _) in expectedManifestUpdates)
+            foreach ((var manifestId, var existingVersion, var existingFeatureBand, _, _) in expectedManifestUpdates)
             {
                 Directory.CreateDirectory(Path.Combine(installedManifestDir, manifestId.ToString()));
                 File.WriteAllText(Path.Combine(installedManifestDir, manifestId.ToString(), _manifestFileName), GetManifestContent(existingVersion));

@@ -80,7 +80,7 @@ Options:
                 .Execute($"sln", solutionName, "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindSolutionOrDirectory, solutionName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory()));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -96,7 +96,7 @@ Options:
                 .Execute("sln", "InvalidSolution.sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -113,7 +113,7 @@ Options:
                 .Execute("sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionFullPath, LocalizableStrings.FileHeaderMissingError));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -130,7 +130,7 @@ Options:
                 .Execute("sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.SolutionDoesNotExist, solutionDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(solutionDir));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -146,7 +146,7 @@ Options:
                 .Execute("sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneSolutionInDirectory, projectDirectory + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
