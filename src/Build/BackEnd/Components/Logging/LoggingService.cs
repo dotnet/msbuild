@@ -1203,7 +1203,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// we need to make sure we process all of the events before the build finished event is raised
         /// and we need to make sure we process all of the logging events before we shutdown the component.
         /// </summary>
-        internal void WaitForLoggingToProcessEvents()
+        public void WaitForLoggingToProcessEvents()
         {
             while (_eventQueue != null && !_eventQueue.IsEmpty)
             {
@@ -1273,9 +1273,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 do
                 {
-                    if (_eventQueue.TryDequeue(out object ev))
+                    // We peak message first in order to not have _eventQueue.IsEmpty before we actually process event
+                    //   as this could be interpreted like "every message has been already processed" otherwise.
+                    if (_eventQueue.TryPeek(out object ev))
                     {
                         LoggingEventProcessor(ev);
+                        _eventQueue.TryDequeue(out _);
                         _dequeueEvent.Set();
                     }
                     else
