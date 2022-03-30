@@ -182,7 +182,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             _reporter.WriteLine();
 
-            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestsToUpdate = new List<(ManifestId, ManifestVersion, ManifestVersion)>();
+            var manifestsToUpdate = Enumerable.Empty<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)>();
             if (!skipManifestUpdate)
             {
                 if (_verbosity != VerbosityOptions.quiet && _verbosity != VerbosityOptions.q)
@@ -200,7 +200,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                 _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
                 manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?
-                    _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion)) :
+                    _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.existingFeatureBand, m.newVersion, m.newFeatureBand)) :
                     _workloadManifestUpdater.CalculateManifestRollbacks(_fromRollbackDefinition);
             }
 
@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private void InstallWorkloadsWithInstallRecord(
             IEnumerable<WorkloadId> workloadIds,
             SdkFeatureBand sdkFeatureBand,
-            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate,
+            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)> manifestsToUpdate,
             DirectoryPath? offlineCache)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
@@ -249,7 +249,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                         foreach (var manifest in manifestsToUpdate)
                         {
-                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand, offlineCache, rollback);
+                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, manifest.newFeatureBand, offlineCache, rollback);
                         }
 
                         _workloadResolver.RefreshWorkloadManifests();
@@ -273,7 +273,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                             foreach (var manifest in manifestsToUpdate)
                             {
-                                _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand, offlineCache: null, isRollback: true);
+                                _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, manifest.existingFeatureBand, offlineCache: null, isRollback: true);
                             }
 
                             foreach (var packId in workloadPackToInstall)

@@ -167,10 +167,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var parseResult =
                 Parser.Instance.Parse(new string[] {"dotnet", "workload", "install", "xamarin-android"});
             var manifestsToUpdate =
-                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
-                    Workloads)[]
+                new (ManifestId manifestId,
+                ManifestVersion existingVersion,
+                SdkFeatureBand existingFeatureBand,
+                ManifestVersion newVersion,
+                SdkFeatureBand newFeatureBand,
+                Dictionary<WorkloadId, WorkloadDefinition> Workloads)[]
                     {
-                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
+                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new SdkFeatureBand(sdkVersion), new ManifestVersion("2.0.0"), new SdkFeatureBand(sdkVersion),
                             null),
                     };
             (_, var installManager, var installer, _, _, _) =
@@ -178,8 +182,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installManager.InstallWorkloads(new List<WorkloadId>(), false); // Don't actually do any installs, just update manifests
 
-            installer.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].Item1);
-            installer.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].Item3);
+            installer.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].manifestId);
+            installer.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].newVersion);
             installer.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.100"));
             installer.InstalledManifests[0].offlineCache.Should().Be(null);
         }
@@ -192,10 +196,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public void GivenWorkloadInstallFromCacheItInstallsCachedManifest(bool userLocal, string sdkVersion)
         {
             var manifestsToUpdate =
-                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
-                    Workloads)[]
+                new (ManifestId manifestId,
+                ManifestVersion existingVersion,
+                SdkFeatureBand existingFeatureBand,
+                ManifestVersion newVersion,
+                SdkFeatureBand newFeatureBand,
+                Dictionary<WorkloadId, WorkloadDefinition> Workloads)[]
                     {
-                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
+                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new SdkFeatureBand(sdkVersion), new ManifestVersion("2.0.0"), new SdkFeatureBand(sdkVersion),
                             null)
                     };
             var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal) + sdkVersion).Path,
@@ -209,8 +217,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installManager.Execute();
 
-            installer.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].Item1);
-            installer.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].Item3);
+            installer.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].manifestId);
+            installer.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].newVersion);
             installer.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.100"));
             installer.InstalledManifests[0].offlineCache.Should().Be(new DirectoryPath(cachePath));
         }
@@ -346,7 +354,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 string sdkVersion,
                 [CallerMemberName] string testName = "",
                 string failingWorkload = null,
-                IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
+                IEnumerable<(ManifestId manifestId,
+                    ManifestVersion existingVersion,
+                    SdkFeatureBand existingFeatureBand,
+                    ManifestVersion newVersion,
+                    SdkFeatureBand newFeatureBand,
+                    Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
                 string tempDirManifestPath = null)
         {
             _reporter.Clear();
@@ -474,10 +487,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var parseResult =
                Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", verbosityFlag, "xamarin-android" });
             var manifestsToUpdate =
-                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
-                    Workloads)[]
+                new (ManifestId manifestId,
+                ManifestVersion existingVersion,
+                SdkFeatureBand existingFeatureBand,
+                ManifestVersion newVersion,
+                SdkFeatureBand newFeatureBand,
+                Dictionary<WorkloadId, WorkloadDefinition> Workloads)[]
                     {
-                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
+                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new SdkFeatureBand("6.0.300"), new ManifestVersion("2.0.0"), new SdkFeatureBand("6.0.300"),
                             null),
                     };
             (_, var installManager, var installer, _, _, _) =
@@ -488,7 +505,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             string.Join(" ", _reporter.Lines).Should().Contain(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests);
             string.Join(" ", _reporter.Lines).Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests, "mock-manifest"));
         }
-
+                
         private string AppendForUserLocal(string identifier, bool userLocal)
         {
             if (!userLocal)

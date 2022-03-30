@@ -165,11 +165,19 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public IEnumerable<(
             ManifestId manifestId,
             ManifestVersion existingVersion,
+            SdkFeatureBand existingFeatureBand,
             ManifestVersion newVersion,
-            Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
+            SdkFeatureBand newFeatureBand,
+            Dictionary<WorkloadId, WorkloadDefinition> Workloads
+            )>
+            CalculateManifestUpdates()
         {
             var manifestUpdates =
-                new List<(ManifestId, ManifestVersion, ManifestVersion,
+                new List<(ManifestId manifestId,
+                    ManifestVersion existingVersion,
+                    SdkFeatureBand existingFeatureBand,
+                    ManifestVersion newVersion,
+                    SdkFeatureBand newFeatureBand,
                     Dictionary<WorkloadId, WorkloadDefinition> Workloads)>();
             var currentManifestIds = GetInstalledManifestIds();
             foreach (var manifestId in currentManifestIds)
@@ -182,10 +190,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
 
                 if (advertisingManifestVersionAndWorkloads != null &&
-                    advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion) > 0)
+                    advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion.Item1) > 0)
                 {
-                    manifestUpdates.Add((manifestId, currentManifestVersion,
-                        advertisingManifestVersionAndWorkloads.Value.ManifestVersion,
+                    manifestUpdates.Add((manifestId, currentManifestVersion.Item1, currentManifestVersion.Item2,
+                        advertisingManifestVersionAndWorkloads.Value.ManifestVersion, advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand,
                         advertisingManifestVersionAndWorkloads.Value.Workloads));
                 }
             }
@@ -207,7 +215,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
+        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
         {
             var currentManifestIds = GetInstalledManifestIds();
             var manifestRollbacks = ParseRollbackDefinitionFile(rollbackDefinitionFilePath);
@@ -220,7 +228,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
 
             var manifestUpdates = manifestRollbacks
-                .Select(manifest => (manifest.Item1, GetInstalledManifestVersion(manifest.Item1), manifest.Item2));
+                .Select(manifest =>
+                {
+                    var installedManifestInfo = GetInstalledManifestVersion(manifest.id);
+                    return (manifest.id, installedManifestInfo.manifestVersion, installedManifestInfo.sdkFeatureBand, manifest.version, manifest.featureBand);
+                });
 
             return manifestUpdates;
         }
@@ -365,7 +377,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        private (ManifestVersion ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)?
+        private (ManifestVersion ManifestVersion, SdkFeatureBand ManifestFeatureBand, Dictionary<WorkloadId, WorkloadDefinition> Workloads)?
             GetAdvertisingManifestVersionAndWorkloads(ManifestId manifestId)
         {
             var manifestPath = Path.Combine(GetAdvertisingManifestPath(_sdkFeatureBand, manifestId),
@@ -378,11 +390,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
             {
                 var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource, manifestPath);
-                return (new ManifestVersion(manifest.Version), manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
+
+                //  TODO: figure out how to differentiate between the feature band an advertising manifest is branded as and the feature band of the SDK
+                //  it's advertised to
+                return (new ManifestVersion(manifest.Version), _sdkFeatureBand, manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
             }
         }
 
-        private ManifestVersion GetInstalledManifestVersion(ManifestId manifestId)
+        private (ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand) GetInstalledManifestVersion(ManifestId manifestId)
         {
 
             var manifest = _workloadResolver.GetInstalledManifests()
@@ -391,7 +406,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 throw new Exception(string.Format(LocalizableStrings.ManifestDoesNotExist, manifestId.ToString()));
             }
-            return new ManifestVersion(manifest.Version);
+            return (new ManifestVersion(manifest.Version), new SdkFeatureBand(manifest.ManifestFeatureBand));
         }
 
         private bool AdManifestSentinelIsDueForUpdate()
@@ -437,7 +452,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        private IEnumerable<(ManifestId, ManifestVersion)> ParseRollbackDefinitionFile(string rollbackDefinitionFilePath)
+        private IEnumerable<(ManifestId id, ManifestVersion version, SdkFeatureBand featureBand)> ParseRollbackDefinitionFile(string rollbackDefinitionFilePath)
         {
             string fileContent;
 
@@ -457,7 +472,22 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }           
             }
             return JsonSerializer.Deserialize<IDictionary<string, string>>(fileContent)
-                .Select(manifest => (new ManifestId(manifest.Key), new ManifestVersion(manifest.Value)));
+                .Select(manifest =>
+                {
+                    ManifestVersion manifestVersion;
+                    SdkFeatureBand manifestFeatureBand;
+                    var parts = manifest.Value.Split('/');
+                    manifestVersion = new ManifestVersion(parts[0]);
+                    if (parts.Length == 1)
+                    {
+                        manifestFeatureBand = _sdkFeatureBand;
+                    }
+                    else
+                    {
+                        manifestFeatureBand = new SdkFeatureBand(parts[1]);
+                    }
+                    return (new ManifestId(manifest.Key), manifestVersion, manifestFeatureBand);
+                });
         }
 
         private bool BackgroundUpdatesAreDisabled() =>
