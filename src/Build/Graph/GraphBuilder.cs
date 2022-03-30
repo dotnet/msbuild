@@ -520,7 +520,6 @@ namespace Microsoft.Build.Graph
 
                 var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), globalProperties[PlatformMetadataName], "", projectInstance.FullPath);
 
-
                 if (!string.IsNullOrEmpty(SelectedPlatform))
                 {
                     globalProperties["platform"] = SelectedPlatform;
