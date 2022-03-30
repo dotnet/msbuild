@@ -5,16 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -42,7 +38,7 @@ namespace Microsoft.Build.Graph
         {
         }
 
-        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] {(GlobalPropertiesModifier) ProjectReferenceGlobalPropertiesModifier}.ToImmutableList();
+        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] { (GlobalPropertiesModifier)ProjectReferenceGlobalPropertiesModifier }.ToImmutableList();
 
         internal enum ProjectType
         {
@@ -67,6 +63,7 @@ namespace Microsoft.Build.Graph
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
+
             switch (GetProjectType(requesterInstance))
             {
                 case ProjectType.OuterBuild:
@@ -199,7 +196,7 @@ namespace Microsoft.Build.Graph
                     project: outerBuild,
                     itemType: InnerBuildReferenceItemName,
                     includeEscaped: outerBuild.FullPath,
-                    directMetadata: new[] {new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}")},
+                    directMetadata: new[] { new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}") },
                     definingFileEscaped: outerBuild.FullPath);
             }
         }
@@ -230,8 +227,6 @@ namespace Microsoft.Build.Graph
             // The properties on the project reference supersede the ones from the MSBuild task instead of appending.
             if (newProperties.Count == 0)
             {
-                // This mimics the _GetProjectReferenceTargetFrameworkProperties task in order to properly reflect what the build graph looks like in
-                // a traversal in which EnableDynamicPlatformResolution is turned on
                 // TODO: Mimic AssignProjectConfiguration's behavior for determining the values for these.
                 var setConfigurationString = projectReference.GetMetadataValue(SetConfigurationMetadataName);
                 var setPlatformString = projectReference.GetMetadataValue(SetPlatformMetadataName);
@@ -244,6 +239,7 @@ namespace Microsoft.Build.Graph
                         $"{setConfigurationString};{setPlatformString};{setTargetFrameworkString}").ToImmutableDictionary();
                 }
             }
+
             return new GlobalPropertyPartsForMSBuildTask(newProperties, defaultParts.AdditionalProperties, newUndefineProperties);
         }
 
