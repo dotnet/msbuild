@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IWorkloadResolver workloadResolver, 
             VerbosityOptions verbosity,
             string userProfileDir,
+            bool verifySignatures,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null, 
             string tempDirPath = null,
@@ -37,7 +38,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     throw new InvalidOperationException(LocalizableStrings.OSDoesNotSupportMsi);
                 }
 
-                return NetSdkMsiInstallerClient.Create(sdkFeatureBand, workloadResolver,
+                return NetSdkMsiInstallerClient.Create(verifySignatures, sdkFeatureBand, workloadResolver,
                     nugetPackageDownloader, verbosity, packageSourceLocation, reporter, tempDirPath);
             }
 

@@ -27,9 +27,9 @@
         <target state="translated">{0}, {1} NuGet akışlarında bulunamadı.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
-        <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
-        <target state="translated">NuGet paketi imza doğrulamasını atlayın. Geçerli .NET SDK’sı birinci tarafça imzalanmadı.</target>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="new">Skipping NuGet package signature verification.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">

@@ -27,9 +27,9 @@
         <target state="translated">Balíček {0} se nenašel v informačních kanálech NuGet {1}“.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
-        <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
-        <target state="translated">Přeskočit ověřování podepisování balíčku NuGet. Současná sada .NET SDK není podepsaná první stranou.</target>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="new">Skipping NuGet package signature verification.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">

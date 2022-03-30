@@ -71,7 +71,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
                                           new NullLogger(),
                                           reporter);
-            var workloadRecordRepo = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion), workloadResolver, Cli.VerbosityOptions.normal, userProfileDir)
+            var workloadRecordRepo = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion),
+                workloadResolver, Cli.VerbosityOptions.normal, userProfileDir, verifySignatures: false)
                 .GetWorkloadInstallationRecordRepository();
 
             return new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userProfileDir, tempPackagesDir.Value, workloadRecordRepo);

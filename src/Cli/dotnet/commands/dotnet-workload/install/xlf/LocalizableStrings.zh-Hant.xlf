@@ -217,6 +217,11 @@
         <target state="translated">跳過更新工作負載資訊清單。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="new">Skip signature verification of workload packages and installers.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
         <source>Manifest packages were not found. Skipping manifest update...</source>
         <target state="translated">找不到資訊清單套件。正在略過資訊清單更新...</target>

@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal class WorkloadInstallCommand : CommandBase
+    internal class WorkloadInstallCommand : WorkloadCommandBase
     {
         private readonly IReporter _reporter;
         private readonly bool _skipManifestUpdate;
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                           _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger(), restoreActionConfig: restoreActionConfig);
             _workloadInstaller = workloadInstaller ??
                                  WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand,
-                                     _workloadResolver, _verbosity, _userProfileDir, _nugetPackageDownloader, _dotnetPath, _tempDirPath,
+                                     _workloadResolver, _verbosity, _userProfileDir, VerifySignatures, _nugetPackageDownloader, _dotnetPath, _tempDirPath,
                                      _packageSourceLocation, restoreActionConfig, elevationRequired: !_printDownloadLinkOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
             bool displayManifestUpdates = false;
             if (_verbosity.VerbosityIsDetailedOrDiagnostic())

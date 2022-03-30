@@ -21,7 +21,7 @@ using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
-    internal class WorkloadListCommand : CommandBase
+    internal class WorkloadListCommand : WorkloadCommandBase
     {
         private readonly SdkFeatureBand _currentSdkFeatureBand;
         private readonly string _dotnetPath;
@@ -84,6 +84,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 
             _workloadRecordRepo = workloadRecordRepo ??
                 WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, _workloadResolver, _verbosity, _userProfileDir,
+                VerifySignatures,
                 elevationRequired: false).GetWorkloadInstallationRecordRepository();
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,

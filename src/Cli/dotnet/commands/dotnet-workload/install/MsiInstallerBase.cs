@@ -102,10 +102,10 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <param name="logger"></param>
         /// <param name="reporter"></param>
         public MsiInstallerBase(InstallElevationContextBase elevationContext, ISetupLogger logger,
-            IReporter reporter = null) : base(elevationContext, logger)
+            bool verifySignatures, IReporter reporter = null) : base(elevationContext, logger, verifySignatures)
         {
-            Cache = new MsiPackageCache(elevationContext, logger);
-            RecordRepository = new RegistryWorkloadInstallationRecordRepository(elevationContext, logger);
+            Cache = new MsiPackageCache(elevationContext, logger, verifySignatures);
+            RecordRepository = new RegistryWorkloadInstallationRecordRepository(elevationContext, logger, VerifySignatures);
             UpdateAgent = new WindowsUpdateAgent(logger);
             Reporter = reporter;
         }
