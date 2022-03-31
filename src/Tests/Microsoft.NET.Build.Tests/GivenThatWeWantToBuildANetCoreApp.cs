@@ -903,7 +903,7 @@ class Program
             {
                 // Reference assembly should be produced in obj
                 var refPath = Path.Combine(
-                    buildCommand.GetIntermediateDirectory(targetFramework: "net5.0").FullName,
+                    buildCommand.GetIntermediateDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework).FullName,
                     "ref",
                     "MainProject.dll");
                 File.Exists(refPath)
