@@ -1,4 +1,4 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Aplikacja konsoli",
   "description": "Projekt służący do tworzenia aplikacji wiersza polecenia, która może działać na platformie .NET w systemach Windows, Linux i macOS",
