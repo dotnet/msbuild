@@ -59,7 +59,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- AvailablePlatforms is the list of platform targets available. -->
   <PropertyGroup>
     <AvailablePlatforms Condition="'$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == ''">Any CPU,x86,x64,Itanium</AvailablePlatforms>
-    <AvailablePlatforms Condition="'$(VisualStudioVersion)' != '' and '$(VisualStudioVersion)' > '10.0'">Any CPU,x86,x64,ARM64</AvailablePlatforms>
+    <AvailablePlatforms Condition="'$(VisualStudioVersion)' != '' and '$(VisualStudioVersion)' > '10.0'">Any CPU,x86,x64</AvailablePlatforms>
   </PropertyGroup>
 
   <!-- Import depends on if it is .NETCore. Imports for .NETFramework is a superset of that for .NETCore-->
