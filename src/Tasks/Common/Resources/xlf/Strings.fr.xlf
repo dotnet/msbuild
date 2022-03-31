@@ -562,7 +562,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
         <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
-        <target state="needs-review-translation">NETSDK1182: le ciblage de .NET 6.0 dans Visual Studio 2019 n’est pas pris en charge.</target>
+        <target state="translated">NETSDK1182: le ciblage de .NET 6.0 ou plus dans Visual Studio 2019 n’est pas pris en charge.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -910,8 +910,8 @@ Vous devrez peut-être générer le projet sur un autre système d’exploitatio
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
 To install these workloads, run the following command: dotnet workload restore</source>
-        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: dotnet workload restore</target>
+        <target state="translated">NETSDK1147: pour générer ce projet, les charges de travail suivantes doivent être installées : {0}
+Pour installer ces charges de travail, exécutez la commande suivante : restauration de la charge de travail de dotnet.</target>
         <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>

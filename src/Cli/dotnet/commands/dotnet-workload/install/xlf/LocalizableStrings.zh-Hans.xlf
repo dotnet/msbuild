@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="CannotCombineSkipManifestAndRollback">
         <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
-        <target state="new">Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</target>
+        <target state="translated">不能同时使用 {0} 和 {1} 选项。如果从回滚文件安装，请删除 {0}。否则，请删除 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CheckForUpdatedWorkloadManifests">
         <source>Checking for updated workload manifests.</source>
-        <target state="new">Checking for updated workload manifests.</target>
+        <target state="translated">正在检查更新的工作负载清单。</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">

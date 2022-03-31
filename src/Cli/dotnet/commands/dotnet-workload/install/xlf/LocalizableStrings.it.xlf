@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="CannotCombineSkipManifestAndRollback">
         <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
-        <target state="new">Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</target>
+        <target state="translated">Impossibile utilizzare contemporaneamente le opzioni {0} e {1}. Se si esegue l'installazione da un file di rollback, rimuovere {0}. In caso contrario, rimuovere {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CheckForUpdatedWorkloadManifests">
         <source>Checking for updated workload manifests.</source>
-        <target state="new">Checking for updated workload manifests.</target>
+        <target state="translated">Verifica della disponibilità di manifesti del carico di lavoro aggiornati.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
