@@ -114,6 +114,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ImplicitlyExpandDesignTimeFacades Condition="'$(ImplicitlyExpandDesignTimeFacades)' == '' and ('$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0')">true</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <AvailablePlatforms Condition="!$(AvailablePlatforms.Contains('ARM64')) and '$(TargetFrameworkIdentifier)' == '.NETFramework' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '4.0'))">$(AvailablePlatforms),ARM64</AvailablePlatforms>
+  </PropertyGroup>
+
   <!--Import props that are common for both full framework and core.
     And before the ImportAfter\* , so users can override it-->
   <Import Project="$(MSBuildToolsPath)\Microsoft.NET.props" />
