@@ -80,8 +80,9 @@ namespace Microsoft.Build.Tasks
 
                 string buildProjectReferenceAs = string.Empty;
 
-                // If the referenced project has a defined `Platform` it should always build as _and_ it's compatible, build it without passing any global properties to reuse the evaluation.
-                if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(CurrentProjectPlatform))
+                // If the referenced project has a defined `Platform` that's compatible, it will build that way by default.
+                // Don't set `buildProjectReferenceAs` and the `_GetProjectReferencePlatformProperties` target will handle the rest.
+                if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(CurrentProjectPlatform, StringComparison.OrdinalIgnoreCase))
                 {
                     Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", AssignedProjectsWithPlatform[i].ItemSpec, referencedProjectPlatform);
                 }
