@@ -64,7 +64,6 @@ namespace Microsoft.Build.Tasks
 
                 if (string.IsNullOrEmpty(projectReferencePlatformsMetadata) && string.IsNullOrEmpty(referencedProjectPlatform))
                 {
-                    // TODO: This message should mean "We weren't given enough info to perform platform negotiation"
                     Log.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", AssignedProjectsWithPlatform[i].ItemSpec);
                     continue;
                 }
