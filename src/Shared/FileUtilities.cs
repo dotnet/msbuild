@@ -166,6 +166,30 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Returns whether MSBuild can write to the given directory. Throws for PathTooLongExceptions
+        /// but not other exceptions.
+        /// </summary>
+        internal static bool CanWriteToDirectory(string directory)
+        {
+            try
+            {
+                string testFilePath = Path.Combine(directory, $"MSBuild_{Guid.NewGuid().ToString("N")}_testFile.txt");
+                File.WriteAllText(testFilePath, $"MSBuild process {Process.GetCurrentProcess().Id} successfully wrote to file.");
+                File.Delete(testFilePath);
+                return true;
+            }
+            catch (PathTooLongException)
+            {
+                ErrorUtilities.ThrowArgument("DebugPathTooLong", directory);
+                return false; // Should never reach here.
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Clears the MSBuild runtime cache
         /// </summary>
         internal static void ClearCacheDirectory()
@@ -322,6 +346,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string TrimAndStripAnyQuotes(string path)
         {
+            if (path is null)
+            {
+                return path;
+            }
+
             // Trim returns the same string if trimming isn't needed
             path = path.Trim();
             path = path.Trim(new char[] { '"' });

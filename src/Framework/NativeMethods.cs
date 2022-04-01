@@ -624,9 +624,7 @@ internal static class NativeMethods
         }
     }
 
-    // CA1416 warns about code that can only run on Windows, but we verified we're running on Windows before this.
-    // This is the most reasonable way to resolve this part because other ways would require ifdef'ing on NET472.
-#pragma warning disable CA1416
+    [SupportedOSPlatform("windows")]
     private static bool IsLongPathsEnabledRegistry()
     {
         using (RegistryKey fileSystemKey = Registry.LocalMachine.OpenSubKey(WINDOWS_FILE_SYSTEM_REGISTRY_KEY))
@@ -635,7 +633,6 @@ internal static class NativeMethods
             return fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1;
         }
     }
-#pragma warning restore CA1416
 
     /// <summary>
     /// Cached value for IsUnixLike (this method is called frequently during evaluation).

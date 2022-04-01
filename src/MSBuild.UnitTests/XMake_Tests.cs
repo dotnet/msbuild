@@ -868,7 +868,7 @@ namespace Microsoft.Build.UnitTests
             var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
             File.Exists(_pathToArbitraryBogusFile).ShouldBeTrue();
 
-            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
             successfulExit.ShouldBeFalse();
 
             output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
@@ -891,7 +891,7 @@ namespace Microsoft.Build.UnitTests
                 pathToMSBuildExe = "\"" + pathToMSBuildExe + "\"";
             }
 
-            string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out var successfulExit);
+            string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out var successfulExit, outputHelper: _output);
             successfulExit.ShouldBeFalse();
 
             output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
@@ -912,7 +912,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
 
-                output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
                 successfulExit.ShouldBeFalse();
             }
             finally
@@ -943,7 +943,7 @@ namespace Microsoft.Build.UnitTests
             // Find the project in the current directory
             _env.SetCurrentDirectory(directory);
 
-            string output = RunnerUtilities.ExecMSBuild(string.Empty, out var successfulExit);
+            string output = RunnerUtilities.ExecMSBuild(string.Empty, out var successfulExit, _output);
             successfulExit.ShouldBeTrue();
 
             output.ShouldContain("[A=1]");
@@ -959,7 +959,7 @@ namespace Microsoft.Build.UnitTests
                 TransientTestFile projectFile = env.CreateFile(folder, "project.proj", "<Project><Target Name=\"T\"><Message Text=\"Text\"/></Target></Project>");
                 TransientTestFile rpsFile = env.CreateFile(folder, "myRsp.rsp", "-nr:false -m:2");
                 env.SetCurrentDirectory(folder.Path);
-                string output = RunnerUtilities.ExecMSBuild("project.proj -nologo", out bool success);
+                string output = RunnerUtilities.ExecMSBuild("project.proj -nologo", out bool success, _output);
                 success.ShouldBeFalse();
                 output.ShouldContain("-nr:false -m:2");
                 output.ShouldContain("-nowarn:MSB1001 @myRsp.rsp %NONEXISTENTENVIRONMENTVARIABLE%");
@@ -991,7 +991,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=1]");
@@ -1026,7 +1026,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=]");
@@ -1062,7 +1062,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=2]");
@@ -1175,7 +1175,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
                 successfulExit.ShouldBeFalse();
 
                 output.ShouldContain("MSB1027"); // msbuild.rsp cannot have /noautoresponse in it
@@ -1210,7 +1210,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=]");
@@ -1242,7 +1242,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=]");
@@ -1270,7 +1270,7 @@ namespace Microsoft.Build.UnitTests
 
             var msbuildParameters = "\"" + projectPath + "\"";
 
-            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
             successfulExit.ShouldBeTrue();
 
             output.ShouldContain($"[A={directory.Path}{Path.DirectorySeparatorChar}]");

@@ -921,7 +921,7 @@ namespace Microsoft.Build.Evaluation
 
                     reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
 #if RUNTIME_TYPE_NETCORE
-                        "Core",
+                        Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
 #elif MONO
                         NativeMethodsShared.IsMono ? "Mono" : "Full");
 #else
