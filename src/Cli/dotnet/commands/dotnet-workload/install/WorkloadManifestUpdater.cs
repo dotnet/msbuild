@@ -79,7 +79,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public async Task UpdateAdvertisingManifestsAsync(bool includePreviews, DirectoryPath? offlineCache = null)
         {
-            var manifests = GetInstalledManifestIds();
+            // this updates all the manifests 
+            var manifests = _workloadResolver.GetInstalledManifests();
             await Task.WhenAll(manifests.Select(manifest => UpdateAdvertisingManifestAsync(manifest, includePreviews, offlineCache)))
                 .ConfigureAwait(false);
             WriteUpdatableWorkloadsFile();
@@ -182,7 +183,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
 
                 if (advertisingManifestVersionAndWorkloads != null &&
-                    advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion.Item1) > 0)
+                    (advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion.manifestVersion) > 0 ||
+                    advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.CompareTo(currentManifestVersion.sdkFeatureBand) > 0)) // update this to also check if the feature band is greater (OR -- doesn't need to be both)
                 {
                     manifestUpdates.Add((new ManifestVersionUpdate(manifestId, currentManifestVersion.manifestVersion, currentManifestVersion.sdkFeatureBand.ToString(),
                         advertisingManifestVersionAndWorkloads.Value.ManifestVersion, advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.ToString()),
@@ -290,40 +292,54 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return _workloadResolver.GetInstalledManifests().Select(manifest => new ManifestId(manifest.Id));
         }
 
-        private async Task UpdateAdvertisingManifestAsync(ManifestId manifestId, bool includePreviews, DirectoryPath? offlineCache = null)
+        private async Task UpdateAdvertisingManifestAsync(WorkloadManifestInfo manifest, bool includePreviews, DirectoryPath? offlineCache = null)
         {
             string packagePath = null;
             string extractionPath = null;
+            var manifestId = new ManifestId(manifest.Id);
 
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
+                // maybe try abstracting this part out
                 if (offlineCache == null || !offlineCache.HasValue)
                 {
                     try
                     {
-                        packagePath = await _nugetPackageDownloader.DownloadPackageAsync(
-                            GetManifestPackageId(_sdkFeatureBand, manifestId),
-                            packageSourceLocation: _packageSourceLocation,
-                            includePreview: includePreviews);
+                        packagePath = GetOnlinePackagePath(_sdkFeatureBand, manifestId, includePreviews).ToString();
                     }
                     catch (NuGetPackageNotFoundException)
                     {
-                        _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                        // this is where we want to fallback
+                        // if the feature band from the manifest info is different from the current sdk feature band,
+                        // then try downloading the manifest's feature band
+                        if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
+                        {
+                            packagePath = GetOnlinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews).ToString();
+                        }
+                        else
+                        {
+                            _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                        }
                     }
                 }
                 else
                 {
-                    packagePath = Directory.GetFiles(offlineCache.Value.Value)
-                        .Where(path => path.EndsWith(".nupkg"))
-                        .Where(path => Path.GetFileName(path).StartsWith(GetManifestPackageId(_sdkFeatureBand, manifestId).ToString()))
-                        .Max();
+                    packagePath = GetOfflinePackagePath(_sdkFeatureBand, manifestId, offlineCache);
                     if (!File.Exists(packagePath))
                     {
-                        throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, GetManifestPackageId(_sdkFeatureBand, manifestId), "*", offlineCache));
+                        // add similar fallback logic
+                        if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
+                        {
+                            packagePath = GetOfflinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, offlineCache);
+                        }
+                        else
+                        {
+                            throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, GetManifestPackageId(_sdkFeatureBand, manifestId), "*", offlineCache));
+                        }
                     }
                 }
-
+                // abstract through here
                 extractionPath = Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp", $"{manifestId}-extracted");
                 Directory.CreateDirectory(extractionPath);
                 var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(extractionPath));
@@ -334,6 +350,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
                 FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(extractionPath, "data"), adManifestPath));
+                // TODO add file with the current feature band (within the adManifestPath directory) --> contents should be the advertisted manifest feature band
+                // (AdvertisedManifestFeatureBand.txt)
 
                 if (_displayManifestUpdates)
                 {
@@ -383,7 +401,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
             {
                 var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource, manifestPath);
-
+                // we need to know the feature band of the advertised manifest (read it from the AvertisedManifestFeatureBand.txt file)
+                // if we don't find the file then use the current feature band
                 return (new ManifestVersion(manifest.Version), _sdkFeatureBand, manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
             }
         }
@@ -460,7 +479,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 else
                 {
                     throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
-                }           
+                }
             }
             return JsonSerializer.Deserialize<IDictionary<string, string>>(fileContent)
                 .Select(manifest =>
@@ -489,6 +508,26 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private string GetAdvertisingWorkloadsFilePath(SdkFeatureBand featureBand) => GetAdvertisingWorkloadsFilePath(_userProfileDir, featureBand);
 
         private static string GetAdvertisingWorkloadsFilePath(string userProfileDir, SdkFeatureBand featureBand) => Path.Combine(userProfileDir, $".workloadAdvertisingUpdates{featureBand}");
+
+        private async Task<String> GetOnlinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, bool includePreviews) 
+            {
+                string packagePath = await _nugetPackageDownloader.DownloadPackageAsync(
+                    GetManifestPackageId(sdkFeatureBand, manifestId),
+                    packageSourceLocation: _packageSourceLocation,
+                    includePreview: includePreviews);
+                
+                return packagePath;
+            }
+
+        private string GetOfflinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, DirectoryPath? offlineCache = null)
+        {
+            string packagePath = Directory.GetFiles(offlineCache.Value.Value)
+                .Where(path => path.EndsWith(".nupkg"))
+                .Where(path => Path.GetFileName(path).StartsWith(GetManifestPackageId(sdkFeatureBand, manifestId).ToString()))
+                .Max();
+
+            return packagePath;
+        }
 
         private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
             Path.Combine(_userProfileDir, "sdk-advertising", featureBand.ToString(), manifestId.ToString());
