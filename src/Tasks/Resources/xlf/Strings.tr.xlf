@@ -1366,6 +1366,11 @@
         <target state="translated">MSB3982: EnableDynamicPlatformResolution doğru ancak başvurulan proje '{0}', 'Platforms' meta veri kümesine sahip değil. Belirli bir platform olmadan oluşturulacak.</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
         <source>ProjectReference and current project have the same platform.</source>
         <target state="translated">ProjectReference ve geçerli proje aynı platforma sahip.</target>

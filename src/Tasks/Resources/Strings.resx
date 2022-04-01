@@ -2928,6 +2928,9 @@
   <data name="GetCompatiblePlatform.AnyCPUDefault">
     <value>Choosing AnyCPU by default.</value>
   </data>
+  <data name="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+    <value>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</value>
+  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 

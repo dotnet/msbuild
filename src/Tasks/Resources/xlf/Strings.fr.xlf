@@ -1366,6 +1366,11 @@
         <target state="translated">MSB3982: EnableDynamicPlatformResolution a la valeur true, mais le projet référencé '{0}' n’a pas de métadonnées ’Platforms’ définies. Il sera généré sans une plateforme spécifiée.</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
         <source>ProjectReference and current project have the same platform.</source>
         <target state="translated">ProjectReference et le projet actuel ont la même plateforme.</target>

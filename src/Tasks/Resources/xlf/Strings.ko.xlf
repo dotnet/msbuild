@@ -1366,6 +1366,11 @@
         <target state="translated">MSB3982: EnableDynamicPlatformResolution이 true이지만 참조된 프로젝트 '{0}'에 '플랫폼' 메타데이터 세트가 없습니다. 지정된 플랫폼 없이 구축됩니다.</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
         <source>ProjectReference and current project have the same platform.</source>
         <target state="translated">ProjectReference와 현재 프로젝트는 동일한 플랫폼을 가지고 있습니다.</target>
