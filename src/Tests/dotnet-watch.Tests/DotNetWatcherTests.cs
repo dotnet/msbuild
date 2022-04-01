@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development", TimeSpan.FromSeconds(10));
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/24406")]
         public async Task Run_WithHotReloadEnabled_ReadsLaunchSettings_WhenUsingProjectOption()
         {
             var testAsset = _testAssetsManager.CopyTestAsset("WatchAppWithLaunchSettings")
