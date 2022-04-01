@@ -2906,7 +2906,7 @@
     <comment>{StrBegin="MSB3981: "}</comment>
   </data>
   <data name="GetCompatiblePlatform.NoPlatformsListed">
-    <value>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' metadata set. It will be built without a specified platform.</value>
+    <value>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</value>
     <comment>{StrBegin="MSB3982: "}</comment>
   </data>
   <data name="GetCompatiblePlatform.InvalidLookupTableFormat">
