@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="NuGetPackageSignatureVerificationSkipped">
         <source>Skipping NuGet package signature verification.</source>
-        <target state="new">Skipping NuGet package signature verification.</target>
+        <target state="translated">NuGet パッケージ署名の認証をスキップしています。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">
